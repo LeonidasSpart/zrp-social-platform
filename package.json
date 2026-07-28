@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "postinstall": "npx prisma generate",
+    "build": "next build && npx prisma db push"
+  }
+}
