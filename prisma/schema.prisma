@@ -13,7 +13,7 @@ model User {
   id          String    @id @default(cuid())
   email       String    @unique
   username    String    @unique
-  password    String    // Hashed
+  password    String
   name        String?
   bio         String?   @db.Text
   avatarUrl   String?
@@ -28,7 +28,8 @@ model User {
   likes       Like[]
   reposts     Repost[]
   notifications Notification[]
-  messages    Message[]
+  sentMessages Message[] @relation("Message_sender")
+  receivedMessages Message[] @relation("Message_receiver")
 }
 
 model Post {
@@ -94,7 +95,7 @@ model Notification {
   id          String    @id @default(cuid())
   userId      String
   user        User      @relation("Notification_user", fields: [userId], references: [id], onDelete: Cascade)
-  type        String    // like, follow, comment, repost
+  type        String
   fromUserId  String
   fromUser    User      @relation("Notification_fromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
   postId      String?
@@ -107,9 +108,9 @@ model Message {
   id          String    @id @default(cuid())
   content     String    @db.Text
   senderId    String
-  sender      User      @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  sender      User      @relation("Message_sender", fields: [senderId], references: [id], onDelete: Cascade)
   receiverId  String
-  receiver    User      @relation(fields: [receiverId], references: [id], onDelete: Cascade)
+  receiver    User      @relation("Message_receiver", fields: [receiverId], references: [id], onDelete: Cascade)
   read        Boolean   @default(false)
   createdAt   DateTime  @default(now())
 }
