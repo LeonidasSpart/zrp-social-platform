@@ -11,8 +11,8 @@ interface Post {
   content: string;
   imageUrl?: string;
   createdAt: string;
-  authorId: string;
-  author?: {
+  // author is now required to match PostCard's prop type
+  author: {
     id: string;
     username: string;
     name: string;
@@ -56,8 +56,8 @@ export default function HomePage() {
         throw new Error(data.error || `HTTP ${res.status}`);
       }
 
-      // Add author info and counts (since the API doesn't include them yet)
-      const postsWithData = data.map((post: Post) => ({
+      // Transform API response to match Post interface
+      const postsWithData: Post[] = data.map((post: any) => ({
         ...post,
         author: {
           id: post.authorId,
