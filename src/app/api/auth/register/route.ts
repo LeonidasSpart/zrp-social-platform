@@ -6,7 +6,6 @@ export async function POST(req: NextRequest) {
   try {
     const { name, username, email, password } = await req.json();
 
-    // Validate
     if (!email || !password || !username) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -21,7 +20,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if user exists
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [{ email }, { username }],
@@ -35,10 +33,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
     const user = await prisma.user.create({
       data: {
         name,
