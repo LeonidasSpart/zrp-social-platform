@@ -27,7 +27,7 @@ model User {
   followers   Follow[]  @relation("Followers")
   likes       Like[]
   reposts     Repost[]
-  notifications Notification[]
+  notifications Notification[] @relation("Notification_user")
   sentMessages Message[] @relation("Message_sender")
   receivedMessages Message[] @relation("Message_receiver")
 }
@@ -45,6 +45,7 @@ model Post {
   comments    Comment[]
   likes       Like[]
   reposts     Repost[]
+  notifications Notification[] @relation("Notification_post")
 }
 
 model Comment {
@@ -99,7 +100,7 @@ model Notification {
   fromUserId  String
   fromUser    User      @relation("Notification_fromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
   postId      String?
-  post        Post?     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post        Post?     @relation("Notification_post", fields: [postId], references: [id], onDelete: Cascade)
   read        Boolean   @default(false)
   createdAt   DateTime  @default(now())
 }
