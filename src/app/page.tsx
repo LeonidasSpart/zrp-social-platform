@@ -3,32 +3,11 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import PostComposer from "@/components/PostComposer";
-import PostCard from "@/components/PostCard";
-
-interface Post {
-  id: string;
-  content: string;
-  imageUrl?: string;
-  createdAt: string;
-  author: {
-    id: string;
-    username: string;
-    name: string;
-    avatarUrl?: string;
-  };
-  _count: {
-    likes: number;
-    comments: number;
-    reposts: number;
-  };
-  liked?: boolean;
-}
 
 export default function HomePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,23 +28,19 @@ export default function HomePage() {
       setLoading(true);
       setError(null);
       const res = await fetch("/api/posts");
-      
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
-      
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
+
       setPosts(data);
     } catch (err) {
-      console.error("Error fetching posts:", err);
+      console.error(err);
       setError(err instanceof Error ? err.message : "Failed to load posts");
     } finally {
       setLoading(false);
     }
-  };
-
-  const handlePostCreated = (newPost: Post) => {
-    setPosts([newPost, ...posts]);
   };
 
   if (status === "loading" || loading) {
@@ -79,12 +54,11 @@ export default function HomePage() {
   if (error) {
     return (
       <div className="max-w-2xl mx-auto py-4 px-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-          <p className="font-medium">Error loading posts:</p>
-          <p className="text-sm">{error}</p>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-700 font-medium">Error: {error}</p>
           <button
             onClick={fetchPosts}
-            className="mt-2 bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm hover:bg-red-200"
+            className="mt-2 bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm"
           >
             Retry
           </button>
@@ -95,19 +69,8 @@ export default function HomePage() {
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
-      <PostComposer onPostCreated={handlePostCreated} />
-      
-      <div className="mt-6 space-y-4">
-        {posts.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <p>No posts yet. Be the first to post!</p>
-          </div>
-        ) : (
-          posts.map((post) => (
-            <PostCard key={post.id} post={post} onUpdate={fetchPosts} />
-          ))
-        )}
-      </div>
+      <h1>Hello</h1>
+      <pre>{JSON.stringify(posts, null, 2)}</pre>
     </div>
   );
 }
