@@ -30,6 +30,7 @@ export default function HomePage() {
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -45,11 +46,19 @@ export default function HomePage() {
 
   const fetchPosts = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const res = await fetch("/api/posts");
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      
       const data = await res.json();
       setPosts(data);
-    } catch (error) {
-      console.error("Error fetching posts:", error);
+    } catch (err) {
+      console.error("Error fetching posts:", err);
+      setError(err instanceof Error ? err.message : "Failed to load posts");
     } finally {
       setLoading(false);
     }
@@ -63,6 +72,23 @@ export default function HomePage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-gray-500">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-2xl mx-auto py-4 px-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+          <p className="font-medium">Error loading posts:</p>
+          <p className="text-sm">{error}</p>
+          <button
+            onClick={fetchPosts}
+            className="mt-2 bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm hover:bg-red-200"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
