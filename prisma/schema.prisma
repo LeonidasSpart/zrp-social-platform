@@ -93,10 +93,10 @@ model Repost {
 model Notification {
   id          String    @id @default(cuid())
   userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation("Notification_user", fields: [userId], references: [id], onDelete: Cascade)
   type        String    // like, follow, comment, repost
   fromUserId  String
-  fromUser    User      @relation(fields: [fromUserId], references: [id], onDelete: Cascade)
+  fromUser    User      @relation("Notification_fromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
   postId      String?
   post        Post?     @relation(fields: [postId], references: [id], onDelete: Cascade)
   read        Boolean   @default(false)
