@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Heart, MessageCircle, Repeat, Share2 } from "lucide-react";
-import Comments from "./Comments"; // ← Import Comments component
+// import Comments from "./Comments"; // Temporarily disabled
 
 interface PostCardProps {
   post: {
@@ -17,7 +17,7 @@ interface PostCardProps {
       name: string;
       avatarUrl?: string;
     };
-    _count: {
+    _count?: {
       likes: number;
       comments: number;
       reposts: number;
@@ -29,14 +29,11 @@ interface PostCardProps {
 
 export default function PostCard({ post, onUpdate }: PostCardProps) {
   const [liked, setLiked] = useState(post.liked || false);
-  const [likesCount, setLikesCount] = useState(post._count.likes);
-  
-  // ─── NEW STATE ────────────────────────────────────────────────
+  const [likesCount, setLikesCount] = useState(post._count?.likes || 0);
   const [showComments, setShowComments] = useState(false);
   const [reposted, setReposted] = useState(false);
-  const [repostsCount, setRepostsCount] = useState(post._count.reposts);
+  const [repostsCount, setRepostsCount] = useState(post._count?.reposts || 0);
 
-  // ─── LIKE HANDLER ──────────────────────────────────────────────
   const handleLike = async () => {
     try {
       const res = await fetch(`/api/posts/${post.id}/like`, {
@@ -52,7 +49,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
     }
   };
 
-  // ─── REPOST HANDLER ────────────────────────────────────────────
   const handleRepost = async () => {
     try {
       const res = await fetch(`/api/posts/${post.id}/repost`, {
@@ -63,14 +59,13 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
         const data = await res.json();
         setReposted(data.reposted);
         setRepostsCount(data.reposted ? repostsCount + 1 : repostsCount - 1);
-        onUpdate(); // Refresh parent feed
+        onUpdate();
       }
     } catch (error) {
       console.error("Error reposting:", error);
     }
   };
 
-  // ─── SHARE HANDLER ─────────────────────────────────────────────
   const handleShare = async () => {
     const url = window.location.href;
     if (navigator.share) {
@@ -93,7 +88,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
     }
   };
 
-  // ─── TIME AGO ──────────────────────────────────────────────────
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
     const minutes = Math.floor(diff / 60000);
@@ -135,9 +129,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
             </div>
           )}
 
-          {/* ─── ACTION BUTTONS ─── */}
           <div className="flex items-center gap-6 mt-3">
-            {/* Like */}
             <button
               onClick={handleLike}
               className={`flex items-center gap-1 text-sm ${
@@ -148,16 +140,14 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
               <span>{likesCount}</span>
             </button>
 
-            {/* Comments - toggles comments section */}
             <button
               onClick={() => setShowComments(!showComments)}
               className="flex items-center gap-1 text-sm text-gray-500 hover:text-blue-500 transition"
             >
               <MessageCircle className="w-4 h-4" />
-              <span>{post._count.comments}</span>
+              <span>{post._count?.comments || 0}</span>
             </button>
 
-            {/* Repost - toggles repost state */}
             <button
               onClick={handleRepost}
               className={`flex items-center gap-1 text-sm ${
@@ -168,7 +158,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
               <span>{repostsCount}</span>
             </button>
 
-            {/* Share */}
             <button
               onClick={handleShare}
               className="flex items-center gap-1 text-sm text-gray-500 hover:text-blue-500 transition"
@@ -177,9 +166,11 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
             </button>
           </div>
 
-          {/* ─── COMMENTS SECTION ─── */}
+          {/* Comments section – temporarily disabled */}
           {showComments && (
-            <Comments postId={post.id} onCommentAdded={onUpdate} />
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <p className="text-sm text-gray-400">Comments coming soon!</p>
+            </div>
           )}
         </div>
       </div>
