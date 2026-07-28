@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Heart, MessageCircle, Repeat, Share2 } from "lucide-react";
+import Comments from "./Comments";
 
 interface PostCardProps {
   post: {
@@ -29,6 +30,9 @@ interface PostCardProps {
 export default function PostCard({ post, onUpdate }: PostCardProps) {
   const [liked, setLiked] = useState(post.liked || false);
   const [likesCount, setLikesCount] = useState(post._count.likes);
+  const [showComments, setShowComments] = useState(false);
+  const [reposted, setReposted] = useState(false);
+  const [repostsCount, setRepostsCount] = useState(post._count.reposts);
 
   const handleLike = async () => {
     try {
@@ -42,6 +46,46 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
       }
     } catch (error) {
       console.error("Error liking post:", error);
+    }
+  };
+
+  const handleRepost = async () => {
+    try {
+      const res = await fetch(`/api/posts/${post.id}/repost`, {
+        method: "POST",
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setReposted(data.reposted);
+        setRepostsCount(data.reposted ? repostsCount + 1 : repostsCount - 1);
+        // Refresh parent feed to update counts elsewhere
+        onUpdate();
+      }
+    } catch (error) {
+      console.error("Error reposting:", error);
+    }
+  };
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Post by ${post.author.name}`,
+          text: post.content,
+          url: url,
+        });
+      } catch (e) {
+        // User cancelled
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        alert("Link copied to clipboard!");
+      } catch (e) {
+        alert("Share not supported on this device.");
+      }
     }
   };
 
@@ -95,18 +139,37 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
               <Heart className={`w-4 h-4 ${liked ? "fill-red-500" : ""}`} />
               <span>{likesCount}</span>
             </button>
-            <button className="flex items-center gap-1 text-sm text-gray-500 hover:text-blue-500 transition">
+
+            <button
+              onClick={() => setShowComments(!showComments)}
+              className="flex items-center gap-1 text-sm text-gray-500 hover:text-blue-500 transition"
+            >
               <MessageCircle className="w-4 h-4" />
               <span>{post._count.comments}</span>
             </button>
-            <button className="flex items-center gap-1 text-sm text-gray-500 hover:text-green-500 transition">
-              <Repeat className="w-4 h-4" />
-              <span>{post._count.reposts}</span>
+
+            <button
+              onClick={handleRepost}
+              className={`flex items-center gap-1 text-sm ${
+                reposted ? "text-green-500" : "text-gray-500 hover:text-green-500"
+              } transition`}
+            >
+              <Repeat className={`w-4 h-4 ${reposted ? "fill-green-500" : ""}`} />
+              <span>{repostsCount}</span>
             </button>
-            <button className="flex items-center gap-1 text-sm text-gray-500 hover:text-blue-500 transition">
+
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-1 text-sm text-gray-500 hover:text-blue-500 transition"
+            >
               <Share2 className="w-4 h-4" />
             </button>
           </div>
+
+          {/* Comments section */}
+          {showComments && (
+            <Comments postId={post.id} onCommentAdded={onUpdate} />
+          )}
         </div>
       </div>
     </div>
