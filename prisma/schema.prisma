@@ -28,6 +28,7 @@ model User {
   likes       Like[]
   reposts     Repost[]
   notifications Notification[] @relation("Notification_user")
+  sentNotifications Notification[] @relation("Notification_fromUser")
   sentMessages Message[] @relation("Message_sender")
   receivedMessages Message[] @relation("Message_receiver")
 }
