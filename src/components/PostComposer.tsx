@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import { Image } from "lucide-react";
 
 interface PostComposerProps {
   onPostCreated: (post: any) => void;
@@ -10,8 +11,40 @@ interface PostComposerProps {
 export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const { data: session } = useSession();
   const [content, setContent] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
+  // Handle image upload
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setImageUrl(data.url);
+      } else {
+        alert(data.error || "Upload failed");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Submit post
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) return;
@@ -21,13 +54,17 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       const res = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({
+          content,
+          imageUrl: imageUrl || undefined, // send only if exists
+        }),
       });
 
       if (res.ok) {
         const post = await res.json();
         onPostCreated(post);
         setContent("");
+        setImageUrl(""); // clear image after post
       }
     } catch (error) {
       console.error("Error creating post:", error);
@@ -51,10 +88,41 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               className="w-full resize-none border-0 focus:ring-0 p-0 text-gray-800 placeholder-gray-400 min-h-[80px]"
               maxLength={280}
             />
+
+            {/* Image preview */}
+            {imageUrl && (
+              <div className="relative mt-2 rounded-lg overflow-hidden">
+                <img
+                  src={imageUrl}
+                  alt="Upload preview"
+                  className="max-h-60 w-auto rounded-lg"
+                />
+                <button
+                  type="button"
+                  onClick={() => setImageUrl("")}
+                  className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 text-xl leading-none"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
             <div className="flex items-center justify-between mt-2 border-t border-gray-100 pt-2">
-              <span className="text-xs text-gray-400">
-                {content.length}/280
-              </span>
+              <div className="flex items-center gap-2">
+                {/* Image upload button */}
+                <label className="cursor-pointer text-gray-500 hover:text-blue-500 transition">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    disabled={uploading}
+                  />
+                  <Image className="w-5 h-5" />
+                  {uploading && <span className="text-xs ml-1 text-gray-400">Uploading...</span>}
+                </label>
+                <span className="text-xs text-gray-400">{content.length}/280</span>
+              </div>
               <button
                 type="submit"
                 disabled={!content.trim() || loading}
