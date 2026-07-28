@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 
 interface Comment {
   id: string;
@@ -21,7 +20,6 @@ interface CommentsProps {
 }
 
 export default function Comments({ postId, onCommentAdded }: CommentsProps) {
-  const { data: session } = useSession();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,7 +46,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim() || !session) return;
+    if (!newComment.trim()) return;
 
     setSubmitting(true);
     try {
@@ -108,25 +106,23 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         </div>
       )}
 
-      {session && (
-        <form onSubmit={handleSubmit} className="mt-3 flex gap-2">
-          <input
-            type="text"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Write a comment..."
-            className="flex-1 px-3 py-1.5 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            maxLength={280}
-          />
-          <button
-            type="submit"
-            disabled={!newComment.trim() || submitting}
-            className="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {submitting ? "..." : "Reply"}
-          </button>
-        </form>
-      )}
+      <form onSubmit={handleSubmit} className="mt-3 flex gap-2">
+        <input
+          type="text"
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          placeholder="Write a comment..."
+          className="flex-1 px-3 py-1.5 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          maxLength={280}
+        />
+        <button
+          type="submit"
+          disabled={!newComment.trim() || submitting}
+          className="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {submitting ? "..." : "Reply"}
+        </button>
+      </form>
     </div>
   );
 }
