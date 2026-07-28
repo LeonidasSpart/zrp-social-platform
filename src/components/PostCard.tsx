@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Heart, MessageCircle, Repeat, Share2 } from "lucide-react";
-// import Comments from "./Comments"; // Temporarily disabled
+import Comments from "./Comments";   // ✅ Enabled
 
 interface PostCardProps {
   post: {
@@ -166,11 +166,9 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
             </button>
           </div>
 
-          {/* Comments section – temporarily disabled */}
+          {/* ✅ Comments section – now using the real component */}
           {showComments && (
-            <div className="mt-3 pt-3 border-t border-gray-100">
-              <p className="text-sm text-gray-400">Comments coming soon!</p>
-            </div>
+            <Comments postId={post.id} onCommentAdded={onUpdate} />
           )}
         </div>
       </div>
