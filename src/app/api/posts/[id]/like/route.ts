@@ -8,7 +8,9 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions);
-  if (!session) {
+  
+  // Ensure session and session.user exist
+  if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -44,6 +46,7 @@ export async function POST(
       return NextResponse.json({ liked: true });
     }
   } catch (error) {
+    console.error("Like error:", error);
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
 }
