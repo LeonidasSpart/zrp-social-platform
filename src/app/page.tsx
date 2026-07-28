@@ -3,11 +3,33 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import PostComposer from "@/components/PostComposer";
+import PostCard from "@/components/PostCard";
+
+interface Post {
+  id: string;
+  content: string;
+  imageUrl?: string;
+  createdAt: string;
+  authorId: string;
+  author?: {
+    id: string;
+    username: string;
+    name: string;
+    avatarUrl?: string;
+  };
+  _count?: {
+    likes: number;
+    comments: number;
+    reposts: number;
+  };
+  liked?: boolean;
+}
 
 export default function HomePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,13 +56,32 @@ export default function HomePage() {
         throw new Error(data.error || `HTTP ${res.status}`);
       }
 
-      setPosts(data);
+      // Add author info and counts (since the API doesn't include them yet)
+      const postsWithData = data.map((post: Post) => ({
+        ...post,
+        author: {
+          id: post.authorId,
+          username: session?.user?.username || "unknown",
+          name: session?.user?.name || "Unknown",
+        },
+        _count: {
+          likes: 0,
+          comments: 0,
+          reposts: 0,
+        },
+      }));
+
+      setPosts(postsWithData);
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Failed to load posts");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePostCreated = (newPost: Post) => {
+    setPosts([newPost, ...posts]);
   };
 
   if (status === "loading" || loading) {
@@ -69,8 +110,19 @@ export default function HomePage() {
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
-      <h1>Hello</h1>
-      <pre>{JSON.stringify(posts, null, 2)}</pre>
+      <PostComposer onPostCreated={handlePostCreated} />
+      
+      <div className="mt-6 space-y-4">
+        {posts.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">
+            <p>No posts yet. Be the first to post!</p>
+          </div>
+        ) : (
+          posts.map((post) => (
+            <PostCard key={post.id} post={post} onUpdate={fetchPosts} />
+          ))
+        )}
+      </div>
     </div>
   );
 }
