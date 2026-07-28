@@ -31,8 +31,10 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
     setLoading(true);
     try {
       const res = await fetch(`/api/posts/${postId}/comments`);
-      const data = await res.json();
-      setComments(data);
+      if (res.ok) {
+        const data = await res.json();
+        setComments(data);
+      }
     } catch (error) {
       console.error("Error fetching comments:", error);
     } finally {
@@ -59,7 +61,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       if (res.ok) {
         setNewComment("");
         await fetchComments();
-        onCommentAdded(); // Refresh parent post counts
+        onCommentAdded();
       }
     } catch (error) {
       console.error("Error posting comment:", error);
@@ -81,7 +83,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
 
   return (
     <div className="mt-3 pt-3 border-t border-gray-100">
-      {/* Comment list */}
       {loading ? (
         <p className="text-sm text-gray-400">Loading comments...</p>
       ) : comments.length === 0 ? (
@@ -107,7 +108,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         </div>
       )}
 
-      {/* Comment form */}
       {session && (
         <form onSubmit={handleSubmit} className="mt-3 flex gap-2">
           <input
