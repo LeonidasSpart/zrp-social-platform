@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { createNotification } from "@/lib/notifications";
 
 export async function POST(
   req: NextRequest,
@@ -14,10 +15,6 @@ export async function POST(
 
   const followerId = session.user.id;
   const username = params.username;
-
-  if (followerId === username) {
-    return NextResponse.json({ error: "Cannot follow yourself" }, { status: 400 });
-  }
 
   try {
     // Find the user to follow by username
@@ -32,6 +29,11 @@ export async function POST(
 
     const followingId = userToFollow.id;
 
+    // Prevent self-follow
+    if (followerId === followingId) {
+      return NextResponse.json({ error: "Cannot follow yourself" }, { status: 400 });
+    }
+
     const existing = await prisma.follow.findUnique({
       where: {
         followerId_followingId: {
@@ -42,6 +44,7 @@ export async function POST(
     });
 
     if (existing) {
+      // Unfollow
       await prisma.follow.delete({
         where: {
           followerId_followingId: {
@@ -52,12 +55,21 @@ export async function POST(
       });
       return NextResponse.json({ following: false });
     } else {
+      // Follow
       await prisma.follow.create({
         data: {
           followerId,
           followingId,
         },
       });
+
+      // ─── Send notification ──────────────────────────────────────
+      await createNotification({
+        userId: followingId,
+        type: "follow",
+        fromUserId: followerId,
+      });
+
       return NextResponse.json({ following: true });
     }
   } catch (error) {
