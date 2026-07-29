@@ -19,6 +19,7 @@ export async function GET(
         bio: true,
         avatarUrl: true,
         createdAt: true,
+        isPrivate: true,  // ← Include private flag
         _count: {
           select: {
             posts: true,
@@ -34,7 +35,10 @@ export async function GET(
     }
 
     let isFollowing = false;
+    let isBlocked = false;
+
     if (session && session.user && session.user.id !== user.id) {
+      // Check if viewer follows target
       const follow = await prisma.follow.findUnique({
         where: {
           followerId_followingId: {
@@ -44,9 +48,20 @@ export async function GET(
         },
       });
       isFollowing = !!follow;
+
+      // Check if viewer has blocked target
+      const block = await prisma.blocked.findUnique({
+        where: {
+          blockerId_blockedId: {
+            blockerId: session.user.id,
+            blockedId: user.id,
+          },
+        },
+      });
+      isBlocked = !!block;
     }
 
-    return NextResponse.json({ ...user, isFollowing });
+    return NextResponse.json({ ...user, isFollowing, isBlocked });
   } catch (error) {
     console.error("Error fetching user:", error);
     return NextResponse.json({ error: "Failed to fetch user" }, { status: 500 });
