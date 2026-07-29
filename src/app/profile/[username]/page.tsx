@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import PostCard from "@/components/PostCard";
-import { Calendar, MapPin, Link as LinkIcon } from "lucide-react";
 
 interface User {
   id: string;
@@ -19,6 +18,7 @@ interface User {
     followers: number;
     following: number;
   };
+  isFollowing: boolean;
 }
 
 interface Post {
@@ -47,7 +47,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isFollowing, setIsFollowing] = useState(false);
 
   const isOwnProfile = session?.user?.username === params.username;
 
@@ -90,21 +89,21 @@ export default function ProfilePage({ params }: { params: { username: string } }
   };
 
   const handleFollow = async () => {
+    if (!user) return;
     try {
-      const res = await fetch(`/api/users/${user?.id}/follow`, {
+      const res = await fetch(`/api/users/${user.id}/follow`, {
         method: "POST",
       });
       if (res.ok) {
         const data = await res.json();
-        setIsFollowing(data.following);
-        // Update follower count
-        setUser((prev) => prev ? {
-          ...prev,
+        setUser({
+          ...user,
+          isFollowing: data.following,
           _count: {
-            ...prev._count,
-            followers: data.following ? prev._count.followers + 1 : prev._count.followers - 1,
+            ...user._count,
+            followers: data.following ? user._count.followers + 1 : user._count.followers - 1,
           },
-        } : null);
+        });
       }
     } catch (error) {
       console.error("Error toggling follow:", error);
@@ -150,18 +149,16 @@ export default function ProfilePage({ params }: { params: { username: string } }
           <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
             <p className="text-gray-500">@{user.username}</p>
-            {user.bio && (
-              <p className="text-gray-700 mt-2">{user.bio}</p>
-            )}
+            {user.bio && <p className="text-gray-700 mt-2">{user.bio}</p>}
             <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
               <span>Joined {formatDate(user.createdAt)}</span>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-2">
+          <div>
             {isOwnProfile ? (
               <Link
                 href="/settings"
-                className="px-4 py-1.5 border border-gray-300 rounded-full text-sm font-medium hover:bg-gray-50 transition"
+                className="px-4 py-1.5 border border-gray-300 rounded-full text-sm font-medium hover:bg-gray-50 transition inline-block"
               >
                 Edit Profile
               </Link>
@@ -169,12 +166,12 @@ export default function ProfilePage({ params }: { params: { username: string } }
               <button
                 onClick={handleFollow}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
-                  isFollowing
+                  user.isFollowing
                     ? "border border-gray-300 text-gray-700 hover:bg-gray-50"
                     : "bg-blue-600 text-white hover:bg-blue-700"
                 }`}
               >
-                {isFollowing ? "Unfollow" : "Follow"}
+                {user.isFollowing ? "Unfollow" : "Follow"}
               </button>
             )}
           </div>
