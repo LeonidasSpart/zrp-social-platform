@@ -29,6 +29,7 @@ model User {
   sentNotifications Notification[] @relation("Notification_fromUser")
   sentMessages Message[] @relation("Message_sender")
   receivedMessages Message[] @relation("Message_receiver")
+  pollVotes   PollVote[]
 }
 
 model Post {
@@ -41,10 +42,9 @@ model Post {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  // ─── NEW FIELDS ────────────────────────────────────────────────
-  hashtags    String[]  // Store hashtags as array
-  mentions    String[]  // Store mentioned usernames
-  pollId      String?
+  hashtags    String[]
+  mentions    String[]
+  pollId      String?   @unique
   poll        Poll?     @relation(fields: [pollId], references: [id], onDelete: SetNull)
   isPoll      Boolean   @default(false)
 
@@ -122,14 +122,14 @@ model Message {
   createdAt   DateTime  @default(now())
 }
 
-// ─── NEW MODELS ───────────────────────────────────────────────────
+// ─── Poll & PollVote (fixed) ─────────────────────────────────────
 
 model Poll {
   id          String    @id @default(cuid())
   question    String    @db.Text
-  options     String[]  // Array of option texts
-  votes       Json?     // Store vote counts e.g. { "0": 5, "1": 3 }
-  postId      String?
+  options     String[]
+  votes       Json?     // store vote counts per option
+  postId      String?   @unique
   post        Post?     @relation(fields: [postId], references: [id], onDelete: Cascade)
   expiresAt   DateTime?
   createdAt   DateTime  @default(now())
@@ -144,7 +144,7 @@ model PollVote {
   poll        Poll      @relation(fields: [pollId], references: [id], onDelete: Cascade)
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  optionIndex Int       // Which option they voted for
+  optionIndex Int
   createdAt   DateTime  @default(now())
 
   @@unique([pollId, userId])
