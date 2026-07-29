@@ -88,10 +88,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
     }
   };
 
+  // ─── UPDATED: Uses username instead of id ──────────────────────
   const handleFollow = async () => {
     if (!user) return;
     try {
-      const res = await fetch(`/api/users/${user.id}/follow`, {
+      const res = await fetch(`/api/users/${user.username}/follow`, {
         method: "POST",
       });
       if (res.ok) {
