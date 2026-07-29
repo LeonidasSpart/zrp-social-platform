@@ -79,7 +79,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Post by ${post.author.name}`,
+          title: `Post by ${post.author.name || post.author.username}`,
           text: post.content,
           url: url,
         });
@@ -134,15 +134,16 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
         <div className="flex items-start gap-3">
           <Link href={`/profile/${post.author.username}`}>
             <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold flex-shrink-0">
-              {post.author.name?.[0] || "?"}
+              {post.author.name?.[0] || post.author.username?.[0] || "?"}
             </div>
           </Link>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Link href={`/profile/${post.author.username}`}>
+                  {/* ─── FALLBACK: Show username if name is missing ─── */}
                   <span className="font-semibold hover:underline text-gray-900">
-                    {post.author.name}
+                    {post.author.name || post.author.username}
                   </span>
                 </Link>
                 <Link href={`/profile/${post.author.username}`}>
