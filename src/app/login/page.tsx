@@ -16,33 +16,24 @@ export default function LoginPage() {
     setError("");
 
     try {
+      // Use callbackUrl instead of redirect: false
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false,
+        callbackUrl: "/",
       });
 
-      // If we get an error, display it
+      // If there's an error, the promise will resolve with an error object
       if (result?.error) {
         setError("Invalid email or password");
         setLoading(false);
-        return;
       }
-
-      // If we have a result (even without error), we assume login was successful
-      // The session might not be ready immediately, so we give it a short delay
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 200);
-    } catch (err: any) {
-      // This catch handles any unexpected errors (e.g., network issues)
-      console.error("Login error:", err);
-      // If the error is related to session, we still redirect
-      // because the backend authenticated the user
-      setError("Login succeeded but session may not be ready. Redirecting...");
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1000);
+      // If successful, NextAuth will redirect to callbackUrl automatically
+      // No need to call router.push or window.location
+    } catch (err) {
+      // This catch handles network errors or unexpected issues
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
     }
   };
 
