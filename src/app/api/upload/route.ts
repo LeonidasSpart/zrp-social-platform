@@ -16,19 +16,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    // Validate file type
-    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-    if (!validTypes.includes(file.type)) {
+    // Validate file type – support images and videos
+    const validImageTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    const validVideoTypes = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"];
+    const isImage = validImageTypes.includes(file.type);
+    const isVideo = validVideoTypes.includes(file.type);
+
+    if (!isImage && !isVideo) {
       return NextResponse.json(
-        { error: "Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed." },
+        { error: "Invalid file type. Only images (JPEG, PNG, GIF, WebP) and videos (MP4, WebM, MOV) are allowed." },
         { status: 400 }
       );
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate file size: 5MB for images, 50MB for videos
+    const maxSize = isVideo ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (file.size > maxSize) {
       return NextResponse.json(
-        { error: "File too large. Max size is 5MB." },
+        { error: `File too large. Max size is ${isVideo ? "50MB" : "5MB"}.` },
         { status: 400 }
       );
     }
@@ -39,13 +44,14 @@ export async function POST(req: NextRequest) {
     const base64 = buffer.toString("base64");
     const dataUrl = `data:${file.type};base64,${base64}`;
 
-    // In production, you'd upload to a cloud storage service (S3, R2, UploadThing)
-    // For now, we'll return the base64 URL (works for demo, but for production use a real CDN)
+    // In production, upload to a cloud storage service (S3, R2, UploadThing)
+    // For now, return base64 URL (works for demo, but use a real CDN in production)
 
     return NextResponse.json({
       success: true,
       url: dataUrl,
       filename: file.name,
+      type: file.type,        // useful for frontend to know if it's image/video
     });
   } catch (error) {
     console.error("Upload error:", error);
