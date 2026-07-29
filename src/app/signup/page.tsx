@@ -18,7 +18,7 @@ export default function SignupPage() {
     setError("");
 
     try {
-      // 1. Create the account
+      // Create account
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -33,18 +33,14 @@ export default function SignupPage() {
         return;
       }
 
-      // 2. Auto-login with the same credentials
-      const loginResult = await signIn("credentials", {
+      // Auto-login
+      await signIn("credentials", {
         email,
         password,
-        callbackUrl: "/",  // Redirect to home after login
+        callbackUrl: "/",
       });
 
-      // If there's an error, redirect to login page
-      if (loginResult?.error) {
-        window.location.href = "/login?registered=true";
-      }
-      // Otherwise, NextAuth will redirect to the home page automatically
+      // If signIn fails, it will show an error, but we don't need to handle it here
     } catch (err) {
       setError("Something went wrong. Please try again.");
       setLoading(false);
