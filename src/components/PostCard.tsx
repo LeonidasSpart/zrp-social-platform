@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Heart, MessageCircle, Repeat, Share2, Pencil, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Comments from "./Comments";
 import EditPostModal from "./EditPostModal";
+import ReportModal from "./ReportModal";
 
 interface PostCardProps {
   post: {
@@ -38,6 +39,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
   const [repostsCount, setRepostsCount] = useState(post._count?.reposts || 0);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const isAuthor = session?.user?.id === post.author.id;
@@ -117,6 +119,29 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
     }
   };
 
+  const handleReport = async (reason: string, details?: string) => {
+    try {
+      const res = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          postId: post.id,
+          reason,
+          details,
+        }),
+      });
+      if (res.ok) {
+        alert("Report submitted. Thank you for helping keep the community safe.");
+        setShowReportModal(false);
+      } else {
+        alert("Failed to submit report. Please try again.");
+      }
+    } catch (error) {
+      console.error("Report error:", error);
+      alert("Failed to submit report. Please try again.");
+    }
+  };
+
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
     const minutes = Math.floor(diff / 60000);
@@ -141,7 +166,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Link href={`/profile/${post.author.username}`}>
-                  {/* ─── FALLBACK: Show username if name is missing ─── */}
                   <span className="font-semibold hover:underline text-gray-900">
                     {post.author.name || post.author.username}
                   </span>
@@ -155,8 +179,8 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
                 <span className="text-gray-400 text-sm">{timeAgo(post.createdAt)}</span>
               </div>
 
-              {/* ─── Edit & Delete Buttons ─── */}
-              {isAuthor && (
+              {/* ─── Edit & Delete Buttons (Author) ─── */}
+              {isAuthor ? (
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setShowEditModal(true)}
@@ -173,6 +197,15 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
+              ) : (
+                // ─── Report Button (Non-author) ───
+                <button
+                  onClick={() => setShowReportModal(true)}
+                  className="text-gray-400 hover:text-red-500 transition p-1"
+                  title="Report"
+                >
+                  <Flag className="w-4 h-4" />
+                </button>
               )}
             </div>
 
@@ -261,6 +294,13 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
           </div>
         </div>
       )}
+
+      {/* ─── Report Modal ─── */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        onSubmit={handleReport}
+      />
     </>
   );
 }
