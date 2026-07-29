@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Bell, Home, Search, User, MessageSquare, Compass } from "lucide-react";
+import { Home, Compass, Search, MessageSquare, Bell, User } from "lucide-react";
 
 export default function Header() {
   const { data: session } = useSession();
@@ -27,7 +27,7 @@ export default function Header() {
     }
   };
 
-  // Poll every 30 seconds
+  // Poll for new notifications every 30 seconds
   useEffect(() => {
     const interval = setInterval(fetchUnreadCount, 30000);
     return () => clearInterval(interval);
@@ -42,16 +42,19 @@ export default function Header() {
           ZRP Social
         </Link>
         <nav className="flex items-center gap-4">
-          <Link href="/" className="text-gray-500 hover:text-blue-600 transition">
+          <Link href="/" className="text-gray-500 hover:text-blue-600 transition" title="Home">
             <Home className="w-5 h-5" />
           </Link>
-          <Link href="/explore" className="text-gray-500 hover:text-blue-600 transition">
+          <Link href="/explore" className="text-gray-500 hover:text-blue-600 transition" title="Explore">
             <Compass className="w-5 h-5" />
           </Link>
-          <Link href="/search" className="text-gray-500 hover:text-blue-600 transition">
+          <Link href="/search" className="text-gray-500 hover:text-blue-600 transition" title="Search">
             <Search className="w-5 h-5" />
           </Link>
-          <Link href="/notifications" className="relative text-gray-500 hover:text-blue-600 transition">
+          <Link href="/messages" className="text-gray-500 hover:text-blue-600 transition" title="Messages">
+            <MessageSquare className="w-5 h-5" />
+          </Link>
+          <Link href="/notifications" className="relative text-gray-500 hover:text-blue-600 transition" title="Notifications">
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
@@ -59,7 +62,7 @@ export default function Header() {
               </span>
             )}
           </Link>
-          <Link href={`/profile/${session.user?.username}`} className="text-gray-500 hover:text-blue-600 transition">
+          <Link href={`/profile/${session.user?.username}`} className="text-gray-500 hover:text-blue-600 transition" title="Profile">
             <User className="w-5 h-5" />
           </Link>
         </nav>
