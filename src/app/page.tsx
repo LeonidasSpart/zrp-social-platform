@@ -11,7 +11,6 @@ interface Post {
   content: string;
   imageUrl?: string;
   createdAt: string;
-  // author is now required to match PostCard's prop type
   author: {
     id: string;
     username: string;
@@ -56,22 +55,8 @@ export default function HomePage() {
         throw new Error(data.error || `HTTP ${res.status}`);
       }
 
-      // Transform API response to match Post interface
-      const postsWithData: Post[] = data.map((post: any) => ({
-        ...post,
-        author: {
-          id: post.authorId,
-          username: session?.user?.username || "unknown",
-          name: session?.user?.name || "Unknown",
-        },
-        _count: {
-          likes: 0,
-          comments: 0,
-          reposts: 0,
-        },
-      }));
-
-      setPosts(postsWithData);
+      // ✅ Use the data directly – the API already includes author info
+      setPosts(data);
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Failed to load posts");
