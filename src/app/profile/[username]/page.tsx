@@ -12,6 +12,9 @@ interface User {
   name: string;
   bio: string | null;
   avatarUrl: string | null;
+  location?: string | null;
+  country?: string | null;
+  website?: string | null;
   createdAt: string;
   isPrivate: boolean;
   isBlocked: boolean;
@@ -160,13 +163,28 @@ export default function ProfilePage({ params }: { params: { username: string } }
     });
   };
 
+  // Determine if we should show location & website
+  const hasLocation = user.location || user.country;
+  const displayLocation = user.location && user.country
+    ? `${user.location}, ${user.country}`
+    : user.location || user.country;
+
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
       {/* Profile Header */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-start gap-4">
-          <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-3xl font-bold flex-shrink-0">
-            {user.name?.[0] || "?"}
+          {/* ─── Avatar ─── */}
+          <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-3xl font-bold flex-shrink-0 overflow-hidden">
+            {user.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt={user.name || user.username}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              user.name?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase() || "?"
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -177,6 +195,24 @@ export default function ProfilePage({ params }: { params: { username: string } }
             </div>
             <p className="text-gray-500">@{user.username}</p>
             {user.bio && <p className="text-gray-700 mt-2">{user.bio}</p>}
+            {/* Location & Website */}
+            <div className="mt-2 space-y-1">
+              {hasLocation && (
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  📍 {displayLocation}
+                </p>
+              )}
+              {user.website && (
+                <a
+                  href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                >
+                  🔗 {user.website}
+                </a>
+              )}
+            </div>
             <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
               <span>Joined {formatDate(user.createdAt)}</span>
             </div>
