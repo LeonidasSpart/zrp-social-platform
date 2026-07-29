@@ -1,7 +1,7 @@
 "use client";
 
-import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -16,18 +16,37 @@ export default function LoginPage() {
     setError("");
 
     try {
+      // First, call our custom login API to verify credentials
+      const res = await fetch("/api/auth/custom-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Invalid credentials");
+        setLoading(false);
+        return;
+      }
+
+      // Then, sign in using NextAuth – this will set the session
       const result = await signIn("credentials", {
         email,
         password,
-        callbackUrl: "/",  // NextAuth handles the redirect
+        redirect: false,
+        callbackUrl: "/",
       });
 
-      // If there is an error (like wrong password), show it
       if (result?.error) {
-        setError("Invalid email or password");
+        setError(result.error);
         setLoading(false);
+        return;
       }
-      // On success, NextAuth redirects to callbackUrl – we don't need to do anything
+
+      // Force redirect to home (as a fallback)
+      window.location.href = "/";
     } catch (err) {
       setError("Something went wrong. Please try again.");
       setLoading(false);
