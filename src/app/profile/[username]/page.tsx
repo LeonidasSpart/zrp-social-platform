@@ -13,6 +13,8 @@ interface User {
   bio: string | null;
   avatarUrl: string | null;
   createdAt: string;
+  isPrivate: boolean;
+  isBlocked: boolean;
   _count: {
     posts: number;
     followers: number;
@@ -47,6 +49,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isBlocked, setIsBlocked] = useState(false);
 
   const isOwnProfile = session?.user?.username === params.username;
 
@@ -69,6 +72,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
       if (!res.ok) throw new Error("User not found");
       const data = await res.json();
       setUser(data);
+      setIsBlocked(data.isBlocked || false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load profile");
     }
@@ -88,7 +92,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
     }
   };
 
-  // ─── UPDATED: Uses username instead of id ──────────────────────
   const handleFollow = async () => {
     if (!user) return;
     try {
@@ -108,6 +111,24 @@ export default function ProfilePage({ params }: { params: { username: string } }
       }
     } catch (error) {
       console.error("Error toggling follow:", error);
+    }
+  };
+
+  const handleBlock = async () => {
+    if (!user) return;
+    try {
+      const res = await fetch(`/api/users/${user.username}/block`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setIsBlocked(data.blocked);
+        if (data.blocked) {
+          router.push("/");
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling block:", error);
     }
   };
 
@@ -148,56 +169,79 @@ export default function ProfilePage({ params }: { params: { username: string } }
             {user.name?.[0] || "?"}
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-gray-900">{user.name || user.username}</h1>
+              {user.isPrivate && (
+                <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">Private</span>
+              )}
+            </div>
             <p className="text-gray-500">@{user.username}</p>
             {user.bio && <p className="text-gray-700 mt-2">{user.bio}</p>}
             <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
               <span>Joined {formatDate(user.createdAt)}</span>
             </div>
           </div>
-          <div>
+          <div className="flex flex-col gap-2">
             {isOwnProfile ? (
               <Link
                 href="/settings"
-                className="px-4 py-1.5 border border-gray-300 rounded-full text-sm font-medium hover:bg-gray-50 transition inline-block"
+                className="px-4 py-1.5 border border-gray-300 rounded-full text-sm font-medium hover:bg-gray-50 transition inline-block text-center"
               >
                 Edit Profile
               </Link>
             ) : (
-              <button
-                onClick={handleFollow}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
-                  user.isFollowing
-                    ? "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                    : "bg-blue-600 text-white hover:bg-blue-700"
-                }`}
-              >
-                {user.isFollowing ? "Unfollow" : "Follow"}
-              </button>
+              <>
+                <button
+                  onClick={handleFollow}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
+                    user.isFollowing
+                      ? "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
+                  }`}
+                >
+                  {user.isFollowing ? "Unfollow" : "Follow"}
+                </button>
+                <button
+                  onClick={handleBlock}
+                  className="px-4 py-1.5 border border-red-300 text-red-600 rounded-full text-sm font-medium hover:bg-red-50 transition"
+                >
+                  {isBlocked ? "Unblock" : "Block"}
+                </button>
+              </>
             )}
           </div>
         </div>
 
         {/* Stats */}
         <div className="flex gap-6 mt-4 pt-4 border-t border-gray-100">
-          <div>
+          <Link href={`/profile/${user.username}/followers`} className="hover:underline">
             <span className="font-bold text-gray-900">{user._count.posts}</span>
             <span className="text-gray-500 text-sm ml-1">Posts</span>
-          </div>
-          <div>
+          </Link>
+          <Link href={`/profile/${user.username}/followers`} className="hover:underline">
             <span className="font-bold text-gray-900">{user._count.followers}</span>
             <span className="text-gray-500 text-sm ml-1">Followers</span>
-          </div>
-          <div>
+          </Link>
+          <Link href={`/profile/${user.username}/following`} className="hover:underline">
             <span className="font-bold text-gray-900">{user._count.following}</span>
             <span className="text-gray-500 text-sm ml-1">Following</span>
-          </div>
+          </Link>
         </div>
       </div>
 
       {/* Posts */}
       <div className="mt-4 space-y-4">
-        {posts.length === 0 ? (
+        {isBlocked ? (
+          <div className="bg-white rounded-lg shadow-sm p-8 border border-gray-200 text-center">
+            <p className="text-gray-500">You have blocked @{user.username}</p>
+            <button
+              onClick={handleBlock}
+              className="mt-2 text-blue-600 hover:underline text-sm"
+            >
+              Unblock
+            </button>
+          </div>
+        ) : posts.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 text-center py-12">
             <p className="text-gray-500">
               {isOwnProfile
