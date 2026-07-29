@@ -2,7 +2,7 @@ import { prisma } from "./db";
 
 interface CreateNotificationParams {
   userId: string;
-  type: "like" | "comment" | "follow" | "repost";
+  type: "like" | "comment" | "follow" | "repost" | "mention";
   fromUserId: string;
   postId?: string;
 }
@@ -13,7 +13,6 @@ export async function createNotification({
   fromUserId,
   postId,
 }: CreateNotificationParams) {
-  // Don't notify yourself
   if (userId === fromUserId) return;
 
   try {
