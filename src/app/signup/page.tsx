@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 
 export default function SignupPage() {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -18,21 +17,38 @@ export default function SignupPage() {
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, username, email, password }),
-    });
+    try {
+      // 1. Create the account
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, username, email, password }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      setError(data.error || "Something went wrong");
+      if (!res.ok) {
+        setError(data.error || "Something went wrong");
+        setLoading(false);
+        return;
+      }
+
+      // 2. Auto-login with the same credentials
+      const loginResult = await signIn("credentials", {
+        email,
+        password,
+        callbackUrl: "/",  // Redirect to home after login
+      });
+
+      // If there's an error, redirect to login page
+      if (loginResult?.error) {
+        window.location.href = "/login?registered=true";
+      }
+      // Otherwise, NextAuth will redirect to the home page automatically
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
       setLoading(false);
-      return;
     }
-
-    router.push("/login?registered=true");
   };
 
   return (
