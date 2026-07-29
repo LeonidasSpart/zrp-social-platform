@@ -41,6 +41,13 @@ model Post {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  // ─── NEW FIELDS ────────────────────────────────────────────────
+  hashtags    String[]  // Store hashtags as array
+  mentions    String[]  // Store mentioned usernames
+  pollId      String?
+  poll        Poll?     @relation(fields: [pollId], references: [id], onDelete: SetNull)
+  isPoll      Boolean   @default(false)
+
   comments    Comment[]
   likes       Like[]
   reposts     Repost[]
@@ -112,5 +119,42 @@ model Message {
   receiverId  String
   receiver    User      @relation("Message_receiver", fields: [receiverId], references: [id], onDelete: Cascade)
   read        Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+}
+
+// ─── NEW MODELS ───────────────────────────────────────────────────
+
+model Poll {
+  id          String    @id @default(cuid())
+  question    String    @db.Text
+  options     String[]  // Array of option texts
+  votes       Json?     // Store vote counts e.g. { "0": 5, "1": 3 }
+  postId      String?
+  post        Post?     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  votes_user  PollVote[]
+}
+
+model PollVote {
+  id          String    @id @default(cuid())
+  pollId      String
+  poll        Poll      @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  optionIndex Int       // Which option they voted for
+  createdAt   DateTime  @default(now())
+
+  @@unique([pollId, userId])
+}
+
+model Gif {
+  id          String    @id @default(cuid())
+  url         String
+  title       String?
+  width       Int?
+  height      Int?
   createdAt   DateTime  @default(now())
 }
