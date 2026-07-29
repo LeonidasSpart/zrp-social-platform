@@ -45,7 +45,7 @@ model Post {
   hashtags    String[]
   mentions    String[]
   pollId      String?   @unique
-  poll        Poll?     @relation(fields: [pollId], references: [id], onDelete: SetNull)
+  poll        Poll?     @relation(fields: [pollId], references: [id])
   isPoll      Boolean   @default(false)
 
   comments    Comment[]
@@ -122,15 +122,12 @@ model Message {
   createdAt   DateTime  @default(now())
 }
 
-// ─── Poll & PollVote (fixed) ─────────────────────────────────────
-
 model Poll {
   id          String    @id @default(cuid())
   question    String    @db.Text
   options     String[]
   votes       Json?     // store vote counts per option
-  postId      String?   @unique
-  post        Post?     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post        Post?     // opposite side of the relation (no extra attributes)
   expiresAt   DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
