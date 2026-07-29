@@ -153,13 +153,28 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
     return `${days}d`;
   };
 
+  // Helper to get the initial letter for fallback
+  const getInitial = () => {
+    const name = post.author.name || post.author.username || "?";
+    return name.charAt(0).toUpperCase();
+  };
+
   return (
     <>
       <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 hover:bg-gray-50 transition">
         <div className="flex items-start gap-3">
           <Link href={`/profile/${post.author.username}`}>
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold flex-shrink-0">
-              {post.author.name?.[0] || post.author.username?.[0] || "?"}
+            {/* ─── Avatar with image fallback ─── */}
+            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold flex-shrink-0 overflow-hidden">
+              {post.author.avatarUrl ? (
+                <img
+                  src={post.author.avatarUrl}
+                  alt={post.author.name || post.author.username}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                getInitial()
+              )}
             </div>
           </Link>
           <div className="flex-1 min-w-0">
