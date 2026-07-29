@@ -37,10 +37,11 @@ export default function SignupPage() {
       await signIn("credentials", {
         email,
         password,
+        redirect: false,
         callbackUrl: "/",
       });
 
-      // If signIn fails, it will show an error, but we don't need to handle it here
+      window.location.href = "/";
     } catch (err) {
       setError("Something went wrong. Please try again.");
       setLoading(false);
