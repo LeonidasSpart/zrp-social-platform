@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   const adminCheck = await requireAdmin();
@@ -11,13 +12,14 @@ export async function GET(req: NextRequest) {
   const limit = parseInt(req.nextUrl.searchParams.get("limit") || "20");
 
   try {
-    const where = search ? {
-      OR: [
+    const where: Prisma.UserWhereInput = {};
+    if (search) {
+      where.OR = [
         { username: { contains: search, mode: "insensitive" } },
         { email: { contains: search, mode: "insensitive" } },
         { name: { contains: search, mode: "insensitive" } },
-      ],
-    } : {};
+      ];
+    }
 
     const [users, total] = await Promise.all([
       prisma.user.findMany({
@@ -46,6 +48,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ users, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error) {
+    console.error("Error fetching users:", error);
     return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
   }
 }
