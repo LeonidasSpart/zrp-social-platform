@@ -16,6 +16,7 @@ model User {
   bio         String?   @db.Text
   avatarUrl   String?
   coverUrl    String?
+  isPrivate   Boolean   @default(false)    // ← New: private account flag
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -30,6 +31,11 @@ model User {
   sentMessages Message[] @relation("Message_sender")
   receivedMessages Message[] @relation("Message_receiver")
   pollVotes   PollVote[]
+
+  // ─── Privacy & Moderation ──────────────────────────────────────
+  blockedUsers Blocked[] @relation("Blocker")   // users this user has blocked
+  blockedBy    Blocked[] @relation("Blocked")   // users who blocked this user
+  reports      Report[]  @relation("Reporter")  // reports made by this user
 }
 
 model Post {
@@ -52,6 +58,7 @@ model Post {
   likes       Like[]
   reposts     Repost[]
   notifications Notification[] @relation("Notification_post")
+  reports     Report[]  // ← New: reports on this post
 }
 
 model Comment {
@@ -63,6 +70,8 @@ model Comment {
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  reports     Report[]  // ← New: reports on this comment
 }
 
 model Follow {
@@ -154,4 +163,36 @@ model Gif {
   width       Int?
   height      Int?
   createdAt   DateTime  @default(now())
+}
+
+// ─── Privacy & Moderation ────────────────────────────────────────
+
+model Blocked {
+  id          String   @id @default(cuid())
+  blockerId   String
+  blocker     User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId   String
+  blocked     User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  reporterId  String
+  reporter    User     @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  postId      String?
+  post        Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  commentId   String?
+  comment     Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  reason      String   // spam, harassment, inappropriate, other
+  details     String?  @db.Text
+  status      String   @default("pending") // pending, reviewed, dismissed, actioned
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([postId])
+  @@index([commentId])
+  @@index([status])
 }
