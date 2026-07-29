@@ -16,22 +16,19 @@ export default function LoginPage() {
     setError("");
 
     try {
-      // Use callbackUrl instead of redirect: false
       const result = await signIn("credentials", {
         email,
         password,
-        callbackUrl: "/",
+        callbackUrl: "/",  // NextAuth handles the redirect
       });
 
-      // If there's an error, the promise will resolve with an error object
+      // If there is an error (like wrong password), show it
       if (result?.error) {
         setError("Invalid email or password");
         setLoading(false);
       }
-      // If successful, NextAuth will redirect to callbackUrl automatically
-      // No need to call router.push or window.location
+      // On success, NextAuth redirects to callbackUrl – we don't need to do anything
     } catch (err) {
-      // This catch handles network errors or unexpected issues
       setError("Something went wrong. Please try again.");
       setLoading(false);
     }
