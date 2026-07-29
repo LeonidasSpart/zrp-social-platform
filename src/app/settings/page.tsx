@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Check, X, Globe, MapPin, User, Key, Calendar } from "lucide-react";
+import { Check, X, Globe, MapPin, User, Key, Calendar, Camera } from "lucide-react";
 
 interface UserData {
   id: string;
@@ -42,6 +42,11 @@ export default function SettingsPage() {
   const [updatingUsername, setUpdatingUsername] = useState(false);
   const [updatingPassword, setUpdatingPassword] = useState(false);
 
+  // Avatar states
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
   const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [usernameCooldown, setUsernameCooldown] = useState<number | null>(null);
@@ -70,6 +75,7 @@ export default function SettingsPage() {
         setCountry(data.country || "");
         setWebsite(data.website || "");
         setNewUsername(data.username || "");
+        setAvatarPreview(data.avatarUrl || null);
 
         // Check username cooldown
         if (data.usernameChangedAt) {
@@ -82,6 +88,54 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
+    }
+  };
+
+  // ─── Avatar Upload ──────────────────────────────────────────────
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({ type: "error", text: "File too large. Max size is 5MB." });
+      return;
+    }
+
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      setMessage({ type: "error", text: "Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed." });
+      return;
+    }
+
+    setUploadingAvatar(true);
+    setMessage(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/user/avatar", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage({ type: "success", text: "Profile picture updated successfully!" });
+        setAvatarPreview(data.avatarUrl);
+        await update();
+        fetchUserData();
+      } else {
+        setMessage({ type: "error", text: data.error || "Upload failed" });
+      }
+    } catch (error) {
+      console.error("Avatar upload error:", error);
+      setMessage({ type: "error", text: "Upload failed. Please try again." });
+    } finally {
+      setUploadingAvatar(false);
     }
   };
 
@@ -256,6 +310,51 @@ export default function SettingsPage() {
         <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
           <Calendar className="w-4 h-4" />
           <span>Joined {formatDate(userData.createdAt)}</span>
+        </div>
+      </div>
+
+      {/* ─── Profile Picture ────────────────────────────────────────── */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Profile Picture</h2>
+        <div className="flex items-center gap-6">
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 text-3xl font-bold overflow-hidden">
+              {avatarPreview ? (
+                <img
+                  src={avatarPreview}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                userData?.name?.[0]?.toUpperCase() || "?"
+              )}
+            </div>
+            <label
+              htmlFor="avatar-upload"
+              className="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-1.5 cursor-pointer hover:bg-blue-700 transition"
+            >
+              <Camera className="w-4 h-4" />
+            </label>
+            <input
+              id="avatar-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              className="hidden"
+              disabled={uploadingAvatar}
+            />
+          </div>
+          <div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Upload a profile picture. Max 5MB.
+            </p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              Supported formats: JPEG, PNG, GIF, WebP
+            </p>
+            {uploadingAvatar && (
+              <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">Uploading...</p>
+            )}
+          </div>
         </div>
       </div>
 
