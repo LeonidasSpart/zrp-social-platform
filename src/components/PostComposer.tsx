@@ -202,6 +202,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   // ─── Render helpers ─────────────────────────────────────────────
   const displayName = session?.user?.name || session?.user?.username || "User";
   const initial = displayName?.[0]?.toUpperCase() || "?";
+  const avatarUrl = session?.user?.avatarUrl;
 
   const isPollValid = showPollBuilder &&
     pollQuestion.trim() &&
@@ -211,8 +212,17 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
       <form onSubmit={handleSubmit}>
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-semibold flex-shrink-0">
-            {initial}
+          {/* ─── Avatar ─── */}
+          <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-semibold flex-shrink-0 overflow-hidden">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={displayName}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              initial
+            )}
           </div>
           <div className="flex-1 space-y-2">
             <textarea
@@ -305,7 +315,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
             {/* ─── Toolbar ──────────────────────────────────────────── */}
             <div className="flex items-center justify-between mt-2 border-t border-gray-100 dark:border-gray-700 pt-2">
               <div className="flex items-center gap-2 flex-wrap">
-                {/* File upload (image/video) */}
                 <label className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition">
                   <input
                     ref={fileInputRef}
@@ -319,7 +328,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   {uploading && <span className="text-xs ml-1 text-gray-400 dark:text-gray-500">Uploading...</span>}
                 </label>
 
-                {/* GIF picker */}
                 <button
                   type="button"
                   onClick={() => setShowGifPicker(true)}
@@ -329,7 +337,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   <FileImage className="w-5 h-5" />
                 </button>
 
-                {/* Poll toggle */}
                 <button
                   type="button"
                   onClick={() => setShowPollBuilder(!showPollBuilder)}
@@ -341,7 +348,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   <BarChart3 className="w-5 h-5" />
                 </button>
 
-                {/* Character count */}
                 <span className="text-xs text-gray-400 dark:text-gray-500">
                   {content.length}/500
                 </span>
