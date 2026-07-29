@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Image, Gif, BarChart3, X, Plus, Trash2 } from "lucide-react";
+import { Image, FileImage, BarChart3, Plus, Trash2 } from "lucide-react";
 import GifPicker from "./GifPicker";
 
 interface PostComposerProps {
@@ -326,7 +326,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   className="text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition"
                   title="Add GIF"
                 >
-                  <Gif className="w-5 h-5" />
+                  <FileImage className="w-5 h-5" />
                 </button>
 
                 {/* Poll toggle */}
