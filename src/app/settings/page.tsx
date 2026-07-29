@@ -4,35 +4,104 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Check, X, Globe, MapPin, User, Key, Calendar } from "lucide-react";
+
+interface UserData {
+  id: string;
+  username: string;
+  name: string;
+  bio: string | null;
+  location: string | null;
+  country: string | null;
+  website: string | null;
+  avatarUrl: string | null;
+  createdAt: string;
+  usernameChangedAt: string | null;
+}
 
 export default function SettingsPage() {
   const { data: session, status, update } = useSession();
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
+
+  // Form states
+  const [name, setName] = useState("");
+  const [bio, setBio] = useState("");
+  const [location, setLocation] = useState("");
+  const [country, setCountry] = useState("");
+  const [website, setWebsite] = useState("");
+  const [newUsername, setNewUsername] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  // Loading states for each section
+  const [updatingProfile, setUpdatingProfile] = useState(false);
+  const [updatingUsername, setUpdatingUsername] = useState(false);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
+
+  const [usernameError, setUsernameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [usernameCooldown, setUsernameCooldown] = useState<number | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
     }
-    if (session?.user) {
-      setName(session.user.name || "");
-      // You could fetch bio from an API if you add it to session
-    }
-  }, [status, session, router]);
+  }, [status, router]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    if (session?.user) {
+      fetchUserData();
+    }
+  }, [session]);
+
+  const fetchUserData = async () => {
+    try {
+      const res = await fetch(`/api/users/${session?.user?.username}`);
+      if (res.ok) {
+        const data = await res.json();
+        setUserData(data);
+        setName(data.name || "");
+        setBio(data.bio || "");
+        setLocation(data.location || "");
+        setCountry(data.country || "");
+        setWebsite(data.website || "");
+        setNewUsername(data.username || "");
+
+        // Check username cooldown
+        if (data.usernameChangedAt) {
+          const lastChange = new Date(data.usernameChangedAt);
+          const daysSince = Math.floor((Date.now() - lastChange.getTime()) / (1000 * 60 * 60 * 24));
+          if (daysSince < 30) {
+            setUsernameCooldown(30 - daysSince);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  // ─── Update Profile ─────────────────────────────────────────────
+  const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setUpdatingProfile(true);
     setMessage(null);
 
     try {
       const res = await fetch("/api/user", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, bio }),
+        body: JSON.stringify({
+          name,
+          bio,
+          location,
+          country,
+          website,
+        }),
       });
 
       if (res.ok) {
@@ -44,11 +113,108 @@ export default function SettingsPage() {
     } catch (error) {
       setMessage({ type: "error", text: "Something went wrong" });
     } finally {
-      setLoading(false);
+      setUpdatingProfile(false);
     }
   };
 
-  if (status === "loading") {
+  // ─── Update Username ────────────────────────────────────────────
+  const handleUpdateUsername = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUsernameError("");
+    setMessage(null);
+
+    if (!newUsername || newUsername.length < 3) {
+      setUsernameError("Username must be at least 3 characters");
+      return;
+    }
+
+    if (newUsername === userData?.username) {
+      setUsernameError("New username is the same as current");
+      return;
+    }
+
+    if (usernameCooldown && usernameCooldown > 0) {
+      setUsernameError(`You can change your username again in ${usernameCooldown} days`);
+      return;
+    }
+
+    setUpdatingUsername(true);
+
+    try {
+      const res = await fetch("/api/user/username", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: newUsername }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        await update();
+        setMessage({ type: "success", text: "Username updated successfully! You can change it again in 30 days." });
+        setUsernameCooldown(30);
+        setUserData(data.user);
+      } else {
+        setUsernameError(data.error || "Failed to update username");
+      }
+    } catch (error) {
+      setUsernameError("Something went wrong");
+    } finally {
+      setUpdatingUsername(false);
+    }
+  };
+
+  // ─── Update Password ────────────────────────────────────────────
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError("");
+    setMessage(null);
+
+    if (!currentPassword || !newPassword) {
+      setPasswordError("All fields are required");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Passwords do not match");
+      return;
+    }
+
+    setUpdatingPassword(true);
+
+    try {
+      const res = await fetch("/api/user/password", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage({ type: "success", text: "Password updated successfully!" });
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        setPasswordError(data.error || "Failed to update password");
+      }
+    } catch (error) {
+      setPasswordError("Something went wrong");
+    } finally {
+      setUpdatingPassword(false);
+    }
+  };
+
+  if (status === "loading" || !userData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-gray-500">Loading...</div>
@@ -56,54 +222,246 @@ export default function SettingsPage() {
     );
   }
 
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
       <div className="mb-4">
         <Link href={`/profile/${session?.user?.username}`} className="text-blue-600 hover:underline text-sm">
           ← Back to profile
         </Link>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mt-2">Settings</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Manage your account settings</p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Profile</h1>
+      {message && (
+        <div className={`p-3 rounded-lg mb-4 ${
+          message.type === "success"
+            ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
+            : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800"
+        }`}>
+          {message.text}
+        </div>
+      )}
 
-        {message && (
-          <div className={`p-3 rounded-lg mb-4 ${message.type === "success" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}>
-            {message.text}
-          </div>
-        )}
+      {/* ─── Account Info ──────────────────────────────────────────── */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Account Info</h2>
+        <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+          <Calendar className="w-4 h-4" />
+          <span>Joined {formatDate(userData.createdAt)}</span>
+        </div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+      {/* ─── Profile Section ────────────────────────────────────────── */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Profile</h2>
+        <form onSubmit={handleUpdateProfile} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Display Name
+            </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               maxLength={50}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Bio
+            </label>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
               placeholder="Tell us about yourself..."
               maxLength={160}
             />
-            <p className="text-xs text-gray-400 mt-1">{bio.length}/160</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{bio.length}/160</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                City
+              </label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="City"
+                  maxLength={50}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Country
+              </label>
+              <input
+                type="text"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder="Country"
+                maxLength={50}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Website
+            </label>
+            <div className="relative">
+              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="url"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder="https://your-website.com"
+              />
+            </div>
           </div>
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={updatingProfile}
+            className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
-            {loading ? "Saving..." : "Save Changes"}
+            {updatingProfile ? "Saving..." : "Update Profile"}
+          </button>
+        </form>
+      </div>
+
+      {/* ─── Username Section ────────────────────────────────────────── */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Username</h2>
+
+        {usernameCooldown !== null && usernameCooldown > 0 && (
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-300 text-sm p-3 rounded-lg mb-4">
+            ⏳ You can change your username again in {usernameCooldown} days
+          </div>
+        )}
+
+        <form onSubmit={handleUpdateUsername} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Current Username
+            </label>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-600 dark:text-gray-400">@{userData.username}</span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              New Username
+            </label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value.toLowerCase())}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder="New username"
+                minLength={3}
+                maxLength={20}
+                disabled={usernameCooldown !== null && usernameCooldown > 0}
+              />
+            </div>
+            {usernameError && (
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">{usernameError}</p>
+            )}
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+              Username must be 3-20 characters. Can only be changed once every 30 days.
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            disabled={updatingUsername || (usernameCooldown !== null && usernameCooldown > 0)}
+            className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            {updatingUsername ? "Updating..." : "Change Username"}
+          </button>
+        </form>
+      </div>
+
+      {/* ─── Password Section ────────────────────────────────────────── */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Change Password</h2>
+        <form onSubmit={handleUpdatePassword} className="space-y-4">
+          {passwordError && (
+            <p className="text-red-500 dark:text-red-400 text-sm">{passwordError}</p>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Current Password
+            </label>
+            <div className="relative">
+              <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder="Enter current password"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              New Password
+            </label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              placeholder="Enter new password"
+              minLength={6}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Confirm New Password
+            </label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              placeholder="Confirm new password"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={updatingPassword}
+            className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            {updatingPassword ? "Updating..." : "Change Password"}
           </button>
         </form>
       </div>
