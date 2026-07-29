@@ -39,7 +39,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           username: user.username,
           avatarUrl: user.avatarUrl,
-          isAdmin: user.isAdmin,   // ← ADDED
+          isAdmin: user.isAdmin,   // ✅ ADDED
         };
       },
     }),
@@ -50,7 +50,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.username = user.username;
         token.avatarUrl = user.avatarUrl;
-        token.isAdmin = user.isAdmin;   // ← ADDED
+        token.isAdmin = user.isAdmin;   // ✅ ADDED
       }
       return token;
     },
@@ -59,7 +59,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
         session.user.avatarUrl = token.avatarUrl as string;
-        session.user.isAdmin = token.isAdmin as boolean;   // ← ADDED
+        session.user.isAdmin = token.isAdmin as boolean;   // ✅ ADDED
       }
       return session;
     },
