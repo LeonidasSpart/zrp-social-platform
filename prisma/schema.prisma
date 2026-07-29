@@ -17,6 +17,7 @@ model User {
   avatarUrl   String?
   coverUrl    String?
   isPrivate   Boolean   @default(false)
+  isAdmin     Boolean   @default(false)   // ← Added
   location    String?
   country     String?
   website     String?
