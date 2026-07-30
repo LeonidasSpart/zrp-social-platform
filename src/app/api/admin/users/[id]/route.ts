@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 
+const VALID_BADGE_TYPES = ["verified", "organization", "government", null];
+
 export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -10,14 +12,20 @@ export async function PUT(
   if (!adminCheck.authorized) return adminCheck.response;
 
   try {
-    const { isAdmin, suspended } = await req.json();
+    const { isAdmin, badgeType } = await req.json();
 
-    // You can add a 'suspended' field to User if needed, or use isActive.
-    // For simplicity, we'll just update isAdmin here.
-    // To suspend, you could add a `suspended` boolean to the schema.
+    const data: { isAdmin?: boolean; badgeType?: string | null } = {};
+    if (isAdmin !== undefined) data.isAdmin = isAdmin;
+    if (badgeType !== undefined) {
+      if (!VALID_BADGE_TYPES.includes(badgeType)) {
+        return NextResponse.json({ error: "Invalid badge type" }, { status: 400 });
+      }
+      data.badgeType = badgeType;
+    }
+
     const updated = await prisma.user.update({
       where: { id: params.id },
-      data: { isAdmin },
+      data,
     });
 
     return NextResponse.json(updated);
@@ -34,7 +42,6 @@ export async function DELETE(
   if (!adminCheck.authorized) return adminCheck.response;
 
   try {
-    // Delete user and all associated data (cascade)
     await prisma.user.delete({
       where: { id: params.id },
     });
