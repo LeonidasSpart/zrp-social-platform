@@ -12,12 +12,15 @@ model User {
   email       String    @unique
   username    String    @unique
   password    String
+  resetToken       String?   @unique
+  resetTokenExpiry DateTime?
   name        String?
   bio         String?   @db.Text
   avatarUrl   String?
   coverUrl    String?
   isPrivate   Boolean   @default(false)
   isAdmin     Boolean   @default(false)   // ← Added
+  verified    Boolean   @default(false)
   location    String?
   country     String?
   website     String?
