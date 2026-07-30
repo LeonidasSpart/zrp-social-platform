@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "ZRP Social",
   description: "A social platform for the ZRP community",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon.png",   // ← Corrected to .png
   },
 };
 
