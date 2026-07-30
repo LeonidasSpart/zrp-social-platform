@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Home, Compass, Search, MessageSquare, Bell, User, Sun, Moon, Menu, X, LayoutDashboard, Bookmark } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import Logo from "@/components/Logo";
 
 export default function Header() {
   const { data: session } = useSession();
@@ -53,25 +54,24 @@ export default function Header() {
     <>
       <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-50">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-blue-600 dark:text-blue-400">
-            ZRP Social
-          </Link>
+          {/* ─── ZRP Logo ─── */}
+          <Logo variant="horizontal" className="flex-shrink-0" />
 
-          {/* Desktop Navigation */}
+          {/* ─── Desktop Navigation ─── */}
           <nav className="hidden md:flex items-center gap-4">
-            <Link href="/" className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="Home">
+            <Link href="/" className="text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition" title="Home">
               <Home className="w-5 h-5" />
             </Link>
-            <Link href="/explore" className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="Explore">
+            <Link href="/explore" className="text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition" title="Explore">
               <Compass className="w-5 h-5" />
             </Link>
-            <Link href="/search" className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="Search">
+            <Link href="/search" className="text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition" title="Search">
               <Search className="w-5 h-5" />
             </Link>
-            <Link href="/messages" className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="Messages">
+            <Link href="/messages" className="text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition" title="Messages">
               <MessageSquare className="w-5 h-5" />
             </Link>
-            <Link href="/notifications" className="relative text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="Notifications">
+            <Link href="/notifications" className="relative text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition" title="Notifications">
               <Bell className="w-5 h-5" />
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
@@ -82,34 +82,34 @@ export default function Header() {
             <Link href="/bookmarks" className="text-gray-500 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition" title="Bookmarks">
               <Bookmark className="w-5 h-5" />
             </Link>
-            <Link href={`/profile/${session.user?.username}`} className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="Profile">
+            <Link href={`/profile/${session.user?.username}`} className="text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition" title="Profile">
               <User className="w-5 h-5" />
             </Link>
             {session.user?.isAdmin && (
-              <Link href="/admin" className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="Admin Dashboard">
+              <Link href="/admin" className="text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition" title="Admin Dashboard">
                 <LayoutDashboard className="w-5 h-5" />
               </Link>
             )}
             <button
               onClick={toggleTheme}
-              className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition"
+              className="text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition"
               title={theme === "light" ? "Dark mode" : "Light mode"}
             >
               {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </button>
           </nav>
 
-          {/* Mobile Hamburger */}
+          {/* ─── Mobile Hamburger ─── */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition"
+            className="md:hidden text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
+      {/* ─── Mobile Menu Overlay ─── */}
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-x-0 top-[57px] bottom-0 bg-white dark:bg-gray-900 z-40 px-4 py-6 border-t border-gray-200 dark:border-gray-800 overflow-y-auto">
           <nav className="flex flex-col gap-2">
