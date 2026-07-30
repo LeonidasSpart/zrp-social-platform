@@ -2,12 +2,13 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import ChatInterface from "@/components/ChatInterface";
 import CallComponent from "@/components/CallComponent";
-import { getMediaStream, createPeer } from "@/lib/call-service";
+import { getSocket } from "@/lib/socket-client";
+import Peer from "simple-peer";
 
 export default function ChatPage({ params }: { params: { username: string } }) {
   const { data: session, status } = useSession();
@@ -19,7 +20,11 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   const [callerName, setCallerName] = useState("");
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
-  const [peer, setPeer] = useState<any>(null);
+  const [peer, setPeer] = useState<Peer.Instance | null>(null);
+  const [incomingSignal, setIncomingSignal] = useState<any>(null);
+  const socketRef = useRef<any>(null);
+
+  const userId = session?.user?.id;
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -28,10 +33,25 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   }, [status, router]);
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (status === "authenticated" && userId) {
       fetchReceiver();
+      setupSocket();
     }
-  }, [params.username, status]);
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off("incoming-call");
+        socketRef.current.off("call-accepted");
+        socketRef.current.off("call-rejected");
+        socketRef.current.off("call-ended");
+      }
+      if (peer) {
+        peer.destroy();
+      }
+      if (localStream) {
+        localStream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [status, userId, params.username]);
 
   const fetchReceiver = async () => {
     try {
@@ -45,52 +65,157 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     }
   };
 
+  const setupSocket = () => {
+    if (!userId) return;
+    const socket = getSocket(userId);
+    socketRef.current = socket;
+
+    socket.on("incoming-call", ({ from, signal, callerName, isVideo }) => {
+      setCallerName(callerName);
+      setIsVideoCall(isVideo);
+      setIncomingSignal(signal);
+      setCallState("incoming");
+      // Store the caller ID for later use
+      socketRef.current._callerId = from;
+    });
+
+    socket.on("call-accepted", ({ signal }) => {
+      if (peer) {
+        peer.signal(signal);
+      }
+    });
+
+    socket.on("call-rejected", () => {
+      endCall();
+      alert("Call was rejected");
+    });
+
+    socket.on("call-ended", () => {
+      endCall();
+    });
+  };
+
   // ─── Start Call ──────────────────────────────────────────────────
   const startCall = async (isVideo: boolean) => {
     try {
-      const stream = await getMediaStream(isVideo);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: isVideo,
+        audio: true,
+      });
       setLocalStream(stream);
       setIsVideoCall(isVideo);
       setCallState("calling");
 
-      // TODO: Send call signal to receiver via socket.io
-      // For now, simulate with a timeout
-      setTimeout(() => {
+      const newPeer = new Peer({
+        initiator: true,
+        stream: stream,
+        config: {
+          iceServers: [
+            { urls: "stun:stun.l.google.com:19302" },
+            { urls: "stun:stun1.l.google.com:19302" },
+          ],
+        },
+      });
+
+      newPeer.on("signal", (signal) => {
+        socketRef.current?.emit("call-user", {
+          receiverId: receiver.id,
+          signal,
+          callerName: session?.user?.name || "User",
+          isVideo,
+        });
+      });
+
+      newPeer.on("stream", (remoteStream) => {
+        setRemoteStream(remoteStream);
         setCallState("active");
-        // Simulate remote stream
-        getMediaStream(isVideo).then((remote) => setRemoteStream(remote));
-      }, 1500);
+      });
+
+      newPeer.on("error", (err) => {
+        console.error("Peer error:", err);
+        endCall();
+      });
+
+      setPeer(newPeer);
     } catch (error) {
       console.error("Error starting call:", error);
+      alert("Could not access camera/microphone. Please allow permissions.");
+      setCallState("idle");
     }
   };
 
+  // ─── Accept Incoming Call ──────────────────────────────────────
   const acceptCall = async () => {
     try {
-      const stream = await getMediaStream(isVideoCall);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: isVideoCall,
+        audio: true,
+      });
       setLocalStream(stream);
-      setCallState("active");
-      // TODO: Send acceptance signal
-      getMediaStream(isVideoCall).then((remote) => setRemoteStream(remote));
+
+      const newPeer = new Peer({
+        initiator: false,
+        stream: stream,
+        config: {
+          iceServers: [
+            { urls: "stun:stun.l.google.com:19302" },
+            { urls: "stun:stun1.l.google.com:19302" },
+          ],
+        },
+      });
+
+      newPeer.on("signal", (signal) => {
+        socketRef.current?.emit("accept-call", {
+          receiverId: socketRef.current?._callerId,
+          signal,
+        });
+      });
+
+      newPeer.on("stream", (remoteStream) => {
+        setRemoteStream(remoteStream);
+        setCallState("active");
+      });
+
+      newPeer.on("error", (err) => {
+        console.error("Peer error:", err);
+        endCall();
+      });
+
+      // Signal with the incoming offer
+      if (incomingSignal) {
+        newPeer.signal(incomingSignal);
+      }
+
+      setPeer(newPeer);
     } catch (error) {
       console.error("Error accepting call:", error);
+      alert("Could not access camera/microphone.");
+      rejectCall();
     }
   };
 
   const rejectCall = () => {
+    socketRef.current?.emit("reject-call", {
+      receiverId: socketRef.current?._callerId || receiver?.id,
+    });
     setCallState("idle");
-    setLocalStream(null);
-    setRemoteStream(null);
+    setIncomingSignal(null);
   };
 
   const endCall = () => {
-    setCallState("idle");
-    setLocalStream(null);
-    setRemoteStream(null);
     if (peer) {
       peer.destroy();
       setPeer(null);
     }
+    if (localStream) {
+      localStream.getTracks().forEach((track) => track.stop());
+      setLocalStream(null);
+    }
+    setRemoteStream(null);
+    setCallState("idle");
+    socketRef.current?.emit("end-call", {
+      receiverId: receiver?.id || socketRef.current?._callerId,
+    });
   };
 
   if (status === "loading" || loading) {
