@@ -12,14 +12,22 @@ model User {
   email       String    @unique
   username    String    @unique
   password    String
+
+  // ─── Password Reset ──────────────────────────────────────────────
   resetToken       String?   @unique
   resetTokenExpiry DateTime?
+
+  // ─── Email Verification ──────────────────────────────────────────
+  emailVerified        DateTime?   // null = not verified
+  verificationToken    String?     @unique
+  verificationTokenExpiry DateTime?
+
   name        String?
   bio         String?   @db.Text
   avatarUrl   String?
   coverUrl    String?
   isPrivate   Boolean   @default(false)
-  isAdmin     Boolean   @default(false)   // ← Added
+  isAdmin     Boolean   @default(false)
   badgeType   String?   // null | "verified" | "organization" | "government"
   location    String?
   country     String?
