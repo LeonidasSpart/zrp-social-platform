@@ -57,8 +57,8 @@ export default function Header() {
             <Image
               src="/logo.png"
               alt="ZRP"
-              width={40}
-              height={40}
+              width={90}
+              height={90}
               className="w-10 h-10 object-contain"
             />
           </Link>
