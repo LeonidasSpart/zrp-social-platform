@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
             username: true,
             name: true,
             avatarUrl: true,
+            badgeType: true,
           },
         },
         poll: {
@@ -40,7 +41,6 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Add liked status if user is logged in
     if (session && session.user) {
       const likes = await prisma.like.findMany({
         where: {
@@ -54,7 +54,6 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Transform poll votes for response
     const transformedPosts = posts.map((post) => {
       const result = { ...post };
       if (post.poll) {
@@ -93,7 +92,6 @@ export async function POST(req: NextRequest) {
       poll,
     } = await req.json();
 
-    // Ensure content exists (either text or poll question)
     if (!content || content.trim().length === 0) {
       if (!isPoll || !poll?.question?.trim()) {
         return NextResponse.json(
@@ -103,7 +101,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Prepare post data
     const postData: any = {
       content: content.trim() || poll.question.trim(),
       imageUrl: imageUrl || null,
@@ -114,7 +111,6 @@ export async function POST(req: NextRequest) {
       isPoll: !!isPoll,
     };
 
-    // If poll data exists, create poll first
     let pollId = null;
     if (isPoll && poll && poll.options && poll.options.length >= 2) {
       const validOptions = poll.options.filter((o: string) => o.trim().length > 0);
@@ -140,7 +136,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Create post
     const post = await prisma.post.create({
       data: postData,
       include: {
@@ -150,6 +145,7 @@ export async function POST(req: NextRequest) {
             username: true,
             name: true,
             avatarUrl: true,
+            badgeType: true,
           },
         },
         poll: {
@@ -160,7 +156,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // ─── Send notifications for mentions ──────────────────────────
     if (mentions && mentions.length > 0) {
       const mentionedUsers = await prisma.user.findMany({
         where: {
@@ -179,11 +174,10 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ─── Transform poll data for response ──────────────────────────
     const result = { ...post };
     if (result.poll) {
       const p = result.poll as any;
-      p.userVote = null; // no vote for the author
+      p.userVote = null;
       delete p.votes_user;
       result.poll = p;
     }
