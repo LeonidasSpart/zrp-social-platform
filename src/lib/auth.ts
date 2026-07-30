@@ -38,8 +38,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           username: user.username,
-          avatarUrl: user.avatarUrl,
-          isAdmin: user.isAdmin,   // ✅ Added
+          isAdmin: user.isAdmin,
         };
       },
     }),
@@ -49,8 +48,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.username = user.username;
-        token.avatarUrl = user.avatarUrl;
-        token.isAdmin = user.isAdmin;   // ✅ Added
+        token.isAdmin = user.isAdmin;
       }
       return token;
     },
@@ -58,8 +56,14 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
-        session.user.avatarUrl = token.avatarUrl as string;
-        session.user.isAdmin = token.isAdmin as boolean;   // ✅ Added
+        session.user.isAdmin = token.isAdmin as boolean;
+
+        // Fetch avatarUrl fresh from DB instead of storing it in the JWT
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { avatarUrl: true },
+        });
+        session.user.avatarUrl = dbUser?.avatarUrl ?? null;
       }
       return session;
     },
