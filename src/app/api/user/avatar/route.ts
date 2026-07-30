@@ -4,8 +4,6 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { UTApi } from "uploadthing/server";
 
-const utapi = new UTApi();
-
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {
@@ -35,6 +33,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const utapi = new UTApi();
     const uploadResult = await utapi.uploadFiles(file);
 
     if (uploadResult.error) {
