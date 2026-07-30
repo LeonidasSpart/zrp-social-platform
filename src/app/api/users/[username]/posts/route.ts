@@ -10,7 +10,6 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions);
 
-    // Find user by username
     const user = await prisma.user.findUnique({
       where: { username: params.username },
       select: { id: true },
@@ -31,12 +30,12 @@ export async function GET(
             username: true,
             name: true,
             avatarUrl: true,
+            badgeType: true,
           },
         },
       },
     });
 
-    // Check which posts the current user liked
     if (session && session.user) {
       const likes = await prisma.like.findMany({
         where: {
@@ -50,7 +49,6 @@ export async function GET(
       });
     }
 
-    // Add count data
     const postsWithCounts = await Promise.all(
       posts.map(async (post) => {
         const [likesCount, commentsCount, repostsCount] = await Promise.all([
