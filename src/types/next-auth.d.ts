@@ -9,7 +9,7 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       avatarUrl?: string | null;
-      isAdmin?: boolean;  // ← Add this
+      isAdmin?: boolean;
       badgeType?: string | null;
     };
   }
@@ -18,7 +18,7 @@ declare module "next-auth" {
     id: string;
     username: string;
     avatarUrl?: string | null;
-    isAdmin?: boolean;   // ← Add this
+    isAdmin?: boolean;
     badgeType?: string | null;
   }
 }
@@ -28,7 +28,7 @@ declare module "next-auth/jwt" {
     id: string;
     username: string;
     avatarUrl?: string | null;
-    isAdmin?: boolean;   // ← Add this
+    isAdmin?: boolean;
     badgeType?: string | null;
   }
 }
