@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Check, X, Globe, MapPin, User, Key, Calendar, Camera } from "lucide-react";
+import { Check, X, Globe, MapPin, User, Key, Calendar, Camera, Trash2 } from "lucide-react";
 
 interface UserData {
   id: string;
@@ -77,7 +77,6 @@ export default function SettingsPage() {
         setNewUsername(data.username || "");
         setAvatarPreview(data.avatarUrl || null);
 
-        // Check username cooldown
         if (data.usernameChangedAt) {
           const lastChange = new Date(data.usernameChangedAt);
           const daysSince = Math.floor((Date.now() - lastChange.getTime()) / (1000 * 60 * 60 * 24));
@@ -96,13 +95,11 @@ export default function SettingsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       setMessage({ type: "error", text: "File too large. Max size is 5MB." });
       return;
     }
 
-    // Validate file type
     const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!validTypes.includes(file.type)) {
       setMessage({ type: "error", text: "Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed." });
@@ -287,7 +284,7 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
       <div className="mb-4">
-        <Link href={`/profile/${session?.user?.username}`} className="text-blue-600 hover:underline text-sm">
+        <Link href={`/profile/${session?.user?.username}`} className="text-zrp-red hover:underline text-sm">
           ← Back to profile
         </Link>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mt-2">Settings</h1>
@@ -318,7 +315,7 @@ export default function SettingsPage() {
         <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Profile Picture</h2>
         <div className="flex items-center gap-6">
           <div className="relative">
-            <div className="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 text-3xl font-bold overflow-hidden">
+            <div className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-3xl font-bold overflow-hidden">
               {avatarPreview ? (
                 <img
                   src={avatarPreview}
@@ -331,7 +328,7 @@ export default function SettingsPage() {
             </div>
             <label
               htmlFor="avatar-upload"
-              className="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-1.5 cursor-pointer hover:bg-blue-700 transition"
+              className="absolute bottom-0 right-0 bg-zrp-red text-white rounded-full p-1.5 cursor-pointer hover:bg-zrp-darkRed transition"
             >
               <Camera className="w-4 h-4" />
             </label>
@@ -352,7 +349,7 @@ export default function SettingsPage() {
               Supported formats: JPEG, PNG, GIF, WebP
             </p>
             {uploadingAvatar && (
-              <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">Uploading...</p>
+              <p className="text-sm text-zrp-red dark:text-zrp-red mt-1">Uploading...</p>
             )}
           </div>
         </div>
@@ -370,7 +367,7 @@ export default function SettingsPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               maxLength={50}
             />
           </div>
@@ -383,7 +380,7 @@ export default function SettingsPage() {
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               rows={3}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
               placeholder="Tell us about yourself..."
               maxLength={160}
             />
@@ -401,7 +398,7 @@ export default function SettingsPage() {
                   type="text"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="City"
                   maxLength={50}
                 />
@@ -416,7 +413,7 @@ export default function SettingsPage() {
                 type="text"
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="Country"
                 maxLength={50}
               />
@@ -433,7 +430,7 @@ export default function SettingsPage() {
                 type="url"
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="https://your-website.com"
               />
             </div>
@@ -442,7 +439,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={updatingProfile}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             {updatingProfile ? "Saving..." : "Update Profile"}
           </button>
@@ -479,7 +476,7 @@ export default function SettingsPage() {
                 type="text"
                 value={newUsername}
                 onChange={(e) => setNewUsername(e.target.value.toLowerCase())}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="New username"
                 minLength={3}
                 maxLength={20}
@@ -497,7 +494,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={updatingUsername || (usernameCooldown !== null && usernameCooldown > 0)}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             {updatingUsername ? "Updating..." : "Change Username"}
           </button>
@@ -522,7 +519,7 @@ export default function SettingsPage() {
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="Enter current password"
               />
             </div>
@@ -536,7 +533,7 @@ export default function SettingsPage() {
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="Enter new password"
               minLength={6}
             />
@@ -550,7 +547,7 @@ export default function SettingsPage() {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="Confirm new password"
             />
           </div>
@@ -558,11 +555,33 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={updatingPassword}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             {updatingPassword ? "Updating..." : "Change Password"}
           </button>
         </form>
+      </div>
+
+      {/* ─── Delete Account Section ──────────────────────────────────── */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Danger Zone</h2>
+        <div className="border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900/10">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium text-gray-900 dark:text-white">Delete Account</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Permanently delete your account and all associated data. This action cannot be undone.
+              </p>
+            </div>
+            <Link
+              href="/settings/delete"
+              className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition"
+            >
+              <Trash2 className="w-4 h-4 inline mr-1" />
+              Delete Account
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
