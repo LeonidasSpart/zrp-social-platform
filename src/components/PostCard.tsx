@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag } from "lucide-react";
+import { Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag, Bookmark } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Comments from "./Comments";
 import EditPostModal from "./EditPostModal";
@@ -44,7 +44,29 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
   const [showReportModal, setShowReportModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // ─── Bookmark state ──────────────────────────────────────────────
+  const [bookmarked, setBookmarked] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
+
   const isAuthor = session?.user?.id === post.author.id;
+
+  // ─── Fetch bookmark status ──────────────────────────────────────
+  useEffect(() => {
+    const checkBookmark = async () => {
+      try {
+        const res = await fetch(`/api/posts/${post.id}/bookmark`);
+        if (res.ok) {
+          const data = await res.json();
+          setBookmarked(data.bookmarked);
+        }
+      } catch (error) {
+        console.error("Error checking bookmark:", error);
+      }
+    };
+    if (session) {
+      checkBookmark();
+    }
+  }, [post.id, session]);
 
   const handleLike = async () => {
     try {
@@ -141,6 +163,26 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
     } catch (error) {
       console.error("Report error:", error);
       alert("Failed to submit report. Please try again.");
+    }
+  };
+
+  // ─── Toggle bookmark ─────────────────────────────────────────────
+  const handleBookmark = async () => {
+    setBookmarkLoading(true);
+    try {
+      const res = await fetch(`/api/posts/${post.id}/bookmark`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setBookmarked(data.bookmarked);
+        // Optionally update parent if you want to sync bookmarks list
+        onUpdate();
+      }
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+    } finally {
+      setBookmarkLoading(false);
     }
   };
 
@@ -264,6 +306,18 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
                 className="flex items-center gap-1 text-sm text-gray-500 hover:text-blue-500 transition"
               >
                 <Share2 className="w-4 h-4" />
+              </button>
+
+              {/* ─── Bookmark button ─── */}
+              <button
+                onClick={handleBookmark}
+                disabled={bookmarkLoading}
+                className={`flex items-center gap-1 text-sm ${
+                  bookmarked ? "text-yellow-500" : "text-gray-500 hover:text-yellow-500"
+                } transition`}
+                title={bookmarked ? "Remove bookmark" : "Bookmark"}
+              >
+                <Bookmark className={`w-4 h-4 ${bookmarked ? "fill-yellow-500" : ""}`} />
               </button>
             </div>
 
