@@ -89,6 +89,28 @@ export function initSocketServer(server: HTTPServer) {
         }
       });
 
+      // ─── WebRTC Call Signaling ────────────────────────────────────
+      socket.on("call-user", ({ receiverId, signal, callerName, isVideo }) => {
+        io?.to(`user:${receiverId}`).emit("incoming-call", {
+          from: userId,
+          signal,
+          callerName,
+          isVideo,
+        });
+      });
+
+      socket.on("accept-call", ({ receiverId, signal }) => {
+        io?.to(`user:${receiverId}`).emit("call-accepted", { signal });
+      });
+
+      socket.on("reject-call", ({ receiverId }) => {
+        io?.to(`user:${receiverId}`).emit("call-rejected");
+      });
+
+      socket.on("end-call", ({ receiverId }) => {
+        io?.to(`user:${receiverId}`).emit("call-ended");
+      });
+
       socket.on("disconnect", () => {
         console.log("Socket disconnected:", socket.id);
       });
