@@ -197,10 +197,10 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 hover:bg-gray-50 transition">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
         <div className="flex items-start gap-3">
           <Link href={`/profile/${post.author.username}`}>
-            <div className="w-10 h-10 rounded-full bg-zrp-red/10 flex items-center justify-center text-zrp-red font-semibold flex-shrink-0 overflow-hidden">
+            <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 font-semibold flex-shrink-0 overflow-hidden">
               {post.author.avatarUrl ? (
                 <img
                   src={post.author.avatarUrl}
@@ -216,25 +216,25 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Link href={`/profile/${post.author.username}`}>
-                  <span className="font-semibold hover:underline text-gray-900 inline-flex items-center gap-1">
+                  <span className="font-semibold hover:underline text-gray-900 dark:text-white inline-flex items-center gap-1">
                     {post.author.name || post.author.username}
                     <VerifiedBadge badgeType={post.author.badgeType} />
                   </span>
                 </Link>
                 <Link href={`/profile/${post.author.username}`}>
-                  <span className="text-gray-500 text-sm hover:underline">
+                  <span className="text-gray-500 dark:text-gray-400 text-sm hover:underline">
                     @{post.author.username}
                   </span>
                 </Link>
-                <span className="text-gray-400 text-sm">·</span>
-                <span className="text-gray-400 text-sm">{timeAgo(post.createdAt)}</span>
+                <span className="text-gray-400 dark:text-gray-500 text-sm">·</span>
+                <span className="text-gray-400 dark:text-gray-500 text-sm">{timeAgo(post.createdAt)}</span>
               </div>
 
               {isAuthor ? (
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setShowEditModal(true)}
-                    className="text-gray-400 hover:text-zrp-red transition p-1"
+                    className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition p-1"
                     title="Edit"
                   >
                     <Pencil className="w-4 h-4" />
@@ -258,7 +258,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
               )}
             </div>
 
-            <p className="text-gray-800 mt-1 whitespace-pre-wrap">{post.content}</p>
+            <p className="text-gray-800 dark:text-gray-200 mt-1 whitespace-pre-wrap">{post.content}</p>
             {post.imageUrl && (
               <div className="mt-2 rounded-lg overflow-hidden">
                 <img src={post.imageUrl} alt="Post image" className="w-full" />
@@ -269,7 +269,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
               <button
                 onClick={handleLike}
                 className={`flex items-center gap-1 text-sm ${
-                  liked ? "text-red-500" : "text-gray-500 hover:text-red-500"
+                  liked ? "text-red-500" : "text-gray-500 dark:text-gray-400 hover:text-red-500"
                 } transition`}
               >
                 <Heart className={`w-4 h-4 ${liked ? "fill-red-500" : ""}`} />
@@ -278,7 +278,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
 
               <button
                 onClick={() => setShowComments(!showComments)}
-                className="flex items-center gap-1 text-sm text-gray-500 hover:text-zrp-red transition"
+                className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>{post._count?.comments || 0}</span>
@@ -287,7 +287,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
               <button
                 onClick={handleRepost}
                 className={`flex items-center gap-1 text-sm ${
-                  reposted ? "text-green-500" : "text-gray-500 hover:text-green-500"
+                  reposted ? "text-green-500" : "text-gray-500 dark:text-gray-400 hover:text-green-500"
                 } transition`}
               >
                 <Repeat className={`w-4 h-4 ${reposted ? "fill-green-500" : ""}`} />
@@ -296,21 +296,23 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
 
               <button
                 onClick={handleShare}
-                className="flex items-center gap-1 text-sm text-gray-500 hover:text-zrp-red transition"
+                className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition"
               >
                 <Share2 className="w-4 h-4" />
               </button>
 
-              {/* ─── Bookmark button (ZRP Red) ─── */}
+              {/* ─── Bookmark (theme‑aware) ─── */}
               <button
                 onClick={handleBookmark}
                 disabled={bookmarkLoading}
                 className={`flex items-center gap-1 text-sm ${
-                  bookmarked ? "text-zrp-red" : "text-gray-500 hover:text-zrp-red"
+                  bookmarked
+                    ? "text-gray-900 dark:text-white"
+                    : "text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white"
                 } transition`}
                 title={bookmarked ? "Remove bookmark" : "Bookmark"}
               >
-                <Bookmark className={`w-4 h-4 ${bookmarked ? "fill-zrp-red" : ""}`} />
+                <Bookmark className={`w-4 h-4 ${bookmarked ? "fill-current" : ""}`} />
               </button>
             </div>
 
@@ -330,15 +332,15 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Delete Post?</h2>
-            <p className="text-gray-600 text-sm mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full p-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Delete Post?</h2>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
               This action cannot be undone. Are you sure you want to delete this post?
             </p>
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 border border-gray-300 rounded-full text-sm font-medium hover:bg-gray-50 transition"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
               >
                 Cancel
               </button>
