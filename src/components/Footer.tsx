@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Logo from "./Logo";
 import { Send, Disc, Github } from "lucide-react";
 
 export default function Footer() {
@@ -9,10 +8,8 @@ export default function Footer() {
     <footer className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 mt-auto">
       <div className="max-w-2xl mx-auto px-4 py-6 md:py-8">
         <div className="flex flex-col items-center text-center space-y-4 md:space-y-5">
-          {/* ─── Simple Logo (no tagline) ─── */}
-          <Logo variant="footer" />
+          {/* ─── No Logo ─── */}
 
-          {/* ─── Navigation Links ─── */}
           <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-gray-600 dark:text-gray-400">
             <Link href="/about" className="hover:text-zrp-red transition">About</Link>
             <Link href="/privacy" className="hover:text-zrp-red transition">Privacy</Link>
@@ -21,7 +18,6 @@ export default function Footer() {
             <Link href="/charity" className="hover:text-zrp-red transition">Charity</Link>
           </div>
 
-          {/* ─── Social Icons ─── */}
           <div className="flex justify-center gap-4">
             <a href="https://t.me/AIZRP" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-zrp-red transition">
               <Send className="w-5 h-5" />
@@ -34,7 +30,6 @@ export default function Footer() {
             </a>
           </div>
 
-          {/* ─── Charity & Copyright ─── */}
           <p className="text-xs text-gray-500 dark:text-gray-400">
             35% of profits go to charity.
           </p>
