@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -10,47 +9,14 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    try {
-      // First, call our custom login API to verify credentials
-      const res = await fetch("/api/auth/custom-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Invalid credentials");
-        setLoading(false);
-        return;
-      }
-
-      // Then, sign in using NextAuth – this will set the session
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-        callbackUrl: "/",
-      });
-
-      if (result?.error) {
-        setError(result.error);
-        setLoading(false);
-        return;
-      }
-
-      // Force redirect to home (as a fallback)
-      window.location.href = "/";
-    } catch (err) {
-      setError("Something went wrong. Please try again.");
-      setLoading(false);
-    }
+    // Submit the form to NextAuth's credentials endpoint
+    const form = e.currentTarget;
+    form.submit();
   };
 
   return (
@@ -62,7 +28,13 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* ─── FORM POSTS DIRECTLY TO /api/auth/callback/credentials ─── */}
+          <form
+            action="/api/auth/callback/credentials"
+            method="POST"
+            onSubmit={handleSubmit}
+            className="space-y-4"
+          >
             {error && (
               <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg text-sm">
                 {error}
@@ -75,6 +47,7 @@ export default function LoginPage() {
               </label>
               <input
                 type="email"
+                name="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -89,6 +62,7 @@ export default function LoginPage() {
               </label>
               <input
                 type="password"
+                name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -102,6 +76,9 @@ export default function LoginPage() {
                 Forgot password?
               </Link>
             </div>
+
+            {/* Hidden field to tell NextAuth where to redirect after success */}
+            <input type="hidden" name="callbackUrl" value="/" />
 
             <button
               type="submit"
