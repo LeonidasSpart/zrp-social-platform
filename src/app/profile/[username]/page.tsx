@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import PostCard from "@/components/PostCard";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 interface User {
   id: string;
@@ -18,6 +19,7 @@ interface User {
   createdAt: string;
   isPrivate: boolean;
   isBlocked: boolean;
+  badgeType?: string | null;
   _count: {
     posts: number;
     followers: number;
@@ -36,6 +38,7 @@ interface Post {
     username: string;
     name: string;
     avatarUrl?: string;
+    badgeType?: string | null;
   };
   _count: {
     likes: number;
@@ -163,7 +166,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
     });
   };
 
-  // Determine if we should show location & website
   const hasLocation = user.location || user.country;
   const displayLocation = user.location && user.country
     ? `${user.location}, ${user.country}`
@@ -171,10 +173,8 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
-      {/* Profile Header */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-start gap-4">
-          {/* ─── Avatar ─── */}
           <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-3xl font-bold flex-shrink-0 overflow-hidden">
             {user.avatarUrl ? (
               <img
@@ -188,14 +188,16 @@ export default function ProfilePage({ params }: { params: { username: string } }
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-gray-900">{user.name || user.username}</h1>
+              <h1 className="text-2xl font-bold text-gray-900 inline-flex items-center gap-1.5">
+                {user.name || user.username}
+                <VerifiedBadge badgeType={user.badgeType} />
+              </h1>
               {user.isPrivate && (
                 <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">Private</span>
               )}
             </div>
             <p className="text-gray-500">@{user.username}</p>
             {user.bio && <p className="text-gray-700 mt-2">{user.bio}</p>}
-            {/* Location & Website */}
             <div className="mt-2 space-y-1">
               {hasLocation && (
                 <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -248,7 +250,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
           </div>
         </div>
 
-        {/* Stats */}
         <div className="flex gap-6 mt-4 pt-4 border-t border-gray-100">
           <Link href={`/profile/${user.username}/followers`} className="hover:underline">
             <span className="font-bold text-gray-900">{user._count.posts}</span>
@@ -265,7 +266,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
         </div>
       </div>
 
-      {/* Posts */}
       <div className="mt-4 space-y-4">
         {isBlocked ? (
           <div className="bg-white rounded-lg shadow-sm p-8 border border-gray-200 text-center">
