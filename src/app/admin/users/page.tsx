@@ -10,11 +10,19 @@ interface User {
   email: string;
   createdAt: string;
   isAdmin: boolean;
+  badgeType: string | null;
   _count: {
     posts: number;
     comments: number;
   };
 }
+
+const BADGE_OPTIONS = [
+  { value: "", label: "None" },
+  { value: "verified", label: "Verified (blue)" },
+  { value: "organization", label: "Organization (gold)" },
+  { value: "government", label: "Government (gray)" },
+];
 
 export default function AdminUsers() {
   const [users, setUsers] = useState<User[]>([]);
@@ -68,6 +76,21 @@ export default function AdminUsers() {
     }
   };
 
+  const setBadge = async (userId: string, badgeType: string) => {
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ badgeType: badgeType || null }),
+      });
+      if (res.ok) {
+        fetchUsers();
+      }
+    } catch (error) {
+      console.error("Error updating badge:", error);
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-12 text-gray-500">Loading...</div>;
   }
@@ -95,6 +118,7 @@ export default function AdminUsers() {
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">Email</th>
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">Posts</th>
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">Admin</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">Badge</th>
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">Actions</th>
               </tr>
             </thead>
@@ -120,6 +144,19 @@ export default function AdminUsers() {
                     >
                       {user.isAdmin ? "Admin" : "User"}
                     </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    <select
+                      value={user.badgeType || ""}
+                      onChange={(e) => setBadge(user.id, e.target.value)}
+                      className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 dark:bg-gray-700 dark:text-white"
+                    >
+                      {BADGE_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
                   </td>
                   <td className="px-4 py-3">
                     <button
