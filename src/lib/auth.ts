@@ -58,12 +58,13 @@ export const authOptions: NextAuthOptions = {
         session.user.username = token.username as string;
         session.user.isAdmin = token.isAdmin as boolean;
 
-        // Fetch avatarUrl fresh from DB instead of storing it in the JWT
+        // Fetch avatarUrl and badgeType fresh from DB instead of storing them in the JWT
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { avatarUrl: true },
+          select: { avatarUrl: true, badgeType: true },
         });
         session.user.avatarUrl = dbUser?.avatarUrl ?? null;
+        session.user.badgeType = dbUser?.badgeType ?? null;
       }
       return session;
     },
