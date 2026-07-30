@@ -1,22 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function LoginPage() {
+  const [csrfToken, setCsrfToken] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    fetch("/api/auth/csrf")
+      .then((res) => res.json())
+      .then((data) => setCsrfToken(data.csrfToken))
+      .catch(() => console.error("Failed to fetch CSRF token"));
+  }, []);
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
-    // Submit the form to NextAuth's credentials endpoint
-    const form = e.currentTarget;
-    form.submit();
+    e.currentTarget.submit();
   };
 
   return (
@@ -28,7 +33,6 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8">
-          {/* ─── FORM POSTS DIRECTLY TO /api/auth/callback/credentials ─── */}
           <form
             action="/api/auth/callback/credentials"
             method="POST"
@@ -40,6 +44,9 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
+
+            <input type="hidden" name="csrfToken" value={csrfToken} />
+            <input type="hidden" name="callbackUrl" value="/" />
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -77,12 +84,9 @@ export default function LoginPage() {
               </Link>
             </div>
 
-            {/* Hidden field to tell NextAuth where to redirect after success */}
-            <input type="hidden" name="callbackUrl" value="/" />
-
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !csrfToken}
               className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Signing in..." : "Sign in"}
