@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Send, Disc, Github } from "lucide-react";
 
 export default function Footer() {
@@ -8,7 +9,16 @@ export default function Footer() {
     <footer className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 mt-auto">
       <div className="max-w-2xl mx-auto px-4 py-6 md:py-8">
         <div className="flex flex-col items-center text-center space-y-4 md:space-y-5">
-          {/* ─── No Logo ─── */}
+          {/* ─── Logo Image ─── */}
+          <Link href="/" className="flex-shrink-0">
+            <Image
+              src="/logo.png"
+              alt="ZRP"
+              width={32}
+              height={32}
+              className="w-8 h-8 object-contain"
+            />
+          </Link>
 
           <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-gray-600 dark:text-gray-400">
             <Link href="/about" className="hover:text-zrp-red transition">About</Link>
