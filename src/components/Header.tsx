@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Home, Compass, Search, MessageSquare, Bell, User, Sun, Moon, Menu, X, LayoutDashboard, Bookmark } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -51,9 +52,18 @@ export default function Header() {
     <>
       <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-50">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          {/* ─── No Logo ─── */}
+          {/* ─── Logo Image ─── */}
+          <Link href="/" className="flex-shrink-0">
+            <Image
+              src="/logo.png"
+              alt="ZRP"
+              width={40}
+              height={40}
+              className="w-10 h-10 object-contain"
+            />
+          </Link>
 
-          <nav className="flex items-center gap-4 w-full justify-end">
+          <nav className="hidden md:flex items-center gap-4">
             <Link href="/" className="text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition" title="Home">
               <Home className="w-5 h-5" />
             </Link>
