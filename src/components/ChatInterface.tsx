@@ -66,7 +66,6 @@ export default function ChatInterface({
     socket.on("receive-message", (message: Message) => {
       if (message.senderId === receiverId) {
         setMessages((prev) => [...prev, message]);
-        // Mark as read
         socket.emit("mark-read", { messageId: message.id, senderId: receiverId });
       }
     });
@@ -77,13 +76,14 @@ export default function ChatInterface({
       );
     });
 
-    socket.on("user-typing", ({ userId, isTyping }) => {
+    // ─── FIXED: Added type annotation ──────────────────────────────
+    socket.on("user-typing", ({ userId, isTyping }: { userId: string; isTyping: boolean }) => {
       if (userId === receiverId) {
         setReceiverTyping(isTyping);
       }
     });
 
-    socket.on("message-read", ({ messageId }) => {
+    socket.on("message-read", ({ messageId }: { messageId: string }) => {
       setMessages((prev) =>
         prev.map((m) => (m.id === messageId ? { ...m, read: true } : m))
       );
@@ -159,7 +159,6 @@ export default function ChatInterface({
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-      {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
@@ -190,7 +189,6 @@ export default function ChatInterface({
         </div>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {messages.length === 0 ? (
           <div className="text-center py-8 text-gray-400">
@@ -228,7 +226,6 @@ export default function ChatInterface({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
       <form onSubmit={handleSend} className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
         <button
           type="button"
