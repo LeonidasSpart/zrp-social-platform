@@ -18,6 +18,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
+    console.log("Avatar upload attempt:", {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+    });
+
     const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!validTypes.includes(file.type)) {
       return NextResponse.json(
@@ -37,7 +43,7 @@ export async function POST(req: NextRequest) {
     const uploadResult = await utapi.uploadFiles(file);
 
     if (uploadResult.error) {
-      console.error("UploadThing error:", uploadResult.error);
+      console.error("UploadThing error (returned):", JSON.stringify(uploadResult.error, null, 2));
       return NextResponse.json({ error: "Upload failed" }, { status: 500 });
     }
 
@@ -50,8 +56,10 @@ export async function POST(req: NextRequest) {
       success: true,
       avatarUrl: user.avatarUrl,
     });
-  } catch (error) {
-    console.error("Avatar upload error:", error);
+  } catch (error: any) {
+    console.error("Avatar upload error (thrown):", error?.message);
+    console.error("Error cause:", JSON.stringify(error?.cause, null, 2));
+    console.error("Full error:", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 }
