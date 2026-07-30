@@ -11,10 +11,12 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch("/api/auth/csrf")
+    fetch("/api/auth/csrf", {
+      credentials: "include",  // ← Important for session cookie
+    })
       .then((res) => res.json())
       .then((data) => setCsrfToken(data.csrfToken))
-      .catch(() => console.error("Failed to fetch CSRF token"));
+      .catch((err) => console.error("CSRF error:", err));
   }, []);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
