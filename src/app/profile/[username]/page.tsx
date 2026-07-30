@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { MessageSquare } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
@@ -229,16 +230,25 @@ export default function ProfilePage({ params }: { params: { username: string } }
               </Link>
             ) : (
               <>
-                <button
-                  onClick={handleFollow}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
-                    user.isFollowing
-                      ? "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                      : "bg-blue-600 text-white hover:bg-blue-700"
-                  }`}
-                >
-                  {user.isFollowing ? "Unfollow" : "Follow"}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleFollow}
+                    className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
+                      user.isFollowing
+                        ? "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                        : "bg-blue-600 text-white hover:bg-blue-700"
+                    }`}
+                  >
+                    {user.isFollowing ? "Unfollow" : "Follow"}
+                  </button>
+                  <Link
+                    href={`/messages/${user.username}`}
+                    className="px-4 py-1.5 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition text-center inline-flex items-center gap-1.5"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    Message
+                  </Link>
+                </div>
                 <button
                   onClick={handleBlock}
                   className="px-4 py-1.5 border border-red-300 text-red-600 rounded-full text-sm font-medium hover:bg-red-50 transition"
