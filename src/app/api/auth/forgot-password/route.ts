@@ -22,16 +22,14 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Generate reset token
     const resetToken = crypto.randomBytes(32).toString("hex");
     const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
 
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        // Add these fields to your schema if they don't exist
-        // resetToken: resetToken,
-        // resetTokenExpiry: resetTokenExpiry,
+        resetToken,
+        resetTokenExpiry,
       },
     });
 
