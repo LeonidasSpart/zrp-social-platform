@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { UTApi } from "uploadthing/server";
+
+const utapi = new UTApi();
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -38,20 +41,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Convert to base64
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const base64 = buffer.toString("base64");
-    const dataUrl = `data:${file.type};base64,${base64}`;
+    // Upload to UploadThing instead of storing base64
+    const uploadResult = await utapi.uploadFiles(file);
 
-    // In production, upload to a cloud storage service (S3, R2, UploadThing)
-    // For now, return base64 URL (works for demo, but use a real CDN in production)
+    if (uploadResult.error) {
+      console.error("UploadThing error:", uploadResult.error);
+      return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    }
 
     return NextResponse.json({
       success: true,
-      url: dataUrl,
+      url: uploadResult.data.url,
       filename: file.name,
-      type: file.type,        // useful for frontend to know if it's image/video
+      type: file.type,
     });
   } catch (error) {
     console.error("Upload error:", error);
