@@ -20,7 +20,7 @@ model User {
   coverUrl    String?
   isPrivate   Boolean   @default(false)
   isAdmin     Boolean   @default(false)   // ← Added
-  verified    Boolean   @default(false)
+  badgeType   String?   // null | "verified" | "organization" | "government"
   location    String?
   country     String?
   website     String?
