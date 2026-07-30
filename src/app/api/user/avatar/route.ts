@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { UTApi } from "uploadthing/server";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -32,32 +33,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Call UploadThing's presigned-URL request endpoint directly to see the raw error
-    const presignRes = await fetch("https://api.uploadthing.com/v6/uploadFiles", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Uploadthing-Api-Key": process.env.UPLOADTHING_SECRET!,
-      },
-      body: JSON.stringify({
-        files: [{ name: file.name, size: file.size, type: file.type }],
-      }),
-    });
+    const utapi = new UTApi();
+    const uploadResult = await utapi.uploadFiles(file);
 
-    const presignText = await presignRes.text();
-    console.log("UploadThing raw response status:", presignRes.status);
-    console.log("UploadThing raw response body:", presignText);
-
-    if (!presignRes.ok) {
-      return NextResponse.json(
-        { error: "Upload failed", debug: presignText },
-        { status: 500 }
-      );
+    if (uploadResult.error) {
+      console.error("UploadThing error:", JSON.stringify(uploadResult.error, null, 2));
+      return NextResponse.json({ error: "Upload failed" }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, debug: presignText });
+    const user = await prisma.user.update({
+      where: { id: session.user.id },
+      data: { avatarUrl: uploadResult.data.url },
+    });
+
+    return NextResponse.json({
+      success: true,
+      avatarUrl: user.avatarUrl,
+    });
   } catch (error: any) {
-    console.error("Avatar upload error (thrown):", error?.message);
+    console.error("Avatar upload error:", error?.message);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 }
