@@ -31,7 +31,9 @@ export default function LoginPage() {
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("Something went wrong. Please try again.");
+      setError(
+        `Something went wrong: ${err instanceof Error ? err.message : String(err)}`
+      );
       setLoading(false);
     }
   };
