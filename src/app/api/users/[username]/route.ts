@@ -10,8 +10,14 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions);
 
-    const user = await prisma.user.findUnique({
-      where: { username: params.username },
+    // ─── Case‑insensitive username search ──────────────────────────
+    const user = await prisma.user.findFirst({
+      where: {
+        username: {
+          equals: params.username,
+          mode: "insensitive",
+        },
+      },
       select: {
         id: true,
         username: true,
@@ -43,6 +49,7 @@ export async function GET(
     let isBlocked = false;
 
     if (session && session.user && session.user.id !== user.id) {
+      // Check if viewer follows target
       const follow = await prisma.follow.findUnique({
         where: {
           followerId_followingId: {
@@ -53,6 +60,7 @@ export async function GET(
       });
       isFollowing = !!follow;
 
+      // Check if viewer has blocked target
       const block = await prisma.blocked.findUnique({
         where: {
           blockerId_blockedId: {
