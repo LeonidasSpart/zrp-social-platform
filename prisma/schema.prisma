@@ -22,6 +22,10 @@ model User {
   verificationToken    String?     @unique
   verificationTokenExpiry DateTime?
 
+  // ─── Account Deletion ────────────────────────────────────────────
+  deletionRequestedAt  DateTime?
+  deletionScheduledFor DateTime?
+
   name        String?
   bio         String?   @db.Text
   avatarUrl   String?
@@ -47,7 +51,7 @@ model User {
   sentMessages Message[] @relation("Message_sender")
   receivedMessages Message[] @relation("Message_receiver")
   pollVotes   PollVote[]
-  bookmarks   Bookmark[]   // ─── ADDED
+  bookmarks   Bookmark[]
 
   blockedUsers Blocked[] @relation("Blocker")
   blockedBy    Blocked[] @relation("Blocked")
@@ -75,7 +79,7 @@ model Post {
   reposts     Repost[]
   notifications Notification[] @relation("Notification_post")
   reports     Report[]
-  bookmarks   Bookmark[]   // ─── ADDED
+  bookmarks   Bookmark[]
 }
 
 model Comment {
@@ -211,8 +215,6 @@ model Report {
   @@index([commentId])
   @@index([status])
 }
-
-// ─── NEW: Bookmark Model ──────────────────────────────────────────
 
 model Bookmark {
   id        String   @id @default(cuid())
