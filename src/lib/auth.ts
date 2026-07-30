@@ -33,6 +33,13 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
+        // ─── BLOCK LOGIN IF EMAIL NOT VERIFIED ───────────────────────
+        if (!user.emailVerified) {
+          throw new Error(
+            "Please verify your email before logging in. Check your inbox for the verification link."
+          );
+        }
+
         return {
           id: user.id,
           email: user.email,
@@ -58,7 +65,7 @@ export const authOptions: NextAuthOptions = {
         session.user.username = token.username as string;
         session.user.isAdmin = token.isAdmin as boolean;
 
-        // Fetch avatarUrl and badgeType fresh from DB instead of storing them in the JWT
+        // Fetch avatarUrl and badgeType fresh from DB
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
           select: { avatarUrl: true, badgeType: true },
