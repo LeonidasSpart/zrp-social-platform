@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
           email: true,
           createdAt: true,
           isAdmin: true,
+          badgeType: true,
           _count: {
             select: {
               posts: true,
