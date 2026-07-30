@@ -13,11 +13,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Find user with valid token
     const user = await prisma.user.findFirst({
       where: {
-        // resetToken: token,
-        // resetTokenExpiry: { gt: new Date() },
+        resetToken: token,
+        resetTokenExpiry: { gt: new Date() },
       },
     });
 
@@ -34,8 +33,8 @@ export async function POST(req: NextRequest) {
       where: { id: user.id },
       data: {
         password: hashedPassword,
-        // resetToken: null,
-        // resetTokenExpiry: null,
+        resetToken: null,
+        resetTokenExpiry: null,
       },
     });
 
