@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import Comments from "./Comments";
 import EditPostModal from "./EditPostModal";
 import ReportModal from "./ReportModal";
+import VerifiedBadge from "./VerifiedBadge";
 
 interface PostCardProps {
   post: {
@@ -19,6 +20,7 @@ interface PostCardProps {
       username: string;
       name: string;
       avatarUrl?: string;
+      badgeType?: string | null;
     };
     _count?: {
       likes: number;
@@ -153,7 +155,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
     return `${days}d`;
   };
 
-  // Helper to get the initial letter for fallback
   const getInitial = () => {
     const name = post.author.name || post.author.username || "?";
     return name.charAt(0).toUpperCase();
@@ -164,7 +165,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
       <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 hover:bg-gray-50 transition">
         <div className="flex items-start gap-3">
           <Link href={`/profile/${post.author.username}`}>
-            {/* ─── Avatar with image fallback ─── */}
             <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold flex-shrink-0 overflow-hidden">
               {post.author.avatarUrl ? (
                 <img
@@ -181,8 +181,9 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Link href={`/profile/${post.author.username}`}>
-                  <span className="font-semibold hover:underline text-gray-900">
+                  <span className="font-semibold hover:underline text-gray-900 inline-flex items-center gap-1">
                     {post.author.name || post.author.username}
+                    <VerifiedBadge badgeType={post.author.badgeType} />
                   </span>
                 </Link>
                 <Link href={`/profile/${post.author.username}`}>
@@ -194,7 +195,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
                 <span className="text-gray-400 text-sm">{timeAgo(post.createdAt)}</span>
               </div>
 
-              {/* ─── Edit & Delete Buttons (Author) ─── */}
               {isAuthor ? (
                 <div className="flex items-center gap-1">
                   <button
@@ -213,7 +213,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
                   </button>
                 </div>
               ) : (
-                // ─── Report Button (Non-author) ───
                 <button
                   onClick={() => setShowReportModal(true)}
                   className="text-gray-400 hover:text-red-500 transition p-1"
@@ -275,7 +274,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
         </div>
       </div>
 
-      {/* ─── Edit Modal ─── */}
       <EditPostModal
         post={post}
         isOpen={showEditModal}
@@ -283,7 +281,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
         onUpdate={onUpdate}
       />
 
-      {/* ─── Delete Confirmation Modal ─── */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
@@ -310,7 +307,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
         </div>
       )}
 
-      {/* ─── Report Modal ─── */}
       <ReportModal
         isOpen={showReportModal}
         onClose={() => setShowReportModal(false)}
