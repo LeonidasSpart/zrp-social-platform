@@ -3,8 +3,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { UTApi } from "uploadthing/server";
 
-const utapi = new UTApi();
-
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {
@@ -41,7 +39,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Upload to UploadThing instead of storing base64
+    const utapi = new UTApi();
     const uploadResult = await utapi.uploadFiles(file);
 
     if (uploadResult.error) {
