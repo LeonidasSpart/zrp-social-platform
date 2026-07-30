@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import VerifiedBadge from "./VerifiedBadge";
 
 interface Comment {
   id: string;
@@ -11,6 +12,7 @@ interface Comment {
     username: string;
     name: string;
     avatarUrl?: string;
+    badgeType?: string | null;
   };
 }
 
@@ -94,7 +96,10 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm">{comment.author.name}</span>
+                  <span className="font-medium text-sm inline-flex items-center gap-1">
+                    {comment.author.name}
+                    <VerifiedBadge badgeType={comment.author.badgeType} />
+                  </span>
                   <span className="text-xs text-gray-400">@{comment.author.username}</span>
                   <span className="text-xs text-gray-400">·</span>
                   <span className="text-xs text-gray-400">{timeAgo(comment.createdAt)}</span>
