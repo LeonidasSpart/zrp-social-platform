@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
             username: true,
             name: true,
             avatarUrl: true,
+            badgeType: true,
           },
         },
         _count: {
@@ -29,14 +30,12 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Sort by engagement (likes + comments + reposts)
     const sortedPosts = posts.sort((a, b) => {
       const engagementA = a._count.likes + a._count.comments + a._count.reposts;
       const engagementB = b._count.likes + b._count.comments + b._count.reposts;
       return engagementB - engagementA;
     });
 
-    // If user is logged in, check which posts they liked
     if (session && session.user) {
       const likes = await prisma.like.findMany({
         where: {
