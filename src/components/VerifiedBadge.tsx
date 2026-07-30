@@ -17,13 +17,14 @@ export default function VerifiedBadge({ badgeType, className = "" }: VerifiedBad
   const { fill, label } = BADGE_STYLES[badgeType];
 
   return (
-    <BadgeCheck
-      className={`w-4 h-4 inline-block flex-shrink-0 ${fill} ${className}`}
-      fill="currentColor"
-      stroke="white"
-      strokeWidth={2}
-      title={label}
-      aria-label={label}
-    />
+    <span className="inline-flex" title={label}>
+      <BadgeCheck
+        className={`w-4 h-4 inline-block flex-shrink-0 ${fill} ${className}`}
+        fill="currentColor"
+        stroke="white"
+        strokeWidth={2}
+        aria-label={label}
+      />
+    </span>
   );
 }
