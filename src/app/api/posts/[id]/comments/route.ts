@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
-// GET all comments for a post
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -19,6 +18,7 @@ export async function GET(
             username: true,
             name: true,
             avatarUrl: true,
+            badgeType: true,
           },
         },
       },
@@ -29,7 +29,6 @@ export async function GET(
   }
 }
 
-// POST a new comment
 export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -58,6 +57,7 @@ export async function POST(
             username: true,
             name: true,
             avatarUrl: true,
+            badgeType: true,
           },
         },
       },
