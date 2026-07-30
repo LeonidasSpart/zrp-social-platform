@@ -46,6 +46,8 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           username: user.username,
           isAdmin: user.isAdmin,
+          badgeType: user.badgeType,
+          avatarUrl: user.avatarUrl,
         };
       },
     }),
@@ -56,6 +58,8 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.username = user.username;
         token.isAdmin = user.isAdmin;
+        token.badgeType = user.badgeType;
+        token.avatarUrl = user.avatarUrl;
       }
       return token;
     },
@@ -64,14 +68,8 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
         session.user.isAdmin = token.isAdmin as boolean;
-
-        // Fetch avatarUrl and badgeType fresh from DB
-        const dbUser = await prisma.user.findUnique({
-          where: { id: token.id as string },
-          select: { avatarUrl: true, badgeType: true },
-        });
-        session.user.avatarUrl = dbUser?.avatarUrl ?? null;
-        session.user.badgeType = dbUser?.badgeType ?? null;
+        session.user.badgeType = token.badgeType as string || null;
+        session.user.avatarUrl = token.avatarUrl as string || null;
       }
       return session;
     },
