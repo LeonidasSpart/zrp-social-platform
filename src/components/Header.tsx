@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Home, Compass, Search, MessageSquare, Bell, User, Sun, Moon, Menu, X, LayoutDashboard } from "lucide-react";
+import { Home, Compass, Search, MessageSquare, Bell, User, Sun, Moon, Menu, X, LayoutDashboard, Bookmark } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 
 export default function Header() {
@@ -79,10 +79,12 @@ export default function Header() {
                 </span>
               )}
             </Link>
+            <Link href="/bookmarks" className="text-gray-500 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition" title="Bookmarks">
+              <Bookmark className="w-5 h-5" />
+            </Link>
             <Link href={`/profile/${session.user?.username}`} className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="Profile">
               <User className="w-5 h-5" />
             </Link>
-            {/* ─── Admin Link ─── */}
             {session.user?.isAdmin && (
               <Link href="/admin" className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="Admin Dashboard">
                 <LayoutDashboard className="w-5 h-5" />
@@ -157,6 +159,14 @@ export default function Header() {
               )}
             </Link>
             <Link
+              href="/bookmarks"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-700 dark:text-gray-300"
+            >
+              <Bookmark className="w-5 h-5" />
+              <span>Bookmarks</span>
+            </Link>
+            <Link
               href={`/profile/${session.user?.username}`}
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-700 dark:text-gray-300"
@@ -164,7 +174,6 @@ export default function Header() {
               <User className="w-5 h-5" />
               <span>Profile</span>
             </Link>
-            {/* ─── Admin Link (mobile) ─── */}
             {session.user?.isAdmin && (
               <Link
                 href="/admin"
