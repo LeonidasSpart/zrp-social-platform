@@ -24,6 +24,7 @@ export async function GET(
         createdAt: true,
         usernameChangedAt: true,
         isPrivate: true,
+        badgeType: true,
         _count: {
           select: {
             posts: true,
@@ -42,7 +43,6 @@ export async function GET(
     let isBlocked = false;
 
     if (session && session.user && session.user.id !== user.id) {
-      // Check if viewer follows target
       const follow = await prisma.follow.findUnique({
         where: {
           followerId_followingId: {
@@ -53,7 +53,6 @@ export async function GET(
       });
       isFollowing = !!follow;
 
-      // Check if viewer has blocked target
       const block = await prisma.blocked.findUnique({
         where: {
           blockerId_blockedId: {
