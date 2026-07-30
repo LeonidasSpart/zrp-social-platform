@@ -1,5 +1,6 @@
 import { Server as SocketServer } from "socket.io";
 import { Server as HTTPServer } from "http";
+import { prisma } from "./db";
 
 let io: SocketServer | null = null;
 
@@ -17,30 +18,52 @@ export function initSocketServer(server: HTTPServer) {
     io.on("connection", (socket) => {
       console.log("Socket connected:", socket.id);
 
-      // Join user to their own room
       const userId = socket.handshake.auth.userId;
       if (userId) {
         socket.join(`user:${userId}`);
       }
 
-      // Send message
+      // ─── Send message ──────────────────────────────────────────────
       socket.on("send-message", async (data) => {
         const { receiverId, content, senderId } = data;
 
-        // Save message to database
-        const message = await saveMessageToDB({
-          senderId,
-          receiverId,
-          content,
-        });
+        try {
+          const message = await prisma.message.create({
+            data: {
+              content,
+              senderId,
+              receiverId,
+              read: false,
+            },
+            include: {
+              sender: {
+                select: {
+                  id: true,
+                  username: true,
+                  name: true,
+                  avatarUrl: true,
+                },
+              },
+              receiver: {
+                select: {
+                  id: true,
+                  username: true,
+                  name: true,
+                  avatarUrl: true,
+                },
+              },
+            },
+          });
 
-        // Emit to receiver's room
-        io?.to(`user:${receiverId}`).emit("receive-message", message);
-        // Also emit back to sender for confirmation
-        socket.emit("message-sent", message);
+          io?.to(`user:${receiverId}`).emit("receive-message", message);
+          socket.emit("message-sent", message);
+        } catch (error) {
+          console.error("Error saving message:", error);
+          socket.emit("message-error", { error: "Failed to send message" });
+        }
       });
 
-      // Typing indicator
+      // ─── Typing indicator ──────────────────────────────────────────
       socket.on("typing", ({ receiverId, isTyping }) => {
         io?.to(`user:${receiverId}`).emit("user-typing", {
           userId,
@@ -48,10 +71,22 @@ export function initSocketServer(server: HTTPServer) {
         });
       });
 
-      // Mark as read
+      // ─── Mark as read ─────────────────────────────────────────────
       socket.on("mark-read", async ({ messageId, senderId }) => {
-        await markMessagesAsRead(senderId, messageId);
-        io?.to(`user:${senderId}`).emit("message-read", { messageId });
+        try {
+          await prisma.message.updateMany({
+            where: {
+              id: messageId,
+              senderId: senderId,
+              receiverId: userId,
+              read: false,
+            },
+            data: { read: true },
+          });
+          io?.to(`user:${senderId}`).emit("message-read", { messageId });
+        } catch (error) {
+          console.error("Error marking message as read:", error);
+        }
       });
 
       socket.on("disconnect", () => {
