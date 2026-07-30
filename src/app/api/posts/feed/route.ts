@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       select: { followingId: true },
     });
     const followedIds = followed.map(f => f.followingId);
-    followedIds.push(session.user.id); // include own posts
+    followedIds.push(session.user.id);
 
     const posts = await prisma.post.findMany({
       where: {
@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
             username: true,
             name: true,
             avatarUrl: true,
+            badgeType: true,
           },
         },
         _count: {
