@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import CookieConsent from "@/components/CookieConsent";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
   title: "ZRP Social",
   description: "A social platform for the ZRP community",
   icons: {
-    icon: "/favicon.png",   // ← Corrected to .png
+    icon: "/favicon.png",
   },
 };
 
@@ -29,6 +30,7 @@ export default function RootLayout({
           <AuthProvider>
             <Header />
             <main className="flex-1">{children}</main>
+            <CookieConsent />
             <Footer />
           </AuthProvider>
         </ThemeProvider>
