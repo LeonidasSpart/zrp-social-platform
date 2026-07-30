@@ -44,13 +44,11 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
   const [showReportModal, setShowReportModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // ─── Bookmark state ──────────────────────────────────────────────
   const [bookmarked, setBookmarked] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
 
   const isAuthor = session?.user?.id === post.author.id;
 
-  // ─── Fetch bookmark status ──────────────────────────────────────
   useEffect(() => {
     const checkBookmark = async () => {
       try {
@@ -73,7 +71,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
       const res = await fetch(`/api/posts/${post.id}/like`, {
         method: "POST",
       });
-
       if (res.ok) {
         setLiked(!liked);
         setLikesCount(liked ? likesCount - 1 : likesCount + 1);
@@ -88,7 +85,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
       const res = await fetch(`/api/posts/${post.id}/repost`, {
         method: "POST",
       });
-
       if (res.ok) {
         const data = await res.json();
         setReposted(data.reposted);
@@ -128,7 +124,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
       const res = await fetch(`/api/posts/${post.id}`, {
         method: "DELETE",
       });
-
       if (res.ok) {
         onUpdate();
         setShowDeleteConfirm(false);
@@ -166,7 +161,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
     }
   };
 
-  // ─── Toggle bookmark ─────────────────────────────────────────────
   const handleBookmark = async () => {
     setBookmarkLoading(true);
     try {
@@ -176,7 +170,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
       if (res.ok) {
         const data = await res.json();
         setBookmarked(data.bookmarked);
-        // Optionally update parent if you want to sync bookmarks list
         onUpdate();
       }
     } catch (error) {
@@ -207,7 +200,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
       <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 hover:bg-gray-50 transition">
         <div className="flex items-start gap-3">
           <Link href={`/profile/${post.author.username}`}>
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold flex-shrink-0 overflow-hidden">
+            <div className="w-10 h-10 rounded-full bg-zrp-red/10 flex items-center justify-center text-zrp-red font-semibold flex-shrink-0 overflow-hidden">
               {post.author.avatarUrl ? (
                 <img
                   src={post.author.avatarUrl}
@@ -241,7 +234,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setShowEditModal(true)}
-                    className="text-gray-400 hover:text-blue-500 transition p-1"
+                    className="text-gray-400 hover:text-zrp-red transition p-1"
                     title="Edit"
                   >
                     <Pencil className="w-4 h-4" />
@@ -285,7 +278,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
 
               <button
                 onClick={() => setShowComments(!showComments)}
-                className="flex items-center gap-1 text-sm text-gray-500 hover:text-blue-500 transition"
+                className="flex items-center gap-1 text-sm text-gray-500 hover:text-zrp-red transition"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>{post._count?.comments || 0}</span>
@@ -303,21 +296,21 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
 
               <button
                 onClick={handleShare}
-                className="flex items-center gap-1 text-sm text-gray-500 hover:text-blue-500 transition"
+                className="flex items-center gap-1 text-sm text-gray-500 hover:text-zrp-red transition"
               >
                 <Share2 className="w-4 h-4" />
               </button>
 
-              {/* ─── Bookmark button ─── */}
+              {/* ─── Bookmark button (ZRP Red) ─── */}
               <button
                 onClick={handleBookmark}
                 disabled={bookmarkLoading}
                 className={`flex items-center gap-1 text-sm ${
-                  bookmarked ? "text-yellow-500" : "text-gray-500 hover:text-yellow-500"
+                  bookmarked ? "text-zrp-red" : "text-gray-500 hover:text-zrp-red"
                 } transition`}
                 title={bookmarked ? "Remove bookmark" : "Bookmark"}
               >
-                <Bookmark className={`w-4 h-4 ${bookmarked ? "fill-yellow-500" : ""}`} />
+                <Bookmark className={`w-4 h-4 ${bookmarked ? "fill-zrp-red" : ""}`} />
               </button>
             </div>
 
