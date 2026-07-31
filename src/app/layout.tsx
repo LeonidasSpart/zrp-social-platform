@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Orbitron } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
@@ -19,6 +19,13 @@ export const metadata: Metadata = {
   },
 };
 
+// ─── MOBILE VIEWPORT ──────────────────────────────────────────────
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -26,11 +33,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${orbitron.variable} font-inter min-h-screen flex flex-col`}>
+      <body className={`${inter.variable} ${orbitron.variable} font-inter min-h-screen flex flex-col overflow-x-hidden`}>
         <ThemeProvider>
           <AuthProvider>
             <Header />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 w-full max-w-full">{children}</main>
             <CookieConsent />
             <Footer />
             <PushNotificationManager />
