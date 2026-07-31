@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PostActions } from "@/components/Post/PostActions";
 import { Avatar } from "@/components/ui/avatar";
-import { VerifiedBadge } from "@/components/VerifiedBadge";
+import VerifiedBadge from "@/components/VerifiedBadge";      // ✅ default import
 import { timeAgo } from "@/lib/utils";
 
 interface FeedItemProps {
@@ -14,7 +14,6 @@ interface FeedItemProps {
       id: string;
       username: string;
       name: string | null;
-      // ✅ Support any field name – check multiple possible names
       avatar?: string | null;
       image?: string | null;
       profilePicture?: string | null;
@@ -38,7 +37,6 @@ export function FeedItem({ post, userId }: FeedItemProps) {
   const isReposted = post.reposts.length > 0;
   const isBookmarked = post.bookmarks.length > 0;
 
-  // ✅ Get avatar from any field
   const avatarSrc =
     post.author.avatar ??
     post.author.image ??
@@ -60,7 +58,7 @@ export function FeedItem({ post, userId }: FeedItemProps) {
             >
               {post.author.name || post.author.username}
             </Link>
-            <VerifiedBadge type={post.author.badgeType} />
+            <VerifiedBadge badgeType={post.author.badgeType} />
             <span className="text-sm text-zinc-500">@{post.author.username}</span>
             <span className="text-sm text-zinc-400">·</span>
             <time className="text-sm text-zinc-400" dateTime={post.createdAt.toISOString()}>
