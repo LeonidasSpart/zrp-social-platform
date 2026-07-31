@@ -87,78 +87,67 @@ svg {
   }
 }
 
-/* ─── NUKE YELLOW, AMBER, ORANGE ────────────────────────────────── */
+/* ─── NUCLEAR YELLOW REMOVAL ──────────────────────────────────────── */
 
-/* 1. Kill any background that has yellow, amber, or orange in its class name */
-[class*="bg-yellow-"],
-[class*="bg-amber-"],
-[class*="bg-orange-"],
-[class*="bg-yellow"],
-[class*="bg-amber"],
-[class*="bg-orange"] {
+/* 1. Remove ALL backgrounds from every single element, EXCEPT body */
+*:not(body) {
   background-color: transparent !important;
   background: transparent !important;
 }
 
-/* 2. Same for text and border */
-[class*="text-yellow-"],
-[class*="text-amber-"],
-[class*="text-orange-"],
-[class*="text-yellow"],
-[class*="text-amber"],
-[class*="text-orange"] {
-  color: #6B7280 !important;
-}
-
-[class*="border-yellow-"],
-[class*="border-amber-"],
-[class*="border-orange-"],
-[class*="border-yellow"],
-[class*="border-amber"],
-[class*="border-orange"] {
-  border-color: #D1D5DB !important;
-}
-
-/* 3. Override any element with inline yellow hex codes */
-[style*="background:#FFD700"],
-[style*="background:#FFC107"],
-[style*="background:#FFA500"],
-[style*="background-color:#FFD700"],
-[style*="background-color:#FFC107"],
-[style*="background-color:#FFA500"] {
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-/* 4. Force all containers to use the theme background (except body) */
-main,
-section,
-article,
-div:not(body) {
+/* 2. Restore body background */
+body {
   background-color: hsl(var(--background)) !important;
 }
 
-/* 5. But let the "Post" button stay blue! */
+/* 3. Restore backgrounds for essential containers */
+main,
+main > div,
+main > div > div,
+.max-w-2xl,
+.max-w-2xl.mx-auto,
+.py-4,
+.px-4,
+.space-y-4,
+section,
+article {
+  background-color: hsl(var(--background)) !important;
+}
+
+/* 4. Restore post cards, composer, and other white/dark containers */
+.bg-white,
+.dark\:bg-gray-800,
+.dark\:bg-gray-900,
+.rounded-lg.shadow-sm.p-4,
+.rounded-lg.shadow-sm,
+.bg-white.dark\:bg-gray-800,
+.bg-white.dark\:bg-gray-900 {
+  background-color: hsl(var(--background)) !important;
+}
+
+/* 5. Restore the Post button (blue) */
 button.bg-blue-600,
-[type="submit"].bg-blue-600,
-.bg-blue-600 {
+[type="submit"].bg-blue-600 {
   background-color: #2563EB !important;
 }
 button.bg-blue-600:hover,
-[type="submit"].bg-blue-600:hover,
-.bg-blue-600:hover {
+[type="submit"].bg-blue-600:hover {
   background-color: #1D4ED8 !important;
 }
 
-/* 6. And let the "Post" button have proper hover */
-button.bg-blue-600:disabled {
-  opacity: 0.5 !important;
-  cursor: not-allowed !important;
+/* 6. Restore any red buttons (like delete) */
+button.bg-red-600,
+[type="button"].bg-red-600 {
+  background-color: #DC2626 !important;
+}
+button.bg-red-600:hover {
+  background-color: #B91C1C !important;
 }
 
-/* 7. Preserve white/dark backgrounds for cards and composer */
-.bg-white,
-.dark\:bg-gray-800,
-.dark\:bg-gray-900 {
-  background-color: hsl(var(--background)) !important;
+/* 7. Restore the ZRP red accent */
+.bg-zrp-red {
+  background-color: #FF2D2D !important;
+}
+.bg-zrp-red:hover {
+  background-color: #B10000 !important;
 }
