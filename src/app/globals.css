@@ -89,3 +89,32 @@ svg {
     padding: 0.75rem !important;
   }
 }
+
+/* ─── DESTROY ALL YELLOW, AMBER, ORANGE BACKGROUNDS ─── */
+
+/* 1. Override all Tailwind yellow/amber/orange background classes */
+.bg-yellow-50, .bg-yellow-100, .bg-yellow-200, .bg-yellow-300,
+.bg-yellow-400, .bg-yellow-500, .bg-yellow-600, .bg-yellow-700,
+.bg-yellow-800, .bg-yellow-900,
+.bg-amber-50, .bg-amber-100, .bg-amber-200, .bg-amber-300,
+.bg-amber-400, .bg-amber-500, .bg-amber-600, .bg-amber-700,
+.bg-amber-800, .bg-amber-900,
+.bg-orange-50, .bg-orange-100, .bg-orange-200, .bg-orange-300,
+.bg-orange-400, .bg-orange-500, .bg-orange-600, .bg-orange-700,
+.bg-orange-800, .bg-orange-900 {
+  background-color: transparent !important;
+}
+
+/* 2. Catch any class name containing "yellow", "amber", or "orange" */
+[class*="yellow"], [class*="amber"], [class*="orange"] {
+  background-color: transparent !important;
+}
+
+/* 3. Also override any inline background style (if any) */
+* {
+  background-color: unset;
+}
+/* But keep the body background intact */
+body {
+  background-color: hsl(var(--background)) !important;
+}
