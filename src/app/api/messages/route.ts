@@ -97,10 +97,11 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { content, receiverId } = await req.json();
+    const { content, receiverId, imageUrl } = await req.json();
 
-    if (!content || content.trim().length === 0) {
-      return NextResponse.json({ error: "Message cannot be empty" }, { status: 400 });
+    // Allow empty content only if there is an image
+    if ((!content || content.trim().length === 0) && !imageUrl) {
+      return NextResponse.json({ error: "Message content or image is required" }, { status: 400 });
     }
 
     if (!receiverId) {
@@ -119,9 +120,10 @@ export async function POST(req: NextRequest) {
     // ─── Save message ──────────────────────────────────────────────────
     const message = await prisma.message.create({
       data: {
-        content: content.trim(),
+        content: content?.trim() || "",
         senderId: session.user.id,
         receiverId,
+        imageUrl: imageUrl || null,
       },
       include: {
         sender: {
@@ -146,10 +148,13 @@ export async function POST(req: NextRequest) {
     // ─── Send push notification (non‑blocking) ──────────────────────
     if (receiverId !== session.user.id) {
       try {
+        const notificationMessage = imageUrl
+          ? `${session.user.name || session.user.username} sent you an image.`
+          : `${session.user.name || session.user.username} sent you a message.`;
         await sendPushNotification(
           receiverId,
           "New Message",
-          `${session.user.name || session.user.username} sent you a message.`,
+          notificationMessage,
           `/messages/${session.user.username}`
         );
       } catch (notifErr) {
