@@ -15,32 +15,38 @@ export default function PushNotificationManager() {
         return;
       }
 
-      // Request permission
-      const permission = await Notification.requestPermission();
-      if (permission !== "granted") {
-        console.log("Notification permission denied");
-        return;
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") {
+          console.log("Notification permission denied");
+          return;
+        }
+
+        const registration = await navigator.serviceWorker.register("/sw.js");
+        console.log("Service Worker registered");
+
+        const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (!publicKey) {
+          console.error("VAPID public key not set");
+          return;
+        }
+
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: publicKey,
+        });
+
+        // No need to send userId – the server uses getServerSession
+        await fetch("/api/push/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subscription }),
+        });
+
+        console.log("Push subscription saved");
+      } catch (error) {
+        console.error("Push registration error:", error);
       }
-
-      // Register service worker
-      const registration = await navigator.serviceWorker.register("/sw.js");
-      console.log("Service Worker registered");
-
-      // Subscribe to push
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-      });
-
-      // Send subscription to server
-      await fetch("/api/push/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          subscription,
-          userId: session.user.id,
-        }),
-      });
     }
 
     registerPush();
