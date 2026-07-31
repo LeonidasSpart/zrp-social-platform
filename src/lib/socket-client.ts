@@ -5,14 +5,14 @@ let socket: Socket | null = null;
 export function getSocket(userId: string): Socket {
   if (!socket) {
     socket = io({
-      path: "/api/socket.io",          // ✅ must match server path
+      path: "/api/socket.io",
       transports: ["websocket"],
       autoConnect: true,
     });
 
     socket.on("connect", () => {
       console.log("✅ Socket connected");
-      socket?.emit("join-room", userId);   // ✅ join room for this user
+      socket?.emit("join-room", userId);
     });
 
     socket.on("disconnect", () => {
@@ -24,9 +24,6 @@ export function getSocket(userId: string): Socket {
     });
   }
 
-  // If socket is already connected but we haven't joined the room yet,
-  // we should join when called. But for simplicity, we join on connect.
-  // If the socket is already connected, we can just emit join-room.
   if (socket.connected) {
     socket.emit("join-room", userId);
   }
