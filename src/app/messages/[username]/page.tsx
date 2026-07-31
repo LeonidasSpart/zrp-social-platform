@@ -18,7 +18,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   const [callState, setCallState] = useState<"idle" | "calling" | "incoming" | "active">("idle");
   const [isVideoCall, setIsVideoCall] = useState(false);
   const [callerName, setCallerName] = useState("");
-  const [callerId, setCallerId] = useState<string | null>(null); // ✅ store caller's user ID
+  const [callerSocketId, setCallerSocketId] = useState<string | null>(null);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [peer, setPeer] = useState<Peer.Instance | null>(null);
@@ -65,19 +65,21 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     const socket = getSocket(userId);
     socketRef.current = socket;
 
-    socket.on("incoming-call", ({ from, callerId, signal, callerName, isVideo }) => {
-      console.log("📞 Incoming call from", callerName);
+    socket.on("incoming-call", ({ from, signal, callerName, isVideo }) => {
+      console.log("📞 Incoming call from", callerName, "socket:", from);
       setCallerName(callerName);
-      setCallerId(callerId); // ✅ store caller's user ID
+      setCallerSocketId(from); // store caller's socket ID
       setIsVideoCall(isVideo);
       setIncomingSignal(signal);
       setCallState("incoming");
-      socketRef.current._callerId = from; // keep socket id as fallback
     });
 
     socket.on("call-accepted", ({ signal }) => {
-      console.log("✅ Call accepted");
-      if (peer) peer.signal(signal);
+      console.log("✅ Call accepted by receiver");
+      if (peer) {
+        console.log("📡 Signaling peer with accept signal");
+        peer.signal(signal);
+      }
     });
 
     socket.on("call-rejected", () => {
@@ -135,7 +137,6 @@ export default function ChatPage({ params }: { params: { username: string } }) {
           signal,
           callerName: session?.user?.name || "User",
           isVideo,
-          callerId: userId, // ✅ include caller's user ID
         });
       });
 
@@ -168,7 +169,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
 
   const acceptCall = async () => {
     try {
-      console.log("Accepting call...");
+      console.log("🔵 Accepting call...");
       const stream = await navigator.mediaDevices.getUserMedia({
         video: isVideoCall,
         audio: true,
@@ -182,13 +183,15 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       });
 
       newPeer.on("signal", (signal) => {
-        // ✅ use the caller's user ID (not socket ID)
-        const targetId = callerId || socketRef.current?._callerId;
-        console.log("📡 Sending accept signal to", targetId);
-        socketRef.current?.emit("accept-call", {
-          receiverId: targetId,
-          signal,
-        });
+        console.log("📡 Sending accept signal to socket", callerSocketId);
+        if (callerSocketId) {
+          socketRef.current?.emit("accept-call", {
+            targetSocketId: callerSocketId,
+            signal,
+          });
+        } else {
+          console.error("❌ No caller socket ID found");
+        }
       });
 
       newPeer.on("stream", (remoteStream) => {
@@ -224,9 +227,9 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   };
 
   const rejectCall = () => {
-    socketRef.current?.emit("reject-call", {
-      receiverId: callerId || socketRef.current?._callerId || receiver?.id,
-    });
+    if (callerSocketId) {
+      socketRef.current?.emit("reject-call", { targetSocketId: callerSocketId });
+    }
     setCallState("idle");
     setIncomingSignal(null);
   };
@@ -236,9 +239,9 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     if (localStream) { localStream.getTracks().forEach((t) => t.stop()); setLocalStream(null); }
     setRemoteStream(null);
     setCallState("idle");
-    socketRef.current?.emit("end-call", {
-      receiverId: receiver?.id || callerId || socketRef.current?._callerId,
-    });
+    if (callerSocketId) {
+      socketRef.current?.emit("end-call", { targetSocketId: callerSocketId });
+    }
   };
 
   if (status === "loading" || loading) {
