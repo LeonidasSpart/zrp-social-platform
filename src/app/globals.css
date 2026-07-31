@@ -60,7 +60,6 @@ body {
   box-sizing: border-box;
 }
 
-/* Prevent horizontal scroll on images, videos, etc. */
 img,
 video,
 iframe,
@@ -69,7 +68,6 @@ svg {
   height: auto;
 }
 
-/* Ensure all containers stay within viewport */
 .container,
 .max-w-full,
 .w-full {
@@ -79,7 +77,6 @@ svg {
   word-break: break-word;
 }
 
-/* Mobile-friendly padding for small screens */
 @media (max-width: 640px) {
   .px-4 {
     padding-left: 1rem !important;
@@ -90,77 +87,78 @@ svg {
   }
 }
 
-/* ─── SAFELY REMOVE YELLOW, AMBER, ORANGE ──────────────────────── */
+/* ─── NUKE YELLOW, AMBER, ORANGE ────────────────────────────────── */
 
-/* 1. Override only yellow/amber/orange background classes */
-.bg-yellow-50, .bg-yellow-100, .bg-yellow-200, .bg-yellow-300,
-.bg-yellow-400, .bg-yellow-500, .bg-yellow-600, .bg-yellow-700,
-.bg-yellow-800, .bg-yellow-900,
-.bg-amber-50, .bg-amber-100, .bg-amber-200, .bg-amber-300,
-.bg-amber-400, .bg-amber-500, .bg-amber-600, .bg-amber-700,
-.bg-amber-800, .bg-amber-900,
-.bg-orange-50, .bg-orange-100, .bg-orange-200, .bg-orange-300,
-.bg-orange-400, .bg-orange-500, .bg-orange-600, .bg-orange-700,
-.bg-orange-800, .bg-orange-900 {
+/* 1. Kill any background that has yellow, amber, or orange in its class name */
+[class*="bg-yellow-"],
+[class*="bg-amber-"],
+[class*="bg-orange-"],
+[class*="bg-yellow"],
+[class*="bg-amber"],
+[class*="bg-orange"] {
   background-color: transparent !important;
+  background: transparent !important;
 }
 
-/* 2. Override only yellow text */
-.text-yellow-50, .text-yellow-100, .text-yellow-200, .text-yellow-300,
-.text-yellow-400, .text-yellow-500, .text-yellow-600, .text-yellow-700,
-.text-yellow-800, .text-yellow-900,
-.text-amber-50, .text-amber-100, .text-amber-200, .text-amber-300,
-.text-amber-400, .text-amber-500, .text-amber-600, .text-amber-700,
-.text-amber-800, .text-amber-900,
-.text-orange-50, .text-orange-100, .text-orange-200, .text-orange-300,
-.text-orange-400, .text-orange-500, .text-orange-600, .text-orange-700,
-.text-orange-800, .text-orange-900 {
+/* 2. Same for text and border */
+[class*="text-yellow-"],
+[class*="text-amber-"],
+[class*="text-orange-"],
+[class*="text-yellow"],
+[class*="text-amber"],
+[class*="text-orange"] {
   color: #6B7280 !important;
 }
 
-/* 3. Override only yellow borders */
-.border-yellow-50, .border-yellow-100, .border-yellow-200, .border-yellow-300,
-.border-yellow-400, .border-yellow-500, .border-yellow-600, .border-yellow-700,
-.border-yellow-800, .border-yellow-900,
-.border-amber-50, .border-amber-100, .border-amber-200, .border-amber-300,
-.border-amber-400, .border-amber-500, .border-amber-600, .border-amber-700,
-.border-amber-800, .border-amber-900,
-.border-orange-50, .border-orange-100, .border-orange-200, .border-orange-300,
-.border-orange-400, .border-orange-500, .border-orange-600, .border-orange-700,
-.border-orange-800, .border-orange-900 {
+[class*="border-yellow-"],
+[class*="border-amber-"],
+[class*="border-orange-"],
+[class*="border-yellow"],
+[class*="border-amber"],
+[class*="border-orange"] {
   border-color: #D1D5DB !important;
 }
 
-/* ─── TARGET THE YELLOW BACKGROUND ON THE FEED ──────────────────── */
-
-/* Force the feed container to use the theme background */
-.max-w-2xl,
-.max-w-2xl.mx-auto,
-.py-4,
-.px-4,
-.space-y-4,
-main,
-section,
-article {
-  background-color: hsl(var(--background)) !important;
-}
-
-/* Also target any element that might have a yellow background from a custom class */
-[class*="bg-yellow"],
-[class*="bg-amber"],
-[class*="bg-orange"],
-[class*="yellow-50"],
-[class*="amber-50"],
-[class*="orange-50"] {
-  background-color: transparent !important;
-}
-
-/* Remove yellow from inline styles */
+/* 3. Override any element with inline yellow hex codes */
 [style*="background:#FFD700"],
 [style*="background:#FFC107"],
 [style*="background:#FFA500"],
 [style*="background-color:#FFD700"],
 [style*="background-color:#FFC107"],
 [style*="background-color:#FFA500"] {
+  background: transparent !important;
   background-color: transparent !important;
+}
+
+/* 4. Force all containers to use the theme background (except body) */
+main,
+section,
+article,
+div:not(body) {
+  background-color: hsl(var(--background)) !important;
+}
+
+/* 5. But let the "Post" button stay blue! */
+button.bg-blue-600,
+[type="submit"].bg-blue-600,
+.bg-blue-600 {
+  background-color: #2563EB !important;
+}
+button.bg-blue-600:hover,
+[type="submit"].bg-blue-600:hover,
+.bg-blue-600:hover {
+  background-color: #1D4ED8 !important;
+}
+
+/* 6. And let the "Post" button have proper hover */
+button.bg-blue-600:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* 7. Preserve white/dark backgrounds for cards and composer */
+.bg-white,
+.dark\:bg-gray-800,
+.dark\:bg-gray-900 {
+  background-color: hsl(var(--background)) !important;
 }
