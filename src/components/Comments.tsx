@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";                              // ✅ Added
+import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { Send, Pencil, Trash2, X, Check } from "lucide-react";
 import VerifiedBadge from "./VerifiedBadge";
+import { timeAgo } from "@/lib/utils";
 
 interface Comment {
   id: string;
@@ -30,6 +32,16 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // ─── Edit state ───
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [editing, setEditing] = useState(false);
+
+  // ─── Delete state ───
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+
   const fetchComments = async () => {
     setLoading(true);
     try {
@@ -49,6 +61,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
     fetchComments();
   }, [postId]);
 
+  // ─── Add comment ───
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || !session) return;
@@ -58,7 +71,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       const res = await fetch(`/api/posts/${postId}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: newComment }),
+        body: JSON.stringify({ content: newComment.trim() }),
       });
 
       if (res.ok) {
@@ -73,76 +86,210 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
     }
   };
 
-  const timeAgo = (date: string) => {
-    const diff = Date.now() - new Date(date).getTime();
-    const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return "Just now";
-    if (minutes < 60) return `${minutes}m`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h`;
-    const days = Math.floor(hours / 24);
-    return `${days}d`;
+  // ─── Start editing ───
+  const startEdit = (comment: Comment) => {
+    setEditingId(comment.id);
+    setEditContent(comment.content);
   };
+
+  // ─── Cancel editing ───
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditContent("");
+  };
+
+  // ─── Save edited comment ───
+  const saveEdit = async (commentId: string) => {
+    if (!editContent.trim() || !session) return;
+
+    setEditing(true);
+    try {
+      const res = await fetch(`/api/comments/${commentId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: editContent.trim() }),
+      });
+
+      if (res.ok) {
+        setEditingId(null);
+        setEditContent("");
+        await fetchComments();
+        onCommentAdded();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to update comment");
+      }
+    } catch (error) {
+      console.error("Error editing comment:", error);
+      alert("Failed to update comment");
+    } finally {
+      setEditing(false);
+    }
+  };
+
+  // ─── Delete comment ───
+  const confirmDelete = (commentId: string) => {
+    setCommentToDelete(commentId);
+    setShowDeleteModal(true);
+  };
+
+  const handleDelete = async () => {
+    if (!commentToDelete) return;
+
+    setDeletingId(commentToDelete);
+    try {
+      const res = await fetch(`/api/comments/${commentToDelete}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setShowDeleteModal(false);
+        setCommentToDelete(null);
+        await fetchComments();
+        onCommentAdded();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to delete comment");
+      }
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      alert("Failed to delete comment");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const getAvatarSrc = (author: Comment["author"]) => {
+    return author.avatarUrl || "/default-avatar.png";
+  };
+
+  const getDisplayName = (author: Comment["author"]) => {
+    return author.name || author.username;
+  };
+
+  if (loading) {
+    return (
+      <div className="mt-3 space-y-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="flex gap-3 animate-pulse">
+            <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3 w-24 bg-zinc-200 dark:bg-zinc-700 rounded" />
+              <div className="h-3 w-full bg-zinc-200 dark:bg-zinc-700 rounded" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-      {loading ? (
-        <p className="text-sm text-gray-400 dark:text-gray-500">Loading comments...</p>
-      ) : comments.length === 0 ? (
+      {/* ─── Comment List ─── */}
+      {comments.length === 0 ? (
         <p className="text-sm text-gray-400 dark:text-gray-500">No comments yet.</p>
       ) : (
         <div className="space-y-3">
-          {comments.map((comment) => (
-            <div key={comment.id} className="flex gap-3">
-              {/* ─── Clickable Avatar ─── */}
-              <Link
-                href={`/profile/${comment.author.username}`}
-                className="flex-shrink-0"
-              >
-                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-sm font-semibold flex-shrink-0 overflow-hidden hover:ring-2 hover:ring-zrp-red transition">
-                  {comment.author.avatarUrl ? (
+          {comments.map((comment) => {
+            const isAuthor = session?.user?.id === comment.author.id;
+            const isEditing = editingId === comment.id;
+
+            return (
+              <div key={comment.id} className="flex gap-3 group">
+                {/* Avatar */}
+                <Link
+                  href={`/profile/${comment.author.username}`}
+                  className="flex-shrink-0"
+                >
+                  <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-sm font-semibold overflow-hidden hover:ring-2 hover:ring-zrp-red transition">
                     <img
-                      src={comment.author.avatarUrl}
-                      alt={comment.author.name || comment.author.username}
+                      src={getAvatarSrc(comment.author)}
+                      alt={getDisplayName(comment.author)}
                       className="w-full h-full object-cover"
                     />
-                  ) : (
-                    comment.author.name?.[0]?.toUpperCase() ||
-                    comment.author.username?.[0]?.toUpperCase() ||
-                    "?"
-                  )}
-                </div>
-              </Link>
+                  </div>
+                </Link>
 
-              <div>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {/* ─── Clickable Username ─── */}
-                  <Link
-                    href={`/profile/${comment.author.username}`}
-                    className="font-medium text-sm hover:underline text-gray-900 dark:text-white"
-                  >
-                    {comment.author.name || comment.author.username}
-                  </Link>
-                  {comment.author.badgeType && (
-                    <VerifiedBadge badgeType={comment.author.badgeType} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <Link
+                      href={`/profile/${comment.author.username}`}
+                      className="font-medium text-sm hover:underline text-gray-900 dark:text-white"
+                    >
+                      {getDisplayName(comment.author)}
+                    </Link>
+                    {comment.author.badgeType && (
+                      <VerifiedBadge badgeType={comment.author.badgeType} />
+                    )}
+                    <span className="text-xs text-gray-400 dark:text-gray-500">
+                      @{comment.author.username}
+                    </span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500">·</span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500">
+                      {timeAgo(comment.createdAt)}
+                    </span>
+
+                    {/* ─── Edit/Delete buttons ─── */}
+                    {isAuthor && !isEditing && (
+                      <div className="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => startEdit(comment)}
+                          className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 p-1"
+                          title="Edit comment"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => confirmDelete(comment.id)}
+                          className="text-gray-400 hover:text-red-500 p-1"
+                          title="Delete comment"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ─── Comment content ─── */}
+                  {isEditing ? (
+                    <div className="mt-1 flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
+                        autoFocus
+                        maxLength={280}
+                      />
+                      <button
+                        onClick={() => saveEdit(comment.id)}
+                        disabled={!editContent.trim() || editing}
+                        className="text-green-600 hover:text-green-700 p-1 disabled:opacity-50"
+                        title="Save"
+                      >
+                        <Check className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={cancelEdit}
+                        className="text-gray-400 hover:text-gray-600 p-1"
+                        title="Cancel"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-800 dark:text-gray-200 mt-0.5">
+                      {comment.content}
+                    </p>
                   )}
-                  <span className="text-xs text-gray-400 dark:text-gray-500">
-                    @{comment.author.username}
-                  </span>
-                  <span className="text-xs text-gray-400 dark:text-gray-500">·</span>
-                  <span className="text-xs text-gray-400 dark:text-gray-500">
-                    {timeAgo(comment.createdAt)}
-                  </span>
                 </div>
-                <p className="text-sm text-gray-800 dark:text-gray-200 mt-0.5">
-                  {comment.content}
-                </p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
+      {/* ─── Add Comment Form ─── */}
       {session && (
         <form onSubmit={handleSubmit} className="mt-3 flex gap-2">
           <input
@@ -156,11 +303,44 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
           <button
             type="submit"
             disabled={!newComment.trim() || submitting}
-            className="bg-zrp-red text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="bg-zrp-red text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-1"
           >
-            {submitting ? "..." : "Reply"}
+            <Send className="w-4 h-4" />
+            Reply
           </button>
         </form>
+      )}
+
+      {/* ─── Delete Confirmation Modal ─── */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full p-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+              Delete Comment?
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
+              This action cannot be undone. Are you sure you want to delete this comment?
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setCommentToDelete(null);
+                }}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={!!deletingId}
+                className="bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              >
+                {deletingId ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
