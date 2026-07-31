@@ -5,6 +5,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
+import PushNotificationManager from "@/components/PushNotificationManager";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -32,6 +33,7 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <CookieConsent />
             <Footer />
+            <PushNotificationManager />
           </AuthProvider>
         </ThemeProvider>
       </body>
