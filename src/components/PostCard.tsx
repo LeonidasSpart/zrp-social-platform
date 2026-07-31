@@ -32,6 +32,45 @@ interface PostCardProps {
   onUpdate: () => void;
 }
 
+// ─── PARSE HASHTAGS AND MENTIONS ──────────────────────────────────
+function parseContent(content: string) {
+  const parts: { type: "text" | "hashtag" | "mention"; value: string }[] = [];
+  let remaining = content;
+  let lastIndex = 0;
+
+  // Find all #hashtag and @mention matches
+  const regex = /(@\w+)|(#\w+)/g;
+  let match;
+
+  while ((match = regex.exec(content)) !== null) {
+    // Add text before the match
+    if (match.index > lastIndex) {
+      parts.push({
+        type: "text",
+        value: content.slice(lastIndex, match.index),
+      });
+    }
+
+    // Add the matched hashtag or mention
+    parts.push({
+      type: match[0].startsWith("@") ? "mention" : "hashtag",
+      value: match[0],
+    });
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add remaining text
+  if (lastIndex < content.length) {
+    parts.push({
+      type: "text",
+      value: content.slice(lastIndex),
+    });
+  }
+
+  return parts;
+}
+
 export default function PostCard({ post, onUpdate }: PostCardProps) {
   const { data: session } = useSession();
   const [liked, setLiked] = useState(post.liked || false);
@@ -48,6 +87,8 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
 
   const isAuthor = session?.user?.id === post.author.id;
+
+  const contentParts = parseContent(post.content);
 
   useEffect(() => {
     const checkBookmark = async () => {
@@ -258,7 +299,37 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
               )}
             </div>
 
-            <p className="text-gray-800 dark:text-gray-200 mt-1 whitespace-pre-wrap">{post.content}</p>
+            {/* ─── POST CONTENT WITH CLICKABLE HASHTAGS & MENTIONS ─── */}
+            <p className="text-gray-800 dark:text-gray-200 mt-1 whitespace-pre-wrap break-words">
+              {contentParts.map((part, index) => {
+                if (part.type === "hashtag") {
+                  const tag = part.value.slice(1);
+                  return (
+                    <Link
+                      key={index}
+                      href={`/hashtag/${tag}`}
+                      className="text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                      {part.value}
+                    </Link>
+                  );
+                }
+                if (part.type === "mention") {
+                  const username = part.value.slice(1);
+                  return (
+                    <Link
+                      key={index}
+                      href={`/profile/${username}`}
+                      className="text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                      {part.value}
+                    </Link>
+                  );
+                }
+                return <span key={index}>{part.value}</span>;
+              })}
+            </p>
+
             {post.imageUrl && (
               <div className="mt-2 rounded-lg overflow-hidden">
                 <img src={post.imageUrl} alt="Post image" className="w-full" />
@@ -301,7 +372,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
                 <Share2 className="w-4 h-4" />
               </button>
 
-              {/* ─── Bookmark (theme‑aware) ─── */}
               <button
                 onClick={handleBookmark}
                 disabled={bookmarkLoading}
