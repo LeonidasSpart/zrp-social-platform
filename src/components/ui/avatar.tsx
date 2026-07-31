@@ -10,6 +10,9 @@ export function Avatar({ src, alt, className = "" }: AvatarProps) {
       src={src || "/default-avatar.png"}
       alt={alt}
       className={`w-10 h-10 rounded-full object-cover ${className}`}
+      onError={(e) => {
+        (e.target as HTMLImageElement).src = "/default-avatar.png";
+      }}
     />
   );
 }
