@@ -4,7 +4,6 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import ChatInterface from "@/components/ChatInterface";
 import CallComponent from "@/components/CallComponent";
 import { getSocket } from "@/lib/socket-client";
@@ -71,37 +70,42 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     socketRef.current = socket;
 
     socket.on("incoming-call", ({ from, signal, callerName, isVideo }) => {
+      console.log("📞 Incoming call from:", callerName);
       setCallerName(callerName);
       setIsVideoCall(isVideo);
       setIncomingSignal(signal);
       setCallState("incoming");
-      // Store the caller ID for later use
       socketRef.current._callerId = from;
     });
 
     socket.on("call-accepted", ({ signal }) => {
+      console.log("✅ Call accepted");
       if (peer) {
         peer.signal(signal);
       }
     });
 
     socket.on("call-rejected", () => {
+      console.log("❌ Call rejected");
       endCall();
       alert("Call was rejected");
     });
 
     socket.on("call-ended", () => {
+      console.log("🔚 Call ended");
       endCall();
     });
   };
 
   // ─── Start Call ──────────────────────────────────────────────────
   const startCall = async (isVideo: boolean) => {
+    console.log("📞 Starting call, video:", isVideo);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: isVideo,
         audio: true,
       });
+      console.log("🎥 Got media stream");
       setLocalStream(stream);
       setIsVideoCall(isVideo);
       setCallState("calling");
@@ -113,11 +117,13 @@ export default function ChatPage({ params }: { params: { username: string } }) {
           iceServers: [
             { urls: "stun:stun.l.google.com:19302" },
             { urls: "stun:stun1.l.google.com:19302" },
+            { urls: "stun:stun2.l.google.com:19302" },
           ],
         },
       });
 
       newPeer.on("signal", (signal) => {
+        console.log("📡 Sending signal to receiver");
         socketRef.current?.emit("call-user", {
           receiverId: receiver.id,
           signal,
@@ -127,30 +133,34 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       });
 
       newPeer.on("stream", (remoteStream) => {
+        console.log("📡 Remote stream received");
         setRemoteStream(remoteStream);
         setCallState("active");
       });
 
       newPeer.on("error", (err) => {
-        console.error("Peer error:", err);
+        console.error("❌ Peer error:", err);
+        alert("Call error: " + err.message);
         endCall();
       });
 
       setPeer(newPeer);
-    } catch (error) {
-      console.error("Error starting call:", error);
-      alert("Could not access camera/microphone. Please allow permissions.");
+    } catch (error: any) {
+      console.error("❌ Error starting call:", error);
+      alert("Could not access camera/microphone: " + (error.message || "Please allow permissions"));
       setCallState("idle");
     }
   };
 
   // ─── Accept Incoming Call ──────────────────────────────────────
   const acceptCall = async () => {
+    console.log("📞 Accepting call...");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: isVideoCall,
         audio: true,
       });
+      console.log("🎥 Got media stream for accept");
       setLocalStream(stream);
 
       const newPeer = new Peer({
@@ -160,11 +170,13 @@ export default function ChatPage({ params }: { params: { username: string } }) {
           iceServers: [
             { urls: "stun:stun.l.google.com:19302" },
             { urls: "stun:stun1.l.google.com:19302" },
+            { urls: "stun:stun2.l.google.com:19302" },
           ],
         },
       });
 
       newPeer.on("signal", (signal) => {
+        console.log("📡 Sending accept signal");
         socketRef.current?.emit("accept-call", {
           receiverId: socketRef.current?._callerId,
           signal,
@@ -172,29 +184,32 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       });
 
       newPeer.on("stream", (remoteStream) => {
+        console.log("📡 Remote stream received");
         setRemoteStream(remoteStream);
         setCallState("active");
       });
 
       newPeer.on("error", (err) => {
-        console.error("Peer error:", err);
+        console.error("❌ Peer error:", err);
+        alert("Call error: " + err.message);
         endCall();
       });
 
-      // Signal with the incoming offer
       if (incomingSignal) {
+        console.log("📡 Signaling with incoming offer");
         newPeer.signal(incomingSignal);
       }
 
       setPeer(newPeer);
-    } catch (error) {
-      console.error("Error accepting call:", error);
-      alert("Could not access camera/microphone.");
+    } catch (error: any) {
+      console.error("❌ Error accepting call:", error);
+      alert("Could not access camera/microphone: " + (error.message || "Please allow permissions"));
       rejectCall();
     }
   };
 
   const rejectCall = () => {
+    console.log("❌ Rejecting call");
     socketRef.current?.emit("reject-call", {
       receiverId: socketRef.current?._callerId || receiver?.id,
     });
@@ -203,6 +218,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   };
 
   const endCall = () => {
+    console.log("🔚 Ending call");
     if (peer) {
       peer.destroy();
       setPeer(null);
