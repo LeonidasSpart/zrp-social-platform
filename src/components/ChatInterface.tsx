@@ -5,7 +5,6 @@ import { useSession } from "next-auth/react";
 import { getSocket } from "@/lib/socket-client";
 import { Send, Phone, Video, Image, Smile, X } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
-import { useUploadThing } from "@/lib/uploadthing";
 
 interface Message {
   id: string;
@@ -48,21 +47,6 @@ export default function ChatInterface({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const userId = session?.user?.id;
-
-  // ─── UploadThing ──────────────────────────────────────────────────
-  const { startUpload } = useUploadThing("messageImage", {
-    onClientUploadComplete: (files) => {
-      const file = files[0];
-      setUploadingImage(false);
-      // Send message with image URL
-      sendMessageWithImage(file.url);
-    },
-    onUploadError: (error) => {
-      console.error("Upload error:", error);
-      setUploadingImage(false);
-      alert("Failed to upload image. Please try again.");
-    },
-  });
 
   // ─── Fetch messages ──────────────────────────────────────────────
   const fetchMessages = async () => {
@@ -206,21 +190,24 @@ export default function ChatInterface({
     }
   };
 
-  const sendMessageWithImage = (imageUrl: string) => {
-    sendMessage("📷 Image", imageUrl);
-  };
-
-  // ─── Handle image upload ──────────────────────────────────────────
+  // ─── Handle image upload (base64) ──────────────────────────────────
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploadingImage(true);
     try {
-      await startUpload([file]);
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result as string;
+        await sendMessage("📷 Image", base64);
+        setUploadingImage(false);
+      };
+      reader.readAsDataURL(file);
     } catch (error) {
       console.error("Upload error:", error);
       setUploadingImage(false);
+      alert("Failed to upload image. Please try again.");
     }
     e.target.value = "";
   };
