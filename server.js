@@ -32,9 +32,14 @@ app.prepare().then(() => {
     });
 
     socket.on("send-message", async ({ senderId, receiverId, content, messageId }) => {
-      // Here you can optionally save to DB if not already saved via HTTP
-      // Then broadcast to receiver and back to sender for confirmation
-      const message = { id: messageId, senderId, receiverId, content, createdAt: new Date().toISOString(), read: false };
+      const message = {
+        id: messageId,
+        senderId,
+        receiverId,
+        content,
+        createdAt: new Date().toISOString(),
+        read: false,
+      };
       io.to(receiverId).emit("receive-message", message);
       io.to(senderId).emit("message-sent", message);
     });
