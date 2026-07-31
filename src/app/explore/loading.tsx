@@ -1,4 +1,4 @@
-// src/app/explore/loading.tsx
+import { Skeleton } from "@/components/ui/Skeleton";
 import { SkeletonFeed } from "@/components/skeletons/SkeletonFeed";
 
 export default function ExploreLoading() {
