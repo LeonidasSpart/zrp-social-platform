@@ -46,3 +46,46 @@
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #B10000;
 }
+
+/* ─── MOBILE RESPONSIVENESS ────────────────────────────────────── */
+html,
+body {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Prevent horizontal scroll on images, videos, etc. */
+img,
+video,
+iframe,
+svg {
+  max-width: 100% !important;
+  height: auto;
+}
+
+/* Ensure all containers stay within viewport */
+.container,
+.max-w-full,
+.w-full {
+  max-width: 100% !important;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Mobile-friendly padding for small screens */
+@media (max-width: 640px) {
+  .px-4 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  .p-4 {
+    padding: 0.75rem !important;
+  }
+}
