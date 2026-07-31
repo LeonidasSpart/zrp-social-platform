@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
+import { sendPushNotification } from "@/lib/push-notifications"; // ← Added
 
 export async function POST(
   req: NextRequest,
@@ -49,16 +50,32 @@ export async function POST(
       // Get post author to send notification
       const post = await prisma.post.findUnique({
         where: { id: postId },
-        select: { authorId: true },
+        select: { 
+          authorId: true,
+          author: {
+            select: {
+              name: true,
+            },
+          },
+        },
       });
 
       if (post && post.authorId !== userId) {
+        // ─── Send database notification ──────────────────────────────
         await createNotification({
           userId: post.authorId,
           type: "like",
           fromUserId: userId,
           postId,
         });
+
+        // ─── Send push notification ──────────────────────────────────
+        await sendPushNotification(
+          post.authorId,
+          "New Like",
+          `${session.user.name || session.user.username} liked your post.`,
+          `/post/${postId}`
+        );
       }
 
       return NextResponse.json({ liked: true });
