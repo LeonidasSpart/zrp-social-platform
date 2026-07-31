@@ -2,13 +2,17 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 
+interface ItemWithId {
+  id: string;
+}
+
 interface UseInfiniteScrollOptions {
   initialPage?: number;
   limit?: number;
   enabled?: boolean;
 }
 
-export function useInfiniteScroll<T>({
+export function useInfiniteScroll<T extends ItemWithId>({
   initialPage = 1,
   limit = 10,
   enabled = true,
@@ -42,7 +46,10 @@ export function useInfiniteScroll<T>({
       abortControllerRef.current = controller;
 
       try {
-        const cursor = !reset && items.length > 0 ? items[items.length - 1]?.id : undefined;
+        // ─── Get the last item's ID as cursor ──────────────────────
+        const lastItem = !reset && items.length > 0 ? items[items.length - 1] : null;
+        const cursor = lastItem?.id || undefined;
+
         const url = new URL("/api/posts", window.location.origin);
         url.searchParams.set("limit", String(limit));
         if (cursor) {
