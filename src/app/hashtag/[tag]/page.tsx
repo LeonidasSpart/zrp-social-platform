@@ -6,6 +6,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import PostCard from "@/components/PostCard";
 
+// ─── PREVENT STATIC GENERATION ─────────────────────────────────────
+export const dynamic = 'force-dynamic';
+
 interface Post {
   id: string;
   content: string;
