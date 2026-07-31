@@ -6,6 +6,9 @@ import { useEffect, useState } from "react";
 import PostCard from "@/components/PostCard";
 import { Compass, TrendingUp, Flame } from "lucide-react";
 
+// ─── PREVENT STATIC GENERATION ─────────────────────────────────────
+export const dynamic = 'force-dynamic';
+
 interface Post {
   id: string;
   content: string;
