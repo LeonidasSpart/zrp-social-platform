@@ -3,17 +3,23 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { sendPushNotification } from "@/lib/push-notifications";
+import { rateLimit } from "@/lib/rate-limit";
 
-// GET conversations (list of users with latest message)
+// ─── GET conversations ──────────────────────────────────────────────
 export async function GET(req: NextRequest) {
+  // Rate limit: 60 requests per minute (light)
+  const limit = await rateLimit(req, { limit: 60, window: 60, type: "messages-get" });
+  if (!limit.success) return limit.response;
+
   const session = await getServerSession(authOptions);
-  if (!session || !session.user) {
+  if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const userId = session.user.id;
 
+    // Get distinct conversations via latest messages
     const conversations = await prisma.message.findMany({
       where: {
         OR: [{ senderId: userId }, { receiverId: userId }],
@@ -40,7 +46,6 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Group by conversation partner
     const conversationMap = new Map();
     conversations.forEach((msg) => {
       const partnerId = msg.senderId === userId ? msg.receiverId : msg.senderId;
@@ -54,7 +59,7 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    // Count unread messages
+    // Count unread messages per sender
     const unreadMessages = await prisma.message.groupBy({
       by: ["senderId"],
       where: {
@@ -80,10 +85,14 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST send message
+// ─── POST send message ──────────────────────────────────────────────
 export async function POST(req: NextRequest) {
+  // Rate limit: 60 messages per hour
+  const limit = await rateLimit(req, { limit: 60, window: 3600, type: "messages-send" });
+  if (!limit.success) return limit.response;
+
   const session = await getServerSession(authOptions);
-  if (!session || !session.user) {
+  if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -98,9 +107,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Receiver ID required" }, { status: 400 });
     }
 
+    // ─── Verify receiver exists ──────────────────────────────────────
+    const receiver = await prisma.user.findUnique({
+      where: { id: receiverId },
+      select: { id: true, username: true },
+    });
+    if (!receiver) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // ─── Save message ──────────────────────────────────────────────────
     const message = await prisma.message.create({
       data: {
-        content,
+        content: content.trim(),
         senderId: session.user.id,
         receiverId,
       },
@@ -124,14 +143,19 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // ─── Send push notification to receiver ──────────────────────────
+    // ─── Send push notification (non‑blocking) ──────────────────────
     if (receiverId !== session.user.id) {
-      await sendPushNotification(
-        receiverId,
-        "New Message",
-        `${session.user.name || session.user.username} sent you a message.`,
-        `/messages/${session.user.username}`
-      );
+      try {
+        await sendPushNotification(
+          receiverId,
+          "New Message",
+          `${session.user.name || session.user.username} sent you a message.`,
+          `/messages/${session.user.username}`
+        );
+      } catch (notifErr) {
+        console.error("Push notification failed:", notifErr);
+        // Fail silently – message still delivered
+      }
     }
 
     return NextResponse.json(message, { status: 201 });
