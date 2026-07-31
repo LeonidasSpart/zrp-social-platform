@@ -8,9 +8,28 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
+    // ─── Pagination parameters ──────────────────────────────────────
+    const cursor = req.nextUrl.searchParams.get("cursor");
+    const limit = parseInt(req.nextUrl.searchParams.get("limit") || "10");
+
+    // ─── Get blocked users ──────────────────────────────────────────
+    let blockedIds: string[] = [];
+    if (session?.user?.id) {
+      const blocked = await prisma.blocked.findMany({
+        where: { blockerId: session.user.id },
+        select: { blockedId: true },
+      });
+      blockedIds = blocked.map((b) => b.blockedId);
+    }
+
+    // ─── Fetch posts ─────────────────────────────────────────────────
     const posts = await prisma.post.findMany({
-      take: 50,
+      take: limit + 1,
+      ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
       orderBy: { createdAt: "desc" },
+      where: {
+        authorId: { notIn: blockedIds },
+      },
       include: {
         author: {
           select: {
@@ -25,9 +44,7 @@ export async function GET(req: NextRequest) {
           include: {
             votes_user: {
               where: session ? { userId: session.user.id } : undefined,
-              select: {
-                optionIndex: true,
-              },
+              select: { optionIndex: true },
             },
           },
         },
@@ -41,7 +58,15 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    if (session && session.user) {
+    // ─── Determine next cursor ──────────────────────────────────────
+    let nextCursor: string | null = null;
+    if (posts.length > limit) {
+      const nextPost = posts.pop();
+      nextCursor = nextPost?.id || null;
+    }
+
+    // ─── Add liked status ────────────────────────────────────────────
+    if (session?.user?.id) {
       const likes = await prisma.like.findMany({
         where: {
           userId: session.user.id,
@@ -54,6 +79,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    // ─── Transform poll votes ───────────────────────────────────────
     const transformedPosts = posts.map((post) => {
       const result = { ...post };
       if (post.poll) {
@@ -65,7 +91,10 @@ export async function GET(req: NextRequest) {
       return result;
     });
 
-    return NextResponse.json(transformedPosts);
+    return NextResponse.json({
+      posts: transformedPosts,
+      nextCursor,
+    });
   } catch (error: any) {
     console.error("Error fetching posts:", error);
     return NextResponse.json(
