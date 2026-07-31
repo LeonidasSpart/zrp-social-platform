@@ -18,6 +18,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   const [callState, setCallState] = useState<"idle" | "calling" | "incoming" | "active">("idle");
   const [isVideoCall, setIsVideoCall] = useState(false);
   const [callerName, setCallerName] = useState("");
+  const [callerId, setCallerId] = useState<string | null>(null); // ✅ store caller's user ID
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [peer, setPeer] = useState<Peer.Instance | null>(null);
@@ -64,13 +65,14 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     const socket = getSocket(userId);
     socketRef.current = socket;
 
-    socket.on("incoming-call", ({ from, signal, callerName, isVideo }) => {
+    socket.on("incoming-call", ({ from, callerId, signal, callerName, isVideo }) => {
       console.log("📞 Incoming call from", callerName);
       setCallerName(callerName);
+      setCallerId(callerId); // ✅ store caller's user ID
       setIsVideoCall(isVideo);
       setIncomingSignal(signal);
       setCallState("incoming");
-      socketRef.current._callerId = from;
+      socketRef.current._callerId = from; // keep socket id as fallback
     });
 
     socket.on("call-accepted", ({ signal }) => {
@@ -90,7 +92,6 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     });
   };
 
-  // ─── ICE Servers with TURN ──────────────────────────────────────
   const iceServers = [
     { urls: "stun:stun.l.google.com:19302" },
     { urls: "stun:stun1.l.google.com:19302" },
@@ -134,6 +135,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
           signal,
           callerName: session?.user?.name || "User",
           isVideo,
+          callerId: userId, // ✅ include caller's user ID
         });
       });
 
@@ -180,8 +182,11 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       });
 
       newPeer.on("signal", (signal) => {
+        // ✅ use the caller's user ID (not socket ID)
+        const targetId = callerId || socketRef.current?._callerId;
+        console.log("📡 Sending accept signal to", targetId);
         socketRef.current?.emit("accept-call", {
-          receiverId: socketRef.current?._callerId,
+          receiverId: targetId,
           signal,
         });
       });
@@ -220,7 +225,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
 
   const rejectCall = () => {
     socketRef.current?.emit("reject-call", {
-      receiverId: socketRef.current?._callerId || receiver?.id,
+      receiverId: callerId || socketRef.current?._callerId || receiver?.id,
     });
     setCallState("idle");
     setIncomingSignal(null);
@@ -232,7 +237,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     setRemoteStream(null);
     setCallState("idle");
     socketRef.current?.emit("end-call", {
-      receiverId: receiver?.id || socketRef.current?._callerId,
+      receiverId: receiver?.id || callerId || socketRef.current?._callerId,
     });
   };
 
