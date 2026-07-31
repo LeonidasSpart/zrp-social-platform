@@ -36,38 +36,63 @@ export default function ChatInterface({
   const [sending, setSending] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [receiverTyping, setReceiverTyping] = useState(false);
-  const [socketConnected, setSocketConnected] = useState(false); // ✅ Socket status
+  const [socketConnected, setSocketConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<any>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const userId = session?.user?.id;
 
-  // ─── Socket connection status ──────────────────────────────────
+  // ─── Fetch messages ──────────────────────────────────────────────
+  const fetchMessages = async () => {
+    try {
+      const res = await fetch(`/api/messages/${receiverId}`);
+      const data = await res.json();
+      setMessages(data);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ─── Socket Setup ──────────────────────────────────────────────────
   useEffect(() => {
     if (userId) {
       const socket = getSocket(userId);
       socketRef.current = socket;
-      socket.on("connect", () => setSocketConnected(true));
-      socket.on("disconnect", () => setSocketConnected(false));
-      socket.on("connect_error", (err) => console.error("Socket error:", err));
-    }
-  }, [userId]);
 
-  useEffect(() => {
-    if (userId) {
+      socket.on("connect", () => {
+        console.log("✅ Socket connected");
+        setSocketConnected(true);
+      });
+      socket.on("disconnect", () => {
+        console.log("❌ Socket disconnected");
+        setSocketConnected(false);
+      });
+      socket.on("connect_error", (err) => {
+        console.error("Socket error:", err);
+        setSocketConnected(false);
+      });
+
       setupSocketListeners();
       fetchMessages();
-    }
 
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.off("receive-message");
-        socketRef.current.off("user-typing");
-        socketRef.current.off("message-read");
-        socketRef.current.off("message-sent");
-      }
-    };
+      // ─── POLLING FALLBACK (every 3 seconds) ──────────────────
+      const interval = setInterval(() => {
+        fetchMessages();
+      }, 3000);
+
+      return () => {
+        clearInterval(interval);
+        if (socketRef.current) {
+          socketRef.current.off("receive-message");
+          socketRef.current.off("user-typing");
+          socketRef.current.off("message-read");
+          socketRef.current.off("message-sent");
+        }
+      };
+    }
   }, [userId, receiverId]);
 
   const setupSocketListeners = () => {
@@ -100,18 +125,7 @@ export default function ChatInterface({
     });
   };
 
-  const fetchMessages = async () => {
-    try {
-      const res = await fetch(`/api/messages/${receiverId}`);
-      const data = await res.json();
-      setMessages(data);
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // ─── Send message ──────────────────────────────────────────────────
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !userId) return;
@@ -207,7 +221,6 @@ export default function ChatInterface({
             <p className="font-semibold text-gray-900 dark:text-white">{receiverName}</p>
             {receiverTyping && <p className="text-xs text-blue-500">Typing...</p>}
           </div>
-          {/* ─── Socket Status Dot ─── */}
           <div className="flex items-center gap-1 ml-2">
             <span className={`w-2 h-2 rounded-full ${socketConnected ? 'bg-green-500' : 'bg-red-500'}`} />
             <span className="text-xs text-gray-500">{socketConnected ? 'Live' : 'Offline'}</span>
