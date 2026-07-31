@@ -3,12 +3,14 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
-// GET a single post (optional, for editing)
+// GET a single post (with all data for the post page)
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+
     const post = await prisma.post.findUnique({
       where: { id: params.id },
       include: {
@@ -18,6 +20,22 @@ export async function GET(
             username: true,
             name: true,
             avatarUrl: true,
+            badgeType: true, // ← Added
+          },
+        },
+        poll: {
+          include: {
+            votes_user: {
+              where: session ? { userId: session.user.id } : undefined,
+              select: { optionIndex: true },
+            },
+          },
+        },
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
+            reposts: true,
           },
         },
       },
@@ -27,7 +45,29 @@ export async function GET(
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
-    return NextResponse.json(post);
+    // Add liked status if user is logged in
+    if (session?.user?.id) {
+      const like = await prisma.like.findUnique({
+        where: {
+          postId_userId: {
+            postId: params.id,
+            userId: session.user.id,
+          },
+        },
+      });
+      (post as any).liked = !!like;
+    }
+
+    // Transform poll data
+    const result = { ...post };
+    if (post.poll) {
+      const poll = post.poll as any;
+      poll.userVote = poll.votes_user?.[0]?.optionIndex ?? null;
+      delete poll.votes_user;
+      result.poll = poll;
+    }
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Error fetching post:", error);
     return NextResponse.json({ error: "Failed to fetch post" }, { status: 500 });
@@ -78,6 +118,14 @@ export async function PUT(
             username: true,
             name: true,
             avatarUrl: true,
+            badgeType: true,
+          },
+        },
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
+            reposts: true,
           },
         },
       },
