@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PostActions } from "@/components/Post/PostActions";
 import { Avatar } from "@/components/ui/avatar";
-import VerifiedBadge from "@/components/VerifiedBadge";      // ✅ default import
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { timeAgo } from "@/lib/utils";
 
 interface FeedItemProps {
@@ -32,6 +32,37 @@ interface FeedItemProps {
   userId: string;
 }
 
+// ─── PARSE HASHTAGS AND MENTIONS ──────────────────────────────────
+function parseContent(content: string) {
+  const parts: { type: "text" | "hashtag" | "mention"; value: string }[] = [];
+  let lastIndex = 0;
+  const regex = /(@\w+)|(#\w+)/g;
+  let match;
+
+  while ((match = regex.exec(content)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({
+        type: "text",
+        value: content.slice(lastIndex, match.index),
+      });
+    }
+    parts.push({
+      type: match[0].startsWith("@") ? "mention" : "hashtag",
+      value: match[0],
+    });
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < content.length) {
+    parts.push({
+      type: "text",
+      value: content.slice(lastIndex),
+    });
+  }
+
+  return parts;
+}
+
 export function FeedItem({ post, userId }: FeedItemProps) {
   const isLiked = post.likes.length > 0;
   const isReposted = post.reposts.length > 0;
@@ -43,6 +74,8 @@ export function FeedItem({ post, userId }: FeedItemProps) {
     post.author.profilePicture ??
     post.author.avatarUrl ??
     "/default-avatar.png";
+
+  const contentParts = parseContent(post.content);
 
   return (
     <article className="p-4 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors">
@@ -65,7 +98,38 @@ export function FeedItem({ post, userId }: FeedItemProps) {
               {timeAgo(post.createdAt)}
             </time>
           </div>
-          <div className="mt-1 whitespace-pre-wrap break-words">{post.content}</div>
+
+          {/* ─── CONTENT WITH CLICKABLE HASHTAGS & MENTIONS ─── */}
+          <div className="mt-1 whitespace-pre-wrap break-words">
+            {contentParts.map((part, index) => {
+              if (part.type === "hashtag") {
+                const tag = part.value.slice(1);
+                return (
+                  <Link
+                    key={index}
+                    href={`/hashtag/${tag}`}
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    {part.value}
+                  </Link>
+                );
+              }
+              if (part.type === "mention") {
+                const username = part.value.slice(1);
+                return (
+                  <Link
+                    key={index}
+                    href={`/profile/${username}`}
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    {part.value}
+                  </Link>
+                );
+              }
+              return <span key={index}>{part.value}</span>;
+            })}
+          </div>
+
           {post.imageUrl && (
             <div className="mt-2 rounded-lg overflow-hidden">
               <img
