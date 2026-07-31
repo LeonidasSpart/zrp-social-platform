@@ -3,8 +3,17 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest) {
+  // ─── RATE LIMIT: 100 requests per minute ──────────────────────
+  const limitResult = await rateLimit(req, {
+    limit: 100,
+    window: 60,
+    type: "posts-get",
+  });
+  if (!limitResult.success) return limitResult.response;
+
   try {
     const session = await getServerSession(authOptions);
 
@@ -105,6 +114,14 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // ─── RATE LIMIT: 30 posts per hour ─────────────────────────────
+  const limitResult = await rateLimit(req, {
+    limit: 30,
+    window: 3600,
+    type: "posts-create",
+  });
+  if (!limitResult.success) return limitResult.response;
+
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
