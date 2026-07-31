@@ -1,34 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getCached, setCached } from "@/lib/redis";
 
-// ─── PREVENT STATIC GENERATION ─────────────────────────────────────
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    // Get all posts and extract hashtags
+    // ─── CHECK CACHE ───────────────────────────────────────────
+    const cached = await getCached("trending:hashtags");
+    if (cached) {
+      return NextResponse.json(cached);
+    }
+
     const posts = await prisma.post.findMany({
       take: 1000,
       select: { hashtags: true },
     });
 
-    // Count hashtag occurrences
     const hashtagCount: Record<string, number> = {};
-    posts.forEach((post) => {
-      post.hashtags?.forEach((tag) => {
+    posts.forEach((p) => {
+      p.hashtags?.forEach((tag) => {
         hashtagCount[tag] = (hashtagCount[tag] || 0) + 1;
       });
     });
 
-    // Sort by count and return top 10
     const trending = Object.entries(hashtagCount)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10)
       .map(([tag, count]) => ({ tag, count }));
 
+    // ─── CACHE FOR 5 MINUTES ──────────────────────────────────
+    await setCached("trending:hashtags", trending, 300);
+
     return NextResponse.json(trending);
   } catch (error) {
-    console.error("Error fetching trending hashtags:", error);
+    console.error("Trending error:", error);
     return NextResponse.json({ error: "Failed to fetch trending hashtags" }, { status: 500 });
   }
 }
