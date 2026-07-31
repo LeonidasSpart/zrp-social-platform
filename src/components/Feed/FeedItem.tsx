@@ -2,7 +2,7 @@ import Link from "next/link";
 import { PostActions } from "@/components/Post/PostActions";
 import { Avatar } from "@/components/ui/avatar";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
-import { formatDate } from "@/lib/utils";
+import { timeAgo } from "@/lib/utils";
 
 interface FeedItemProps {
   post: {
@@ -14,7 +14,11 @@ interface FeedItemProps {
       id: string;
       username: string;
       name: string | null;
-      avatar: string | null;
+      // ✅ Support any field name – check multiple possible names
+      avatar?: string | null;
+      image?: string | null;
+      profilePicture?: string | null;
+      avatarUrl?: string | null;
       badgeType: string | null;
     };
     likes: { id: string }[];
@@ -34,11 +38,19 @@ export function FeedItem({ post, userId }: FeedItemProps) {
   const isReposted = post.reposts.length > 0;
   const isBookmarked = post.bookmarks.length > 0;
 
+  // ✅ Get avatar from any field
+  const avatarSrc =
+    post.author.avatar ??
+    post.author.image ??
+    post.author.profilePicture ??
+    post.author.avatarUrl ??
+    "/default-avatar.png";
+
   return (
     <article className="p-4 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors">
       <div className="flex gap-3">
         <Link href={`/profile/${post.author.username}`} className="flex-shrink-0">
-          <Avatar src={post.author.avatar} alt={post.author.name || post.author.username} />
+          <Avatar src={avatarSrc} alt={post.author.name || post.author.username} />
         </Link>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -52,12 +64,10 @@ export function FeedItem({ post, userId }: FeedItemProps) {
             <span className="text-sm text-zinc-500">@{post.author.username}</span>
             <span className="text-sm text-zinc-400">·</span>
             <time className="text-sm text-zinc-400" dateTime={post.createdAt.toISOString()}>
-              {formatDate(post.createdAt)}
+              {timeAgo(post.createdAt)}
             </time>
           </div>
-          <div className="mt-1 whitespace-pre-wrap break-words">
-            {post.content}
-          </div>
+          <div className="mt-1 whitespace-pre-wrap break-words">{post.content}</div>
           {post.imageUrl && (
             <div className="mt-2 rounded-lg overflow-hidden">
               <img
