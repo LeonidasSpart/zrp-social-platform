@@ -87,7 +87,6 @@ export default function CallComponent({
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // ─── Determine what to display ─────────────────────────────────
   const showRemoteVideo = remoteStream && isVideo;
   const showLocalVideo = localStream && isVideoOn && isVideo;
 
@@ -107,7 +106,7 @@ export default function CallComponent({
             <div className="flex items-center justify-center h-full text-white text-2xl">
               {isIncoming ? (
                 <div className="text-center">
-                  <div className="w-24 h-24 rounded-full bg-blue-600/30 flex items-center justify-center mx-auto mb-4 text-6xl">
+                  <div className="w-24 h-24 rounded-full bg-blue-600/30 flex items-center justify-center mx-auto mb-4 text-6xl animate-pulse">
                     📞
                   </div>
                   <p className="text-xl font-semibold">{callerName || "Someone"} is calling...</p>
@@ -187,7 +186,16 @@ export default function CallComponent({
 
           {/* ─── Accept / End / Reject buttons ────────────────────── */}
           <button
-            onClick={isIncoming ? onAccept : onEnd}
+            onClick={() => {
+              console.log("🔵 Main button clicked");
+              if (isIncoming) {
+                console.log("🔵 Accept button - calling onAccept");
+                onAccept();
+              } else {
+                console.log("🔴 End button - calling onEnd");
+                onEnd();
+              }
+            }}
             className={`p-6 rounded-full transition ${
               isIncoming
                 ? "bg-green-500 hover:bg-green-600 text-white animate-pulse"
@@ -199,7 +207,10 @@ export default function CallComponent({
 
           {isIncoming && (
             <button
-              onClick={onReject}
+              onClick={() => {
+                console.log("🔴 Reject button - calling onReject");
+                onReject();
+              }}
               className="p-4 rounded-full bg-red-500 hover:bg-red-600 text-white transition"
             >
               <X className="w-6 h-6" />
