@@ -1,48 +1,132 @@
-/* ─── DESTROY ALL YELLOW, AMBER, ORANGE ────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
-/* 1. Backgrounds: remove from all elements except body */
-*:not(body) {
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 255 255 255;
+    --foreground: 5 5 5;
+    --primary: 255 45 45;
+    --primary-dark: 177 0 0;
+  }
+
+  .dark {
+    --background: 5 5 5;
+    --foreground: 255 255 255;
+    --primary: 255 45 45;
+    --primary-dark: 177 0 0;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'Inter', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Orbitron', sans-serif;
+  }
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #0D0D0D;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #FF2D2D;
+  border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #B10000;
+}
+
+/* ─── MOBILE RESPONSIVENESS ────────────────────────────────────── */
+html,
+body {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Prevent horizontal scroll on images, videos, etc. */
+img,
+video,
+iframe,
+svg {
+  max-width: 100% !important;
+  height: auto;
+}
+
+/* Ensure all containers stay within viewport */
+.container,
+.max-w-full,
+.w-full {
+  max-width: 100% !important;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Mobile-friendly padding for small screens */
+@media (max-width: 640px) {
+  .px-4 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  .p-4 {
+    padding: 0.75rem !important;
+  }
+}
+
+/* ─── SAFELY REMOVE YELLOW, AMBER, ORANGE ──────────────────────── */
+
+/* 1. Override only yellow/amber/orange background classes */
+.bg-yellow-50, .bg-yellow-100, .bg-yellow-200, .bg-yellow-300,
+.bg-yellow-400, .bg-yellow-500, .bg-yellow-600, .bg-yellow-700,
+.bg-yellow-800, .bg-yellow-900,
+.bg-amber-50, .bg-amber-100, .bg-amber-200, .bg-amber-300,
+.bg-amber-400, .bg-amber-500, .bg-amber-600, .bg-amber-700,
+.bg-amber-800, .bg-amber-900,
+.bg-orange-50, .bg-orange-100, .bg-orange-200, .bg-orange-300,
+.bg-orange-400, .bg-orange-500, .bg-orange-600, .bg-orange-700,
+.bg-orange-800, .bg-orange-900 {
   background-color: transparent !important;
 }
 
-/* 2. Text colors: force to neutral (gray) */
-.text-yellow-*,
-.text-amber-*,
-.text-orange-*,
-[class*="text-yellow"],
-[class*="text-amber"],
-[class*="text-orange"] {
-  color: #6B7280 !important; /* neutral gray */
-}
-
-/* 3. Border colors: force to neutral */
-.border-yellow-*,
-.border-amber-*,
-.border-orange-*,
-[class*="border-yellow"],
-[class*="border-amber"],
-[class*="border-orange"] {
-  border-color: #D1D5DB !important; /* light gray */
-}
-
-/* 4. SVG fills: force to currentColor or neutral */
-svg[fill*="yellow"], 
-svg[fill*="amber"], 
-svg[fill*="orange"],
-[fill="#FFD700"], [fill="#FFC107"], [fill="#FFA500"] {
-  fill: #6B7280 !important;
-}
-
-/* 5. Also any inline style with yellow hex */
-[style*="background:#FFD700"],
-[style*="background:#FFC107"],
-[style*="background:#FFA500"],
-[style*="background-color:#FFD700"],
-[style*="background-color:#FFC107"],
-[style*="background-color:#FFA500"],
-[style*="color:#FFD700"],
-[style*="color:#FFC107"],
-[style*="color:#FFA500"] {
-  background-color: transparent !important;
+/* 2. Override only yellow text */
+.text-yellow-50, .text-yellow-100, .text-yellow-200, .text-yellow-300,
+.text-yellow-400, .text-yellow-500, .text-yellow-600, .text-yellow-700,
+.text-yellow-800, .text-yellow-900,
+.text-amber-50, .text-amber-100, .text-amber-200, .text-amber-300,
+.text-amber-400, .text-amber-500, .text-amber-600, .text-amber-700,
+.text-amber-800, .text-amber-900,
+.text-orange-50, .text-orange-100, .text-orange-200, .text-orange-300,
+.text-orange-400, .text-orange-500, .text-orange-600, .text-orange-700,
+.text-orange-800, .text-orange-900 {
   color: #6B7280 !important;
+}
+
+/* 3. Override only yellow borders */
+.border-yellow-50, .border-yellow-100, .border-yellow-200, .border-yellow-300,
+.border-yellow-400, .border-yellow-500, .border-yellow-600, .border-yellow-700,
+.border-yellow-800, .border-yellow-900,
+.border-amber-50, .border-amber-100, .border-amber-200, .border-amber-300,
+.border-amber-400, .border-amber-500, .border-amber-600, .border-amber-700,
+.border-amber-800, .border-amber-900,
+.border-orange-50, .border-orange-100, .border-orange-200, .border-orange-300,
+.border-orange-400, .border-orange-500, .border-orange-600, .border-orange-700,
+.border-orange-800, .border-orange-900 {
+  border-color: #D1D5DB !important;
 }
