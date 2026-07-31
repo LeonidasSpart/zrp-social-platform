@@ -1,4 +1,3 @@
-// src/components/Feed/Feed.tsx (excerpt)
 import { Suspense } from "react";
 import { SkeletonFeed } from "@/components/skeletons/SkeletonFeed";
 import { FeedContent } from "./FeedContent";
