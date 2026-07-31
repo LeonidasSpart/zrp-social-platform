@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";                              // ✅ Added
 import { useSession } from "next-auth/react";
 import VerifiedBadge from "./VerifiedBadge";
 
@@ -93,23 +94,35 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         <div className="space-y-3">
           {comments.map((comment) => (
             <div key={comment.id} className="flex gap-3">
-              {/* ─── Avatar ─── */}
-              <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-sm font-semibold flex-shrink-0 overflow-hidden">
-                {comment.author.avatarUrl ? (
-                  <img
-                    src={comment.author.avatarUrl}
-                    alt={comment.author.name || comment.author.username}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  comment.author.name?.[0]?.toUpperCase() || comment.author.username?.[0]?.toUpperCase() || "?"
-                )}
-              </div>
+              {/* ─── Clickable Avatar ─── */}
+              <Link
+                href={`/profile/${comment.author.username}`}
+                className="flex-shrink-0"
+              >
+                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-sm font-semibold flex-shrink-0 overflow-hidden hover:ring-2 hover:ring-zrp-red transition">
+                  {comment.author.avatarUrl ? (
+                    <img
+                      src={comment.author.avatarUrl}
+                      alt={comment.author.name || comment.author.username}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    comment.author.name?.[0]?.toUpperCase() ||
+                    comment.author.username?.[0]?.toUpperCase() ||
+                    "?"
+                  )}
+                </div>
+              </Link>
+
               <div>
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="font-medium text-sm text-gray-900 dark:text-white">
+                  {/* ─── Clickable Username ─── */}
+                  <Link
+                    href={`/profile/${comment.author.username}`}
+                    className="font-medium text-sm hover:underline text-gray-900 dark:text-white"
+                  >
                     {comment.author.name || comment.author.username}
-                  </span>
+                  </Link>
                   {comment.author.badgeType && (
                     <VerifiedBadge badgeType={comment.author.badgeType} />
                   )}
