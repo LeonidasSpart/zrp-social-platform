@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { sendPushNotification } from "@/lib/push-notifications";
 
 // GET conversations (list of users with latest message)
 export async function GET(req: NextRequest) {
@@ -122,6 +123,16 @@ export async function POST(req: NextRequest) {
         },
       },
     });
+
+    // ─── Send push notification to receiver ──────────────────────────
+    if (receiverId !== session.user.id) {
+      await sendPushNotification(
+        receiverId,
+        "New Message",
+        `${session.user.name || session.user.username} sent you a message.`,
+        `/messages/${session.user.username}`
+      );
+    }
 
     return NextResponse.json(message, { status: 201 });
   } catch (error) {
