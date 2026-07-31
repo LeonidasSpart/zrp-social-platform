@@ -26,6 +26,7 @@ app.prepare().then(() => {
   io.on("connection", (socket) => {
     console.log("Socket connected:", socket.id);
 
+    // ─── Messaging ──────────────────────────────────────────────
     socket.on("join-room", (userId) => {
       socket.join(userId);
       console.log(`User ${userId} joined room`);
@@ -51,6 +52,28 @@ app.prepare().then(() => {
     socket.on("mark-read", async ({ messageId, senderId }) => {
       await prisma.message.update({ where: { id: messageId }, data: { read: true } });
       io.to(senderId).emit("message-read", { messageId });
+    });
+
+    // ─── Call Signaling ───────────────────────────────────────────
+    socket.on("call-user", ({ receiverId, signal, callerName, isVideo }) => {
+      io.to(receiverId).emit("incoming-call", {
+        from: socket.id,
+        callerName,
+        signal,
+        isVideo,
+      });
+    });
+
+    socket.on("accept-call", ({ receiverId, signal }) => {
+      io.to(receiverId).emit("call-accepted", { signal });
+    });
+
+    socket.on("reject-call", ({ receiverId }) => {
+      io.to(receiverId).emit("call-rejected");
+    });
+
+    socket.on("end-call", ({ receiverId }) => {
+      io.to(receiverId).emit("call-ended");
     });
 
     socket.on("disconnect", () => {
