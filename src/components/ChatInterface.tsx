@@ -36,15 +36,26 @@ export default function ChatInterface({
   const [sending, setSending] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [receiverTyping, setReceiverTyping] = useState(false);
+  const [socketConnected, setSocketConnected] = useState(false); // ✅ Socket status
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<any>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const userId = session?.user?.id;
 
+  // ─── Socket connection status ──────────────────────────────────
   useEffect(() => {
     if (userId) {
-      socketRef.current = getSocket(userId);
+      const socket = getSocket(userId);
+      socketRef.current = socket;
+      socket.on("connect", () => setSocketConnected(true));
+      socket.on("disconnect", () => setSocketConnected(false));
+      socket.on("connect_error", (err) => console.error("Socket error:", err));
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
       setupSocketListeners();
       fetchMessages();
     }
@@ -63,7 +74,6 @@ export default function ChatInterface({
     const socket = socketRef.current;
     if (!socket) return;
 
-    // ─── When a new message arrives ──────────────────────────────
     socket.on("receive-message", (message: Message) => {
       if (message.senderId === receiverId) {
         setMessages((prev) => [...prev, message]);
@@ -71,7 +81,6 @@ export default function ChatInterface({
       }
     });
 
-    // ─── Confirmation from server that message is saved ─────────
     socket.on("message-sent", (message: Message) => {
       setMessages((prev) =>
         prev.map((m) => (m.id === message.id ? message : m))
@@ -103,14 +112,12 @@ export default function ChatInterface({
     }
   };
 
-  // ─── Send message via HTTP POST + Socket ───────────────────────
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !userId) return;
 
     setSending(true);
 
-    // ─── Optimistic update ──────────────────────────────────────
     const tempId = `temp-${Date.now()}`;
     const optimisticMessage: Message = {
       id: tempId,
@@ -124,7 +131,6 @@ export default function ChatInterface({
     setNewMessage("");
 
     try {
-      // ─── 1. Save to database via API ──────────────────────────
       const res = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -141,12 +147,10 @@ export default function ChatInterface({
 
       const savedMessage = await res.json();
 
-      // ─── 2. Replace optimistic message with real one ──────────
       setMessages((prev) =>
         prev.map((m) => (m.id === tempId ? savedMessage : m))
       );
 
-      // ─── 3. Broadcast via socket (optional, server may already do it) ──
       socketRef.current?.emit("send-message", {
         senderId: userId,
         receiverId,
@@ -156,7 +160,6 @@ export default function ChatInterface({
 
     } catch (error: any) {
       console.error("Send error:", error);
-      // Remove optimistic message on error
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
       alert(`Failed to send: ${error.message || "Unknown error"}`);
     } finally {
@@ -189,11 +192,11 @@ export default function ChatInterface({
   }
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+    <div className="flex flex-col h-full w-full max-w-full bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
       {/* ─── Header ─── */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
+          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold flex-shrink-0">
             {receiverAvatar ? (
               <img src={receiverAvatar} alt={receiverName} className="w-full h-full rounded-full object-cover" />
             ) : (
@@ -203,6 +206,11 @@ export default function ChatInterface({
           <div>
             <p className="font-semibold text-gray-900 dark:text-white">{receiverName}</p>
             {receiverTyping && <p className="text-xs text-blue-500">Typing...</p>}
+          </div>
+          {/* ─── Socket Status Dot ─── */}
+          <div className="flex items-center gap-1 ml-2">
+            <span className={`w-2 h-2 rounded-full ${socketConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+            <span className="text-xs text-gray-500">{socketConnected ? 'Live' : 'Offline'}</span>
           </div>
         </div>
         <div className="flex gap-2">
@@ -237,13 +245,13 @@ export default function ChatInterface({
                 className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[70%] rounded-2xl px-4 py-2 ${
+                  className={`max-w-[75%] rounded-2xl px-4 py-2 break-words ${
                     isOwn
                       ? "bg-blue-600 text-white rounded-br-none"
                       : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-none"
                   }`}
                 >
-                  <p className="text-sm break-words">{message.content}</p>
+                  <p className="text-sm">{message.content}</p>
                   <p className={`text-[10px] mt-1 ${isOwn ? "text-blue-200" : "text-gray-400"}`}>
                     {new Date(message.createdAt).toLocaleTimeString([], {
                       hour: "2-digit",
@@ -263,7 +271,7 @@ export default function ChatInterface({
       <form onSubmit={handleSend} className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
         <button
           type="button"
-          className="text-gray-500 hover:text-blue-500 transition"
+          className="text-gray-500 hover:text-blue-500 transition flex-shrink-0"
         >
           <Image className="w-5 h-5" />
         </button>
@@ -272,12 +280,12 @@ export default function ChatInterface({
           value={newMessage}
           onChange={handleTyping}
           placeholder={`Message ${receiverName}...`}
-          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm min-w-0"
         />
         <button
           type="submit"
           disabled={!newMessage.trim() || sending}
-          className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition flex-shrink-0"
         >
           <Send className="w-5 h-5" />
         </button>
