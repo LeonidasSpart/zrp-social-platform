@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import ChatInterface from "@/components/ChatInterface";
 import CallComponent from "@/components/CallComponent";
 import { getSocket } from "@/lib/socket-client";
@@ -26,9 +27,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   const userId = session?.user?.id;
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
+    if (status === "unauthenticated") router.push("/login");
   }, [status, router]);
 
   useEffect(() => {
@@ -43,12 +42,8 @@ export default function ChatPage({ params }: { params: { username: string } }) {
         socketRef.current.off("call-rejected");
         socketRef.current.off("call-ended");
       }
-      if (peer) {
-        peer.destroy();
-      }
-      if (localStream) {
-        localStream.getTracks().forEach((track) => track.stop());
-      }
+      if (peer) peer.destroy();
+      if (localStream) localStream.getTracks().forEach((t) => t.stop());
     };
   }, [status, userId, params.username]);
 
@@ -70,7 +65,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     socketRef.current = socket;
 
     socket.on("incoming-call", ({ from, signal, callerName, isVideo }) => {
-      console.log("📞 Incoming call from:", callerName);
+      console.log("📞 Incoming call from", callerName);
       setCallerName(callerName);
       setIsVideoCall(isVideo);
       setIncomingSignal(signal);
@@ -80,9 +75,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
 
     socket.on("call-accepted", ({ signal }) => {
       console.log("✅ Call accepted");
-      if (peer) {
-        peer.signal(signal);
-      }
+      if (peer) peer.signal(signal);
     });
 
     socket.on("call-rejected", () => {
@@ -92,43 +85,50 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     });
 
     socket.on("call-ended", () => {
-      console.log("🔚 Call ended");
+      console.log("🔚 Call ended by other party");
       endCall();
     });
   };
 
-  // ─── Start Call ──────────────────────────────────────────────────
+  // ─── ICE Servers with TURN ──────────────────────────────────────
+  const iceServers = [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" },
+    {
+      urls: "turn:openrelay.metered.ca:80",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+    {
+      urls: "turn:openrelay.metered.ca:443",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+    {
+      urls: "turn:openrelay.metered.ca:5349",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+  ];
+
   const startCall = async (isVideo: boolean) => {
-    alert("📞 Starting call... (video: " + isVideo + ")");
-    console.log("📞 Starting call, video:", isVideo);
     try {
-      alert("📱 Requesting camera/microphone...");
       const stream = await navigator.mediaDevices.getUserMedia({
         video: isVideo,
         audio: true,
       });
-      alert("✅ Got media stream");
-      console.log("🎥 Got media stream");
       setLocalStream(stream);
       setIsVideoCall(isVideo);
       setCallState("calling");
 
-      alert("🔧 Creating Peer instance...");
       const newPeer = new Peer({
         initiator: true,
-        stream: stream,
-        config: {
-          iceServers: [
-            { urls: "stun:stun.l.google.com:19302" },
-            { urls: "stun:stun1.l.google.com:19302" },
-            { urls: "stun:stun2.l.google.com:19302" },
-          ],
-        },
+        stream,
+        config: { iceServers },
       });
 
       newPeer.on("signal", (signal) => {
-        alert("📡 Emitting call-user signal");
-        console.log("📡 Sending signal to receiver");
+        console.log("📡 Signal sent to", receiver.username);
         socketRef.current?.emit("call-user", {
           receiverId: receiver.id,
           signal,
@@ -138,56 +138,48 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       });
 
       newPeer.on("stream", (remoteStream) => {
-        alert("✅ Call connected! Remote stream received.");
         console.log("📡 Remote stream received");
         setRemoteStream(remoteStream);
         setCallState("active");
       });
 
+      newPeer.on("iceStateChange", (state) => {
+        console.log("🧊 ICE state:", state);
+      });
+
+      newPeer.on("connect", () => {
+        console.log("✅ Peer connected!");
+      });
+
       newPeer.on("error", (err) => {
-        alert("❌ Peer error: " + err.message);
         console.error("❌ Peer error:", err);
         endCall();
       });
 
       setPeer(newPeer);
-    } catch (error: any) {
-      alert("❌ Error starting call: " + (error.message || "Unknown error"));
-      console.error("❌ Error starting call:", error);
+    } catch (error) {
+      console.error("Error starting call:", error);
+      alert("Could not access camera/microphone. Please allow permissions.");
       setCallState("idle");
     }
   };
 
-  // ─── Accept Incoming Call ──────────────────────────────────────
   const acceptCall = async () => {
-    alert("🔵 Accept button pressed – starting acceptCall...");
-    console.log("📞 Accepting call...");
     try {
-      alert("📱 Requesting camera/microphone...");
+      console.log("Accepting call...");
       const stream = await navigator.mediaDevices.getUserMedia({
         video: isVideoCall,
         audio: true,
       });
-      alert("✅ Got media stream");
-      console.log("🎥 Got media stream for accept");
       setLocalStream(stream);
 
-      alert("🔧 Creating Peer instance...");
       const newPeer = new Peer({
         initiator: false,
-        stream: stream,
-        config: {
-          iceServers: [
-            { urls: "stun:stun.l.google.com:19302" },
-            { urls: "stun:stun1.l.google.com:19302" },
-            { urls: "stun:stun2.l.google.com:19302" },
-          ],
-        },
+        stream,
+        config: { iceServers },
       });
 
       newPeer.on("signal", (signal) => {
-        alert("📡 Emitting accept-call signal");
-        console.log("📡 Sending accept signal");
         socketRef.current?.emit("accept-call", {
           receiverId: socketRef.current?._callerId,
           signal,
@@ -195,38 +187,38 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       });
 
       newPeer.on("stream", (remoteStream) => {
-        alert("✅ Call connected! Remote stream received.");
-        console.log("📡 Remote stream received");
+        console.log("📡 Remote stream received (accept)");
         setRemoteStream(remoteStream);
         setCallState("active");
       });
 
+      newPeer.on("iceStateChange", (state) => {
+        console.log("🧊 ICE state (accept):", state);
+      });
+
+      newPeer.on("connect", () => {
+        console.log("✅ Peer connected (accept)!");
+      });
+
       newPeer.on("error", (err) => {
-        alert("❌ Peer error: " + err.message);
-        console.error("❌ Peer error:", err);
+        console.error("❌ Peer error (accept):", err);
         endCall();
       });
 
       if (incomingSignal) {
-        alert("📡 Signaling with incoming offer");
         console.log("📡 Signaling with incoming offer");
         newPeer.signal(incomingSignal);
-      } else {
-        alert("⚠️ No incoming signal – this should not happen.");
-        console.warn("⚠️ No incoming signal");
       }
 
       setPeer(newPeer);
-    } catch (error: any) {
-      alert("❌ Error in acceptCall: " + (error.message || "Unknown error"));
-      console.error("❌ Error accepting call:", error);
+    } catch (error) {
+      console.error("Error accepting call:", error);
+      alert("Could not access camera/microphone.");
       rejectCall();
     }
   };
 
   const rejectCall = () => {
-    alert("❌ Rejecting call");
-    console.log("❌ Rejecting call");
     socketRef.current?.emit("reject-call", {
       receiverId: socketRef.current?._callerId || receiver?.id,
     });
@@ -235,16 +227,8 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   };
 
   const endCall = () => {
-    alert("🔚 Ending call");
-    console.log("🔚 Ending call");
-    if (peer) {
-      peer.destroy();
-      setPeer(null);
-    }
-    if (localStream) {
-      localStream.getTracks().forEach((track) => track.stop());
-      setLocalStream(null);
-    }
+    if (peer) { peer.destroy(); setPeer(null); }
+    if (localStream) { localStream.getTracks().forEach((t) => t.stop()); setLocalStream(null); }
     setRemoteStream(null);
     setCallState("idle");
     socketRef.current?.emit("end-call", {
@@ -253,21 +237,15 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   };
 
   if (status === "loading" || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">Loading...</div>
-      </div>
-    );
+    return <div className="flex items-center justify-center min-h-screen"><div className="text-gray-500">Loading...</div></div>;
   }
 
   if (!receiver) {
     return (
-      <div className="max-w-2xl mx-auto py-4 px-4">
+      <div className="max-w-2xl mx-auto px-4 py-4">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-700 font-medium">User not found</p>
-          <Link href="/messages" className="text-blue-600 hover:underline text-sm mt-2 block">
-            ← Back to messages
-          </Link>
+          <Link href="/messages" className="text-blue-600 hover:underline text-sm mt-2 block">← Back to messages</Link>
         </div>
       </div>
     );
@@ -278,9 +256,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       {callState === "idle" ? (
         <>
           <div className="mb-2 sm:mb-4">
-            <Link href="/messages" className="text-blue-600 hover:underline text-sm">
-              ← Back to messages
-            </Link>
+            <Link href="/messages" className="text-blue-600 hover:underline text-sm">← Back to messages</Link>
           </div>
           <div className="flex-1 min-h-0">
             <ChatInterface
