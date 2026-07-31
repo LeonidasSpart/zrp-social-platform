@@ -52,6 +52,7 @@ model User {
   receivedMessages Message[] @relation("Message_receiver")
   pollVotes   PollVote[]
   bookmarks   Bookmark[]
+  pushSubscriptions PushSubscription[]   // ─── ADDED
 
   blockedUsers Blocked[] @relation("Blocker")
   blockedBy    Blocked[] @relation("Blocked")
@@ -225,4 +226,15 @@ model Bookmark {
   createdAt DateTime @default(now())
 
   @@unique([userId, postId])
+}
+
+// ─── NEW: PushSubscription Model ──────────────────────────────────
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  keys      Json     // store { auth, p256dh }
+  createdAt DateTime @default(now())
 }
