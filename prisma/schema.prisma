@@ -168,6 +168,7 @@ model Notification {
 model Message {
   id          String    @id @default(cuid())
   content     String    @db.Text
+  imageUrl    String?   // ✨ NEW – allows image attachments in chat
   senderId    String
   sender      User      @relation("Message_sender", fields: [senderId], references: [id], onDelete: Cascade)
   receiverId  String
