@@ -31,6 +31,11 @@ export default function CallComponent({
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
+  // ─── Debug mount ──────────────────────────────────────────────
+  useEffect(() => {
+    alert("📞 CallComponent mounted. isIncoming: " + isIncoming);
+  }, []);
+
   // ─── Set video streams ──────────────────────────────────────────
   useEffect(() => {
     if (localStream && localVideoRef.current) {
@@ -187,11 +192,14 @@ export default function CallComponent({
           {/* ─── Accept / End / Reject buttons ────────────────────── */}
           <button
             onClick={() => {
+              alert("🔵 Main button clicked. isIncoming: " + isIncoming);
               console.log("🔵 Main button clicked");
               if (isIncoming) {
+                alert("🔵 Accept button - calling onAccept");
                 console.log("🔵 Accept button - calling onAccept");
                 onAccept();
               } else {
+                alert("🔴 End button - calling onEnd");
                 console.log("🔴 End button - calling onEnd");
                 onEnd();
               }
@@ -208,6 +216,7 @@ export default function CallComponent({
           {isIncoming && (
             <button
               onClick={() => {
+                alert("🔴 Reject button clicked - calling onReject");
                 console.log("🔴 Reject button - calling onReject");
                 onReject();
               }}
@@ -221,7 +230,10 @@ export default function CallComponent({
         {/* ─── End call button (when active) ──────────────────────── */}
         {!isIncoming && remoteStream && (
           <button
-            onClick={onEnd}
+            onClick={() => {
+              alert("🔴 End call button clicked (active)");
+              onEnd();
+            }}
             className="absolute bottom-24 left-1/2 -translate-x-1/2 text-red-400 text-sm hover:text-red-300 transition bg-red-500/10 px-4 py-1.5 rounded-full"
           >
             End Call
