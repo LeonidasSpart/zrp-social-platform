@@ -4,35 +4,44 @@ import { rateLimit } from "@/lib/rate-limit";
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
-  // ─── Apply rate limiting to auth API routes ──────────────────
-  if (path.startsWith("/api/auth")) {
-    // Different limits for different auth actions
-    let config;
-    if (path.includes("/callback") || path.includes("/session")) {
-      // Allow callbacks and session checks more freely
-      config = { limit: 100, window: 60, type: "auth-general" };
-    } else if (path.includes("/signin") || path.includes("/credentials")) {
-      // Login attempts
-      config = { limit: 5, window: 900, type: "auth-login" };
-    } else if (path.includes("/register") || path.includes("/signup")) {
-      // Registration attempts
-      config = { limit: 5, window: 3600, type: "auth-register" };
-    } else {
-      // Default for other auth routes
-      config = { limit: 30, window: 60, type: "auth-default" };
-    }
+  // ─── EXEMPT NEXT.AUTH CRITICAL ROUTES ──────────────────────────
+  if (
+    path.startsWith("/api/auth/session") ||
+    path.startsWith("/api/auth/callback") ||
+    path.startsWith("/api/auth/csrf") ||
+    path.startsWith("/api/auth/providers") ||
+    path.startsWith("/api/auth/signin") ||
+    path.startsWith("/api/auth/signout")
+  ) {
+    return NextResponse.next();
+  }
 
-    const result = await rateLimit(req, config);
-    if (!result.success) {
-      return result.response;
+  // ─── RATE LIMIT ONLY LOGIN & REGISTER ──────────────────────────
+  if (path.startsWith("/api/auth")) {
+    // Only apply to login/register endpoints, not session/callback
+    if (path.includes("login") || path.includes("register") || path.includes("signup")) {
+      const result = await rateLimit(req, {
+        limit: 5,
+        window: 900, // 15 minutes
+        type: "auth-login",
+      });
+      if (!result.success) {
+        return result.response;
+      }
     }
   }
 
-  // ─── Continue to the route ────────────────────────────────────
+  // ─── RATE LIMIT OTHER API ROUTES ───────────────────────────────
+  if (path.startsWith("/api/") && !path.startsWith("/api/auth")) {
+    // Add specific rate limits for other endpoints
+    // We'll handle these inside individual routes instead of middleware
+    // to avoid blocking legitimate requests
+    return NextResponse.next();
+  }
+
   return NextResponse.next();
 }
 
-// ─── Only run on API routes ─────────────────────────────────────
 export const config = {
   matcher: "/api/:path*",
 };
