@@ -3,7 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { getSocket } from "@/lib/socket-client";
-import { Send, Phone, Video, Image } from "lucide-react";
+import { Send, Phone, Video, Image, Smile, X } from "lucide-react";
+import EmojiPicker from "emoji-picker-react";
+import { useUploadThing } from "@/lib/uploadthing";
 
 interface Message {
   id: string;
@@ -12,6 +14,7 @@ interface Message {
   receiverId: string;
   createdAt: string;
   read: boolean;
+  imageUrl?: string | null;
 }
 
 interface ChatInterfaceProps {
@@ -37,11 +40,29 @@ export default function ChatInterface({
   const [isTyping, setIsTyping] = useState(false);
   const [receiverTyping, setReceiverTyping] = useState(false);
   const [socketConnected, setSocketConnected] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<any>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const userId = session?.user?.id;
+
+  // ─── UploadThing ──────────────────────────────────────────────────
+  const { startUpload } = useUploadThing("messageImage", {
+    onClientUploadComplete: (files) => {
+      const file = files[0];
+      setUploadingImage(false);
+      // Send message with image URL
+      sendMessageWithImage(file.url);
+    },
+    onUploadError: (error) => {
+      console.error("Upload error:", error);
+      setUploadingImage(false);
+      alert("Failed to upload image. Please try again.");
+    },
+  });
 
   // ─── Fetch messages ──────────────────────────────────────────────
   const fetchMessages = async () => {
@@ -78,7 +99,6 @@ export default function ChatInterface({
       setupSocketListeners();
       fetchMessages();
 
-      // ─── POLLING FALLBACK (every 3 seconds) ──────────────────
       const interval = setInterval(() => {
         fetchMessages();
       }, 3000);
@@ -125,21 +145,25 @@ export default function ChatInterface({
     });
   };
 
-  // ─── Send message ──────────────────────────────────────────────────
+  // ─── Send text message ──────────────────────────────────────────────
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !userId) return;
+    await sendMessage(newMessage.trim(), null);
+  };
 
+  const sendMessage = async (content: string, imageUrl: string | null) => {
     setSending(true);
 
     const tempId = `temp-${Date.now()}`;
     const optimisticMessage: Message = {
       id: tempId,
-      content: newMessage,
-      senderId: userId,
+      content,
+      senderId: userId!,
       receiverId,
       createdAt: new Date().toISOString(),
       read: false,
+      imageUrl,
     };
     setMessages((prev) => [...prev, optimisticMessage]);
     setNewMessage("");
@@ -150,7 +174,8 @@ export default function ChatInterface({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           receiverId,
-          content: newMessage.trim(),
+          content,
+          imageUrl,
         }),
       });
 
@@ -168,7 +193,7 @@ export default function ChatInterface({
       socketRef.current?.emit("send-message", {
         senderId: userId,
         receiverId,
-        content: newMessage,
+        content,
         messageId: savedMessage.id,
       });
 
@@ -179,6 +204,31 @@ export default function ChatInterface({
     } finally {
       setSending(false);
     }
+  };
+
+  const sendMessageWithImage = (imageUrl: string) => {
+    sendMessage("📷 Image", imageUrl);
+  };
+
+  // ─── Handle image upload ──────────────────────────────────────────
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      await startUpload([file]);
+    } catch (error) {
+      console.error("Upload error:", error);
+      setUploadingImage(false);
+    }
+    e.target.value = "";
+  };
+
+  // ─── Emoji picker ──────────────────────────────────────────────────
+  const handleEmojiClick = (emoji: any) => {
+    setNewMessage((prev) => prev + emoji.emoji);
+    setShowEmojiPicker(false);
   };
 
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -264,7 +314,16 @@ export default function ChatInterface({
                       : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-none"
                   }`}
                 >
-                  <p className="text-sm">{message.content}</p>
+                  {message.imageUrl && (
+                    <img
+                      src={message.imageUrl}
+                      alt="Message attachment"
+                      className="rounded-lg max-w-full max-h-48 object-cover mb-1"
+                    />
+                  )}
+                  {message.content && (
+                    <p className="text-sm">{message.content}</p>
+                  )}
                   <p className={`text-[10px] mt-1 ${isOwn ? "text-blue-200" : "text-gray-400"}`}>
                     {new Date(message.createdAt).toLocaleTimeString([], {
                       hour: "2-digit",
@@ -281,13 +340,56 @@ export default function ChatInterface({
       </div>
 
       {/* ─── Input ─── */}
-      <form onSubmit={handleSend} className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+      <form onSubmit={handleSend} className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-2 items-center">
+        {/* ─── Image upload ─── */}
         <button
           type="button"
-          className="text-gray-500 hover:text-blue-500 transition flex-shrink-0"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploadingImage}
+          className="text-gray-500 hover:text-blue-500 transition flex-shrink-0 disabled:opacity-50"
+          title="Upload image"
         >
-          <Image className="w-5 h-5" />
+          {uploadingImage ? (
+            <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Image className="w-5 h-5" />
+          )}
         </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="hidden"
+        />
+
+        {/* ─── Emoji picker ─── */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            className="text-gray-500 hover:text-blue-500 transition flex-shrink-0"
+            title="Add emoji"
+          >
+            <Smile className="w-5 h-5" />
+          </button>
+          {showEmojiPicker && (
+            <div className="absolute bottom-full mb-2 right-0 z-50">
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowEmojiPicker(false)}
+                  className="absolute -top-2 -right-2 bg-gray-800 text-white rounded-full p-1 z-10"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <EmojiPicker onEmojiClick={handleEmojiClick} />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ─── Text input ─── */}
         <input
           type="text"
           value={newMessage}
@@ -295,6 +397,7 @@ export default function ChatInterface({
           placeholder={`Message ${receiverName}...`}
           className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm min-w-0"
         />
+
         <button
           type="submit"
           disabled={!newMessage.trim() || sending}
