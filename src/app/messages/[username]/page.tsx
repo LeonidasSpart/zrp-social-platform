@@ -18,7 +18,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   const [callState, setCallState] = useState<"idle" | "calling" | "incoming" | "active">("idle");
   const [isVideoCall, setIsVideoCall] = useState(false);
   const [callerName, setCallerName] = useState("");
-  const [callerSocketId, setCallerSocketId] = useState<string | null>(null);
+  const [callerId, setCallerId] = useState<string | null>(null);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [peer, setPeer] = useState<Peer.Instance | null>(null);
@@ -65,10 +65,10 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     const socket = getSocket(userId);
     socketRef.current = socket;
 
-    socket.on("incoming-call", ({ from, signal, callerName, isVideo }) => {
-      console.log("📞 Incoming call from", callerName, "socket:", from);
+    socket.on("incoming-call", ({ callerId, signal, callerName, isVideo }) => {
+      console.log("📞 Incoming call from", callerName);
       setCallerName(callerName);
-      setCallerSocketId(from); // ✅ store socket ID
+      setCallerId(callerId); // store caller's userId
       setIsVideoCall(isVideo);
       setIncomingSignal(signal);
       setCallState("incoming");
@@ -76,7 +76,6 @@ export default function ChatPage({ params }: { params: { username: string } }) {
 
     socket.on("call-accepted", ({ signal }) => {
       console.log("✅ Call accepted by receiver");
-      alert("✅ Call accepted!"); // for debugging
       if (peer) peer.signal(signal);
     });
 
@@ -135,6 +134,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
           signal,
           callerName: session?.user?.name || "User",
           isVideo,
+          callerId: userId, // include caller's userId
         });
       });
 
@@ -151,7 +151,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       setPeer(newPeer);
     } catch (error) {
       console.error("Error starting call:", error);
-      alert("Could not access camera/microphone.");
+      alert("Could not access camera/microphone. Please allow permissions.");
       setCallState("idle");
     }
   };
@@ -172,14 +172,15 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       });
 
       newPeer.on("signal", (signal) => {
-        console.log("📡 Sending accept signal to socket", callerSocketId);
-        if (callerSocketId) {
+        console.log("📡 Sending accept signal to callerId", callerId);
+        if (callerId) {
           socketRef.current?.emit("accept-call", {
-            targetSocketId: callerSocketId,
+            callerId: callerId,
             signal,
           });
         } else {
-          alert("❌ No caller socket ID! Cannot accept call.");
+          console.error("❌ No callerId to accept");
+          alert("Cannot accept: missing caller ID");
         }
       });
 
@@ -207,8 +208,8 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   };
 
   const rejectCall = () => {
-    if (callerSocketId) {
-      socketRef.current?.emit("reject-call", { targetSocketId: callerSocketId });
+    if (callerId) {
+      socketRef.current?.emit("reject-call", { callerId });
     }
     setCallState("idle");
     setIncomingSignal(null);
@@ -219,8 +220,8 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     if (localStream) { localStream.getTracks().forEach((t) => t.stop()); setLocalStream(null); }
     setRemoteStream(null);
     setCallState("idle");
-    if (callerSocketId) {
-      socketRef.current?.emit("end-call", { targetSocketId: callerSocketId });
+    if (callerId) {
+      socketRef.current?.emit("end-call", { callerId });
     }
   };
 
