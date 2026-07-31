@@ -57,10 +57,11 @@ app.prepare().then(() => {
     });
 
     // ─── Call Signaling ───────────────────────────────────────────
-    socket.on("call-user", ({ receiverId, signal, callerName, isVideo }) => {
-      console.log(`📞 call-user from ${socket.id} to ${receiverId} (${callerName})`);
+    socket.on("call-user", ({ receiverId, signal, callerName, isVideo, callerId }) => {
+      console.log(`📞 call-user from ${callerId || socket.id} to ${receiverId} (${callerName})`);
       io.to(receiverId).emit("incoming-call", {
         from: socket.id,
+        callerId: callerId, // ✅ store the caller's user ID
         callerName,
         signal,
         isVideo,
