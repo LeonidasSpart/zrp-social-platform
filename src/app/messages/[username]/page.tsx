@@ -240,15 +240,15 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-4 px-4 h-screen flex flex-col">
+    <div className="w-full max-w-full mx-auto px-2 sm:px-4 py-2 sm:py-4 h-screen flex flex-col overflow-hidden">
       {callState === "idle" ? (
         <>
-          <div className="mb-4">
+          <div className="mb-2 sm:mb-4">
             <Link href="/messages" className="text-blue-600 hover:underline text-sm">
               ← Back to messages
             </Link>
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-h-0">
             <ChatInterface
               receiverId={receiver.id}
               receiverName={receiver.name || receiver.username}
