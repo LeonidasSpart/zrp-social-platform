@@ -63,6 +63,7 @@ export default function ChatInterface({
     const socket = socketRef.current;
     if (!socket) return;
 
+    // ─── When a new message arrives ──────────────────────────────
     socket.on("receive-message", (message: Message) => {
       if (message.senderId === receiverId) {
         setMessages((prev) => [...prev, message]);
@@ -70,13 +71,13 @@ export default function ChatInterface({
       }
     });
 
+    // ─── Confirmation from server that message is saved ─────────
     socket.on("message-sent", (message: Message) => {
       setMessages((prev) =>
         prev.map((m) => (m.id === message.id ? message : m))
       );
     });
 
-    // ─── FIXED: Added type annotation ──────────────────────────────
     socket.on("user-typing", ({ userId, isTyping }: { userId: string; isTyping: boolean }) => {
       if (userId === receiverId) {
         setReceiverTyping(isTyping);
@@ -102,32 +103,62 @@ export default function ChatInterface({
     }
   };
 
+  // ─── Send message via HTTP POST + Socket ───────────────────────
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !userId) return;
 
     setSending(true);
 
-    const tempMessage = {
-      id: `temp-${Date.now()}`,
+    // ─── Optimistic update ──────────────────────────────────────
+    const tempId = `temp-${Date.now()}`;
+    const optimisticMessage: Message = {
+      id: tempId,
       content: newMessage,
       senderId: userId,
       receiverId,
       createdAt: new Date().toISOString(),
       read: false,
     };
-
-    setMessages((prev) => [...prev, tempMessage]);
+    setMessages((prev) => [...prev, optimisticMessage]);
     setNewMessage("");
 
     try {
+      // ─── 1. Save to database via API ──────────────────────────
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          receiverId,
+          content: newMessage.trim(),
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to send message");
+      }
+
+      const savedMessage = await res.json();
+
+      // ─── 2. Replace optimistic message with real one ──────────
+      setMessages((prev) =>
+        prev.map((m) => (m.id === tempId ? savedMessage : m))
+      );
+
+      // ─── 3. Broadcast via socket (optional, server may already do it) ──
       socketRef.current?.emit("send-message", {
         senderId: userId,
         receiverId,
         content: newMessage,
+        messageId: savedMessage.id,
       });
-    } catch (error) {
-      console.error("Error sending message:", error);
+
+    } catch (error: any) {
+      console.error("Send error:", error);
+      // Remove optimistic message on error
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+      alert(`Failed to send: ${error.message || "Unknown error"}`);
     } finally {
       setSending(false);
     }
@@ -159,6 +190,7 @@ export default function ChatInterface({
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      {/* ─── Header ─── */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
@@ -189,6 +221,7 @@ export default function ChatInterface({
         </div>
       </div>
 
+      {/* ─── Messages ─── */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {messages.length === 0 ? (
           <div className="text-center py-8 text-gray-400">
@@ -226,6 +259,7 @@ export default function ChatInterface({
         <div ref={messagesEndRef} />
       </div>
 
+      {/* ─── Input ─── */}
       <form onSubmit={handleSend} className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
         <button
           type="button"
