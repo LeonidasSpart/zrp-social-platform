@@ -99,17 +99,21 @@ export default function ChatPage({ params }: { params: { username: string } }) {
 
   // ─── Start Call ──────────────────────────────────────────────────
   const startCall = async (isVideo: boolean) => {
+    alert("📞 Starting call... (video: " + isVideo + ")");
     console.log("📞 Starting call, video:", isVideo);
     try {
+      alert("📱 Requesting camera/microphone...");
       const stream = await navigator.mediaDevices.getUserMedia({
         video: isVideo,
         audio: true,
       });
+      alert("✅ Got media stream");
       console.log("🎥 Got media stream");
       setLocalStream(stream);
       setIsVideoCall(isVideo);
       setCallState("calling");
 
+      alert("🔧 Creating Peer instance...");
       const newPeer = new Peer({
         initiator: true,
         stream: stream,
@@ -123,6 +127,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       });
 
       newPeer.on("signal", (signal) => {
+        alert("📡 Emitting call-user signal");
         console.log("📡 Sending signal to receiver");
         socketRef.current?.emit("call-user", {
           receiverId: receiver.id,
@@ -133,36 +138,41 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       });
 
       newPeer.on("stream", (remoteStream) => {
+        alert("✅ Call connected! Remote stream received.");
         console.log("📡 Remote stream received");
         setRemoteStream(remoteStream);
         setCallState("active");
       });
 
       newPeer.on("error", (err) => {
+        alert("❌ Peer error: " + err.message);
         console.error("❌ Peer error:", err);
-        alert("Call error: " + err.message);
         endCall();
       });
 
       setPeer(newPeer);
     } catch (error: any) {
+      alert("❌ Error starting call: " + (error.message || "Unknown error"));
       console.error("❌ Error starting call:", error);
-      alert("Could not access camera/microphone: " + (error.message || "Please allow permissions"));
       setCallState("idle");
     }
   };
 
   // ─── Accept Incoming Call ──────────────────────────────────────
   const acceptCall = async () => {
+    alert("🔵 Accept button pressed – starting acceptCall...");
     console.log("📞 Accepting call...");
     try {
+      alert("📱 Requesting camera/microphone...");
       const stream = await navigator.mediaDevices.getUserMedia({
         video: isVideoCall,
         audio: true,
       });
+      alert("✅ Got media stream");
       console.log("🎥 Got media stream for accept");
       setLocalStream(stream);
 
+      alert("🔧 Creating Peer instance...");
       const newPeer = new Peer({
         initiator: false,
         stream: stream,
@@ -176,6 +186,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       });
 
       newPeer.on("signal", (signal) => {
+        alert("📡 Emitting accept-call signal");
         console.log("📡 Sending accept signal");
         socketRef.current?.emit("accept-call", {
           receiverId: socketRef.current?._callerId,
@@ -184,31 +195,37 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       });
 
       newPeer.on("stream", (remoteStream) => {
+        alert("✅ Call connected! Remote stream received.");
         console.log("📡 Remote stream received");
         setRemoteStream(remoteStream);
         setCallState("active");
       });
 
       newPeer.on("error", (err) => {
+        alert("❌ Peer error: " + err.message);
         console.error("❌ Peer error:", err);
-        alert("Call error: " + err.message);
         endCall();
       });
 
       if (incomingSignal) {
+        alert("📡 Signaling with incoming offer");
         console.log("📡 Signaling with incoming offer");
         newPeer.signal(incomingSignal);
+      } else {
+        alert("⚠️ No incoming signal – this should not happen.");
+        console.warn("⚠️ No incoming signal");
       }
 
       setPeer(newPeer);
     } catch (error: any) {
+      alert("❌ Error in acceptCall: " + (error.message || "Unknown error"));
       console.error("❌ Error accepting call:", error);
-      alert("Could not access camera/microphone: " + (error.message || "Please allow permissions"));
       rejectCall();
     }
   };
 
   const rejectCall = () => {
+    alert("❌ Rejecting call");
     console.log("❌ Rejecting call");
     socketRef.current?.emit("reject-call", {
       receiverId: socketRef.current?._callerId || receiver?.id,
@@ -218,6 +235,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   };
 
   const endCall = () => {
+    alert("🔚 Ending call");
     console.log("🔚 Ending call");
     if (peer) {
       peer.destroy();
