@@ -1,11 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['uploadthing.com'],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "uploadthing.com",
+      },
+      // Add more domains as needed, e.g.:
+      // {
+      //   protocol: "https",
+      //   hostname: "*.cloudinary.com",
+      // },
+    ],
   },
 
   experimental: {
-    optimizeCss: true,        // ✅ keep only this
+    optimizeCss: true,
   },
 
   async headers() {
