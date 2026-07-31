@@ -2,18 +2,31 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getCached, setCached } from "@/lib/redis";
 
-// ─── PREVENT STATIC GENERATION ─────────────────────────────────────
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
 
+    // ─── CHECK CACHE ───────────────────────────────────────────
+    const cacheKey = `explore:${userId || 'anon'}`;
+    const cached = await getCached(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached);
+    }
+
+    // ─── FETCH FROM DATABASE ──────────────────────────────────
     const posts = await prisma.post.findMany({
-      take: 50,
+      take: 20,
       orderBy: { createdAt: "desc" },
-      include: {
+      select: {
+        id: true,
+        content: true,
+        imageUrl: true,
+        createdAt: true,
         author: {
           select: {
             id: true,
@@ -33,28 +46,30 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    const sortedPosts = posts.sort((a, b) => {
-      const engagementA = a._count.likes + a._count.comments + a._count.reposts;
-      const engagementB = b._count.likes + b._count.comments + b._count.reposts;
-      return engagementB - engagementA;
+    const sorted = posts.sort((a, b) => {
+      const aEng = a._count.likes + a._count.comments + a._count.reposts;
+      const bEng = b._count.likes + b._count.comments + b._count.reposts;
+      return bEng - aEng;
     });
 
-    if (session && session.user) {
+    if (session?.user) {
       const likes = await prisma.like.findMany({
         where: {
           userId: session.user.id,
-          postId: { in: sortedPosts.map((p) => p.id) },
+          postId: { in: sorted.map(p => p.id) },
         },
+        select: { postId: true },
       });
-      const likedIds = new Set(likes.map((l) => l.postId));
-      sortedPosts.forEach((p) => {
-        (p as any).liked = likedIds.has(p.id);
-      });
+      const likedIds = new Set(likes.map(l => l.postId));
+      sorted.forEach(p => (p as any).liked = likedIds.has(p.id));
     }
 
-    return NextResponse.json(sortedPosts);
+    // ─── CACHE FOR 1 MINUTE ───────────────────────────────────
+    await setCached(cacheKey, sorted, 60);
+
+    return NextResponse.json(sorted);
   } catch (error) {
-    console.error("Error fetching explore posts:", error);
+    console.error("Explore error:", error);
     return NextResponse.json({ error: "Failed to fetch explore posts" }, { status: 500 });
   }
 }
