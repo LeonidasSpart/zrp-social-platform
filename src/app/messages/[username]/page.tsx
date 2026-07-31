@@ -68,7 +68,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     socket.on("incoming-call", ({ from, signal, callerName, isVideo }) => {
       console.log("📞 Incoming call from", callerName, "socket:", from);
       setCallerName(callerName);
-      setCallerSocketId(from); // store caller's socket ID
+      setCallerSocketId(from); // ✅ store socket ID
       setIsVideoCall(isVideo);
       setIncomingSignal(signal);
       setCallState("incoming");
@@ -76,10 +76,8 @@ export default function ChatPage({ params }: { params: { username: string } }) {
 
     socket.on("call-accepted", ({ signal }) => {
       console.log("✅ Call accepted by receiver");
-      if (peer) {
-        console.log("📡 Signaling peer with accept signal");
-        peer.signal(signal);
-      }
+      alert("✅ Call accepted!"); // for debugging
+      if (peer) peer.signal(signal);
     });
 
     socket.on("call-rejected", () => {
@@ -146,23 +144,14 @@ export default function ChatPage({ params }: { params: { username: string } }) {
         setCallState("active");
       });
 
-      newPeer.on("iceStateChange", (state) => {
-        console.log("🧊 ICE state:", state);
-      });
-
-      newPeer.on("connect", () => {
-        console.log("✅ Peer connected!");
-      });
-
-      newPeer.on("error", (err) => {
-        console.error("❌ Peer error:", err);
-        endCall();
-      });
+      newPeer.on("iceStateChange", (state) => console.log("🧊 ICE state:", state));
+      newPeer.on("connect", () => console.log("✅ Peer connected!"));
+      newPeer.on("error", (err) => { console.error("❌ Peer error:", err); endCall(); });
 
       setPeer(newPeer);
     } catch (error) {
       console.error("Error starting call:", error);
-      alert("Could not access camera/microphone. Please allow permissions.");
+      alert("Could not access camera/microphone.");
       setCallState("idle");
     }
   };
@@ -190,7 +179,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
             signal,
           });
         } else {
-          console.error("❌ No caller socket ID found");
+          alert("❌ No caller socket ID! Cannot accept call.");
         }
       });
 
@@ -200,18 +189,9 @@ export default function ChatPage({ params }: { params: { username: string } }) {
         setCallState("active");
       });
 
-      newPeer.on("iceStateChange", (state) => {
-        console.log("🧊 ICE state (accept):", state);
-      });
-
-      newPeer.on("connect", () => {
-        console.log("✅ Peer connected (accept)!");
-      });
-
-      newPeer.on("error", (err) => {
-        console.error("❌ Peer error (accept):", err);
-        endCall();
-      });
+      newPeer.on("iceStateChange", (state) => console.log("🧊 ICE state (accept):", state));
+      newPeer.on("connect", () => console.log("✅ Peer connected (accept)!"));
+      newPeer.on("error", (err) => { console.error("❌ Peer error (accept):", err); endCall(); });
 
       if (incomingSignal) {
         console.log("📡 Signaling with incoming offer");
