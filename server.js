@@ -26,7 +26,7 @@ app.prepare().then(() => {
   io.on("connection", (socket) => {
     console.log("🔌 Socket connected:", socket.id);
 
-    // ─── Join Room (for messaging) ──────────────────────────────
+    // ─── Join Room (userId) ────────────────────────────────────
     socket.on("join-room", (userId) => {
       socket.join(userId);
       console.log(`✅ User ${userId} joined room (socket ${socket.id})`);
@@ -34,7 +34,6 @@ app.prepare().then(() => {
 
     // ─── Messaging ──────────────────────────────────────────────
     socket.on("send-message", async ({ senderId, receiverId, content, messageId }) => {
-      console.log(`💬 Message from ${senderId} to ${receiverId}: ${content}`);
       const message = {
         id: messageId,
         senderId,
@@ -56,32 +55,30 @@ app.prepare().then(() => {
       io.to(senderId).emit("message-read", { messageId });
     });
 
-    // ─── Call Signaling (using socket IDs) ────────────────────────
-    socket.on("call-user", ({ receiverId, signal, callerName, isVideo }) => {
-      console.log(`📞 call-user from ${socket.id} to user ${receiverId}`);
-      // Forward the incoming call to the receiver's user room, but include the caller's socket ID
+    // ─── Call Signaling (using userId rooms) ──────────────────────
+    socket.on("call-user", ({ receiverId, signal, callerName, isVideo, callerId }) => {
+      console.log(`📞 call-user from ${callerId} to ${receiverId}`);
       io.to(receiverId).emit("incoming-call", {
-        from: socket.id,          // caller's socket ID
+        callerId,          // caller's userId
         callerName,
         signal,
         isVideo,
       });
     });
 
-    // ─── Accept call: target is a socket ID ──────────────────────
-    socket.on("accept-call", ({ targetSocketId, signal }) => {
-      console.log(`✅ accept-call from ${socket.id} to socket ${targetSocketId}`);
-      io.to(targetSocketId).emit("call-accepted", { signal });
+    socket.on("accept-call", ({ callerId, signal }) => {
+      console.log(`✅ accept-call from ${socket.id} to ${callerId}`);
+      io.to(callerId).emit("call-accepted", { signal });
     });
 
-    socket.on("reject-call", ({ targetSocketId }) => {
-      console.log(`❌ reject-call from ${socket.id} to socket ${targetSocketId}`);
-      io.to(targetSocketId).emit("call-rejected");
+    socket.on("reject-call", ({ callerId }) => {
+      console.log(`❌ reject-call from ${socket.id} to ${callerId}`);
+      io.to(callerId).emit("call-rejected");
     });
 
-    socket.on("end-call", ({ targetSocketId }) => {
-      console.log(`🔚 end-call from ${socket.id} to socket ${targetSocketId}`);
-      io.to(targetSocketId).emit("call-ended");
+    socket.on("end-call", ({ callerId }) => {
+      console.log(`🔚 end-call from ${socket.id} to ${callerId}`);
+      io.to(callerId).emit("call-ended");
     });
 
     socket.on("disconnect", () => {
