@@ -130,3 +130,37 @@ svg {
 .border-orange-800, .border-orange-900 {
   border-color: #D1D5DB !important;
 }
+
+/* ─── TARGET THE YELLOW BACKGROUND ON THE FEED ──────────────────── */
+
+/* Force the feed container to use the theme background */
+.max-w-2xl,
+.max-w-2xl.mx-auto,
+.py-4,
+.px-4,
+.space-y-4,
+main,
+section,
+article {
+  background-color: hsl(var(--background)) !important;
+}
+
+/* Also target any element that might have a yellow background from a custom class */
+[class*="bg-yellow"],
+[class*="bg-amber"],
+[class*="bg-orange"],
+[class*="yellow-50"],
+[class*="amber-50"],
+[class*="orange-50"] {
+  background-color: transparent !important;
+}
+
+/* Remove yellow from inline styles */
+[style*="background:#FFD700"],
+[style*="background:#FFC107"],
+[style*="background:#FFA500"],
+[style*="background-color:#FFD700"],
+[style*="background-color:#FFC107"],
+[style*="background-color:#FFA500"] {
+  background-color: transparent !important;
+}
