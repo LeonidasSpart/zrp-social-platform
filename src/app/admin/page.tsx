@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Users, FileText, MessageCircle, Flag, UserCheck, UserPlus, Activity } from "lucide-react";
-import AdminLayout from "@/components/AdminLayout";
 
 interface Stats {
   users: number;
@@ -11,11 +10,7 @@ interface Stats {
   comments: number;
   reports: number;
   pendingReports: number;
-  roleCounts: {
-    USER: number;
-    MODERATOR: number;
-    ADMIN: number;
-  };
+  roleCounts: Record<string, number>;
 }
 
 export default function AdminDashboard() {
@@ -29,16 +24,17 @@ export default function AdminDashboard() {
         setStats(data);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        console.error("Stats error:", err);
+        setLoading(false);
+      });
   }, []);
 
   if (loading) {
     return (
-      <AdminLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-zrp-red border-t-transparent" />
-        </div>
-      </AdminLayout>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-zrp-red border-t-transparent" />
+      </div>
     );
   }
 
@@ -52,12 +48,12 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <AdminLayout>
+    <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           <Activity className="w-4 h-4" />
-          <span>Last updated: {new Date().toLocaleTimeString()}</span>
+          <span>Updated: {new Date().toLocaleTimeString()}</span>
         </div>
       </div>
 
@@ -84,12 +80,16 @@ export default function AdminDashboard() {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">User Roles</h2>
           <div className="space-y-2">
-            {stats?.roleCounts && Object.entries(stats.roleCounts).map(([role, count]) => (
-              <div key={role} className="flex items-center justify-between">
-                <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">{role}</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">{count}</span>
-              </div>
-            ))}
+            {stats?.roleCounts ? (
+              Object.entries(stats.roleCounts).map(([role, count]) => (
+                <div key={role} className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">{role}</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">{count}</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">No role data available</p>
+            )}
           </div>
         </div>
 
@@ -103,11 +103,11 @@ export default function AdminDashboard() {
               → Manage Posts
             </Link>
             <Link href="/admin/reports" className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition">
-              → View Reports ({stats?.pendingReports || 0} pending)
+              → View Reports {stats?.pendingReports ? `(${stats.pendingReports} pending)` : ""}
             </Link>
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 }
