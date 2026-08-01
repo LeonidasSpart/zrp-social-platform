@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { UTApi } from "uploadthing/server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,31 +17,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // Validate file type
-    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"];
+    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!validTypes.includes(file.type)) {
       return NextResponse.json({ error: "Invalid file type. Only images are allowed." }, { status: 400 });
     }
 
-    // Max 5MB
     if (file.size > 5 * 1024 * 1024) {
       return NextResponse.json({ error: "File too large. Max 5MB." }, { status: 400 });
     }
 
-    // ─── Read file and convert to base64 ──────────────────────────
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const base64 = buffer.toString("base64");
-    const mimeType = file.type;
-    const dataUrl = `data:${mimeType};base64,${base64}`;
+    const utapi = new UTApi();
+    const uploadResult = await utapi.uploadFiles(file);
 
-    // ─── Save to database ──────────────────────────────────────────
-    await prisma.user.update({
+    if (uploadResult.error) {
+      console.error("UploadThing error:", JSON.stringify(uploadResult.error, null, 2));
+      return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    }
+
+    const user = await prisma.user.update({
       where: { id: session.user.id },
-      data: { coverUrl: dataUrl },
+      data: { coverUrl: uploadResult.data.url },
     });
 
-    return NextResponse.json({ coverUrl: dataUrl });
+    return NextResponse.json({ coverUrl: user.coverUrl });
   } catch (error) {
     console.error("Cover upload error:", error);
     return NextResponse.json({ error: "Failed to upload cover" }, { status: 500 });
