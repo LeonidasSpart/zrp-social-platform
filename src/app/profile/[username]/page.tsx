@@ -384,8 +384,8 @@ export default function ProfilePage({ params }: { params: { username: string } }
       </div>
 
       {/* ─── Profile info ─── */}
-      <div className="px-4 mt-4 relative z-10 flex items-end justify-between">
-        <div className="pb-2 flex-1 pr-4">
+      <div className="px-4 relative z-10 flex items-start justify-between">
+        <div className="pb-2 flex-1 pr-4 mt-3">
           <div className="flex items-center gap-1 flex-wrap">
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">
               {profile.name || profile.username}
@@ -457,7 +457,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
         </div>
 
         <div className="flex flex-col items-end gap-2 pb-2">
-          <div className="relative w-24 h-24 rounded-full border-4 border-white dark:border-gray-900 shadow-lg overflow-hidden flex-shrink-0 group">
+          <div className="relative w-24 h-24 -mt-16 sm:w-28 sm:h-28 sm:-mt-20 rounded-full border-4 border-white dark:border-gray-900 shadow-lg overflow-hidden flex-shrink-0 group bg-white dark:bg-gray-900">
             {profile.avatarUrl ? (
               <img
                 src={profile.avatarUrl}
