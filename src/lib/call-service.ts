@@ -14,6 +14,11 @@ export function createPeer(options: CallOptions) {
       iceServers: [
         { urls: "stun:stun.l.google.com:19302" },
         { urls: "stun:stun1.l.google.com:19302" },
+        {
+          urls: "turn:YOUR_TURN_SERVER:3478",
+          username: process.env.NEXT_PUBLIC_TURN_USERNAME,
+          credential: process.env.NEXT_PUBLIC_TURN_CREDENTIAL,
+        },
       ],
       ...options.config,
     },
