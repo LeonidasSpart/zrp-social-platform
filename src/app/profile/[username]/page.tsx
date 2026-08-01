@@ -124,7 +124,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
     setUploadingBanner(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("type", "cover"); // we'll handle cover update
+    formData.append("type", "cover");
 
     try {
       const res = await fetch("/api/user/update-cover", {
@@ -173,7 +173,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
             className="w-full h-full object-cover"
           />
         )}
-        {/* Gradient overlay to keep text readable */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
 
         {/* ─── Banner upload button (owner only) ─── */}
@@ -203,7 +202,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
       </div>
 
       {/* ─── Profile info (now clearly below the banner) ─── */}
-      <div className="px-4 -mt-10 relative z-10 flex items-end justify-between">
+      <div className="px-4 mt-4 relative z-10 flex items-end justify-between">
         {/* LEFT: Name, username, bio, location, stats */}
         <div className="pb-2 flex-1 pr-4">
           <div className="flex items-center gap-1 flex-wrap">
