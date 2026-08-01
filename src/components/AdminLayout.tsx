@@ -2,22 +2,43 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, FileText, Flag } from "lucide-react";
-
-const navItems = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/posts", label: "Posts", icon: FileText },
-  { href: "/admin/reports", label: "Reports", icon: Flag },
-];
+import { useSession } from "next-auth/react";
+import { LayoutDashboard, Users, FileText, Flag, ClipboardCheck } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const { data: session } = useSession();
   const pathname = usePathname();
+  const role = session?.user?.role || "USER";
+
+  const isAdmin = role === "ADMIN";
+  const isModerator = role === "MODERATOR";
+
+  // ─── Build nav items based on role ──────────────────────────────
+  let navItems = [];
+
+  if (isAdmin) {
+    navItems = [
+      { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/admin/users", label: "Users", icon: Users },
+      { href: "/admin/posts", label: "Posts", icon: FileText },
+      { href: "/admin/reports", label: "Reports", icon: Flag },
+    ];
+  } else if (isModerator) {
+    navItems = [
+      { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/admin/reports", label: "Reports", icon: ClipboardCheck },
+    ];
+  } else {
+    // If neither, redirect to home or show nothing
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
-      <aside className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 p-4 hidden md:block min-h-screen">
-        <h1 className="text-xl font-bold text-zrp-red mb-6">Admin</h1>
+      <aside className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 p-4 hidden md:block min-h-screen sticky top-0">
+        <h1 className="text-xl font-bold text-zrp-red mb-6">
+          {isModerator ? "Moderator" : "Admin"}
+        </h1>
         <nav className="space-y-1">
           {navItems.map((item) => (
             <Link
