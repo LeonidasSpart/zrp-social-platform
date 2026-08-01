@@ -10,17 +10,22 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const [users, posts, comments, reports, pendingReports] = await Promise.all([
+    const [users, posts, comments, reports, pendingReports, roleCounts] = await Promise.all([
       prisma.user.count(),
       prisma.post.count(),
       prisma.comment.count(),
       prisma.report.count(),
       prisma.report.count({ where: { status: "pending" } }),
+      prisma.user.groupBy({
+        by: ["role"],
+        _count: true,
+      }),
     ]);
 
-    const roleCounts = await prisma.user.groupBy({
-      by: ["role"],
-      _count: true,
+    // ─── Build typed role counts ──────────────────────────────────────
+    const roleCountsMap: Record<string, number> = {};
+    roleCounts.forEach((item) => {
+      roleCountsMap[item.role] = item._count;
     });
 
     return NextResponse.json({
@@ -29,10 +34,7 @@ export async function GET(req: NextRequest) {
       comments,
       reports,
       pendingReports,
-      roleCounts: roleCounts.reduce((acc, curr) => {
-        acc[curr.role] = curr._count;
-        return acc;
-      }, {}),
+      roleCounts: roleCountsMap,
     });
   } catch (error) {
     console.error("Stats error:", error);
