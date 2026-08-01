@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { Role } from "@prisma/client";
 
 const VALID_BADGE_TYPES = ["verified", "organization", "government", null];
 const VALID_ROLES = ["USER", "MODERATOR", "ADMIN"];
@@ -15,7 +16,7 @@ export async function PUT(
   try {
     const { isAdmin, badgeType, role } = await req.json();
 
-    const data: { isAdmin?: boolean; badgeType?: string | null; role?: string } = {};
+    const data: { isAdmin?: boolean; badgeType?: string | null; role?: Role } = {};
 
     if (isAdmin !== undefined) data.isAdmin = isAdmin;
     if (badgeType !== undefined) {
@@ -28,7 +29,7 @@ export async function PUT(
       if (!VALID_ROLES.includes(role)) {
         return NextResponse.json({ error: "Invalid role" }, { status: 400 });
       }
-      data.role = role;
+      data.role = role as Role; // ✅ cast to Role enum
     }
 
     const updated = await prisma.user.update({
