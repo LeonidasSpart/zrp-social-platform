@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Shield, ShieldAlert, ShieldCheck, User } from "lucide-react";
+import { Search, User, Shield, ShieldAlert } from "lucide-react";
 
 interface User {
   id: string;
   username: string;
   name: string;
   email: string;
-  createdAt: string;
   role: "USER" | "MODERATOR" | "ADMIN";
   badgeType: string | null;
   _count: {
@@ -57,14 +56,12 @@ export default function AdminUsers() {
   }, [page, search]);
 
   const handleDelete = async (userId: string) => {
-    if (!confirm("Are you sure you want to delete this user?")) return;
+    if (!confirm("Delete this user? This cannot be undone.")) return;
     try {
       const res = await fetch(`/api/admin/users/${userId}`, { method: "DELETE" });
-      if (res.ok) {
-        fetchUsers();
-      }
+      if (res.ok) fetchUsers();
     } catch (error) {
-      console.error("Error deleting user:", error);
+      console.error("Delete error:", error);
     }
   };
 
@@ -75,15 +72,9 @@ export default function AdminUsers() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role: newRole }),
       });
-      if (res.ok) {
-        fetchUsers();
-      } else {
-        const data = await res.json();
-        alert(data.error || "Failed to update role");
-      }
+      if (res.ok) fetchUsers();
     } catch (error) {
-      console.error("Error updating role:", error);
-      alert("Something went wrong");
+      console.error("Role update error:", error);
     }
   };
 
@@ -94,123 +85,119 @@ export default function AdminUsers() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ badgeType: badgeType || null }),
       });
-      if (res.ok) {
-        fetchUsers();
-      }
+      if (res.ok) fetchUsers();
     } catch (error) {
-      console.error("Error updating badge:", error);
+      console.error("Badge update error:", error);
     }
   };
 
-  const getRoleIcon = (role: string) => {
-    const option = ROLE_OPTIONS.find((r) => r.value === role);
-    if (!option) return <User className="w-4 h-4" />;
-    const Icon = option.icon;
-    return <Icon className="w-4 h-4" />;
-  };
-
   if (loading) {
-    return <div className="text-center py-12 text-gray-500">Loading...</div>;
+    return <div className="text-center py-12 text-gray-500">Loading users...</div>;
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Users</h1>
-
-      <div className="flex gap-2 mb-4">
-        <input
-          type="text"
-          placeholder="Search users..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-        />
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Users</h1>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search users..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-zrp-red focus:border-transparent"
+          />
+        </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">User</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">Email</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">Posts</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">Role</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">Badge</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">Actions</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">User</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Email</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Posts</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Role</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Badge</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-900 transition">
-                  <td className="px-4 py-3">
-                    <Link href={`/profile/${user.username}`} className="hover:underline">
-                      <span className="font-medium text-gray-900 dark:text-white">{user.name || user.username}</span>
-                      <span className="text-gray-500 text-xs ml-1">@{user.username}</span>
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{user.email}</td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{user._count.posts}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                        {getRoleIcon(user.role)}
-                      </span>
+              {users.map((user) => {
+                const RoleIcon = ROLE_OPTIONS.find(r => r.value === user.role)?.icon || User;
+                return (
+                  <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-900 transition">
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <Link href={`/profile/${user.username}`} className="hover:underline">
+                        <span className="font-medium text-gray-900 dark:text-white">{user.name || user.username}</span>
+                        <span className="text-gray-500 text-xs ml-1">@{user.username}</span>
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300 truncate max-w-[150px]">
+                      {user.email}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{user._count.posts}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <RoleIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                        <select
+                          value={user.role}
+                          onChange={(e) => updateRole(user.id, e.target.value)}
+                          className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
+                        >
+                          {ROLE_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
                       <select
-                        value={user.role}
-                        onChange={(e) => updateRole(user.id, e.target.value)}
-                        className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        value={user.badgeType || ""}
+                        onChange={(e) => setBadge(user.id, e.target.value)}
+                        className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
                       >
-                        {ROLE_OPTIONS.map((opt) => (
+                        {BADGE_OPTIONS.map((opt) => (
                           <option key={opt.value} value={opt.value}>
                             {opt.label}
                           </option>
                         ))}
                       </select>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <select
-                      value={user.badgeType || ""}
-                      onChange={(e) => setBadge(user.id, e.target.value)}
-                      className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    >
-                      {BADGE_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => handleDelete(user.id)}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => handleDelete(user.id)}
+                        className="text-red-600 hover:text-red-800 text-sm font-medium transition"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
 
       {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-4">
+        <div className="flex justify-center items-center gap-2 mt-4">
           <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
             className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
           >
             Previous
           </button>
-          <span className="px-3 py-1 text-gray-700 dark:text-gray-300">
+          <span className="text-sm text-gray-700 dark:text-gray-300">
             Page {page} of {totalPages}
           </span>
           <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
             className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
           >
