@@ -28,8 +28,8 @@ model User {
 
   name        String?
   bio         String?   @db.Text
-  avatarUrl   String?
-  coverUrl    String?
+  avatarUrl   String?   @db.Text   // ← changed to Text
+  coverUrl    String?   @db.Text   // ← changed to Text
   isPrivate   Boolean   @default(false)
   isAdmin     Boolean   @default(false)
   badgeType   String?
@@ -80,7 +80,7 @@ model Post {
   isPoll      Boolean   @default(false)
 
   // ─── PINNED RELATION ──────────────────────────────────────────────
-  pinnedBy    User?     @relation("PinnedPost")  // Inverse of User.pinnedPost
+  pinnedBy    User?     @relation("PinnedPost")
 
   comments    Comment[]
   likes       Like[]
