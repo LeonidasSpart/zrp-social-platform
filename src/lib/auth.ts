@@ -49,13 +49,13 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           badgeType: user.badgeType,
           avatarUrl: user.avatarUrl,
-          onboardingCompleted: user.onboardingCompleted, // ✅ NEW
+          onboardingCompleted: user.onboardingCompleted,
         };
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
         token.username = user.username;
@@ -63,8 +63,28 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         token.badgeType = user.badgeType;
         token.avatarUrl = user.avatarUrl;
-        token.onboardingCompleted = user.onboardingCompleted; // ✅ NEW
+        token.onboardingCompleted = user.onboardingCompleted;
       }
+
+      // ─── Re-fetch fresh data from DB whenever the client calls update() ───
+      if (trigger === "update" && token.id) {
+        const freshUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: {
+            isAdmin: true,
+            role: true,
+            badgeType: true,
+            onboardingCompleted: true,
+          },
+        });
+        if (freshUser) {
+          token.isAdmin = freshUser.isAdmin;
+          token.role = freshUser.role;
+          token.badgeType = freshUser.badgeType;
+          token.onboardingCompleted = freshUser.onboardingCompleted;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -75,7 +95,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as "USER" | "MODERATOR" | "ADMIN";
         session.user.badgeType = token.badgeType as string || null;
         session.user.avatarUrl = token.avatarUrl as string || null;
-        session.user.onboardingCompleted = token.onboardingCompleted as boolean; // ✅ NEW
+        session.user.onboardingCompleted = token.onboardingCompleted as boolean;
       }
       return session;
     },
