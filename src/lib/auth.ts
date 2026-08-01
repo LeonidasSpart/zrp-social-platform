@@ -46,9 +46,10 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           username: user.username,
           isAdmin: user.isAdmin,
-          role: user.role,           // ✅ ADD ROLE
+          role: user.role,
           badgeType: user.badgeType,
           avatarUrl: user.avatarUrl,
+          onboardingCompleted: user.onboardingCompleted, // ✅ NEW
         };
       },
     }),
@@ -59,9 +60,10 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.username = user.username;
         token.isAdmin = user.isAdmin;
-        token.role = user.role;      // ✅ ADD ROLE
+        token.role = user.role;
         token.badgeType = user.badgeType;
         token.avatarUrl = user.avatarUrl;
+        token.onboardingCompleted = user.onboardingCompleted; // ✅ NEW
       }
       return token;
     },
@@ -70,9 +72,10 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
         session.user.isAdmin = token.isAdmin as boolean;
-        session.user.role = token.role as "USER" | "MODERATOR" | "ADMIN";  // ✅ ADD ROLE
+        session.user.role = token.role as "USER" | "MODERATOR" | "ADMIN";
         session.user.badgeType = token.badgeType as string || null;
         session.user.avatarUrl = token.avatarUrl as string || null;
+        session.user.onboardingCompleted = token.onboardingCompleted as boolean; // ✅ NEW
       }
       return session;
     },
