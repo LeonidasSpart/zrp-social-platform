@@ -9,9 +9,7 @@ export interface RateLimitConfig {
 
 function getClientIp(req: NextRequest): string {
   const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) {
-    return forwarded.split(",")[0].trim();
-  }
+  if (forwarded) return forwarded.split(",")[0].trim();
   return req.headers.get("x-real-ip") || "127.0.0.1";
 }
 
@@ -21,15 +19,16 @@ export async function rateLimit(
 ): Promise<{ success: boolean; response?: NextResponse }> {
   const { limit, window: windowSeconds, type } = config;
 
-  const redis = await getRedisClient();
-  if (!redis) {
-    return { success: true }; // fail open
-  }
-
-  const ip = getClientIp(req);
-  const key = `rate-limit:${type}:${ip}`;
-
   try {
+    const redis = await getRedisClient();
+    if (!redis) {
+      // If Redis is unavailable, allow the request
+      return { success: true };
+    }
+
+    const ip = getClientIp(req);
+    const key = `rate-limit:${type}:${ip}`;
+
     const current = await redis.get(key);
     const count = current ? parseInt(current, 10) : 0;
 
@@ -52,7 +51,6 @@ export async function rateLimit(
             headers: {
               "X-RateLimit-Limit": limit.toString(),
               "X-RateLimit-Remaining": "0",
-              "X-RateLimit-Reset": (Math.floor(Date.now() / 1000) + (ttl > 0 ? ttl : windowSeconds)).toString(),
               "Retry-After": (ttl > 0 ? ttl : windowSeconds).toString(),
             },
           }
@@ -61,10 +59,10 @@ export async function rateLimit(
     }
 
     await redis.incr(key);
-
     return { success: true };
   } catch (error) {
     console.error("Rate limit error:", error);
+    // On any error, allow the request – never block
     return { success: true };
   }
 }
