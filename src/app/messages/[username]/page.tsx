@@ -125,6 +125,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
 
       const newPeer = new Peer({
         initiator: true,
+        trickle: false,
         stream,
         config: { iceServers },
       });
@@ -176,6 +177,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
 
       const newPeer = new Peer({
         initiator: false,
+        trickle: false,
         stream,
         config: { iceServers },
       });
