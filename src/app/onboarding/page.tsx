@@ -29,6 +29,7 @@ export default function OnboardingPage() {
   const [following, setFollowing] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (step === 1) {
@@ -39,6 +40,7 @@ export default function OnboardingPage() {
   const fetchSuggestedUsers = async () => {
     try {
       const res = await fetch("/api/users/suggested");
+      if (!res.ok) throw new Error("Failed to fetch suggestions");
       const data = await res.json();
       setSuggestedUsers(data);
     } catch (error) {
@@ -68,13 +70,19 @@ export default function OnboardingPage() {
   const handleNext = async () => {
     if (step === 0) {
       setSaving(true);
+      setError(null);
       try {
         const profileRes = await fetch("/api/user/profile", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, bio, location, website }),
         });
-        if (!profileRes.ok) throw new Error("Failed to update profile");
+
+        if (!profileRes.ok) {
+          const errorData = await profileRes.json().catch(() => ({ error: "Unknown error" }));
+          console.error("Profile update error:", errorData);
+          throw new Error(errorData.error || `Server error: ${profileRes.status}`);
+        }
 
         if (avatarFile) {
           const formData = new FormData();
@@ -83,36 +91,49 @@ export default function OnboardingPage() {
             method: "POST",
             body: formData,
           });
-          if (!avatarRes.ok) throw new Error("Failed to upload avatar");
+          if (!avatarRes.ok) {
+            const err = await avatarRes.json().catch(() => ({ error: "Avatar upload failed" }));
+            throw new Error(err.error || "Failed to upload avatar");
+          }
         }
 
         setStep(1);
-      } catch (error) {
-        console.error(error);
-        alert("Failed to save profile. Please try again.");
+      } catch (error: any) {
+        console.error("Onboarding step 0 error:", error);
+        setError(error.message || "Failed to save profile. Please try again.");
       } finally {
         setSaving(false);
       }
     } else if (step === 1) {
       setLoading(true);
+      setError(null);
       try {
-        // ─── FIXED: convert Set to array ──────────────────────────
+        // Follow each selected user
         for (const userId of Array.from(following)) {
-          await fetch(`/api/users/${userId}/follow`, {
+          const res = await fetch(`/api/users/${userId}/follow`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ action: "follow" }),
           });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({ error: "Failed to follow user" }));
+            throw new Error(err.error || `Failed to follow user ${userId}`);
+          }
         }
+
         const completeRes = await fetch("/api/user/onboarding-complete", {
           method: "POST",
         });
-        if (!completeRes.ok) throw new Error("Failed to complete onboarding");
+        if (!completeRes.ok) {
+          const err = await completeRes.json().catch(() => ({ error: "Failed to complete onboarding" }));
+          throw new Error(err.error || "Failed to complete onboarding");
+        }
+
         await update();
         router.push("/");
-      } catch (error) {
-        console.error(error);
-        alert("Failed to follow users. Please try again.");
+      } catch (error: any) {
+        console.error("Onboarding step 1 error:", error);
+        setError(error.message || "Failed to follow users. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -127,10 +148,13 @@ export default function OnboardingPage() {
       if (res.ok) {
         await update();
         router.push("/");
+      } else {
+        const err = await res.json().catch(() => ({ error: "Failed to skip" }));
+        throw new Error(err.error || "Failed to skip onboarding");
       }
-    } catch (error) {
-      console.error(error);
-      router.push("/");
+    } catch (error: any) {
+      console.error("Skip error:", error);
+      alert(error.message || "Failed to skip. Please try again.");
     }
   };
 
@@ -186,6 +210,13 @@ export default function OnboardingPage() {
             </div>
           ))}
         </div>
+
+        {/* ─── Error Display ─── */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
+            {error}
+          </div>
+        )}
 
         <div className="mb-6">
           {step === 0 && (
