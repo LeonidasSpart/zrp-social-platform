@@ -2,9 +2,9 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff, Heart } from "lucide-react";
+import { MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff, Heart, Camera, Loader2 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
@@ -56,6 +56,8 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const [pinnedPost, setPinnedPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"posts" | "replies" | "media" | "likes">("posts");
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isOwnProfile = session?.user?.id === profile?.id;
 
@@ -114,6 +116,36 @@ export default function ProfilePage({ params }: { params: { username: string } }
     fetchPosts();
   };
 
+  // ─── Upload banner ──────────────────────────────────────────────
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingBanner(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", "cover"); // we'll handle cover update
+
+    try {
+      const res = await fetch("/api/user/update-cover", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProfile((prev) => prev ? { ...prev, coverUrl: data.coverUrl } : null);
+      } else {
+        alert("Failed to upload banner");
+      }
+    } catch (error) {
+      console.error("Banner upload error:", error);
+      alert("Failed to upload banner");
+    } finally {
+      setUploadingBanner(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   if (loading || !profile) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -128,12 +160,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
     year: "numeric",
   });
 
-  // ─── Charity impact (dummy – replace with real data later) ───
   const impactMeals = Math.floor(Math.random() * 50) + 5;
 
   return (
     <div className="max-w-2xl mx-auto bg-white dark:bg-gray-900 min-h-screen">
-      {/* ─── Cover ─── */}
+      {/* ─── Banner ─── */}
       <div className="relative h-48 bg-gradient-to-r from-zrp-red/30 to-zrp-red/10">
         {profile.coverUrl && (
           <img
@@ -142,11 +173,37 @@ export default function ProfilePage({ params }: { params: { username: string } }
             className="w-full h-full object-cover"
           />
         )}
+        {/* Gradient overlay to keep text readable */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
+
+        {/* ─── Banner upload button (owner only) ─── */}
+        {isOwnProfile && (
+          <div className="absolute bottom-2 right-2">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingBanner}
+              className="bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
+              title="Change banner"
+            >
+              {uploadingBanner ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Camera className="w-5 h-5" />
+              )}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleBannerUpload}
+              className="hidden"
+            />
+          </div>
+        )}
       </div>
 
-      {/* ─── Header: Avatar on the RIGHT, info on the LEFT ─── */}
-      <div className="relative px-4 -mt-16 flex items-end justify-between">
+      {/* ─── Profile info (now clearly below the banner) ─── */}
+      <div className="px-4 -mt-10 relative z-10 flex items-end justify-between">
         {/* LEFT: Name, username, bio, location, stats */}
         <div className="pb-2 flex-1 pr-4">
           <div className="flex items-center gap-1 flex-wrap">
@@ -169,7 +226,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
             {profile.location && (
               <span className="flex items-center gap-1">
                 <MapPin className="w-4 h-4" />
-                {profile.location}
+                {profile.location.replace(/^@/, "")}
               </span>
             )}
             {profile.website && (
@@ -211,8 +268,8 @@ export default function ProfilePage({ params }: { params: { username: string } }
             </Link>
           </div>
 
-          {/* ─── Charity Impact (unique to ZRP) ─── */}
-          <div className="mt-3 flex items-center gap-2 text-xs">
+          {/* ─── Charity Impact ─── */}
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
             <span className="bg-zrp-red/10 text-zrp-red px-3 py-0.5 rounded-full flex items-center gap-1">
               <Heart className="w-3.5 h-3.5" />
               Impact: {impactMeals} meals 🧡
@@ -256,7 +313,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
         </div>
       </div>
 
-      {/* ─── Tabs: Rounded pills (instead of underline) ─── */}
+      {/* ─── Tabs (rounded pills) ─── */}
       <div className="flex gap-2 mt-4 px-4">
         {(["posts", "replies", "media", "likes"] as const).map((tab) => (
           <button
@@ -277,7 +334,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
       <div className="mt-4 px-4">
         {activeTab === "posts" && (
           <div className="space-y-4">
-            {/* Pinned Post */}
             {pinnedPost && (
               <div className="relative border border-blue-200 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-900/10 rounded-xl p-3">
                 <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-medium mb-2">
@@ -305,7 +361,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
               </div>
             )}
 
-            {/* Regular Posts */}
             {posts.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
                 <p>No posts yet.</p>
