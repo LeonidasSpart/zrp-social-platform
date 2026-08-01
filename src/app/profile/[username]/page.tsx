@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff, CheckCircle } from "lucide-react";
+import { MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff, Heart } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
@@ -110,7 +110,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
   };
 
   const handlePinToggle = () => {
-    // Refresh profile and posts after pin toggle
     fetchProfile();
     fetchPosts();
   };
@@ -129,6 +128,9 @@ export default function ProfilePage({ params }: { params: { username: string } }
     year: "numeric",
   });
 
+  // ─── Charity impact (dummy – replace with real data later) ───
+  const impactMeals = Math.floor(Math.random() * 50) + 5;
+
   return (
     <div className="max-w-2xl mx-auto bg-white dark:bg-gray-900 min-h-screen">
       {/* ─── Cover ─── */}
@@ -140,14 +142,90 @@ export default function ProfilePage({ params }: { params: { username: string } }
             className="w-full h-full object-cover"
           />
         )}
-        {/* Gradient overlay to ensure text readability */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
       </div>
 
-      {/* ─── Avatar & Actions ─── */}
+      {/* ─── Header: Avatar on the RIGHT, info on the LEFT ─── */}
       <div className="relative px-4 -mt-16 flex items-end justify-between">
-        <div className="flex items-end gap-4">
-          <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 border-4 border-white dark:border-gray-900 overflow-hidden flex-shrink-0 shadow-lg">
+        {/* LEFT: Name, username, bio, location, stats */}
+        <div className="pb-2 flex-1 pr-4">
+          <div className="flex items-center gap-1 flex-wrap">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+              {profile.name || profile.username}
+            </h1>
+            {profile.badgeType && <VerifiedBadge badgeType={profile.badgeType} />}
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">@{profile.username}</p>
+
+          {/* Bio */}
+          {profile.bio && (
+            <p className="mt-2 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+              {profile.bio}
+            </p>
+          )}
+
+          {/* Location, website, join date */}
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            {profile.location && (
+              <span className="flex items-center gap-1">
+                <MapPin className="w-4 h-4" />
+                {profile.location}
+              </span>
+            )}
+            {profile.website && (
+              <a
+                href={profile.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-blue-600 hover:underline"
+              >
+                <LinkIcon className="w-4 h-4" />
+                {profile.website.replace(/^https?:\/\//, "")}
+              </a>
+            )}
+            <span className="flex items-center gap-1">
+              <Calendar className="w-4 h-4" />
+              Joined {formattedJoinDate}
+            </span>
+          </div>
+
+          {/* Stats */}
+          <div className="flex gap-4 mt-2">
+            <Link
+              href={`/profile/${profile.username}/following`}
+              className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
+            >
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {profile._count.following}
+              </span>{" "}
+              Following
+            </Link>
+            <Link
+              href={`/profile/${profile.username}/followers`}
+              className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
+            >
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {profile._count.followers}
+              </span>{" "}
+              Followers
+            </Link>
+          </div>
+
+          {/* ─── Charity Impact (unique to ZRP) ─── */}
+          <div className="mt-3 flex items-center gap-2 text-xs">
+            <span className="bg-zrp-red/10 text-zrp-red px-3 py-0.5 rounded-full flex items-center gap-1">
+              <Heart className="w-3.5 h-3.5" />
+              Impact: {impactMeals} meals 🧡
+            </span>
+            <span className="text-gray-400 text-xs">
+              35% of profits go to charity
+            </span>
+          </div>
+        </div>
+
+        {/* RIGHT: Avatar + action buttons */}
+        <div className="flex flex-col items-end gap-2 pb-2">
+          <div className="w-24 h-24 rounded-full border-4 border-white dark:border-gray-900 shadow-lg overflow-hidden flex-shrink-0">
             {profile.avatarUrl ? (
               <img
                 src={profile.avatarUrl}
@@ -155,103 +233,39 @@ export default function ProfilePage({ params }: { params: { username: string } }
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-gray-600 dark:text-gray-300">
+              <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700">
                 {(profile.name || profile.username)[0].toUpperCase()}
               </div>
             )}
           </div>
-          <div className="pb-2">
-            <div className="flex items-center gap-1">
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                {profile.name || profile.username}
-              </h1>
-              {profile.badgeType && <VerifiedBadge badgeType={profile.badgeType} />}
-            </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">@{profile.username}</p>
+          <div>
+            {isOwnProfile ? (
+              <Link
+                href="/settings"
+                className="flex items-center gap-1 px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+              >
+                <Pencil className="w-4 h-4" />
+                Edit Profile
+              </Link>
+            ) : (
+              <button className="px-4 py-1.5 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed transition">
+                Follow
+              </button>
+            )}
           </div>
         </div>
-
-        <div className="pb-2 flex gap-2">
-          {isOwnProfile ? (
-            <Link
-              href="/settings"
-              className="flex items-center gap-1 px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-            >
-              <Pencil className="w-4 h-4" />
-              Edit Profile
-            </Link>
-          ) : (
-            <button className="px-4 py-1.5 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed transition">
-              Follow
-            </button>
-          )}
-        </div>
       </div>
 
-      {/* ─── Bio ─── */}
-      <div className="px-4 mt-2 space-y-1">
-        {profile.bio && (
-          <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap text-sm">
-            {profile.bio}
-          </p>
-        )}
-
-        <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-          {profile.location && (
-            <span className="flex items-center gap-1">
-              <MapPin className="w-4 h-4" />
-              {profile.location}
-            </span>
-          )}
-          {profile.website && (
-            <a
-              href={profile.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-blue-600 hover:underline"
-            >
-              <LinkIcon className="w-4 h-4" />
-              {profile.website.replace(/^https?:\/\//, "")}
-            </a>
-          )}
-          <span className="flex items-center gap-1">
-            <Calendar className="w-4 h-4" />
-            Joined {formattedJoinDate}
-          </span>
-        </div>
-
-        <div className="flex gap-4 mt-2">
-          <Link
-            href={`/profile/${profile.username}/following`}
-            className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
-          >
-            <span className="font-semibold text-gray-900 dark:text-white">
-              {profile._count.following}
-            </span>{" "}
-            Following
-          </Link>
-          <Link
-            href={`/profile/${profile.username}/followers`}
-            className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
-          >
-            <span className="font-semibold text-gray-900 dark:text-white">
-              {profile._count.followers}
-            </span>{" "}
-            Followers
-          </Link>
-        </div>
-      </div>
-
-      {/* ─── Tabs ─── */}
-      <div className="flex border-b border-gray-200 dark:border-gray-700 mt-4">
+      {/* ─── Tabs: Rounded pills (instead of underline) ─── */}
+      <div className="flex gap-2 mt-4 px-4">
         {(["posts", "replies", "media", "likes"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+            className={`px-4 py-1.5 text-sm font-medium rounded-full transition ${
               activeTab === tab
-                ? "text-zrp-red border-b-2 border-zrp-red"
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                ? "bg-zrp-red text-white"
+                : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
             }`}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
