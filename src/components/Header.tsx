@@ -7,6 +7,14 @@ import { signOut, useSession } from "next-auth/react";
 import { Home, Compass, Search, MessageSquare, Bell, User, Sun, Moon, Menu, X, LayoutDashboard, Bookmark, LogOut } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 
+// ─── Type for navigation items ──────────────────────────────────────
+type NavItem = {
+  href: string;
+  icon: React.ElementType | null;
+  label: string;
+  badge?: number; // optional badge count
+};
+
 export default function Header() {
   const { data: session } = useSession();
   const { theme, toggleTheme } = useTheme();
@@ -51,7 +59,7 @@ export default function Header() {
   }, []);
 
   // ─── Public nav links ──────────────────────────────────────────────
-  const publicNavLinks = [
+  const publicNavLinks: NavItem[] = [
     { href: "/", icon: Home, label: "Home" },
     { href: "/about", icon: null, label: "About" },
     { href: "/login", icon: null, label: "Login" },
@@ -59,7 +67,7 @@ export default function Header() {
   ];
 
   // ─── Authenticated nav links ──────────────────────────────────────
-  const authNavLinks = [
+  const authNavLinks: NavItem[] = [
     { href: "/", icon: Home, label: "Home" },
     { href: "/explore", icon: Compass, label: "Explore" },
     { href: "/search", icon: Search, label: "Search" },
