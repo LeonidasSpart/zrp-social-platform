@@ -4,13 +4,15 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ArrowLeft, UserCheck, UserPlus, Loader2 } from "lucide-react";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 interface User {
   id: string;
   username: string;
-  name: string;
-  avatarUrl?: string;
-  bio?: string;
+  name: string | null;
+  avatarUrl: string | null;
+  badgeType: string | null;
   isFollowing: boolean;
 }
 
@@ -19,6 +21,7 @@ export default function FollowingPage({ params }: { params: { username: string }
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [followLoading, setFollowLoading] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -33,6 +36,7 @@ export default function FollowingPage({ params }: { params: { username: string }
   }, [params.username, status]);
 
   const fetchFollowing = async () => {
+    setLoading(true);
     try {
       const res = await fetch(`/api/users/${params.username}/following`);
       const data = await res.json();
@@ -44,72 +48,115 @@ export default function FollowingPage({ params }: { params: { username: string }
     }
   };
 
-  const handleFollow = async (userId: string) => {
+  const handleFollow = async (targetUserId: string, currentState: boolean) => {
+    if (!session) return;
+    setFollowLoading(targetUserId);
     try {
       const res = await fetch(`/api/users/${params.username}/follow`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: currentState ? "unfollow" : "follow" }),
       });
       if (res.ok) {
-        setUsers(users.map((u) =>
-          u.id === userId ? { ...u, isFollowing: !u.isFollowing } : u
-        ));
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === targetUserId ? { ...u, isFollowing: !currentState } : u
+          )
+        );
       }
     } catch (error) {
-      console.error("Error toggling follow:", error);
+      console.error("Follow error:", error);
+    } finally {
+      setFollowLoading(null);
     }
   };
 
-  if (status === "loading" || loading) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">Loading...</div>
+      <div className="max-w-2xl mx-auto p-4 flex justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-zrp-red" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-4 px-4">
-      <div className="mb-4">
+    <div className="max-w-2xl mx-auto bg-white dark:bg-gray-900 min-h-screen p-4">
+      <div className="flex items-center gap-3 mb-4">
         <Link
           href={`/profile/${params.username}`}
-          className="text-blue-600 hover:underline text-sm"
+          className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
         >
-          ← Back to profile
+          <ArrowLeft className="w-5 h-5" />
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900 mt-2">Following</h1>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+          Following
+        </h1>
       </div>
 
       {users.length === 0 ? (
-        <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8 border border-gray-200 text-center">
-          <p className="text-gray-500">Not following anyone yet</p>
+        <div className="text-center py-12 text-gray-500">
+          <p>Not following anyone yet.</p>
         </div>
       ) : (
         <div className="space-y-2">
           {users.map((user) => (
             <div
               key={user.id}
-              className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 hover:bg-gray-50 transition flex items-center justify-between"
+              className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition"
             >
-              <Link href={`/profile/${user.username}`} className="flex items-center gap-3 flex-1">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold flex-shrink-0">
-                  {user.name?.[0] || "?"}
+              <Link
+                href={`/profile/${user.username}`}
+                className="flex items-center gap-3 flex-1 min-w-0"
+              >
+                <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
+                  {user.avatarUrl ? (
+                    <img
+                      src={user.avatarUrl}
+                      alt={user.name || user.username}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold">
+                      {(user.name || user.username)[0].toUpperCase()}
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <p className="font-semibold text-gray-900">{user.name}</p>
-                  <p className="text-sm text-gray-500">@{user.username}</p>
-                  {user.bio && <p className="text-xs text-gray-400 truncate">{user.bio}</p>}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1">
+                    <span className="font-semibold text-gray-900 dark:text-white truncate">
+                      {user.name || user.username}
+                    </span>
+                    {user.badgeType && <VerifiedBadge badgeType={user.badgeType} />}
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                    @{user.username}
+                  </p>
                 </div>
               </Link>
+
               {session?.user?.id !== user.id && (
                 <button
-                  onClick={() => handleFollow(user.id)}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition ${
+                  onClick={() => handleFollow(user.id, user.isFollowing)}
+                  disabled={followLoading === user.id}
+                  className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium transition ${
                     user.isFollowing
-                      ? "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                      : "bg-blue-600 text-white hover:bg-blue-700"
+                      ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                      : "bg-zrp-red text-white hover:bg-zrp-darkRed"
                   }`}
                 >
-                  {user.isFollowing ? "Unfollow" : "Follow"}
+                  {followLoading === user.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : user.isFollowing ? (
+                    <>
+                      <UserCheck className="w-4 h-4" />
+                      Following
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4" />
+                      Follow
+                    </>
+                  )}
                 </button>
               )}
             </div>
