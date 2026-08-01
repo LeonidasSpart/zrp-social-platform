@@ -1,41 +1,58 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 import { rateLimit } from "@/lib/rate-limit";
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
-  // ─── EXEMPT NEXT.AUTH CRITICAL ROUTES ──────────────────────────
-  if (
-    path.startsWith("/api/auth/session") ||
-    path.startsWith("/api/auth/callback") ||
-    path.startsWith("/api/auth/csrf") ||
-    path.startsWith("/api/auth/providers") ||
-    path.startsWith("/api/auth/signin") ||
-    path.startsWith("/api/auth/signout")
-  ) {
+  // ─── EXEMPT PATHS ──────────────────────────────────────────────────
+  const exemptPaths = [
+    "/api/auth/session",
+    "/api/auth/callback",
+    "/api/auth/csrf",
+    "/api/auth/providers",
+    "/api/auth/signin",
+    "/api/auth/signout",
+    "/api",
+    "/_next",
+    "/favicon.ico",
+    "/login",
+    "/signup",
+    "/forgot-password",
+    "/reset-password",
+    "/onboarding", // allow the onboarding page itself
+  ];
+
+  if (exemptPaths.some((p) => path.startsWith(p))) {
     return NextResponse.next();
   }
 
-  // ─── RATE LIMIT ONLY LOGIN & REGISTER ──────────────────────────
+  // ─── RATE LIMIT (only for auth endpoints we didn't exempt) ──────
   if (path.startsWith("/api/auth")) {
-    // Only apply to login/register endpoints, not session/callback
     if (path.includes("login") || path.includes("register") || path.includes("signup")) {
       const result = await rateLimit(req, {
         limit: 5,
-        window: 900, // 15 minutes
+        window: 900,
         type: "auth-login",
       });
-      if (!result.success) {
-        return result.response;
-      }
+      if (!result.success) return result.response;
+    }
+    return NextResponse.next();
+  }
+
+  // ─── ONBOARDING CHECK ─────────────────────────────────────────────
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  if (token) {
+    // If authenticated and onboarding not completed, redirect to /onboarding
+    if (token.onboardingCompleted === false) {
+      return NextResponse.redirect(new URL("/onboarding", req.url));
     }
   }
 
-  // ─── RATE LIMIT OTHER API ROUTES ───────────────────────────────
+  // ─── RATE LIMIT OTHER API ROUTES (if needed) ──────────────────
   if (path.startsWith("/api/") && !path.startsWith("/api/auth")) {
-    // Add specific rate limits for other endpoints
-    // We'll handle these inside individual routes instead of middleware
-    // to avoid blocking legitimate requests
+    // If you want to rate limit other API routes, do it here.
+    // Otherwise just let them through.
     return NextResponse.next();
   }
 
@@ -43,5 +60,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: "/api/:path*",
+  matcher: "/((?!_next/static|_next/image|favicon.ico).*)",
 };
