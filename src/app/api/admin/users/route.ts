@@ -33,7 +33,8 @@ export async function GET(req: NextRequest) {
           name: true,
           email: true,
           createdAt: true,
-          isAdmin: true,
+          isAdmin: true,          // kept for compatibility
+          role: true,             // ← added
           badgeType: true,
           _count: {
             select: {
