@@ -7,7 +7,6 @@ import Link from "next/link";
 import { MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff, CheckCircle } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
-import { format } from "date-fns";
 
 interface UserProfile {
   id: string;
