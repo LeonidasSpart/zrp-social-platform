@@ -7,6 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── ROLE ENUM ──────────────────────────────────────────────────────
+enum Role {
+  USER
+  MODERATOR
+  ADMIN
+}
+
 model User {
   id          String    @id @default(cuid())
   email       String    @unique
@@ -31,7 +38,7 @@ model User {
   avatarUrl   String?   @db.Text
   coverUrl    String?   @db.Text
   isPrivate   Boolean   @default(false)
-  isAdmin     Boolean   @default(false)
+  isAdmin     Boolean   @default(false)   // kept for compatibility
   badgeType   String?
   location    String?
   country     String?
@@ -39,6 +46,9 @@ model User {
   usernameChangedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  // ─── ROLE (ADMIN, MODERATOR, USER) ──────────────────────────────
+  role        Role      @default(USER)
 
   // ─── PINNED POST ──────────────────────────────────────────────────
   pinnedPostId  String?   @unique
