@@ -8,6 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     const { name, username, email, password } = await req.json();
 
+    // ─── Validation ──────────────────────────────────────────────
     if (!email || !password || !username) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
@@ -16,30 +17,42 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Password too short" }, { status: 400 });
     }
 
-    const existing = await prisma.user.findFirst({
-      where: { OR: [{ email }, { username }] },
-    });
-    if (existing) {
-      return NextResponse.json({ error: "Email or username taken" }, { status: 400 });
+    if (username.length < 3 || username.length > 20) {
+      return NextResponse.json({ error: "Username must be 3-20 characters" }, { status: 400 });
     }
 
+    // ─── Check existing user ────────────────────────────────────
+    const existing = await prisma.user.findFirst({
+      where: {
+        OR: [{ email }, { username }],
+      },
+    });
+    if (existing) {
+      return NextResponse.json({ error: "Email or username already taken" }, { status: 400 });
+    }
+
+    // ─── Hash password & generate token ────────────────────────
     const hashed = await bcrypt.hash(password, 10);
     const token = crypto.randomBytes(32).toString("hex");
-    const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
+    // ─── Create user (explicitly set role) ─────────────────────
     const user = await prisma.user.create({
       data: {
-        name,
+        name: name || null,
         username,
         email,
         password: hashed,
+        role: "USER", // ✅ explicit default
         verificationToken: token,
         verificationTokenExpiry: expiry,
       },
     });
 
-    // Send email (don't await to avoid blocking response)
-    sendVerificationEmail(email, token).catch(console.error);
+    // ─── Send verification email (non‑blocking) ────────────────
+    sendVerificationEmail(email, token).catch((err) => {
+      console.error("Email sending failed:", err);
+    });
 
     return NextResponse.json(
       { message: "User created. Please check your email to verify your account." },
@@ -47,6 +60,10 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     console.error("Signup error:", error);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    // Log the full error for debugging
+    return NextResponse.json(
+      { error: "Registration failed. Please try again later." },
+      { status: 500 }
+    );
   }
 }
