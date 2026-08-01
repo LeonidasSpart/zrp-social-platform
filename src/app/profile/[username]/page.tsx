@@ -6,7 +6,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import {
   MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff,
-  Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck
+  Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck, Share2
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -50,7 +50,6 @@ interface Post {
     reposts: number;
   };
   liked?: boolean;
-  // ─── For replies ──────────────────────────────────────────────────
   replyTo?: {
     id: string;
     content: string;
@@ -175,6 +174,29 @@ export default function ProfilePage({ params }: { params: { username: string } }
       console.error("Follow error:", error);
     } finally {
       setFollowLoading(false);
+    }
+  };
+
+  // ─── Share Profile ──────────────────────────────────────────────────
+  const handleShareProfile = async () => {
+    const url = `${window.location.origin}/profile/${profile?.username}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${profile?.name || profile?.username} on ZRP Social`,
+          text: `Check out ${profile?.name || profile?.username}'s profile on ZRP Social!`,
+          url,
+        });
+      } catch {
+        // User cancelled
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        alert("Profile link copied to clipboard!");
+      } catch {
+        alert("Share not supported on this device.");
+      }
     }
   };
 
@@ -473,6 +495,15 @@ export default function ProfilePage({ params }: { params: { username: string } }
           </div>
 
           <div className="flex flex-wrap gap-2 justify-end">
+            {/* ─── Share Profile ───────────────────────────────────────── */}
+            <button
+              onClick={handleShareProfile}
+              className="flex items-center gap-1 px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+            >
+              <Share2 className="w-4 h-4" />
+              Share Profile
+            </button>
+
             {isOwnProfile ? (
               <Link
                 href="/settings"
