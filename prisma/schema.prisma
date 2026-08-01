@@ -18,7 +18,7 @@ model User {
   resetTokenExpiry DateTime?
 
   // ─── Email Verification ──────────────────────────────────────────
-  emailVerified        DateTime?   // null = not verified
+  emailVerified        DateTime?
   verificationToken    String?     @unique
   verificationTokenExpiry DateTime?
 
@@ -32,13 +32,17 @@ model User {
   coverUrl    String?
   isPrivate   Boolean   @default(false)
   isAdmin     Boolean   @default(false)
-  badgeType   String?   // null | "verified" | "organization" | "government"
+  badgeType   String?
   location    String?
   country     String?
   website     String?
   usernameChangedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  // ─── PINNED POST ──────────────────────────────────────────────────
+  pinnedPostId  String?   @unique
+  pinnedPost    Post?     @relation("PinnedPost", fields: [pinnedPostId], references: [id], onDelete: SetNull)
 
   posts       Post[]
   comments    Comment[]
@@ -168,7 +172,7 @@ model Notification {
 model Message {
   id          String    @id @default(cuid())
   content     String    @db.Text
-  imageUrl    String?   // ✨ NEW – allows image attachments in chat
+  imageUrl    String?
   senderId    String
   sender      User      @relation("Message_sender", fields: [senderId], references: [id], onDelete: Cascade)
   receiverId  String
