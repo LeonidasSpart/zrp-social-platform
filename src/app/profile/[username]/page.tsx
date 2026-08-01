@@ -4,9 +4,10 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Pin, PinOff, MapPin, Link as LinkIcon, Calendar, Users, MessageSquare } from "lucide-react";
+import { MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff, CheckCircle } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { format } from "date-fns";
 
 interface UserProfile {
   id: string;
@@ -19,6 +20,7 @@ interface UserProfile {
   website: string | null;
   badgeType: string | null;
   createdAt: string;
+  isAdmin: boolean;
   _count: {
     posts: number;
     followers: number;
@@ -54,9 +56,9 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const [posts, setPosts] = useState<Post[]>([]);
   const [pinnedPost, setPinnedPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"posts" | "followers" | "following">("posts");
+  const [activeTab, setActiveTab] = useState<"posts" | "replies" | "media" | "likes">("posts");
 
-  const isOwnProfile = session?.user?.username === params.username;
+  const isOwnProfile = session?.user?.id === profile?.id;
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -122,17 +124,16 @@ export default function ProfilePage({ params }: { params: { username: string } }
     );
   }
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      month: "long",
-      year: "numeric",
-    });
-  };
+  const joinDate = new Date(profile.createdAt);
+  const formattedJoinDate = joinDate.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
 
   return (
-    <div className="max-w-2xl mx-auto py-4 px-4">
-      {/* ─── Cover Image ─── */}
-      <div className="relative h-48 bg-gradient-to-r from-zrp-red/20 to-zrp-red/5 rounded-t-lg overflow-hidden">
+    <div className="max-w-2xl mx-auto bg-white dark:bg-gray-900 min-h-screen">
+      {/* ─── Cover ─── */}
+      <div className="relative h-48 bg-gradient-to-r from-zrp-red/30 to-zrp-red/10">
         {profile.coverUrl && (
           <img
             src={profile.coverUrl}
@@ -140,52 +141,63 @@ export default function ProfilePage({ params }: { params: { username: string } }
             className="w-full h-full object-cover"
           />
         )}
+        {/* Gradient overlay to ensure text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
       </div>
 
-      {/* ─── Avatar ─── */}
-      <div className="flex items-end -mt-12 px-4">
-        <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 border-4 border-white dark:border-gray-900 overflow-hidden">
-          {profile.avatarUrl ? (
-            <img
-              src={profile.avatarUrl}
-              alt={profile.name || profile.username}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-gray-600 dark:text-gray-300">
-              {(profile.name || profile.username)[0].toUpperCase()}
+      {/* ─── Avatar & Actions ─── */}
+      <div className="relative px-4 -mt-16 flex items-end justify-between">
+        <div className="flex items-end gap-4">
+          <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 border-4 border-white dark:border-gray-900 overflow-hidden flex-shrink-0 shadow-lg">
+            {profile.avatarUrl ? (
+              <img
+                src={profile.avatarUrl}
+                alt={profile.name || profile.username}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-gray-600 dark:text-gray-300">
+                {(profile.name || profile.username)[0].toUpperCase()}
+              </div>
+            )}
+          </div>
+          <div className="pb-2">
+            <div className="flex items-center gap-1">
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                {profile.name || profile.username}
+              </h1>
+              {profile.badgeType && <VerifiedBadge badgeType={profile.badgeType} />}
             </div>
-          )}
+            <p className="text-sm text-gray-500 dark:text-gray-400">@{profile.username}</p>
+          </div>
         </div>
-        <div className="ml-auto flex gap-2 pb-2">
-          {isOwnProfile && (
+
+        <div className="pb-2 flex gap-2">
+          {isOwnProfile ? (
             <Link
               href="/settings"
-              className="px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+              className="flex items-center gap-1 px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
             >
+              <Pencil className="w-4 h-4" />
               Edit Profile
             </Link>
+          ) : (
+            <button className="px-4 py-1.5 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed transition">
+              Follow
+            </button>
           )}
         </div>
       </div>
 
-      {/* ─── Profile Info ─── */}
-      <div className="px-4 mt-2">
-        <div className="flex items-center gap-2">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-            {profile.name || profile.username}
-          </h1>
-          {profile.badgeType && <VerifiedBadge badgeType={profile.badgeType} />}
-        </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400">@{profile.username}</p>
-
+      {/* ─── Bio ─── */}
+      <div className="px-4 mt-2 space-y-1">
         {profile.bio && (
-          <p className="mt-2 text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+          <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap text-sm">
             {profile.bio}
           </p>
         )}
 
-        <div className="flex flex-wrap gap-3 mt-2 text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           {profile.location && (
             <span className="flex items-center gap-1">
               <MapPin className="w-4 h-4" />
@@ -205,11 +217,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
           )}
           <span className="flex items-center gap-1">
             <Calendar className="w-4 h-4" />
-            Joined {formatDate(profile.createdAt)}
+            Joined {formattedJoinDate}
           </span>
         </div>
 
-        <div className="flex gap-4 mt-3">
+        <div className="flex gap-4 mt-2">
           <Link
             href={`/profile/${profile.username}/following`}
             className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
@@ -233,48 +245,31 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
       {/* ─── Tabs ─── */}
       <div className="flex border-b border-gray-200 dark:border-gray-700 mt-4">
-        <button
-          onClick={() => setActiveTab("posts")}
-          className={`px-4 py-2 text-sm font-medium transition ${
-            activeTab === "posts"
-              ? "text-zrp-red border-b-2 border-zrp-red"
-              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-          }`}
-        >
-          Posts
-        </button>
-        <button
-          onClick={() => setActiveTab("followers")}
-          className={`px-4 py-2 text-sm font-medium transition ${
-            activeTab === "followers"
-              ? "text-zrp-red border-b-2 border-zrp-red"
-              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-          }`}
-        >
-          Followers
-        </button>
-        <button
-          onClick={() => setActiveTab("following")}
-          className={`px-4 py-2 text-sm font-medium transition ${
-            activeTab === "following"
-              ? "text-zrp-red border-b-2 border-zrp-red"
-              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-          }`}
-        >
-          Following
-        </button>
+        {(["posts", "replies", "media", "likes"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+              activeTab === tab
+                ? "text-zrp-red border-b-2 border-zrp-red"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+            }`}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
       </div>
 
       {/* ─── Content ─── */}
-      <div className="mt-4">
+      <div className="mt-4 px-4">
         {activeTab === "posts" && (
           <div className="space-y-4">
             {/* Pinned Post */}
             {pinnedPost && (
-              <div className="relative border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10 rounded-lg p-3">
+              <div className="relative border border-blue-200 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-900/10 rounded-xl p-3">
                 <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-medium mb-2">
                   <Pin className="w-3.5 h-3.5" />
-                  Pinned Post
+                  Pinned
                   {isOwnProfile && (
                     <button
                       onClick={async () => {
@@ -304,22 +299,21 @@ export default function ProfilePage({ params }: { params: { username: string } }
               </div>
             ) : (
               posts.map((post) => {
-                // Skip if this post is pinned (already shown above)
                 if (pinnedPost && post.id === pinnedPost.id) return null;
-                return (
-                  <PostCard key={post.id} post={post} onUpdate={fetchPosts} />
-                );
+                return <PostCard key={post.id} post={post} onUpdate={fetchPosts} />;
               })
             )}
           </div>
         )}
 
-        {activeTab === "followers" && (
-          <div className="text-center py-8 text-gray-500">Followers list coming soon</div>
+        {activeTab === "replies" && (
+          <div className="text-center py-8 text-gray-500">Replies coming soon</div>
         )}
-
-        {activeTab === "following" && (
-          <div className="text-center py-8 text-gray-500">Following list coming soon</div>
+        {activeTab === "media" && (
+          <div className="text-center py-8 text-gray-500">Media coming soon</div>
+        )}
+        {activeTab === "likes" && (
+          <div className="text-center py-8 text-gray-500">Likes coming soon</div>
         )}
       </div>
     </div>
