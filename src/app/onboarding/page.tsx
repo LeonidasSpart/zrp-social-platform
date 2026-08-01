@@ -106,7 +106,7 @@ export default function OnboardingPage() {
       setLoading(true);
       setError(null);
       try {
-        // ─── Use username instead of ID ──────────────────────────────
+        // Follow selected users using their username (not ID)
         const selectedUsers = suggestedUsers.filter((user) => following.has(user.id));
         for (const user of selectedUsers) {
           const res = await fetch(`/api/users/${user.username}/follow`, {
@@ -128,8 +128,9 @@ export default function OnboardingPage() {
           throw new Error(err.error || "Failed to complete onboarding");
         }
 
+        // ─── Force a full page reload to refresh the session ───
         await update();
-        router.push("/");
+        window.location.href = "/";
       } catch (error: any) {
         console.error("Onboarding step 1 error:", error);
         setError(error.message || "Failed to follow users. Please try again.");
