@@ -2,9 +2,12 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
-import { MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff, Heart, Camera, Loader2 } from "lucide-react";
+import {
+  MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff,
+  Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck
+} from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
@@ -26,6 +29,7 @@ interface UserProfile {
     following: number;
   };
   pinnedPostId: string | null;
+  isFollowedByMe?: boolean;
 }
 
 interface Post {
@@ -48,6 +52,8 @@ interface Post {
   liked?: boolean;
 }
 
+type TabType = "posts" | "replies" | "media" | "likes";
+
 export default function ProfilePage({ params }: { params: { username: string } }) {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -55,30 +61,23 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const [posts, setPosts] = useState<Post[]>([]);
   const [pinnedPost, setPinnedPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"posts" | "replies" | "media" | "likes">("posts");
+  const [activeTab, setActiveTab] = useState<TabType>("posts");
   const [uploadingBanner, setUploadingBanner] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const isOwnProfile = session?.user?.id === profile?.id;
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
-  }, [status, router]);
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      fetchProfile();
-      fetchPosts();
-    }
-  }, [params.username, status]);
-
+  // ─── Fetch profile & follow status ──────────────────────────────────
   const fetchProfile = async () => {
     try {
       const res = await fetch(`/api/users/${params.username}`);
       const data = await res.json();
       setProfile(data);
+      setIsFollowing(data.isFollowedByMe || false);
       if (data.pinnedPostId) {
         fetchPinnedPost(data.pinnedPostId);
       }
@@ -99,9 +98,19 @@ export default function ProfilePage({ params }: { params: { username: string } }
     }
   };
 
-  const fetchPosts = async () => {
+  // ─── Fetch posts based on active tab ──────────────────────────────
+  const fetchPosts = useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await fetch(`/api/users/${params.username}/posts`);
+      let endpoint = `/api/users/${params.username}/posts`;
+      if (activeTab === "replies") {
+        endpoint = `/api/users/${params.username}/replies`;
+      } else if (activeTab === "media") {
+        endpoint = `/api/users/${params.username}/media`;
+      } else if (activeTab === "likes") {
+        endpoint = `/api/users/${params.username}/likes`;
+      }
+      const res = await fetch(endpoint);
       const data = await res.json();
       setPosts(data);
     } catch (error) {
@@ -109,14 +118,57 @@ export default function ProfilePage({ params }: { params: { username: string } }
     } finally {
       setLoading(false);
     }
+  }, [params.username, activeTab]);
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetchProfile();
+    }
+  }, [params.username, status]);
+
+  useEffect(() => {
+    if (status === "authenticated" && profile) {
+      fetchPosts();
+    }
+  }, [activeTab, profile, status, fetchPosts]);
+
+  // ─── Follow / Unfollow ──────────────────────────────────────────────
+  const handleFollow = async () => {
+    if (!session || isOwnProfile) return;
+    setFollowLoading(true);
+    try {
+      const res = await fetch(`/api/users/${params.username}/follow`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: isFollowing ? "unfollow" : "follow" }),
+      });
+      if (res.ok) {
+        setIsFollowing(!isFollowing);
+        setProfile((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            _count: {
+              ...prev._count,
+              followers: isFollowing ? prev._count.followers - 1 : prev._count.followers + 1,
+            },
+          };
+        });
+      }
+    } catch (error) {
+      console.error("Follow error:", error);
+    } finally {
+      setFollowLoading(false);
+    }
   };
 
-  const handlePinToggle = () => {
-    fetchProfile();
-    fetchPosts();
-  };
-
-  // ─── Upload banner ──────────────────────────────────────────────
+  // ─── Banner upload ──────────────────────────────────────────────────
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -142,16 +194,50 @@ export default function ProfilePage({ params }: { params: { username: string } }
       alert("Failed to upload banner");
     } finally {
       setUploadingBanner(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (bannerInputRef.current) bannerInputRef.current.value = "";
     }
   };
 
-  if (loading || !profile) {
+  // ─── Avatar upload ──────────────────────────────────────────────────
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingAvatar(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", "avatar");
+
+    try {
+      const res = await fetch("/api/user/update-avatar", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProfile((prev) => prev ? { ...prev, avatarUrl: data.avatarUrl } : null);
+      } else {
+        alert("Failed to upload avatar");
+      }
+    } catch (error) {
+      console.error("Avatar upload error:", error);
+      alert("Failed to upload avatar");
+    } finally {
+      setUploadingAvatar(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+    }
+  };
+
+  if (loading && !profile) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-gray-500">Loading...</div>
       </div>
     );
+  }
+
+  if (!profile) {
+    return <div className="text-center py-12 text-gray-500">User not found</div>;
   }
 
   const joinDate = new Date(profile.createdAt);
@@ -160,6 +246,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
     year: "numeric",
   });
 
+  // Dummy impact – replace with real data later
   const impactMeals = Math.floor(Math.random() * 50) + 5;
 
   return (
@@ -175,11 +262,10 @@ export default function ProfilePage({ params }: { params: { username: string } }
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
 
-        {/* ─── Banner upload button (owner only) ─── */}
         {isOwnProfile && (
           <div className="absolute bottom-2 right-2">
             <button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => bannerInputRef.current?.click()}
               disabled={uploadingBanner}
               className="bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
               title="Change banner"
@@ -191,7 +277,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
               )}
             </button>
             <input
-              ref={fileInputRef}
+              ref={bannerInputRef}
               type="file"
               accept="image/*"
               onChange={handleBannerUpload}
@@ -201,9 +287,8 @@ export default function ProfilePage({ params }: { params: { username: string } }
         )}
       </div>
 
-      {/* ─── Profile info (now clearly below the banner) ─── */}
+      {/* ─── Profile info ─── */}
       <div className="px-4 mt-4 relative z-10 flex items-end justify-between">
-        {/* LEFT: Name, username, bio, location, stats */}
         <div className="pb-2 flex-1 pr-4">
           <div className="flex items-center gap-1 flex-wrap">
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -213,14 +298,12 @@ export default function ProfilePage({ params }: { params: { username: string } }
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">@{profile.username}</p>
 
-          {/* Bio */}
           {profile.bio && (
             <p className="mt-2 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
               {profile.bio}
             </p>
           )}
 
-          {/* Location, website, join date */}
           <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
             {profile.location && (
               <span className="flex items-center gap-1">
@@ -245,7 +328,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
             </span>
           </div>
 
-          {/* Stats */}
           <div className="flex gap-4 mt-2">
             <Link
               href={`/profile/${profile.username}/following`}
@@ -267,7 +349,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
             </Link>
           </div>
 
-          {/* ─── Charity Impact ─── */}
+          {/* Charity Impact */}
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
             <span className="bg-zrp-red/10 text-zrp-red px-3 py-0.5 rounded-full flex items-center gap-1">
               <Heart className="w-3.5 h-3.5" />
@@ -281,7 +363,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
         {/* RIGHT: Avatar + action buttons */}
         <div className="flex flex-col items-end gap-2 pb-2">
-          <div className="w-24 h-24 rounded-full border-4 border-white dark:border-gray-900 shadow-lg overflow-hidden flex-shrink-0">
+          <div className="relative w-24 h-24 rounded-full border-4 border-white dark:border-gray-900 shadow-lg overflow-hidden flex-shrink-0 group">
             {profile.avatarUrl ? (
               <img
                 src={profile.avatarUrl}
@@ -293,8 +375,32 @@ export default function ProfilePage({ params }: { params: { username: string } }
                 {(profile.name || profile.username)[0].toUpperCase()}
               </div>
             )}
+            {isOwnProfile && (
+              <>
+                <button
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white"
+                  title="Change avatar"
+                >
+                  {uploadingAvatar ? (
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  ) : (
+                    <Camera className="w-6 h-6" />
+                  )}
+                </button>
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                />
+              </>
+            )}
           </div>
-          <div>
+
+          <div className="flex flex-wrap gap-2 justify-end">
             {isOwnProfile ? (
               <Link
                 href="/settings"
@@ -304,15 +410,44 @@ export default function ProfilePage({ params }: { params: { username: string } }
                 Edit Profile
               </Link>
             ) : (
-              <button className="px-4 py-1.5 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed transition">
-                Follow
-              </button>
+              <>
+                <button
+                  onClick={handleFollow}
+                  disabled={followLoading}
+                  className={`flex items-center gap-1 px-4 py-1.5 rounded-full text-sm font-medium transition ${
+                    isFollowing
+                      ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                      : "bg-zrp-red text-white hover:bg-zrp-darkRed"
+                  }`}
+                >
+                  {followLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : isFollowing ? (
+                    <>
+                      <UserCheck className="w-4 h-4" />
+                      Following
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4" />
+                      Follow
+                    </>
+                  )}
+                </button>
+                <Link
+                  href={`/messages/${profile.username}`}
+                  className="flex items-center gap-1 px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Message
+                </Link>
+              </>
             )}
           </div>
         </div>
       </div>
 
-      {/* ─── Tabs (rounded pills) ─── */}
+      {/* ─── Tabs ─── */}
       <div className="flex gap-2 mt-4 px-4">
         {(["posts", "replies", "media", "likes"] as const).map((tab) => (
           <button
@@ -331,9 +466,18 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
       {/* ─── Content ─── */}
       <div className="mt-4 px-4">
-        {activeTab === "posts" && (
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-zrp-red" />
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">
+            <p>No {activeTab} yet.</p>
+          </div>
+        ) : (
           <div className="space-y-4">
-            {pinnedPost && (
+            {/* Show pinned post only on "posts" tab */}
+            {activeTab === "posts" && pinnedPost && (
               <div className="relative border border-blue-200 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-900/10 rounded-xl p-3">
                 <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-medium mb-2">
                   <Pin className="w-3.5 h-3.5" />
@@ -360,27 +504,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
               </div>
             )}
 
-            {posts.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <p>No posts yet.</p>
-              </div>
-            ) : (
-              posts.map((post) => {
-                if (pinnedPost && post.id === pinnedPost.id) return null;
-                return <PostCard key={post.id} post={post} onUpdate={fetchPosts} />;
-              })
-            )}
+            {posts.map((post) => {
+              if (activeTab === "posts" && pinnedPost && post.id === pinnedPost.id) return null;
+              return <PostCard key={post.id} post={post} onUpdate={fetchPosts} />;
+            })}
           </div>
-        )}
-
-        {activeTab === "replies" && (
-          <div className="text-center py-8 text-gray-500">Replies coming soon</div>
-        )}
-        {activeTab === "media" && (
-          <div className="text-center py-8 text-gray-500">Media coming soon</div>
-        )}
-        {activeTab === "likes" && (
-          <div className="text-center py-8 text-gray-500">Likes coming soon</div>
         )}
       </div>
     </div>
