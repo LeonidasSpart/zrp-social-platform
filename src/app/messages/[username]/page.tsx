@@ -23,6 +23,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [peer, setPeer] = useState<Peer.Instance | null>(null);
   const [incomingSignal, setIncomingSignal] = useState<any>(null);
+  const [callError, setCallError] = useState<string | null>(null);
   const socketRef = useRef<any>(null);
 
   const userId = session?.user?.id;
@@ -68,7 +69,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     socket.on("incoming-call", ({ callerId, signal, callerName, isVideo }) => {
       console.log("📞 Incoming call from", callerName);
       setCallerName(callerName);
-      setCallerId(callerId); // store caller's userId
+      setCallerId(callerId);
       setIsVideoCall(isVideo);
       setIncomingSignal(signal);
       setCallState("incoming");
@@ -82,7 +83,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     socket.on("call-rejected", () => {
       console.log("❌ Call rejected");
       endCall();
-      alert("Call was rejected");
+      setCallError("Call was rejected");
     });
 
     socket.on("call-ended", () => {
@@ -112,6 +113,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   ];
 
   const startCall = async (isVideo: boolean) => {
+    setCallError(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: isVideo,
@@ -134,7 +136,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
           signal,
           callerName: session?.user?.name || "User",
           isVideo,
-          callerId: userId, // include caller's userId
+          callerId: userId,
         });
       });
 
@@ -146,17 +148,24 @@ export default function ChatPage({ params }: { params: { username: string } }) {
 
       newPeer.on("iceStateChange", (state) => console.log("🧊 ICE state:", state));
       newPeer.on("connect", () => console.log("✅ Peer connected!"));
-      newPeer.on("error", (err) => { console.error("❌ Peer error:", err); endCall(); });
+      newPeer.on("error", (err) => {
+        console.error("❌ Peer error:", err);
+        setCallError("Connection error: " + (err?.message || String(err)));
+        endCall();
+      });
 
       setPeer(newPeer);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error starting call:", error);
-      alert("Could not access camera/microphone. Please allow permissions.");
+      setCallError(
+        "Could not access microphone/camera: " + (error?.name || "") + " " + (error?.message || String(error))
+      );
       setCallState("idle");
     }
   };
 
   const acceptCall = async () => {
+    setCallError(null);
     try {
       console.log("🔵 Accepting call...");
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -180,7 +189,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
           });
         } else {
           console.error("❌ No callerId to accept");
-          alert("Cannot accept: missing caller ID");
+          setCallError("Cannot accept: missing caller ID");
         }
       });
 
@@ -192,7 +201,11 @@ export default function ChatPage({ params }: { params: { username: string } }) {
 
       newPeer.on("iceStateChange", (state) => console.log("🧊 ICE state (accept):", state));
       newPeer.on("connect", () => console.log("✅ Peer connected (accept)!"));
-      newPeer.on("error", (err) => { console.error("❌ Peer error (accept):", err); endCall(); });
+      newPeer.on("error", (err) => {
+        console.error("❌ Peer error (accept):", err);
+        setCallError("Connection error: " + (err?.message || String(err)));
+        endCall();
+      });
 
       if (incomingSignal) {
         console.log("📡 Signaling with incoming offer");
@@ -200,9 +213,11 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       }
 
       setPeer(newPeer);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error accepting call:", error);
-      alert("Could not access camera/microphone.");
+      setCallError(
+        "Could not access microphone/camera: " + (error?.name || "") + " " + (error?.message || String(error))
+      );
       rejectCall();
     }
   };
@@ -242,6 +257,17 @@ export default function ChatPage({ params }: { params: { username: string } }) {
 
   return (
     <div className="w-full max-w-full mx-auto px-2 sm:px-4 py-2 sm:py-4 h-screen flex flex-col overflow-hidden">
+      {callError && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] bg-red-600 text-white text-sm px-4 py-2 rounded-lg shadow-lg max-w-md text-center">
+          {callError}
+          <button
+            onClick={() => setCallError(null)}
+            className="ml-3 underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
       {callState === "idle" ? (
         <>
           <div className="mb-2 sm:mb-4">
