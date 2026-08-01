@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// ─── Verification Email ──────────────────────────────────────────────
 export async function sendVerificationEmail(email: string, token: string) {
   const baseUrl = process.env.NEXTAUTH_URL;
   const link = `${baseUrl}/verify-email?token=${token}`;
@@ -21,4 +22,53 @@ export async function sendVerificationEmail(email: string, token: string) {
       </div>
     `,
   });
+}
+
+// ─── Password Reset Email ────────────────────────────────────────────
+export async function sendPasswordResetEmail(
+  to: string,
+  name: string | undefined,
+  resetLink: string
+) {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'noreply@zrp.one',
+      to,
+      subject: 'Reset Your Password – ZRP Social',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
+          <h1 style="color: #FF2D2D; text-align: center;">Reset Your Password</h1>
+          <p style="font-size: 16px; color: #333;">
+            Hello ${name || "there"},
+          </p>
+          <p style="font-size: 16px; color: #333;">
+            We received a request to reset your password for your ZRP Social account.
+            Click the button below to set a new password.
+          </p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetLink}" style="background-color: #FF2D2D; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+              Reset Password
+            </a>
+          </div>
+          <p style="font-size: 14px; color: #666;">
+            If you didn't request this, please ignore this email. This link will expire in 1 hour.
+          </p>
+          <hr style="border: 1px solid #ddd;" />
+          <p style="font-size: 12px; color: #999; text-align: center;">
+            ZRP Social – Freedom of speech. 35% of profits to charity.
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Resend error:", error);
+      throw new Error(error.message);
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Failed to send email:", error);
+    throw error;
+  }
 }
