@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Send, Pencil, Trash2, X, Check } from "lucide-react";
+import { Send, Pencil, Trash2, X, Check, Reply } from "lucide-react";
 import VerifiedBadge from "./VerifiedBadge";
 import { timeAgo } from "@/lib/utils";
 
@@ -18,6 +18,8 @@ interface Comment {
     avatarUrl?: string | null;
     badgeType?: string | null;
   };
+  replies: Comment[];
+  parentId?: string | null;
 }
 
 interface CommentsProps {
@@ -31,6 +33,8 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState("");
 
   // ─── Edit state ───
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -38,7 +42,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   const [editing, setEditing] = useState(false);
 
   // ─── Delete state ───
-  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
 
@@ -61,7 +64,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
     fetchComments();
   }, [postId]);
 
-  // ─── Add comment ───
+  // ─── Add top‑level comment ──────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || !session) return;
@@ -86,19 +89,42 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
     }
   };
 
-  // ─── Start editing ───
+  // ─── Add reply to a comment ──────────────────────────────────────
+  const handleReply = async (parentId: string) => {
+    if (!replyContent.trim() || !session) return;
+
+    try {
+      const res = await fetch(`/api/posts/${postId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: replyContent.trim(),
+          parentId,
+        }),
+      });
+
+      if (res.ok) {
+        setReplyContent("");
+        setReplyingTo(null);
+        await fetchComments();
+        onCommentAdded();
+      }
+    } catch (error) {
+      console.error("Error replying:", error);
+    }
+  };
+
+  // ─── Start editing ──────────────────────────────────────────────
   const startEdit = (comment: Comment) => {
     setEditingId(comment.id);
     setEditContent(comment.content);
   };
 
-  // ─── Cancel editing ───
   const cancelEdit = () => {
     setEditingId(null);
     setEditContent("");
   };
 
-  // ─── Save edited comment ───
   const saveEdit = async (commentId: string) => {
     if (!editContent.trim() || !session) return;
 
@@ -127,7 +153,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
     }
   };
 
-  // ─── Delete comment ───
+  // ─── Delete comment ──────────────────────────────────────────────
   const confirmDelete = (commentId: string) => {
     setCommentToDelete(commentId);
     setShowDeleteModal(true);
@@ -136,7 +162,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   const handleDelete = async () => {
     if (!commentToDelete) return;
 
-    setDeletingId(commentToDelete);
     try {
       const res = await fetch(`/api/comments/${commentToDelete}`, {
         method: "DELETE",
@@ -154,8 +179,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
     } catch (error) {
       console.error("Error deleting comment:", error);
       alert("Failed to delete comment");
-    } finally {
-      setDeletingId(null);
     }
   };
 
@@ -165,6 +188,166 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
 
   const getDisplayName = (author: Comment["author"]) => {
     return author.name || author.username;
+  };
+
+  // ─── Render a single comment (recursive) ──────────────────────────
+  const renderComment = (comment: Comment, depth = 0) => {
+    const isAuthor = session?.user?.id === comment.author.id;
+    const isEditing = editingId === comment.id;
+    const isReplying = replyingTo === comment.id;
+
+    return (
+      <div
+        key={comment.id}
+        className={`flex gap-3 group ${depth > 0 ? "ml-8 pl-4 border-l-2 border-gray-200 dark:border-gray-700" : ""}`}
+      >
+        {/* Avatar */}
+        <Link
+          href={`/profile/${comment.author.username}`}
+          className="flex-shrink-0"
+        >
+          <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-sm font-semibold overflow-hidden hover:ring-2 hover:ring-zrp-red transition">
+            <img
+              src={getAvatarSrc(comment.author)}
+              alt={getDisplayName(comment.author)}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </Link>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Link
+              href={`/profile/${comment.author.username}`}
+              className="font-medium text-sm hover:underline text-gray-900 dark:text-white"
+            >
+              {getDisplayName(comment.author)}
+            </Link>
+            {comment.author.badgeType && (
+              <VerifiedBadge badgeType={comment.author.badgeType} />
+            )}
+            <span className="text-xs text-gray-400 dark:text-gray-500">
+              @{comment.author.username}
+            </span>
+            <span className="text-xs text-gray-400 dark:text-gray-500">·</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500">
+              {timeAgo(comment.createdAt)}
+            </span>
+
+            {/* ─── Edit/Delete buttons ─── */}
+            {isAuthor && !isEditing && (
+              <div className="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => startEdit(comment)}
+                  className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 p-1"
+                  title="Edit comment"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => confirmDelete(comment.id)}
+                  className="text-gray-400 hover:text-red-500 p-1"
+                  title="Delete comment"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* ─── Comment content ─── */}
+          {isEditing ? (
+            <div className="mt-1 flex items-center gap-2">
+              <input
+                type="text"
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
+                autoFocus
+                maxLength={280}
+              />
+              <button
+                onClick={() => saveEdit(comment.id)}
+                disabled={!editContent.trim() || editing}
+                className="text-green-600 hover:text-green-700 p-1 disabled:opacity-50"
+                title="Save"
+              >
+                <Check className="w-4 h-4" />
+              </button>
+              <button
+                onClick={cancelEdit}
+                className="text-gray-400 hover:text-gray-600 p-1"
+                title="Cancel"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-800 dark:text-gray-200 mt-0.5">
+              {comment.content}
+            </p>
+          )}
+
+          {/* ─── Reply button ──────────────────────────────────────────── */}
+          {!isEditing && (
+            <button
+              onClick={() => {
+                setReplyingTo(replyingTo === comment.id ? null : comment.id);
+                setReplyContent("");
+              }}
+              className="text-xs text-gray-400 hover:text-zrp-red transition mt-0.5 flex items-center gap-1"
+            >
+              <Reply className="w-3 h-3" />
+              Reply
+            </button>
+          )}
+
+          {/* ─── Reply form ────────────────────────────────────────────── */}
+          {isReplying && (
+            <div className="mt-2 flex items-center gap-2">
+              <input
+                type="text"
+                value={replyContent}
+                onChange={(e) => setReplyContent(e.target.value)}
+                placeholder={`Reply to ${comment.author.name || comment.author.username}...`}
+                className="flex-1 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
+                maxLength={280}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleReply(comment.id);
+                  }
+                }}
+              />
+              <button
+                onClick={() => handleReply(comment.id)}
+                disabled={!replyContent.trim()}
+                className="px-3 py-1.5 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 transition"
+              >
+                Reply
+              </button>
+              <button
+                onClick={() => {
+                  setReplyingTo(null);
+                  setReplyContent("");
+                }}
+                className="text-gray-400 hover:text-gray-600 text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+
+          {/* ─── Render nested replies ────────────────────────────────── */}
+          {comment.replies && comment.replies.length > 0 && (
+            <div className="mt-2 space-y-2">
+              {comment.replies.map((reply) => renderComment(reply, depth + 1))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   if (loading) {
@@ -190,102 +373,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         <p className="text-sm text-gray-400 dark:text-gray-500">No comments yet.</p>
       ) : (
         <div className="space-y-3">
-          {comments.map((comment) => {
-            const isAuthor = session?.user?.id === comment.author.id;
-            const isEditing = editingId === comment.id;
-
-            return (
-              <div key={comment.id} className="flex gap-3 group">
-                {/* Avatar */}
-                <Link
-                  href={`/profile/${comment.author.username}`}
-                  className="flex-shrink-0"
-                >
-                  <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-sm font-semibold overflow-hidden hover:ring-2 hover:ring-zrp-red transition">
-                    <img
-                      src={getAvatarSrc(comment.author)}
-                      alt={getDisplayName(comment.author)}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </Link>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <Link
-                      href={`/profile/${comment.author.username}`}
-                      className="font-medium text-sm hover:underline text-gray-900 dark:text-white"
-                    >
-                      {getDisplayName(comment.author)}
-                    </Link>
-                    {comment.author.badgeType && (
-                      <VerifiedBadge badgeType={comment.author.badgeType} />
-                    )}
-                    <span className="text-xs text-gray-400 dark:text-gray-500">
-                      @{comment.author.username}
-                    </span>
-                    <span className="text-xs text-gray-400 dark:text-gray-500">·</span>
-                    <span className="text-xs text-gray-400 dark:text-gray-500">
-                      {timeAgo(comment.createdAt)}
-                    </span>
-
-                    {/* ─── Edit/Delete buttons ─── */}
-                    {isAuthor && !isEditing && (
-                      <div className="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => startEdit(comment)}
-                          className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 p-1"
-                          title="Edit comment"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => confirmDelete(comment.id)}
-                          className="text-gray-400 hover:text-red-500 p-1"
-                          title="Delete comment"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* ─── Comment content ─── */}
-                  {isEditing ? (
-                    <div className="mt-1 flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={editContent}
-                        onChange={(e) => setEditContent(e.target.value)}
-                        className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-zrp-deepBlack text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
-                        autoFocus
-                        maxLength={280}
-                      />
-                      <button
-                        onClick={() => saveEdit(comment.id)}
-                        disabled={!editContent.trim() || editing}
-                        className="text-green-600 hover:text-green-700 p-1 disabled:opacity-50"
-                        title="Save"
-                      >
-                        <Check className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={cancelEdit}
-                        className="text-gray-400 hover:text-gray-600 p-1"
-                        title="Cancel"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-800 dark:text-gray-200 mt-0.5">
-                      {comment.content}
-                    </p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+          {comments.map((comment) => renderComment(comment, 0))}
         </div>
       )}
 
@@ -297,7 +385,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Write a comment..."
-            className="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-zrp-deepBlack text-gray-900 dark:text-white"
+            className="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             maxLength={280}
           />
           <button
@@ -314,12 +402,17 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       {/* ─── Delete Confirmation Modal ─── */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-xl max-w-sm w-full p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full p-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
               Delete Comment?
             </h2>
             <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
               This action cannot be undone. Are you sure you want to delete this comment?
+              {commentToDelete && (
+                <span className="block text-xs text-gray-400 mt-1">
+                  (Note: If this comment has replies, they will also be deleted.)
+                </span>
+              )}
             </p>
             <div className="flex gap-3 justify-end">
               <button
@@ -333,10 +426,9 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
               </button>
               <button
                 onClick={handleDelete}
-                disabled={!!deletingId}
-                className="bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                className="bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-red-700 transition"
               >
-                {deletingId ? "Deleting..." : "Delete"}
+                Delete
               </button>
             </div>
           </div>
