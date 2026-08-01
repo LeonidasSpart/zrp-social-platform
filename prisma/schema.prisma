@@ -28,8 +28,8 @@ model User {
 
   name        String?
   bio         String?   @db.Text
-  avatarUrl   String?   @db.Text   // ← changed to Text
-  coverUrl    String?   @db.Text   // ← changed to Text
+  avatarUrl   String?   @db.Text
+  coverUrl    String?   @db.Text
   isPrivate   Boolean   @default(false)
   isAdmin     Boolean   @default(false)
   badgeType   String?
@@ -101,6 +101,12 @@ model Comment {
   post        Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   authorId    String
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // ─── NESTED REPLIES ──────────────────────────────────────────────
+  parentId    String?
+  parent      Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Comment[] @relation("CommentReplies")
+
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -109,6 +115,7 @@ model Comment {
   // ─── INDEXES ──────────────────────────────────────────────────────
   @@index([postId])
   @@index([createdAt])
+  @@index([parentId])
 }
 
 model Follow {
@@ -120,7 +127,6 @@ model Follow {
   createdAt   DateTime  @default(now())
 
   @@unique([followerId, followingId])
-  // ─── INDEXES ──────────────────────────────────────────────────────
   @@index([followerId])
   @@index([followingId])
 }
@@ -134,7 +140,6 @@ model Like {
   createdAt   DateTime  @default(now())
 
   @@unique([postId, userId])
-  // ─── INDEXES ──────────────────────────────────────────────────────
   @@index([postId])
   @@index([userId])
 }
@@ -148,7 +153,6 @@ model Repost {
   createdAt   DateTime  @default(now())
 
   @@unique([postId, userId])
-  // ─── INDEXES ──────────────────────────────────────────────────────
   @@index([postId])
   @@index([userId])
 }
@@ -165,7 +169,6 @@ model Notification {
   read        Boolean   @default(false)
   createdAt   DateTime  @default(now())
 
-  // ─── INDEXES ──────────────────────────────────────────────────────
   @@index([userId])
   @@index([userId, read])
   @@index([createdAt])
@@ -183,7 +186,6 @@ model Message {
   read        Boolean   @default(false)
   createdAt   DateTime  @default(now())
 
-  // ─── INDEXES ──────────────────────────────────────────────────────
   @@index([senderId])
   @@index([receiverId])
   @@index([createdAt])
@@ -213,7 +215,6 @@ model PollVote {
   createdAt   DateTime  @default(now())
 
   @@unique([pollId, userId])
-  // ─── INDEXES ──────────────────────────────────────────────────────
   @@index([pollId])
   @@index([userId])
 }
@@ -236,7 +237,6 @@ model Blocked {
   createdAt   DateTime  @default(now())
 
   @@unique([blockerId, blockedId])
-  // ─── INDEXES ──────────────────────────────────────────────────────
   @@index([blockerId])
   @@index([blockedId])
 }
@@ -255,7 +255,6 @@ model Report {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  // ─── INDEXES ──────────────────────────────────────────────────────
   @@index([postId])
   @@index([commentId])
   @@index([status])
@@ -271,7 +270,6 @@ model Bookmark {
   createdAt DateTime @default(now())
 
   @@unique([userId, postId])
-  // ─── INDEXES ──────────────────────────────────────────────────────
   @@index([userId])
   @@index([postId])
 }
@@ -284,6 +282,5 @@ model PushSubscription {
   keys      Json     // store { auth, p256dh }
   createdAt DateTime @default(now())
 
-  // ─── INDEXES ──────────────────────────────────────────────────────
   @@index([userId])
 }
