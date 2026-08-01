@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { sendPasswordResetEmail } from "@/lib/email"; // ← ADD THIS
+import { sendPasswordResetEmail } from "@/lib/email"; // ✅ added
 import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
@@ -11,14 +11,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    // ─── Find user ──────────────────────────────────────────────────
+    // ─── Find user (case‑insensitive) ──────────────────────────────
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
       select: { id: true, email: true, name: true },
     });
 
-    // Security: always return a generic message
     if (!user) {
+      // For security, always return a generic message
       return NextResponse.json({
         message: "If an account exists, you'll receive a reset link",
       });
