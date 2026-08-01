@@ -30,7 +30,6 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Load suggested users when step 2 is reached
   useEffect(() => {
     if (step === 1) {
       fetchSuggestedUsers();
@@ -68,10 +67,8 @@ export default function OnboardingPage() {
 
   const handleNext = async () => {
     if (step === 0) {
-      // Save profile info and avatar
       setSaving(true);
       try {
-        // 1. Update profile fields
         const profileRes = await fetch("/api/user/profile", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -79,7 +76,6 @@ export default function OnboardingPage() {
         });
         if (!profileRes.ok) throw new Error("Failed to update profile");
 
-        // 2. Upload avatar if provided
         if (avatarFile) {
           const formData = new FormData();
           formData.append("file", avatarFile);
@@ -90,7 +86,6 @@ export default function OnboardingPage() {
           if (!avatarRes.ok) throw new Error("Failed to upload avatar");
         }
 
-        // 3. Mark onboarding as in progress (we'll complete later)
         setStep(1);
       } catch (error) {
         console.error(error);
@@ -99,23 +94,20 @@ export default function OnboardingPage() {
         setSaving(false);
       }
     } else if (step === 1) {
-      // Follow selected users
       setLoading(true);
       try {
-        // Follow each selected user
-        for (const userId of following) {
+        // ─── FIXED: convert Set to array ──────────────────────────
+        for (const userId of Array.from(following)) {
           await fetch(`/api/users/${userId}/follow`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ action: "follow" }),
           });
         }
-        // Mark onboarding as completed
         const completeRes = await fetch("/api/user/onboarding-complete", {
           method: "POST",
         });
         if (!completeRes.ok) throw new Error("Failed to complete onboarding");
-        // Update session
         await update();
         router.push("/");
       } catch (error) {
@@ -128,7 +120,6 @@ export default function OnboardingPage() {
   };
 
   const handleSkip = async () => {
-    // Mark onboarding as completed without following anyone
     try {
       const res = await fetch("/api/user/onboarding-complete", {
         method: "POST",
@@ -143,7 +134,6 @@ export default function OnboardingPage() {
     }
   };
 
-  // If session is loading or not authenticated, redirect
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
@@ -166,14 +156,12 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 py-8">
       <div className="max-w-2xl w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8">
-        {/* ─── Logo ─── */}
         <div className="flex justify-center mb-6">
           <div className="w-12 h-12 bg-zrp-red rounded-full flex items-center justify-center text-white font-bold text-2xl">
             Z
           </div>
         </div>
 
-        {/* ─── Progress ─── */}
         <div className="flex items-center gap-2 mb-6">
           {steps.map((label, idx) => (
             <div key={idx} className="flex-1 flex items-center gap-2">
@@ -199,7 +187,6 @@ export default function OnboardingPage() {
           ))}
         </div>
 
-        {/* ─── Content ─── */}
         <div className="mb-6">
           {step === 0 && (
             <div>
@@ -210,7 +197,6 @@ export default function OnboardingPage() {
                 Set up your profile to get started.
               </p>
               <div className="space-y-4">
-                {/* Avatar */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Profile Picture
@@ -231,7 +217,6 @@ export default function OnboardingPage() {
                     </label>
                   </div>
                 </div>
-                {/* Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Display Name</label>
                   <input
@@ -243,7 +228,6 @@ export default function OnboardingPage() {
                     maxLength={50}
                   />
                 </div>
-                {/* Bio */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label>
                   <textarea
@@ -256,7 +240,6 @@ export default function OnboardingPage() {
                   />
                   <p className="text-xs text-gray-400 mt-1">{bio.length}/160</p>
                 </div>
-                {/* Location & Website */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
@@ -353,7 +336,6 @@ export default function OnboardingPage() {
           )}
         </div>
 
-        {/* ─── Actions ─── */}
         <div className="flex items-center justify-between">
           {step < 2 && (
             <button
