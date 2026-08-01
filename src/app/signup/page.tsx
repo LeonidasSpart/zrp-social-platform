@@ -56,7 +56,7 @@ export default function SignupPage() {
           <p className="text-gray-600 mt-2">Join the community</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-8">
+        <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">

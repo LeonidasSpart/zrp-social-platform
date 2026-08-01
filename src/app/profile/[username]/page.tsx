@@ -174,7 +174,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-start gap-4">
           <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-3xl font-bold flex-shrink-0 overflow-hidden">
             {user.avatarUrl ? (
@@ -278,7 +278,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
       <div className="mt-4 space-y-4">
         {isBlocked ? (
-          <div className="bg-white rounded-lg shadow-sm p-8 border border-gray-200 text-center">
+          <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8 border border-gray-200 text-center">
             <p className="text-gray-500">You have blocked @{user.username}</p>
             <button
               onClick={handleBlock}
@@ -288,7 +288,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
             </button>
           </div>
         ) : posts.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 text-center py-12">
+          <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 text-center py-12">
             <p className="text-gray-500">
               {isOwnProfile
                 ? "You haven't posted anything yet."

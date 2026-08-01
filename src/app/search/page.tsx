@@ -86,7 +86,7 @@ export default function SearchPage() {
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 p-4">
         <div className="flex items-center gap-2">
           <div className="flex-1 relative">
             <input
@@ -126,7 +126,7 @@ export default function SearchPage() {
       )}
 
       {!loading && hasSearched && users.length === 0 && posts.length === 0 && (
-        <div className="bg-white rounded-lg shadow-sm p-8 border border-gray-200 text-center mt-4">
+        <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8 border border-gray-200 text-center mt-4">
           <p className="text-gray-500">No results found for "{query}"</p>
         </div>
       )}
@@ -139,7 +139,7 @@ export default function SearchPage() {
               <Link
                 key={user.id}
                 href={`/profile/${user.username}`}
-                className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 hover:bg-gray-50 transition flex items-center gap-3"
+                className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 hover:bg-gray-50 transition flex items-center gap-3"
               >
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold flex-shrink-0">
                   {user.name?.[0] || "?"}
@@ -166,7 +166,7 @@ export default function SearchPage() {
               <Link
                 key={post.id}
                 href={`/post/${post.id}`}
-                className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 hover:bg-gray-50 transition block"
+                className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 hover:bg-gray-50 transition block"
               >
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-semibold text-sm text-gray-900">{post.author.name}</span>

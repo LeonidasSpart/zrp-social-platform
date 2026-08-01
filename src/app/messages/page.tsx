@@ -75,7 +75,7 @@ export default function MessagesPage() {
       <h1 className="text-2xl font-bold text-gray-900 mb-4">Messages</h1>
 
       {conversations.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-sm p-8 border border-gray-200 text-center">
+        <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8 border border-gray-200 text-center">
           <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500">No conversations yet</p>
           <p className="text-sm text-gray-400 mt-1">Start a conversation by visiting someone's profile</p>
@@ -86,7 +86,7 @@ export default function MessagesPage() {
             <Link
               key={conv.partner.id}
               href={`/messages/${conv.partner.username}`}
-              className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 hover:bg-gray-50 transition flex items-center gap-3"
+              className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 hover:bg-gray-50 transition flex items-center gap-3"
             >
               <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold flex-shrink-0">
                 {conv.partner.name?.[0] || "?"}

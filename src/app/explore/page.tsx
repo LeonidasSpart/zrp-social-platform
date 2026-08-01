@@ -88,7 +88,7 @@ export default function ExplorePage() {
       </p>
 
       {posts.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-sm p-8 border border-gray-200 text-center">
+        <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8 border border-gray-200 text-center">
           <p className="text-gray-500">No posts to explore yet</p>
           <p className="text-sm text-gray-400 mt-1">Be the first to post something!</p>
         </div>

@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
           <p className="text-gray-600 mt-2">Reset your password</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-8">
+        <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8">
           {message && (
             <div className={`p-3 rounded-lg text-sm mb-4 ${
               message.type === "success"

@@ -80,7 +80,7 @@ export default function FollowingPage({ params }: { params: { username: string }
       </div>
 
       {users.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-sm p-8 border border-gray-200 text-center">
+        <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8 border border-gray-200 text-center">
           <p className="text-gray-500">Not following anyone yet</p>
         </div>
       ) : (
@@ -88,7 +88,7 @@ export default function FollowingPage({ params }: { params: { username: string }
           {users.map((user) => (
             <div
               key={user.id}
-              className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 hover:bg-gray-50 transition flex items-center justify-between"
+              className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 hover:bg-gray-50 transition flex items-center justify-between"
             >
               <Link href={`/profile/${user.username}`} className="flex items-center gap-3 flex-1">
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold flex-shrink-0">

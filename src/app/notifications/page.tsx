@@ -122,7 +122,7 @@ export default function NotificationsPage() {
       <h1 className="text-2xl font-bold text-gray-900 mb-4">Notifications</h1>
 
       {notifications.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-sm p-8 border border-gray-200 text-center">
+        <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8 border border-gray-200 text-center">
           <p className="text-gray-500">No notifications yet</p>
           <p className="text-sm text-gray-400 mt-1">When someone interacts with you, it will appear here</p>
         </div>
@@ -131,7 +131,7 @@ export default function NotificationsPage() {
           {notifications.map((notification) => (
             <div
               key={notification.id}
-              className={`bg-white rounded-lg shadow-sm p-4 border transition ${
+              className={`bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border transition ${
                 notification.read ? "border-gray-200" : "border-blue-200 bg-blue-50/30"
               }`}
             >
