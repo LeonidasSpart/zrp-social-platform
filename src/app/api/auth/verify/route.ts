@@ -29,9 +29,7 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.redirect(
-      `${process.env.NEXTAUTH_URL}/login?verified=true`
-    );
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Verification error:", error);
     return NextResponse.json({ error: "Failed to verify email" }, { status: 500 });
