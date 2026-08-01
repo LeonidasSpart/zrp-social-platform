@@ -29,7 +29,7 @@ interface UserProfile {
     following: number;
   };
   pinnedPostId: string | null;
-  isFollowing: boolean;   // ✅ matches your API
+  isFollowing: boolean;
 }
 
 interface Post {
@@ -50,6 +50,15 @@ interface Post {
     reposts: number;
   };
   liked?: boolean;
+  // ─── For replies ──────────────────────────────────────────────────
+  replyTo?: {
+    id: string;
+    content: string;
+    author: {
+      username: string;
+      name: string | null;
+    };
+  };
 }
 
 type TabType = "posts" | "replies" | "media" | "likes";
@@ -77,7 +86,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
       const res = await fetch(`/api/users/${params.username}`);
       const data = await res.json();
       setProfile(data);
-      setIsFollowing(data.isFollowing || false);   // ✅
+      setIsFollowing(data.isFollowing || false);
       if (data.pinnedPostId) {
         fetchPinnedPost(data.pinnedPostId);
       }
@@ -150,7 +159,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
       });
       if (res.ok) {
         const data = await res.json();
-        setIsFollowing(data.following);   // ✅ returns { following: true/false }
+        setIsFollowing(data.following);
         setProfile((prev) => {
           if (!prev) return prev;
           return {
@@ -248,6 +257,71 @@ export default function ProfilePage({ params }: { params: { username: string } }
   });
 
   const impactMeals = Math.floor(Math.random() * 50) + 5;
+
+  // ─── Render reply item ──────────────────────────────────────────────
+  const renderReplyItem = (reply: any) => {
+    const isOwn = reply.author.id === session?.user?.id;
+
+    return (
+      <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+        <div className="flex items-start gap-3">
+          <Link href={`/profile/${reply.author.username}`} className="flex-shrink-0">
+            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+              {reply.author.avatarUrl ? (
+                <img
+                  src={reply.author.avatarUrl}
+                  alt={reply.author.name || reply.author.username}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold">
+                  {(reply.author.name || reply.author.username)[0].toUpperCase()}
+                </div>
+              )}
+            </div>
+          </Link>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Link
+                href={`/profile/${reply.author.username}`}
+                className="font-semibold hover:underline text-gray-900 dark:text-white"
+              >
+                {reply.author.name || reply.author.username}
+              </Link>
+              <span className="text-sm text-gray-500">@{reply.author.username}</span>
+              <span className="text-sm text-gray-400">·</span>
+              <span className="text-sm text-gray-400">
+                {new Date(reply.createdAt).toLocaleDateString()}
+              </span>
+            </div>
+
+            {/* ─── Replying to ────────────────────────────────────────── */}
+            {reply.replyTo && (
+              <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Replying to <Link href={`/profile/${reply.replyTo.author.username}`} className="text-blue-600 hover:underline">
+                  @{reply.replyTo.author.username}
+                </Link>
+              </div>
+            )}
+
+            <p className="mt-1 text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+              {reply.content}
+            </p>
+
+            {reply.imageUrl && (
+              <div className="mt-2 rounded-lg overflow-hidden">
+                <img
+                  src={reply.imageUrl}
+                  alt="Reply image"
+                  className="w-full max-h-60 object-cover"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="max-w-2xl mx-auto bg-white dark:bg-gray-900 min-h-screen">
@@ -349,7 +423,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
             </Link>
           </div>
 
-          {/* Charity Impact */}
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
             <span className="bg-zrp-red/10 text-zrp-red px-3 py-0.5 rounded-full flex items-center gap-1">
               <Heart className="w-3.5 h-3.5" />
@@ -361,7 +434,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
           </div>
         </div>
 
-        {/* RIGHT: Avatar + action buttons */}
         <div className="flex flex-col items-end gap-2 pb-2">
           <div className="relative w-24 h-24 rounded-full border-4 border-white dark:border-gray-900 shadow-lg overflow-hidden flex-shrink-0 group">
             {profile.avatarUrl ? (
@@ -476,38 +548,66 @@ export default function ProfilePage({ params }: { params: { username: string } }
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Show pinned post only on "posts" tab */}
-            {activeTab === "posts" && pinnedPost && (
-              <div className="relative border border-blue-200 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-900/10 rounded-xl p-3">
-                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-medium mb-2">
-                  <Pin className="w-3.5 h-3.5" />
-                  Pinned
-                  {isOwnProfile && (
-                    <button
-                      onClick={async () => {
-                        const res = await fetch(`/api/posts/${pinnedPost.id}/pin`, {
-                          method: "POST",
-                        });
-                        if (res.ok) {
-                          setPinnedPost(null);
-                          fetchProfile();
-                        }
-                      }}
-                      className="ml-auto text-gray-400 hover:text-red-500 transition"
-                      title="Unpin"
-                    >
-                      <PinOff className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-                <PostCard post={pinnedPost} onUpdate={fetchPosts} />
-              </div>
+            {/* ─── Posts Tab ──────────────────────────────────────────── */}
+            {activeTab === "posts" && (
+              <>
+                {pinnedPost && (
+                  <div className="relative border border-blue-200 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-900/10 rounded-xl p-3">
+                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-medium mb-2">
+                      <Pin className="w-3.5 h-3.5" />
+                      Pinned
+                      {isOwnProfile && (
+                        <button
+                          onClick={async () => {
+                            const res = await fetch(`/api/posts/${pinnedPost.id}/pin`, {
+                              method: "POST",
+                            });
+                            if (res.ok) {
+                              setPinnedPost(null);
+                              fetchProfile();
+                            }
+                          }}
+                          className="ml-auto text-gray-400 hover:text-red-500 transition"
+                          title="Unpin"
+                        >
+                          <PinOff className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                    <PostCard post={pinnedPost} onUpdate={fetchPosts} />
+                  </div>
+                )}
+                {posts.map((post) => {
+                  if (pinnedPost && post.id === pinnedPost.id) return null;
+                  return <PostCard key={post.id} post={post} onUpdate={fetchPosts} />;
+                })}
+              </>
             )}
 
-            {posts.map((post) => {
-              if (activeTab === "posts" && pinnedPost && post.id === pinnedPost.id) return null;
-              return <PostCard key={post.id} post={post} onUpdate={fetchPosts} />;
-            })}
+            {/* ─── Replies Tab ────────────────────────────────────────── */}
+            {activeTab === "replies" && (
+              <>
+                {posts.map((reply) => renderReplyItem(reply))}
+              </>
+            )}
+
+            {/* ─── Media Tab ──────────────────────────────────────────── */}
+            {activeTab === "media" && (
+              <>
+                {posts.map((post) => (
+                  <PostCard key={post.id} post={post} onUpdate={fetchPosts} />
+                ))}
+              </>
+            )}
+
+            {/* ─── Likes Tab ──────────────────────────────────────────── */}
+            {activeTab === "likes" && (
+              <>
+                {posts.map((post) => (
+                  <PostCard key={post.id} post={post} onUpdate={fetchPosts} />
+                ))}
+              </>
+            )}
           </div>
         )}
       </div>
