@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 
 const VALID_BADGE_TYPES = ["verified", "organization", "government", null];
+const VALID_ROLES = ["USER", "MODERATOR", "ADMIN"];
 
 export async function PUT(
   req: NextRequest,
@@ -12,9 +13,10 @@ export async function PUT(
   if (!adminCheck.authorized) return adminCheck.response;
 
   try {
-    const { isAdmin, badgeType } = await req.json();
+    const { isAdmin, badgeType, role } = await req.json();
 
-    const data: { isAdmin?: boolean; badgeType?: string | null } = {};
+    const data: { isAdmin?: boolean; badgeType?: string | null; role?: string } = {};
+
     if (isAdmin !== undefined) data.isAdmin = isAdmin;
     if (badgeType !== undefined) {
       if (!VALID_BADGE_TYPES.includes(badgeType)) {
@@ -22,14 +24,33 @@ export async function PUT(
       }
       data.badgeType = badgeType;
     }
+    if (role !== undefined) {
+      if (!VALID_ROLES.includes(role)) {
+        return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+      }
+      data.role = role;
+    }
 
     const updated = await prisma.user.update({
       where: { id: params.id },
       data,
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        email: true,
+        role: true,
+        isAdmin: true,
+        badgeType: true,
+        _count: {
+          select: { posts: true, comments: true, reports: true },
+        },
+      },
     });
 
     return NextResponse.json(updated);
   } catch (error) {
+    console.error("Update user error:", error);
     return NextResponse.json({ error: "Failed to update user" }, { status: 500 });
   }
 }
@@ -47,6 +68,7 @@ export async function DELETE(
     });
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error("Delete user error:", error);
     return NextResponse.json({ error: "Failed to delete user" }, { status: 500 });
   }
 }
