@@ -6,19 +6,19 @@
 
 @layer base {
   :root {
-    --background: 255 255 255;
-    --foreground: 5 5 5;
-    --primary: 255 45 45;
-    --primary-dark: 177 0 0;
-    --border: 229 231 235;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 2%;
+    --primary: 0 100% 59%;
+    --primary-dark: 0 100% 35%;
+    --border: 220 13% 91%;
   }
 
   .dark {
-    --background: 5 5 5;
-    --foreground: 255 255 255;
-    --primary: 255 45 45;
-    --primary-dark: 177 0 0;
-    --border: 55 65 81;
+    --background: 0 0% 2%;
+    --foreground: 0 0% 100%;
+    --primary: 0 100% 59%;
+    --primary-dark: 0 100% 35%;
+    --border: 220 9% 26%;
   }
 
   html {
