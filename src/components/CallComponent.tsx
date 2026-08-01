@@ -31,12 +31,6 @@ export default function CallComponent({
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
-  // ─── Debug mount ──────────────────────────────────────────────
-  useEffect(() => {
-    alert("📞 CallComponent mounted. isIncoming: " + isIncoming);
-  }, []);
-
-  // ─── Set video streams ──────────────────────────────────────────
   useEffect(() => {
     if (localStream && localVideoRef.current) {
       localVideoRef.current.srcObject = localStream;
@@ -48,7 +42,6 @@ export default function CallComponent({
     }
   }, [localStream, remoteStream]);
 
-  // ─── Call duration timer ──────────────────────────────────────
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (!isIncoming && remoteStream) {
@@ -59,7 +52,6 @@ export default function CallComponent({
     return () => clearInterval(interval);
   }, [isIncoming, remoteStream]);
 
-  // ─── Cleanup streams on unmount ──────────────────────────────
   useEffect(() => {
     return () => {
       if (localStream) {
@@ -98,7 +90,6 @@ export default function CallComponent({
   return (
     <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50">
       <div className="relative w-full max-w-4xl p-4">
-        {/* ─── Remote video ──────────────────────────────────────── */}
         <div className="relative bg-gray-900 rounded-2xl overflow-hidden aspect-video">
           {showRemoteVideo ? (
             <video
@@ -133,7 +124,6 @@ export default function CallComponent({
             </div>
           )}
 
-          {/* ─── Local video (picture-in-picture) ──────────────────── */}
           {showLocalVideo && (
             <div className="absolute bottom-4 right-4 w-32 h-24 bg-black rounded-xl overflow-hidden border-2 border-white/30 shadow-lg">
               <video
@@ -147,7 +137,6 @@ export default function CallComponent({
           )}
         </div>
 
-        {/* ─── Call info ──────────────────────────────────────────── */}
         <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white text-center">
           <p className="text-lg font-semibold">{callerName || "Call"}</p>
           {!isIncoming && remoteStream && (
@@ -159,7 +148,6 @@ export default function CallComponent({
           )}
         </div>
 
-        {/* ─── Controls ────────────────────────────────────────────── */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4">
           {!isIncoming && remoteStream && (
             <>
@@ -189,18 +177,11 @@ export default function CallComponent({
             </>
           )}
 
-          {/* ─── Accept / End / Reject buttons ────────────────────── */}
           <button
             onClick={() => {
-              alert("🔵 Main button clicked. isIncoming: " + isIncoming);
-              console.log("🔵 Main button clicked");
               if (isIncoming) {
-                alert("🔵 Accept button - calling onAccept");
-                console.log("🔵 Accept button - calling onAccept");
                 onAccept();
               } else {
-                alert("🔴 End button - calling onEnd");
-                console.log("🔴 End button - calling onEnd");
                 onEnd();
               }
             }}
@@ -215,11 +196,7 @@ export default function CallComponent({
 
           {isIncoming && (
             <button
-              onClick={() => {
-                alert("🔴 Reject button clicked - calling onReject");
-                console.log("🔴 Reject button - calling onReject");
-                onReject();
-              }}
+              onClick={onReject}
               className="p-4 rounded-full bg-red-500 hover:bg-red-600 text-white transition"
             >
               <X className="w-6 h-6" />
@@ -227,13 +204,9 @@ export default function CallComponent({
           )}
         </div>
 
-        {/* ─── End call button (when active) ──────────────────────── */}
         {!isIncoming && remoteStream && (
           <button
-            onClick={() => {
-              alert("🔴 End call button clicked (active)");
-              onEnd();
-            }}
+            onClick={onEnd}
             className="absolute bottom-24 left-1/2 -translate-x-1/2 text-red-400 text-sm hover:text-red-300 transition bg-red-500/10 px-4 py-1.5 rounded-full"
           >
             End Call
