@@ -50,6 +50,9 @@ model User {
   // ─── ROLE (ADMIN, MODERATOR, USER) ──────────────────────────────
   role        Role      @default(USER)
 
+  // ─── ONBOARDING ──────────────────────────────────────────────────
+  onboardingCompleted Boolean @default(false)   // ✅ NEW
+
   // ─── PINNED POST ──────────────────────────────────────────────────
   pinnedPostId  String?   @unique
   pinnedPost    Post?     @relation("PinnedPost", fields: [pinnedPostId], references: [id], onDelete: SetNull)
