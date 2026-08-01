@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { sendPasswordResetEmail } from "@/lib/email"; // ← ADD THIS
 import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
@@ -10,18 +11,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
+    // ─── Find user ──────────────────────────────────────────────────
     const user = await prisma.user.findUnique({
-      where: { email },
-      select: { id: true, email: true },
+      where: { email: email.toLowerCase() },
+      select: { id: true, email: true, name: true },
     });
 
+    // Security: always return a generic message
     if (!user) {
-      // Don't reveal that the user doesn't exist for security
       return NextResponse.json({
         message: "If an account exists, you'll receive a reset link",
       });
     }
 
+    // ─── Generate token ─────────────────────────────────────────────
     const resetToken = crypto.randomBytes(32).toString("hex");
     const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
 
@@ -33,15 +36,18 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // In production, send email with reset link
+    // ─── Send email ──────────────────────────────────────────────────
     const resetLink = `${process.env.NEXTAUTH_URL}/reset-password/${resetToken}`;
-    console.log(`🔐 Reset link: ${resetLink}`);
+    await sendPasswordResetEmail(user.email, user.name || undefined, resetLink);
 
     return NextResponse.json({
       message: "If an account exists, you'll receive a reset link",
     });
   } catch (error) {
     console.error("Forgot password error:", error);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Something went wrong. Please try again." },
+      { status: 500 }
+    );
   }
 }
