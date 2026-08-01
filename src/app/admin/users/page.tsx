@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Shield, ShieldAlert, ShieldCheck, User } from "lucide-react";
 
 interface User {
   id: string;
@@ -9,7 +10,7 @@ interface User {
   name: string;
   email: string;
   createdAt: string;
-  isAdmin: boolean;
+  role: "USER" | "MODERATOR" | "ADMIN";
   badgeType: string | null;
   _count: {
     posts: number;
@@ -22,6 +23,12 @@ const BADGE_OPTIONS = [
   { value: "verified", label: "Verified (blue)" },
   { value: "organization", label: "Organization (gold)" },
   { value: "government", label: "Government (gray)" },
+];
+
+const ROLE_OPTIONS = [
+  { value: "USER", label: "User", icon: User },
+  { value: "MODERATOR", label: "Moderator", icon: Shield },
+  { value: "ADMIN", label: "Admin", icon: ShieldAlert },
 ];
 
 export default function AdminUsers() {
@@ -61,18 +68,22 @@ export default function AdminUsers() {
     }
   };
 
-  const toggleAdmin = async (userId: string, currentAdmin: boolean) => {
+  const updateRole = async (userId: string, newRole: string) => {
     try {
       const res = await fetch(`/api/admin/users/${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isAdmin: !currentAdmin }),
+        body: JSON.stringify({ role: newRole }),
       });
       if (res.ok) {
         fetchUsers();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to update role");
       }
     } catch (error) {
-      console.error("Error updating user:", error);
+      console.error("Error updating role:", error);
+      alert("Something went wrong");
     }
   };
 
@@ -91,6 +102,13 @@ export default function AdminUsers() {
     }
   };
 
+  const getRoleIcon = (role: string) => {
+    const option = ROLE_OPTIONS.find((r) => r.value === role);
+    if (!option) return <User className="w-4 h-4" />;
+    const Icon = option.icon;
+    return <Icon className="w-4 h-4" />;
+  };
+
   if (loading) {
     return <div className="text-center py-12 text-gray-500">Loading...</div>;
   }
@@ -105,11 +123,11 @@ export default function AdminUsers() {
           placeholder="Search users..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
       </div>
 
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-700">
@@ -117,14 +135,14 @@ export default function AdminUsers() {
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">User</th>
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">Email</th>
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">Posts</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">Admin</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">Role</th>
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">Badge</th>
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {users.map((user) => (
-                <tr key={user.id}>
+                <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-900 transition">
                   <td className="px-4 py-3">
                     <Link href={`/profile/${user.username}`} className="hover:underline">
                       <span className="font-medium text-gray-900 dark:text-white">{user.name || user.username}</span>
@@ -134,22 +152,28 @@ export default function AdminUsers() {
                   <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{user.email}</td>
                   <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{user._count.posts}</td>
                   <td className="px-4 py-3">
-                    <button
-                      onClick={() => toggleAdmin(user.id, user.isAdmin)}
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        user.isAdmin
-                          ? "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400"
-                          : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                      }`}
-                    >
-                      {user.isAdmin ? "Admin" : "User"}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                        {getRoleIcon(user.role)}
+                      </span>
+                      <select
+                        value={user.role}
+                        onChange={(e) => updateRole(user.id, e.target.value)}
+                        className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      >
+                        {ROLE_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <select
                       value={user.badgeType || ""}
                       onChange={(e) => setBadge(user.id, e.target.value)}
-                      className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 dark:bg-gray-700 dark:text-white"
+                      className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
                       {BADGE_OPTIONS.map((opt) => (
                         <option key={opt.value} value={opt.value}>
@@ -178,17 +202,17 @@ export default function AdminUsers() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="px-3 py-1 border rounded disabled:opacity-50"
+            className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
           >
             Previous
           </button>
-          <span className="px-3 py-1">
+          <span className="px-3 py-1 text-gray-700 dark:text-gray-300">
             Page {page} of {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="px-3 py-1 border rounded disabled:opacity-50"
+            className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
           >
             Next
           </button>
