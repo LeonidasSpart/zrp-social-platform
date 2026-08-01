@@ -29,7 +29,7 @@ interface UserProfile {
     following: number;
   };
   pinnedPostId: string | null;
-  isFollowedByMe?: boolean;
+  isFollowing: boolean;   // ✅ matches your API
 }
 
 interface Post {
@@ -77,7 +77,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
       const res = await fetch(`/api/users/${params.username}`);
       const data = await res.json();
       setProfile(data);
-      setIsFollowing(data.isFollowedByMe || false);
+      setIsFollowing(data.isFollowing || false);   // ✅
       if (data.pinnedPostId) {
         fetchPinnedPost(data.pinnedPostId);
       }
@@ -149,14 +149,15 @@ export default function ProfilePage({ params }: { params: { username: string } }
         body: JSON.stringify({ action: isFollowing ? "unfollow" : "follow" }),
       });
       if (res.ok) {
-        setIsFollowing(!isFollowing);
+        const data = await res.json();
+        setIsFollowing(data.following);   // ✅ returns { following: true/false }
         setProfile((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
             _count: {
               ...prev._count,
-              followers: isFollowing ? prev._count.followers - 1 : prev._count.followers + 1,
+              followers: data.following ? prev._count.followers + 1 : prev._count.followers - 1,
             },
           };
         });
@@ -246,7 +247,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
     year: "numeric",
   });
 
-  // Dummy impact – replace with real data later
   const impactMeals = Math.floor(Math.random() * 50) + 5;
 
   return (
