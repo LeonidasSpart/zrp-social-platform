@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Heart, MessageCircle, Repeat2, Bookmark, Share2 } from "lucide-react";
+import { Heart, MessageCircle, Repeat2, Bookmark, Share2, Pin, PinOff } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,10 @@ interface PostActionsProps {
   isLiked: boolean;
   isReposted: boolean;
   isBookmarked: boolean;
+  // ─── Pin props ──────────────────────────────────────────────────────
+  isPinned?: boolean;
+  isAuthor?: boolean;
+  onPinToggle?: () => void;
 }
 
 export function PostActions({
@@ -25,6 +29,9 @@ export function PostActions({
   isLiked: initialIsLiked,
   isReposted: initialIsReposted,
   isBookmarked: initialIsBookmarked,
+  isPinned = false,
+  isAuthor = false,
+  onPinToggle,
 }: PostActionsProps) {
   const [likes, setLikes] = useState(initialLikes);
   const [reposts, setReposts] = useState(initialReposts);
@@ -108,6 +115,10 @@ export function PostActions({
     }
   };
 
+  const handlePinToggle = () => {
+    if (onPinToggle) onPinToggle();
+  };
+
   return (
     <div className="flex items-center gap-4 mt-2 text-zinc-500">
       <button
@@ -146,8 +157,8 @@ export function PostActions({
         onClick={handleBookmark}
         disabled={isPending}
         className={cn(
-          "flex items-center gap-1 text-sm hover:text-yellow-500 transition-colors disabled:opacity-50",
-          isBookmarked && "text-yellow-500"
+          "flex items-center gap-1 text-sm hover:text-zrp-red transition-colors disabled:opacity-50",
+          isBookmarked && "text-zrp-red"
         )}
       >
         <Bookmark className={cn("w-5 h-5", isBookmarked && "fill-current")} />
@@ -159,6 +170,22 @@ export function PostActions({
       >
         <Share2 className="w-5 h-5" />
       </button>
+
+      {/* ─── Pin Button (only for author) ────────────────────────────── */}
+      {isAuthor && onPinToggle && (
+        <button
+          onClick={handlePinToggle}
+          className={cn(
+            "flex items-center gap-1 text-sm transition-colors",
+            isPinned
+              ? "text-blue-600"
+              : "text-zinc-400 hover:text-blue-600"
+          )}
+          title={isPinned ? "Unpin from profile" : "Pin to profile"}
+        >
+          {isPinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
+        </button>
+      )}
     </div>
   );
 }
