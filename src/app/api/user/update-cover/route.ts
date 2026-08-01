@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.user.update({
       where: { id: session.user.id },
-      data: { coverUrl: uploadResult.data.url },
+      data: { coverUrl: uploadResult.data.ufsUrl },
     });
 
     return NextResponse.json({ coverUrl: user.coverUrl });
