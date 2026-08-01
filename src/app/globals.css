@@ -11,6 +11,7 @@
     --primary: 0 100% 59%;
     --primary-dark: 0 100% 35%;
     --border: 220 13% 91%;
+    color-scheme: light;
   }
 
   .dark {
@@ -19,6 +20,7 @@
     --primary: 0 100% 59%;
     --primary-dark: 0 100% 35%;
     --border: 220 9% 26%;
+    color-scheme: dark;
   }
 
   html {
