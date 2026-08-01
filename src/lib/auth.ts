@@ -46,6 +46,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           username: user.username,
           isAdmin: user.isAdmin,
+          role: user.role,           // ✅ ADD ROLE
           badgeType: user.badgeType,
           avatarUrl: user.avatarUrl,
         };
@@ -58,6 +59,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.username = user.username;
         token.isAdmin = user.isAdmin;
+        token.role = user.role;      // ✅ ADD ROLE
         token.badgeType = user.badgeType;
         token.avatarUrl = user.avatarUrl;
       }
@@ -68,6 +70,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
         session.user.isAdmin = token.isAdmin as boolean;
+        session.user.role = token.role as "USER" | "MODERATOR" | "ADMIN";  // ✅ ADD ROLE
         session.user.badgeType = token.badgeType as string || null;
         session.user.avatarUrl = token.avatarUrl as string || null;
       }
