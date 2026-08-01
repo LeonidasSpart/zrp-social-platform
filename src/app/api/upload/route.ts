@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      url: uploadResult.data.url,
+      url: uploadResult.data.ufsUrl,
       filename: file.name,
       type: file.type,
     });
