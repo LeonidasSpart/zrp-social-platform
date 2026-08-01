@@ -36,12 +36,10 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
 
-  // ─── Edit state ───
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [editing, setEditing] = useState(false);
 
-  // ─── Delete state ───
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
 
@@ -66,7 +64,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
 
   // ─── Add top‑level comment ──────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // ✅ Prevents page refresh
     if (!newComment.trim() || !session) return;
 
     setSubmitting(true);
@@ -80,7 +78,9 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       if (res.ok) {
         setNewComment("");
         await fetchComments();
-        onCommentAdded();
+        onCommentAdded(); // Only updates state, never reloads
+      } else {
+        console.error("Failed to post comment");
       }
     } catch (error) {
       console.error("Error posting comment:", error);
@@ -234,7 +234,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
               {timeAgo(comment.createdAt)}
             </span>
 
-            {/* ─── Edit/Delete buttons ─── */}
             {isAuthor && !isEditing && (
               <div className="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
@@ -255,7 +254,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             )}
           </div>
 
-          {/* ─── Comment content ─── */}
           {isEditing ? (
             <div className="mt-1 flex items-center gap-2">
               <input
@@ -288,7 +286,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             </p>
           )}
 
-          {/* ─── Reply button ──────────────────────────────────────────── */}
           {!isEditing && (
             <button
               onClick={() => {
@@ -302,7 +299,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             </button>
           )}
 
-          {/* ─── Reply form ────────────────────────────────────────────── */}
           {isReplying && (
             <div className="mt-2 flex items-center gap-2">
               <input
@@ -339,7 +335,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             </div>
           )}
 
-          {/* ─── Render nested replies ────────────────────────────────── */}
           {comment.replies && comment.replies.length > 0 && (
             <div className="mt-2 space-y-2">
               {comment.replies.map((reply) => renderComment(reply, depth + 1))}
@@ -368,7 +363,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
 
   return (
     <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-      {/* ─── Comment List ─── */}
       {comments.length === 0 ? (
         <p className="text-sm text-gray-400 dark:text-gray-500">No comments yet.</p>
       ) : (
@@ -377,7 +371,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         </div>
       )}
 
-      {/* ─── Add Comment Form ─── */}
       {session && (
         <form onSubmit={handleSubmit} className="mt-3 flex gap-2">
           <input
@@ -399,7 +392,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         </form>
       )}
 
-      {/* ─── Delete Confirmation Modal ─── */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full p-6">
@@ -408,11 +400,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             </h2>
             <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
               This action cannot be undone. Are you sure you want to delete this comment?
-              {commentToDelete && (
-                <span className="block text-xs text-gray-400 mt-1">
-                  (Note: If this comment has replies, they will also be deleted.)
-                </span>
-              )}
             </p>
             <div className="flex gap-3 justify-end">
               <button
