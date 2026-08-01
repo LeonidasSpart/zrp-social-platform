@@ -3,8 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Loader2, Check, User, Users, Sparkles } from "lucide-react";
-import { useTheme } from "@/contexts/ThemeContext";
+import { Loader2, Check } from "lucide-react";
 
 interface SuggestedUser {
   id: string;
@@ -16,7 +15,6 @@ interface SuggestedUser {
 export default function OnboardingPage() {
   const { data: session, update, status } = useSession();
   const router = useRouter();
-  const { theme } = useTheme();
 
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
@@ -108,16 +106,17 @@ export default function OnboardingPage() {
       setLoading(true);
       setError(null);
       try {
-        // Follow each selected user
-        for (const userId of Array.from(following)) {
-          const res = await fetch(`/api/users/${userId}/follow`, {
+        // ─── Use username instead of ID ──────────────────────────────
+        const selectedUsers = suggestedUsers.filter((user) => following.has(user.id));
+        for (const user of selectedUsers) {
+          const res = await fetch(`/api/users/${user.username}/follow`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ action: "follow" }),
           });
           if (!res.ok) {
             const err = await res.json().catch(() => ({ error: "Failed to follow user" }));
-            throw new Error(err.error || `Failed to follow user ${userId}`);
+            throw new Error(err.error || `Failed to follow ${user.username}`);
           }
         }
 
@@ -147,14 +146,15 @@ export default function OnboardingPage() {
       });
       if (res.ok) {
         await update();
-        router.push("/");
+        // Force a hard reload to ensure the session cookie is refreshed
+        window.location.href = "/";
       } else {
         const err = await res.json().catch(() => ({ error: "Failed to skip" }));
         throw new Error(err.error || "Failed to skip onboarding");
       }
     } catch (error: any) {
       console.error("Skip error:", error);
-      alert(error.message || "Failed to skip. Please try again.");
+      setError(error.message || "Failed to skip. Please try again.");
     }
   };
 
@@ -211,7 +211,6 @@ export default function OnboardingPage() {
           ))}
         </div>
 
-        {/* ─── Error Display ─── */}
         {error && (
           <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
             {error}
