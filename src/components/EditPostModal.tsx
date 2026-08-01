@@ -54,7 +54,7 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditP
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-xl max-w-lg w-full p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-gray-900">Edit Post</h2>
           <button
