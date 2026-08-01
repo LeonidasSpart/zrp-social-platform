@@ -68,7 +68,7 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
       <div
         ref={modalRef}
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-hidden"
+        className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-hidden"
       >
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">Choose a GIF</h2>

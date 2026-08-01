@@ -72,7 +72,7 @@ export default function AdminReports() {
 
       <div className="space-y-2">
         {reports.map((report) => (
-          <div key={report.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
+          <div key={report.id} className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-start">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">

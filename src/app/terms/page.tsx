@@ -326,7 +326,7 @@ export default function TermsPage() {
         </section>
 
         {/* ─── 16. SUMMARY OF USER RIGHTS ─── */}
-        <section className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+        <section className="bg-gray-50 dark:bg-zrp-deepBlack p-6 rounded-lg border border-gray-200 dark:border-gray-700">
           <h2 className="text-2xl font-orbitron text-gray-900 dark:text-white mb-4">Summary of Your Rights</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="flex items-start gap-2">

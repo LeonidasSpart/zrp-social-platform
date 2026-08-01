@@ -86,7 +86,7 @@ export default function BookmarksPage() {
           {error}
         </div>
       ) : posts.length === 0 ? (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8 border border-gray-200 dark:border-gray-700 text-center">
+        <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8 border border-gray-200 dark:border-gray-700 text-center">
           <Bookmark className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500 dark:text-gray-400">No bookmarks yet</p>
           <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">

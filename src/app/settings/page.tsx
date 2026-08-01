@@ -302,7 +302,7 @@ export default function SettingsPage() {
       )}
 
       {/* ─── Account Info ──────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Account Info</h2>
         <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
           <Calendar className="w-4 h-4" />
@@ -311,7 +311,7 @@ export default function SettingsPage() {
       </div>
 
       {/* ─── Profile Picture ────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Profile Picture</h2>
         <div className="flex items-center gap-6">
           <div className="relative">
@@ -356,7 +356,7 @@ export default function SettingsPage() {
       </div>
 
       {/* ─── Profile Section ────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Profile</h2>
         <form onSubmit={handleUpdateProfile} className="space-y-4">
           <div>
@@ -447,7 +447,7 @@ export default function SettingsPage() {
       </div>
 
       {/* ─── Username Section ────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Username</h2>
 
         {usernameCooldown !== null && usernameCooldown > 0 && (
@@ -502,7 +502,7 @@ export default function SettingsPage() {
       </div>
 
       {/* ─── Password Section ────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Change Password</h2>
         <form onSubmit={handleUpdatePassword} className="space-y-4">
           {passwordError && (
@@ -563,7 +563,7 @@ export default function SettingsPage() {
       </div>
 
       {/* ─── Delete Account Section ──────────────────────────────────── */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Danger Zone</h2>
         <div className="border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900/10">
           <div className="flex items-center justify-between">

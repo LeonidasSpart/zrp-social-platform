@@ -209,7 +209,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     pollOptions.filter(o => o.trim()).length >= 2;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
+    <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
       <form onSubmit={handleSubmit}>
         <div className="flex items-start gap-3">
           {/* ─── Avatar ─── */}
@@ -246,7 +246,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   value={pollQuestion}
                   onChange={(e) => setPollQuestion(e.target.value)}
                   placeholder="Poll question..."
-                  className="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+                  className="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-zrp-deepBlack text-gray-900 dark:text-white text-sm"
                   maxLength={200}
                 />
                 <div className="mt-2 space-y-1.5">
@@ -257,7 +257,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                         value={option}
                         onChange={(e) => updatePollOption(idx, e.target.value)}
                         placeholder={`Option ${idx + 1}`}
-                        className="flex-1 px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+                        className="flex-1 px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-zrp-deepBlack text-gray-900 dark:text-white text-sm"
                         maxLength={60}
                       />
                       {pollOptions.length > 2 && (
@@ -287,7 +287,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                       type="datetime-local"
                       value={pollExpiry}
                       onChange={(e) => setPollExpiry(e.target.value)}
-                      className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+                      className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-zrp-deepBlack text-gray-900 dark:text-white text-sm"
                     />
                   </div>
                 </div>

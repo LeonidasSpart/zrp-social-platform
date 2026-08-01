@@ -402,7 +402,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full p-6">
+          <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-xl max-w-sm w-full p-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Delete Post?</h2>
             <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
               This action cannot be undone. Are you sure you want to delete this post?

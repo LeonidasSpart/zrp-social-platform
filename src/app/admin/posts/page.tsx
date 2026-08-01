@@ -64,7 +64,7 @@ export default function AdminPosts() {
 
       <div className="space-y-2">
         {posts.map((post) => (
-          <div key={post.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
+          <div key={post.id} className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-start">
               <div className="flex-1 min-w-0">
                 <p className="text-gray-900 dark:text-white">{post.content}</p>

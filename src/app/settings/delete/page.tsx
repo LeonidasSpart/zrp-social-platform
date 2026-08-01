@@ -136,7 +136,7 @@ export default function DeleteAccountPage() {
         </Link>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8">
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-full">
             <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />

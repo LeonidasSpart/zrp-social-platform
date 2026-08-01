@@ -257,7 +257,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                         type="text"
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
-                        className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
+                        className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-zrp-deepBlack text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
                         autoFocus
                         maxLength={280}
                       />
@@ -297,7 +297,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Write a comment..."
-            className="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-zrp-deepBlack text-gray-900 dark:text-white"
             maxLength={280}
           />
           <button
@@ -314,7 +314,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       {/* ─── Delete Confirmation Modal ─── */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full p-6">
+          <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-xl max-w-sm w-full p-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
               Delete Comment?
             </h2>

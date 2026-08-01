@@ -40,7 +40,7 @@ export default function AdminLayout({
     <div className="max-w-7xl mx-auto py-4 px-4">
       <div className="flex flex-col md:flex-row gap-6">
         <aside className="md:w-64 flex-shrink-0">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+          <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Admin</h2>
             <nav className="space-y-1">
               {navItems.map((item) => (
