@@ -4,29 +4,27 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { MessageSquare } from "lucide-react";
+import { Pin, PinOff, MapPin, Link as LinkIcon, Calendar, Users, MessageSquare } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
-interface User {
+interface UserProfile {
   id: string;
   username: string;
-  name: string;
+  name: string | null;
   bio: string | null;
   avatarUrl: string | null;
-  location?: string | null;
-  country?: string | null;
-  website?: string | null;
+  coverUrl: string | null;
+  location: string | null;
+  website: string | null;
+  badgeType: string | null;
   createdAt: string;
-  isPrivate: boolean;
-  isBlocked: boolean;
-  badgeType?: string | null;
   _count: {
     posts: number;
     followers: number;
     following: number;
   };
-  isFollowing: boolean;
+  pinnedPostId: string | null;
 }
 
 interface Post {
@@ -41,7 +39,7 @@ interface Post {
     avatarUrl?: string;
     badgeType?: string | null;
   };
-  _count: {
+  _count?: {
     likes: number;
     comments: number;
     reposts: number;
@@ -52,11 +50,11 @@ interface Post {
 export default function ProfilePage({ params }: { params: { username: string } }) {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [pinnedPost, setPinnedPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isBlocked, setIsBlocked] = useState(false);
+  const [activeTab, setActiveTab] = useState<"posts" | "followers" | "following">("posts");
 
   const isOwnProfile = session?.user?.username === params.username;
 
@@ -76,86 +74,50 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const fetchProfile = async () => {
     try {
       const res = await fetch(`/api/users/${params.username}`);
-      if (!res.ok) throw new Error("User not found");
       const data = await res.json();
-      setUser(data);
-      setIsBlocked(data.isBlocked || false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load profile");
+      setProfile(data);
+      if (data.pinnedPostId) {
+        fetchPinnedPost(data.pinnedPostId);
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
+  };
+
+  const fetchPinnedPost = async (postId: string) => {
+    try {
+      const res = await fetch(`/api/posts/${postId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setPinnedPost(data);
+      }
+    } catch (error) {
+      console.error("Error fetching pinned post:", error);
     }
   };
 
   const fetchPosts = async () => {
     try {
-      setLoading(true);
       const res = await fetch(`/api/users/${params.username}/posts`);
-      if (!res.ok) throw new Error("Failed to fetch posts");
       const data = await res.json();
       setPosts(data);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFollow = async () => {
-    if (!user) return;
-    try {
-      const res = await fetch(`/api/users/${user.username}/follow`, {
-        method: "POST",
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setUser({
-          ...user,
-          isFollowing: data.following,
-          _count: {
-            ...user._count,
-            followers: data.following ? user._count.followers + 1 : user._count.followers - 1,
-          },
-        });
-      }
-    } catch (error) {
-      console.error("Error toggling follow:", error);
-    }
+  const handlePinToggle = () => {
+    // Refresh profile and posts after pin toggle
+    fetchProfile();
+    fetchPosts();
   };
 
-  const handleBlock = async () => {
-    if (!user) return;
-    try {
-      const res = await fetch(`/api/users/${user.username}/block`, {
-        method: "POST",
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setIsBlocked(data.blocked);
-        if (data.blocked) {
-          router.push("/");
-        }
-      }
-    } catch (error) {
-      console.error("Error toggling block:", error);
-    }
-  };
-
-  if (status === "loading" || loading) {
+  if (loading || !profile) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-gray-500">Loading...</div>
-      </div>
-    );
-  }
-
-  if (error || !user) {
-    return (
-      <div className="max-w-2xl mx-auto py-4 px-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-700 font-medium">{error || "User not found"}</p>
-          <Link href="/" className="text-blue-600 hover:underline text-sm mt-2 block">
-            ← Back to home
-          </Link>
-        </div>
       </div>
     );
   }
@@ -167,138 +129,197 @@ export default function ProfilePage({ params }: { params: { username: string } }
     });
   };
 
-  const hasLocation = user.location || user.country;
-  const displayLocation = user.location && user.country
-    ? `${user.location}, ${user.country}`
-    : user.location || user.country;
-
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex items-start gap-4">
-          <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-3xl font-bold flex-shrink-0 overflow-hidden">
-            {user.avatarUrl ? (
-              <img
-                src={user.avatarUrl}
-                alt={user.name || user.username}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              user.name?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase() || "?"
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-gray-900 inline-flex items-center gap-1.5">
-                {user.name || user.username}
-                <VerifiedBadge badgeType={user.badgeType} />
-              </h1>
-              {user.isPrivate && (
-                <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">Private</span>
-              )}
+      {/* ─── Cover Image ─── */}
+      <div className="relative h-48 bg-gradient-to-r from-zrp-red/20 to-zrp-red/5 rounded-t-lg overflow-hidden">
+        {profile.coverUrl && (
+          <img
+            src={profile.coverUrl}
+            alt="Cover"
+            className="w-full h-full object-cover"
+          />
+        )}
+      </div>
+
+      {/* ─── Avatar ─── */}
+      <div className="flex items-end -mt-12 px-4">
+        <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 border-4 border-white dark:border-gray-900 overflow-hidden">
+          {profile.avatarUrl ? (
+            <img
+              src={profile.avatarUrl}
+              alt={profile.name || profile.username}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-gray-600 dark:text-gray-300">
+              {(profile.name || profile.username)[0].toUpperCase()}
             </div>
-            <p className="text-gray-500">@{user.username}</p>
-            {user.bio && <p className="text-gray-700 mt-2">{user.bio}</p>}
-            <div className="mt-2 space-y-1">
-              {hasLocation && (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  📍 {displayLocation}
-                </p>
-              )}
-              {user.website && (
-                <a
-                  href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:underline flex items-center gap-1"
-                >
-                  🔗 {user.website}
-                </a>
-              )}
-            </div>
-            <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-              <span>Joined {formatDate(user.createdAt)}</span>
-            </div>
-          </div>
-          <div className="flex flex-col gap-2">
-            {isOwnProfile ? (
-              <Link
-                href="/settings"
-                className="px-4 py-1.5 border border-gray-300 rounded-full text-sm font-medium hover:bg-gray-50 transition inline-block text-center"
-              >
-                Edit Profile
-              </Link>
-            ) : (
-              <>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleFollow}
-                    className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
-                      user.isFollowing
-                        ? "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                        : "bg-blue-600 text-white hover:bg-blue-700"
-                    }`}
-                  >
-                    {user.isFollowing ? "Unfollow" : "Follow"}
-                  </button>
-                  <Link
-                    href={`/messages/${user.username}`}
-                    className="px-4 py-1.5 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition text-center inline-flex items-center gap-1.5"
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                    Message
-                  </Link>
-                </div>
-                <button
-                  onClick={handleBlock}
-                  className="px-4 py-1.5 border border-red-300 text-red-600 rounded-full text-sm font-medium hover:bg-red-50 transition"
-                >
-                  {isBlocked ? "Unblock" : "Block"}
-                </button>
-              </>
-            )}
-          </div>
+          )}
+        </div>
+        <div className="ml-auto flex gap-2 pb-2">
+          {isOwnProfile && (
+            <Link
+              href="/settings"
+              className="px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+            >
+              Edit Profile
+            </Link>
+          )}
+        </div>
+      </div>
+
+      {/* ─── Profile Info ─── */}
+      <div className="px-4 mt-2">
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+            {profile.name || profile.username}
+          </h1>
+          {profile.badgeType && <VerifiedBadge badgeType={profile.badgeType} />}
+        </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400">@{profile.username}</p>
+
+        {profile.bio && (
+          <p className="mt-2 text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+            {profile.bio}
+          </p>
+        )}
+
+        <div className="flex flex-wrap gap-3 mt-2 text-sm text-gray-500 dark:text-gray-400">
+          {profile.location && (
+            <span className="flex items-center gap-1">
+              <MapPin className="w-4 h-4" />
+              {profile.location}
+            </span>
+          )}
+          {profile.website && (
+            <a
+              href={profile.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-blue-600 hover:underline"
+            >
+              <LinkIcon className="w-4 h-4" />
+              {profile.website.replace(/^https?:\/\//, "")}
+            </a>
+          )}
+          <span className="flex items-center gap-1">
+            <Calendar className="w-4 h-4" />
+            Joined {formatDate(profile.createdAt)}
+          </span>
         </div>
 
-        <div className="flex gap-6 mt-4 pt-4 border-t border-gray-100">
-          <Link href={`/profile/${user.username}/followers`} className="hover:underline">
-            <span className="font-bold text-gray-900">{user._count.posts}</span>
-            <span className="text-gray-500 text-sm ml-1">Posts</span>
+        <div className="flex gap-4 mt-3">
+          <Link
+            href={`/profile/${profile.username}/following`}
+            className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
+          >
+            <span className="font-semibold text-gray-900 dark:text-white">
+              {profile._count.following}
+            </span>{" "}
+            Following
           </Link>
-          <Link href={`/profile/${user.username}/followers`} className="hover:underline">
-            <span className="font-bold text-gray-900">{user._count.followers}</span>
-            <span className="text-gray-500 text-sm ml-1">Followers</span>
-          </Link>
-          <Link href={`/profile/${user.username}/following`} className="hover:underline">
-            <span className="font-bold text-gray-900">{user._count.following}</span>
-            <span className="text-gray-500 text-sm ml-1">Following</span>
+          <Link
+            href={`/profile/${profile.username}/followers`}
+            className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
+          >
+            <span className="font-semibold text-gray-900 dark:text-white">
+              {profile._count.followers}
+            </span>{" "}
+            Followers
           </Link>
         </div>
       </div>
 
-      <div className="mt-4 space-y-4">
-        {isBlocked ? (
-          <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8 border border-gray-200 text-center">
-            <p className="text-gray-500">You have blocked @{user.username}</p>
-            <button
-              onClick={handleBlock}
-              className="mt-2 text-blue-600 hover:underline text-sm"
-            >
-              Unblock
-            </button>
+      {/* ─── Tabs ─── */}
+      <div className="flex border-b border-gray-200 dark:border-gray-700 mt-4">
+        <button
+          onClick={() => setActiveTab("posts")}
+          className={`px-4 py-2 text-sm font-medium transition ${
+            activeTab === "posts"
+              ? "text-zrp-red border-b-2 border-zrp-red"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+          }`}
+        >
+          Posts
+        </button>
+        <button
+          onClick={() => setActiveTab("followers")}
+          className={`px-4 py-2 text-sm font-medium transition ${
+            activeTab === "followers"
+              ? "text-zrp-red border-b-2 border-zrp-red"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+          }`}
+        >
+          Followers
+        </button>
+        <button
+          onClick={() => setActiveTab("following")}
+          className={`px-4 py-2 text-sm font-medium transition ${
+            activeTab === "following"
+              ? "text-zrp-red border-b-2 border-zrp-red"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+          }`}
+        >
+          Following
+        </button>
+      </div>
+
+      {/* ─── Content ─── */}
+      <div className="mt-4">
+        {activeTab === "posts" && (
+          <div className="space-y-4">
+            {/* Pinned Post */}
+            {pinnedPost && (
+              <div className="relative border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10 rounded-lg p-3">
+                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-medium mb-2">
+                  <Pin className="w-3.5 h-3.5" />
+                  Pinned Post
+                  {isOwnProfile && (
+                    <button
+                      onClick={async () => {
+                        const res = await fetch(`/api/posts/${pinnedPost.id}/pin`, {
+                          method: "POST",
+                        });
+                        if (res.ok) {
+                          setPinnedPost(null);
+                          fetchProfile();
+                        }
+                      }}
+                      className="ml-auto text-gray-400 hover:text-red-500 transition"
+                      title="Unpin"
+                    >
+                      <PinOff className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+                <PostCard post={pinnedPost} onUpdate={fetchPosts} />
+              </div>
+            )}
+
+            {/* Regular Posts */}
+            {posts.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <p>No posts yet.</p>
+              </div>
+            ) : (
+              posts.map((post) => {
+                // Skip if this post is pinned (already shown above)
+                if (pinnedPost && post.id === pinnedPost.id) return null;
+                return (
+                  <PostCard key={post.id} post={post} onUpdate={fetchPosts} />
+                );
+              })
+            )}
           </div>
-        ) : posts.length === 0 ? (
-          <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 text-center py-12">
-            <p className="text-gray-500">
-              {isOwnProfile
-                ? "You haven't posted anything yet."
-                : `@${user.username} hasn't posted anything yet.`}
-            </p>
-          </div>
-        ) : (
-          posts.map((post) => (
-            <PostCard key={post.id} post={post} onUpdate={fetchPosts} />
-          ))
+        )}
+
+        {activeTab === "followers" && (
+          <div className="text-center py-8 text-gray-500">Followers list coming soon</div>
+        )}
+
+        {activeTab === "following" && (
+          <div className="text-center py-8 text-gray-500">Following list coming soon</div>
         )}
       </div>
     </div>
