@@ -2,49 +2,39 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
-  const query = req.nextUrl.searchParams.get("q");
-  const type = req.nextUrl.searchParams.get("type") || "all";
+  const query = req.nextUrl.searchParams.get("q") || "";
 
-  if (!query || query.length < 2) {
+  if (query.length < 2) {
     return NextResponse.json({ users: [], posts: [] });
   }
 
   try {
-    let users: any[] = [];
-    let posts: any[] = [];
-
-    if (type === "all" || type === "users") {
-      users = await prisma.user.findMany({
+    const [users, posts] = await Promise.all([
+      prisma.user.findMany({
         where: {
           OR: [
             { username: { contains: query, mode: "insensitive" } },
             { name: { contains: query, mode: "insensitive" } },
           ],
         },
-        take: 10,
         select: {
           id: true,
           username: true,
           name: true,
-          avatarUrl: true,
-          bio: true,
-          _count: {
-            select: {
-              posts: true,
-              followers: true,
-            },
-          },
-        },
-      });
-    }
-
-    if (type === "all" || type === "posts") {
-      posts = await prisma.post.findMany({
-        where: {
-          content: { contains: query, mode: "insensitive" },
+          avatarUrl: true,    // ← required
+          badgeType: true,    // ← required
         },
         take: 20,
+      }),
+      prisma.post.findMany({
+        where: {
+          OR: [
+            { content: { contains: query, mode: "insensitive" } },
+            { hashtags: { has: query.toLowerCase() } },
+          ],
+        },
         orderBy: { createdAt: "desc" },
+        take: 20,
         include: {
           author: {
             select: {
@@ -52,11 +42,15 @@ export async function GET(req: NextRequest) {
               username: true,
               name: true,
               avatarUrl: true,
+              badgeType: true,
             },
           },
+          _count: {
+            select: { likes: true, comments: true, reposts: true },
+          },
         },
-      });
-    }
+      }),
+    ]);
 
     return NextResponse.json({ users, posts });
   } catch (error) {
