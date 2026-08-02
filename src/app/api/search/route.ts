@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
@@ -9,6 +11,27 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+
+    // ─── Get blocked and muted users ──────────────────────────────
+    let excludedAuthorIds: string[] = [];
+    if (userId) {
+      const [blocked, muted] = await Promise.all([
+        prisma.blocked.findMany({
+          where: { blockerId: userId },
+          select: { blockedId: true },
+        }),
+        prisma.mute.findMany({
+          where: { muterId: userId },
+          select: { mutedId: true },
+        }),
+      ]);
+      const blockedIds = blocked.map(b => b.blockedId);
+      const mutedIds = muted.map(m => m.mutedId);
+      excludedAuthorIds = [...blockedIds, ...mutedIds];
+    }
+
     const [users, posts] = await Promise.all([
       prisma.user.findMany({
         where: {
@@ -28,9 +51,15 @@ export async function GET(req: NextRequest) {
       }),
       prisma.post.findMany({
         where: {
-          OR: [
-            { content: { contains: query, mode: "insensitive" } },
-            { hashtags: { has: query.toLowerCase() } },
+          AND: [
+            {
+              OR: [
+                { content: { contains: query, mode: "insensitive" } },
+                { hashtags: { has: query.toLowerCase() } },
+              ],
+            },
+            { authorId: { notIn: excludedAuthorIds } },
+            { status: "published" },
           ],
         },
         orderBy: { createdAt: "desc" },
