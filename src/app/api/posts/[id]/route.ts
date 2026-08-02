@@ -20,7 +20,7 @@ export async function GET(
             username: true,
             name: true,
             avatarUrl: true,
-            badgeType: true, // ← Added
+            badgeType: true,
           },
         },
         poll: {
@@ -31,11 +31,34 @@ export async function GET(
             },
           },
         },
+        // ✅ QUOTE REPOST – include the quoted post
+        quotePost: {
+          include: {
+            author: {
+              select: {
+                id: true,
+                username: true,
+                name: true,
+                avatarUrl: true,
+                badgeType: true,
+              },
+            },
+            _count: {
+              select: {
+                likes: true,
+                comments: true,
+                reposts: true,
+                quotedBy: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             likes: true,
             comments: true,
             reposts: true,
+            quotedBy: true, // ✅ count of quotes on this post
           },
         },
       },
@@ -121,11 +144,34 @@ export async function PUT(
             badgeType: true,
           },
         },
+        // ✅ also include quotePost in the updated response
+        quotePost: {
+          include: {
+            author: {
+              select: {
+                id: true,
+                username: true,
+                name: true,
+                avatarUrl: true,
+                badgeType: true,
+              },
+            },
+            _count: {
+              select: {
+                likes: true,
+                comments: true,
+                reposts: true,
+                quotedBy: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             likes: true,
             comments: true,
             reposts: true,
+            quotedBy: true,
           },
         },
       },
@@ -168,6 +214,8 @@ export async function DELETE(
       prisma.like.deleteMany({ where: { postId: params.id } }),
       prisma.comment.deleteMany({ where: { postId: params.id } }),
       prisma.repost.deleteMany({ where: { postId: params.id } }),
+      // ✅ For quote reposts: when a post is deleted, its quotePostId will be set to null automatically
+      // because we used onDelete: SetNull in the schema. No extra action needed.
       prisma.post.delete({ where: { id: params.id } }),
     ]);
 
