@@ -384,10 +384,104 @@ export default function ProfilePage({ params }: { params: { username: string } }
       </div>
 
       {/* ─── Profile info ─── */}
-      <div className="px-4 relative z-10 flex items-start justify-between">
-        <div className="pb-2 flex-1 pr-4 mt-3">
+      <div className="px-4 relative z-10">
+        {/* Avatar + action buttons row — never contains the name/bio text */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="relative w-20 h-20 -mt-10 sm:w-28 sm:h-28 sm:-mt-16 rounded-full border-4 border-white dark:border-gray-900 shadow-lg overflow-hidden flex-shrink-0 group bg-white dark:bg-gray-900">
+            {profile.avatarUrl ? (
+              <img
+                src={profile.avatarUrl}
+                alt={profile.name || profile.username}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-2xl sm:text-3xl font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700">
+                {(profile.name || profile.username)[0].toUpperCase()}
+              </div>
+            )}
+            {isOwnProfile && (
+              <>
+                <button
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white"
+                  title="Change avatar"
+                >
+                  {uploadingAvatar ? (
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  ) : (
+                    <Camera className="w-6 h-6" />
+                  )}
+                </button>
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                />
+              </>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2 justify-end pt-2 flex-shrink-0">
+            <button
+              onClick={handleShareProfile}
+              className="flex items-center gap-1 px-3 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+            >
+              <Share2 className="w-4 h-4" />
+              <span className="hidden sm:inline">Share Profile</span>
+            </button>
+
+            {isOwnProfile ? (
+              <Link
+                href="/settings"
+                className="flex items-center gap-1 px-3 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+              >
+                <Pencil className="w-4 h-4" />
+                <span className="hidden sm:inline">Edit Profile</span>
+              </Link>
+            ) : (
+              <>
+                <button
+                  onClick={handleFollow}
+                  disabled={followLoading}
+                  className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap ${
+                    isFollowing
+                      ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                      : "bg-zrp-red text-white hover:bg-zrp-darkRed"
+                  }`}
+                >
+                  {followLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : isFollowing ? (
+                    <>
+                      <UserCheck className="w-4 h-4" />
+                      Following
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4" />
+                      Follow
+                    </>
+                  )}
+                </button>
+                <Link
+                  href={`/messages/${profile.username}`}
+                  className="flex items-center gap-1 px-3 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span className="hidden sm:inline">Message</span>
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Name/bio block — always full width, never squeezed by the row above */}
+        <div className="mt-3 w-full">
           <div className="flex items-center gap-1 flex-wrap">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white break-words">
               {profile.name || profile.username}
             </h1>
             {profile.badgeType && <VerifiedBadge badgeType={profile.badgeType} />}
@@ -400,7 +494,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
             </p>
           )}
 
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
             {profile.location && (
               <span className="flex items-center gap-1">
                 <MapPin className="w-4 h-4" />
@@ -427,7 +521,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
           <div className="flex gap-4 mt-2">
             <Link
               href={`/profile/${profile.username}/following`}
-              className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
+              className="text-sm text-gray-500 dark:text-gray-400 hover:underline whitespace-nowrap"
             >
               <span className="font-semibold text-gray-900 dark:text-white">
                 {profile._count.following}
@@ -436,7 +530,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
             </Link>
             <Link
               href={`/profile/${profile.username}/followers`}
-              className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
+              className="text-sm text-gray-500 dark:text-gray-400 hover:underline whitespace-nowrap"
             >
               <span className="font-semibold text-gray-900 dark:text-white">
                 {profile._count.followers}
@@ -446,7 +540,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
           </div>
 
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-            <span className="bg-zrp-red/10 text-zrp-red px-3 py-0.5 rounded-full flex items-center gap-1">
+            <span className="bg-zrp-red/10 text-zrp-red px-3 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap">
               <Heart className="w-3.5 h-3.5" />
               Impact: {impactMeals} meals 🧡
             </span>
@@ -455,6 +549,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
             </span>
           </div>
         </div>
+      </div>
 
         <div className="flex flex-col items-end gap-2 pb-2">
           <div className="relative w-24 h-24 -mt-16 sm:w-28 sm:h-28 sm:-mt-20 rounded-full border-4 border-white dark:border-gray-900 shadow-lg overflow-hidden flex-shrink-0 group bg-white dark:bg-gray-900">
