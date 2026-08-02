@@ -22,11 +22,13 @@ export async function GET(req: NextRequest) {
     const posts = await prisma.post.findMany({
       take: 20,
       orderBy: { createdAt: "desc" },
-      select: {
+        select: {
         id: true,
         content: true,
         imageUrl: true,
         createdAt: true,
+        views: true,
+
         author: {
           select: {
             id: true,
