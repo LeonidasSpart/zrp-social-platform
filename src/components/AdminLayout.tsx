@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { LayoutDashboard, Users, FileText, Flag, ClipboardCheck } from "lucide-react";
+import { LayoutDashboard, Users, FileText, Flag, ClipboardCheck, BarChart3 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
@@ -22,6 +22,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       { href: "/admin/users", label: "Users", icon: Users },
       { href: "/admin/posts", label: "Posts", icon: FileText },
       { href: "/admin/reports", label: "Reports", icon: Flag },
+      { href: "/admin/analytics", label: "Analytics", icon: BarChart3 }, // ✅ NEW
     ];
   } else if (isModerator) {
     navItems = [
