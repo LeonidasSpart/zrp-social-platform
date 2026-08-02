@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag, Bookmark, BarChart3 } from "lucide-react";
+import { Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag, Bookmark, BarChart3, Quote } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Comments from "./Comments";
 import EditPostModal from "./EditPostModal";
 import ReportModal from "./ReportModal";
 import VerifiedBadge from "./VerifiedBadge";
+import QuoteModal from "./QuoteModal"; // ✅ new component (create it)
 
 interface PostCardProps {
   post: {
@@ -27,10 +28,15 @@ interface PostCardProps {
       likes: number;
       comments: number;
       reposts: number;
+      quotedBy?: number; // optional
     };
     liked?: boolean;
+    // ✅ QUOTE REPOST
+    quotePost?: PostCardProps["post"] | null;
   };
   onUpdate: () => void;
+  isQuoted?: boolean; // to disable interactions if embedded
+  depth?: number; // to limit nesting
 }
 
 // ─── PARSE HASHTAGS AND MENTIONS ──────────────────────────────────
@@ -39,12 +45,10 @@ function parseContent(content: string) {
   let remaining = content;
   let lastIndex = 0;
 
-  // Find all #hashtag and @mention matches
   const regex = /(@\w+)|(#\w+)/g;
   let match;
 
   while ((match = regex.exec(content)) !== null) {
-    // Add text before the match
     if (match.index > lastIndex) {
       parts.push({
         type: "text",
@@ -52,7 +56,6 @@ function parseContent(content: string) {
       });
     }
 
-    // Add the matched hashtag or mention
     parts.push({
       type: match[0].startsWith("@") ? "mention" : "hashtag",
       value: match[0],
@@ -61,7 +64,6 @@ function parseContent(content: string) {
     lastIndex = match.index + match[0].length;
   }
 
-  // Add remaining text
   if (lastIndex < content.length) {
     parts.push({
       type: "text",
@@ -79,7 +81,12 @@ function formatCount(n: number) {
   return n.toString();
 }
 
-export default function PostCard({ post, onUpdate }: PostCardProps) {
+export default function PostCard({
+  post,
+  onUpdate,
+  isQuoted = false,
+  depth = 0,
+}: PostCardProps) {
   const { data: session } = useSession();
   const [liked, setLiked] = useState(post.liked || false);
   const [likesCount, setLikesCount] = useState(post._count?.likes || 0);
@@ -94,6 +101,10 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
 
   const [bookmarked, setBookmarked] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
+
+  // ─── QUOTE REPOST STATE ──────────────────────────────────────────
+  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
+  const [quoteLoading, setQuoteLoading] = useState(false);
 
   const hasCountedView = useRef(false);
 
@@ -150,6 +161,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
     } catch {}
   }, [post.id]);
 
+  // ─── Like ──────────────────────────────────────────────────────────
   const handleLike = async () => {
     try {
       const res = await fetch(`/api/posts/${post.id}/like`, {
@@ -164,6 +176,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
     }
   };
 
+  // ─── Repost ─────────────────────────────────────────────────────────
   const handleRepost = async () => {
     try {
       const res = await fetch(`/api/posts/${post.id}/repost`, {
@@ -180,6 +193,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
     }
   };
 
+  // ─── Share ──────────────────────────────────────────────────────────
   const handleShare = async () => {
     const url = window.location.href;
     if (navigator.share) {
@@ -202,6 +216,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
     }
   };
 
+  // ─── Delete ─────────────────────────────────────────────────────────
   const handleDelete = async () => {
     setDeleting(true);
     try {
@@ -222,6 +237,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
     }
   };
 
+  // ─── Report ─────────────────────────────────────────────────────────
   const handleReport = async (reason: string, details?: string) => {
     try {
       const res = await fetch("/api/reports", {
@@ -245,6 +261,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
     }
   };
 
+  // ─── Bookmark ──────────────────────────────────────────────────────
   const handleBookmark = async () => {
     setBookmarkLoading(true);
     try {
@@ -263,6 +280,43 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
     }
   };
 
+  // ─── QUOTE REPOST HANDLERS ──────────────────────────────────────
+  const handleQuote = () => {
+    if (!session) {
+      alert("Please log in to quote a post.");
+      return;
+    }
+    setIsQuoteModalOpen(true);
+  };
+
+  const handleQuoteSubmit = async (quoteContent: string) => {
+    setQuoteLoading(true);
+    try {
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: quoteContent,
+          quotePostId: post.id,
+          status: "published",
+        }),
+      });
+      if (res.ok) {
+        setIsQuoteModalOpen(false);
+        onUpdate();
+      } else {
+        const error = await res.json();
+        alert(error.error || "Failed to quote post.");
+      }
+    } catch (error) {
+      console.error("Quote error:", error);
+      alert("Failed to quote post.");
+    } finally {
+      setQuoteLoading(false);
+    }
+  };
+
+  // ─── Time ago ──────────────────────────────────────────────────────
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
     const minutes = Math.floor(diff / 60000);
@@ -281,7 +335,11 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+      <div
+        className={`bg-white dark:bg-gray-900 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition ${
+          isQuoted ? "border-l-4 border-l-blue-500 bg-gray-50 dark:bg-gray-800/40" : ""
+        }`}
+      >
         <div className="flex items-start gap-3">
           <Link href={`/profile/${post.author.username}`}>
             <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 font-semibold flex-shrink-0 overflow-hidden">
@@ -298,7 +356,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
           </Link>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Link href={`/profile/${post.author.username}`}>
                   <span className="font-semibold hover:underline text-gray-900 dark:text-white inline-flex items-center gap-1">
                     {post.author.name || post.author.username}
@@ -314,31 +372,35 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
                 <span className="text-gray-400 dark:text-gray-500 text-sm">{timeAgo(post.createdAt)}</span>
               </div>
 
-              {isAuthor ? (
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setShowEditModal(true)}
-                    className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition p-1"
-                    title="Edit"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="text-gray-400 hover:text-red-500 transition p-1"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowReportModal(true)}
-                  className="text-gray-400 hover:text-red-500 transition p-1"
-                  title="Report"
-                >
-                  <Flag className="w-4 h-4" />
-                </button>
+              {!isQuoted && (
+                <>
+                  {isAuthor ? (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setShowEditModal(true)}
+                        className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition p-1"
+                        title="Edit"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="text-gray-400 hover:text-red-500 transition p-1"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setShowReportModal(true)}
+                      className="text-gray-400 hover:text-red-500 transition p-1"
+                      title="Report"
+                    >
+                      <Flag className="w-4 h-4" />
+                    </button>
+                  )}
+                </>
               )}
             </div>
 
@@ -379,63 +441,94 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
               </div>
             )}
 
-            <div className="flex items-center gap-6 mt-3 flex-wrap">
-              <button
-                onClick={handleLike}
-                className={`flex items-center gap-1 text-sm ${
-                  liked ? "text-red-500" : "text-gray-500 dark:text-gray-400 hover:text-red-500"
-                } transition`}
-              >
-                <Heart className={`w-4 h-4 ${liked ? "fill-red-500" : ""}`} />
-                <span>{formatCount(likesCount)}</span>
-              </button>
+            {/* ─── QUOTED POST (if any) ────────────────────────────── */}
+            {post.quotePost && depth < 2 && (
+              <div className="mt-3 border-l-4 border-gray-300 dark:border-gray-600 pl-3">
+                <PostCard
+                  post={post.quotePost}
+                  onUpdate={onUpdate}
+                  isQuoted={true}
+                  depth={depth + 1}
+                />
+              </div>
+            )}
+            {post.quotePost && depth >= 2 && (
+              <div className="mt-3 text-sm text-gray-500 dark:text-gray-400 italic">
+                <Link href={`/post/${post.quotePost.id}`} className="hover:underline">
+                  View quoted post →
+                </Link>
+              </div>
+            )}
 
-              <button
-                onClick={() => setShowComments(!showComments)}
-                className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>{formatCount(post._count?.comments || 0)}</span>
-              </button>
+            {/* ─── ACTIONS ──────────────────────────────────────────── */}
+            {!isQuoted && (
+              <div className="flex items-center gap-6 mt-3 flex-wrap">
+                <button
+                  onClick={handleLike}
+                  className={`flex items-center gap-1 text-sm ${
+                    liked ? "text-red-500" : "text-gray-500 dark:text-gray-400 hover:text-red-500"
+                  } transition`}
+                >
+                  <Heart className={`w-4 h-4 ${liked ? "fill-red-500" : ""}`} />
+                  <span>{formatCount(likesCount)}</span>
+                </button>
 
-              <button
-                onClick={handleRepost}
-                className={`flex items-center gap-1 text-sm ${
-                  reposted ? "text-green-500" : "text-gray-500 dark:text-gray-400 hover:text-green-500"
-                } transition`}
-              >
-                <Repeat className={`w-4 h-4 ${reposted ? "fill-green-500" : ""}`} />
-                <span>{formatCount(repostsCount)}</span>
-              </button>
+                <button
+                  onClick={() => setShowComments(!showComments)}
+                  className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>{formatCount(post._count?.comments || 0)}</span>
+                </button>
 
-              <span
-                className="flex items-center gap-1 text-sm text-gray-400 dark:text-gray-500"
-                title={`${viewsCount.toLocaleString()} views`}
-              >
-                <BarChart3 className="w-4 h-4" />
-                <span>{formatCount(viewsCount)}</span>
-              </span>
+                <button
+                  onClick={handleRepost}
+                  className={`flex items-center gap-1 text-sm ${
+                    reposted ? "text-green-500" : "text-gray-500 dark:text-gray-400 hover:text-green-500"
+                  } transition`}
+                >
+                  <Repeat className={`w-4 h-4 ${reposted ? "fill-green-500" : ""}`} />
+                  <span>{formatCount(repostsCount)}</span>
+                </button>
 
-              <button
-                onClick={handleShare}
-                className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition"
-              >
-                <Share2 className="w-4 h-4" />
-              </button>
+                {/* ─── QUOTE BUTTON ────────────────────────────────── */}
+                <button
+                  onClick={handleQuote}
+                  className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-400 transition"
+                  title="Quote this post"
+                >
+                  <Quote className="w-4 h-4" />
+                </button>
 
-              <button
-                onClick={handleBookmark}
-                disabled={bookmarkLoading}
-                className={`flex items-center gap-1 text-sm ${
-                  bookmarked
-                    ? "text-gray-900 dark:text-white"
-                    : "text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                } transition`}
-                title={bookmarked ? "Remove bookmark" : "Bookmark"}
-              >
-                <Bookmark className={`w-4 h-4 ${bookmarked ? "fill-current" : ""}`} />
-              </button>
-            </div>
+                <span
+                  className="flex items-center gap-1 text-sm text-gray-400 dark:text-gray-500"
+                  title={`${viewsCount.toLocaleString()} views`}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  <span>{formatCount(viewsCount)}</span>
+                </span>
+
+                <button
+                  onClick={handleShare}
+                  className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition"
+                >
+                  <Share2 className="w-4 h-4" />
+                </button>
+
+                <button
+                  onClick={handleBookmark}
+                  disabled={bookmarkLoading}
+                  className={`flex items-center gap-1 text-sm ${
+                    bookmarked
+                      ? "text-gray-900 dark:text-white"
+                      : "text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                  } transition`}
+                  title={bookmarked ? "Remove bookmark" : "Bookmark"}
+                >
+                  <Bookmark className={`w-4 h-4 ${bookmarked ? "fill-current" : ""}`} />
+                </button>
+              </div>
+            )}
 
             {showComments && (
               <Comments postId={post.id} onCommentAdded={onUpdate} />
@@ -481,6 +574,15 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
         isOpen={showReportModal}
         onClose={() => setShowReportModal(false)}
         onSubmit={handleReport}
+      />
+
+      {/* ─── QUOTE MODAL ────────────────────────────────────────────── */}
+      <QuoteModal
+        isOpen={isQuoteModalOpen}
+        onClose={() => setIsQuoteModalOpen(false)}
+        onSubmit={handleQuoteSubmit}
+        originalPost={post}
+        loading={quoteLoading}
       />
     </>
   );
