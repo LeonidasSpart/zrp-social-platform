@@ -4,7 +4,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Check, X, Globe, MapPin, User, Key, Calendar, Camera, Trash2 } from "lucide-react";
+import { Check, X, Globe, MapPin, User, Key, Calendar, Camera, Trash2, Loader2 } from "lucide-react";
+import { useUploadThing } from "@/lib/uploadthing-client";
 
 interface UserData {
   id: string;
@@ -42,14 +43,44 @@ export default function SettingsPage() {
   const [updatingUsername, setUpdatingUsername] = useState(false);
   const [updatingPassword, setUpdatingPassword] = useState(false);
 
-  // Avatar states
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  // Avatar states (using Uploadthing)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [usernameCooldown, setUsernameCooldown] = useState<number | null>(null);
+
+  // ─── Uploadthing hook for avatar ──────────────────────────────────
+  const { startUpload } = useUploadThing("avatar", {
+    onClientUploadComplete: (files) => {
+      const url = files[0].url;
+      setAvatarPreview(url);
+      setUploadingAvatar(false);
+      // Save the URL to the user profile
+      fetch("/api/user/update-avatar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl: url }),
+      })
+        .then((res) => {
+          if (res.ok) {
+            setMessage({ type: "success", text: "Avatar updated successfully!" });
+            update();
+            fetchUserData();
+          } else {
+            setMessage({ type: "error", text: "Failed to save avatar URL" });
+          }
+        })
+        .catch(() => {
+          setMessage({ type: "error", text: "Failed to save avatar" });
+        });
+    },
+    onUploadError: (error) => {
+      setUploadingAvatar(false);
+      setMessage({ type: "error", text: "Avatar upload failed: " + error.message });
+    },
+  });
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -90,7 +121,7 @@ export default function SettingsPage() {
     }
   };
 
-  // ─── Avatar Upload ──────────────────────────────────────────────
+  // ─── Avatar upload handler ──────────────────────────────────────────
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -108,31 +139,11 @@ export default function SettingsPage() {
 
     setUploadingAvatar(true);
     setMessage(null);
-
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const res = await fetch("/api/user/avatar", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setMessage({ type: "success", text: "Profile picture updated successfully!" });
-        setAvatarPreview(data.avatarUrl);
-        await update();
-        fetchUserData();
-      } else {
-        setMessage({ type: "error", text: data.error || "Upload failed" });
-      }
-    } catch (error) {
-      console.error("Avatar upload error:", error);
-      setMessage({ type: "error", text: "Upload failed. Please try again." });
-    } finally {
+      await startUpload([file]);
+    } catch (err) {
       setUploadingAvatar(false);
+      setMessage({ type: "error", text: "Upload failed. Please try again." });
     }
   };
 
@@ -268,7 +279,7 @@ export default function SettingsPage() {
   if (status === "loading" || !userData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">Loading...</div>
+        <Loader2 className="w-6 h-6 animate-spin text-zrp-red" />
       </div>
     );
   }
