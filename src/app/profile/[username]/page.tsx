@@ -7,7 +7,7 @@ import Link from "next/link";
 import {
   MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff,
   Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck, Share2,
-  Eye, Bell, BellOff // <-- added icons for mute
+  Eye, Bell, BellOff
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -575,6 +575,12 @@ export default function ProfilePage({ params }: { params: { username: string } }
               {profile.name || profile.username}
             </h1>
             {profile.badgeType && <VerifiedBadge badgeType={profile.badgeType} />}
+            {/* ─── MUTED INDICATOR ────────────────────────────── */}
+            {isMuted && (
+              <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full ml-1">
+                Muted
+              </span>
+            )}
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">@{profile.username}</p>
 
