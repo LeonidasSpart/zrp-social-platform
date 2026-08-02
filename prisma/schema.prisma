@@ -57,12 +57,16 @@ model User {
   pinnedPostId  String?   @unique
   pinnedPost    Post?     @relation("PinnedPost", fields: [pinnedPostId], references: [id], onDelete: SetNull)
 
+  // ─── RELATIONS ────────────────────────────────────────────────────
   posts       Post[]
   comments    Comment[]
   following   Follow[]  @relation("Following")
   followers   Follow[]  @relation("Followers")
   likes       Like[]
   reposts     Repost[]
+  reactions   Reaction[] // ✅ new
+  muter       Mute[]    @relation("Muter")   // users this user muted
+  mutedBy     Mute[]    @relation("Muted")   // users who muted this user
   notifications Notification[] @relation("Notification_user")
   sentNotifications Notification[] @relation("Notification_fromUser")
   sentMessages Message[] @relation("Message_sender")
@@ -105,6 +109,7 @@ model Post {
   comments    Comment[]
   likes       Like[]
   reposts     Repost[]
+  reactions   Reaction[]
   notifications Notification[] @relation("Notification_post")
   reports     Report[]
   bookmarks   Bookmark[]
@@ -119,6 +124,7 @@ model Post {
 model Comment {
   id          String    @id @default(cuid())
   content     String    @db.Text
+  imageUrl    String?   // ✅ new: allow images in comments
   postId      String
   post        Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   authorId    String
@@ -167,16 +173,44 @@ model Like {
 }
 
 model Repost {
-  id          String    @id @default(cuid())
-  postId      String
-  post        Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
+  id            String    @id @default(cuid())
+  postId        String
+  post          Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quoteContent  String?   @db.Text // ✅ new: quote repost text
+  createdAt     DateTime  @default(now())
 
   @@unique([postId, userId])
   @@index([postId])
   @@index([userId])
+}
+
+model Reaction {
+  id        String   @id @default(cuid())
+  emoji     String   // ❤️, 🔥, 😢, 😡, 👍, etc.
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId, emoji]) // one reaction per emoji per user per post
+  @@index([postId])
+  @@index([userId])
+}
+
+model Mute {
+  id        String   @id @default(cuid())
+  muterId   String
+  muter     User     @relation("Muter", fields: [muterId], references: [id], onDelete: Cascade)
+  mutedId   String
+  muted     User     @relation("Muted", fields: [mutedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([muterId, mutedId])
+  @@index([muterId])
+  @@index([mutedId])
 }
 
 model Notification {
