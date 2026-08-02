@@ -87,7 +87,11 @@ model Post {
   updatedAt   DateTime  @updatedAt
 
   // ─── ANALYTICS ──────────────────────────────────────────────────
-  views       Int       @default(0)   // ✅ ADDED
+  views       Int       @default(0)
+
+  // ─── SCHEDULING ──────────────────────────────────────────────────
+  scheduledAt DateTime?                           // null = published immediately
+  status      String    @default("published")     // "draft" | "scheduled" | "published"
 
   hashtags    String[]
   mentions    String[]
@@ -108,6 +112,8 @@ model Post {
   // ─── INDEXES ──────────────────────────────────────────────────────
   @@index([createdAt])
   @@index([authorId])
+  @@index([status])
+  @@index([scheduledAt])
 }
 
 model Comment {
