@@ -6,13 +6,16 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import {
   MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff,
-  Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck, Share2,
-  Eye, Bell, BellOff
+  Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck, Share2
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
-import AnalyticsTab from "@/components/AnalyticsTab";
-import { useUploadThing } from "@/lib/uploadthing-client";
+
+function formatProfileCount(n: number) {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+  return n.toString();
+}
 
 interface UserProfile {
   id: string;
@@ -40,6 +43,7 @@ interface Post {
   content: string;
   imageUrl?: string;
   createdAt: string;
+  views?: number;
   author: {
     id: string;
     username: string;
@@ -63,7 +67,7 @@ interface Post {
   };
 }
 
-type TabType = "posts" | "replies" | "media" | "likes" | "analytics";
+type TabType = "posts" | "replies" | "media" | "likes";
 
 export default function ProfilePage({ params }: { params: { username: string } }) {
   const { data: session, status } = useSession();
@@ -77,58 +81,10 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
-  
-  // ─── MUTE STATE ──────────────────────────────────────────────────────
-  const [isMuted, setIsMuted] = useState(false);
-  const [muteLoading, setMuteLoading] = useState(false);
-
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const isOwnProfile = session?.user?.id === profile?.id;
-
-  // ─── Uploadthing hooks ──────────────────────────────────────────────
-  const { startUpload: uploadBanner } = useUploadThing("banner", {
-    onClientUploadComplete: (files) => {
-      const url = files[0].url;
-      setUploadingBanner(false);
-      fetch("/api/user/update-cover", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ coverUrl: url }),
-      })
-        .then((res) => {
-          if (res.ok) setProfile((prev) => prev ? { ...prev, coverUrl: url } : null);
-          else alert("Failed to save banner URL");
-        })
-        .catch(() => alert("Failed to save banner"));
-    },
-    onUploadError: (error) => {
-      setUploadingBanner(false);
-      alert("Banner upload failed: " + error.message);
-    },
-  });
-
-  const { startUpload: uploadAvatar } = useUploadThing("avatar", {
-    onClientUploadComplete: (files) => {
-      const url = files[0].url;
-      setUploadingAvatar(false);
-      fetch("/api/user/update-avatar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ avatarUrl: url }),
-      })
-        .then((res) => {
-          if (res.ok) setProfile((prev) => prev ? { ...prev, avatarUrl: url } : null);
-          else alert("Failed to save avatar URL");
-        })
-        .catch(() => alert("Failed to save avatar"));
-    },
-    onUploadError: (error) => {
-      setUploadingAvatar(false);
-      alert("Avatar upload failed: " + error.message);
-    },
-  });
 
   // ─── Fetch profile & follow status ──────────────────────────────────
   const fetchProfile = async () => {
@@ -139,14 +95,8 @@ export default function ProfilePage({ params }: { params: { username: string } }
       setIsFollowing(data.isFollowing || false);
       if (data.pinnedPostId) {
         fetchPinnedPost(data.pinnedPostId);
-      }
-      // ─── Fetch mute status ──────────────────────────────────────────
-      if (session?.user?.id && data.id !== session.user.id) {
-        const muteRes = await fetch(`/api/users/mute?userId=${data.id}`);
-        if (muteRes.ok) {
-          const muteData = await muteRes.json();
-          setIsMuted(muteData.muted);
-        }
+      } else {
+        setPinnedPost(null);
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -236,31 +186,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
     }
   };
 
-  // ─── Mute / Unmute ──────────────────────────────────────────────────
-  const handleMute = async () => {
-    if (!session || isOwnProfile || !profile) return;
-    setMuteLoading(true);
-    try {
-      const res = await fetch("/api/users/mute", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: profile.id }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setIsMuted(data.muted);
-      } else {
-        const err = await res.json();
-        alert(err.error || "Failed to toggle mute");
-      }
-    } catch (error) {
-      console.error("Mute error:", error);
-      alert("Failed to toggle mute");
-    } finally {
-      setMuteLoading(false);
-    }
-  };
-
   // ─── Share Profile ──────────────────────────────────────────────────
   const handleShareProfile = async () => {
     const url = `${window.location.origin}/profile/${profile?.username}`;
@@ -284,47 +209,63 @@ export default function ProfilePage({ params }: { params: { username: string } }
     }
   };
 
-  // ─── Banner upload handler ──────────────────────────────────────────
+  // ─── Banner upload ──────────────────────────────────────────────────
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 4 * 1024 * 1024) {
-      alert("File too large. Max 4MB.");
-      return;
-    }
-    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-    if (!validTypes.includes(file.type)) {
-      alert("Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.");
-      return;
-    }
+
     setUploadingBanner(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", "cover");
+
     try {
-      await uploadBanner([file]);
-    } catch (err) {
+      const res = await fetch("/api/user/update-cover", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProfile((prev) => prev ? { ...prev, coverUrl: data.coverUrl } : null);
+      } else {
+        alert("Failed to upload banner");
+      }
+    } catch (error) {
+      console.error("Banner upload error:", error);
+      alert("Failed to upload banner");
+    } finally {
       setUploadingBanner(false);
-      alert("Banner upload failed.");
+      if (bannerInputRef.current) bannerInputRef.current.value = "";
     }
   };
 
-  // ─── Avatar upload handler ──────────────────────────────────────────
+  // ─── Avatar upload ──────────────────────────────────────────────────
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      alert("File too large. Max 2MB.");
-      return;
-    }
-    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-    if (!validTypes.includes(file.type)) {
-      alert("Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.");
-      return;
-    }
+
     setUploadingAvatar(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", "avatar");
+
     try {
-      await uploadAvatar([file]);
-    } catch (err) {
+      const res = await fetch("/api/user/update-avatar", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProfile((prev) => prev ? { ...prev, avatarUrl: data.avatarUrl } : null);
+      } else {
+        alert("Failed to upload avatar");
+      }
+    } catch (error) {
+      console.error("Avatar upload error:", error);
+      alert("Failed to upload avatar");
+    } finally {
       setUploadingAvatar(false);
-      alert("Avatar upload failed.");
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
     }
   };
 
@@ -351,6 +292,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
   // ─── Render reply item ──────────────────────────────────────────────
   const renderReplyItem = (reply: any) => {
     const isOwn = reply.author.id === session?.user?.id;
+
     return (
       <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
         <div className="flex items-start gap-3">
@@ -383,6 +325,8 @@ export default function ProfilePage({ params }: { params: { username: string } }
                 {new Date(reply.createdAt).toLocaleDateString()}
               </span>
             </div>
+
+            {/* ─── Replying to ────────────────────────────────────────── */}
             {reply.replyTo && (
               <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 Replying to <Link href={`/profile/${reply.replyTo.author.username}`} className="text-blue-600 hover:underline">
@@ -390,9 +334,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
                 </Link>
               </div>
             )}
+
             <p className="mt-1 text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
               {reply.content}
             </p>
+
             {reply.imageUrl && (
               <div className="mt-2 rounded-lg overflow-hidden">
                 <img
@@ -448,7 +394,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
       {/* ─── Profile info ─── */}
       <div className="px-4 relative z-10">
-        {/* Avatar + action buttons row */}
+        {/* Avatar + action buttons row — never contains the name/bio text */}
         <div className="flex items-start justify-between gap-3">
           <div className="relative w-20 h-20 -mt-10 sm:w-28 sm:h-28 sm:-mt-16 rounded-full border-4 border-white dark:border-gray-900 shadow-lg overflow-hidden flex-shrink-0 group bg-white dark:bg-gray-900">
             {profile.avatarUrl ? (
@@ -529,7 +475,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
                     </>
                   )}
                 </button>
-
                 <Link
                   href={`/messages/${profile.username}`}
                   className="flex items-center gap-1 px-3 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
@@ -537,50 +482,18 @@ export default function ProfilePage({ params }: { params: { username: string } }
                   <MessageCircle className="w-4 h-4" />
                   <span className="hidden sm:inline">Message</span>
                 </Link>
-
-                {/* ─── MUTE BUTTON ──────────────────────────────────── */}
-                <button
-                  onClick={handleMute}
-                  disabled={muteLoading}
-                  className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap border ${
-                    isMuted
-                      ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600"
-                      : "bg-transparent border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
-                  title={isMuted ? "Unmute user" : "Mute user"}
-                >
-                  {muteLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : isMuted ? (
-                    <>
-                      <BellOff className="w-4 h-4" />
-                      <span className="hidden sm:inline">Unmute</span>
-                    </>
-                  ) : (
-                    <>
-                      <Bell className="w-4 h-4" />
-                      <span className="hidden sm:inline">Mute</span>
-                    </>
-                  )}
-                </button>
               </>
             )}
           </div>
         </div>
 
-        {/* Name/bio block — always full width */}
+        {/* Name/bio block — always full width, never squeezed by the row above */}
         <div className="mt-3 w-full">
           <div className="flex items-center gap-1 flex-wrap">
             <h1 className="text-xl font-bold text-gray-900 dark:text-white break-words">
               {profile.name || profile.username}
             </h1>
             {profile.badgeType && <VerifiedBadge badgeType={profile.badgeType} />}
-            {/* ─── MUTED INDICATOR ────────────────────────────── */}
-            {isMuted && (
-              <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full ml-1">
-                Muted
-              </span>
-            )}
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">@{profile.username}</p>
 
@@ -620,7 +533,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
               className="text-sm text-gray-500 dark:text-gray-400 hover:underline whitespace-nowrap"
             >
               <span className="font-semibold text-gray-900 dark:text-white">
-                {profile._count.following}
+                {formatProfileCount(profile._count.following)}
               </span>{" "}
               Following
             </Link>
@@ -629,7 +542,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
               className="text-sm text-gray-500 dark:text-gray-400 hover:underline whitespace-nowrap"
             >
               <span className="font-semibold text-gray-900 dark:text-white">
-                {profile._count.followers}
+                {formatProfileCount(profile._count.followers)}
               </span>{" "}
               Followers
             </Link>
@@ -647,31 +560,24 @@ export default function ProfilePage({ params }: { params: { username: string } }
         </div>
       </div>
 
-      {/* ─── Tabs (including "Analytics") ─── */}
-      <div className="flex gap-2 mt-4 px-4 overflow-x-auto pb-1">
-        {(["posts", "replies", "media", "likes", "analytics"] as const).map((tab) => {
-          if (tab === "analytics" && !isOwnProfile) return null;
-          return (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-1.5 text-sm font-medium rounded-full transition whitespace-nowrap ${
-                activeTab === tab
-                  ? "bg-zrp-red text-white"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
-              }`}
-            >
-              {tab === "analytics" ? (
-                <span className="flex items-center gap-1">
-                  <Eye className="w-3.5 h-3.5" />
-                  Analytics
-                </span>
-              ) : (
-                tab.charAt(0).toUpperCase() + tab.slice(1)
-              )}
-            </button>
-          );
-        })}
+      {/* ─── Tabs ─── */}
+      <div className="flex mt-4 px-4 border-b border-gray-200 dark:border-gray-800">
+        {(["posts", "replies", "media", "likes"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`relative flex-1 py-3 text-sm font-medium transition hover:bg-gray-50 dark:hover:bg-gray-800/50 ${
+              activeTab === tab
+                ? "text-gray-900 dark:text-white"
+                : "text-gray-500 dark:text-gray-400"
+            }`}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {activeTab === tab && (
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-1 bg-zrp-red rounded-full" />
+            )}
+          </button>
+        ))}
       </div>
 
       {/* ─── Content ─── */}
@@ -680,8 +586,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
           <div className="flex justify-center py-8">
             <Loader2 className="w-6 h-6 animate-spin text-zrp-red" />
           </div>
-        ) : activeTab === "analytics" ? (
-          <AnalyticsTab userId={profile.id} />
         ) : posts.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <p>No {activeTab} yet.</p>
@@ -696,30 +600,28 @@ export default function ProfilePage({ params }: { params: { username: string } }
                     <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-medium mb-2">
                       <Pin className="w-3.5 h-3.5" />
                       Pinned
-                      {isOwnProfile && (
-                        <button
-                          onClick={async () => {
-                            const res = await fetch(`/api/posts/${pinnedPost.id}/pin`, {
-                              method: "POST",
-                            });
-                            if (res.ok) {
-                              setPinnedPost(null);
-                              fetchProfile();
-                            }
-                          }}
-                          className="ml-auto text-gray-400 hover:text-red-500 transition"
-                          title="Unpin"
-                        >
-                          <PinOff className="w-3.5 h-3.5" />
-                        </button>
-                      )}
                     </div>
-                    <PostCard post={pinnedPost} onUpdate={fetchPosts} />
+                    <PostCard
+                      post={pinnedPost}
+                      onUpdate={fetchPosts}
+                      showPinOption={isOwnProfile}
+                      isPinned={true}
+                      onPinToggle={fetchProfile}
+                    />
                   </div>
                 )}
                 {posts.map((post) => {
                   if (pinnedPost && post.id === pinnedPost.id) return null;
-                  return <PostCard key={post.id} post={post} onUpdate={fetchPosts} />;
+                  return (
+                    <PostCard
+                      key={post.id}
+                      post={post}
+                      onUpdate={fetchPosts}
+                      showPinOption={isOwnProfile}
+                      isPinned={false}
+                      onPinToggle={fetchProfile}
+                    />
+                  );
                 })}
               </>
             )}
