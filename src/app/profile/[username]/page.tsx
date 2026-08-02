@@ -6,10 +6,12 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import {
   MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff,
-  Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck, Share2
+  Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck, Share2,
+  Eye // for analytics tab icon
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import AnalyticsTab from "@/components/AnalyticsTab"; // ✅ new component
 import { useUploadThing } from "@/lib/uploadthing-client";
 
 interface UserProfile {
@@ -61,7 +63,8 @@ interface Post {
   };
 }
 
-type TabType = "posts" | "replies" | "media" | "likes";
+// ✅ Added "analytics" to TabType
+type TabType = "posts" | "replies" | "media" | "likes" | "analytics";
 
 export default function ProfilePage({ params }: { params: { username: string } }) {
   const { data: session, status } = useSession();
@@ -85,18 +88,14 @@ export default function ProfilePage({ params }: { params: { username: string } }
     onClientUploadComplete: (files) => {
       const url = files[0].url;
       setUploadingBanner(false);
-      // Save the URL to the user profile
       fetch("/api/user/update-cover", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ coverUrl: url }),
       })
         .then((res) => {
-          if (res.ok) {
-            setProfile((prev) => prev ? { ...prev, coverUrl: url } : null);
-          } else {
-            alert("Failed to save banner URL");
-          }
+          if (res.ok) setProfile((prev) => prev ? { ...prev, coverUrl: url } : null);
+          else alert("Failed to save banner URL");
         })
         .catch(() => alert("Failed to save banner"));
     },
@@ -116,11 +115,8 @@ export default function ProfilePage({ params }: { params: { username: string } }
         body: JSON.stringify({ avatarUrl: url }),
       })
         .then((res) => {
-          if (res.ok) {
-            setProfile((prev) => prev ? { ...prev, avatarUrl: url } : null);
-          } else {
-            alert("Failed to save avatar URL");
-          }
+          if (res.ok) setProfile((prev) => prev ? { ...prev, avatarUrl: url } : null);
+          else alert("Failed to save avatar URL");
         })
         .catch(() => alert("Failed to save avatar"));
     },
@@ -255,7 +251,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (file.size > 4 * 1024 * 1024) {
       alert("File too large. Max 4MB.");
       return;
@@ -265,7 +260,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
       alert("Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.");
       return;
     }
-
     setUploadingBanner(true);
     try {
       await uploadBanner([file]);
@@ -279,7 +273,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (file.size > 2 * 1024 * 1024) {
       alert("File too large. Max 2MB.");
       return;
@@ -289,7 +282,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
       alert("Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.");
       return;
     }
-
     setUploadingAvatar(true);
     try {
       await uploadAvatar([file]);
@@ -322,7 +314,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
   // ─── Render reply item ──────────────────────────────────────────────
   const renderReplyItem = (reply: any) => {
     const isOwn = reply.author.id === session?.user?.id;
-
     return (
       <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
         <div className="flex items-start gap-3">
@@ -355,8 +346,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
                 {new Date(reply.createdAt).toLocaleDateString()}
               </span>
             </div>
-
-            {/* ─── Replying to ────────────────────────────────────────── */}
             {reply.replyTo && (
               <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 Replying to <Link href={`/profile/${reply.replyTo.author.username}`} className="text-blue-600 hover:underline">
@@ -364,11 +353,9 @@ export default function ProfilePage({ params }: { params: { username: string } }
                 </Link>
               </div>
             )}
-
             <p className="mt-1 text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
               {reply.content}
             </p>
-
             {reply.imageUrl && (
               <div className="mt-2 rounded-lg overflow-hidden">
                 <img
@@ -590,21 +577,32 @@ export default function ProfilePage({ params }: { params: { username: string } }
         </div>
       </div>
 
-      {/* ─── Tabs ─── */}
-      <div className="flex gap-2 mt-4 px-4">
-        {(["posts", "replies", "media", "likes"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-1.5 text-sm font-medium rounded-full transition ${
-              activeTab === tab
-                ? "bg-zrp-red text-white"
-                : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
-            }`}
-          >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-          </button>
-        ))}
+      {/* ─── Tabs (including "Analytics") ─── */}
+      <div className="flex gap-2 mt-4 px-4 overflow-x-auto pb-1">
+        {(["posts", "replies", "media", "likes", "analytics"] as const).map((tab) => {
+          // Only show analytics tab if it's the user's own profile
+          if (tab === "analytics" && !isOwnProfile) return null;
+          return (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-1.5 text-sm font-medium rounded-full transition whitespace-nowrap ${
+                activeTab === tab
+                  ? "bg-zrp-red text-white"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+              }`}
+            >
+              {tab === "analytics" ? (
+                <span className="flex items-center gap-1">
+                  <Eye className="w-3.5 h-3.5" />
+                  Analytics
+                </span>
+              ) : (
+                tab.charAt(0).toUpperCase() + tab.slice(1)
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* ─── Content ─── */}
@@ -613,6 +611,9 @@ export default function ProfilePage({ params }: { params: { username: string } }
           <div className="flex justify-center py-8">
             <Loader2 className="w-6 h-6 animate-spin text-zrp-red" />
           </div>
+        ) : activeTab === "analytics" ? (
+          // ─── Analytics Tab ────────────────────────────────────────────
+          <AnalyticsTab userId={profile.id} />
         ) : posts.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <p>No {activeTab} yet.</p>
