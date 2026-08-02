@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag, Bookmark } from "lucide-react";
+import { Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag, Bookmark, BarChart3 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Comments from "./Comments";
 import EditPostModal from "./EditPostModal";
@@ -15,6 +15,7 @@ interface PostCardProps {
     content: string;
     imageUrl?: string;
     createdAt: string;
+    views?: number;
     author: {
       id: string;
       username: string;
@@ -71,6 +72,13 @@ function parseContent(content: string) {
   return parts;
 }
 
+// ─── FORMAT COUNTS LIKE X (1.2K, 3.4M) ─────────────────────────────
+function formatCount(n: number) {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+  return n.toString();
+}
+
 export default function PostCard({ post, onUpdate }: PostCardProps) {
   const { data: session } = useSession();
   const [liked, setLiked] = useState(post.liked || false);
@@ -78,6 +86,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [reposted, setReposted] = useState(false);
   const [repostsCount, setRepostsCount] = useState(post._count?.reposts || 0);
+  const [viewsCount, setViewsCount] = useState(post.views || 0);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
@@ -85,6 +94,8 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
 
   const [bookmarked, setBookmarked] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
+
+  const hasCountedView = useRef(false);
 
   const isAuthor = session?.user?.id === post.author.id;
 
@@ -106,6 +117,38 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
       checkBookmark();
     }
   }, [post.id, session]);
+
+  // ─── Count a view once per mount, guarded against double-counting ───
+  useEffect(() => {
+    if (hasCountedView.current) return;
+    hasCountedView.current = true;
+
+    const storageKey = "zrp_viewed_posts";
+    let viewed: string[] = [];
+    try {
+      viewed = JSON.parse(sessionStorage.getItem(storageKey) || "[]");
+    } catch {
+      viewed = [];
+    }
+
+    if (viewed.includes(post.id)) return;
+
+    fetch(`/api/posts/${post.id}/view`, { method: "POST" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.views != null) {
+          setViewsCount(data.views);
+        } else {
+          setViewsCount((v) => v + 1);
+        }
+      })
+      .catch(() => {});
+
+    viewed.push(post.id);
+    try {
+      sessionStorage.setItem(storageKey, JSON.stringify(viewed.slice(-500)));
+    } catch {}
+  }, [post.id]);
 
   const handleLike = async () => {
     try {
@@ -336,7 +379,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
               </div>
             )}
 
-            <div className="flex items-center gap-6 mt-3">
+            <div className="flex items-center gap-6 mt-3 flex-wrap">
               <button
                 onClick={handleLike}
                 className={`flex items-center gap-1 text-sm ${
@@ -344,7 +387,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
                 } transition`}
               >
                 <Heart className={`w-4 h-4 ${liked ? "fill-red-500" : ""}`} />
-                <span>{likesCount}</span>
+                <span>{formatCount(likesCount)}</span>
               </button>
 
               <button
@@ -352,7 +395,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
                 className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition"
               >
                 <MessageCircle className="w-4 h-4" />
-                <span>{post._count?.comments || 0}</span>
+                <span>{formatCount(post._count?.comments || 0)}</span>
               </button>
 
               <button
@@ -362,8 +405,16 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
                 } transition`}
               >
                 <Repeat className={`w-4 h-4 ${reposted ? "fill-green-500" : ""}`} />
-                <span>{repostsCount}</span>
+                <span>{formatCount(repostsCount)}</span>
               </button>
+
+              <span
+                className="flex items-center gap-1 text-sm text-gray-400 dark:text-gray-500"
+                title={`${viewsCount.toLocaleString()} views`}
+              >
+                <BarChart3 className="w-4 h-4" />
+                <span>{formatCount(viewsCount)}</span>
+              </span>
 
               <button
                 onClick={handleShare}
@@ -402,7 +453,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-xl max-w-sm w-full p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-sm w-full p-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Delete Post?</h2>
             <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
               This action cannot be undone. Are you sure you want to delete this post?
@@ -410,7 +461,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
               >
                 Cancel
               </button>
