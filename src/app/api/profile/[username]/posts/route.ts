@@ -49,7 +49,6 @@ export async function GET(
       return NextResponse.json({
         posts: [],
         nextCursor: null,
-        user,
       });
     }
 
@@ -61,7 +60,10 @@ export async function GET(
       where: {
         authorId: user.id,
         status: "published",
-        authorId: { notIn: blockedIds }, // exclude posts from users blocked by viewer
+        // ✅ We already checked if the viewer blocked the profile user.
+        // No need for another authorId filter; the viewer's blocked list
+        // only matters for the author of the post (which is fixed to user.id).
+        // If the viewer has blocked the profile user, we returned empty above.
       },
       include: {
         author: {
