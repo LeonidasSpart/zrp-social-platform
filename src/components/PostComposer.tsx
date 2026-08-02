@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { Image, FileImage, BarChart3, Plus, Trash2, Clock } from "lucide-react";
 import GifPicker from "./GifPicker";
+import { useUploadThing } from "@/lib/uploadthing-client";
 
 interface PostComposerProps {
   onPostCreated: (post: any) => void;
@@ -33,6 +34,20 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // ─── Uploadthing upload hook ──────────────────────────────────────
+  const { startUpload, isUploading } = useUploadThing("postMedia", {
+    onClientUploadComplete: (files) => {
+      const file = files[0];
+      setImageUrl(file.url);
+      setMediaType(file.type.startsWith("video") ? "video" : "image");
+      setUploading(false);
+    },
+    onUploadError: (error) => {
+      setError("Upload failed: " + error.message);
+      setUploading(false);
+    },
+  });
+
   // ─── Utility: extract hashtags & mentions ──────────────────────
   const extractHashtags = (text: string): string[] => {
     const matches = text.match(/#[\w\u0590-\u05fe]+/g) || [];
@@ -44,16 +59,16 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     return matches.map(tag => tag.slice(1).toLowerCase());
   };
 
-  // ─── Image / Video upload ──────────────────────────────────────
+  // ─── Image / Video upload (using Uploadthing) ────────────────────
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const isVideo = file.type.startsWith("video/");
-    const maxSize = isVideo ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
+    const maxSize = isVideo ? 32 * 1024 * 1024 : 4 * 1024 * 1024;
 
     if (file.size > maxSize) {
-      setError(`File too large. Max ${isVideo ? "50" : "5"}MB.`);
+      setError(`File too large. Max ${isVideo ? "32" : "4"}MB.`);
       return;
     }
 
@@ -64,29 +79,12 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
     setUploading(true);
     setError(null);
-
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        setImageUrl(data.url);
-        setMediaType(isVideo ? "video" : "image");
-      } else {
-        setError(data.error || "Upload failed");
-      }
-    } catch (error) {
-      console.error("Upload error:", error);
+      await startUpload([file]);
+    } catch (err) {
+      console.error("Upload error:", err);
       setError("Upload failed. Please try again.");
-    } finally {
       setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
