@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     const posts = await prisma.post.findMany({
       take: 20,
       orderBy: { createdAt: "desc" },
-        select: {
+      select: {
         id: true,
         content: true,
         imageUrl: true,
@@ -38,22 +38,51 @@ export async function GET(req: NextRequest) {
             badgeType: true,
           },
         },
+        // ✅ QUOTE REPOST – include the quoted post
+        quotePost: {
+          select: {
+            id: true,
+            content: true,
+            imageUrl: true,
+            createdAt: true,
+            author: {
+              select: {
+                id: true,
+                username: true,
+                name: true,
+                avatarUrl: true,
+                badgeType: true,
+              },
+            },
+            _count: {
+              select: {
+                likes: true,
+                comments: true,
+                reposts: true,
+                quotedBy: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             likes: true,
             comments: true,
             reposts: true,
+            quotedBy: true, // count of quote reposts on this post
           },
         },
       },
     });
 
+    // ─── Sort by engagement ─────────────────────────────────────
     const sorted = posts.sort((a, b) => {
       const aEng = a._count.likes + a._count.comments + a._count.reposts;
       const bEng = b._count.likes + b._count.comments + b._count.reposts;
       return bEng - aEng;
     });
 
+    // ─── Add liked status if logged in ──────────────────────────
     if (session?.user) {
       const likes = await prisma.like.findMany({
         where: {
