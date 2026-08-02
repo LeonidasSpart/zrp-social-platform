@@ -51,7 +51,7 @@ model User {
   role        Role      @default(USER)
 
   // ─── ONBOARDING ──────────────────────────────────────────────────
-  onboardingCompleted Boolean @default(false)   // ✅ NEW
+  onboardingCompleted Boolean @default(false)
 
   // ─── PINNED POST ──────────────────────────────────────────────────
   pinnedPostId  String?   @unique
@@ -85,6 +85,9 @@ model Post {
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  // ─── ANALYTICS ──────────────────────────────────────────────────
+  views       Int       @default(0)   // ✅ ADDED
 
   hashtags    String[]
   mentions    String[]
