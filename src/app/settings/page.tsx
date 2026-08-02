@@ -4,7 +4,10 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Check, X, Globe, MapPin, User, Key, Calendar, Camera, Trash2, Loader2 } from "lucide-react";
+import {
+  Check, X, Globe, MapPin, User, Key, Calendar, Camera, Trash2, Loader2,
+  BellOff, ChevronRight // <-- added icons for muted list
+} from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 
 interface UserData {
@@ -572,6 +575,24 @@ export default function SettingsPage() {
             {updatingPassword ? "Updating..." : "Change Password"}
           </button>
         </form>
+      </div>
+
+      {/* ─── Privacy Section ──────────────────────────────────────────── */}
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Privacy</h2>
+        <Link
+          href="/settings/muted"
+          className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+        >
+          <div className="flex items-center gap-3">
+            <BellOff className="w-5 h-5 text-gray-500" />
+            <span className="text-gray-900 dark:text-white">Muted Users</span>
+          </div>
+          <ChevronRight className="w-5 h-5 text-gray-400" />
+        </Link>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 pl-2">
+          View and manage users you have muted.
+        </p>
       </div>
 
       {/* ─── Delete Account Section ──────────────────────────────────── */}
