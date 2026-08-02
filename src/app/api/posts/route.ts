@@ -31,13 +31,26 @@ export async function GET(req: NextRequest) {
       blockedIds = blocked.map((b) => b.blockedId);
     }
 
+    // ─── Get muted users ─────────────────────────────────────────────
+    let mutedIds: string[] = [];
+    if (session?.user?.id) {
+      const muted = await prisma.mute.findMany({
+        where: { muterId: session.user.id },
+        select: { mutedId: true },
+      });
+      mutedIds = muted.map((m) => m.mutedId);
+    }
+
+    // ─── Combine blocked + muted for filtering ──────────────────────
+    const excludedAuthorIds = [...blockedIds, ...mutedIds];
+
     // ─── Fetch posts ─────────────────────────────────────────────────
     const posts = await prisma.post.findMany({
       take: limit + 1,
       ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
       orderBy: { createdAt: "desc" },
       where: {
-        authorId: { notIn: blockedIds },
+        authorId: { notIn: excludedAuthorIds },
         status: "published",
       },
       include: {
@@ -75,7 +88,6 @@ export async function GET(req: NextRequest) {
                 likes: true,
                 comments: true,
                 reposts: true,
-                // ✅ optional: count of quotes on the original post
                 quotedBy: true,
               },
             },
@@ -86,7 +98,6 @@ export async function GET(req: NextRequest) {
             likes: true,
             comments: true,
             reposts: true,
-            // ✅ optional: count of quotes on this post
             quotedBy: true,
           },
         },
@@ -164,7 +175,6 @@ export async function POST(req: NextRequest) {
       poll,
       status = "published",
       scheduledAt,
-      // ✅ QUOTE REPOST – accept quotePostId
       quotePostId,
     } = await req.json();
 
@@ -220,7 +230,7 @@ export async function POST(req: NextRequest) {
       isPoll: !!isPoll,
       status: status || "published",
       scheduledAt: status === "scheduled" ? new Date(scheduledAt) : null,
-      quotePostId: quotePostId || null, // ✅ QUOTE REPOST
+      quotePostId: quotePostId || null,
     };
 
     // ─── Poll handling ──────────────────────────────────────────────
@@ -267,7 +277,6 @@ export async function POST(req: NextRequest) {
             votes_user: true,
           },
         },
-        // ✅ QUOTE REPOST – include the quoted post in the response
         quotePost: {
           include: {
             author: {
