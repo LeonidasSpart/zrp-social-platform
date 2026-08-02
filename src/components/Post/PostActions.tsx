@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Heart, MessageCircle, Repeat2, Bookmark, Share2, Pin, PinOff } from "lucide-react";
+import { Heart, MessageCircle, Repeat2, Bookmark, Share2, Pin, PinOff, Quote } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +18,8 @@ interface PostActionsProps {
   isPinned?: boolean;
   isAuthor?: boolean;
   onPinToggle?: () => void;
+  // ─── Quote Repost ──────────────────────────────────────────────────
+  onQuote?: () => void;
 }
 
 export function PostActions({
@@ -32,6 +34,7 @@ export function PostActions({
   isPinned = false,
   isAuthor = false,
   onPinToggle,
+  onQuote,
 }: PostActionsProps) {
   const [likes, setLikes] = useState(initialLikes);
   const [reposts, setReposts] = useState(initialReposts);
@@ -119,6 +122,10 @@ export function PostActions({
     if (onPinToggle) onPinToggle();
   };
 
+  const handleQuote = () => {
+    if (onQuote) onQuote();
+  };
+
   return (
     <div className="flex items-center gap-4 mt-2 text-zinc-500">
       <button
@@ -152,6 +159,17 @@ export function PostActions({
         <Repeat2 className={cn("w-5 h-5", isReposted && "fill-current")} />
         <span>{reposts > 0 && reposts}</span>
       </button>
+
+      {/* ─── Quote Repost Button ────────────────────────────────────── */}
+      {onQuote && (
+        <button
+          onClick={handleQuote}
+          className="flex items-center gap-1 text-sm hover:text-blue-400 transition-colors"
+          title="Quote this post"
+        >
+          <Quote className="w-5 h-5" />
+        </button>
+      )}
 
       <button
         onClick={handleBookmark}
