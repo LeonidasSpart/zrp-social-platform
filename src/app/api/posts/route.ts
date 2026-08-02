@@ -38,6 +38,7 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" },
       where: {
         authorId: { notIn: blockedIds },
+        status: "published", // ✅ only show published posts
       },
       include: {
         author: {
@@ -136,7 +137,26 @@ export async function POST(req: NextRequest) {
       mentions,
       isPoll = false,
       poll,
+      status = "published",       // ✅ new
+      scheduledAt,                // ✅ new
     } = await req.json();
+
+    // ─── Validate scheduling ─────────────────────────────────────────
+    if (status === "scheduled") {
+      if (!scheduledAt) {
+        return NextResponse.json(
+          { error: "Scheduled date is required for scheduled posts." },
+          { status: 400 }
+        );
+      }
+      const scheduledDate = new Date(scheduledAt);
+      if (scheduledDate <= new Date()) {
+        return NextResponse.json(
+          { error: "Scheduled time must be in the future." },
+          { status: 400 }
+        );
+      }
+    }
 
     if (!content || content.trim().length === 0) {
       if (!isPoll || !poll?.question?.trim()) {
@@ -155,6 +175,8 @@ export async function POST(req: NextRequest) {
       hashtags: hashtags || [],
       mentions: mentions || [],
       isPoll: !!isPoll,
+      status: status || "published",
+      scheduledAt: status === "scheduled" ? new Date(scheduledAt) : null,
     };
 
     let pollId = null;
