@@ -7,11 +7,11 @@ import Link from "next/link";
 import {
   MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff,
   Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck, Share2,
-  Eye // for analytics tab icon
+  Eye, Bell, BellOff // <-- added icons for mute
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
-import AnalyticsTab from "@/components/AnalyticsTab"; // ✅ new component
+import AnalyticsTab from "@/components/AnalyticsTab";
 import { useUploadThing } from "@/lib/uploadthing-client";
 
 interface UserProfile {
@@ -63,7 +63,6 @@ interface Post {
   };
 }
 
-// ✅ Added "analytics" to TabType
 type TabType = "posts" | "replies" | "media" | "likes" | "analytics";
 
 export default function ProfilePage({ params }: { params: { username: string } }) {
@@ -78,6 +77,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  
+  // ─── MUTE STATE ──────────────────────────────────────────────────────
+  const [isMuted, setIsMuted] = useState(false);
+  const [muteLoading, setMuteLoading] = useState(false);
+
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -135,6 +139,14 @@ export default function ProfilePage({ params }: { params: { username: string } }
       setIsFollowing(data.isFollowing || false);
       if (data.pinnedPostId) {
         fetchPinnedPost(data.pinnedPostId);
+      }
+      // ─── Fetch mute status ──────────────────────────────────────────
+      if (session?.user?.id && data.id !== session.user.id) {
+        const muteRes = await fetch(`/api/users/mute?userId=${data.id}`);
+        if (muteRes.ok) {
+          const muteData = await muteRes.json();
+          setIsMuted(muteData.muted);
+        }
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -221,6 +233,31 @@ export default function ProfilePage({ params }: { params: { username: string } }
       console.error("Follow error:", error);
     } finally {
       setFollowLoading(false);
+    }
+  };
+
+  // ─── Mute / Unmute ──────────────────────────────────────────────────
+  const handleMute = async () => {
+    if (!session || isOwnProfile || !profile) return;
+    setMuteLoading(true);
+    try {
+      const res = await fetch("/api/users/mute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: profile.id }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setIsMuted(data.muted);
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to toggle mute");
+      }
+    } catch (error) {
+      console.error("Mute error:", error);
+      alert("Failed to toggle mute");
+    } finally {
+      setMuteLoading(false);
     }
   };
 
@@ -411,7 +448,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
       {/* ─── Profile info ─── */}
       <div className="px-4 relative z-10">
-        {/* Avatar + action buttons row — never contains the name/bio text */}
+        {/* Avatar + action buttons row */}
         <div className="flex items-start justify-between gap-3">
           <div className="relative w-20 h-20 -mt-10 sm:w-28 sm:h-28 sm:-mt-16 rounded-full border-4 border-white dark:border-gray-900 shadow-lg overflow-hidden flex-shrink-0 group bg-white dark:bg-gray-900">
             {profile.avatarUrl ? (
@@ -492,6 +529,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
                     </>
                   )}
                 </button>
+
                 <Link
                   href={`/messages/${profile.username}`}
                   className="flex items-center gap-1 px-3 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
@@ -499,12 +537,38 @@ export default function ProfilePage({ params }: { params: { username: string } }
                   <MessageCircle className="w-4 h-4" />
                   <span className="hidden sm:inline">Message</span>
                 </Link>
+
+                {/* ─── MUTE BUTTON ──────────────────────────────────── */}
+                <button
+                  onClick={handleMute}
+                  disabled={muteLoading}
+                  className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap border ${
+                    isMuted
+                      ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600"
+                      : "bg-transparent border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
+                  title={isMuted ? "Unmute user" : "Mute user"}
+                >
+                  {muteLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : isMuted ? (
+                    <>
+                      <BellOff className="w-4 h-4" />
+                      <span className="hidden sm:inline">Unmute</span>
+                    </>
+                  ) : (
+                    <>
+                      <Bell className="w-4 h-4" />
+                      <span className="hidden sm:inline">Mute</span>
+                    </>
+                  )}
+                </button>
               </>
             )}
           </div>
         </div>
 
-        {/* Name/bio block — always full width, never squeezed by the row above */}
+        {/* Name/bio block — always full width */}
         <div className="mt-3 w-full">
           <div className="flex items-center gap-1 flex-wrap">
             <h1 className="text-xl font-bold text-gray-900 dark:text-white break-words">
@@ -580,7 +644,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
       {/* ─── Tabs (including "Analytics") ─── */}
       <div className="flex gap-2 mt-4 px-4 overflow-x-auto pb-1">
         {(["posts", "replies", "media", "likes", "analytics"] as const).map((tab) => {
-          // Only show analytics tab if it's the user's own profile
           if (tab === "analytics" && !isOwnProfile) return null;
           return (
             <button
@@ -612,7 +675,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
             <Loader2 className="w-6 h-6 animate-spin text-zrp-red" />
           </div>
         ) : activeTab === "analytics" ? (
-          // ─── Analytics Tab ────────────────────────────────────────────
           <AnalyticsTab userId={profile.id} />
         ) : posts.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
