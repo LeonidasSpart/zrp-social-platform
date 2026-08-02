@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.0.0",
+    "@uploadthing/react": "^7.3.3",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",
     "critters": "^0.0.22",
@@ -26,9 +27,9 @@
     "redis": "^4.6.10",
     "resend": "^4.0.0",
     "sharp": "^0.33.5",
+    "simple-peer": "^9.11.1",
     "socket.io": "^4.7.0",
     "socket.io-client": "^4.7.0",
-    "simple-peer": "^9.11.1",
     "tailwind-merge": "^2.5.4",
     "uploadthing": "^7.4.4",
     "web-push": "^3.6.7"
