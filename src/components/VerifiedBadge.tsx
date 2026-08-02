@@ -5,9 +5,10 @@ interface VerifiedBadgeProps {
   className?: string;
 }
 
+// ─── Use custom gold color for organization badge ──────────────────
 const BADGE_STYLES: Record<string, { fill: string; label: string }> = {
   verified: { fill: "text-blue-500", label: "Verified account" },
-  organization: { fill: "text-yellow-500", label: "Verified organization" },
+  organization: { fill: "text-amber-400", label: "Verified organization" }, // ✅ gold
   government: { fill: "text-gray-400", label: "Government official" },
 };
 
