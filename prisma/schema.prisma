@@ -64,9 +64,9 @@ model User {
   followers   Follow[]  @relation("Followers")
   likes       Like[]
   reposts     Repost[]
-  reactions   Reaction[] // ✅ new
-  muter       Mute[]    @relation("Muter")   // users this user muted
-  mutedBy     Mute[]    @relation("Muted")   // users who muted this user
+  reactions   Reaction[]
+  muter       Mute[]    @relation("Muter")
+  mutedBy     Mute[]    @relation("Muted")
   notifications Notification[] @relation("Notification_user")
   sentNotifications Notification[] @relation("Notification_fromUser")
   sentMessages Message[] @relation("Message_sender")
@@ -89,6 +89,11 @@ model Post {
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  // ─── QUOTE REPOST ──────────────────────────────────────────────────
+  quotePostId String?            // ID of the post being quoted
+  quotePost   Post?   @relation("QuotePost", fields: [quotePostId], references: [id], onDelete: SetNull)
+  quotedBy    Post[]  @relation("QuotePost") // posts that quote this one
 
   // ─── ANALYTICS ──────────────────────────────────────────────────
   views       Int       @default(0)
@@ -119,12 +124,13 @@ model Post {
   @@index([authorId])
   @@index([status])
   @@index([scheduledAt])
+  @@index([quotePostId])          // ✅ for fast quote lookups
 }
 
 model Comment {
   id          String    @id @default(cuid())
   content     String    @db.Text
-  imageUrl    String?   // ✅ new: allow images in comments
+  imageUrl    String?   // allow images in comments
   postId      String
   post        Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   authorId    String
@@ -178,7 +184,7 @@ model Repost {
   post          Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   userId        String
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quoteContent  String?   @db.Text // ✅ new: quote repost text
+  quoteContent  String?   @db.Text // optional quote text for classic repost
   createdAt     DateTime  @default(now())
 
   @@unique([postId, userId])
@@ -188,14 +194,14 @@ model Repost {
 
 model Reaction {
   id        String   @id @default(cuid())
-  emoji     String   // ❤️, 🔥, 😢, 😡, 👍, etc.
+  emoji     String
   postId    String
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
-  @@unique([postId, userId, emoji]) // one reaction per emoji per user per post
+  @@unique([postId, userId, emoji])
   @@index([postId])
   @@index([userId])
 }
