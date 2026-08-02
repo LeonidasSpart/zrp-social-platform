@@ -26,6 +26,8 @@ export default function Footer() {
             <Link href="/terms" className="hover:text-zrp-red transition">Terms</Link>
             <Link href="/contact" className="hover:text-zrp-red transition">Contact</Link>
             <Link href="/charity" className="hover:text-zrp-red transition">Charity</Link>
+            <Link href="/faq" className="hover:text-zrp-red transition">FAQ</Link>
+            <Link href="/help" className="hover:text-zrp-red transition">Help</Link>
           </div>
 
           {/* ─── Copyright ─── */}
