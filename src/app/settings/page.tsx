@@ -126,8 +126,9 @@ export default function SettingsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      setMessage({ type: "error", text: "File too large. Max size is 5MB." });
+    // ─── 2MB limit (matches uploadthing router) ───────────────────
+    if (file.size > 2 * 1024 * 1024) {
+      setMessage({ type: "error", text: "File too large. Max size is 2MB." });
       return;
     }
 
@@ -354,7 +355,7 @@ export default function SettingsPage() {
           </div>
           <div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Upload a profile picture. Max 5MB.
+              Upload a profile picture. Max 2MB.
             </p>
             <p className="text-xs text-gray-400 dark:text-gray-500">
               Supported formats: JPEG, PNG, GIF, WebP
