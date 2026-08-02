@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Image, FileImage, BarChart3, Plus, Trash2 } from "lucide-react";
+import { Image, FileImage, BarChart3, Plus, Trash2, Clock } from "lucide-react";
 import GifPicker from "./GifPicker";
 
 interface PostComposerProps {
@@ -17,6 +17,10 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // ─── Scheduling ──────────────────────────────────────────────────
+  const [schedulePost, setSchedulePost] = useState(false);
+  const [scheduledAt, setScheduledAt] = useState("");
 
   // GIF picker
   const [showGifPicker, setShowGifPicker] = useState(false);
@@ -121,6 +125,15 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       return;
     }
 
+    // Validate scheduled date
+    if (schedulePost && scheduledAt) {
+      const selectedDate = new Date(scheduledAt);
+      if (selectedDate <= new Date()) {
+        setError("Scheduled time must be in the future.");
+        return;
+      }
+    }
+
     setLoading(true);
     setError(null);
 
@@ -143,6 +156,8 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
         hashtags,
         mentions,
         isPoll: !!pollData,
+        status: schedulePost ? "scheduled" : "published",
+        scheduledAt: schedulePost ? scheduledAt : null,
       };
 
       if (pollData) {
@@ -161,7 +176,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
           const data = await res.json();
           errorMsg = data.error || errorMsg;
         } catch {
-          // If response is not JSON but status is 500, reload to check if post was created
           if (res.status === 500) {
             window.location.reload();
             return;
@@ -189,6 +203,8 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       setPollOptions(["", ""]);
       setPollExpiry("");
       setShowPollBuilder(false);
+      setSchedulePost(false);
+      setScheduledAt("");
       setError(null);
     } catch (err) {
       console.error("Error creating post:", err);
@@ -237,6 +253,30 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
             {error && (
               <div className="text-red-500 dark:text-red-400 text-sm">{error}</div>
             )}
+
+            {/* ─── Scheduling ──────────────────────────────────────────── */}
+            <div className="flex items-center gap-2 mt-2">
+              <button
+                type="button"
+                onClick={() => setSchedulePost(!schedulePost)}
+                className={`text-xs flex items-center gap-1 px-3 py-1 rounded-full border ${
+                  schedulePost
+                    ? "bg-zrp-red/10 border-zrp-red text-zrp-red"
+                    : "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400"
+                }`}
+              >
+                <Clock className="w-3.5 h-3.5" />
+                {schedulePost ? "Scheduling on" : "Schedule"}
+              </button>
+              {schedulePost && (
+                <input
+                  type="datetime-local"
+                  value={scheduledAt}
+                  onChange={(e) => setScheduledAt(e.target.value)}
+                  className="text-xs border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              )}
+            </div>
 
             {/* ─── Poll Builder ────────────────────────────────────── */}
             {showPollBuilder && (
@@ -362,7 +402,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                 }
                 className="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
-                {loading ? "Posting..." : "Post"}
+                {loading ? "Posting..." : schedulePost ? "Schedule" : "Post"}
               </button>
             </div>
           </div>
