@@ -24,6 +24,7 @@ export async function GET(
         name: true,
         bio: true,
         avatarUrl: true,
+        coverUrl: true,
         location: true,
         country: true,
         website: true,
@@ -31,6 +32,8 @@ export async function GET(
         usernameChangedAt: true,
         isPrivate: true,
         badgeType: true,
+        isAdmin: true,
+        pinnedPostId: true,
         _count: {
           select: {
             posts: true,
