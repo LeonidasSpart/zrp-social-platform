@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { getSocket } from "@/lib/socket-client";
 import { Send, Phone, Video, Image, Smile, X, Download, ZoomIn } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
+import { useUploadThing } from "@/lib/uploadthing-client";
 
 interface Message {
   id: string;
@@ -49,6 +50,19 @@ export default function ChatInterface({
   const lastMessageCountRef = useRef(0);
 
   const userId = session?.user?.id;
+
+  // ─── Uploadthing hook for chat images ──────────────────────────────
+  const { startUpload, isUploading } = useUploadThing("chatImage", {
+    onClientUploadComplete: (files) => {
+      const url = files[0].url;
+      setUploadingImage(false);
+      sendMessage("", url);
+    },
+    onUploadError: (error) => {
+      setUploadingImage(false);
+      alert("Image upload failed: " + error.message);
+    },
+  });
 
   const fetchMessages = async () => {
     try {
@@ -195,17 +209,22 @@ export default function ChatInterface({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file
+    if (file.size > 4 * 1024 * 1024) {
+      alert("File too large. Max 4MB.");
+      return;
+    }
+    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      alert("Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.");
+      return;
+    }
+
     setUploadingImage(true);
     try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64 = reader.result as string;
-        await sendMessage("", base64);
-        setUploadingImage(false);
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      console.error("Upload error:", error);
+      await startUpload([file]);
+    } catch (err) {
+      console.error("Upload error:", err);
       setUploadingImage(false);
       alert("Failed to upload image. Please try again.");
     }
