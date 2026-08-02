@@ -1,23 +1,21 @@
+// src/app/api/posts/[id]/pin/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
-export const dynamic = 'force-dynamic';
-
 export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const postId = params.id;
+
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const postId = params.id;
-
-    // Check if post exists and belongs to user
     const post = await prisma.post.findUnique({
       where: { id: postId },
       select: { authorId: true },
@@ -28,13 +26,9 @@ export async function POST(
     }
 
     if (post.authorId !== session.user.id) {
-      return NextResponse.json(
-        { error: "You can only pin your own posts" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    // Check if this post is already pinned
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { pinnedPostId: true },
@@ -43,14 +37,12 @@ export async function POST(
     const isPinned = user?.pinnedPostId === postId;
 
     if (isPinned) {
-      // Unpin
       await prisma.user.update({
         where: { id: session.user.id },
         data: { pinnedPostId: null },
       });
       return NextResponse.json({ pinned: false });
     } else {
-      // Pin (overwrites any existing pinned post)
       await prisma.user.update({
         where: { id: session.user.id },
         data: { pinnedPostId: postId },
@@ -58,7 +50,7 @@ export async function POST(
       return NextResponse.json({ pinned: true });
     }
   } catch (error) {
-    console.error("Error toggling pin:", error);
+    console.error("Pin toggle error:", error);
     return NextResponse.json(
       { error: "Failed to toggle pin" },
       { status: 500 }
