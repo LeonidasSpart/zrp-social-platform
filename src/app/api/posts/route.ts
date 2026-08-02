@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" },
       where: {
         authorId: { notIn: blockedIds },
-        status: "published", // ✅ only show published posts
+        status: "published",
       },
       include: {
         author: {
@@ -58,11 +58,36 @@ export async function GET(req: NextRequest) {
             },
           },
         },
+        // ✅ QUOTE REPOST – include the quoted post
+        quotePost: {
+          include: {
+            author: {
+              select: {
+                id: true,
+                username: true,
+                name: true,
+                avatarUrl: true,
+                badgeType: true,
+              },
+            },
+            _count: {
+              select: {
+                likes: true,
+                comments: true,
+                reposts: true,
+                // ✅ optional: count of quotes on the original post
+                quotedBy: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             likes: true,
             comments: true,
             reposts: true,
+            // ✅ optional: count of quotes on this post
+            quotedBy: true,
           },
         },
       },
@@ -137,8 +162,10 @@ export async function POST(req: NextRequest) {
       mentions,
       isPoll = false,
       poll,
-      status = "published",       // ✅ new
-      scheduledAt,                // ✅ new
+      status = "published",
+      scheduledAt,
+      // ✅ QUOTE REPOST – accept quotePostId
+      quotePostId,
     } = await req.json();
 
     // ─── Validate scheduling ─────────────────────────────────────────
@@ -158,6 +185,21 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // ─── Validate quotePostId ──────────────────────────────────────
+    if (quotePostId) {
+      const originalPost = await prisma.post.findUnique({
+        where: { id: quotePostId },
+        select: { id: true },
+      });
+      if (!originalPost) {
+        return NextResponse.json(
+          { error: "Original post not found" },
+          { status: 404 }
+        );
+      }
+    }
+
+    // ─── Content validation ────────────────────────────────────────
     if (!content || content.trim().length === 0) {
       if (!isPoll || !poll?.question?.trim()) {
         return NextResponse.json(
@@ -167,6 +209,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // ─── Build post data ──────────────────────────────────────────
     const postData: any = {
       content: content.trim() || poll.question.trim(),
       imageUrl: imageUrl || null,
@@ -177,8 +220,10 @@ export async function POST(req: NextRequest) {
       isPoll: !!isPoll,
       status: status || "published",
       scheduledAt: status === "scheduled" ? new Date(scheduledAt) : null,
+      quotePostId: quotePostId || null, // ✅ QUOTE REPOST
     };
 
+    // ─── Poll handling ──────────────────────────────────────────────
     let pollId = null;
     if (isPoll && poll && poll.options && poll.options.length >= 2) {
       const validOptions = poll.options.filter((o: string) => o.trim().length > 0);
@@ -204,6 +249,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // ─── Create post ────────────────────────────────────────────────
     const post = await prisma.post.create({
       data: postData,
       include: {
@@ -221,9 +267,32 @@ export async function POST(req: NextRequest) {
             votes_user: true,
           },
         },
+        // ✅ QUOTE REPOST – include the quoted post in the response
+        quotePost: {
+          include: {
+            author: {
+              select: {
+                id: true,
+                username: true,
+                name: true,
+                avatarUrl: true,
+                badgeType: true,
+              },
+            },
+            _count: {
+              select: {
+                likes: true,
+                comments: true,
+                reposts: true,
+                quotedBy: true,
+              },
+            },
+          },
+        },
       },
     });
 
+    // ─── Create notifications for mentions ──────────────────────────
     if (mentions && mentions.length > 0) {
       const mentionedUsers = await prisma.user.findMany({
         where: {
@@ -242,6 +311,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // ─── Transform response ─────────────────────────────────────────
     const result = { ...post };
     if (result.poll) {
       const p = result.poll as any;
