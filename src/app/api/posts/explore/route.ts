@@ -11,6 +11,24 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
 
+    // ─── Get blocked and muted users ──────────────────────────────
+    let excludedAuthorIds: string[] = [];
+    if (userId) {
+      const [blocked, muted] = await Promise.all([
+        prisma.blocked.findMany({
+          where: { blockerId: userId },
+          select: { blockedId: true },
+        }),
+        prisma.mute.findMany({
+          where: { muterId: userId },
+          select: { mutedId: true },
+        }),
+      ]);
+      const blockedIds = blocked.map(b => b.blockedId);
+      const mutedIds = muted.map(m => m.mutedId);
+      excludedAuthorIds = [...blockedIds, ...mutedIds];
+    }
+
     // ─── CHECK CACHE ───────────────────────────────────────────
     const cacheKey = `explore:${userId || 'anon'}`;
     const cached = await getCached(cacheKey);
@@ -22,6 +40,10 @@ export async function GET(req: NextRequest) {
     const posts = await prisma.post.findMany({
       take: 20,
       orderBy: { createdAt: "desc" },
+      where: {
+        authorId: { notIn: excludedAuthorIds },
+        status: "published", // ensure only published posts
+      },
       select: {
         id: true,
         content: true,
@@ -69,7 +91,7 @@ export async function GET(req: NextRequest) {
             likes: true,
             comments: true,
             reposts: true,
-            quotedBy: true, // count of quote reposts on this post
+            quotedBy: true,
           },
         },
       },
@@ -83,10 +105,10 @@ export async function GET(req: NextRequest) {
     });
 
     // ─── Add liked status if logged in ──────────────────────────
-    if (session?.user) {
+    if (userId) {
       const likes = await prisma.like.findMany({
         where: {
-          userId: session.user.id,
+          userId: userId,
           postId: { in: sorted.map(p => p.id) },
         },
         select: { postId: true },
