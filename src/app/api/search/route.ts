@@ -21,8 +21,8 @@ export async function GET(req: NextRequest) {
           id: true,
           username: true,
           name: true,
-          avatarUrl: true,    // ← required
-          badgeType: true,    // ← required
+          avatarUrl: true,
+          badgeType: true,
         },
         take: 20,
       }),
@@ -45,8 +45,35 @@ export async function GET(req: NextRequest) {
               badgeType: true,
             },
           },
+          // ✅ QUOTE REPOST – include the quoted post
+          quotePost: {
+            include: {
+              author: {
+                select: {
+                  id: true,
+                  username: true,
+                  name: true,
+                  avatarUrl: true,
+                  badgeType: true,
+                },
+              },
+              _count: {
+                select: {
+                  likes: true,
+                  comments: true,
+                  reposts: true,
+                  quotedBy: true,
+                },
+              },
+            },
+          },
           _count: {
-            select: { likes: true, comments: true, reposts: true },
+            select: {
+              likes: true,
+              comments: true,
+              reposts: true,
+              quotedBy: true,
+            },
           },
         },
       }),
