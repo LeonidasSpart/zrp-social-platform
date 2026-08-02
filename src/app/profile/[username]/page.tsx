@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { useUploadThing } from "@/lib/uploadthing-client";
 
 interface UserProfile {
   id: string;
@@ -78,6 +79,56 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const isOwnProfile = session?.user?.id === profile?.id;
+
+  // ─── Uploadthing hooks ──────────────────────────────────────────────
+  const { startUpload: uploadBanner } = useUploadThing("banner", {
+    onClientUploadComplete: (files) => {
+      const url = files[0].url;
+      setUploadingBanner(false);
+      // Save the URL to the user profile
+      fetch("/api/user/update-cover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ coverUrl: url }),
+      })
+        .then((res) => {
+          if (res.ok) {
+            setProfile((prev) => prev ? { ...prev, coverUrl: url } : null);
+          } else {
+            alert("Failed to save banner URL");
+          }
+        })
+        .catch(() => alert("Failed to save banner"));
+    },
+    onUploadError: (error) => {
+      setUploadingBanner(false);
+      alert("Banner upload failed: " + error.message);
+    },
+  });
+
+  const { startUpload: uploadAvatar } = useUploadThing("avatar", {
+    onClientUploadComplete: (files) => {
+      const url = files[0].url;
+      setUploadingAvatar(false);
+      fetch("/api/user/update-avatar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl: url }),
+      })
+        .then((res) => {
+          if (res.ok) {
+            setProfile((prev) => prev ? { ...prev, avatarUrl: url } : null);
+          } else {
+            alert("Failed to save avatar URL");
+          }
+        })
+        .catch(() => alert("Failed to save avatar"));
+    },
+    onUploadError: (error) => {
+      setUploadingAvatar(false);
+      alert("Avatar upload failed: " + error.message);
+    },
+  });
 
   // ─── Fetch profile & follow status ──────────────────────────────────
   const fetchProfile = async () => {
@@ -200,63 +251,51 @@ export default function ProfilePage({ params }: { params: { username: string } }
     }
   };
 
-  // ─── Banner upload ──────────────────────────────────────────────────
+  // ─── Banner upload handler ──────────────────────────────────────────
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploadingBanner(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("type", "cover");
+    if (file.size > 4 * 1024 * 1024) {
+      alert("File too large. Max 4MB.");
+      return;
+    }
+    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      alert("Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.");
+      return;
+    }
 
+    setUploadingBanner(true);
     try {
-      const res = await fetch("/api/user/update-cover", {
-        method: "POST",
-        body: formData,
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setProfile((prev) => prev ? { ...prev, coverUrl: data.coverUrl } : null);
-      } else {
-        alert("Failed to upload banner");
-      }
-    } catch (error) {
-      console.error("Banner upload error:", error);
-      alert("Failed to upload banner");
-    } finally {
+      await uploadBanner([file]);
+    } catch (err) {
       setUploadingBanner(false);
-      if (bannerInputRef.current) bannerInputRef.current.value = "";
+      alert("Banner upload failed.");
     }
   };
 
-  // ─── Avatar upload ──────────────────────────────────────────────────
+  // ─── Avatar upload handler ──────────────────────────────────────────
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploadingAvatar(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("type", "avatar");
+    if (file.size > 2 * 1024 * 1024) {
+      alert("File too large. Max 2MB.");
+      return;
+    }
+    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      alert("Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.");
+      return;
+    }
 
+    setUploadingAvatar(true);
     try {
-      const res = await fetch("/api/user/update-avatar", {
-        method: "POST",
-        body: formData,
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setProfile((prev) => prev ? { ...prev, avatarUrl: data.avatarUrl } : null);
-      } else {
-        alert("Failed to upload avatar");
-      }
-    } catch (error) {
-      console.error("Avatar upload error:", error);
-      alert("Failed to upload avatar");
-    } finally {
+      await uploadAvatar([file]);
+    } catch (err) {
       setUploadingAvatar(false);
-      if (avatarInputRef.current) avatarInputRef.current.value = "";
+      alert("Avatar upload failed.");
     }
   };
 
