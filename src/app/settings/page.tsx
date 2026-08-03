@@ -6,9 +6,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Check, X, Globe, MapPin, User, Key, Calendar, Camera, Trash2, Loader2,
-  BellOff, ChevronRight // <-- added icons for muted list
+  BellOff, ChevronRight
 } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
+import EmailPreferences from "@/components/EmailPreferences"; // ✅ Added
 
 interface UserData {
   id: string;
@@ -575,6 +576,15 @@ export default function SettingsPage() {
             {updatingPassword ? "Updating..." : "Change Password"}
           </button>
         </form>
+      </div>
+
+      {/* ─── Email Preferences Section ────────────────────────────── */}
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Email Notifications</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          Choose which email notifications you want to receive.
+        </p>
+        <EmailPreferences />
       </div>
 
       {/* ─── Privacy Section ──────────────────────────────────────────── */}
