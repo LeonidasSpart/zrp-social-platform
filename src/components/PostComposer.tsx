@@ -174,10 +174,9 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
           const data = await res.json();
           errorMsg = data.error || errorMsg;
         } catch {
-          if (res.status === 500) {
-            window.location.reload();
-            return;
-          }
+          // If response isn't JSON, reload to recover from a possible server error
+          window.location.reload();
+          return;
         }
         setError(errorMsg);
         setLoading(false);
@@ -188,22 +187,16 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       try {
         post = await res.json();
       } catch {
-        window.location.reload();
+        // If no JSON returned, just refresh the feed
+        onPostCreated(null);
+        resetForm();
+        setLoading(false);
         return;
       }
 
-      // Reset form
+      // ─── Success: notify parent and reset ──────────────────────────
       onPostCreated(post);
-      setContent("");
-      setImageUrl(null);
-      setMediaType(null);
-      setPollQuestion("");
-      setPollOptions(["", ""]);
-      setPollExpiry("");
-      setShowPollBuilder(false);
-      setSchedulePost(false);
-      setScheduledAt("");
-      setError(null);
+      resetForm();
     } catch (err) {
       console.error("Error creating post:", err);
       setTimeout(() => window.location.reload(), 2000);
@@ -211,6 +204,19 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const resetForm = () => {
+    setContent("");
+    setImageUrl(null);
+    setMediaType(null);
+    setPollQuestion("");
+    setPollOptions(["", ""]);
+    setPollExpiry("");
+    setShowPollBuilder(false);
+    setSchedulePost(false);
+    setScheduledAt("");
+    setError(null);
   };
 
   // ─── Render helpers ─────────────────────────────────────────────
