@@ -9,19 +9,50 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const viewerId = session?.user?.id;
 
-    const user = await prisma.user.findUnique({
+    // ─── Find profile owner ──────────────────────────────────────────
+    const profileOwner = await prisma.user.findUnique({
       where: { username: params.username },
       select: { id: true },
     });
 
-    if (!user) {
+    if (!profileOwner) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // ─── Get all comments by this user ──────────────────────────────
+    // ─── Get excluded users (blocked + blockers + muted) ──────────
+    let excludedAuthorIds: string[] = [];
+    if (viewerId) {
+      const [blocked, blockers, muted] = await Promise.all([
+        prisma.blocked.findMany({
+          where: { blockerId: viewerId },
+          select: { blockedId: true },
+        }),
+        prisma.blocked.findMany({
+          where: { blockedId: viewerId },
+          select: { blockerId: true },
+        }),
+        prisma.mute.findMany({
+          where: { muterId: viewerId },
+          select: { mutedId: true },
+        }),
+      ]);
+      const blockedIds = blocked.map(b => b.blockedId);
+      const blockerIds = blockers.map(b => b.blockerId);
+      const mutedIds = muted.map(m => m.mutedId);
+      excludedAuthorIds = [...blockedIds, ...blockerIds, ...mutedIds];
+    }
+
+    // ─── If profile owner is excluded, return empty ──────────────────
+    const isExcluded = excludedAuthorIds.includes(profileOwner.id);
+    if (isExcluded) {
+      return NextResponse.json([]);
+    }
+
+    // ─── Fetch replies (comments) by this user ──────────────────────
     const replies = await prisma.comment.findMany({
-      where: { authorId: user.id },
+      where: { authorId: profileOwner.id },
       orderBy: { createdAt: "desc" },
       include: {
         author: {
@@ -52,7 +83,7 @@ export async function GET(
     const formattedReplies = replies.map((reply) => ({
       id: reply.id,
       content: reply.content,
-      imageUrl: null, // comments don't have images yet
+      imageUrl: null,
       createdAt: reply.createdAt,
       author: reply.author,
       replyTo: {
