@@ -1,12 +1,12 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { Language, translations, SUPPORTED_LANGUAGES } from "@/lib/translations";
+import { Language, translations, SUPPORTED_LANGUAGES, TranslationKey } from "@/lib/translations";
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: keyof typeof translations["en"]) => string;
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -37,6 +37,14 @@ function detectBrowserLanguage(): Language {
   return "en";
 }
 
+function interpolate(str: string, params?: Record<string, string | number>) {
+  if (!params) return str;
+  return Object.entries(params).reduce(
+    (acc, [key, value]) => acc.replace(new RegExp(`\\{${key}\\}`, "g"), String(value)),
+    str
+  );
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>("en");
   const [mounted, setMounted] = useState(false);
@@ -58,14 +66,21 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setCookie(COOKIE_NAME, lang);
   };
 
-  const t = (key: keyof typeof translations["en"]) => {
-    return translations[language]?.[key] ?? translations.en[key] ?? key;
+  const t = (key: TranslationKey, params?: Record<string, string | number>) => {
+    const raw = translations[language]?.[key] ?? translations.en[key] ?? key;
+    return interpolate(raw, params);
   };
 
   // Avoid a flash of wrong-language content before the cookie/browser check runs
   if (!mounted) {
     return (
-      <LanguageContext.Provider value={{ language: "en", setLanguage, t: (k) => translations.en[k] ?? k }}>
+      <LanguageContext.Provider
+        value={{
+          language: "en",
+          setLanguage,
+          t: (k, p) => interpolate(translations.en[k] ?? k, p),
+        }}
+      >
         {children}
       </LanguageContext.Provider>
     );
