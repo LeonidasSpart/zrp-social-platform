@@ -53,7 +53,9 @@ export async function PUT(req: NextRequest) {
       where: { id: session.user.id },
       select: { emailPreferences: true },
     });
-    const currentPreferences = user?.emailPreferences || defaultPreferences;
+
+    // Cast to Record<string, boolean> to avoid TypeScript spread error
+    const currentPreferences = (user?.emailPreferences as Record<string, boolean>) || defaultPreferences;
 
     // ─── Merge: only update the keys provided in the request ──────
     const newPreferences = { ...currentPreferences, ...body };
