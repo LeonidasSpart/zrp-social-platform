@@ -2,9 +2,10 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { Loader2, MessageCircle } from "lucide-react";
+import { Loader2, MessageCircle, Trash2 } from "lucide-react";
+import { getSocket } from "@/lib/socket-client";
 
 interface Conversation {
   partner: {
@@ -27,6 +28,8 @@ export default function MessagesPage() {
   const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingConversation, setDeletingConversation] = useState<string | null>(null);
+  const socketRef = useRef<any>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -35,10 +38,21 @@ export default function MessagesPage() {
   }, [status, router]);
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (status === "authenticated" && session?.user?.id) {
+      const socket = getSocket(session.user.id);
+      socketRef.current = socket;
+
+      socket.on("conversation-deleted", ({ withUserId }) => {
+        setConversations((prev) => prev.filter((conv) => conv.partner.id !== withUserId));
+      });
+
       fetchConversations();
+
+      return () => {
+        socket.off("conversation-deleted");
+      };
     }
-  }, [status]);
+  }, [status, session?.user?.id]);
 
   const fetchConversations = async () => {
     try {
@@ -51,6 +65,32 @@ export default function MessagesPage() {
       console.error("Error fetching conversations:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteConversation = async (userId: string) => {
+    if (!confirm("Delete this conversation? All messages will be removed.")) return;
+
+    setDeletingConversation(userId);
+    try {
+      const res = await fetch(`/api/messages/conversation/${userId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setConversations((prev) => prev.filter((conv) => conv.partner.id !== userId));
+        socketRef.current?.emit("delete-conversation", {
+          otherUserId: userId,
+          senderId: session?.user?.id,
+        });
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to delete conversation");
+      }
+    } catch (error) {
+      console.error("Delete conversation error:", error);
+      alert("Failed to delete conversation");
+    } finally {
+      setDeletingConversation(null);
     }
   };
 
@@ -80,49 +120,67 @@ export default function MessagesPage() {
             const isOwn = lastMsg.senderId === session?.user?.id;
 
             return (
-              <Link
+              <div
                 key={partner.id}
-                href={`/messages/${partner.username}`}
                 className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition group"
               >
-                {/* Avatar */}
-                <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
-                  {partner.avatarUrl ? (
-                    <img
-                      src={partner.avatarUrl}
-                      alt={partner.name || partner.username}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-lg">
-                      {(partner.name || partner.username)[0].toUpperCase()}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <p className="font-semibold text-gray-900 dark:text-white truncate">
-                      {partner.name || partner.username}
-                    </p>
-                    <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
-                      {new Date(lastMsg.createdAt).toLocaleDateString([], {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </span>
+                <Link
+                  href={`/messages/${partner.username}`}
+                  className="flex items-center gap-3 flex-1 min-w-0"
+                >
+                  {/* Avatar */}
+                  <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
+                    {partner.avatarUrl ? (
+                      <img
+                        src={partner.avatarUrl}
+                        alt={partner.name || partner.username}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-lg">
+                        {(partner.name || partner.username)[0].toUpperCase()}
+                      </div>
+                    )}
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                    {isOwn ? `You: ${lastMsg.content}` : lastMsg.content}
-                  </p>
-                </div>
 
-                {conv.unreadCount > 0 && (
-                  <span className="bg-zrp-red text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0">
-                    {conv.unreadCount > 9 ? "9+" : conv.unreadCount}
-                  </span>
-                )}
-              </Link>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold text-gray-900 dark:text-white truncate">
+                        {partner.name || partner.username}
+                      </p>
+                      <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+                        {new Date(lastMsg.createdAt).toLocaleDateString([], {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                      {isOwn ? `You: ${lastMsg.content}` : lastMsg.content}
+                    </p>
+                  </div>
+
+                  {conv.unreadCount > 0 && (
+                    <span className="bg-zrp-red text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0">
+                      {conv.unreadCount > 9 ? "9+" : conv.unreadCount}
+                    </span>
+                  )}
+                </Link>
+
+                {/* ─── DELETE BUTTON ────────────────────────────────── */}
+                <button
+                  onClick={() => handleDeleteConversation(partner.id)}
+                  disabled={deletingConversation === partner.id}
+                  className="text-gray-400 hover:text-red-500 transition p-2 opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                  title="Delete conversation"
+                >
+                  {deletingConversation === partner.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             );
           })}
         </div>
