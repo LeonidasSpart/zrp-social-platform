@@ -10,7 +10,7 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions);
 
-    // ─── Case‑insensitive username search ──────────────────────────
+    // ─── CASE-INSENSITIVE USER LOOKUP ──────────────────────────────
     const user = await prisma.user.findFirst({
       where: {
         username: {
@@ -33,7 +33,7 @@ export async function GET(
         isPrivate: true,
         badgeType: true,
         isAdmin: true,
-        pinnedPostId: true,
+        pinnedPostId: true, // ✅ critical for pinned posts
         _count: {
           select: {
             posts: true,
@@ -44,14 +44,16 @@ export async function GET(
       },
     });
 
+    // ─── USER NOT FOUND ─────────────────────────────────────────────
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // ─── FOLLOW / BLOCK STATUS ──────────────────────────────────────
     let isFollowing = false;
     let isBlocked = false;
 
-    if (session && session.user && session.user.id !== user.id) {
+    if (session?.user?.id && session.user.id !== user.id) {
       // Check if viewer follows target
       const follow = await prisma.follow.findUnique({
         where: {
@@ -75,6 +77,7 @@ export async function GET(
       isBlocked = !!block;
     }
 
+    // ─── RESPONSE ────────────────────────────────────────────────────
     return NextResponse.json({
       ...user,
       isFollowing,
