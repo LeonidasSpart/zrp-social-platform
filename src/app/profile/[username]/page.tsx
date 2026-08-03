@@ -7,11 +7,11 @@ import Link from "next/link";
 import {
   MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff,
   Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck, Share2,
-  Eye // ✅ for Analytics tab icon
+  Eye, Bell, BellOff // ← added Bell and BellOff for mute
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
-import AnalyticsTab from "@/components/AnalyticsTab"; // ✅ import AnalyticsTab
+import AnalyticsTab from "@/components/AnalyticsTab";
 
 function formatProfileCount(n: number) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
@@ -69,7 +69,6 @@ interface Post {
   };
 }
 
-// ✅ Add "analytics" to TabType
 type TabType = "posts" | "replies" | "media" | "likes" | "analytics";
 
 export default function ProfilePage({ params }: { params: { username: string } }) {
@@ -84,16 +83,19 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  // ─── MUTE STATE ──────────────────────────────────────────────────────
+  const [isMuted, setIsMuted] = useState(false);
+  const [muteLoading, setMuteLoading] = useState(false);
+
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const isOwnProfile = session?.user?.id === profile?.id;
 
-  // ─── Fetch profile & follow status ──────────────────────────────────
+  // ─── Fetch profile & follow & mute status ──────────────────────────
   const fetchProfile = async () => {
     try {
       const res = await fetch(`/api/users/${params.username}`);
-      // ✅ Handle 404 properly – prevents client crash
       if (!res.ok) {
         setProfile(null);
         return;
@@ -105,6 +107,14 @@ export default function ProfilePage({ params }: { params: { username: string } }
         fetchPinnedPost(data.pinnedPostId);
       } else {
         setPinnedPost(null);
+      }
+      // ─── Fetch mute status ──────────────────────────────────────────
+      if (session?.user?.id && data.id !== session.user.id) {
+        const muteRes = await fetch(`/api/users/mute?userId=${data.id}`);
+        if (muteRes.ok) {
+          const muteData = await muteRes.json();
+          setIsMuted(muteData.muted);
+        }
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -192,6 +202,31 @@ export default function ProfilePage({ params }: { params: { username: string } }
       console.error("Follow error:", error);
     } finally {
       setFollowLoading(false);
+    }
+  };
+
+  // ─── Mute / Unmute ──────────────────────────────────────────────────
+  const handleMute = async () => {
+    if (!session || isOwnProfile || !profile) return;
+    setMuteLoading(true);
+    try {
+      const res = await fetch("/api/users/mute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: profile.id }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setIsMuted(data.muted);
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to toggle mute");
+      }
+    } catch (error) {
+      console.error("Mute error:", error);
+      alert("Failed to toggle mute");
+    } finally {
+      setMuteLoading(false);
     }
   };
 
@@ -491,6 +526,32 @@ export default function ProfilePage({ params }: { params: { username: string } }
                   <MessageCircle className="w-4 h-4" />
                   <span className="hidden sm:inline">Message</span>
                 </Link>
+
+                {/* ─── MUTE BUTTON ──────────────────────────────────── */}
+                <button
+                  onClick={handleMute}
+                  disabled={muteLoading}
+                  className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap border ${
+                    isMuted
+                      ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600"
+                      : "bg-transparent border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
+                  title={isMuted ? "Unmute user" : "Mute user"}
+                >
+                  {muteLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : isMuted ? (
+                    <>
+                      <BellOff className="w-4 h-4" />
+                      <span className="hidden sm:inline">Unmute</span>
+                    </>
+                  ) : (
+                    <>
+                      <Bell className="w-4 h-4" />
+                      <span className="hidden sm:inline">Mute</span>
+                    </>
+                  )}
+                </button>
               </>
             )}
           </div>
@@ -572,7 +633,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
       {/* ─── Tabs ─── */}
       <div className="flex mt-4 px-4 border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
         {(["posts", "replies", "media", "likes", "analytics"] as const).map((tab) => {
-          // Only show Analytics tab for the profile owner
           if (tab === "analytics" && !isOwnProfile) return null;
           return (
             <button
@@ -607,7 +667,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
             <Loader2 className="w-6 h-6 animate-spin text-zrp-red" />
           </div>
         ) : activeTab === "analytics" ? (
-          // ✅ Analytics Tab
           <AnalyticsTab userId={profile.id} />
         ) : posts.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
