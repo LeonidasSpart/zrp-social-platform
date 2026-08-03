@@ -16,7 +16,11 @@ type TranslationKey =
   | "action.save" | "action.delete" | "action.edit" | "action.reply" | "action.like"
   | "action.repost" | "action.loading" | "action.retry" | "profile.joined"
   | "profile.followers" | "profile.following" | "profile.posts" | "profile.replies"
-  | "profile.media" | "profile.likes" | "profile.pinned" | "profile.noPostsYet";
+  | "profile.media" | "profile.likes" | "profile.pinned" | "profile.noPostsYet"
+  | "profile.userNotFound" | "profile.impact" | "profile.charityNote" | "profile.replyingTo"
+  | "profile.noPosts" | "profile.noReplies" | "profile.noMedia" | "profile.noLikes"
+  | "profile.changeBanner" | "profile.changeAvatar" | "profile.uploadBannerFailed"
+  | "profile.uploadAvatarFailed" | "profile.linkCopied" | "profile.shareNotSupported";
 
 type TranslationDict = Record<TranslationKey, string>;
 
@@ -62,6 +66,20 @@ export const translations: Record<Language, TranslationDict> = {
     "profile.likes": "Likes",
     "profile.pinned": "Pinned",
     "profile.noPostsYet": "No posts yet.",
+    "profile.userNotFound": "User not found",
+    "profile.impact": "Impact: {n} meals",
+    "profile.charityNote": "{pct}% of profits go to charity",
+    "profile.replyingTo": "Replying to",
+    "profile.noPosts": "No posts yet.",
+    "profile.noReplies": "No replies yet.",
+    "profile.noMedia": "No media yet.",
+    "profile.noLikes": "No likes yet.",
+    "profile.changeBanner": "Change banner",
+    "profile.changeAvatar": "Change avatar",
+    "profile.uploadBannerFailed": "Failed to upload banner",
+    "profile.uploadAvatarFailed": "Failed to upload avatar",
+    "profile.linkCopied": "Profile link copied to clipboard!",
+    "profile.shareNotSupported": "Share not supported on this device.",
   },
   fr: {
     "nav.home": "Accueil",
@@ -104,6 +122,20 @@ export const translations: Record<Language, TranslationDict> = {
     "profile.likes": "J'aime",
     "profile.pinned": "Épinglé",
     "profile.noPostsYet": "Aucune publication pour le moment.",
+    "profile.userNotFound": "Utilisateur introuvable",
+    "profile.impact": "Impact : {n} repas",
+    "profile.charityNote": "{pct}% des bénéfices sont reversés à des associations caritatives",
+    "profile.replyingTo": "En réponse à",
+    "profile.noPosts": "Aucune publication pour le moment.",
+    "profile.noReplies": "Aucune réponse pour le moment.",
+    "profile.noMedia": "Aucun média pour le moment.",
+    "profile.noLikes": "Aucun j'aime pour le moment.",
+    "profile.changeBanner": "Changer la bannière",
+    "profile.changeAvatar": "Changer l'avatar",
+    "profile.uploadBannerFailed": "Échec du téléchargement de la bannière",
+    "profile.uploadAvatarFailed": "Échec du téléchargement de l'avatar",
+    "profile.linkCopied": "Lien du profil copié !",
+    "profile.shareNotSupported": "Le partage n'est pas pris en charge sur cet appareil.",
   },
   de: {
     "nav.home": "Startseite",
@@ -146,6 +178,20 @@ export const translations: Record<Language, TranslationDict> = {
     "profile.likes": "Gefällt mir",
     "profile.pinned": "Angeheftet",
     "profile.noPostsYet": "Noch keine Beiträge.",
+    "profile.userNotFound": "Benutzer nicht gefunden",
+    "profile.impact": "Wirkung: {n} Mahlzeiten",
+    "profile.charityNote": "{pct}% der Gewinne gehen an wohltätige Zwecke",
+    "profile.replyingTo": "Antwort an",
+    "profile.noPosts": "Noch keine Beiträge.",
+    "profile.noReplies": "Noch keine Antworten.",
+    "profile.noMedia": "Noch keine Medien.",
+    "profile.noLikes": "Noch keine Gefällt-mir-Angaben.",
+    "profile.changeBanner": "Banner ändern",
+    "profile.changeAvatar": "Profilbild ändern",
+    "profile.uploadBannerFailed": "Banner-Upload fehlgeschlagen",
+    "profile.uploadAvatarFailed": "Avatar-Upload fehlgeschlagen",
+    "profile.linkCopied": "Profil-Link kopiert!",
+    "profile.shareNotSupported": "Teilen wird auf diesem Gerät nicht unterstützt.",
   },
   it: {
     "nav.home": "Home",
@@ -188,5 +234,21 @@ export const translations: Record<Language, TranslationDict> = {
     "profile.likes": "Mi piace",
     "profile.pinned": "In evidenza",
     "profile.noPostsYet": "Ancora nessun post.",
+    "profile.userNotFound": "Utente non trovato",
+    "profile.impact": "Impatto: {n} pasti",
+    "profile.charityNote": "Il {pct}% dei profitti va in beneficenza",
+    "profile.replyingTo": "In risposta a",
+    "profile.noPosts": "Ancora nessun post.",
+    "profile.noReplies": "Ancora nessuna risposta.",
+    "profile.noMedia": "Ancora nessun media.",
+    "profile.noLikes": "Ancora nessun mi piace.",
+    "profile.changeBanner": "Cambia copertina",
+    "profile.changeAvatar": "Cambia avatar",
+    "profile.uploadBannerFailed": "Caricamento copertina non riuscito",
+    "profile.uploadAvatarFailed": "Caricamento avatar non riuscito",
+    "profile.linkCopied": "Link del profilo copiato!",
+    "profile.shareNotSupported": "La condivisione non è supportata su questo dispositivo.",
   },
 };
+
+export type { TranslationKey };
