@@ -578,7 +578,7 @@ export default function FAQPage() {
                 return (
                   <div
                     key={faq.id}
-                    className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900"
+                    className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-zrp-deepBlack"
                   >
                     <button
                       onClick={() => toggleFaq(faq.id)}

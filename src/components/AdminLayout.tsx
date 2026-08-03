@@ -36,7 +36,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
-      <aside className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 p-4 hidden md:block min-h-screen sticky top-0">
+      <aside className="w-64 bg-white dark:bg-zrp-deepBlack border-r border-gray-200 dark:border-gray-800 p-4 hidden md:block min-h-screen sticky top-0">
         <h1 className="text-xl font-bold text-zrp-red mb-6">
           {isModerator ? "Moderator" : "Admin"}
         </h1>

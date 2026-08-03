@@ -92,7 +92,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-50">
+      <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-zrp-deepBlack sticky top-0 z-50">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* ─── Logo ─── */}
           <Link href="/" className="flex-shrink-0">
@@ -200,7 +200,7 @@ export default function Header() {
 
       {/* ─── Mobile Menu ─── */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-[57px] bottom-0 bg-white dark:bg-gray-900 z-40 px-4 py-6 border-t border-gray-200 dark:border-gray-800 overflow-y-auto">
+        <div className="md:hidden fixed inset-x-0 top-[57px] bottom-0 bg-white dark:bg-zrp-deepBlack z-40 px-4 py-6 border-t border-gray-200 dark:border-gray-800 overflow-y-auto">
           <nav className="flex flex-col gap-2">
             {navLinks.map((link) => (
               <Link

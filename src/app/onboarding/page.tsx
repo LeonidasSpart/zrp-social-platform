@@ -179,7 +179,7 @@ export default function OnboardingPage() {
   const steps = ["Profile", "Follow", "Done"];
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 py-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-zrp-deepBlack px-4 py-8">
       <div className="max-w-2xl w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8">
         <div className="flex justify-center mb-6">
           <div className="w-12 h-12 bg-zrp-red rounded-full flex items-center justify-center text-white font-bold text-2xl">

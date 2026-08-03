@@ -204,7 +204,7 @@ export default function HelpPage() {
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {planFeatures.map((feature, idx) => (
-                  <tr key={idx} className={idx % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-50 dark:bg-gray-800"}>
+                  <tr key={idx} className={idx % 2 === 0 ? "bg-white dark:bg-zrp-deepBlack" : "bg-gray-50 dark:bg-gray-800"}>
                     <td className="px-3 py-2 font-medium text-gray-900 dark:text-white">{feature.name}</td>
                     <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400">{feature.free}</td>
                     <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400">{feature.pro}</td>
@@ -343,7 +343,7 @@ export default function HelpPage() {
             <div
               key={section.id}
               id={`help-${section.id}`}
-              className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900"
+              className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-zrp-deepBlack"
             >
               <button
                 onClick={() => toggleSection(section.id)}

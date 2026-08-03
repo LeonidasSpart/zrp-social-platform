@@ -399,7 +399,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
   };
 
   return (
-    <div className="max-w-2xl mx-auto bg-white dark:bg-gray-900 min-h-screen">
+    <div className="max-w-2xl mx-auto bg-white dark:bg-zrp-deepBlack min-h-screen">
       {/* ─── Banner ─── */}
       <div className="relative h-48 bg-gradient-to-r from-zrp-red/30 to-zrp-red/10">
         {profile.coverUrl && (
@@ -440,7 +440,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
       <div className="px-4 relative z-10">
         {/* Avatar + action buttons row — never contains the name/bio text */}
         <div className="flex items-start justify-between gap-3">
-          <div className="relative w-20 h-20 -mt-10 sm:w-28 sm:h-28 sm:-mt-16 rounded-full border-4 border-white dark:border-gray-900 shadow-lg overflow-hidden flex-shrink-0 group bg-white dark:bg-gray-900">
+          <div className="relative w-20 h-20 -mt-10 sm:w-28 sm:h-28 sm:-mt-16 rounded-full border-4 border-white dark:border-gray-900 shadow-lg overflow-hidden flex-shrink-0 group bg-white dark:bg-zrp-deepBlack">
             {profile.avatarUrl ? (
               <img
                 src={profile.avatarUrl}

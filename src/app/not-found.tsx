@@ -5,7 +5,7 @@ import { Home, ArrowLeft, Search } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-900 px-4 text-center">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-zrp-deepBlack px-4 text-center">
       {/* ─── ZRP Branding ─── */}
       <div className="mb-6">
         <h1 className="text-6xl font-bold text-zrp-red">404</h1>

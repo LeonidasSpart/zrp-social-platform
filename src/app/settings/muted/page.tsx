@@ -94,7 +94,7 @@ export default function MutedUsersPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 bg-white dark:bg-gray-900 min-h-screen">
+    <div className="max-w-2xl mx-auto px-4 py-6 bg-white dark:bg-zrp-deepBlack min-h-screen">
       {/* ─── Header ──────────────────────────────────────────────────── */}
       <div className="flex items-center gap-4 mb-6">
         <Link

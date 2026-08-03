@@ -63,7 +63,7 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto bg-white dark:bg-gray-900 min-h-screen p-4">
+    <div className="max-w-2xl mx-auto bg-white dark:bg-zrp-deepBlack min-h-screen p-4">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Messages</h1>
 
       {conversations.length === 0 ? (

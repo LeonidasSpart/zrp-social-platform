@@ -80,7 +80,7 @@ export default function FollowersPage({ params }: { params: { username: string }
   }
 
   return (
-    <div className="max-w-2xl mx-auto bg-white dark:bg-gray-900 min-h-screen p-4">
+    <div className="max-w-2xl mx-auto bg-white dark:bg-zrp-deepBlack min-h-screen p-4">
       <div className="flex items-center gap-3 mb-4">
         <Link
           href={`/profile/${params.username}`}
