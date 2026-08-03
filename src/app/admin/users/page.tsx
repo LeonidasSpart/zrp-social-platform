@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, User, Shield, ShieldAlert } from "lucide-react";
+import { Search, User, Shield, ShieldAlert, Ban, CheckCircle } from "lucide-react";
 
 interface User {
   id: string;
@@ -11,6 +11,7 @@ interface User {
   email: string;
   role: "USER" | "MODERATOR" | "ADMIN";
   badgeType: string | null;
+  banned: boolean; // ✅ added
   _count: {
     posts: number;
     comments: number;
@@ -91,6 +92,23 @@ export default function AdminUsers() {
     }
   };
 
+  // ─── BAN / UNBAN ─────────────────────────────────────────────────────
+  const toggleBan = async (userId: string, currentStatus: boolean) => {
+    const action = currentStatus ? "unban" : "ban";
+    if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/ban`, { method: "POST" });
+      if (res.ok) fetchUsers();
+      else {
+        const err = await res.json();
+        alert(err.error || "Failed to toggle ban");
+      }
+    } catch (error) {
+      console.error("Ban toggle error:", error);
+      alert("Failed to toggle ban");
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-12 text-gray-500">Loading users...</div>;
   }
@@ -121,6 +139,7 @@ export default function AdminUsers() {
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Posts</th>
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Role</th>
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Badge</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Status</th>
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Actions</th>
               </tr>
             </thead>
@@ -169,9 +188,30 @@ export default function AdminUsers() {
                       </select>
                     </td>
                     <td className="px-4 py-3">
+                      {user.banned ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400">
+                          <Ban className="w-3 h-3" /> Banned
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400">
+                          <CheckCircle className="w-3 h-3" /> Active
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 space-x-2">
+                      <button
+                        onClick={() => toggleBan(user.id, user.banned)}
+                        className={`text-xs font-medium transition ${
+                          user.banned
+                            ? "text-green-600 hover:text-green-800"
+                            : "text-red-600 hover:text-red-800"
+                        }`}
+                      >
+                        {user.banned ? "Unban" : "Ban"}
+                      </button>
                       <button
                         onClick={() => handleDelete(user.id)}
-                        className="text-red-600 hover:text-red-800 text-sm font-medium transition"
+                        className="text-red-600 hover:text-red-800 text-xs font-medium transition"
                       >
                         Delete
                       </button>
