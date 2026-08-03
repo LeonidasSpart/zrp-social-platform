@@ -11,13 +11,17 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
 
-    // ─── Get blocked and muted users ──────────────────────────────
+    // ─── Get excluded users (blocked + blockers + muted) ──────────
     let excludedAuthorIds: string[] = [];
     if (userId) {
-      const [blocked, muted] = await Promise.all([
+      const [blocked, blockers, muted] = await Promise.all([
         prisma.blocked.findMany({
           where: { blockerId: userId },
           select: { blockedId: true },
+        }),
+        prisma.blocked.findMany({
+          where: { blockedId: userId },
+          select: { blockerId: true },
         }),
         prisma.mute.findMany({
           where: { muterId: userId },
@@ -25,8 +29,9 @@ export async function GET(req: NextRequest) {
         }),
       ]);
       const blockedIds = blocked.map(b => b.blockedId);
+      const blockerIds = blockers.map(b => b.blockerId);
       const mutedIds = muted.map(m => m.mutedId);
-      excludedAuthorIds = [...blockedIds, ...mutedIds];
+      excludedAuthorIds = [...blockedIds, ...blockerIds, ...mutedIds];
     }
 
     // ─── CHECK CACHE ───────────────────────────────────────────
@@ -42,7 +47,7 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" },
       where: {
         authorId: { notIn: excludedAuthorIds },
-        status: "published", // ensure only published posts
+        status: "published",
       },
       select: {
         id: true,
