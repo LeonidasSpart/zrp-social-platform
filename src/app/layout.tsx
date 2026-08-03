@@ -8,7 +8,7 @@ import CookieConsent from "@/components/CookieConsent";
 import PushNotificationManager from "@/components/PushNotificationManager";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import PageTransition from "@/components/PageTransition"; // ✅ added
+import PageTransition from "@/components/PageTransition";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
@@ -19,12 +19,15 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.png",
   },
+  manifest: "/manifest", // ✅ PWA manifest
+  themeColor: "#FF2D2D", // ✅ PWA theme colour
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  themeColor: "#FF2D2D", // ✅ also support viewport themeColor (for some browsers)
 };
 
 export default function RootLayout({
@@ -34,6 +37,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="manifest" href="/manifest" />
+        <meta name="theme-color" content="#FF2D2D" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      </head>
       <body className={`${inter.variable} ${orbitron.variable} font-inter min-h-screen flex flex-col overflow-x-hidden`}>
         <ThemeProvider>
           <LanguageProvider>
