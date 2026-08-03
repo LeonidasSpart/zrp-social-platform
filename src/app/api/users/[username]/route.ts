@@ -10,7 +10,12 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions);
 
-    // ─── 1. Primary: case‑insensitive lookup ──────────────────────
+    // ─── DEBUG: Log the incoming username ──────────────────────────
+    console.log("🔍 Looking for username:", params.username);
+    console.log("🔍 Username length:", params.username.length);
+    console.log("🔍 Username char codes:", [...params.username].map(c => c.charCodeAt(0)));
+
+    // ─── 1. Try Prisma's case‑insensitive lookup ──────────────────
     let user = await prisma.user.findFirst({
       where: {
         username: {
@@ -44,8 +49,10 @@ export async function GET(
       },
     });
 
-    // ─── 2. Fallback: raw SQL with ILIKE (if primary fails) ──────
+    // ─── 2. If not found, try raw SQL with ILIKE ──────────────────
     if (!user) {
+      console.log("🔍 Prisma findFirst returned null, trying raw SQL...");
+
       const users = await prisma.$queryRaw<Array<{
         id: string;
         username: string;
@@ -72,7 +79,20 @@ export async function GET(
         LIMIT 1
       `;
 
+      console.log("🔍 Raw SQL result count:", users.length);
+      if (users.length > 0) {
+        console.log("🔍 Found user in raw SQL:", users[0].username);
+        console.log("🔍 Raw username length:", users[0].username.length);
+        console.log("🔍 Raw username char codes:", [...users[0].username].map(c => c.charCodeAt(0)));
+      }
+
       if (users.length === 0) {
+        // ─── 3. Final attempt: list all usernames ──────────────────
+        const allUsers = await prisma.$queryRaw<Array<{ username: string }>>`
+          SELECT username FROM "User"
+        `;
+        console.log("🔍 All usernames in database:", allUsers.map(u => u.username));
+
         return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
 
@@ -85,7 +105,6 @@ export async function GET(
         prisma.follow.count({ where: { followerId: raw.id } }),
       ]);
 
-      // Re‑build the user object to match the expected shape (createdAt as Date)
       user = {
         id: raw.id,
         username: raw.username,
@@ -96,8 +115,8 @@ export async function GET(
         location: raw.location,
         country: raw.country,
         website: raw.website,
-        createdAt: raw.createdAt,          // Date, not string
-        usernameChangedAt: raw.usernameChangedAt, // Date | null
+        createdAt: raw.createdAt,
+        usernameChangedAt: raw.usernameChangedAt,
         isPrivate: raw.isPrivate,
         badgeType: raw.badgeType,
         isAdmin: raw.isAdmin,
