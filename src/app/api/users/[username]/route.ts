@@ -10,8 +10,8 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions);
 
-    // ─── CASE-INSENSITIVE USER LOOKUP ──────────────────────────────
-    const user = await prisma.user.findFirst({
+    // ─── 1. Primary: case‑insensitive lookup ──────────────────────
+    let user = await prisma.user.findFirst({
       where: {
         username: {
           equals: params.username,
@@ -33,7 +33,7 @@ export async function GET(
         isPrivate: true,
         badgeType: true,
         isAdmin: true,
-        pinnedPostId: true, // ✅ critical for pinned posts
+        pinnedPostId: true,
         _count: {
           select: {
             posts: true,
@@ -44,9 +44,70 @@ export async function GET(
       },
     });
 
-    // ─── USER NOT FOUND ─────────────────────────────────────────────
+    // ─── 2. Fallback: raw SQL with ILIKE (if primary fails) ──────
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      const users = await prisma.$queryRaw<Array<{
+        id: string;
+        username: string;
+        name: string | null;
+        bio: string | null;
+        avatarUrl: string | null;
+        coverUrl: string | null;
+        location: string | null;
+        country: string | null;
+        website: string | null;
+        createdAt: Date;
+        usernameChangedAt: Date | null;
+        isPrivate: boolean;
+        badgeType: string | null;
+        isAdmin: boolean;
+        pinnedPostId: string | null;
+      }>>`
+        SELECT 
+          id, username, name, bio, "avatarUrl", "coverUrl", 
+          location, country, website, "createdAt", "usernameChangedAt", 
+          "isPrivate", "badgeType", "isAdmin", "pinnedPostId"
+        FROM "User"
+        WHERE username ILIKE ${params.username}
+        LIMIT 1
+      `;
+
+      if (users.length === 0) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+
+      const raw = users[0];
+
+      // ─── Fetch counts separately ──────────────────────────────────
+      const [postsCount, followersCount, followingCount] = await Promise.all([
+        prisma.post.count({ where: { authorId: raw.id, status: "published" } }),
+        prisma.follow.count({ where: { followingId: raw.id } }),
+        prisma.follow.count({ where: { followerId: raw.id } }),
+      ]);
+
+      // Re‑build the user object to match the expected shape
+      user = {
+        id: raw.id,
+        username: raw.username,
+        name: raw.name,
+        bio: raw.bio,
+        avatarUrl: raw.avatarUrl,
+        coverUrl: raw.coverUrl,
+        location: raw.location,
+        country: raw.country,
+        website: raw.website,
+        createdAt: raw.createdAt.toISOString(),
+        usernameChangedAt: raw.usernameChangedAt?.toISOString() || null,
+        isPrivate: raw.isPrivate,
+        badgeType: raw.badgeType,
+        isAdmin: raw.isAdmin,
+        pinnedPostId: raw.pinnedPostId,
+        _count: {
+          posts: postsCount,
+          followers: followersCount,
+          following: followingCount,
+        },
+      };
     }
 
     // ─── FOLLOW / BLOCK STATUS ──────────────────────────────────────
@@ -54,7 +115,6 @@ export async function GET(
     let isBlocked = false;
 
     if (session?.user?.id && session.user.id !== user.id) {
-      // Check if viewer follows target
       const follow = await prisma.follow.findUnique({
         where: {
           followerId_followingId: {
@@ -65,7 +125,6 @@ export async function GET(
       });
       isFollowing = !!follow;
 
-      // Check if viewer has blocked target
       const block = await prisma.blocked.findUnique({
         where: {
           blockerId_blockedId: {
@@ -77,7 +136,6 @@ export async function GET(
       isBlocked = !!block;
     }
 
-    // ─── RESPONSE ────────────────────────────────────────────────────
     return NextResponse.json({
       ...user,
       isFollowing,
