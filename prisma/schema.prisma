@@ -53,6 +53,9 @@ model User {
   // ─── ONBOARDING ──────────────────────────────────────────────────
   onboardingCompleted Boolean @default(false)
 
+  // ─── EMAIL NOTIFICATION PREFERENCES ─────────────────────────────
+  emailPreferences Json?   // stores { mentions, messages, likes, comments, follows, reposts }
+
   // ─── PINNED POST ──────────────────────────────────────────────────
   pinnedPostId  String?   @unique
   pinnedPost    Post?     @relation("PinnedPost", fields: [pinnedPostId], references: [id], onDelete: SetNull)
@@ -124,7 +127,7 @@ model Post {
   @@index([authorId])
   @@index([status])
   @@index([scheduledAt])
-  @@index([quotePostId])          // ✅ for fast quote lookups
+  @@index([quotePostId])
 }
 
 model Comment {
