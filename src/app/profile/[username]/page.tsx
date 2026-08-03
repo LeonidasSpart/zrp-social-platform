@@ -7,7 +7,7 @@ import Link from "next/link";
 import {
   MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff,
   Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck, Share2,
-  Eye, Bell, BellOff, Ban, CheckCircle // ✅ Ban for block, CheckCircle for unblock
+  Eye, Bell, BellOff, Ban, CheckCircle, MoreHorizontal
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -38,7 +38,7 @@ interface UserProfile {
   };
   pinnedPostId: string | null;
   isFollowing: boolean;
-  isBlocked: boolean; // ✅ added
+  isBlocked: boolean;
 }
 
 interface Post {
@@ -93,10 +93,25 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const [isBlocked, setIsBlocked] = useState(false);
   const [blockLoading, setBlockLoading] = useState(false);
 
+  // ─── MORE DROPDOWN ──────────────────────────────────────────────────
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const isOwnProfile = session?.user?.id === profile?.id;
+
+  // ─── Click outside to close dropdown ──────────────────────────────
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
+        setMoreMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // ─── Fetch profile & follow & mute & block status ──────────────────
   const fetchProfile = async () => {
@@ -512,24 +527,26 @@ export default function ProfilePage({ params }: { params: { username: string } }
           </div>
 
           <div className="flex flex-wrap gap-2 justify-end pt-2 flex-shrink-0">
+            {/* ─── Share Profile ──────────────────────────────────────── */}
             <button
               onClick={handleShareProfile}
-              className="flex items-center gap-1 px-3 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+              className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
             >
               <Share2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Share Profile</span>
+              <span className="hidden sm:inline">Share</span>
             </button>
 
             {isOwnProfile ? (
               <Link
                 href="/settings"
-                className="flex items-center gap-1 px-3 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+                className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
               >
                 <Pencil className="w-4 h-4" />
-                <span className="hidden sm:inline">Edit Profile</span>
+                <span className="hidden sm:inline">Edit</span>
               </Link>
             ) : (
               <>
+                {/* ─── Follow / Following ────────────────────────────── */}
                 <button
                   onClick={handleFollow}
                   disabled={followLoading}
@@ -544,74 +561,85 @@ export default function ProfilePage({ params }: { params: { username: string } }
                   ) : isFollowing ? (
                     <>
                       <UserCheck className="w-4 h-4" />
-                      Following
+                      <span className="hidden sm:inline">Following</span>
                     </>
                   ) : (
                     <>
                       <UserPlus className="w-4 h-4" />
-                      Follow
+                      <span>Follow</span>
                     </>
                   )}
                 </button>
+
+                {/* ─── Message ────────────────────────────────────────── */}
                 <Link
                   href={`/messages/${profile.username}`}
-                  className="flex items-center gap-1 px-3 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+                  className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
                 >
                   <MessageCircle className="w-4 h-4" />
                   <span className="hidden sm:inline">Message</span>
                 </Link>
 
-                {/* ─── MUTE BUTTON ──────────────────────────────────── */}
-                <button
-                  onClick={handleMute}
-                  disabled={muteLoading}
-                  className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap border ${
-                    isMuted
-                      ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600"
-                      : "bg-transparent border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
-                  title={isMuted ? "Unmute user" : "Mute user"}
-                >
-                  {muteLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : isMuted ? (
-                    <>
-                      <BellOff className="w-4 h-4" />
-                      <span className="hidden sm:inline">Unmute</span>
-                    </>
-                  ) : (
-                    <>
-                      <Bell className="w-4 h-4" />
-                      <span className="hidden sm:inline">Mute</span>
-                    </>
+                {/* ─── More dropdown ──────────────────────────────────── */}
+                <div className="relative" ref={moreMenuRef}>
+                  <button
+                    onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+                    className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+                    title="More actions"
+                  >
+                    <MoreHorizontal className="w-4 h-4" />
+                  </button>
+                  {moreMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+                      {/* Mute / Unmute */}
+                      <button
+                        onClick={() => {
+                          handleMute();
+                          setMoreMenuOpen(false);
+                        }}
+                        disabled={muteLoading}
+                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      >
+                        {muteLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : isMuted ? (
+                          <>
+                            <BellOff className="w-4 h-4" />
+                            Unmute
+                          </>
+                        ) : (
+                          <>
+                            <Bell className="w-4 h-4" />
+                            Mute
+                          </>
+                        )}
+                      </button>
+                      {/* Block / Unblock */}
+                      <button
+                        onClick={() => {
+                          handleBlock();
+                          setMoreMenuOpen(false);
+                        }}
+                        disabled={blockLoading}
+                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition border-t border-gray-200 dark:border-gray-700"
+                      >
+                        {blockLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : isBlocked ? (
+                          <>
+                            <CheckCircle className="w-4 h-4" />
+                            Unblock
+                          </>
+                        ) : (
+                          <>
+                            <Ban className="w-4 h-4" />
+                            Block
+                          </>
+                        )}
+                      </button>
+                    </div>
                   )}
-                </button>
-
-                {/* ─── BLOCK BUTTON ─────────────────────────────────── */}
-                <button
-                  onClick={handleBlock}
-                  disabled={blockLoading}
-                  className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap border ${
-                    isBlocked
-                      ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30"
-                      : "bg-transparent border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700"
-                  }`}
-                  title={isBlocked ? "Unblock user" : "Block user"}
-                >
-                  {blockLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : isBlocked ? (
-                    <>
-                      <CheckCircle className="w-4 h-4" />
-                      <span className="hidden sm:inline">Unblock</span>
-                    </>
-                  ) : (
-                    <>
-                      <Ban className="w-4 h-4" />
-                      <span className="hidden sm:inline">Block</span>
-                    </>
-                  )}
-                </button>
+                </div>
               </>
             )}
           </div>
