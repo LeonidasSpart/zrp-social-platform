@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { getSocket } from "@/lib/socket-client";
 import { Send, Phone, Video, Image, Smile, X, Download, ZoomIn } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
@@ -20,6 +21,7 @@ interface Message {
 interface ChatInterfaceProps {
   receiverId: string;
   receiverName: string;
+  receiverUsername: string; // ✅ NEW – for profile link
   receiverAvatar?: string;
   onVoiceCall?: () => void;
   onVideoCall?: () => void;
@@ -28,6 +30,7 @@ interface ChatInterfaceProps {
 export default function ChatInterface({
   receiverId,
   receiverName,
+  receiverUsername,
   receiverAvatar,
   onVoiceCall,
   onVideoCall,
@@ -209,7 +212,6 @@ export default function ChatInterface({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file
     if (file.size > 4 * 1024 * 1024) {
       alert("File too large. Max 4MB.");
       return;
@@ -271,7 +273,6 @@ export default function ChatInterface({
     }
   };
 
-  // Only auto-scroll when a message was actually added, not on every poll refresh
   useEffect(() => {
     if (messages.length > lastMessageCountRef.current) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -285,29 +286,51 @@ export default function ChatInterface({
 
   return (
     <div className="flex flex-col h-full w-full max-w-full bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      {/* ─── HEADER – CLICKABLE PROFILE LINK ───────────────────────── */}
       <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <Link
+          href={`/profile/${receiverUsername}`}
+          className="flex items-center gap-2 sm:gap-3 min-w-0 hover:opacity-80 transition"
+        >
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold flex-shrink-0">
             {receiverAvatar ? (
-              <img src={receiverAvatar} alt={receiverName} className="w-full h-full rounded-full object-cover" />
+              <img
+                src={receiverAvatar}
+                alt={receiverName}
+                className="w-full h-full rounded-full object-cover"
+              />
             ) : (
               receiverName?.[0]?.toUpperCase() || "?"
             )}
           </div>
           <div className="min-w-0">
-            <p className="font-semibold text-gray-900 dark:text-white truncate text-sm sm:text-base">{receiverName}</p>
+            <p className="font-semibold text-gray-900 dark:text-white truncate text-sm sm:text-base hover:underline">
+              {receiverName}
+            </p>
             {receiverTyping && <p className="text-xs text-blue-500">Typing...</p>}
           </div>
           <div className="hidden sm:flex items-center gap-1 ml-2 flex-shrink-0">
-            <span className={`w-2 h-2 rounded-full ${socketConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-            <span className="text-xs text-gray-500">{socketConnected ? 'Live' : 'Offline'}</span>
+            <span
+              className={`w-2 h-2 rounded-full ${
+                socketConnected ? 'bg-green-500' : 'bg-red-500'
+              }`}
+            />
+            <span className="text-xs text-gray-500">
+              {socketConnected ? 'Live' : 'Offline'}
+            </span>
           </div>
-        </div>
+        </Link>
         <div className="flex gap-1 flex-shrink-0">
-          <button onClick={onVoiceCall} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition text-gray-500 dark:text-gray-400">
+          <button
+            onClick={onVoiceCall}
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition text-gray-500 dark:text-gray-400"
+          >
             <Phone className="w-5 h-5" />
           </button>
-          <button onClick={onVideoCall} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition text-gray-500 dark:text-gray-400">
+          <button
+            onClick={onVideoCall}
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition text-gray-500 dark:text-gray-400"
+          >
             <Video className="w-5 h-5" />
           </button>
         </div>
@@ -322,15 +345,18 @@ export default function ChatInterface({
         ) : (
           messages.map((message) => {
             const isOwn = message.senderId === userId;
-            const displayContent = message.content && message.content !== "📷 Image" ? message.content : "";
+            const displayContent =
+              message.content && message.content !== "📷 Image" ? message.content : "";
 
             return (
               <div key={message.id} className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[80%] sm:max-w-[75%] rounded-2xl px-3 sm:px-4 py-2 break-words ${
-                  isOwn
-                    ? "bg-blue-600 text-white rounded-br-none"
-                    : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-none"
-                }`}>
+                <div
+                  className={`max-w-[80%] sm:max-w-[75%] rounded-2xl px-3 sm:px-4 py-2 break-words ${
+                    isOwn
+                      ? "bg-blue-600 text-white rounded-br-none"
+                      : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-none"
+                  }`}
+                >
                   {message.imageUrl && (
                     <div
                       className="cursor-pointer group relative"
@@ -347,7 +373,11 @@ export default function ChatInterface({
                     </div>
                   )}
                   {displayContent && <p className="text-sm">{displayContent}</p>}
-                  <p className={`text-[10px] mt-1 ${isOwn ? "text-blue-200" : "text-gray-400"}`}>
+                  <p
+                    className={`text-[10px] mt-1 ${
+                      isOwn ? "text-blue-200" : "text-gray-400"
+                    }`}
+                  >
                     {new Date(message.createdAt).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -362,7 +392,10 @@ export default function ChatInterface({
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSend} className="p-2 sm:p-4 border-t border-gray-200 dark:border-gray-700 flex gap-1 sm:gap-2 items-center flex-shrink-0">
+      <form
+        onSubmit={handleSend}
+        className="p-2 sm:p-4 border-t border-gray-200 dark:border-gray-700 flex gap-1 sm:gap-2 items-center flex-shrink-0"
+      >
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
@@ -376,7 +409,13 @@ export default function ChatInterface({
             <Image className="w-5 h-5" />
           )}
         </button>
-        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="hidden"
+        />
 
         <button
           type="button"
@@ -404,7 +443,7 @@ export default function ChatInterface({
         </button>
       </form>
 
-      {/* ─── Emoji picker: full overlay on mobile, anchored popover on desktop ─── */}
+      {/* ─── Emoji picker ─── */}
       {showEmojiPicker && (
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center bg-black/40"
