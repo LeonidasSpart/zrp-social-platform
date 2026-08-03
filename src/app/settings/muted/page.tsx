@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { ChevronLeft, User, Loader2, BellOff, Calendar } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
@@ -137,22 +136,17 @@ export default function MutedUsersPage() {
               key={user.id}
               className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition group"
             >
-              {/* Avatar */}
+              {/* Avatar – using <img> with fallback */}
               <Link href={`/profile/${user.username}`} className="flex-shrink-0">
                 <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                  {user.avatarUrl ? (
-                    <Image
-                      src={user.avatarUrl}
-                      alt={user.name || user.username}
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-lg">
-                      {(user.name || user.username)[0].toUpperCase()}
-                    </div>
-                  )}
+                  <img
+                    src={user.avatarUrl || '/default-avatar.png'}
+                    alt={user.name || user.username}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/default-avatar.png';
+                    }}
+                  />
                 </div>
               </Link>
 
