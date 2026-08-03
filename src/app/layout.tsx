@@ -8,6 +8,7 @@ import CookieConsent from "@/components/CookieConsent";
 import PushNotificationManager from "@/components/PushNotificationManager";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import PageTransition from "@/components/PageTransition"; // ✅ added
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
@@ -20,7 +21,6 @@ export const metadata: Metadata = {
   },
 };
 
-// ─── MOBILE VIEWPORT ──────────────────────────────────────────────
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -39,7 +39,7 @@ export default function RootLayout({
           <LanguageProvider>
             <AuthProvider>
               <Header />
-              <main className="flex-1 w-full max-w-full">{children}</main>
+              <PageTransition>{children}</PageTransition>
               <CookieConsent />
               <Footer />
               <PushNotificationManager />
