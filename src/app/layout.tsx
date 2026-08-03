@@ -19,15 +19,15 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.png",
   },
-  manifest: "/manifest", // ✅ PWA manifest
-  themeColor: "#FF2D2D", // ✅ PWA theme colour
+  manifest: "/manifest",
+  themeColor: "#FF2D2D",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#FF2D2D", // ✅ also support viewport themeColor (for some browsers)
+  themeColor: "#FF2D2D",
 };
 
 export default function RootLayout({
@@ -40,8 +40,15 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest" />
         <meta name="theme-color" content="#FF2D2D" />
+        <meta name="mobile-web-app-capable" content="yes" /> {/* ✅ Android */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="ZRP" />
+        {/* ─── Apple Touch Icons ────────────────────────────────────── */}
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icon-192.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icon-192.png" />
+        <link rel="apple-touch-icon" sizes="167x167" href="/icon-192.png" />
       </head>
       <body className={`${inter.variable} ${orbitron.variable} font-inter min-h-screen flex flex-col overflow-x-hidden`}>
         <ThemeProvider>
