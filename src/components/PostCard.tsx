@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag, Bookmark, BarChart3, Pin, PinOff } from "lucide-react";
+import {
+  Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag,
+  Bookmark, BarChart3, Pin, PinOff, X, ZoomIn
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import Comments from "./Comments";
 import EditPostModal from "./EditPostModal";
@@ -39,39 +42,26 @@ interface PostCardProps {
 // ─── PARSE HASHTAGS AND MENTIONS ──────────────────────────────────
 function parseContent(content: string) {
   const parts: { type: "text" | "hashtag" | "mention"; value: string }[] = [];
-  let remaining = content;
   let lastIndex = 0;
-
-  // Find all #hashtag and @mention matches
   const regex = /(@\w+)|(#\w+)/g;
   let match;
 
   while ((match = regex.exec(content)) !== null) {
-    // Add text before the match
     if (match.index > lastIndex) {
       parts.push({
         type: "text",
         value: content.slice(lastIndex, match.index),
       });
     }
-
-    // Add the matched hashtag or mention
     parts.push({
       type: match[0].startsWith("@") ? "mention" : "hashtag",
       value: match[0],
     });
-
     lastIndex = match.index + match[0].length;
   }
-
-  // Add remaining text
   if (lastIndex < content.length) {
-    parts.push({
-      type: "text",
-      value: content.slice(lastIndex),
-    });
+    parts.push({ type: "text", value: content.slice(lastIndex) });
   }
-
   return parts;
 }
 
@@ -101,16 +91,70 @@ export default function PostCard({
   const [showReportModal, setShowReportModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [pinLoading, setPinLoading] = useState(false);
-
   const [bookmarked, setBookmarked] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
-
   const hasCountedView = useRef(false);
 
-  const isAuthor = session?.user?.id === post.author.id;
+  // ─── DOUBLE‑CLICK TO LIKE ──────────────────────────────────────────
+  const [lastClickTime, setLastClickTime] = useState(0);
 
+  // ─── IMAGE LIGHTBOX ────────────────────────────────────────────────
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+
+  // ─── EMOJI REACTIONS ──────────────────────────────────────────────
+  const [reactions, setReactions] = useState<Record<string, number>>({});
+  const [userReactions, setUserReactions] = useState<string[]>([]);
+  const [reactionsLoading, setReactionsLoading] = useState(true);
+
+  const isAuthor = session?.user?.id === post.author.id;
   const contentParts = parseContent(post.content);
 
+  // ─── FETCH REACTIONS ──────────────────────────────────────────────
+  const fetchReactions = async () => {
+    try {
+      const res = await fetch(`/api/posts/${post.id}/reaction`);
+      if (res.ok) {
+        const data = await res.json();
+        const counts = data.reduce((acc: any, r: any) => {
+          acc[r.emoji] = (acc[r.emoji] || 0) + 1;
+          return acc;
+        }, {});
+        setReactions(counts);
+        const userEmojis = data
+          .filter((r: any) => r.user.id === session?.user?.id)
+          .map((r: any) => r.emoji);
+        setUserReactions(userEmojis);
+      }
+    } catch (error) {
+      console.error("Error fetching reactions:", error);
+    } finally {
+      setReactionsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (session) fetchReactions();
+  }, [post.id, session]);
+
+  // ─── HANDLE REACTION ──────────────────────────────────────────────
+  const handleReaction = async (emoji: string) => {
+    if (!session) return;
+    try {
+      const res = await fetch(`/api/posts/${post.id}/reaction`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emoji }),
+      });
+      if (res.ok) {
+        // Re‑fetch reactions to update counts
+        await fetchReactions();
+      }
+    } catch (error) {
+      console.error("Error toggling reaction:", error);
+    }
+  };
+
+  // ─── CHECK BOOKMARK ──────────────────────────────────────────────
   useEffect(() => {
     const checkBookmark = async () => {
       try {
@@ -128,7 +172,7 @@ export default function PostCard({
     }
   }, [post.id, session]);
 
-  // ─── Count a view once per mount, guarded against double-counting ───
+  // ─── COUNT VIEW ────────────────────────────────────────────────────
   useEffect(() => {
     if (hasCountedView.current) return;
     hasCountedView.current = true;
@@ -159,6 +203,8 @@ export default function PostCard({
       sessionStorage.setItem(storageKey, JSON.stringify(viewed.slice(-500)));
     } catch {}
   }, [post.id]);
+
+  // ─── HANDLERS ──────────────────────────────────────────────────────
 
   const handleLike = async () => {
     try {
@@ -290,6 +336,28 @@ export default function PostCard({
     }
   };
 
+  // ─── DOUBLE‑CLICK TO LIKE ──────────────────────────────────────────
+  const handlePostClick = (e: React.MouseEvent) => {
+    const now = Date.now();
+    const timeSince = now - lastClickTime;
+    setLastClickTime(now);
+    if (timeSince < 300) {
+      handleLike();
+    }
+  };
+
+  // Touch version for mobile
+  let lastTouchTime = 0;
+  const handleTouchEnd = () => {
+    const now = Date.now();
+    const timeSince = now - lastTouchTime;
+    lastTouchTime = now;
+    if (timeSince < 300) {
+      handleLike();
+    }
+  };
+
+  // ─── TIME AGO ──────────────────────────────────────────────────────
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
     const minutes = Math.floor(diff / 60000);
@@ -383,43 +451,59 @@ export default function PostCard({
               )}
             </div>
 
-            {/* ─── POST CONTENT WITH CLICKABLE HASHTAGS & MENTIONS ─── */}
-            <p className="text-gray-800 dark:text-gray-200 mt-1 whitespace-pre-wrap break-words">
-              {contentParts.map((part, index) => {
-                if (part.type === "hashtag") {
-                  const tag = part.value.slice(1);
-                  return (
-                    <Link
-                      key={index}
-                      href={`/hashtag/${tag}`}
-                      className="text-blue-600 dark:text-blue-400 hover:underline"
-                    >
-                      {part.value}
-                    </Link>
-                  );
-                }
-                if (part.type === "mention") {
-                  const username = part.value.slice(1);
-                  return (
-                    <Link
-                      key={index}
-                      href={`/profile/${username}`}
-                      className="text-blue-600 dark:text-blue-400 hover:underline"
-                    >
-                      {part.value}
-                    </Link>
-                  );
-                }
-                return <span key={index}>{part.value}</span>;
-              })}
-            </p>
+            {/* ─── POST CONTENT WITH DOUBLE‑CLICK TO LIKE ──────────── */}
+            <div
+              onClick={handlePostClick}
+              onTouchEnd={handleTouchEnd}
+              className="cursor-pointer select-none"
+            >
+              <p className="text-gray-800 dark:text-gray-200 mt-1 whitespace-pre-wrap break-words">
+                {contentParts.map((part, index) => {
+                  if (part.type === "hashtag") {
+                    const tag = part.value.slice(1);
+                    return (
+                      <Link
+                        key={index}
+                        href={`/hashtag/${tag}`}
+                        className="text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        {part.value}
+                      </Link>
+                    );
+                  }
+                  if (part.type === "mention") {
+                    const username = part.value.slice(1);
+                    return (
+                      <Link
+                        key={index}
+                        href={`/profile/${username}`}
+                        className="text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        {part.value}
+                      </Link>
+                    );
+                  }
+                  return <span key={index}>{part.value}</span>;
+                })}
+              </p>
 
-            {post.imageUrl && (
-              <div className="mt-2 rounded-lg overflow-hidden">
-                <img src={post.imageUrl} alt="Post image" className="w-full" />
-              </div>
-            )}
+              {post.imageUrl && (
+                <div
+                  className="mt-2 rounded-lg overflow-hidden cursor-pointer group relative"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightboxImage(post.imageUrl!);
+                  }}
+                >
+                  <img src={post.imageUrl} alt="Post image" className="w-full" />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20">
+                    <ZoomIn className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+              )}
+            </div>
 
+            {/* ─── ACTION BUTTONS ────────────────────────────────────── */}
             <div className="flex items-center gap-6 mt-3 flex-wrap">
               <button
                 onClick={handleLike}
@@ -478,6 +562,29 @@ export default function PostCard({
               </button>
             </div>
 
+            {/* ─── EMOJI REACTIONS ──────────────────────────────────── */}
+            {!reactionsLoading && (
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                {["❤️", "🔥", "😢", "😂", "😡", "👍"].map((emoji) => {
+                  const count = reactions[emoji] || 0;
+                  const isActive = userReactions.includes(emoji);
+                  return (
+                    <button
+                      key={emoji}
+                      onClick={() => handleReaction(emoji)}
+                      className={`text-sm px-2 py-1 rounded-full border transition ${
+                        isActive
+                          ? "bg-zrp-red/10 border-zrp-red text-zrp-red"
+                          : "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
+                      }`}
+                    >
+                      {emoji} {count > 0 && <span className="ml-1 text-xs">{count}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             {showComments && (
               <Comments postId={post.id} onCommentAdded={onUpdate} />
             )}
@@ -523,6 +630,31 @@ export default function PostCard({
         onClose={() => setShowReportModal(false)}
         onSubmit={handleReport}
       />
+
+      {/* ─── IMAGE LIGHTBOX ──────────────────────────────────────────── */}
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 bg-black/90 flex items-center justify-center z-[999] p-4"
+          onClick={() => setLightboxImage(null)}
+        >
+          <div
+            className="relative max-w-3xl w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={lightboxImage}
+              alt="Full size"
+              className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
+            />
+            <button
+              onClick={() => setLightboxImage(null)}
+              className="absolute top-2 right-2 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
