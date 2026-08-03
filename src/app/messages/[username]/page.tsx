@@ -272,9 +272,30 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       )}
       {callState === "idle" ? (
         <>
-          <div className="mb-2 sm:mb-4">
-            <Link href="/messages" className="text-blue-600 hover:underline text-sm">← Back to messages</Link>
+          <div className="flex items-center gap-3 mb-2 sm:mb-4">
+            <Link href="/messages" className="text-blue-600 hover:underline text-sm flex items-center gap-1">
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Link>
+            <div className="flex items-center gap-3 ml-auto">
+              <Link href={`/profile/${receiver.username}`} className="flex items-center gap-2 hover:opacity-80 transition">
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0">
+                  {receiver.avatarUrl ? (
+                    <img src={receiver.avatarUrl} alt={receiver.name || receiver.username} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-semibold text-sm">
+                      {(receiver.name || receiver.username)[0]?.toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <span className="font-medium text-gray-900 dark:text-white hover:underline">
+                  {receiver.name || receiver.username}
+                </span>
+              </Link>
+              <span className="text-xs text-green-500">● Live</span>
+            </div>
           </div>
+
           <div className="flex-1 min-h-0">
             <ChatInterface
               receiverId={receiver.id}
