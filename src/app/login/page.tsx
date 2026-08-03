@@ -1,14 +1,24 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // ─── Handle ban error from URL ──────────────────────────────────
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    if (errorParam === "banned") {
+      setError("Your account has been banned. Please contact support.");
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +36,6 @@ export default function LoginPage() {
         setError("Invalid email or password");
         setLoading(false);
       } else {
-        // ✅ Success: force a full page reload to home
         window.location.href = "/";
       }
     } catch (err) {
@@ -49,8 +58,25 @@ export default function LoginPage() {
         <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg text-sm">
+              <div className={`p-3 rounded-lg text-sm ${
+                error.includes("banned")
+                  ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
+                  : "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
+              }`}>
                 {error}
+                {error.includes("banned") && (
+                  <div className="mt-2">
+                    <a
+                      href="mailto:support@zrp.one?subject=Account%20Ban%20Appeal"
+                      className="text-blue-600 dark:text-blue-400 underline text-sm hover:text-blue-800 dark:hover:text-blue-300"
+                    >
+                      📧 Contact support via email
+                    </a>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Please include your username and the reason you believe this is a mistake.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
