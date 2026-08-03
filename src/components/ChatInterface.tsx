@@ -219,7 +219,8 @@ export default function ChatInterface({
 
     setDeletingMessageId(messageId);
     try {
-      const res = await fetch(`/api/messages/${messageId}`, {
+      // ✅ FIXED: Use the nested /delete/[id] endpoint
+      const res = await fetch(`/api/messages/delete/${messageId}`, {
         method: "DELETE",
       });
       if (res.ok) {
