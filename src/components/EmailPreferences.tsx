@@ -13,11 +13,20 @@ const preferenceLabels: Record<string, string> = {
   reposts: "Reposts of your posts",
 };
 
+const defaultPreferences = {
+  mentions: true,
+  messages: true,
+  likes: true,
+  comments: true,
+  follows: true,
+  reposts: true,
+};
+
 export default function EmailPreferences() {
   const { data: session } = useSession();
-  const [preferences, setPreferences] = useState<Record<string, boolean>>({});
+  const [preferences, setPreferences] = useState<Record<string, boolean>>(defaultPreferences);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = useState<string | null>(null); // track which key is being saved
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const fetchPreferences = async () => {
@@ -25,7 +34,8 @@ export default function EmailPreferences() {
       const res = await fetch("/api/user/email-preferences");
       if (res.ok) {
         const data = await res.json();
-        setPreferences(data);
+        // Merge with defaults to ensure all keys exist
+        setPreferences({ ...defaultPreferences, ...data });
       } else {
         setMessage({ type: "error", text: "Failed to load preferences" });
       }
@@ -44,11 +54,11 @@ export default function EmailPreferences() {
 
   const handleToggle = async (key: string) => {
     const newValue = !preferences[key];
+    // Optimistically update UI
     setPreferences((prev) => ({ ...prev, [key]: newValue }));
-
-    // Optimistically update UI, but we'll also send request
-    setSaving(true);
+    setSaving(key);
     setMessage(null);
+
     try {
       const res = await fetch("/api/user/email-preferences", {
         method: "PUT",
@@ -57,11 +67,12 @@ export default function EmailPreferences() {
       });
       if (res.ok) {
         const data = await res.json();
-        setPreferences(data.preferences);
+        // Update with the server response (ensures consistency)
+        setPreferences((prev) => ({ ...prev, ...data.preferences }));
         setMessage({ type: "success", text: "Preferences saved!" });
         setTimeout(() => setMessage(null), 3000);
       } else {
-        // revert
+        // Revert on error
         setPreferences((prev) => ({ ...prev, [key]: !newValue }));
         setMessage({ type: "error", text: "Failed to save preference" });
       }
@@ -69,12 +80,16 @@ export default function EmailPreferences() {
       setPreferences((prev) => ({ ...prev, [key]: !newValue }));
       setMessage({ type: "error", text: "Something went wrong" });
     } finally {
-      setSaving(false);
+      setSaving(null);
     }
   };
 
   if (loading) {
-    return <div className="flex justify-center py-4"><Loader2 className="w-6 h-6 animate-spin text-zrp-red" /></div>;
+    return (
+      <div className="flex justify-center py-4">
+        <Loader2 className="w-6 h-6 animate-spin text-zrp-red" />
+      </div>
+    );
   }
 
   return (
@@ -86,10 +101,10 @@ export default function EmailPreferences() {
           </span>
           <button
             onClick={() => handleToggle(key)}
-            disabled={saving}
+            disabled={saving === key}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
               value ? "bg-zrp-red" : "bg-gray-300 dark:bg-gray-600"
-            } ${saving ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+            } ${saving === key ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
           >
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
@@ -100,7 +115,11 @@ export default function EmailPreferences() {
         </div>
       ))}
       {message && (
-        <p className={`text-sm mt-2 ${message.type === "success" ? "text-green-600" : "text-red-600"}`}>
+        <p
+          className={`text-sm mt-2 ${
+            message.type === "success" ? "text-green-600" : "text-red-600"
+          }`}
+        >
           {message.text}
         </p>
       )}
