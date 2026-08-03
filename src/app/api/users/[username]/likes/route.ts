@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 export async function GET(
@@ -6,17 +8,57 @@ export async function GET(
   { params }: { params: { username: string } }
 ) {
   try {
-    const user = await prisma.user.findUnique({
+    const session = await getServerSession(authOptions);
+    const viewerId = session?.user?.id;
+
+    // ─── Find profile owner ──────────────────────────────────────────
+    const profileOwner = await prisma.user.findUnique({
       where: { username: params.username },
       select: { id: true },
     });
 
-    if (!user) {
+    if (!profileOwner) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // ─── Get excluded users (blocked + blockers + muted) ──────────
+    let excludedAuthorIds: string[] = [];
+    if (viewerId) {
+      const [blocked, blockers, muted] = await Promise.all([
+        prisma.blocked.findMany({
+          where: { blockerId: viewerId },
+          select: { blockedId: true },
+        }),
+        prisma.blocked.findMany({
+          where: { blockedId: viewerId },
+          select: { blockerId: true },
+        }),
+        prisma.mute.findMany({
+          where: { muterId: viewerId },
+          select: { mutedId: true },
+        }),
+      ]);
+      const blockedIds = blocked.map(b => b.blockedId);
+      const blockerIds = blockers.map(b => b.blockerId);
+      const mutedIds = muted.map(m => m.mutedId);
+      excludedAuthorIds = [...blockedIds, ...blockerIds, ...mutedIds];
+    }
+
+    // ─── If profile owner is excluded, return empty ──────────────────
+    const isExcluded = excludedAuthorIds.includes(profileOwner.id);
+    if (isExcluded) {
+      return NextResponse.json([]);
+    }
+
+    // ─── Fetch likes by profile owner, excluding posts from blocked authors ──
     const likes = await prisma.like.findMany({
-      where: { userId: user.id },
+      where: {
+        userId: profileOwner.id,
+        post: {
+          authorId: { notIn: excludedAuthorIds },
+          status: "published",
+        },
+      },
       orderBy: { createdAt: "desc" },
       include: {
         post: {
@@ -30,11 +72,33 @@ export async function GET(
                 badgeType: true,
               },
             },
+            quotePost: {
+              include: {
+                author: {
+                  select: {
+                    id: true,
+                    username: true,
+                    name: true,
+                    avatarUrl: true,
+                    badgeType: true,
+                  },
+                },
+                _count: {
+                  select: {
+                    likes: true,
+                    comments: true,
+                    reposts: true,
+                    quotedBy: true,
+                  },
+                },
+              },
+            },
             _count: {
               select: {
                 likes: true,
                 comments: true,
                 reposts: true,
+                quotedBy: true,
               },
             },
           },
@@ -42,11 +106,26 @@ export async function GET(
       },
     });
 
-    const posts = likes.map((like) => like.post);
+    // ─── Extract posts from likes ────────────────────────────────────
+    let posts = likes.map((like) => like.post);
+
+    // ─── Add liked status for viewer ────────────────────────────────
+    if (viewerId && posts.length > 0) {
+      const viewerLikes = await prisma.like.findMany({
+        where: {
+          userId: viewerId,
+          postId: { in: posts.map((p) => p.id) },
+        },
+      });
+      const likedIds = new Set(viewerLikes.map((l) => l.postId));
+      posts.forEach((p) => {
+        (p as any).liked = likedIds.has(p.id);
+      });
+    }
 
     return NextResponse.json(posts);
   } catch (error) {
-    console.error("Error fetching likes:", error);
-    return NextResponse.json({ error: "Failed to fetch likes" }, { status: 500 });
+    console.error("Error fetching liked posts:", error);
+    return NextResponse.json({ error: "Failed to fetch liked posts" }, { status: 500 });
   }
 }
