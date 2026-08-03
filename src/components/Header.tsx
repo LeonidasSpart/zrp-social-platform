@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { signOut, useSession } from "next-auth/react";
-import { Home, Compass, Search, MessageSquare, Bell, User, Sun, Moon, Menu, X, LayoutDashboard, Bookmark, LogOut } from "lucide-react";
+import { Home, Compass, Search, MessageSquare, Bell, User, Sun, Moon, Menu, X, LayoutDashboard, Bookmark, LogOut, Globe } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { SUPPORTED_LANGUAGES } from "@/lib/translations";
 
 // ─── Type for navigation items ──────────────────────────────────────
 type NavItem = {
@@ -18,8 +20,10 @@ type NavItem = {
 export default function Header() {
   const { data: session } = useSession();
   const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
   const [unreadCount, setUnreadCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
 
   const isAuthenticated = !!session;
 
@@ -60,21 +64,21 @@ export default function Header() {
 
   // ─── Public nav links ──────────────────────────────────────────────
   const publicNavLinks: NavItem[] = [
-    { href: "/", icon: Home, label: "Home" },
-    { href: "/about", icon: null, label: "About" },
-    { href: "/login", icon: null, label: "Login" },
-    { href: "/signup", icon: null, label: "Sign Up" },
+    { href: "/", icon: Home, label: t("nav.home") },
+    { href: "/about", icon: null, label: t("nav.about") },
+    { href: "/login", icon: null, label: t("nav.login") },
+    { href: "/signup", icon: null, label: t("nav.signup") },
   ];
 
   // ─── Authenticated nav links ──────────────────────────────────────
   const authNavLinks: NavItem[] = [
-    { href: "/", icon: Home, label: "Home" },
-    { href: "/explore", icon: Compass, label: "Explore" },
-    { href: "/search", icon: Search, label: "Search" },
-    { href: "/messages", icon: MessageSquare, label: "Messages" },
-    { href: "/notifications", icon: Bell, label: "Notifications", badge: unreadCount },
-    { href: "/bookmarks", icon: Bookmark, label: "Bookmarks" },
-    { href: `/profile/${session?.user?.username}`, icon: User, label: "Profile" },
+    { href: "/", icon: Home, label: t("nav.home") },
+    { href: "/explore", icon: Compass, label: t("nav.explore") },
+    { href: "/search", icon: Search, label: t("nav.search") },
+    { href: "/messages", icon: MessageSquare, label: t("nav.messages") },
+    { href: "/notifications", icon: Bell, label: t("nav.notifications"), badge: unreadCount },
+    { href: "/bookmarks", icon: Bookmark, label: t("nav.bookmarks") },
+    { href: `/profile/${session?.user?.username}`, icon: User, label: t("nav.profile") },
   ];
 
   const navLinks = isAuthenticated ? authNavLinks : publicNavLinks;
@@ -83,6 +87,8 @@ export default function Header() {
   const handleLogout = async () => {
     await signOut({ callbackUrl: "/login" });
   };
+
+  const currentLangLabel = SUPPORTED_LANGUAGES.find((l) => l.code === language)?.code.toUpperCase() || "EN";
 
   return (
     <>
@@ -119,15 +125,54 @@ export default function Header() {
               <Link
                 href="/admin"
                 className="text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition"
-                title="Admin Dashboard"
+                title={t("nav.admin")}
               >
                 <LayoutDashboard className="w-5 h-5" />
               </Link>
             )}
+
+            {/* ─── Language switcher ───────────────────────────────── */}
+            <div className="relative">
+              <button
+                onClick={() => setLangMenuOpen(!langMenuOpen)}
+                className="flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition"
+                title={t("nav.language")}
+              >
+                <Globe className="w-5 h-5" />
+                <span className="text-xs font-medium">{currentLangLabel}</span>
+              </button>
+              {langMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setLangMenuOpen(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+                    {SUPPORTED_LANGUAGES.map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => {
+                          setLanguage(lang.code);
+                          setLangMenuOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 text-sm transition ${
+                          language === lang.code
+                            ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white font-medium"
+                            : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        }`}
+                      >
+                        {lang.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
             <button
               onClick={toggleTheme}
               className="text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition"
-              title={theme === "light" ? "Dark mode" : "Light mode"}
+              title={theme === "light" ? t("nav.darkMode") : t("nav.lightMode")}
             >
               {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </button>
@@ -137,7 +182,7 @@ export default function Header() {
               <button
                 onClick={handleLogout}
                 className="text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-500 transition"
-                title="Sign out"
+                title={t("nav.signOut")}
               >
                 <LogOut className="w-5 h-5" />
               </button>
@@ -180,15 +225,36 @@ export default function Header() {
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-700 dark:text-gray-300"
               >
                 <LayoutDashboard className="w-5 h-5" />
-                <span>Admin</span>
+                <span>{t("nav.admin")}</span>
               </Link>
             )}
+
+            {/* ─── Language switcher (mobile) ─────────────────────── */}
+            <div className="p-3">
+              <p className="text-xs text-gray-400 mb-2">{t("nav.language")}</p>
+              <div className="flex gap-2 flex-wrap">
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => setLanguage(lang.code)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
+                      language === lang.code
+                        ? "bg-zrp-red text-white"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                    }`}
+                  >
+                    {lang.code.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <button
               onClick={() => { toggleTheme(); setMobileMenuOpen(false); }}
               className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-700 dark:text-gray-300"
             >
               {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-              <span>{theme === "light" ? "Dark Mode" : "Light Mode"}</span>
+              <span>{theme === "light" ? t("nav.darkMode") : t("nav.lightMode")}</span>
             </button>
 
             {/* ─── LOGOUT (mobile) ──────────────────────────────────── */}
@@ -201,7 +267,7 @@ export default function Header() {
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition text-red-600 dark:text-red-400"
               >
                 <LogOut className="w-5 h-5" />
-                <span>Sign Out</span>
+                <span>{t("nav.signOut")}</span>
               </button>
             )}
           </nav>
