@@ -3,14 +3,13 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
-// ─── Default preferences (all true) ──────────────────────────────
 const defaultPreferences = {
-  mentions: true,
-  messages: true,
   likes: true,
   comments: true,
   follows: true,
   reposts: true,
+  mentions: true,
+  messages: true,
 };
 
 export async function GET(req: NextRequest) {
@@ -24,12 +23,11 @@ export async function GET(req: NextRequest) {
       where: { id: session.user.id },
       select: { emailPreferences: true },
     });
-
     const preferences = user?.emailPreferences || defaultPreferences;
     return NextResponse.json(preferences);
   } catch (error) {
-    console.error("Error fetching email preferences:", error);
-    return NextResponse.json({ error: "Failed to fetch preferences" }, { status: 500 });
+    console.error("GET email-preferences error:", error);
+    return NextResponse.json(defaultPreferences);
   }
 }
 
@@ -41,7 +39,6 @@ export async function PUT(req: NextRequest) {
 
   try {
     const body = await req.json();
-    // Validate body: it must be an object with only allowed keys
     const allowedKeys = Object.keys(defaultPreferences);
     const invalidKeys = Object.keys(body).filter(k => !allowedKeys.includes(k));
     if (invalidKeys.length > 0) {
@@ -51,8 +48,15 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // Merge with defaults to ensure all keys exist
-    const newPreferences = { ...defaultPreferences, ...body };
+    // ─── Fetch current preferences from DB ──────────────────────────
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { emailPreferences: true },
+    });
+    const currentPreferences = user?.emailPreferences || defaultPreferences;
+
+    // ─── Merge: only update the keys provided in the request ──────
+    const newPreferences = { ...currentPreferences, ...body };
 
     await prisma.user.update({
       where: { id: session.user.id },
@@ -61,7 +65,10 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json({ success: true, preferences: newPreferences });
   } catch (error) {
-    console.error("Error updating email preferences:", error);
-    return NextResponse.json({ error: "Failed to update preferences" }, { status: 500 });
+    console.error("PUT email-preferences error:", error);
+    return NextResponse.json(
+      { error: "Failed to update preferences" },
+      { status: 500 }
+    );
   }
 }
