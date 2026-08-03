@@ -10,7 +10,6 @@ const userConnections = new Map<string, number>(); // userId -> connection count
 function setUserOnline(userId: string) {
   const count = userConnections.get(userId) || 0;
   userConnections.set(userId, count + 1);
-  // Broadcast online only if it was previously offline
   if (count === 0) {
     io?.emit("user-status", { userId, status: "online" });
   }
@@ -143,6 +142,12 @@ export function initSocketServer(server: HTTPServer) {
 
       socket.on("end-call", ({ receiverId }) => {
         io?.to(`user:${receiverId}`).emit("call-ended");
+      });
+
+      // ─── DELETE MESSAGE ────────────────────────────────────────────
+      socket.on("delete-message", ({ messageId, senderId, receiverId }) => {
+        io?.to(`user:${senderId}`).emit("message-deleted", { messageId });
+        io?.to(`user:${receiverId}`).emit("message-deleted", { messageId });
       });
 
       // ─── Disconnect ──────────────────────────────────────────────
