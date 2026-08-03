@@ -9,6 +9,9 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 const prisma = new PrismaClient();
 
+// ─── Track online users ──────────────────────────────────────────────
+const userStatus = new Map(); // userId -> true (online)
+
 app.prepare().then(() => {
   const server = createServer((req, res) => {
     const parsedUrl = parse(req.url, true);
@@ -29,7 +32,18 @@ app.prepare().then(() => {
     // ─── Join Room (userId) ────────────────────────────────────
     socket.on("join-room", (userId) => {
       socket.join(userId);
+      socket.data.userId = userId; // store for disconnect
       console.log(`✅ User ${userId} joined room (socket ${socket.id})`);
+
+      // ─── Set online and broadcast status ──────────────────────
+      userStatus.set(userId, true);
+      socket.broadcast.emit("user-status", { userId, status: "online" });
+    });
+
+    // ─── Request status for a specific user ──────────────────────
+    socket.on("get-status", (userId) => {
+      const isOnline = userStatus.has(userId) && userStatus.get(userId) === true;
+      socket.emit("user-status", { userId, status: isOnline ? "online" : "offline" });
     });
 
     // ─── Messaging ──────────────────────────────────────────────
@@ -55,11 +69,11 @@ app.prepare().then(() => {
       io.to(senderId).emit("message-read", { messageId });
     });
 
-    // ─── Call Signaling (using userId rooms) ──────────────────────
+    // ─── Call Signaling ──────────────────────────────────────────
     socket.on("call-user", ({ receiverId, signal, callerName, isVideo, callerId }) => {
       console.log(`📞 call-user from ${callerId} to ${receiverId}`);
       io.to(receiverId).emit("incoming-call", {
-        callerId,          // caller's userId
+        callerId,
         callerName,
         signal,
         isVideo,
@@ -81,8 +95,16 @@ app.prepare().then(() => {
       io.to(callerId).emit("call-ended");
     });
 
+    // ─── Disconnect ──────────────────────────────────────────────
     socket.on("disconnect", () => {
-      console.log("🔌 Socket disconnected:", socket.id);
+      const userId = socket.data.userId;
+      if (userId) {
+        userStatus.delete(userId);
+        socket.broadcast.emit("user-status", { userId, status: "offline" });
+        console.log(`🔌 User ${userId} disconnected (socket ${socket.id})`);
+      } else {
+        console.log("🔌 Socket disconnected without userId:", socket.id);
+      }
     });
   });
 
