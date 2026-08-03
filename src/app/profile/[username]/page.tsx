@@ -12,6 +12,7 @@ import {
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import AnalyticsTab from "@/components/AnalyticsTab";
+import PostComposer from "@/components/PostComposer";
 
 function formatProfileCount(n: number) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
@@ -717,6 +718,13 @@ export default function ProfilePage({ params }: { params: { username: string } }
           </div>
         </div>
       </div>
+
+      {/* ─── Post Composer (only on own profile) ────────────────────── */}
+      {isOwnProfile && (
+        <div className="mt-4 px-4">
+          <PostComposer onPostCreated={fetchPosts} />
+        </div>
+      )}
 
       {/* ─── Tabs ─── */}
       <div className="flex mt-4 px-4 border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
