@@ -20,7 +20,7 @@ export async function middleware(req: NextRequest) {
     "/signup",
     "/forgot-password",
     "/reset-password",
-    "/onboarding", // allow the onboarding page itself
+    "/onboarding",
   ];
 
   if (exemptPaths.some((p) => path.startsWith(p))) {
@@ -40,19 +40,27 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // ─── ONBOARDING CHECK ─────────────────────────────────────────────
+  // ─── GET TOKEN ─────────────────────────────────────────────────────
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  if (token) {
-    // If authenticated and onboarding not completed, redirect to /onboarding
-    if (token.onboardingCompleted === false) {
-      return NextResponse.redirect(new URL("/onboarding", req.url));
-    }
+
+  // ─── BANNED CHECK ──────────────────────────────────────────────────
+  if (token?.banned === true) {
+    const response = NextResponse.redirect(new URL("/login?error=banned", req.url));
+    // Clear the session cookie to force logout
+    response.cookies.delete("next-auth.session-token");
+    // Also clear any other next-auth cookies if needed (e.g., for secure/httponly)
+    response.cookies.delete("next-auth.csrf-token");
+    return response;
+  }
+
+  // ─── ONBOARDING CHECK ─────────────────────────────────────────────
+  if (token && token.onboardingCompleted === false) {
+    return NextResponse.redirect(new URL("/onboarding", req.url));
   }
 
   // ─── RATE LIMIT OTHER API ROUTES (if needed) ──────────────────
   if (path.startsWith("/api/") && !path.startsWith("/api/auth")) {
-    // If you want to rate limit other API routes, do it here.
-    // Otherwise just let them through.
+    // Add custom rate limiting if needed
     return NextResponse.next();
   }
 
