@@ -14,6 +14,38 @@ export async function GET(
     console.log("🔍 Looking for username:", params.username);
     console.log("🔍 Username length:", params.username.length);
 
+    // ─── Determine if requester is admin ────────────────────────────
+    const isAdmin = session?.user?.role === "ADMIN";
+
+    // ─── Build select object dynamically ────────────────────────────
+    const selectFields: any = {
+      id: true,
+      username: true,
+      name: true,
+      bio: true,
+      avatarUrl: true,
+      coverUrl: true,
+      location: true,
+      country: true,
+      website: true,
+      createdAt: true,
+      usernameChangedAt: true,
+      isPrivate: true,
+      badgeType: true,
+      isAdmin: true,
+      pinnedPostId: true,
+      _count: {
+        select: {
+          posts: true,
+          followers: true,
+          following: true,
+        },
+      },
+    };
+    if (isAdmin) {
+      selectFields.banned = true; // ✅ only for admins
+    }
+
     // ─── 1. Try Prisma's case‑insensitive lookup ──────────────────
     let user = await prisma.user.findFirst({
       where: {
@@ -22,30 +54,7 @@ export async function GET(
           mode: "insensitive",
         },
       },
-      select: {
-        id: true,
-        username: true,
-        name: true,
-        bio: true,
-        avatarUrl: true,
-        coverUrl: true,
-        location: true,
-        country: true,
-        website: true,
-        createdAt: true,
-        usernameChangedAt: true,
-        isPrivate: true,
-        badgeType: true,
-        isAdmin: true,
-        pinnedPostId: true,
-        _count: {
-          select: {
-            posts: true,
-            followers: true,
-            following: true,
-          },
-        },
-      },
+      select: selectFields,
     });
 
     // ─── 2. If not found, try raw SQL with ILIKE ──────────────────
@@ -68,11 +77,13 @@ export async function GET(
         badgeType: string | null;
         isAdmin: boolean;
         pinnedPostId: string | null;
+        banned: boolean; // ✅ added
       }>>`
         SELECT 
           id, username, name, bio, "avatarUrl", "coverUrl", 
           location, country, website, "createdAt", "usernameChangedAt", 
-          "isPrivate", "badgeType", "isAdmin", "pinnedPostId"
+          "isPrivate", "badgeType", "isAdmin", "pinnedPostId",
+          "banned"  -- ✅ added
         FROM "User"
         WHERE username ILIKE ${params.username}
         LIMIT 1
@@ -125,6 +136,10 @@ export async function GET(
           following: followingCount,
         },
       };
+      // Conditionally add banned for admin
+      if (isAdmin) {
+        (user as any).banned = raw.banned;
+      }
     }
 
     // ─── FOLLOW / BLOCK STATUS ──────────────────────────────────────
