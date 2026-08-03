@@ -150,6 +150,12 @@ export function initSocketServer(server: HTTPServer) {
         io?.to(`user:${receiverId}`).emit("message-deleted", { messageId });
       });
 
+      // ─── DELETE CONVERSATION ───────────────────────────────────────
+      socket.on("delete-conversation", ({ otherUserId, senderId }) => {
+        io?.to(`user:${otherUserId}`).emit("conversation-deleted", { withUserId: senderId });
+        io?.to(`user:${senderId}`).emit("conversation-deleted", { withUserId: otherUserId });
+      });
+
       // ─── Disconnect ──────────────────────────────────────────────
       socket.on("disconnect", () => {
         if (userId) {
