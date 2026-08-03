@@ -1,5 +1,5 @@
 import { prisma } from "./db";
-import { sendEmail } from "./email"; // Assumes you have a sendEmail function
+import { sendEmail } from "./email";
 
 interface CreateNotificationParams {
   userId: string;
@@ -8,15 +8,16 @@ interface CreateNotificationParams {
   postId?: string;
 }
 
-// ─── Default preferences (all true) ──────────────────────────────
 const defaultPreferences = {
   likes: true,
   comments: true,
   follows: true,
   reposts: true,
   mentions: true,
-  messages: true, // optional, but we include it for completeness
+  messages: true,
 };
+
+type Preferences = typeof defaultPreferences;
 
 export async function createNotification({
   userId,
@@ -27,9 +28,8 @@ export async function createNotification({
   if (userId === fromUserId) return;
 
   // ─── 1. Create in‑app notification (always) ──────────────────────
-  let notification;
   try {
-    notification = await prisma.notification.create({
+    await prisma.notification.create({
       data: {
         userId,
         type,
@@ -42,20 +42,20 @@ export async function createNotification({
     return;
   }
 
-  // ─── 2. Check email preferences ──────────────────────────────────
+  // ─── 2. Check email preferences and send email ────────────────────
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { email: true, name: true, emailPreferences: true },
     });
 
-    if (!user?.email) return; // No email to send
+    if (!user?.email) return; // no email to send
 
-    // Get preferences or fallback to defaults
-    const prefs = user.emailPreferences || defaultPreferences;
+    // Cast preferences to our type, fallback to defaults
+    const prefs = (user.emailPreferences || defaultPreferences) as Preferences;
 
     // Map notification type to preference key
-    const typeMap: Record<string, string> = {
+    const typeMap: Record<string, keyof Preferences> = {
       like: "likes",
       comment: "comments",
       follow: "follows",
@@ -68,7 +68,7 @@ export async function createNotification({
     // If user opted out, skip email
     if (prefs[prefKey] === false) return;
 
-    // ─── 3. Send email ──────────────────────────────────────────────
+    // ─── 3. Fetch sender info ──────────────────────────────────────
     const fromUser = await prisma.user.findUnique({
       where: { id: fromUserId },
       select: { name: true, username: true },
@@ -92,7 +92,6 @@ export async function createNotification({
 
     const subject = subjectMap[type] || "New notification from ZRP";
     const action = actionText[type] || "interacted with you";
-
     const postUrl = postId ? `${process.env.NEXT_PUBLIC_APP_URL}/post/${postId}` : null;
 
     const html = `
@@ -108,7 +107,7 @@ export async function createNotification({
       html,
     });
   } catch (error) {
-    // Log the error but don't fail – the in-app notification already exists.
+    // Log but don't fail – the in‑app notification already exists.
     console.error("Error sending email notification:", error);
   }
 }
