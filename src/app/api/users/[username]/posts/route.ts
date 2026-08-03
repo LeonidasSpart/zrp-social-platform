@@ -50,14 +50,12 @@ export async function GET(
       return NextResponse.json([]);
     }
 
-    // ─── Fetch posts with proper includes ───────────────────────────
-    const posts = await prisma.post.findMany({
+    // ─── Fetch original posts by this user ──────────────────────────
+    const originalPosts = await prisma.post.findMany({
       where: {
         authorId: profileOwner.id,
         status: "published",
       },
-      take: 20,
-      orderBy: { createdAt: "desc" },
       include: {
         author: {
           select: {
@@ -100,23 +98,110 @@ export async function GET(
       },
     });
 
-    // ─── Add liked status ────────────────────────────────────────────
-    if (viewerId) {
+    // ─── Fetch reposts by this user ──────────────────────────────────
+    const reposts = await prisma.repost.findMany({
+      where: {
+        userId: profileOwner.id,
+        post: {
+          status: "published",
+          authorId: { notIn: excludedAuthorIds }, // exclude reposts of blocked authors
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        post: {
+          include: {
+            author: {
+              select: {
+                id: true,
+                username: true,
+                name: true,
+                avatarUrl: true,
+                badgeType: true,
+              },
+            },
+            quotePost: {
+              include: {
+                author: {
+                  select: {
+                    id: true,
+                    username: true,
+                    name: true,
+                    avatarUrl: true,
+                    badgeType: true,
+                  },
+                },
+                _count: {
+                  select: {
+                    likes: true,
+                    comments: true,
+                    reposts: true,
+                    quotedBy: true,
+                  },
+                },
+              },
+            },
+            _count: {
+              select: {
+                likes: true,
+                comments: true,
+                reposts: true,
+                quotedBy: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // ─── Combine and transform ──────────────────────────────────────
+    const originalMapped = originalPosts.map(post => ({
+      ...post,
+      isRepost: false,
+      repostId: null,
+      repostedAt: null,
+      repostOriginalAuthor: null,
+    }));
+
+    const repostMapped = reposts.map(repost => ({
+      id: repost.post.id,
+      content: repost.post.content,
+      imageUrl: repost.post.imageUrl,
+      createdAt: repost.createdAt, // use repost creation time for sorting
+      updatedAt: repost.post.updatedAt,
+      views: repost.post.views,
+      author: repost.post.author,
+      _count: repost.post._count,
+      quotePost: repost.post.quotePost,
+      isRepost: true,
+      repostId: repost.id,
+      repostedAt: repost.createdAt,
+      repostOriginalAuthor: repost.post.author,
+    }));
+
+    // Combine and sort by createdAt descending
+    const combined = [...originalMapped, ...repostMapped].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    // ─── Add liked status for viewer ────────────────────────────────
+    if (viewerId && combined.length > 0) {
+      const postIds = combined.map(p => p.id);
       const likes = await prisma.like.findMany({
         where: {
           userId: viewerId,
-          postId: { in: posts.map((p) => p.id) },
+          postId: { in: postIds },
         },
       });
-      const likedIds = new Set(likes.map((l) => l.postId));
-      posts.forEach((p) => {
+      const likedIds = new Set(likes.map(l => l.postId));
+      combined.forEach(p => {
         (p as any).liked = likedIds.has(p.id);
       });
     }
 
-    return NextResponse.json(posts);
+    return NextResponse.json(combined);
   } catch (error) {
-    console.error("Error fetching profile posts:", error);
+    console.error("Error fetching profile posts with reposts:", error);
     return NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 });
   }
 }
