@@ -1,20 +1,4 @@
 /** @type {import('next').NextConfig} */
-
-const withPWA = require('next-pwa')({
-  dest: 'public', // where the generated service worker and workbox files will go
-  register: true, // auto‑register the service worker
-  skipWaiting: true, // force update on new version
-  disable: process.env.NODE_ENV === 'development', // disable in dev
-  sw: 'sw.js', // use your custom sw.js (we keep your existing one)
-  custom: true, // tells next-pwa not to overwrite your custom sw.js
-  // If you want workbox to handle caching automatically, you can remove `custom: true`
-  // and it will generate a default sw.js with workbox. But you'll lose your custom
-  // push notification logic. Since you already have a solid sw.js, keep `custom: true`.
-  // Additional options:
-  // scope: '/',
-  // runtimeCaching: [ ... ], // define custom caching strategies
-});
-
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -70,4 +54,4 @@ const nextConfig = {
   poweredByHeader: false,
 };
 
-module.exports = withPWA(nextConfig);
+module.exports = nextConfig;
