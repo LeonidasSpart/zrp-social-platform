@@ -168,3 +168,6 @@ export function initSocketServer(server: HTTPServer) {
   }
   return io;
 }
+
+// ─── Export io for use in other modules ──────────────────────────
+export { io };
