@@ -1,5 +1,5 @@
 import { prisma } from "./db";
-import { sendEmail } from "./email";
+import { sendEmail, buildNotificationEmail } from "./email";
 
 interface CreateNotificationParams {
   userId: string;
@@ -51,10 +51,7 @@ export async function createNotification({
 
     if (!user?.email) return; // no email to send
 
-    // Cast preferences to our type, fallback to defaults
     const prefs = (user.emailPreferences || defaultPreferences) as Preferences;
-
-    // Map notification type to preference key
     const typeMap: Record<string, keyof Preferences> = {
       like: "likes",
       comment: "comments",
@@ -63,44 +60,61 @@ export async function createNotification({
       mention: "mentions",
     };
     const prefKey = typeMap[type];
-    if (!prefKey) return; // unknown type
+    if (!prefKey || prefs[prefKey] === false) return;
 
-    // If user opted out, skip email
-    if (prefs[prefKey] === false) return;
-
-    // ─── 3. Fetch sender info ──────────────────────────────────────
+    // ─── 3. Fetch actor info ──────────────────────────────────────
     const fromUser = await prisma.user.findUnique({
       where: { id: fromUserId },
       select: { name: true, username: true },
     });
 
+    const actorName = fromUser?.name || fromUser?.username || "Someone";
+    const actorUsername = fromUser?.username || "unknown";
+
+    // ─── 4. Define action & emoji per type ──────────────────────────
+    const actionMap: Record<string, { action: string; emoji: string }> = {
+      like: { action: "liked your post", emoji: "❤️" },
+      comment: { action: "commented on your post", emoji: "💬" },
+      follow: { action: "started following you", emoji: "👋" },
+      repost: { action: "reposted your post", emoji: "🔄" },
+      mention: { action: "mentioned you in a post", emoji: "📝" },
+    };
+    const { action, emoji } = actionMap[type] || { action: "interacted with you", emoji: "🔔" };
+
+    // ─── 5. Fetch post content (if applicable) ──────────────────────
+    let postContent = "";
+    if (postId) {
+      const post = await prisma.post.findUnique({
+        where: { id: postId },
+        select: { content: true },
+      });
+      if (post) postContent = post.content;
+    }
+
+    const postUrl = postId ? `${process.env.NEXTAUTH_URL}/post/${postId}` : undefined;
+
+    // ─── 6. Build professional email HTML ──────────────────────────
+    const html = buildNotificationEmail({
+      recipientName: user.name || "there",
+      actorName,
+      actorUsername,
+      action,
+      postContent,
+      postUrl,
+      actionEmoji: emoji,
+    });
+
+    // ─── 7. Subject ──────────────────────────────────────────────────
     const subjectMap: Record<string, string> = {
-      like: `${fromUser?.name || "Someone"} liked your post`,
-      comment: `${fromUser?.name || "Someone"} commented on your post`,
-      follow: `${fromUser?.name || "Someone"} started following you`,
-      repost: `${fromUser?.name || "Someone"} reposted your post`,
-      mention: `${fromUser?.name || "Someone"} mentioned you in a post`,
+      like: `${actorName} liked your post`,
+      comment: `${actorName} commented on your post`,
+      follow: `${actorName} started following you`,
+      repost: `${actorName} reposted your post`,
+      mention: `${actorName} mentioned you in a post`,
     };
-
-    const actionText: Record<string, string> = {
-      like: "liked your post",
-      comment: "commented on your post",
-      follow: "started following you",
-      repost: "reposted your post",
-      mention: "mentioned you in a post",
-    };
-
     const subject = subjectMap[type] || "New notification from ZRP";
-    const action = actionText[type] || "interacted with you";
-    const postUrl = postId ? `${process.env.NEXT_PUBLIC_APP_URL}/post/${postId}` : null;
 
-    const html = `
-      <h2>Hello ${user.name || "there"}!</h2>
-      <p><strong>${fromUser?.name || "Someone"}</strong> (${fromUser?.username || "unknown"}) ${action}.</p>
-      ${postUrl ? `<p><a href="${postUrl}">View it here</a></p>` : ""}
-      <p style="color:#888;font-size:12px;">You received this email because you have notifications enabled. To change your preferences, visit your <a href="${process.env.NEXT_PUBLIC_APP_URL}/settings">settings</a>.</p>
-    `;
-
+    // ─── 8. Send email ──────────────────────────────────────────────
     await sendEmail({
       to: user.email,
       subject,
