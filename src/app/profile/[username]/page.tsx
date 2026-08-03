@@ -6,10 +6,12 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import {
   MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff,
-  Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck, Share2
+  Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck, Share2,
+  Eye // ✅ for Analytics tab icon
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import AnalyticsTab from "@/components/AnalyticsTab"; // ✅ import AnalyticsTab
 
 function formatProfileCount(n: number) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
@@ -67,7 +69,8 @@ interface Post {
   };
 }
 
-type TabType = "posts" | "replies" | "media" | "likes";
+// ✅ Add "analytics" to TabType
+type TabType = "posts" | "replies" | "media" | "likes" | "analytics";
 
 export default function ProfilePage({ params }: { params: { username: string } }) {
   const { data: session, status } = useSession();
@@ -90,6 +93,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const fetchProfile = async () => {
     try {
       const res = await fetch(`/api/users/${params.username}`);
+      // ✅ Handle 404 properly – prevents client crash
+      if (!res.ok) {
+        setProfile(null);
+        return;
+      }
       const data = await res.json();
       setProfile(data);
       setIsFollowing(data.isFollowing || false);
@@ -100,6 +108,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
+      setProfile(null);
     }
   };
 
@@ -561,23 +570,34 @@ export default function ProfilePage({ params }: { params: { username: string } }
       </div>
 
       {/* ─── Tabs ─── */}
-      <div className="flex mt-4 px-4 border-b border-gray-200 dark:border-gray-800">
-        {(["posts", "replies", "media", "likes"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`relative flex-1 py-3 text-sm font-medium transition hover:bg-gray-50 dark:hover:bg-gray-800/50 ${
-              activeTab === tab
-                ? "text-gray-900 dark:text-white"
-                : "text-gray-500 dark:text-gray-400"
-            }`}
-          >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            {activeTab === tab && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-1 bg-zrp-red rounded-full" />
-            )}
-          </button>
-        ))}
+      <div className="flex mt-4 px-4 border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
+        {(["posts", "replies", "media", "likes", "analytics"] as const).map((tab) => {
+          // Only show Analytics tab for the profile owner
+          if (tab === "analytics" && !isOwnProfile) return null;
+          return (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`relative flex-1 py-3 text-sm font-medium transition hover:bg-gray-50 dark:hover:bg-gray-800/50 whitespace-nowrap ${
+                activeTab === tab
+                  ? "text-gray-900 dark:text-white"
+                  : "text-gray-500 dark:text-gray-400"
+              }`}
+            >
+              {tab === "analytics" ? (
+                <span className="flex items-center justify-center gap-1">
+                  <Eye className="w-4 h-4" />
+                  Analytics
+                </span>
+              ) : (
+                tab.charAt(0).toUpperCase() + tab.slice(1)
+              )}
+              {activeTab === tab && (
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-1 bg-zrp-red rounded-full" />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* ─── Content ─── */}
@@ -586,6 +606,9 @@ export default function ProfilePage({ params }: { params: { username: string } }
           <div className="flex justify-center py-8">
             <Loader2 className="w-6 h-6 animate-spin text-zrp-red" />
           </div>
+        ) : activeTab === "analytics" ? (
+          // ✅ Analytics Tab
+          <AnalyticsTab userId={profile.id} />
         ) : posts.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <p>No {activeTab} yet.</p>
