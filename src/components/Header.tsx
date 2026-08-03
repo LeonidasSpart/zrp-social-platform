@@ -8,6 +8,7 @@ import { Home, Compass, Search, MessageSquare, Bell, User, Sun, Moon, Menu, X, L
 import { useTheme } from "@/contexts/ThemeContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SUPPORTED_LANGUAGES } from "@/lib/translations";
+import { getSocket } from "@/lib/socket-client";
 
 // ─── Type for navigation items ──────────────────────────────────────
 type NavItem = {
@@ -61,6 +62,21 @@ export default function Header() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // ─── Socket listener for block updates ──────────────────────────
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    const socket = getSocket(session.user.id);
+    socket.on("block-updated", ({ blockerId, blockedId }) => {
+      if (blockerId === session.user.id) {
+        // Refresh the page to update feeds
+        window.location.reload();
+      }
+    });
+    return () => {
+      socket.off("block-updated");
+    };
+  }, [session]);
 
   // ─── Public nav links ──────────────────────────────────────────────
   const publicNavLinks: NavItem[] = [
