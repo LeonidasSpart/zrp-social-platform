@@ -21,28 +21,31 @@ export async function GET(req: NextRequest) {
     const cursor = req.nextUrl.searchParams.get("cursor");
     const limit = parseInt(req.nextUrl.searchParams.get("limit") || "10");
 
-    // ─── Get blocked users ──────────────────────────────────────────
-    let blockedIds: string[] = [];
+    // ─── Get users to exclude (blocked + blockers) ──────────────────
+    let excludedAuthorIds: string[] = [];
     if (session?.user?.id) {
-      const blocked = await prisma.blocked.findMany({
-        where: { blockerId: session.user.id },
-        select: { blockedId: true },
-      });
-      blockedIds = blocked.map((b) => b.blockedId);
-    }
+      const [blocked, blockers] = await Promise.all([
+        prisma.blocked.findMany({
+          where: { blockerId: session.user.id },
+          select: { blockedId: true },
+        }),
+        prisma.blocked.findMany({
+          where: { blockedId: session.user.id },
+          select: { blockerId: true },
+        }),
+      ]);
+      const blockedIds = blocked.map((b) => b.blockedId);
+      const blockerIds = blockers.map((b) => b.blockerId);
+      excludedAuthorIds = [...blockedIds, ...blockerIds];
 
-    // ─── Get muted users ─────────────────────────────────────────────
-    let mutedIds: string[] = [];
-    if (session?.user?.id) {
+      // ─── Also get muted users ──────────────────────────────────────
       const muted = await prisma.mute.findMany({
         where: { muterId: session.user.id },
         select: { mutedId: true },
       });
-      mutedIds = muted.map((m) => m.mutedId);
+      const mutedIds = muted.map((m) => m.mutedId);
+      excludedAuthorIds = [...excludedAuthorIds, ...mutedIds];
     }
-
-    // ─── Combine blocked + muted for filtering ──────────────────────
-    const excludedAuthorIds = [...blockedIds, ...mutedIds];
 
     // ─── Fetch posts ─────────────────────────────────────────────────
     const posts = await prisma.post.findMany({
