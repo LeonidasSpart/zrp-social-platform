@@ -1,5 +1,5 @@
 // public/sw.js
-const CACHE_NAME = 'zrp-v1';
+const CACHE_NAME = 'zrp-v2'; // ✅ Incremented version to force update
 const STATIC_ASSETS = [
   '/',
   '/favicon.ico',
