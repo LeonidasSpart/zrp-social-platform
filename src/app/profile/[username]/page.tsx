@@ -7,7 +7,7 @@ import Link from "next/link";
 import {
   MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff,
   Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck, Share2,
-  Eye, Bell, BellOff // ← added Bell and BellOff for mute
+  Eye, Bell, BellOff, Ban, BanOff // ← added Ban and BanOff for block
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -38,6 +38,7 @@ interface UserProfile {
   };
   pinnedPostId: string | null;
   isFollowing: boolean;
+  isBlocked: boolean; // ✅ added
 }
 
 interface Post {
@@ -83,16 +84,21 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+
   // ─── MUTE STATE ──────────────────────────────────────────────────────
   const [isMuted, setIsMuted] = useState(false);
   const [muteLoading, setMuteLoading] = useState(false);
+
+  // ─── BLOCK STATE ──────────────────────────────────────────────────────
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockLoading, setBlockLoading] = useState(false);
 
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const isOwnProfile = session?.user?.id === profile?.id;
 
-  // ─── Fetch profile & follow & mute status ──────────────────────────
+  // ─── Fetch profile & follow & mute & block status ──────────────────
   const fetchProfile = async () => {
     try {
       const res = await fetch(`/api/users/${params.username}`);
@@ -103,6 +109,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
       const data = await res.json();
       setProfile(data);
       setIsFollowing(data.isFollowing || false);
+      setIsBlocked(data.isBlocked || false);
       if (data.pinnedPostId) {
         fetchPinnedPost(data.pinnedPostId);
       } else {
@@ -227,6 +234,33 @@ export default function ProfilePage({ params }: { params: { username: string } }
       alert("Failed to toggle mute");
     } finally {
       setMuteLoading(false);
+    }
+  };
+
+  // ─── Block / Unblock ──────────────────────────────────────────────────
+  const handleBlock = async () => {
+    if (!session || isOwnProfile || !profile) return;
+    setBlockLoading(true);
+    try {
+      const method = isBlocked ? "DELETE" : "POST";
+      const res = await fetch(`/api/users/${profile.username}/block`, {
+        method: method,
+        headers: { "Content-Type": "application/json" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setIsBlocked(data.blocked);
+        // Refresh profile to update follower counts etc.
+        fetchProfile();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to toggle block");
+      }
+    } catch (error) {
+      console.error("Block error:", error);
+      alert("Failed to toggle block");
+    } finally {
+      setBlockLoading(false);
     }
   };
 
@@ -549,6 +583,32 @@ export default function ProfilePage({ params }: { params: { username: string } }
                     <>
                       <Bell className="w-4 h-4" />
                       <span className="hidden sm:inline">Mute</span>
+                    </>
+                  )}
+                </button>
+
+                {/* ─── BLOCK BUTTON ─────────────────────────────────── */}
+                <button
+                  onClick={handleBlock}
+                  disabled={blockLoading}
+                  className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap border ${
+                    isBlocked
+                      ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600"
+                      : "bg-transparent border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
+                  title={isBlocked ? "Unblock user" : "Block user"}
+                >
+                  {blockLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : isBlocked ? (
+                    <>
+                      <BanOff className="w-4 h-4" />
+                      <span className="hidden sm:inline">Unblock</span>
+                    </>
+                  ) : (
+                    <>
+                      <Ban className="w-4 h-4" />
+                      <span className="hidden sm:inline">Block</span>
                     </>
                   )}
                 </button>
