@@ -13,7 +13,6 @@ export async function GET(
     // ─── DEBUG: Log the incoming username ──────────────────────────
     console.log("🔍 Looking for username:", params.username);
     console.log("🔍 Username length:", params.username.length);
-    console.log("🔍 Username char codes:", [...params.username].map(c => c.charCodeAt(0)));
 
     // ─── 1. Try Prisma's case‑insensitive lookup ──────────────────
     let user = await prisma.user.findFirst({
@@ -83,7 +82,6 @@ export async function GET(
       if (users.length > 0) {
         console.log("🔍 Found user in raw SQL:", users[0].username);
         console.log("🔍 Raw username length:", users[0].username.length);
-        console.log("🔍 Raw username char codes:", [...users[0].username].map(c => c.charCodeAt(0)));
       }
 
       if (users.length === 0) {
