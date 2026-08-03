@@ -19,6 +19,7 @@ interface PostCardProps {
     content: string;
     imageUrl?: string;
     createdAt: string;
+    updatedAt?: string;
     views?: number;
     author: {
       id: string;
@@ -33,6 +34,13 @@ interface PostCardProps {
       reposts: number;
     };
     liked?: boolean;
+    isRepost?: boolean;
+    repostOriginalAuthor?: {
+      id: string;
+      username: string;
+      name: string;
+    } | null;
+    repostId?: string | null;
   };
   onUpdate: () => void;
   showPinOption?: boolean;
@@ -110,6 +118,8 @@ export default function PostCard({
 
   const isAuthor = session?.user?.id === post.author.id;
   const contentParts = parseContent(post.content);
+  const isRepost = post.isRepost === true;
+  const originalAuthor = post.repostOriginalAuthor;
 
   // ─── FETCH REACTIONS ──────────────────────────────────────────────
   const fetchReactions = async () => {
@@ -122,7 +132,6 @@ export default function PostCard({
           return acc;
         }, {});
         setReactions(counts);
-        // Find user's own reaction (single emoji)
         const ownReaction = data.find((r: any) => r.user.id === session?.user?.id)?.emoji || null;
         setUserReaction(ownReaction);
       }
@@ -450,6 +459,22 @@ export default function PostCard({
                 </button>
               )}
             </div>
+
+            {/* ─── REPOSTED FROM LABEL ──────────────────────────────── */}
+            {isRepost && originalAuthor && (
+              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <Repeat className="w-3 h-3" />
+                <span>
+                  Reposted from{" "}
+                  <Link
+                    href={`/profile/${originalAuthor.username}`}
+                    className="hover:underline text-zrp-red"
+                  >
+                    @{originalAuthor.username}
+                  </Link>
+                </span>
+              </div>
+            )}
 
             {/* ─── POST CONTENT WITH DOUBLE‑CLICK TO LIKE ──────────── */}
             <div
