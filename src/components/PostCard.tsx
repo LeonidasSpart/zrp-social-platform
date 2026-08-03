@@ -4,13 +4,14 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag,
-  Bookmark, BarChart3, Pin, PinOff, X, ZoomIn
+  Bookmark, BarChart3, Pin, PinOff, X, ZoomIn, Plus
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Comments from "./Comments";
 import EditPostModal from "./EditPostModal";
 import ReportModal from "./ReportModal";
 import VerifiedBadge from "./VerifiedBadge";
+import EmojiPicker from "emoji-picker-react";
 
 interface PostCardProps {
   post: {
@@ -103,8 +104,9 @@ export default function PostCard({
 
   // ─── EMOJI REACTIONS ──────────────────────────────────────────────
   const [reactions, setReactions] = useState<Record<string, number>>({});
-  const [userReactions, setUserReactions] = useState<string[]>([]);
+  const [userReaction, setUserReaction] = useState<string | null>(null);
   const [reactionsLoading, setReactionsLoading] = useState(true);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const isAuthor = session?.user?.id === post.author.id;
   const contentParts = parseContent(post.content);
@@ -120,10 +122,9 @@ export default function PostCard({
           return acc;
         }, {});
         setReactions(counts);
-        const userEmojis = data
-          .filter((r: any) => r.user.id === session?.user?.id)
-          .map((r: any) => r.emoji);
-        setUserReactions(userEmojis);
+        // Find user's own reaction (single emoji)
+        const ownReaction = data.find((r: any) => r.user.id === session?.user?.id)?.emoji || null;
+        setUserReaction(ownReaction);
       }
     } catch (error) {
       console.error("Error fetching reactions:", error);
@@ -136,7 +137,7 @@ export default function PostCard({
     if (session) fetchReactions();
   }, [post.id, session]);
 
-  // ─── HANDLE REACTION ──────────────────────────────────────────────
+  // ─── HANDLE REACTION (toggle) ──────────────────────────────────────
   const handleReaction = async (emoji: string) => {
     if (!session) return;
     try {
@@ -146,8 +147,8 @@ export default function PostCard({
         body: JSON.stringify({ emoji }),
       });
       if (res.ok) {
-        // Re‑fetch reactions to update counts
         await fetchReactions();
+        setShowEmojiPicker(false);
       }
     } catch (error) {
       console.error("Error toggling reaction:", error);
@@ -346,7 +347,6 @@ export default function PostCard({
     }
   };
 
-  // Touch version for mobile
   let lastTouchTime = 0;
   const handleTouchEnd = () => {
     const now = Date.now();
@@ -562,32 +562,36 @@ export default function PostCard({
               </button>
             </div>
 
-            {/* ─── EMOJI REACTIONS ──────────────────────────────────── */}
+            {/* ─── REACTIONS ────────────────────────────────────────── */}
             {!reactionsLoading && (
               <div className="flex items-center gap-2 mt-2 flex-wrap">
-                {["❤️", "🔥", "😢", "😂", "😡", "👍"].map((emoji) => {
-                  const count = reactions[emoji] || 0;
-                  const isActive = userReactions.includes(emoji);
-                  return (
+                {Object.entries(reactions)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([emoji, count]) => (
                     <button
                       key={emoji}
                       onClick={() => handleReaction(emoji)}
                       className={`text-sm px-2 py-1 rounded-full border transition ${
-                        isActive
+                        userReaction === emoji
                           ? "bg-zrp-red/10 border-zrp-red text-zrp-red"
                           : "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
                       }`}
                     >
-                      {emoji} {count > 0 && <span className="ml-1 text-xs">{count}</span>}
+                      {emoji} <span className="ml-1 text-xs">{count}</span>
                     </button>
-                  );
-                })}
+                  ))}
+                {/* ─── ADD REACTION BUTTON ──────────────────────────── */}
+                <button
+                  onClick={() => setShowEmojiPicker(true)}
+                  className="text-sm px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                  title="Add reaction"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
               </div>
             )}
 
-            {showComments && (
-              <Comments postId={post.id} onCommentAdded={onUpdate} />
-            )}
+            {showComments && <Comments postId={post.id} onCommentAdded={onUpdate} />}
           </div>
         </div>
       </div>
@@ -652,6 +656,34 @@ export default function PostCard({
             >
               <X className="w-6 h-6" />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ─── EMOJI PICKER ──────────────────────────────────────────── */}
+      {showEmojiPicker && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center bg-black/40"
+          onClick={() => setShowEmojiPicker(false)}
+        >
+          <div
+            className="w-full sm:w-auto max-h-[70vh] sm:max-h-[80vh] overflow-hidden rounded-t-2xl sm:rounded-xl bg-white dark:bg-zrp-deepBlack shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-end p-2 border-b border-gray-200 dark:border-gray-700">
+              <button
+                type="button"
+                onClick={() => setShowEmojiPicker(false)}
+                className="p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <EmojiPicker
+              onEmojiClick={(emoji) => handleReaction(emoji.emoji)}
+              width="100%"
+              height={380}
+            />
           </div>
         </div>
       )}
