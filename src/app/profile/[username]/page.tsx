@@ -7,7 +7,7 @@ import Link from "next/link";
 import {
   MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff,
   Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck, Share2,
-  Eye, Bell, BellOff, Ban, BanOff // ← added Ban and BanOff for block
+  Eye, Bell, BellOff, Ban, CheckCircle // ✅ Ban for block, CheckCircle for unblock
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -593,8 +593,8 @@ export default function ProfilePage({ params }: { params: { username: string } }
                   disabled={blockLoading}
                   className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap border ${
                     isBlocked
-                      ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600"
-                      : "bg-transparent border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30"
+                      : "bg-transparent border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700"
                   }`}
                   title={isBlocked ? "Unblock user" : "Block user"}
                 >
@@ -602,7 +602,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : isBlocked ? (
                     <>
-                      <BanOff className="w-4 h-4" />
+                      <CheckCircle className="w-4 h-4" />
                       <span className="hidden sm:inline">Unblock</span>
                     </>
                   ) : (
