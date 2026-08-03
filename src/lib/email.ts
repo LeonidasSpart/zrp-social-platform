@@ -32,6 +32,215 @@ export async function sendEmail({
   }
 }
 
+// ─── Professional notification email template ──────────────────────
+export function buildNotificationEmail({
+  recipientName,
+  actorName,
+  actorUsername,
+  action,
+  postContent,
+  postUrl,
+  actionEmoji = '🔔',
+}: {
+  recipientName: string;
+  actorName: string;
+  actorUsername: string;
+  action: string;
+  postContent?: string;
+  postUrl?: string;
+  actionEmoji?: string;
+}) {
+  const appUrl = process.env.NEXTAUTH_URL || 'https://zrp.one';
+  const settingsUrl = `${appUrl}/settings`;
+  const logoUrl = `${appUrl}/logo.png`;
+
+  const truncatedContent = postContent && postContent.length > 120
+    ? postContent.slice(0, 120) + '…'
+    : postContent;
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notification from ZRP</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f6f9fc;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .header {
+      text-align: center;
+      padding: 20px 0 10px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    .header img {
+      height: 40px;
+      width: auto;
+    }
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 8px 0 0;
+      letter-spacing: -0.5px;
+    }
+    .content {
+      padding: 24px 20px 20px;
+    }
+    .greeting {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 12px;
+      color: #0f172a;
+    }
+    .notification-box {
+      background-color: #f8fafc;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      border-left: 4px solid #FF2D2D;
+    }
+    .notification-box .emoji {
+      font-size: 28px;
+      margin-right: 8px;
+    }
+    .notification-box .action-text {
+      font-size: 15px;
+      color: #1e293b;
+      line-height: 1.5;
+    }
+    .notification-box .action-text strong {
+      color: #0f172a;
+    }
+    .notification-box .post-preview {
+      margin-top: 10px;
+      padding: 12px 16px;
+      background-color: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      color: #334155;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .cta-button {
+      display: inline-block;
+      background-color: #FF2D2D;
+      color: #ffffff !important;
+      text-decoration: none;
+      padding: 12px 28px;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 15px;
+      margin: 20px 0 8px;
+      transition: background-color 0.2s;
+      text-align: center;
+    }
+    .cta-button:hover {
+      background-color: #e02424;
+    }
+    .footer {
+      padding: 20px 20px 10px;
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    .footer a {
+      color: #FF2D2D;
+      text-decoration: none;
+    }
+    .footer .charity {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #64748b;
+    }
+    .footer .charity strong {
+      color: #FF2D2D;
+    }
+    @media (max-width: 480px) {
+      .container { padding: 12px; }
+      .content { padding: 16px 12px; }
+      .notification-box { padding: 12px 16px; }
+      .cta-button { display: block; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div style="max-width:600px; margin:0 auto; padding:20px 10px; background-color:#f6f9fc;">
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <img src="${logoUrl}" alt="ZRP" style="height:40px; width:auto;" />
+        <h1>ZRP Social</h1>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <p class="greeting">Hello ${recipientName || 'there'},</p>
+
+        <div class="notification-box">
+          <div style="display:flex; align-items:flex-start;">
+            <span class="emoji">${actionEmoji}</span>
+            <div>
+              <div class="action-text">
+                <strong>${actorName}</strong> <span style="color:#64748b;">(@${actorUsername})</span> ${action}.
+              </div>
+              ${truncatedContent ? `
+                <div class="post-preview">
+                  “${truncatedContent}”
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+
+        ${postUrl ? `
+          <div style="text-align:center; margin: 16px 0 8px;">
+            <a href="${postUrl}" class="cta-button">View it here</a>
+          </div>
+        ` : ''}
+
+        <p style="font-size:14px; color:#64748b; margin-top:20px; text-align:center;">
+          You received this email because you have notifications enabled.
+          <br/>
+          <a href="${settingsUrl}" style="color:#FF2D2D; text-decoration:underline;">Manage your preferences</a>
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>
+          <a href="${appUrl}">ZRP Social</a> · 
+          <a href="${appUrl}/privacy">Privacy</a> · 
+          <a href="${appUrl}/terms">Terms</a>
+        </p>
+        <div class="charity">
+          <strong>35%</strong> of profits go to orphans, schools, hospitals & climate relief.
+        </div>
+        <p style="margin-top:8px; font-size:12px; color:#cbd5e1;">
+          &copy; ${new Date().getFullYear()} ZRP. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+}
+
 // ─── Verification Email ──────────────────────────────────────────────
 export async function sendVerificationEmail(email: string, token: string) {
   const baseUrl = process.env.NEXTAUTH_URL;
