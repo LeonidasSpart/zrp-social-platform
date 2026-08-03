@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
+// ─── POST – Block a user ────────────────────────────────────────────
 export async function POST(
   req: NextRequest,
   { params }: { params: { username: string } }
@@ -61,5 +62,56 @@ export async function POST(
   } catch (error) {
     console.error("Block error:", error);
     return NextResponse.json({ error: "Failed to toggle block" }, { status: 500 });
+  }
+}
+
+// ─── DELETE – Unblock a user ────────────────────────────────────────
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { username: string } }
+) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const blockerId = session.user.id;
+
+  try {
+    const userToUnblock = await prisma.user.findUnique({
+      where: { username: params.username },
+      select: { id: true },
+    });
+
+    if (!userToUnblock) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const existingBlock = await prisma.blocked.findUnique({
+      where: {
+        blockerId_blockedId: {
+          blockerId,
+          blockedId: userToUnblock.id,
+        },
+      },
+    });
+
+    if (!existingBlock) {
+      return NextResponse.json({ error: "User is not blocked" }, { status: 404 });
+    }
+
+    await prisma.blocked.delete({
+      where: {
+        blockerId_blockedId: {
+          blockerId,
+          blockedId: userToUnblock.id,
+        },
+      },
+    });
+
+    return NextResponse.json({ blocked: false });
+  } catch (error) {
+    console.error("Unblock error:", error);
+    return NextResponse.json({ error: "Failed to unblock user" }, { status: 500 });
   }
 }
