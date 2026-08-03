@@ -4,6 +4,32 @@ import { prisma } from "./db";
 
 let io: SocketServer | null = null;
 
+// ─── Track online users ──────────────────────────────────────────────
+const userConnections = new Map<string, number>(); // userId -> connection count
+
+function setUserOnline(userId: string) {
+  const count = userConnections.get(userId) || 0;
+  userConnections.set(userId, count + 1);
+  // Broadcast online only if it was previously offline
+  if (count === 0) {
+    io?.emit("user-status", { userId, status: "online" });
+  }
+}
+
+function setUserOffline(userId: string) {
+  const count = userConnections.get(userId) || 0;
+  if (count <= 1) {
+    userConnections.delete(userId);
+    io?.emit("user-status", { userId, status: "offline" });
+  } else {
+    userConnections.set(userId, count - 1);
+  }
+}
+
+function isUserOnline(userId: string): boolean {
+  return userConnections.has(userId) && userConnections.get(userId)! > 0;
+}
+
 export function initSocketServer(server: HTTPServer) {
   if (!io) {
     io = new SocketServer(server, {
@@ -21,7 +47,15 @@ export function initSocketServer(server: HTTPServer) {
       const userId = socket.handshake.auth.userId;
       if (userId) {
         socket.join(`user:${userId}`);
+        setUserOnline(userId);
+        console.log(`✅ User ${userId} online (${userConnections.get(userId)} connections)`);
       }
+
+      // ─── Request status for a specific user ──────────────────────
+      socket.on("get-status", (targetUserId: string) => {
+        const online = isUserOnline(targetUserId);
+        socket.emit("user-status", { userId: targetUserId, status: online ? "online" : "offline" });
+      });
 
       // ─── Send message ──────────────────────────────────────────────
       socket.on("send-message", async (data) => {
@@ -111,7 +145,12 @@ export function initSocketServer(server: HTTPServer) {
         io?.to(`user:${receiverId}`).emit("call-ended");
       });
 
+      // ─── Disconnect ──────────────────────────────────────────────
       socket.on("disconnect", () => {
+        if (userId) {
+          setUserOffline(userId);
+          console.log(`🔌 User ${userId} offline (${userConnections.get(userId) || 0} connections)`);
+        }
         console.log("Socket disconnected:", socket.id);
       });
     });
