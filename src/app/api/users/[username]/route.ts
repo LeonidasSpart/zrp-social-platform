@@ -85,7 +85,7 @@ export async function GET(
         prisma.follow.count({ where: { followerId: raw.id } }),
       ]);
 
-      // Re‑build the user object to match the expected shape
+      // Re‑build the user object to match the expected shape (createdAt as Date)
       user = {
         id: raw.id,
         username: raw.username,
@@ -96,8 +96,8 @@ export async function GET(
         location: raw.location,
         country: raw.country,
         website: raw.website,
-        createdAt: raw.createdAt.toISOString(),
-        usernameChangedAt: raw.usernameChangedAt?.toISOString() || null,
+        createdAt: raw.createdAt,          // Date, not string
+        usernameChangedAt: raw.usernameChangedAt, // Date | null
         isPrivate: raw.isPrivate,
         badgeType: raw.badgeType,
         isAdmin: raw.isAdmin,
