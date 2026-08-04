@@ -4,7 +4,7 @@ import { signIn } from "next-auth/react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import PasswordInput from "@/components/PasswordInput"; // ✅ added
+import PasswordInput from "@/components/PasswordInput";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
@@ -33,7 +33,8 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError("Invalid email or password");
+        // ✅ Show the actual error from the server
+        setError(result.error);
         setLoading(false);
       } else {
         window.location.href = "/";
@@ -59,11 +60,26 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className={`p-3 rounded-lg text-sm ${
-                error.includes("banned")
+                error.includes("verify") || error.includes("verification")
+                  ? "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800"
+                  : error.includes("banned")
                   ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
                   : "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
               }`}>
                 {error}
+                {error.includes("verify") && (
+                  <div className="mt-2">
+                    <Link
+                      href="/forgot-password"
+                      className="text-blue-600 dark:text-blue-400 underline text-sm hover:text-blue-800 dark:hover:text-blue-300"
+                    >
+                      Resend verification email
+                    </Link>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Didn't receive the email? Check your spam folder or click the link above.
+                    </p>
+                  </div>
+                )}
                 {error.includes("banned") && (
                   <div className="mt-2">
                     <a
@@ -115,7 +131,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-zrp-red dark:hover:bg-zrp-darkRed text-white py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               {loading ? "Signing in..." : "Sign in"}
             </button>
