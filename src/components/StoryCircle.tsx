@@ -1,13 +1,13 @@
-import Image from "next/image";
 import Link from "next/link";
 
 interface Props {
   user: { id: string; username: string; name: string; avatarUrl?: string | null };
   hasUnseen: boolean;
   onClick: () => void;
+  storyPreview?: string | null; // 👈 new prop
 }
 
-export default function StoryCircle({ user, hasUnseen, onClick }: Props) {
+export default function StoryCircle({ user, hasUnseen, onClick, storyPreview }: Props) {
   return (
     <button
       onClick={onClick}
@@ -15,12 +15,16 @@ export default function StoryCircle({ user, hasUnseen, onClick }: Props) {
     >
       <div className={`w-16 h-16 rounded-full p-[2px] ${hasUnseen ? "bg-gradient-to-tr from-yellow-400 to-pink-500" : "bg-gray-300 dark:bg-gray-600"}`}>
         <div className="w-full h-full rounded-full bg-white dark:bg-gray-800 overflow-hidden">
-          {user.avatarUrl ? (
-            <Image
+          {storyPreview ? (
+            <img
+              src={storyPreview}
+              alt={user.name || user.username}
+              className="w-full h-full object-cover"
+            />
+          ) : user.avatarUrl ? (
+            <img
               src={user.avatarUrl}
               alt={user.name || user.username}
-              width={64}
-              height={64}
               className="w-full h-full object-cover"
             />
           ) : (
