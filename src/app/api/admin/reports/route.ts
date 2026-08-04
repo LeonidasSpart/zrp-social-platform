@@ -1,20 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/admin";
-import { prisma } from "@/lib/db";
-import { Prisma } from "@prisma/client";
+// src/app/api/admin/reports/route.ts – updated section
 
 export async function GET(req: NextRequest) {
   const adminCheck = await requireAdmin();
   if (!adminCheck.authorized) return adminCheck.response;
 
-  const status = req.nextUrl.searchParams.get("status") || "pending";
+  const statusParam = req.nextUrl.searchParams.get("status") || "pending";
   const page = parseInt(req.nextUrl.searchParams.get("page") || "1");
   const limit = parseInt(req.nextUrl.searchParams.get("limit") || "20");
 
   try {
     const where: Prisma.ReportWhereInput = {};
-    if (status) {
-      where.status = status;
+    // Only apply status filter if it's NOT "all"
+    if (statusParam !== "all") {
+      where.status = statusParam as any; // valid enum: pending, reviewed, dismissed
     }
 
     const [reports, total] = await Promise.all([
@@ -22,35 +20,19 @@ export async function GET(req: NextRequest) {
         where,
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: "desc" }, // 👈 changed to desc (newest first)
         include: {
           reporter: {
-            select: {
-              id: true,
-              username: true,
-              name: true,
-            },
+            select: { id: true, username: true, name: true },
           },
           post: {
             include: {
-              author: {
-                select: {
-                  id: true,
-                  username: true,
-                  name: true,
-                },
-              },
+              author: { select: { id: true, username: true, name: true } },
             },
           },
           comment: {
             include: {
-              author: {
-                select: {
-                  id: true,
-                  username: true,
-                  name: true,
-                },
-              },
+              author: { select: { id: true, username: true, name: true } },
             },
           },
         },
