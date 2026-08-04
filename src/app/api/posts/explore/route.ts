@@ -6,12 +6,29 @@ import { getCached, setCached } from "@/lib/redis";
 
 export const dynamic = 'force-dynamic';
 
+// ─── Score = engagement / age_in_hours (capped to avoid Infinity) ──
+function calculateScore(post: any) {
+  const likes = post._count?.likes || 0;
+  const comments = post._count?.comments || 0;
+  const reposts = post._count?.reposts || 0;
+
+  // Engagement weight: reposts > comments > likes
+  const engagement = likes + comments * 2 + reposts * 3;
+
+  const ageMs = Date.now() - new Date(post.createdAt).getTime();
+  // Minimum 0.001 hour (~3.6 seconds) to avoid division by zero
+  const ageHours = Math.max(0.001, ageMs / (1000 * 60 * 60));
+
+  // New posts get a huge score, older posts get proportionally lower
+  return engagement / ageHours;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
 
-    // ─── Get excluded users (blocked + blockers + muted) ──────────
+    // ─── Exclude blocked / muted users ──────────────────────────────
     let excludedAuthorIds: string[] = [];
     if (userId) {
       const [blocked, blockers, muted] = await Promise.all([
@@ -34,20 +51,21 @@ export async function GET(req: NextRequest) {
       excludedAuthorIds = [...blockedIds, ...blockerIds, ...mutedIds];
     }
 
-    // ─── CHECK CACHE ───────────────────────────────────────────
-    const cacheKey = `explore:${userId || 'anon'}`;
+    // ─── Cache key ────────────────────────────────────────────────────
+    const cacheKey = `explore:${userId || 'anon'}:v4`;
     const cached = await getCached(cacheKey);
     if (cached) {
       return NextResponse.json(cached);
     }
 
-    // ─── FETCH FROM DATABASE ──────────────────────────────────
+    // ─── Fetch recent posts ──────────────────────────────────────────
     const posts = await prisma.post.findMany({
-      take: 20,
+      take: 50, // fetch enough to rank and pick top 20
       orderBy: { createdAt: "desc" },
       where: {
         authorId: { notIn: excludedAuthorIds },
         status: "published",
+        scheduledAt: null,
       },
       select: {
         id: true,
@@ -55,7 +73,6 @@ export async function GET(req: NextRequest) {
         imageUrl: true,
         createdAt: true,
         views: true,
-
         author: {
           select: {
             id: true,
@@ -65,7 +82,6 @@ export async function GET(req: NextRequest) {
             badgeType: true,
           },
         },
-        // ✅ QUOTE REPOST – include the quoted post
         quotePost: {
           select: {
             id: true,
@@ -102,30 +118,32 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // ─── Sort by engagement ─────────────────────────────────────
-    const sorted = posts.sort((a, b) => {
-      const aEng = a._count.likes + a._count.comments + a._count.reposts;
-      const bEng = b._count.likes + b._count.comments + b._count.reposts;
-      return bEng - aEng;
-    });
+    // ─── Compute scores and sort ─────────────────────────────────────
+    const ranked = posts
+      .map((post) => ({
+        ...post,
+        score: calculateScore(post),
+      }))
+      .sort((a, b) => b.score - a.score) // highest score first
+      .slice(0, 20); // return only top 20
 
-    // ─── Add liked status if logged in ──────────────────────────
-    if (userId) {
+    // ─── Add liked status if logged in ──────────────────────────────
+    if (userId && ranked.length > 0) {
       const likes = await prisma.like.findMany({
         where: {
           userId: userId,
-          postId: { in: sorted.map(p => p.id) },
+          postId: { in: ranked.map(p => p.id) },
         },
         select: { postId: true },
       });
       const likedIds = new Set(likes.map(l => l.postId));
-      sorted.forEach(p => (p as any).liked = likedIds.has(p.id));
+      ranked.forEach(p => (p as any).liked = likedIds.has(p.id));
     }
 
-    // ─── CACHE FOR 1 MINUTE ───────────────────────────────────
-    await setCached(cacheKey, sorted, 60);
+    // ─── Cache for 5 minutes ─────────────────────────────────────────
+    await setCached(cacheKey, ranked, 300);
 
-    return NextResponse.json(sorted);
+    return NextResponse.json(ranked);
   } catch (error) {
     console.error("Explore error:", error);
     return NextResponse.json({ error: "Failed to fetch explore posts" }, { status: 500 });
