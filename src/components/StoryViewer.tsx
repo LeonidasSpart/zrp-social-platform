@@ -25,7 +25,6 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
 
   const story = group.stories[currentIndex];
 
-  // Mark as viewed when story is shown
   useEffect(() => {
     if (!story.viewed) {
       fetch(`/api/stories/${story.id}/view`, { method: "POST" });
@@ -33,12 +32,11 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
     }
   }, [story.id]);
 
-  // Auto-advance progress
   useEffect(() => {
     setProgress(0);
     if (timerRef.current) clearInterval(timerRef.current);
     const start = Date.now();
-    const duration = 5000; // 5s per story
+    const duration = 5000;
     const interval = setInterval(() => {
       const elapsed = Date.now() - start;
       const pct = Math.min(100, (elapsed / duration) * 100);
@@ -93,18 +91,25 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
         </div>
 
         {/* Story content */}
-        <div className="w-full h-full flex items-center justify-center">
+        <div className="relative w-full h-full flex items-center justify-center">
           {story.mediaUrl ? (
-            story.mediaType === "video" ? (
-              <video src={story.mediaUrl} className="max-h-full max-w-full" controls autoPlay />
-            ) : (
-              // ✅ Use plain img tag instead of next/image
-              <img
-                src={story.mediaUrl}
-                alt="Story"
-                className="max-h-full max-w-full object-contain"
-              />
-            )
+            <>
+              {story.mediaType === "video" ? (
+                <video src={story.mediaUrl} className="max-h-full max-w-full" controls autoPlay />
+              ) : (
+                <img
+                  src={story.mediaUrl}
+                  alt="Story"
+                  className="max-h-full max-w-full object-contain"
+                />
+              )}
+              {/* Text overlay */}
+              {story.content && (
+                <div className="absolute bottom-12 left-0 right-0 text-center text-white p-4 bg-gradient-to-t from-black/60 to-transparent">
+                  <p className="text-lg font-medium drop-shadow-md">{story.content}</p>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-white text-center p-6">
               <p className="text-xl font-medium">{story.content || "No content"}</p>
@@ -113,7 +118,7 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
         </div>
 
         {/* User info */}
-        <div className="absolute top-12 left-4 flex items-center gap-2 text-white">
+        <div className="absolute top-12 left-4 flex items-center gap-2 text-white z-10">
           <div className="w-8 h-8 rounded-full bg-gray-500 overflow-hidden">
             {group.user.avatarUrl ? (
               <img
@@ -132,11 +137,11 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
 
         {/* Navigation areas */}
         <div
-          className="absolute left-0 top-0 w-1/3 h-full cursor-pointer"
+          className="absolute left-0 top-0 w-1/3 h-full cursor-pointer z-10"
           onClick={prev}
         />
         <div
-          className="absolute right-0 top-0 w-1/3 h-full cursor-pointer"
+          className="absolute right-0 top-0 w-1/3 h-full cursor-pointer z-10"
           onClick={next}
         />
       </div>
