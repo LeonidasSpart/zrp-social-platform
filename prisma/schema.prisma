@@ -28,7 +28,7 @@ model User {
   emailVerified        DateTime?
   verificationToken    String?     @unique
   verificationTokenExpiry DateTime?
-  pendingEmail         String?     @unique    // ✅ new field for email change flow
+  pendingEmail         String?     @unique    // for email change flow
 
   // ─── Account Deletion ────────────────────────────────────────────
   deletionRequestedAt  DateTime?
@@ -81,6 +81,10 @@ model User {
   pollVotes   PollVote[]
   bookmarks   Bookmark[]
   pushSubscriptions PushSubscription[]
+
+  // ─── STORIES ──────────────────────────────────────────────────────
+  stories     Story[]
+  storyViews  StoryView[]
 
   blockedUsers Blocked[] @relation("Blocker")
   blockedBy    Blocked[] @relation("Blocked")
@@ -324,7 +328,7 @@ model Report {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  // ─── NEW FIELDS FOR MODERATION ACTIONS ──────────────────────────
+  // ─── MODERATION FIELDS ────────────────────────────────────────────
   actionType   String?   // e.g. "DELETE_POST", "WARN_USER", "BAN_USER", "MUTE_USER", "DELETE_COMMENT", "OTHER"
   actionNote   String?   @db.Text
   actionedAt   DateTime?
@@ -357,4 +361,34 @@ model PushSubscription {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+// ─── STORIES ─────────────────────────────────────────────────────────
+model Story {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content     String?   @db.Text
+  mediaUrl    String?
+  mediaType   String?   // "image" or "video"
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime  @default(now() + 24 hours)
+  views       StoryView[]
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([expiresAt])
+}
+
+model StoryView {
+  id          String    @id @default(cuid())
+  storyId     String
+  story       Story     @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  viewerId    String
+  viewer      User      @relation(fields: [viewerId], references: [id], onDelete: Cascade)
+  viewedAt    DateTime  @default(now())
+
+  @@unique([storyId, viewerId])
+  @@index([storyId])
+  @@index([viewerId])
 }
