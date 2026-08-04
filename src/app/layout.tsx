@@ -9,7 +9,7 @@ import PushNotificationManager from "@/components/PushNotificationManager";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import PageTransition from "@/components/PageTransition";
-import EmailVerificationBanner from "@/components/EmailVerificationBanner"; // ✅ added
+import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
@@ -21,14 +21,14 @@ export const metadata: Metadata = {
     icon: "/favicon.png",
   },
   manifest: "/manifest",
-  themeColor: "#FF2D2D",
+  // ❌ themeColor removed from here – moved to viewport
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#FF2D2D",
+  themeColor: "#FF2D2D", // ✅ only here
 };
 
 export default function RootLayout({
@@ -65,7 +65,7 @@ export default function RootLayout({
           <LanguageProvider>
             <AuthProvider>
               <Header />
-              <EmailVerificationBanner /> {/* ✅ renders only for unverified users */}
+              <EmailVerificationBanner />
               <PageTransition>{children}</PageTransition>
               <CookieConsent />
               <Footer />
