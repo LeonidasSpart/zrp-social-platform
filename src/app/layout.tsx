@@ -9,6 +9,7 @@ import PushNotificationManager from "@/components/PushNotificationManager";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import PageTransition from "@/components/PageTransition";
+import EmailVerificationBanner from "@/components/EmailVerificationBanner"; // ✅ added
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
@@ -64,6 +65,7 @@ export default function RootLayout({
           <LanguageProvider>
             <AuthProvider>
               <Header />
+              <EmailVerificationBanner /> {/* ✅ renders only for unverified users */}
               <PageTransition>{children}</PageTransition>
               <CookieConsent />
               <Footer />
