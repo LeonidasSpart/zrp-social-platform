@@ -51,7 +51,7 @@ export const authOptions: NextAuthOptions = {
           avatarUrl: user.avatarUrl,
           onboardingCompleted: user.onboardingCompleted,
           banned: user.banned || false,
-          emailVerified: !!user.emailVerified, // ✅ convert to boolean
+          emailVerified: !!user.emailVerified, // ✅ boolean
         };
       },
     }),
@@ -67,7 +67,7 @@ export const authOptions: NextAuthOptions = {
         token.avatarUrl = user.avatarUrl;
         token.onboardingCompleted = user.onboardingCompleted;
         token.banned = user.banned || false;
-        token.emailVerified = user.emailVerified || false; // ✅ boolean
+        token.emailVerified = !!user.emailVerified; // ✅ explicit boolean conversion
       }
 
       // ─── Re-fetch fresh data from DB whenever the client calls update() ───
@@ -89,7 +89,7 @@ export const authOptions: NextAuthOptions = {
           token.badgeType = freshUser.badgeType;
           token.onboardingCompleted = freshUser.onboardingCompleted;
           token.banned = freshUser.banned || false;
-          token.emailVerified = !!freshUser.emailVerified; // ✅ convert to boolean
+          token.emailVerified = !!freshUser.emailVerified; // ✅ boolean
         }
       }
 
