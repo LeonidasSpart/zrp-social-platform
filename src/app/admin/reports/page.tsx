@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Flag, Clock, CheckCircle, AlertTriangle, Filter, X } from "lucide-react";
+import Link from "next/link";
+import { Flag, Clock, CheckCircle, AlertTriangle, Filter, X, ExternalLink, User } from "lucide-react";
 
 interface Report {
   id: string;
@@ -199,85 +200,116 @@ export default function AdminReports() {
         {reports.length === 0 ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">No reports to show.</div>
         ) : (
-          reports.map((report) => (
-            <div
-              key={report.id}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-gray-900 dark:text-white">{report.reason}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor(report.status)}`}>
-                      {report.status.toUpperCase()}
-                    </span>
-                    {report.actionType && (
-                      <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded">
-                        {report.actionType.replace("_", " ")}
+          reports.map((report) => {
+            const content = report.post || report.comment;
+            const author = content?.author;
+            const viewPostLink = report.post ? `/post/${report.post.id}` : null;
+            const viewAuthorLink = author ? `/profile/${author.username}` : null;
+            const contentType = report.post ? "Post" : "Comment";
+
+            return (
+              <div
+                key={report.id}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-gray-900 dark:text-white">{report.reason}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor(report.status)}`}>
+                        {report.status.toUpperCase()}
                       </span>
+                      {report.actionType && (
+                        <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded">
+                          {report.actionType.replace("_", " ")}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                      Reported by @{report.reporter.username}
+                    </p>
+
+                    {/* Content preview + navigation links */}
+                    {content && (
+                      <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg border-l-4 border-zrp-red">
+                        <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
+                          {content.content}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-3 mt-2">
+                          {viewPostLink && (
+                            <Link
+                              href={viewPostLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              View {contentType}
+                            </Link>
+                          )}
+                          {viewAuthorLink && (
+                            <Link
+                              href={viewAuthorLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition"
+                            >
+                              <User className="w-3 h-3" />
+                              View Author
+                            </Link>
+                          )}
+                          {/* If it's a comment but no post link, we could add a "View Thread" link if we had postId */}
+                        </div>
+                      </div>
+                    )}
+
+                    {report.details && (
+                      <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                        Details: {report.details}
+                      </p>
+                    )}
+                    {report.actionNote && (
+                      <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                        Note: {report.actionNote}
+                      </p>
+                    )}
+                    {report.actionedAt && (
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                        Actioned on {new Date(report.actionedAt).toLocaleString()}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                      {new Date(report.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 flex-shrink-0">
+                    {report.status === "pending" && (
+                      <>
+                        <button
+                          onClick={() => updateStatus(report.id, "dismissed")}
+                          className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                        >
+                          Dismiss
+                        </button>
+                        <button
+                          onClick={() => updateStatus(report.id, "reviewed")}
+                          className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                        >
+                          Review
+                        </button>
+                        <button
+                          onClick={() => openActionModal(report.id)}
+                          className="px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                        >
+                          Action
+                        </button>
+                      </>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                    Reported by @{report.reporter.username}
-                  </p>
-                  {report.post && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">
-                      Post: {report.post.content.substring(0, 120)}
-                      {report.post.content.length > 120 && "..."}
-                    </p>
-                  )}
-                  {report.comment && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">
-                      Comment: {report.comment.content.substring(0, 120)}
-                      {report.comment.content.length > 120 && "..."}
-                    </p>
-                  )}
-                  {report.details && (
-                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                      Details: {report.details}
-                    </p>
-                  )}
-                  {report.actionNote && (
-                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                      Note: {report.actionNote}
-                    </p>
-                  )}
-                  {report.actionedAt && (
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                      Actioned on {new Date(report.actionedAt).toLocaleString()}
-                    </p>
-                  )}
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                    {new Date(report.createdAt).toLocaleString()}
-                  </p>
-                </div>
-                <div className="flex gap-2 flex-shrink-0">
-                  {report.status === "pending" && (
-                    <>
-                      <button
-                        onClick={() => updateStatus(report.id, "dismissed")}
-                        className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-                      >
-                        Dismiss
-                      </button>
-                      <button
-                        onClick={() => updateStatus(report.id, "reviewed")}
-                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                      >
-                        Review
-                      </button>
-                      <button
-                        onClick={() => openActionModal(report.id)}
-                        className="px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-                      >
-                        Action
-                      </button>
-                    </>
-                  )}
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
