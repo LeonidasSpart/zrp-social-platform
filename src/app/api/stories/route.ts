@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
         select: { id: true },
       },
       _count: {
-        select: { views: true }, // 👈 total view count
+        select: { views: true }, // ✅ total view count
       },
     },
     orderBy: { createdAt: "desc" },
@@ -77,7 +77,6 @@ export async function POST(req: NextRequest) {
 
   const { content, mediaUrl, mediaType } = await req.json();
 
-  // At least one of content or media must be provided
   if (!content && !mediaUrl) {
     return NextResponse.json(
       { error: "Please provide content or media" },
@@ -85,7 +84,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Validate mediaType if mediaUrl is provided
   if (mediaUrl && !["image", "video"].includes(mediaType)) {
     return NextResponse.json(
       { error: "Invalid mediaType. Must be 'image' or 'video'." },
