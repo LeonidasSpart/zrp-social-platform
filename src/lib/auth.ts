@@ -50,7 +50,8 @@ export const authOptions: NextAuthOptions = {
           badgeType: user.badgeType,
           avatarUrl: user.avatarUrl,
           onboardingCompleted: user.onboardingCompleted,
-          banned: user.banned || false, // ✅ ADDED
+          banned: user.banned || false,
+          emailVerified: user.emailVerified, // ✅ added
         };
       },
     }),
@@ -65,7 +66,8 @@ export const authOptions: NextAuthOptions = {
         token.badgeType = user.badgeType;
         token.avatarUrl = user.avatarUrl;
         token.onboardingCompleted = user.onboardingCompleted;
-        token.banned = user.banned || false; // ✅ ADDED
+        token.banned = user.banned || false;
+        token.emailVerified = user.emailVerified || null; // ✅ added
       }
 
       // ─── Re-fetch fresh data from DB whenever the client calls update() ───
@@ -77,7 +79,8 @@ export const authOptions: NextAuthOptions = {
             role: true,
             badgeType: true,
             onboardingCompleted: true,
-            banned: true, // ✅ ADDED
+            banned: true,
+            emailVerified: true, // ✅ added
           },
         });
         if (freshUser) {
@@ -85,7 +88,8 @@ export const authOptions: NextAuthOptions = {
           token.role = freshUser.role;
           token.badgeType = freshUser.badgeType;
           token.onboardingCompleted = freshUser.onboardingCompleted;
-          token.banned = freshUser.banned || false; // ✅ ADDED
+          token.banned = freshUser.banned || false;
+          token.emailVerified = freshUser.emailVerified || null; // ✅ added
         }
       }
 
@@ -100,7 +104,8 @@ export const authOptions: NextAuthOptions = {
         session.user.badgeType = token.badgeType as string || null;
         session.user.avatarUrl = token.avatarUrl as string || null;
         session.user.onboardingCompleted = token.onboardingCompleted as boolean;
-        session.user.banned = token.banned || false; // ✅ ADDED
+        session.user.banned = token.banned || false;
+        session.user.emailVerified = token.emailVerified || null; // ✅ added
       }
       return session;
     },
