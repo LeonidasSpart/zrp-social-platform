@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { Image, FileImage, BarChart3, Plus, Trash2, Clock } from "lucide-react";
 import GifPicker from "./GifPicker";
 import { useUploadThing } from "@/lib/uploadthing-client";
+import { getPlanLimits } from "@/lib/limits";
 
 interface PostComposerProps {
   onPostCreated: (post: any) => void;
@@ -18,6 +19,10 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // ─── Get user's plan and limits ──────────────────────────────────
+  const plan = session?.user?.plan || "free";
+  const limits = getPlanLimits(plan);
 
   // ─── Scheduling ──────────────────────────────────────────────────
   const [schedulePost, setSchedulePost] = useState(false);
@@ -59,16 +64,22 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     return matches.map(tag => tag.slice(1).toLowerCase());
   };
 
-  // ─── Image / Video upload (using Uploadthing) ────────────────────
+  // ─── Image / Video upload (with plan limit check) ────────────────
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // ─── Check if user already has an image (plan limit) ──────────
+    if (imageUrl) {
+      setError(`You've already uploaded an image. Your plan allows ${limits.imagesPerPost} image(s) per post.`);
+      return;
+    }
+
     const isVideo = file.type.startsWith("video/");
-    const maxSize = isVideo ? 32 * 1024 * 1024 : 4 * 1024 * 1024;
+    const maxSize = isVideo ? limits.videoUploadMB * 1024 * 1024 : 4 * 1024 * 1024;
 
     if (file.size > maxSize) {
-      setError(`File too large. Max ${isVideo ? "32" : "4"}MB.`);
+      setError(`File too large. Max ${isVideo ? limits.videoUploadMB : 4}MB.`);
       return;
     }
 
@@ -90,6 +101,11 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
   // ─── GIF picker ──────────────────────────────────────────────────
   const handleGifSelect = (gifUrl: string) => {
+    // Check if user already has an image
+    if (imageUrl) {
+      setError(`Your plan allows ${limits.imagesPerPost} image(s) per post.`);
+      return;
+    }
     setImageUrl(gifUrl);
     setMediaType("image");
     setShowGifPicker(false);
@@ -228,6 +244,9 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     pollQuestion.trim() &&
     pollOptions.filter(o => o.trim()).length >= 2;
 
+  const remaining = limits.postLength - content.length;
+  const isOverLimit = remaining < 0;
+
   return (
     <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
       <form onSubmit={handleSubmit}>
@@ -250,7 +269,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               onChange={(e) => setContent(e.target.value)}
               placeholder="What's happening? Use #hashtags and @mentions"
               className="w-full resize-none border-0 focus:ring-0 p-0 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 min-h-[80px] bg-transparent"
-              maxLength={500}
+              maxLength={limits.postLength}
             />
 
             {/* Error */}
@@ -366,7 +385,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                     accept="image/*,video/*"
                     onChange={handleFileUpload}
                     className="hidden"
-                    disabled={uploading}
+                    disabled={uploading || (imageUrl && !limits.imagesPerPost)}
                   />
                   <Image className="w-5 h-5" />
                   {uploading && <span className="text-xs ml-1 text-gray-400 dark:text-gray-500">Uploading...</span>}
@@ -392,8 +411,14 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   <BarChart3 className="w-5 h-5" />
                 </button>
 
-                <span className="text-xs text-gray-400 dark:text-gray-500">
-                  {content.length}/500
+                <span className={`text-xs ${isOverLimit ? "text-red-500" : "text-gray-400 dark:text-gray-500"}`}>
+                  {content.length}/{limits.postLength}
+                  {isOverLimit && " (over limit!)"}
+                </span>
+
+                {/* ─── Plan indicator (optional) ───────────────────── */}
+                <span className="text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
+                  {plan.charAt(0).toUpperCase() + plan.slice(1)}
                 </span>
               </div>
 
@@ -402,7 +427,9 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                 disabled={
                   loading ||
                   (!content.trim() && !pollQuestion.trim()) ||
-                  (showPollBuilder && !isPollValid)
+                  (showPollBuilder && !isPollValid) ||
+                  isOverLimit ||
+                  (imageUrl && !limits.imagesPerPost)
                 }
                 className="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
