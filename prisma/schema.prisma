@@ -28,6 +28,7 @@ model User {
   emailVerified        DateTime?
   verificationToken    String?     @unique
   verificationTokenExpiry DateTime?
+  pendingEmail         String?     @unique    // ✅ new field for email change flow
 
   // ─── Account Deletion ────────────────────────────────────────────
   deletionRequestedAt  DateTime?
