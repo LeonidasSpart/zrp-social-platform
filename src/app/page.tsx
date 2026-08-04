@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback, useRef } from "react";
 import PostComposer from "@/components/PostComposer";
 import PostCard from "@/components/PostCard";
+import StoriesBar from "@/components/StoriesBar";               // ✅ new
 import { Sparkles, Users } from "lucide-react";
 
 interface Post {
@@ -32,7 +33,6 @@ type FeedType = "for-you" | "following";
 export default function HomePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  // ─── ✅ Changed default from "following" to "for-you" ──────────
   const [feedType, setFeedType] = useState<FeedType>("for-you");
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,7 +65,7 @@ export default function HomePage() {
     setError(null);
     try {
       const data = await fetchPosts(null);
-      const postsData = data.posts || data; // handle both response shapes
+      const postsData = data.posts || data;
       setPosts(postsData);
       cursorRef.current = data.nextCursor || null;
       setHasMore(!!data.nextCursor);
@@ -168,6 +168,9 @@ export default function HomePage() {
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
+      {/* ─── Stories Bar ────────────────────────────────────────────── */}
+      <StoriesBar />
+
       <PostComposer onPostCreated={handlePostCreated} />
 
       {/* ─── Tabs ────────────────────────────────────────────────────── */}
