@@ -51,7 +51,6 @@ export default function StoriesBar() {
     return group.stories.some((s) => !s.viewed);
   };
 
-  // ─── Check if user has their own stories ──────────────────────────
   const userGroup = groups.find((g) => g.user.id === session?.user?.id);
   const hasOwnStories = !!userGroup;
 
@@ -61,7 +60,7 @@ export default function StoriesBar() {
   return (
     <>
       <div className="flex gap-4 overflow-x-auto py-3 px-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        {/* ─── Your Story ────────────────────────────────────────────── */}
+        {/* Your Story */}
         <button
           onClick={() => setShowComposer(true)}
           className="flex flex-col items-center gap-1 flex-shrink-0 group"
@@ -89,15 +88,21 @@ export default function StoriesBar() {
           </span>
         </button>
 
-        {/* ─── Other stories ────────────────────────────────────────── */}
-        {groups.map((group) => (
-          <StoryCircle
-            key={group.user.id}
-            user={group.user}
-            hasUnseen={hasUnseen(group)}
-            onClick={() => setSelectedGroup(group)}
-          />
-        ))}
+        {/* Other stories */}
+        {groups.map((group) => {
+          const firstStoryWithMedia = group.stories.find((s) => s.mediaUrl);
+          const previewUrl = firstStoryWithMedia?.mediaUrl || null;
+
+          return (
+            <StoryCircle
+              key={group.user.id}
+              user={group.user}
+              hasUnseen={hasUnseen(group)}
+              onClick={() => setSelectedGroup(group)}
+              storyPreview={previewUrl}
+            />
+          );
+        })}
       </div>
 
       {selectedGroup && (
