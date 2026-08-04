@@ -49,6 +49,7 @@ model User {
   updatedAt   DateTime  @updatedAt
 
   role        Role      @default(USER)
+  plan        String    @default("free")   // ✅ account tier: free, pro, business, enterprise
   onboardingCompleted Boolean @default(false)
   banned      Boolean   @default(false)
 
