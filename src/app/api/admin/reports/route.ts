@@ -1,4 +1,7 @@
-// src/app/api/admin/reports/route.ts – updated section
+import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/admin";
+import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   const adminCheck = await requireAdmin();
@@ -10,9 +13,9 @@ export async function GET(req: NextRequest) {
 
   try {
     const where: Prisma.ReportWhereInput = {};
-    // Only apply status filter if it's NOT "all"
+    // Only apply filter if statusParam is NOT "all"
     if (statusParam !== "all") {
-      where.status = statusParam as any; // valid enum: pending, reviewed, dismissed
+      where.status = statusParam as any; // "pending", "reviewed", "dismissed"
     }
 
     const [reports, total] = await Promise.all([
@@ -20,7 +23,7 @@ export async function GET(req: NextRequest) {
         where,
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { createdAt: "desc" }, // 👈 changed to desc (newest first)
+        orderBy: { createdAt: "desc" }, // newest first
         include: {
           reporter: {
             select: { id: true, username: true, name: true },
