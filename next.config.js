@@ -1,4 +1,8 @@
 /** @type {import('next').NextConfig} */
+
+// ─── Import Sentry config wrapper ──────────────────────────────────
+const { withSentryConfig } = require('@sentry/nextjs');
+
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -6,11 +10,6 @@ const nextConfig = {
         protocol: "https",
         hostname: "uploadthing.com",
       },
-      // Add more domains as needed, e.g.:
-      // {
-      //   protocol: "https",
-      //   hostname: "*.cloudinary.com",
-      // },
     ],
   },
 
@@ -54,4 +53,15 @@ const nextConfig = {
   poweredByHeader: false,
 };
 
-module.exports = nextConfig;
+// ─── Wrap with Sentry configuration ──────────────────────────────
+module.exports = withSentryConfig(nextConfig, {
+  // Additional Sentry options (optional – these are defaults)
+  silent: true, // Suppress logs
+  hideSourceMaps: false,
+  widenClientFileUpload: true,
+  transpileClientSDK: true,
+  // If you want to upload source maps, set these environment variables:
+  // org: process.env.SENTRY_ORG,
+  // project: process.env.SENTRY_PROJECT,
+  // authToken: process.env.SENTRY_AUTH_TOKEN,
+});
