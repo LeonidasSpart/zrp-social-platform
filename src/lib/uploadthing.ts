@@ -63,6 +63,22 @@ export const ourFileRouter = {
       console.log("Chat image uploaded:", file.url);
       return { url: file.url };
     }),
+
+  // ─── Story media upload (image or video) ────────────────────────
+  storyMedia: f({
+    image: { maxFileSize: "4MB", maxFileCount: 1 },
+    video: { maxFileSize: "16MB", maxFileCount: 1 },
+  })
+    .middleware(async () => {
+      const session = await getServerSession(authOptions);
+      if (!session?.user) throw new UploadThingError("Unauthorized");
+      return { userId: session.user.id };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log("Story media uploaded:", file.url);
+      // file.type is "image" or "video" – you can use that to store mediaType
+      return { url: file.url, type: file.type };
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
