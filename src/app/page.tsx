@@ -32,7 +32,8 @@ type FeedType = "for-you" | "following";
 export default function HomePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [feedType, setFeedType] = useState<FeedType>("following");
+  // ─── ✅ Changed default from "following" to "for-you" ──────────
+  const [feedType, setFeedType] = useState<FeedType>("for-you");
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
