@@ -385,7 +385,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                     accept="image/*,video/*"
                     onChange={handleFileUpload}
                     className="hidden"
-                    disabled={uploading || (imageUrl && !limits.imagesPerPost)}
+                    disabled={uploading || (!!imageUrl && !limits.imagesPerPost)}
                   />
                   <Image className="w-5 h-5" />
                   {uploading && <span className="text-xs ml-1 text-gray-400 dark:text-gray-500">Uploading...</span>}
@@ -429,7 +429,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   (!content.trim() && !pollQuestion.trim()) ||
                   (showPollBuilder && !isPollValid) ||
                   isOverLimit ||
-                  (imageUrl && !limits.imagesPerPost)
+                  (!!imageUrl && !limits.imagesPerPost)
                 }
                 className="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
