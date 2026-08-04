@@ -242,9 +242,14 @@ export function buildNotificationEmail({
 }
 
 // ─── Verification Email ──────────────────────────────────────────────
-export async function sendVerificationEmail(email: string, token: string) {
+export async function sendVerificationEmail(
+  email: string,
+  token: string,
+  customUrl?: string   // ✅ NEW – if provided, use this URL directly
+) {
   const baseUrl = process.env.NEXTAUTH_URL;
-  const link = `${baseUrl}/verify-email?token=${token}`;
+  // If customUrl is given, use it; else fallback to the old /verify-email link (for onboarding)
+  const link = customUrl || `${baseUrl}/verify-email?token=${token}`;
 
   await resend.emails.send({
     from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
