@@ -15,7 +15,7 @@ export async function POST(
   const storyId = params.id;
   const viewerId = session.user.id;
 
-  // Upsert view (avoid duplicate)
+  // Prevent duplicate views
   await prisma.storyView.upsert({
     where: {
       storyId_viewerId: {
