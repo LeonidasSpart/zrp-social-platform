@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
 import { rateLimit } from "@/lib/rate-limit";
-import { getUserPlan, getPlanLimits, checkPostLength, checkImagesPerPost, checkScheduledPostsCount } from "@/lib/limit-checker";
+import { getUserPlan, getPlanLimits, checkPostLength, checkImagesPerPost, checkScheduledPostsCount } from "@/lib/limits";
 
 export async function GET(req: NextRequest) {
   // ─── RATE LIMIT: 100 requests per minute ──────────────────────
