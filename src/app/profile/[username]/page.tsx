@@ -32,6 +32,7 @@ interface UserProfile {
   badgeType: string | null;
   createdAt: string;
   isAdmin: boolean;
+  plan: string | null; // ✅ added
   _count: {
     posts: number;
     followers: number;
@@ -383,6 +384,23 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
   const impactMeals = Math.floor(Math.random() * 50) + 5;
 
+  // ─── Plan badge color ───────────────────────────────────────────────
+  const getPlanBadgeColor = (plan: string | null) => {
+    if (!plan) return "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300";
+    switch (plan.toLowerCase()) {
+      case "free":
+        return "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300";
+      case "pro":
+        return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
+      case "business":
+        return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400";
+      case "enterprise":
+        return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
+      default:
+        return "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300";
+    }
+  };
+
   // ─── Render reply item ──────────────────────────────────────────────
   const renderReplyItem = (reply: any) => {
     const isOwn = reply.author.id === session?.user?.id;
@@ -685,6 +703,15 @@ export default function ProfilePage({ params }: { params: { username: string } }
               Joined {formattedJoinDate}
             </span>
           </div>
+
+          {/* ─── PLAN BADGE ───────────────────────────────────────────── */}
+          {profile.plan && (
+            <div className="mt-2">
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getPlanBadgeColor(profile.plan)}`}>
+                {profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)}
+              </span>
+            </div>
+          )}
 
           <div className="flex gap-4 mt-2">
             <Link
