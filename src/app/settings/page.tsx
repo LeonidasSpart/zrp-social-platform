@@ -17,7 +17,7 @@ interface UserData {
   id: string;
   username: string;
   name: string;
-  email: string;                    // ✅ added
+  email: string;
   bio: string | null;
   location: string | null;
   country: string | null;
@@ -311,6 +311,8 @@ export default function SettingsPage() {
         setEmailMessage({ type: "success", text: data.message });
         setNewEmail("");
         setEmailPassword("");
+        // Optionally update session after email change
+        update();
       } else {
         setEmailMessage({ type: "error", text: data.error || "Failed to send verification email" });
       }
@@ -336,6 +338,9 @@ export default function SettingsPage() {
       year: "numeric",
     });
   };
+
+  // Helper to display the email from session (or fallback)
+  const currentEmail = session?.user?.email || userData?.email || "Not available";
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
@@ -366,7 +371,7 @@ export default function SettingsPage() {
         </div>
         <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400 mt-1">
           <Mail className="w-4 h-4" />
-          <span>{userData.email}</span>
+          <span>{currentEmail}</span>
         </div>
       </div>
 
@@ -378,7 +383,7 @@ export default function SettingsPage() {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Current Email
             </label>
-            <p className="text-gray-600 dark:text-gray-400">{userData.email}</p>
+            <p className="text-gray-600 dark:text-gray-400">{currentEmail}</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
