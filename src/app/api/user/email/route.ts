@@ -18,7 +18,7 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "All fields are required" }, { status: 400 });
   }
 
-  // Validate email format (basic)
+  // Validate email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(newEmail)) {
     return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
@@ -50,20 +50,7 @@ export async function PUT(req: NextRequest) {
   const token = crypto.randomBytes(32).toString("hex");
   const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-  // Store the new email temporarily with token
-  // We'll store it in the user record (but not verified yet)
-  // We'll use a separate field or reuse the existing verificationToken
-  // We'll store the pending email in a new field? Or we can update email directly after verification.
-  // Better: we store the pending email in a separate field (pendingEmail) and use verificationToken for confirmation.
-  // Since we don't have pendingEmail in schema, we can either add it or use a two-step: send token, then on verification update email.
-  // We'll add a pendingEmail field to the User model.
-
-  // Instead of modifying schema, we can store the new email in the verification token itself (e.g., as metadata).
-  // Or we can store it in a separate table. For simplicity, we'll add a `pendingEmail` field to User.
-  // Let's assume we add it.
-  // For now, I'll show the code with the assumption we have `pendingEmail` and `verificationToken` fields.
-
-  // Update user with pending email and token
+  // Save pending email and token
   await prisma.user.update({
     where: { id: session.user.id },
     data: {
@@ -73,9 +60,14 @@ export async function PUT(req: NextRequest) {
     },
   });
 
-  // Send verification email
+  // Construct the full verification URL
   const verifyUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${token}`;
-  await sendVerificationEmail(newEmail, verifyUrl);
+
+  // ✅ Send the email with the correct parameters:
+  //   - email address (to)
+  //   - token (for fallback link if customUrl is not used)
+  //   - customUrl (the full URL to use in the email)
+  await sendVerificationEmail(newEmail, token, verifyUrl);
 
   return NextResponse.json({ message: "Verification email sent. Please check your inbox." });
 }
