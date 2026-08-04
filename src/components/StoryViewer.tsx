@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { X } from "lucide-react";
+import { X, Eye } from "lucide-react";
 
 interface Props {
   group: {
@@ -12,6 +12,7 @@ interface Props {
       mediaUrl?: string;
       mediaType?: string;
       viewed: boolean;
+      viewCount?: number;   // ✅ now we receive it
     }>;
   };
   onClose: () => void;
@@ -103,14 +104,12 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
                   className="max-h-full max-w-full object-contain"
                 />
               )}
-              {/* Professional text overlay */}
+              {/* Text overlay – bottom aligned */}
               {story.content && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="max-w-[80%] p-6 bg-black/40 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl">
-                    <p className="text-white text-2xl font-light text-center leading-relaxed drop-shadow-lg">
-                      {story.content}
-                    </p>
-                  </div>
+                <div className="absolute bottom-12 left-0 right-0 text-center text-white p-4 bg-gradient-to-t from-black/70 to-transparent">
+                  <p className="text-sm font-light tracking-wide drop-shadow-md">
+                    {story.content}
+                  </p>
                 </div>
               )}
             </>
@@ -136,7 +135,13 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
               </div>
             )}
           </div>
-          <span className="font-medium">{group.user.name || group.user.username}</span>
+          <span className="font-medium text-sm">{group.user.name || group.user.username}</span>
+        </div>
+
+        {/* View count – top right */}
+        <div className="absolute top-12 right-4 flex items-center gap-1 text-white/70 text-xs z-10 bg-black/30 px-2 py-1 rounded-full">
+          <Eye className="w-3 h-3" />
+          <span>{story.viewCount ?? 0}</span>
         </div>
 
         {/* Navigation */}
