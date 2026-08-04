@@ -38,17 +38,26 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* ─── PWA Manifest ────────────────────────────────────────── */}
         <link rel="manifest" href="/manifest" />
         <meta name="theme-color" content="#FF2D2D" />
-        <meta name="mobile-web-app-capable" content="yes" /> {/* ✅ Android */}
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="ZRP" />
-        {/* ─── Apple Touch Icons ────────────────────────────────────── */}
+
+        {/* ─── Apple Touch Icons ──────────────────────────────────── */}
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <link rel="apple-touch-icon" sizes="152x152" href="/icon-192.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/icon-192.png" />
         <link rel="apple-touch-icon" sizes="167x167" href="/icon-192.png" />
+
+        {/* ─── Android / Standard Favicon ────────────────────────── */}
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
+        <link rel="shortcut icon" href="/favicon.png" />
       </head>
       <body className={`${inter.variable} ${orbitron.variable} font-inter min-h-screen flex flex-col overflow-x-hidden`}>
         <ThemeProvider>
