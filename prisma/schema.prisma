@@ -323,6 +323,11 @@ model Report {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  // ─── NEW FIELDS FOR MODERATION ACTIONS ──────────────────────────
+  actionType   String?   // e.g. "DELETE_POST", "WARN_USER", "BAN_USER", "MUTE_USER", "DELETE_COMMENT", "OTHER"
+  actionNote   String?   @db.Text
+  actionedAt   DateTime?
+
   @@index([postId])
   @@index([commentId])
   @@index([status])
