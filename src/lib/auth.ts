@@ -19,29 +19,41 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
+        // ─── Trim password to avoid accidental whitespace ──────────
+        const inputPassword = credentials.password.trim();
+
+        console.log("🔑 Login attempt for:", credentials.email);
+        console.log("🔑 Input password length:", inputPassword.length);
+
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
 
         if (!user || !user.password) {
+          console.log("🔑 User not found or password missing");
           throw new Error("Invalid credentials");
         }
+
+        console.log("🔑 Stored hash prefix:", user.password.substring(0, 10));
+        console.log("🔑 Stored hash length:", user.password.length);
 
         // ─── Try bcrypt compare first ──────────────────────────────
         let isValid = false;
         try {
-          isValid = await bcrypt.compare(credentials.password, user.password);
+          isValid = await bcrypt.compare(inputPassword, user.password);
+          console.log("🔑 bcrypt.compare result:", isValid);
         } catch (err) {
-          // If bcrypt throws, the stored password is not a valid hash
+          console.error("🔑 bcrypt.compare error:", err);
           isValid = false;
         }
 
         // ─── Fallback: plain‑text comparison (for old users) ──────
         if (!isValid && !user.password.startsWith('$2')) {
-          isValid = credentials.password === user.password;
-          // If it matches, re‑hash the password and save it
+          console.log("🔑 Falling back to plain‑text compare");
+          isValid = inputPassword === user.password;
           if (isValid) {
-            const hashed = await bcrypt.hash(user.password, 10);
+            console.log("🔑 Plain‑text match – upgrading hash");
+            const hashed = await bcrypt.hash(inputPassword, 10);
             await prisma.user.update({
               where: { id: user.id },
               data: { password: hashed },
@@ -50,15 +62,19 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (!isValid) {
+          console.log("🔑 ❌ Invalid credentials – password mismatch");
           throw new Error("Invalid credentials");
         }
 
         // ─── BLOCK LOGIN IF EMAIL NOT VERIFIED ───────────────────────
         if (!user.emailVerified) {
+          console.log("🔑 ❌ Email not verified for:", user.email);
           throw new Error(
             "Please verify your email before logging in. Check your inbox for the verification link."
           );
         }
+
+        console.log("🔑 ✅ Login successful for:", user.email);
 
         return {
           id: user.id,
@@ -71,7 +87,7 @@ export const authOptions: NextAuthOptions = {
           avatarUrl: user.avatarUrl,
           onboardingCompleted: user.onboardingCompleted,
           banned: user.banned || false,
-          emailVerified: !!user.emailVerified, // ✅ boolean
+          emailVerified: !!user.emailVerified,
         };
       },
     }),
@@ -87,7 +103,7 @@ export const authOptions: NextAuthOptions = {
         token.avatarUrl = user.avatarUrl;
         token.onboardingCompleted = user.onboardingCompleted;
         token.banned = user.banned || false;
-        token.emailVerified = !!user.emailVerified; // ✅ explicit boolean conversion
+        token.emailVerified = !!user.emailVerified;
       }
 
       // ─── Re-fetch fresh data from DB whenever the client calls update() ───
@@ -109,7 +125,7 @@ export const authOptions: NextAuthOptions = {
           token.badgeType = freshUser.badgeType;
           token.onboardingCompleted = freshUser.onboardingCompleted;
           token.banned = freshUser.banned || false;
-          token.emailVerified = !!freshUser.emailVerified; // ✅ boolean
+          token.emailVerified = !!freshUser.emailVerified;
         }
       }
 
@@ -125,7 +141,7 @@ export const authOptions: NextAuthOptions = {
         session.user.avatarUrl = token.avatarUrl as string || null;
         session.user.onboardingCompleted = token.onboardingCompleted as boolean;
         session.user.banned = token.banned || false;
-        session.user.emailVerified = token.emailVerified || false; // ✅ boolean
+        session.user.emailVerified = token.emailVerified || false;
       }
       return session;
     },
