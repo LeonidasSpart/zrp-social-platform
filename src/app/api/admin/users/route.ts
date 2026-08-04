@@ -34,8 +34,10 @@ export async function GET(req: NextRequest) {
           email: true,
           createdAt: true,
           isAdmin: true,          // kept for compatibility
-          role: true,             // ← added
+          role: true,
           badgeType: true,
+          plan: true,             // ✅ added (for plan management)
+          banned: true,           // ✅ added (for status display)
           _count: {
             select: {
               posts: true,
