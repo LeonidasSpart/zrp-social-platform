@@ -4,6 +4,7 @@ import { signIn } from "next-auth/react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import PasswordInput from "@/components/PasswordInput"; // ✅ added
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
@@ -12,7 +13,6 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ─── Handle ban error from URL ──────────────────────────────────
   useEffect(() => {
     const errorParam = searchParams.get("error");
     if (errorParam === "banned") {
@@ -88,31 +88,29 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="you@example.com"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="••••••••"
-                required
-              />
-              <Link
-                href="/forgot-password"
-                className="text-sm text-blue-600 dark:text-blue-400 hover:underline block text-right mt-1"
-              >
-                Forgot password?
-              </Link>
-            </div>
+            <PasswordInput
+              id="password"
+              name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              label="Password"
+              placeholder="Enter your password"
+              required
+              autoComplete="current-password"
+            />
+
+            <Link
+              href="/forgot-password"
+              className="text-sm text-blue-600 dark:text-blue-400 hover:underline block text-right mt-1"
+            >
+              Forgot password?
+            </Link>
 
             <button
               type="submit"
