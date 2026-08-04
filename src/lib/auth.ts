@@ -19,7 +19,6 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
-        // ─── Trim password to avoid accidental whitespace ──────────
         const inputPassword = credentials.password.trim();
 
         console.log("🔑 Login attempt for:", credentials.email);
@@ -27,6 +26,22 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
+          // ✅ Include plan field
+          select: {
+            id: true,
+            email: true,
+            password: true,
+            name: true,
+            username: true,
+            isAdmin: true,
+            role: true,
+            badgeType: true,
+            avatarUrl: true,
+            onboardingCompleted: true,
+            banned: true,
+            emailVerified: true,
+            plan: true, // ✅ added
+          },
         });
 
         if (!user || !user.password) {
@@ -37,7 +52,6 @@ export const authOptions: NextAuthOptions = {
         console.log("🔑 Stored hash prefix:", user.password.substring(0, 10));
         console.log("🔑 Stored hash length:", user.password.length);
 
-        // ─── Try bcrypt compare first ──────────────────────────────
         let isValid = false;
         try {
           isValid = await bcrypt.compare(inputPassword, user.password);
@@ -47,7 +61,6 @@ export const authOptions: NextAuthOptions = {
           isValid = false;
         }
 
-        // ─── Fallback: plain‑text comparison (for old users) ──────
         if (!isValid && !user.password.startsWith('$2')) {
           console.log("🔑 Falling back to plain‑text compare");
           isValid = inputPassword === user.password;
@@ -66,7 +79,6 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
-        // ─── BLOCK LOGIN IF EMAIL NOT VERIFIED ───────────────────────
         if (!user.emailVerified) {
           console.log("🔑 ❌ Email not verified for:", user.email);
           throw new Error(
@@ -88,6 +100,7 @@ export const authOptions: NextAuthOptions = {
           onboardingCompleted: user.onboardingCompleted,
           banned: user.banned || false,
           emailVerified: !!user.emailVerified,
+          plan: user.plan || "free", // ✅ added
         };
       },
     }),
@@ -104,6 +117,7 @@ export const authOptions: NextAuthOptions = {
         token.onboardingCompleted = user.onboardingCompleted;
         token.banned = user.banned || false;
         token.emailVerified = !!user.emailVerified;
+        token.plan = (user as any).plan || "free"; // ✅ added
       }
 
       // ─── Re-fetch fresh data from DB whenever the client calls update() ───
@@ -117,6 +131,7 @@ export const authOptions: NextAuthOptions = {
             onboardingCompleted: true,
             banned: true,
             emailVerified: true,
+            plan: true, // ✅ added
           },
         });
         if (freshUser) {
@@ -126,6 +141,7 @@ export const authOptions: NextAuthOptions = {
           token.onboardingCompleted = freshUser.onboardingCompleted;
           token.banned = freshUser.banned || false;
           token.emailVerified = !!freshUser.emailVerified;
+          token.plan = freshUser.plan || "free"; // ✅ added
         }
       }
 
@@ -142,6 +158,7 @@ export const authOptions: NextAuthOptions = {
         session.user.onboardingCompleted = token.onboardingCompleted as boolean;
         session.user.banned = token.banned || false;
         session.user.emailVerified = token.emailVerified || false;
+        session.user.plan = token.plan as string || "free"; // ✅ added
       }
       return session;
     },
