@@ -16,6 +16,7 @@ interface User {
   role: "USER" | "MODERATOR" | "ADMIN";
   badgeType: string | null;
   banned: boolean;
+  plan: string; // ✅ added
   _count: {
     posts: number;
     comments: number;
@@ -39,6 +40,13 @@ const STATUS_OPTIONS = [
   { value: "ALL", label: "All" },
   { value: "ACTIVE", label: "Active" },
   { value: "BANNED", label: "Banned" },
+];
+
+const PLAN_OPTIONS = [
+  { value: "free", label: "Free" },
+  { value: "pro", label: "Pro" },
+  { value: "business", label: "Business" },
+  { value: "enterprise", label: "Enterprise" },
 ];
 
 export default function AdminUsers() {
@@ -138,6 +146,26 @@ export default function AdminUsers() {
     } catch (error) {
       console.error("Ban toggle error:", error);
       alert("Failed to toggle ban");
+    }
+  };
+
+  // ─── Update user plan ──────────────────────────────────────────────
+  const updatePlan = async (userId: string, newPlan: string) => {
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/plan`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: newPlan }),
+      });
+      if (res.ok) {
+        fetchUsers();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to update plan");
+      }
+    } catch (error) {
+      console.error("Plan update error:", error);
+      alert("Failed to update plan");
     }
   };
 
@@ -258,6 +286,7 @@ export default function AdminUsers() {
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Posts</th>
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Role</th>
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Badge</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Plan</th>  {/* ✅ new */}
                 <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Status</th>
                 <th className="px-4 py-3 text-right text-gray-500 dark:text-gray-300 font-medium">Actions</th>
               </tr>
@@ -265,7 +294,7 @@ export default function AdminUsers() {
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan={8} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                     No users match your filters.
                   </td>
                 </tr>
@@ -339,6 +368,20 @@ export default function AdminUsers() {
                             ))}
                           </select>
                         </div>
+                      </td>
+                      {/* ─── Plan column ───────────────────────────── */}
+                      <td className="px-4 py-3">
+                        <select
+                          value={user.plan || "free"}
+                          onChange={(e) => updatePlan(user.id, e.target.value)}
+                          className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
+                        >
+                          {PLAN_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
                       </td>
                       <td className="px-4 py-3">
                         {user.banned ? (
