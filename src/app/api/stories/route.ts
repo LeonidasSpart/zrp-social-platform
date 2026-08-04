@@ -38,6 +38,9 @@ export async function GET(req: NextRequest) {
         where: { viewerId: userId },
         select: { id: true },
       },
+      _count: {
+        select: { views: true }, // 👈 total view count
+      },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -58,6 +61,7 @@ export async function GET(req: NextRequest) {
       mediaType: story.mediaType,
       createdAt: story.createdAt,
       viewed: story.views.length > 0,
+      viewCount: story._count.views, // ✅ total views
     });
   });
 
