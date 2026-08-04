@@ -8,7 +8,8 @@ declare module "next-auth" {
       role: "USER" | "MODERATOR" | "ADMIN";
       onboardingCompleted: boolean;
       banned: boolean;
-      emailVerified: boolean; // ✅ changed to boolean (always present)
+      emailVerified: boolean;
+      plan: string; // ✅ added – "free", "pro", "business", "enterprise"
       name?: string | null;
       email?: string | null;
       image?: string | null;
@@ -24,7 +25,8 @@ declare module "next-auth" {
     role: "USER" | "MODERATOR" | "ADMIN";
     onboardingCompleted: boolean;
     banned?: boolean;
-    emailVerified?: boolean; // ✅ boolean
+    emailVerified?: boolean;
+    plan?: string; // ✅ added
     avatarUrl?: string | null;
     isAdmin?: boolean;
     badgeType?: string | null;
@@ -38,7 +40,8 @@ declare module "next-auth/jwt" {
     role: "USER" | "MODERATOR" | "ADMIN";
     onboardingCompleted: boolean;
     banned: boolean;
-    emailVerified: boolean; // ✅ boolean
+    emailVerified: boolean;
+    plan: string; // ✅ added
     avatarUrl?: string | null;
     isAdmin?: boolean;
     badgeType?: string | null;
