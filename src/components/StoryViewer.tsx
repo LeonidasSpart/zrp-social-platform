@@ -103,10 +103,14 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
                   className="max-h-full max-w-full object-contain"
                 />
               )}
-              {/* Text overlay */}
+              {/* Professional text overlay */}
               {story.content && (
-                <div className="absolute bottom-12 left-0 right-0 text-center text-white p-4 bg-gradient-to-t from-black/60 to-transparent">
-                  <p className="text-lg font-medium drop-shadow-md">{story.content}</p>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="max-w-[80%] p-6 bg-black/40 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl">
+                    <p className="text-white text-2xl font-light text-center leading-relaxed drop-shadow-lg">
+                      {story.content}
+                    </p>
+                  </div>
                 </div>
               )}
             </>
@@ -135,7 +139,7 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
           <span className="font-medium">{group.user.name || group.user.username}</span>
         </div>
 
-        {/* Navigation areas */}
+        {/* Navigation */}
         <div
           className="absolute left-0 top-0 w-1/3 h-full cursor-pointer z-10"
           onClick={prev}
