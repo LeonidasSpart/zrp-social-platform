@@ -6,16 +6,18 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Check, X, Globe, MapPin, User, Key, Calendar, Camera, Trash2, Loader2,
-  BellOff, ChevronRight, Ban
+  BellOff, ChevronRight, Ban, Mail
 } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import EmailPreferences from "@/components/EmailPreferences";
-import PasswordInput from "@/components/PasswordInput"; // ✅ added
+import PasswordInput from "@/components/PasswordInput";
+import LocationAutocomplete from "@/components/LocationAutocomplete";
 
 interface UserData {
   id: string;
   username: string;
   name: string;
+  email: string;                    // ✅ added
   bio: string | null;
   location: string | null;
   country: string | null;
@@ -42,6 +44,12 @@ export default function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  // Email change states
+  const [newEmail, setNewEmail] = useState("");
+  const [emailPassword, setEmailPassword] = useState("");
+  const [updatingEmail, setUpdatingEmail] = useState(false);
+  const [emailMessage, setEmailMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Loading states for each section
   const [updatingProfile, setUpdatingProfile] = useState(false);
@@ -282,6 +290,37 @@ export default function SettingsPage() {
     }
   };
 
+  // ─── Update Email ──────────────────────────────────────────────────
+  const handleUpdateEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUpdatingEmail(true);
+    setEmailMessage(null);
+
+    try {
+      const res = await fetch("/api/user/email", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword: emailPassword,
+          newEmail,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setEmailMessage({ type: "success", text: data.message });
+        setNewEmail("");
+        setEmailPassword("");
+      } else {
+        setEmailMessage({ type: "error", text: data.error || "Failed to send verification email" });
+      }
+    } catch (error) {
+      setEmailMessage({ type: "error", text: "Something went wrong" });
+    } finally {
+      setUpdatingEmail(false);
+    }
+  };
+
   if (status === "loading" || !userData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -325,6 +364,64 @@ export default function SettingsPage() {
           <Calendar className="w-4 h-4" />
           <span>Joined {formatDate(userData.createdAt)}</span>
         </div>
+        <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400 mt-1">
+          <Mail className="w-4 h-4" />
+          <span>{userData.email}</span>
+        </div>
+      </div>
+
+      {/* ─── Change Email Section ───────────────────────────────────── */}
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Change Email</h2>
+        <form onSubmit={handleUpdateEmail} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Current Email
+            </label>
+            <p className="text-gray-600 dark:text-gray-400">{userData.email}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              New Email
+            </label>
+            <input
+              type="email"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              placeholder="Enter new email address"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Current Password <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="password"
+              value={emailPassword}
+              onChange={(e) => setEmailPassword(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              placeholder="Enter your current password"
+              required
+            />
+          </div>
+          {emailMessage && (
+            <p className={`text-sm ${emailMessage.type === "success" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+              {emailMessage.text}
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={updatingEmail}
+            className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            {updatingEmail ? "Sending..." : "Send Verification Email"}
+          </button>
+        </form>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+          A verification link will be sent to the new email address. You must click it to confirm the change.
+        </p>
       </div>
 
       {/* ─── Profile Picture ────────────────────────────────────────── */}
@@ -406,20 +503,12 @@ export default function SettingsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                City
-              </label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="City"
-                  maxLength={50}
-                />
-              </div>
+              <LocationAutocomplete
+                value={location}
+                onChange={(val) => setLocation(val)}
+                placeholder="Search for a city..."
+                label="City"
+              />
             </div>
 
             <div>
