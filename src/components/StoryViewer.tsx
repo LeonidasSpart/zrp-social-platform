@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X } from "lucide-react";
 
 interface Props {
   group: {
@@ -46,7 +45,6 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
       setProgress(pct);
       if (pct >= 100) {
         clearInterval(interval);
-        // Advance to next or close
         if (currentIndex < group.stories.length - 1) {
           setCurrentIndex(currentIndex + 1);
         } else {
@@ -100,11 +98,10 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
             story.mediaType === "video" ? (
               <video src={story.mediaUrl} className="max-h-full max-w-full" controls autoPlay />
             ) : (
-              <Image
+              // ✅ Use plain img tag instead of next/image
+              <img
                 src={story.mediaUrl}
                 alt="Story"
-                width={500}
-                height={500}
                 className="max-h-full max-w-full object-contain"
               />
             )
@@ -119,11 +116,9 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
         <div className="absolute top-12 left-4 flex items-center gap-2 text-white">
           <div className="w-8 h-8 rounded-full bg-gray-500 overflow-hidden">
             {group.user.avatarUrl ? (
-              <Image
+              <img
                 src={group.user.avatarUrl}
                 alt={group.user.name || group.user.username}
-                width={32}
-                height={32}
                 className="w-full h-full object-cover"
               />
             ) : (
