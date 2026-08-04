@@ -27,7 +27,27 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
+        // ─── Try bcrypt compare first ──────────────────────────────
+        let isValid = false;
+        try {
+          isValid = await bcrypt.compare(credentials.password, user.password);
+        } catch (err) {
+          // If bcrypt throws, the stored password is not a valid hash
+          isValid = false;
+        }
+
+        // ─── Fallback: plain‑text comparison (for old users) ──────
+        if (!isValid && !user.password.startsWith('$2')) {
+          isValid = credentials.password === user.password;
+          // If it matches, re‑hash the password and save it
+          if (isValid) {
+            const hashed = await bcrypt.hash(user.password, 10);
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { password: hashed },
+            });
+          }
+        }
 
         if (!isValid) {
           throw new Error("Invalid credentials");
