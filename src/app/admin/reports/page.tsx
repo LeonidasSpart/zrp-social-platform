@@ -1,19 +1,30 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Flag, Clock, CheckCircle, AlertTriangle, Filter } from "lucide-react";
+import { Flag, Clock, CheckCircle, AlertTriangle, Filter, X } from "lucide-react";
 
 interface Report {
   id: string;
   reason: string;
   details: string | null;
   status: "pending" | "reviewed" | "dismissed" | "actioned";
+  actionType: string | null;
+  actionNote: string | null;
+  actionedAt: string | null;
   createdAt: string;
-  updatedAt?: string;
   reporter: { username: string; name: string };
   post: { id: string; content: string; author: { username: string } } | null;
   comment: { id: string; content: string; author: { username: string } } | null;
 }
+
+const ACTION_TYPES = [
+  { value: "DELETE_POST", label: "Delete Post" },
+  { value: "WARN_USER", label: "Warn User" },
+  { value: "BAN_USER", label: "Ban User" },
+  { value: "MUTE_USER", label: "Mute User" },
+  { value: "DELETE_COMMENT", label: "Delete Comment" },
+  { value: "OTHER", label: "Other" },
+];
 
 export default function AdminReports() {
   const [reports, setReports] = useState<Report[]>([]);
@@ -22,6 +33,12 @@ export default function AdminReports() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
+  const [actionType, setActionType] = useState(ACTION_TYPES[0].value);
+  const [actionNote, setActionNote] = useState("");
 
   const fetchReports = async () => {
     setLoading(true);
@@ -41,12 +58,12 @@ export default function AdminReports() {
     fetchReports();
   }, [page, statusFilter]);
 
-  const updateStatus = async (reportId: string, newStatus: string) => {
+  const updateStatus = async (reportId: string, newStatus: string, extraData = {}) => {
     try {
       const res = await fetch(`/api/admin/reports/${reportId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus, ...extraData }),
       });
       if (res.ok) {
         setMessage({ type: "success", text: `Report ${newStatus}.` });
@@ -56,18 +73,30 @@ export default function AdminReports() {
         setMessage({ type: "error", text: "Failed to update report." });
       }
     } catch (error) {
-      console.error("Error updating report:", error);
       setMessage({ type: "error", text: "Something went wrong." });
     }
   };
 
-  // Compute stats from the current list (client‑side)
-  const stats = {
-    total: reports.length,
-    pending: reports.filter(r => r.status === "pending").length,
-    reviewed: reports.filter(r => r.status === "reviewed").length,
-    dismissed: reports.filter(r => r.status === "dismissed").length,
-    actioned: reports.filter(r => r.status === "actioned").length,
+  const openActionModal = (reportId: string) => {
+    setSelectedReportId(reportId);
+    setActionType(ACTION_TYPES[0].value);
+    setActionNote("");
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedReportId(null);
+  };
+
+  const handleActionSubmit = async () => {
+    if (!selectedReportId) return;
+    if (!actionType) {
+      setMessage({ type: "error", text: "Please select an action type." });
+      return;
+    }
+    await updateStatus(selectedReportId, "actioned", { actionType, actionNote });
+    closeModal();
   };
 
   const statusColor = (status: string) => {
@@ -78,6 +107,14 @@ export default function AdminReports() {
       case "actioned": return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
       default: return "bg-gray-100 text-gray-800";
     }
+  };
+
+  const stats = {
+    total: reports.length,
+    pending: reports.filter(r => r.status === "pending").length,
+    reviewed: reports.filter(r => r.status === "reviewed").length,
+    dismissed: reports.filter(r => r.status === "dismissed").length,
+    actioned: reports.filter(r => r.status === "actioned").length,
   };
 
   if (loading) {
@@ -174,6 +211,11 @@ export default function AdminReports() {
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor(report.status)}`}>
                       {report.status.toUpperCase()}
                     </span>
+                    {report.actionType && (
+                      <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded">
+                        {report.actionType.replace("_", " ")}
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                     Reported by @{report.reporter.username}
@@ -193,6 +235,16 @@ export default function AdminReports() {
                   {report.details && (
                     <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
                       Details: {report.details}
+                    </p>
+                  )}
+                  {report.actionNote && (
+                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                      Note: {report.actionNote}
+                    </p>
+                  )}
+                  {report.actionedAt && (
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                      Actioned on {new Date(report.actionedAt).toLocaleString()}
                     </p>
                   )}
                   <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
@@ -215,7 +267,7 @@ export default function AdminReports() {
                         Review
                       </button>
                       <button
-                        onClick={() => updateStatus(report.id, "actioned")}
+                        onClick={() => openActionModal(report.id)}
                         className="px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
                       >
                         Action
@@ -248,6 +300,65 @@ export default function AdminReports() {
           >
             Next
           </button>
+        </div>
+      )}
+
+      {/* ─── Modal ────────────────────────────────────────────────── */}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6 relative">
+            <button
+              onClick={closeModal}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Choose Action</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Action Type
+                </label>
+                <select
+                  value={actionType}
+                  onChange={(e) => setActionType(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
+                >
+                  {ACTION_TYPES.map((at) => (
+                    <option key={at.value} value={at.value}>
+                      {at.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Note (optional)
+                </label>
+                <textarea
+                  value={actionNote}
+                  onChange={(e) => setActionNote(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none focus:ring-2 focus:ring-zrp-red focus:border-transparent"
+                  placeholder="Add any details about the action taken..."
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleActionSubmit}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+              >
+                Confirm Action
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
