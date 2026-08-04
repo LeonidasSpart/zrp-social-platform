@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
 import { rateLimit } from "@/lib/rate-limit";
+import { getUserPlan, getPlanLimits, checkPostLength, checkImagesPerPost, checkScheduledPostsCount } from "@/lib/limit-checker";
 
 export async function GET(req: NextRequest) {
   // ─── RATE LIMIT: 100 requests per minute ──────────────────────
@@ -74,7 +75,6 @@ export async function GET(req: NextRequest) {
             },
           },
         },
-        // ✅ QUOTE REPOST – include the quoted post
         quotePost: {
           include: {
             author: {
@@ -181,7 +181,30 @@ export async function POST(req: NextRequest) {
       quotePostId,
     } = await req.json();
 
-    // ─── Validate scheduling ─────────────────────────────────────────
+    // ─── Get user with plan ──────────────────────────────────────────
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { plan: true },
+    });
+    const plan = getUserPlan(user);
+    const limits = getPlanLimits(plan);
+
+    // ─── 1. Check post length ────────────────────────────────────────
+    const contentLength = content?.trim()?.length || 0;
+    const lengthCheck = checkPostLength(contentLength, plan);
+    if (!lengthCheck.allowed) {
+      return NextResponse.json({ error: lengthCheck.message }, { status: 400 });
+    }
+
+    // ─── 2. Check images per post ────────────────────────────────────
+    // Currently we have a single imageUrl; treat it as 1 if provided.
+    const imageCount = imageUrl ? 1 : 0;
+    const imageCheck = checkImagesPerPost(imageCount, plan);
+    if (!imageCheck.allowed) {
+      return NextResponse.json({ error: imageCheck.message }, { status: 400 });
+    }
+
+    // ─── 3. Check scheduled posts limit (if scheduling) ────────────
     if (status === "scheduled") {
       if (!scheduledAt) {
         return NextResponse.json(
@@ -195,6 +218,25 @@ export async function POST(req: NextRequest) {
           { error: "Scheduled time must be in the future." },
           { status: 400 }
         );
+      }
+
+      // Count scheduled posts in the current month
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const scheduledCount = await prisma.post.count({
+        where: {
+          authorId: session.user.id,
+          status: "scheduled",
+          scheduledAt: {
+            gte: startOfMonth,
+            lt: endOfMonth,
+          },
+        },
+      });
+      const scheduledCheck = checkScheduledPostsCount(scheduledCount, plan);
+      if (!scheduledCheck.allowed) {
+        return NextResponse.json({ error: scheduledCheck.message }, { status: 400 });
       }
     }
 
