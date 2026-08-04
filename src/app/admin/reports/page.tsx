@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Flag, Clock, CheckCircle, AlertTriangle, Filter } from "lucide-react";
 
 interface Report {
   id: string;
   reason: string;
   details: string | null;
-  status: string;
+  status: "pending" | "reviewed" | "dismissed" | "actioned";
   createdAt: string;
+  updatedAt?: string;
   reporter: { username: string; name: string };
   post: { id: string; content: string; author: { username: string } } | null;
   comment: { id: string; content: string; author: { username: string } } | null;
@@ -19,14 +21,15 @@ export default function AdminReports() {
   const [statusFilter, setStatusFilter] = useState("pending");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const fetchReports = async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/admin/reports?status=${statusFilter}&page=${page}`);
       const data = await res.json();
-      setReports(data.reports);
-      setTotalPages(data.totalPages);
+      setReports(data.reports || []);
+      setTotalPages(data.totalPages || 1);
     } catch (error) {
       console.error("Error fetching reports:", error);
     } finally {
@@ -38,85 +41,213 @@ export default function AdminReports() {
     fetchReports();
   }, [page, statusFilter]);
 
-  const updateStatus = async (reportId: string, status: string) => {
+  const updateStatus = async (reportId: string, newStatus: string) => {
     try {
       const res = await fetch(`/api/admin/reports/${reportId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status: newStatus }),
       });
-      if (res.ok) fetchReports();
+      if (res.ok) {
+        setMessage({ type: "success", text: `Report ${newStatus}.` });
+        fetchReports();
+        setTimeout(() => setMessage(null), 3000);
+      } else {
+        setMessage({ type: "error", text: "Failed to update report." });
+      }
     } catch (error) {
       console.error("Error updating report:", error);
+      setMessage({ type: "error", text: "Something went wrong." });
     }
   };
 
-  if (loading) return <div className="text-center py-12 text-gray-500">Loading...</div>;
+  // Compute stats from the current list (client‑side)
+  const stats = {
+    total: reports.length,
+    pending: reports.filter(r => r.status === "pending").length,
+    reviewed: reports.filter(r => r.status === "reviewed").length,
+    dismissed: reports.filter(r => r.status === "dismissed").length,
+    actioned: reports.filter(r => r.status === "actioned").length,
+  };
+
+  const statusColor = (status: string) => {
+    switch (status) {
+      case "pending": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
+      case "reviewed": return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+      case "dismissed": return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
+      case "actioned": return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-zrp-red border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Reports</h1>
-
-      <div className="flex gap-2 mb-4">
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg"
-        >
-          <option value="pending">Pending</option>
-          <option value="reviewed">Reviewed</option>
-          <option value="dismissed">Dismissed</option>
-          <option value="actioned">Actioned</option>
-        </select>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Reports</h1>
+        <div className="flex items-center gap-3">
+          <Filter className="w-4 h-4 text-gray-400" />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-zrp-red focus:border-transparent"
+          >
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="reviewed">Reviewed</option>
+            <option value="dismissed">Dismissed</option>
+            <option value="actioned">Actioned</option>
+          </select>
+        </div>
       </div>
 
-      <div className="space-y-2">
-        {reports.map((report) => (
-          <div key={report.id} className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
-            <div className="flex justify-between items-start">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-medium text-gray-900 dark:text-white">{report.reason}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-xs ${
-                    report.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                    report.status === 'dismissed' ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' :
-                    report.status === 'actioned' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
-                    'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                  }`}>{report.status}</span>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
+          <Flag className="w-5 h-5 text-blue-500" />
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-white">{stats.total}</p>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
+          <Clock className="w-5 h-5 text-yellow-500" />
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Pending</p>
+            <p className="text-lg font-bold text-yellow-600 dark:text-yellow-400">{stats.pending}</p>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
+          <CheckCircle className="w-5 h-5 text-blue-500" />
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Reviewed</p>
+            <p className="text-lg font-bold text-blue-600 dark:text-blue-400">{stats.reviewed}</p>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
+          <AlertTriangle className="w-5 h-5 text-gray-500" />
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Dismissed</p>
+            <p className="text-lg font-bold text-gray-600 dark:text-gray-400">{stats.dismissed}</p>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
+          <CheckCircle className="w-5 h-5 text-green-500" />
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Actioned</p>
+            <p className="text-lg font-bold text-green-600 dark:text-green-400">{stats.actioned}</p>
+          </div>
+        </div>
+      </div>
+
+      {message && (
+        <div className={`p-3 rounded-lg mb-4 ${
+          message.type === "success"
+            ? "bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
+            : "bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800"
+        }`}>
+          {message.text}
+        </div>
+      )}
+
+      {/* Report List */}
+      <div className="space-y-3">
+        {reports.length === 0 ? (
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">No reports to show.</div>
+        ) : (
+          reports.map((report) => (
+            <div
+              key={report.id}
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-medium text-gray-900 dark:text-white">{report.reason}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor(report.status)}`}>
+                      {report.status.toUpperCase()}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                    Reported by @{report.reporter.username}
+                  </p>
+                  {report.post && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">
+                      Post: {report.post.content.substring(0, 120)}
+                      {report.post.content.length > 120 && "..."}
+                    </p>
+                  )}
+                  {report.comment && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">
+                      Comment: {report.comment.content.substring(0, 120)}
+                      {report.comment.content.length > 120 && "..."}
+                    </p>
+                  )}
+                  {report.details && (
+                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                      Details: {report.details}
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    {new Date(report.createdAt).toLocaleString()}
+                  </p>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                  Reported by {report.reporter.name || report.reporter.username}
-                </p>
-                {report.post && (
-                  <p className="text-sm text-gray-500 mt-1">Post: "{report.post.content.substring(0, 100)}..."</p>
-                )}
-                {report.comment && (
-                  <p className="text-sm text-gray-500 mt-1">Comment: "{report.comment.content.substring(0, 100)}..."</p>
-                )}
-                {report.details && (
-                  <p className="text-sm text-gray-400 mt-1">Details: {report.details}</p>
-                )}
-                <p className="text-xs text-gray-400 mt-1">{new Date(report.createdAt).toLocaleString()}</p>
-              </div>
-              <div className="flex gap-2 ml-4">
-                {report.status === 'pending' && (
-                  <>
-                    <button onClick={() => updateStatus(report.id, 'dismissed')} className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">Dismiss</button>
-                    <button onClick={() => updateStatus(report.id, 'actioned')} className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700">Action</button>
-                    <button onClick={() => updateStatus(report.id, 'reviewed')} className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">Review</button>
-                  </>
-                )}
+                <div className="flex gap-2 flex-shrink-0">
+                  {report.status === "pending" && (
+                    <>
+                      <button
+                        onClick={() => updateStatus(report.id, "dismissed")}
+                        className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                      >
+                        Dismiss
+                      </button>
+                      <button
+                        onClick={() => updateStatus(report.id, "reviewed")}
+                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                      >
+                        Review
+                      </button>
+                      <button
+                        onClick={() => updateStatus(report.id, "actioned")}
+                        className="px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                      >
+                        Action
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {totalPages > 1 && (
         <div className="flex justify-center gap-2 mt-4">
-          <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page===1} className="px-3 py-1 border rounded disabled:opacity-50">Previous</button>
-          <span className="px-3 py-1">Page {page} of {totalPages}</span>
-          <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page===totalPages} className="px-3 py-1 border rounded disabled:opacity-50">Next</button>
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+          >
+            Previous
+          </button>
+          <span className="px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+          >
+            Next
+          </button>
         </div>
       )}
     </div>
