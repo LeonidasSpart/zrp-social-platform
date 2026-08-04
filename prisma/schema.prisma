@@ -28,7 +28,7 @@ model User {
   emailVerified        DateTime?
   verificationToken    String?     @unique
   verificationTokenExpiry DateTime?
-  pendingEmail         String?     @unique    // for email change flow
+  pendingEmail         String?     @unique
 
   // ─── Account Deletion ────────────────────────────────────────────
   deletionRequestedAt  DateTime?
@@ -39,7 +39,7 @@ model User {
   avatarUrl   String?   @db.Text
   coverUrl    String?   @db.Text
   isPrivate   Boolean   @default(false)
-  isAdmin     Boolean   @default(false)   // kept for compatibility
+  isAdmin     Boolean   @default(false)
   badgeType   String?
   location    String?
   country     String?
@@ -48,23 +48,15 @@ model User {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  // ─── ROLE (ADMIN, MODERATOR, USER) ──────────────────────────────
   role        Role      @default(USER)
-
-  // ─── ONBOARDING ──────────────────────────────────────────────────
   onboardingCompleted Boolean @default(false)
-
-  // ─── BANNED ─────────────────────────────────────────────────────
   banned      Boolean   @default(false)
 
-  // ─── EMAIL NOTIFICATION PREFERENCES ─────────────────────────────
-  emailPreferences Json?   // stores { mentions, messages, likes, comments, follows, reposts }
+  emailPreferences Json?
 
-  // ─── PINNED POST ──────────────────────────────────────────────────
   pinnedPostId  String?   @unique
   pinnedPost    Post?     @relation("PinnedPost", fields: [pinnedPostId], references: [id], onDelete: SetNull)
 
-  // ─── RELATIONS ────────────────────────────────────────────────────
   posts       Post[]
   comments    Comment[]
   following   Follow[]  @relation("Following")
@@ -101,17 +93,13 @@ model Post {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  // ─── QUOTE REPOST ──────────────────────────────────────────────────
-  quotePostId String?            // ID of the post being quoted
+  quotePostId String?
   quotePost   Post?   @relation("QuotePost", fields: [quotePostId], references: [id], onDelete: SetNull)
-  quotedBy    Post[]  @relation("QuotePost") // posts that quote this one
+  quotedBy    Post[]  @relation("QuotePost")
 
-  // ─── ANALYTICS ──────────────────────────────────────────────────
   views       Int       @default(0)
-
-  // ─── SCHEDULING ──────────────────────────────────────────────────
-  scheduledAt DateTime?                           // null = published immediately
-  status      String    @default("published")     // "draft" | "scheduled" | "published"
+  scheduledAt DateTime?
+  status      String    @default("published")
 
   hashtags    String[]
   mentions    String[]
@@ -119,7 +107,6 @@ model Post {
   poll        Poll?     @relation(fields: [pollId], references: [id])
   isPoll      Boolean   @default(false)
 
-  // ─── PINNED RELATION ──────────────────────────────────────────────
   pinnedBy    User?     @relation("PinnedPost")
 
   comments    Comment[]
@@ -130,7 +117,6 @@ model Post {
   reports     Report[]
   bookmarks   Bookmark[]
 
-  // ─── INDEXES ──────────────────────────────────────────────────────
   @@index([createdAt])
   @@index([authorId])
   @@index([status])
@@ -141,13 +127,12 @@ model Post {
 model Comment {
   id          String    @id @default(cuid())
   content     String    @db.Text
-  imageUrl    String?   // allow images in comments
+  imageUrl    String?
   postId      String
   post        Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   authorId    String
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
-  // ─── NESTED REPLIES ──────────────────────────────────────────────
   parentId    String?
   parent      Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies     Comment[] @relation("CommentReplies")
@@ -157,7 +142,6 @@ model Comment {
 
   reports     Report[]
 
-  // ─── INDEXES ──────────────────────────────────────────────────────
   @@index([postId])
   @@index([createdAt])
   @@index([parentId])
@@ -195,7 +179,7 @@ model Repost {
   post          Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   userId        String
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quoteContent  String?   @db.Text // optional quote text for classic repost
+  quoteContent  String?   @db.Text
   createdAt     DateTime  @default(now())
 
   @@unique([postId, userId])
@@ -328,8 +312,7 @@ model Report {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  // ─── MODERATION FIELDS ────────────────────────────────────────────
-  actionType   String?   // e.g. "DELETE_POST", "WARN_USER", "BAN_USER", "MUTE_USER", "DELETE_COMMENT", "OTHER"
+  actionType   String?
   actionNote   String?   @db.Text
   actionedAt   DateTime?
 
@@ -357,7 +340,7 @@ model PushSubscription {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   endpoint  String   @unique
-  keys      Json     // store { auth, p256dh }
+  keys      Json
   createdAt DateTime @default(now())
 
   @@index([userId])
@@ -372,7 +355,7 @@ model Story {
   mediaUrl    String?
   mediaType   String?   // "image" or "video"
   createdAt   DateTime  @default(now())
-  expiresAt   DateTime  @default(now() + 24 hours)
+  expiresAt   DateTime   // set in application code (24h later)
   views       StoryView[]
 
   @@index([userId])
