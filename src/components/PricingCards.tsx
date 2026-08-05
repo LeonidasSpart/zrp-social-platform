@@ -15,8 +15,13 @@ interface PricingCardProps {
 function PricingCard({ plan, limits, isCurrent }: PricingCardProps) {
   const [showModal, setShowModal] = useState(false);
   const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
+
+  // ─── Handle price safely ──────────────────────────────────────────
   const price = limits.priceMonthly;
-  const displayPrice = price === 0 ? 'Free' : `CHF ${price.toFixed(2)} / month`;
+  let displayPrice = "Free";
+  if (price !== null && price !== 0) {
+    displayPrice = `CHF ${price.toFixed(2)} / month`;
+  }
 
   const features = [
     { label: `Posts up to ${limits.postLength === 999999 ? 'Unlimited' : limits.postLength} characters`, included: true },
@@ -58,9 +63,9 @@ function PricingCard({ plan, limits, isCurrent }: PricingCardProps) {
         </div>
         <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
           {displayPrice}
-          {price !== 0 && <span className="text-sm font-normal text-gray-500 ml-1">/ month</span>}
+          {price !== null && price !== 0 && <span className="text-sm font-normal text-gray-500 ml-1">/ month</span>}
         </div>
-        {price !== 0 && (
+        {price !== null && price !== 0 && (
           <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">
             Billed monthly. 35% to charity.
           </p>
@@ -102,7 +107,6 @@ function PricingCard({ plan, limits, isCurrent }: PricingCardProps) {
           onClose={() => setShowModal(false)}
           onSuccess={() => {
             setShowModal(false);
-            // Optionally refresh session or show success toast
           }}
         />
       )}
