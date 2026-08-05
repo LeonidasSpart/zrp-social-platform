@@ -134,15 +134,18 @@ export default function PostPage({ params }: { params: { id: string } }) {
       if (res.ok) {
         setCommentContent("");
         fetchComments();
-        // Update post comment count
-        setPost((prev) =>
-          prev
-            ? {
-                ...prev,
-                _count: { ...prev._count, comments: (prev._count?.comments || 0) + 1 },
-              }
-            : prev
-        );
+        // Update post comment count safely
+        setPost((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            _count: {
+              likes: prev._count?.likes ?? 0,
+              comments: (prev._count?.comments ?? 0) + 1,
+              reposts: prev._count?.reposts ?? 0,
+            },
+          };
+        });
       } else {
         const err = await res.json();
         alert(err.error || "Failed to post comment");
@@ -206,7 +209,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
         </form>
       )}
 
-      {/* ─── Comments (threaded, no duplicate heading) ──────────── */}
+      {/* ─── Comments (threaded) ────────────────────────────────────── */}
       {comments.length > 0 && (
         <div className="mt-6 space-y-4">
           {comments.map((comment) => (
