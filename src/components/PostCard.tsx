@@ -114,7 +114,7 @@ export default function PostCard({
 
   const [lastClickTime, setLastClickTime] = useState(0);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
-  const [lightboxVideo, setLightboxVideo] = useState<string | null>(null); // ✅ for videos
+  const [lightboxVideo, setLightboxVideo] = useState<string | null>(null);
   const [reactions, setReactions] = useState<Record<string, number>>({});
   const [userReaction, setUserReaction] = useState<string | null>(null);
   const [reactionsLoading, setReactionsLoading] = useState(true);
@@ -125,8 +125,19 @@ export default function PostCard({
   const isRepost = post.isRepost === true;
   const originalAuthor = post.repostOriginalAuthor;
 
-  // ─── Detect if media is a video ──────────────────────────────────
-  const isVideo = post.imageUrl?.match(/\.(mp4|webm|mov|avi|mkv)$/i);
+  // ─── Improved video detection ──────────────────────────────────────
+  const isVideo = () => {
+    if (!post.imageUrl) return false;
+    const url = post.imageUrl.toLowerCase();
+    const path = url.split('?')[0];
+    const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'm4v', '3gp'];
+    if (videoExtensions.some(ext => path.endsWith('.' + ext))) return true;
+    // Additional hints
+    if (url.includes('/video/') || url.includes('video')) return true;
+    return false;
+  };
+
+  const video = isVideo();
 
   // ─── FETCH REPOST STATUS ──────────────────────────────────────────
   useEffect(() => {
@@ -487,30 +498,32 @@ export default function PostCard({
                   className="mt-2 rounded-lg overflow-hidden cursor-pointer group relative"
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (isVideo) {
+                    if (video) {
                       setLightboxVideo(post.imageUrl!);
                     } else {
                       setLightboxImage(post.imageUrl!);
                     }
                   }}
                 >
-                  {isVideo ? (
-                    <>
-                      <video
-                        src={post.imageUrl}
-                        className="w-full max-h-[400px] object-contain"
-                        controls
-                        playsInline
-                        poster={post.imageUrl} // fallback – some browsers show first frame
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20 pointer-events-none">
-                        <div className="bg-black/50 rounded-full p-3">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
-                            <polygon points="5,3 19,12 5,21" />
-                          </svg>
-                        </div>
-                      </div>
-                    </>
+                  {video ? (
+                    <video
+                      src={post.imageUrl}
+                      className="w-full max-h-[400px] object-contain"
+                      controls
+                      playsInline
+                      webkit-playsinline="true"
+                      preload="metadata"
+                      poster={post.imageUrl}
+                      onError={(e) => {
+                        // Fallback to image if video fails
+                        const target = e.target as HTMLVideoElement;
+                        target.style.display = 'none';
+                        const img = document.createElement('img');
+                        img.src = post.imageUrl!;
+                        img.className = 'w-full';
+                        target.parentNode?.appendChild(img);
+                      }}
+                    />
                   ) : (
                     <>
                       <img src={post.imageUrl} alt="Post image" className="w-full" />
@@ -707,6 +720,7 @@ export default function PostCard({
               className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
               controls
               playsInline
+              webkit-playsinline="true"
               autoPlay
             />
             <button
