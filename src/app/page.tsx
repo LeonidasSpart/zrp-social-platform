@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback, useRef } from "react";
 import PostComposer from "@/components/PostComposer";
 import PostCard from "@/components/PostCard";
-import StoriesBar from "@/components/StoriesBar";               // ✅ new
+import StoriesBar from "@/components/StoriesBar";
 import { Sparkles, Users } from "lucide-react";
 
 interface Post {
@@ -41,6 +41,20 @@ export default function HomePage() {
   const [error, setError] = useState<Error | null>(null);
   const cursorRef = useRef<string | null>(null);
   const observerRef = useRef<HTMLDivElement | null>(null);
+
+  // ─── Check online status ──────────────────────────────────────────
+  const [isOnline, setIsOnline] = useState(true);
+  useEffect(() => {
+    setIsOnline(navigator.onLine);
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   // ─── Fetch posts based on feed type ──────────────────────────────
   const fetchPosts = useCallback(
@@ -140,7 +154,25 @@ export default function HomePage() {
     }
   }, [status, router]);
 
+  // ─── If offline and session is loading, show offline message ────
   if (status === "loading") {
+    if (!isOnline) {
+      return (
+        <div className="max-w-2xl mx-auto py-4 px-4">
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 text-center">
+            <p className="text-yellow-700 dark:text-yellow-400 font-medium">
+              You are offline. Please check your internet connection.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-2 bg-yellow-100 dark:bg-yellow-800 text-yellow-700 dark:text-yellow-300 px-3 py-1 rounded-full text-sm"
+            >
+              Try again
+            </button>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-gray-500">Loading...</div>
