@@ -124,6 +124,23 @@ export default function PostCard({
   const isRepost = post.isRepost === true;
   const originalAuthor = post.repostOriginalAuthor;
 
+  // ─── FETCH REPOST STATUS ──────────────────────────────────────────
+  useEffect(() => {
+    const checkRepost = async () => {
+      if (!session) return;
+      try {
+        const res = await fetch(`/api/posts/${post.id}/repost`);
+        if (res.ok) {
+          const data = await res.json();
+          setReposted(data.reposted);
+        }
+      } catch (error) {
+        console.error("Error checking repost:", error);
+      }
+    };
+    checkRepost();
+  }, [post.id, session]);
+
   // ─── FETCH REACTIONS ──────────────────────────────────────────────
   const fetchReactions = async () => {
     try {
@@ -502,15 +519,27 @@ export default function PostCard({
                 </button>
                 {repostDropdownOpen && (
                   <div className="absolute left-0 mt-1 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
-                    <button
-                      onClick={() => {
-                        handleRepost();
-                        setRepostDropdownOpen(false);
-                      }}
-                      className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                    >
-                      Repost
-                    </button>
+                    {reposted ? (
+                      <button
+                        onClick={() => {
+                          handleRepost();
+                          setRepostDropdownOpen(false);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      >
+                        Undo Repost
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          handleRepost();
+                          setRepostDropdownOpen(false);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      >
+                        Repost
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         setShowQuoteModal(true);
