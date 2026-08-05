@@ -504,7 +504,6 @@ export default function PostCard({
                   onClick={(e) => {
                     e.stopPropagation();
                     if (video) {
-                      // Toggle play/pause inline, not lightbox
                       if (videoRef.current) {
                         if (videoRef.current.paused) {
                           videoRef.current.play();
@@ -534,7 +533,6 @@ export default function PostCard({
                         onEnded={() => setIsVideoPlaying(false)}
                         onContextMenu={(e) => e.preventDefault()}
                         onError={(e) => {
-                          // Fallback to image if video fails
                           const target = e.target as HTMLVideoElement;
                           target.style.display = 'none';
                           const img = document.createElement('img');
@@ -543,20 +541,6 @@ export default function PostCard({
                           target.parentNode?.appendChild(img);
                         }}
                       />
-                      {/* Play overlay – hidden when playing */}
-                      {!isVideoPlaying && (
-                        <div className="absolute inset-0 flex items-center justify-center transition bg-black/20 pointer-events-none">
-                          <div className="bg-black/60 rounded-full p-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="white">
-                              <polygon points="5,3 19,12 5,21" />
-                            </svg>
-                          </div>
-                        </div>
-                      )}
-                      {/* Watermark */}
-                      <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/50 rounded text-xs text-white font-medium pointer-events-none select-none">
-                        @{post.author.username}
-                      </div>
                     </div>
                   ) : (
                     <>
