@@ -33,6 +33,8 @@ interface UserProfile {
   createdAt: string;
   isAdmin: boolean;
   plan: string | null;
+  publicLikes: boolean;      // ✅ privacy setting
+  publicFollowing: boolean;  // ✅ privacy setting
   _count: {
     posts: number;
     followers: number;
@@ -56,7 +58,7 @@ interface Post {
     avatarUrl?: string;
     badgeType?: string | null;
   };
-  _count: {                    // ✅ Made required, added quotedBy
+  _count: {
     likes: number;
     comments: number;
     reposts: number;
@@ -74,7 +76,7 @@ interface Post {
   postId?: string; // for replies
 }
 
-type TabType = "posts" | "replies" | "media" | "likes" | "analytics";
+type TabType = "posts" | "replies" | "media" | "likes" | "reposts" | "analytics";
 
 export default function ProfilePage({ params }: { params: { username: string } }) {
   const { data: session, status } = useSession();
@@ -153,7 +155,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
       const res = await fetch(`/api/posts/${postId}`);
       if (res.ok) {
         const data = await res.json();
-        // Ensure pinnedPost has the required _count shape
         setPinnedPost(data);
       }
     } catch (error) {
@@ -172,6 +173,8 @@ export default function ProfilePage({ params }: { params: { username: string } }
         endpoint = `/api/users/${params.username}/media`;
       } else if (activeTab === "likes") {
         endpoint = `/api/users/${params.username}/likes`;
+      } else if (activeTab === "reposts") {
+        endpoint = `/api/users/${params.username}/reposts`;
       }
       const res = await fetch(endpoint);
       const data = await res.json();
@@ -270,7 +273,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
       if (res.ok) {
         const data = await res.json();
         setIsBlocked(data.blocked);
-        // Refresh profile to update follower counts etc.
         fetchProfile();
       } else {
         const err = await res.json();
@@ -481,6 +483,18 @@ export default function ProfilePage({ params }: { params: { username: string } }
       </Link>
     );
   };
+
+  // ─── Determine which tabs to show based on privacy ──────────────
+  const showLikesTab = isOwnProfile || profile.publicLikes !== false;
+  const showFollowingCount = isOwnProfile || profile.publicFollowing !== false;
+
+  // ─── Available tabs ──────────────────────────────────────────────
+  const allTabs: TabType[] = ["posts", "replies", "media", "likes", "reposts", "analytics"];
+  const visibleTabs = allTabs.filter((tab) => {
+    if (tab === "analytics" && !isOwnProfile) return false;
+    if (tab === "likes" && !showLikesTab) return false;
+    return true;
+  });
 
   return (
     <div className="max-w-2xl mx-auto bg-white dark:bg-zrp-deepBlack min-h-screen">
@@ -730,15 +744,21 @@ export default function ProfilePage({ params }: { params: { username: string } }
           )}
 
           <div className="flex gap-4 mt-2">
-            <Link
-              href={`/profile/${profile.username}/following`}
-              className="text-sm text-gray-500 dark:text-gray-400 hover:underline whitespace-nowrap"
-            >
-              <span className="font-semibold text-gray-900 dark:text-white">
-                {formatProfileCount(profile._count.following)}
-              </span>{" "}
-              Following
-            </Link>
+            {showFollowingCount ? (
+              <Link
+                href={`/profile/${profile.username}/following`}
+                className="text-sm text-gray-500 dark:text-gray-400 hover:underline whitespace-nowrap"
+              >
+                <span className="font-semibold text-gray-900 dark:text-white">
+                  {formatProfileCount(profile._count.following)}
+                </span>{" "}
+                Following
+              </Link>
+            ) : (
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                <span className="font-semibold text-gray-900 dark:text-white">—</span> Following
+              </span>
+            )}
             <Link
               href={`/profile/${profile.username}/followers`}
               className="text-sm text-gray-500 dark:text-gray-400 hover:underline whitespace-nowrap"
@@ -771,8 +791,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
       {/* ─── Tabs ─── */}
       <div className="flex mt-4 px-4 border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
-        {(["posts", "replies", "media", "likes", "analytics"] as const).map((tab) => {
-          if (tab === "analytics" && !isOwnProfile) return null;
+        {visibleTabs.map((tab) => {
           return (
             <button
               key={tab}
@@ -865,6 +884,15 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
             {/* ─── Likes Tab ──────────────────────────────────────────── */}
             {activeTab === "likes" && (
+              <>
+                {posts.map((post) => (
+                  <PostCard key={post.id} post={post} onUpdate={fetchPosts} />
+                ))}
+              </>
+            )}
+
+            {/* ─── Reposts Tab ────────────────────────────────────────── */}
+            {activeTab === "reposts" && (
               <>
                 {posts.map((post) => (
                   <PostCard key={post.id} post={post} onUpdate={fetchPosts} />
