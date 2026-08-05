@@ -19,7 +19,7 @@ interface PostCardProps {
     id: string;
     content: string;
     imageUrl?: string;
-    mediaType?: string; // 👈 allow backend to specify "video"
+    mediaType?: string;
     createdAt: string;
     updatedAt?: string;
     views?: number;
@@ -52,7 +52,6 @@ interface PostCardProps {
   showInlineComments?: boolean;
 }
 
-// ─── PARSE HASHTAGS AND MENTIONS ──────────────────────────────────
 function parseContent(content: string) {
   const parts: { type: "text" | "hashtag" | "mention"; value: string }[] = [];
   let lastIndex = 0;
@@ -78,7 +77,6 @@ function parseContent(content: string) {
   return parts;
 }
 
-// ─── FORMAT COUNTS LIKE X ────────────────────────────────────────────
 function formatCount(n: number) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
   if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
@@ -109,7 +107,6 @@ export default function PostCard({
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
   const hasCountedView = useRef(false);
 
-  // ─── Repost dropdown ──────────────────────────────────────────────
   const [repostDropdownOpen, setRepostDropdownOpen] = useState(false);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
 
@@ -126,12 +123,9 @@ export default function PostCard({
   const isRepost = post.isRepost === true;
   const originalAuthor = post.repostOriginalAuthor;
 
-  // ─── ROBUST VIDEO DETECTION ──────────────────────────────────────
   const isVideo = () => {
-    // 1. If backend provides mediaType, use it
     if (post.mediaType === "video") return true;
     if (!post.imageUrl) return false;
-
     const url = post.imageUrl.toLowerCase();
     const path = url.split('?')[0];
     const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'm4v', '3gp'];
@@ -141,17 +135,15 @@ export default function PostCard({
   };
   const video = isVideo();
 
-  // ─── Video ref to ensure controls are present ────────────────────
   const videoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     if (video && videoRef.current) {
-      // Force controls to be enabled (some browsers may override)
       videoRef.current.controls = true;
       videoRef.current.setAttribute('controls', 'true');
+      videoRef.current.style.pointerEvents = 'auto';
     }
   }, [video]);
 
-  // ─── FETCH REPOST STATUS ──────────────────────────────────────────
   useEffect(() => {
     const checkRepost = async () => {
       if (!session) return;
@@ -168,7 +160,6 @@ export default function PostCard({
     checkRepost();
   }, [post.id, session]);
 
-  // ─── FETCH REACTIONS ──────────────────────────────────────────────
   const fetchReactions = async () => {
     try {
       const res = await fetch(`/api/posts/${post.id}/reaction`);
@@ -210,7 +201,6 @@ export default function PostCard({
     }
   };
 
-  // ─── BOOKMARK ──────────────────────────────────────────────────────
   useEffect(() => {
     const checkBookmark = async () => {
       try {
@@ -228,7 +218,6 @@ export default function PostCard({
     }
   }, [post.id, session]);
 
-  // ─── VIEW COUNT ──────────────────────────────────────────────────
   useEffect(() => {
     if (hasCountedView.current) return;
     hasCountedView.current = true;
@@ -259,8 +248,6 @@ export default function PostCard({
       sessionStorage.setItem(storageKey, JSON.stringify(viewed.slice(-500)));
     } catch {}
   }, [post.id]);
-
-  // ─── HANDLERS ──────────────────────────────────────────────────────
 
   const handleLike = async () => {
     try {
@@ -376,7 +363,6 @@ export default function PostCard({
     }
   };
 
-  // ─── DOUBLE‑CLICK TO LIKE ──────────────────────────────────────────
   const handlePostClick = (e: React.MouseEvent) => {
     const now = Date.now();
     const timeSince = now - lastClickTime;
@@ -392,7 +378,6 @@ export default function PostCard({
     if (timeSince < 300) handleLike();
   };
 
-  // ─── TIME AGO ──────────────────────────────────────────────────────
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
     const minutes = Math.floor(diff / 60000);
@@ -532,8 +517,8 @@ export default function PostCard({
                         webkit-playsinline="true"
                         preload="metadata"
                         controlsList="nodownload"
+                        style={{ pointerEvents: 'auto' }}
                         onError={(e) => {
-                          // Fallback to image if video fails
                           const target = e.target as HTMLVideoElement;
                           target.style.display = 'none';
                           const img = document.createElement('img');
@@ -542,7 +527,6 @@ export default function PostCard({
                           target.parentNode?.appendChild(img);
                         }}
                       />
-                      {/* Play button overlay (visible on hover) */}
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20 pointer-events-none">
                         <div className="bg-black/60 rounded-full p-4">
                           <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="white">
@@ -563,7 +547,6 @@ export default function PostCard({
               )}
             </div>
 
-            {/* ─── ACTION BAR ──────────────────────────────────────────── */}
             <div className="flex items-center gap-4 mt-3 flex-wrap">
               <button
                 onClick={handleLike}
@@ -581,7 +564,6 @@ export default function PostCard({
                 <span>{formatCount(post._count?.comments || 0)}</span>
               </button>
 
-              {/* ─── Repost dropdown ───────────────────────────────────── */}
               <div className="relative">
                 <button
                   onClick={() => setRepostDropdownOpen(!repostDropdownOpen)}
@@ -626,19 +608,11 @@ export default function PostCard({
                 )}
               </div>
 
-              {/* Repost count link */}
-              <Link
-                href={`/post/${post.id}/reposts`}
-                className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
-              >
+              <Link href={`/post/${post.id}/reposts`} className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition">
                 <span className="font-medium">{formatCount(repostsCount)}</span>
               </Link>
 
-              {/* Quotes count link */}
-              <Link
-                href={`/post/${post.id}/quotes`}
-                className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
-              >
+              <Link href={`/post/${post.id}/quotes`} className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition">
                 <span className="font-medium">{formatCount(post._count?.quotedBy || 0)}</span>
               </Link>
 
@@ -661,7 +635,6 @@ export default function PostCard({
               </button>
             </div>
 
-            {/* ─── REACTIONS ────────────────────────────────────────── */}
             {!reactionsLoading && (
               <div className="flex items-center gap-2 mt-2 flex-wrap">
                 {Object.entries(reactions)
@@ -688,7 +661,6 @@ export default function PostCard({
               </div>
             )}
 
-            {/* ─── Inline comments ───────────────────────────────────── */}
             {showInlineComments && showComments && <Comments postId={post.id} onCommentAdded={onUpdate} />}
           </div>
         </div>
@@ -713,29 +685,20 @@ export default function PostCard({
 
       <ReportModal isOpen={showReportModal} onClose={() => setShowReportModal(false)} onSubmit={handleReport} />
 
-      {/* ─── Image lightbox ──────────────────────────────────────────── */}
       {lightboxImage && (
         <div
           className="fixed inset-0 bg-black/90 flex items-center justify-center z-[999] p-4"
           onClick={() => setLightboxImage(null)}
         >
           <div className="relative max-w-3xl w-full" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={lightboxImage}
-              alt="Full size"
-              className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
-            />
-            <button
-              onClick={() => setLightboxImage(null)}
-              className="absolute top-2 right-2 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition"
-            >
+            <img src={lightboxImage} alt="Full size" className="w-full h-auto max-h-[90vh] object-contain rounded-lg" />
+            <button onClick={() => setLightboxImage(null)} className="absolute top-2 right-2 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition">
               <X className="w-6 h-6" />
             </button>
           </div>
         </div>
       )}
 
-      {/* ─── Video lightbox ──────────────────────────────────────────── */}
       {lightboxVideo && (
         <div
           className="fixed inset-0 bg-black/90 flex items-center justify-center z-[999] p-4"
@@ -750,10 +713,7 @@ export default function PostCard({
               webkit-playsinline="true"
               autoPlay
             />
-            <button
-              onClick={() => setLightboxVideo(null)}
-              className="absolute top-2 right-2 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition"
-            >
+            <button onClick={() => setLightboxVideo(null)} className="absolute top-2 right-2 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition">
               <X className="w-6 h-6" />
             </button>
           </div>
@@ -773,7 +733,6 @@ export default function PostCard({
         </div>
       )}
 
-      {/* ─── Quote Post Modal ────────────────────────────────────────── */}
       {showQuoteModal && (
         <QuotePostModal
           post={post}
