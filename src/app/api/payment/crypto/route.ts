@@ -7,7 +7,9 @@ const PLANS = {
   pro: { amount: 9.99, label: "Pro" },
   business: { amount: 49.99, label: "Business" },
   enterprise: { amount: 99.99, label: "Enterprise" },
-};
+} as const;
+
+type Plan = keyof typeof PLANS;
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -16,9 +18,14 @@ export async function POST(req: NextRequest) {
   }
 
   const { plan, transactionId } = await req.json();
-  if (!PLANS[plan]) {
+
+  // Type guard: ensure plan is a valid key
+  if (!plan || typeof plan !== "string" || !(plan in PLANS)) {
     return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
   }
+
+  const planKey = plan as Plan;
+
   if (!transactionId?.trim()) {
     return NextResponse.json({ error: "Transaction signature is required" }, { status: 400 });
   }
@@ -27,7 +34,7 @@ export async function POST(req: NextRequest) {
   const existing = await prisma.paymentRequest.findFirst({
     where: {
       userId: session.user.id,
-      plan,
+      plan: planKey,
       status: "pending",
     },
   });
@@ -38,15 +45,13 @@ export async function POST(req: NextRequest) {
   const payment = await prisma.paymentRequest.create({
     data: {
       userId: session.user.id,
-      plan,
-      amount: PLANS[plan].amount,
+      plan: planKey,
+      amount: PLANS[planKey].amount,
       currency: "USDC",
       transactionId: transactionId.trim(),
       status: "pending",
     },
   });
-
-  // Notify admins (optional – you can add an email or in-app notification)
 
   return NextResponse.json({
     success: true,
