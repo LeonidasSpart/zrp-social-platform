@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   const adminCheck = await requireAdmin();
   if (!adminCheck.authorized) return adminCheck.response;
 
-  const { paymentId, transactionId } = await req.json();
+  const { paymentId } = await req.json();
 
   const payment = await prisma.paymentRequest.findUnique({
     where: { id: paymentId },
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Payment already processed" }, { status: 400 });
   }
 
-  // Upgrade the user
+  // Upgrade the user's plan
   await prisma.user.update({
     where: { id: payment.userId },
     data: { plan: payment.plan },
@@ -29,8 +29,8 @@ export async function POST(req: NextRequest) {
 
   await prisma.paymentRequest.update({
     where: { id: paymentId },
-    data: { status: "verified", transactionId },
+    data: { status: "verified" },
   });
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, message: `User upgraded to ${payment.plan}` });
 }
