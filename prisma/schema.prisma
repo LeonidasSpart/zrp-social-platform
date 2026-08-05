@@ -49,6 +49,10 @@ model User {
   onboardingCompleted Boolean @default(false)
   banned      Boolean   @default(false)
 
+  // ─── PRIVACY SETTINGS ──────────────────────────────────────────
+  publicLikes     Boolean   @default(true)   // true = visible to everyone
+  publicFollowing Boolean   @default(true)   // true = visible to everyone
+
   emailPreferences Json?
 
   pinnedPostId  String?   @unique
