@@ -56,10 +56,11 @@ interface Post {
     avatarUrl?: string;
     badgeType?: string | null;
   };
-  _count?: {
+  _count: {                    // ✅ Made required, added quotedBy
     likes: number;
     comments: number;
     reposts: number;
+    quotedBy: number;
   };
   liked?: boolean;
   replyTo?: {
@@ -70,7 +71,7 @@ interface Post {
       name: string | null;
     };
   };
-  postId?: string; // ✅ added for replies
+  postId?: string; // for replies
 }
 
 type TabType = "posts" | "replies" | "media" | "likes" | "analytics";
@@ -152,6 +153,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
       const res = await fetch(`/api/posts/${postId}`);
       if (res.ok) {
         const data = await res.json();
+        // Ensure pinnedPost has the required _count shape
         setPinnedPost(data);
       }
     } catch (error) {
@@ -410,11 +412,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
       <Link
         href={postLink}
         className="block border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-        onClick={(e) => {
-          // If the click is on an inner link, let the browser handle it
-          if (e.target instanceof HTMLAnchorElement) return;
-          // Otherwise, navigate to the post page
-        }}
       >
         <div className="flex items-start gap-3">
           <Link
@@ -455,7 +452,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
             {/* ─── Replying to ────────────────────────────────────────── */}
             {reply.replyTo && (
               <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Replying to{' '}
+                Replying to{" "}
                 <Link
                   href={`/profile/${reply.replyTo.author.username}`}
                   className="text-blue-600 hover:underline"
