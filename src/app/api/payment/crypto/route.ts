@@ -15,26 +15,41 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { plan } = await req.json();
+  const { plan, transactionId } = await req.json();
   if (!PLANS[plan]) {
     return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
   }
+  if (!transactionId?.trim()) {
+    return NextResponse.json({ error: "Transaction signature is required" }, { status: 400 });
+  }
 
-  // Store a pending payment request
+  // Check if user already has a pending request for this plan
+  const existing = await prisma.paymentRequest.findFirst({
+    where: {
+      userId: session.user.id,
+      plan,
+      status: "pending",
+    },
+  });
+  if (existing) {
+    return NextResponse.json({ error: "You already have a pending request for this plan." }, { status: 400 });
+  }
+
   const payment = await prisma.paymentRequest.create({
     data: {
       userId: session.user.id,
       plan,
       amount: PLANS[plan].amount,
       currency: "USDC",
+      transactionId: transactionId.trim(),
       status: "pending",
     },
   });
 
+  // Notify admins (optional – you can add an email or in-app notification)
+
   return NextResponse.json({
-    paymentId: payment.id,
-    walletAddress: process.env.SOLANA_WALLET_ADDRESS,
-    amount: PLANS[plan].amount,
-    plan,
+    success: true,
+    message: "Payment request submitted. An admin will verify it within 24 hours.",
   });
 }
