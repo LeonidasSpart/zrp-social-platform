@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { Heart, MessageCircle } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 interface Comment {
   id: string;
@@ -14,10 +17,45 @@ interface Comment {
     avatarUrl?: string;
   };
   parentId?: string;
-  replies?: Comment[]; // ✅ added for nested replies
+  replies?: Comment[];
+  _count?: {
+    likes: number;
+  };
+  liked?: boolean;
 }
 
-export default function CommentItem({ comment }: { comment: Comment }) {
+interface CommentItemProps {
+  comment: Comment;
+  onReply: (commentId: string) => void;
+  onUpdate: () => void;
+}
+
+export default function CommentItem({ comment, onReply, onUpdate }: CommentItemProps) {
+  const { data: session } = useSession();
+  const [liked, setLiked] = useState(comment.liked || false);
+  const [likesCount, setLikesCount] = useState(comment._count?.likes || 0);
+  const [isLiking, setIsLiking] = useState(false);
+
+  const handleLike = async () => {
+    if (!session || isLiking) return;
+    setIsLiking(true);
+    try {
+      const res = await fetch(`/api/comments/${comment.id}/like`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setLiked(data.liked);
+        setLikesCount((prev) => (data.liked ? prev + 1 : prev - 1));
+        onUpdate();
+      }
+    } catch (error) {
+      console.error("Error liking comment:", error);
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
   return (
     <div className="rounded-lg">
       {/* ─── Comment card ──────────────────────────────────────────── */}
@@ -64,6 +102,27 @@ export default function CommentItem({ comment }: { comment: Comment }) {
                 />
               </div>
             )}
+
+            {/* ─── Action buttons ───────────────────────────────────── */}
+            <div className="flex items-center gap-4 mt-2">
+              <button
+                onClick={handleLike}
+                disabled={isLiking}
+                className={`flex items-center gap-1 text-xs transition ${
+                  liked ? "text-red-500" : "text-gray-500 hover:text-red-500"
+                }`}
+              >
+                <Heart className={`w-3.5 h-3.5 ${liked ? "fill-red-500" : ""}`} />
+                {likesCount > 0 && <span>{likesCount}</span>}
+              </button>
+              <button
+                onClick={() => onReply(comment.id)}
+                className="flex items-center gap-1 text-xs text-gray-500 hover:text-zrp-red transition"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                Reply
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -72,7 +131,12 @@ export default function CommentItem({ comment }: { comment: Comment }) {
       {comment.replies && comment.replies.length > 0 && (
         <div className="ml-8 mt-2 space-y-2 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
           {comment.replies.map((reply) => (
-            <CommentItem key={reply.id} comment={reply} />
+            <CommentItem
+              key={reply.id}
+              comment={reply}
+              onReply={onReply}
+              onUpdate={onUpdate}
+            />
           ))}
         </div>
       )}
