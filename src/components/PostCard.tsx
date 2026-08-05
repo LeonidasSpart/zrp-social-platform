@@ -46,6 +46,7 @@ interface PostCardProps {
   showPinOption?: boolean;
   isPinned?: boolean;
   onPinToggle?: () => void;
+  hideReplies?: boolean; // ✅ new prop
 }
 
 // ─── PARSE HASHTAGS AND MENTIONS ──────────────────────────────────
@@ -87,6 +88,7 @@ export default function PostCard({
   showPinOption = false,
   isPinned = false,
   onPinToggle,
+  hideReplies = false, // ✅ default false
 }: PostCardProps) {
   const { data: session } = useSession();
   const [liked, setLiked] = useState(post.liked || false);
@@ -616,7 +618,8 @@ export default function PostCard({
               </div>
             )}
 
-            {showComments && <Comments postId={post.id} onCommentAdded={onUpdate} />}
+            {/* ─── Comments ─── */}
+            {!hideReplies && showComments && <Comments postId={post.id} onCommentAdded={onUpdate} />}
           </div>
         </div>
       </div>
