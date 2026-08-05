@@ -1,19 +1,25 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { Check, X, Crown, Building2, Briefcase } from "lucide-react";
 import { PLANS, PlanLimits } from "@/lib/limits";
+import UpgradeRequestModal from "./UpgradeRequestModal";
 
 interface PricingCardProps {
   plan: string;
   limits: PlanLimits;
-  isCurrent?: boolean;
-  onUpgrade?: (plan: string) => void;
+  isCurrent: boolean;
 }
 
-function PricingCard({ plan, limits, isCurrent, onUpgrade }: PricingCardProps) {
+function PricingCard({ plan, limits, isCurrent }: PricingCardProps) {
+  const [showModal, setShowModal] = useState(false);
+  const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
+  const price = limits.priceMonthly;
+  const displayPrice = price === 0 ? 'Free' : `CHF ${price.toFixed(2)} / month`;
+
   const features = [
-    { label: `Posts up to ${limits.postLength} characters`, included: true },
+    { label: `Posts up to ${limits.postLength === 999999 ? 'Unlimited' : limits.postLength} characters`, included: true },
     { label: `${limits.imagesPerPost === 999999 ? 'Unlimited' : limits.imagesPerPost} images per post`, included: true },
     { label: `Video upload up to ${limits.videoUploadMB}MB`, included: true },
     { label: `${limits.scheduledPostsPerMonth === 999999 ? 'Unlimited' : limits.scheduledPostsPerMonth} scheduled posts/month`, included: true },
@@ -36,13 +42,6 @@ function PricingCard({ plan, limits, isCurrent, onUpgrade }: PricingCardProps) {
   };
   const Icon = iconMap[plan];
 
-  const getPlanLabel = () => {
-    if (plan === 'free') return 'Free';
-    if (plan === 'pro') return 'Pro';
-    if (plan === 'business') return 'Business';
-    return 'Enterprise';
-  };
-
   const getPlanColor = () => {
     if (plan === 'free') return 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700';
     if (plan === 'pro') return 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800';
@@ -50,65 +49,70 @@ function PricingCard({ plan, limits, isCurrent, onUpgrade }: PricingCardProps) {
     return 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800';
   };
 
-  const getButtonStyle = () => {
-    if (isCurrent) return 'bg-gray-500 text-white cursor-default';
-    if (plan === 'free') return 'bg-zrp-red text-white hover:bg-zrp-darkRed';
-    if (plan === 'pro') return 'bg-blue-600 text-white hover:bg-blue-700';
-    if (plan === 'business') return 'bg-purple-600 text-white hover:bg-purple-700';
-    return 'bg-amber-600 text-white hover:bg-amber-700';
-  };
-
   return (
-    <div className={`rounded-xl shadow-sm border p-6 ${getPlanColor()}`}>
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white">{getPlanLabel()}</h3>
-        {Icon && <Icon className="w-5 h-5 text-gray-600 dark:text-gray-300" />}
+    <>
+      <div className={`rounded-xl shadow-sm border p-6 ${getPlanColor()}`}>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">{planLabel}</h3>
+          {Icon && <Icon className="w-5 h-5 text-gray-600 dark:text-gray-300" />}
+        </div>
+        <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+          {displayPrice}
+          {price !== 0 && <span className="text-sm font-normal text-gray-500 ml-1">/ month</span>}
+        </div>
+        {price !== 0 && (
+          <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">
+            Billed monthly. 35% to charity.
+          </p>
+        )}
+        <ul className="space-y-2 text-sm mt-4">
+          {features.map((f, i) => (
+            <li key={i} className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+              {f.included ? (
+                <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+              ) : (
+                <X className="w-4 h-4 text-red-500 flex-shrink-0" />
+              )}
+              <span>{f.label}</span>
+            </li>
+          ))}
+        </ul>
+
+        <button
+          onClick={() => {
+            if (isCurrent) return;
+            if (plan === 'free') return;
+            setShowModal(true);
+          }}
+          disabled={isCurrent || plan === 'free'}
+          className={`w-full mt-4 py-2 rounded-lg font-medium transition ${
+            isCurrent
+              ? 'bg-gray-500 text-white cursor-default'
+              : 'bg-zrp-red text-white hover:bg-zrp-darkRed'
+          }`}
+        >
+          {isCurrent ? 'Current Plan' : `Upgrade to ${planLabel}`}
+        </button>
       </div>
 
-      <ul className="space-y-2 text-sm mt-4">
-        {features.map((f, i) => (
-          <li key={i} className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-            {f.included ? (
-              <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-            ) : (
-              <X className="w-4 h-4 text-red-500 flex-shrink-0" />
-            )}
-            <span>{f.label}</span>
-          </li>
-        ))}
-      </ul>
-
-      <button
-        onClick={() => onUpgrade?.(plan)}
-        disabled={isCurrent}
-        className={`w-full mt-4 py-2 rounded-lg font-medium transition ${getButtonStyle()}`}
-      >
-        {isCurrent ? 'Current Plan' : `Upgrade to ${getPlanLabel()}`}
-      </button>
-    </div>
+      {showModal && (
+        <UpgradeRequestModal
+          plan={plan}
+          limits={limits}
+          onClose={() => setShowModal(false)}
+          onSuccess={() => {
+            setShowModal(false);
+            // Optionally refresh session or show success toast
+          }}
+        />
+      )}
+    </>
   );
 }
 
 export default function PricingCards() {
-  const [currentPlan, setCurrentPlan] = useState('free');
-
-  const handleUpgrade = async (plan: string) => {
-    try {
-      const res = await fetch('/api/user/plan', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan }),
-      });
-      if (res.ok) {
-        setCurrentPlan(plan);
-        alert(`Successfully upgraded to ${plan}!`);
-      } else {
-        alert('Upgrade failed. Please try again.');
-      }
-    } catch (error) {
-      alert('Something went wrong.');
-    }
-  };
+  const { data: session, update } = useSession();
+  const currentPlan = session?.user?.plan || 'free';
 
   return (
     <div>
@@ -126,7 +130,6 @@ export default function PricingCards() {
             plan={key}
             limits={limits}
             isCurrent={currentPlan === key}
-            onUpgrade={handleUpgrade}
           />
         ))}
       </div>
