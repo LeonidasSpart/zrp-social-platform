@@ -50,6 +50,8 @@ export default function PostPage({ params }: { params: { id: string } }) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [commentContent, setCommentContent] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const commentRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
@@ -107,7 +109,6 @@ export default function PostPage({ params }: { params: { id: string } }) {
       if (element) {
         setTimeout(() => {
           element.scrollIntoView({ behavior: "smooth", block: "center" });
-          // highlight the comment
           element.style.transition = "background-color 0.5s";
           element.style.backgroundColor = "rgba(255, 45, 45, 0.1)";
           setTimeout(() => {
@@ -117,6 +118,42 @@ export default function PostPage({ params }: { params: { id: string } }) {
       }
     }
   }, [comments]);
+
+  // ─── Submit comment ──────────────────────────────────────────────
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!commentContent.trim() || !session) return;
+
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/posts/${params.id}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: commentContent }),
+      });
+      if (res.ok) {
+        setCommentContent("");
+        fetchComments();
+        // Update post comment count
+        setPost((prev) =>
+          prev
+            ? {
+                ...prev,
+                _count: { ...prev._count, comments: (prev._count?.comments || 0) + 1 },
+              }
+            : prev
+        );
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to post comment");
+      }
+    } catch (error) {
+      console.error("Error posting comment:", error);
+      alert("Failed to post comment");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (status === "loading" || loading) {
     return (
@@ -149,16 +186,30 @@ export default function PostPage({ params }: { params: { id: string } }) {
 
       <PostCard post={post} onUpdate={fetchPost} />
 
-      {/* ─── Comments ────────────────────────────────────────────────── */}
-      <div className="mt-6 space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Comments ({post._count?.comments || 0})
-        </h3>
+      {/* ─── Comment Composer ────────────────────────────────────── */}
+      {session && (
+        <form onSubmit={handleSubmitComment} className="mt-4 flex gap-2">
+          <input
+            type="text"
+            value={commentContent}
+            onChange={(e) => setCommentContent(e.target.value)}
+            placeholder="Write a reply..."
+            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+          />
+          <button
+            type="submit"
+            disabled={submitting || !commentContent.trim()}
+            className="px-4 py-2 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 transition"
+          >
+            {submitting ? "Sending..." : "Reply"}
+          </button>
+        </form>
+      )}
 
-        {comments.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400 text-sm">No comments yet.</p>
-        ) : (
-          comments.map((comment) => (
+      {/* ─── Comments (threaded, no duplicate heading) ──────────── */}
+      {comments.length > 0 && (
+        <div className="mt-6 space-y-4">
+          {comments.map((comment) => (
             <div
               key={comment.id}
               ref={(el) => {
@@ -169,9 +220,9 @@ export default function PostPage({ params }: { params: { id: string } }) {
             >
               <CommentItem comment={comment} />
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
