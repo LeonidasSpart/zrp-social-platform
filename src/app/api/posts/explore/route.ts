@@ -1,151 +1,103 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/db";
-import { getCached, setCached } from "@/lib/redis";
+"use client";
 
-export const dynamic = 'force-dynamic';
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { ArrowLeft, Sparkles } from "lucide-react";
+import PostCard from "@/components/PostCard";
 
-// ─── Score = engagement / age_in_hours (capped to avoid Infinity) ──
-function calculateScore(post: any) {
-  const likes = post._count?.likes || 0;
-  const comments = post._count?.comments || 0;
-  const reposts = post._count?.reposts || 0;
-
-  // Engagement weight: reposts > comments > likes
-  const engagement = likes + comments * 2 + reposts * 3;
-
-  const ageMs = Date.now() - new Date(post.createdAt).getTime();
-  // Minimum 0.001 hour (~3.6 seconds) to avoid division by zero
-  const ageHours = Math.max(0.001, ageMs / (1000 * 60 * 60));
-
-  // New posts get a huge score, older posts get proportionally lower
-  return engagement / ageHours;
+interface Post {
+  id: string;
+  content: string;
+  imageUrl?: string;
+  createdAt: string;
+  views?: number;
+  author: {
+    id: string;
+    username: string;
+    name: string;
+    avatarUrl?: string;
+    badgeType?: string | null;
+  };
+  _count: {
+    likes: number;
+    comments: number;
+    reposts: number;
+    quotedBy: number; // ✅ required
+  };
+  liked?: boolean;
 }
 
-export async function GET(req: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    const userId = session?.user?.id;
+export default function ExplorePage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    // ─── Exclude blocked / muted users ──────────────────────────────
-    let excludedAuthorIds: string[] = [];
-    if (userId) {
-      const [blocked, blockers, muted] = await Promise.all([
-        prisma.blocked.findMany({
-          where: { blockerId: userId },
-          select: { blockedId: true },
-        }),
-        prisma.blocked.findMany({
-          where: { blockedId: userId },
-          select: { blockerId: true },
-        }),
-        prisma.mute.findMany({
-          where: { muterId: userId },
-          select: { mutedId: true },
-        }),
-      ]);
-      const blockedIds = blocked.map(b => b.blockedId);
-      const blockerIds = blockers.map(b => b.blockerId);
-      const mutedIds = muted.map(m => m.mutedId);
-      excludedAuthorIds = [...blockedIds, ...blockerIds, ...mutedIds];
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
     }
+  }, [status, router]);
 
-    // ─── Cache key ────────────────────────────────────────────────────
-    const cacheKey = `explore:${userId || 'anon'}:v4`;
-    const cached = await getCached(cacheKey);
-    if (cached) {
-      return NextResponse.json(cached);
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetchExplorePosts();
     }
+  }, [status]);
 
-    // ─── Fetch recent posts ──────────────────────────────────────────
-    const posts = await prisma.post.findMany({
-      take: 50,
-      orderBy: { createdAt: "desc" },
-      where: {
-        authorId: { notIn: excludedAuthorIds },
-        status: "published",
-        scheduledAt: null,
-      },
-      select: {
-        id: true,
-        content: true,
-        imageUrl: true,
-        createdAt: true,
-        views: true,
-        author: {
-          select: {
-            id: true,
-            username: true,
-            name: true,
-            avatarUrl: true,
-            badgeType: true,
-          },
-        },
-        quotePost: {
-          select: {
-            id: true,
-            content: true,
-            imageUrl: true,
-            createdAt: true,
-            author: {
-              select: {
-                id: true,
-                username: true,
-                name: true,
-                avatarUrl: true,
-                badgeType: true,
-              },
-            },
-            _count: {
-              select: {
-                likes: true,
-                comments: true,
-                reposts: true,
-                quotedBy: true,
-              },
-            },
-          },
-        },
-        _count: {
-          select: {
-            likes: true,
-            comments: true,
-            reposts: true,
-            quotedBy: true,
-          },
-        },
-      },
-    });
-
-    // ─── Compute scores and sort ─────────────────────────────────────
-    const ranked = posts
-      .map((post) => ({
-        ...post,
-        score: calculateScore(post),
-      }))
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 20);
-
-    // ─── Add liked status if logged in ──────────────────────────────
-    if (userId && ranked.length > 0) {
-      const likes = await prisma.like.findMany({
-        where: {
-          userId: userId,
-          postId: { in: ranked.map(p => p.id) },
-        },
-        select: { postId: true },
-      });
-      const likedIds = new Set(likes.map(l => l.postId));
-      ranked.forEach(p => (p as any).liked = likedIds.has(p.id));
+  const fetchExplorePosts = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/posts/explore");
+      if (!res.ok) throw new Error("Failed to fetch explore posts");
+      const data = await res.json();
+      setPosts(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load explore posts");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // ─── Cache for 5 minutes ─────────────────────────────────────────
-    await setCached(cacheKey, ranked, 300);
-
-    return NextResponse.json(ranked);
-  } catch (error) {
-    console.error("Explore error:", error);
-    return NextResponse.json({ error: "Failed to fetch explore posts" }, { status: 500 });
+  if (status === "loading" || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-500">Loading...</div>
+      </div>
+    );
   }
+
+  return (
+    <div className="max-w-2xl mx-auto py-4 px-4">
+      <div className="flex items-center gap-3 mb-6">
+        <Link href="/" className="text-gray-500 hover:text-gray-700 transition">
+          <ArrowLeft className="w-5 h-5" />
+        </Link>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <Sparkles className="w-6 h-6 text-yellow-500" />
+          Explore
+        </h1>
+        <span className="text-sm text-gray-500 ml-auto">{posts.length} posts</span>
+      </div>
+
+      {error ? (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">{error}</div>
+      ) : posts.length === 0 ? (
+        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+          <Sparkles className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
+          <p>No trending posts yet.</p>
+          <p className="text-sm">Check back later for fresh content.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {posts.map((post) => (
+            <PostCard key={post.id} post={post} onUpdate={fetchExplorePosts} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
