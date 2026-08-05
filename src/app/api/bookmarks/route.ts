@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
               },
             },
             _count: {
-              select: { likes: true, comments: true, reposts: true },
+              select: { likes: true, comments: true, reposts: true, quotedBy: true }, // ✅ added quotedBy
             },
           },
         },
