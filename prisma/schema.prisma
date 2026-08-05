@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─── ROLE ENUM ──────────────────────────────────────────────────────
 enum Role {
   USER
   MODERATOR
@@ -20,17 +19,14 @@ model User {
   username    String    @unique
   password    String
 
-  // ─── Password Reset ──────────────────────────────────────────────
   resetToken       String?   @unique
   resetTokenExpiry DateTime?
 
-  // ─── Email Verification ──────────────────────────────────────────
   emailVerified        DateTime?
   verificationToken    String?     @unique
   verificationTokenExpiry DateTime?
   pendingEmail         String?     @unique
 
-  // ─── Account Deletion ────────────────────────────────────────────
   deletionRequestedAt  DateTime?
   deletionScheduledFor DateTime?
 
@@ -79,8 +75,10 @@ model User {
   stories     Story[]
   storyViews  StoryView[]
 
-  // ─── COMMENT LIKES ──────────────────────────────────────────────
-  commentLikes CommentLike[]
+  // ─── COMMENT INTERACTIONS ──────────────────────────────────────
+  commentLikes     CommentLike[]
+  commentReposts   CommentRepost[]
+  commentBookmarks CommentBookmark[]
 
   blockedUsers Blocked[] @relation("Blocker")
   blockedBy    Blocked[] @relation("Blocked")
@@ -146,8 +144,10 @@ model Comment {
 
   reports     Report[]
 
-  // ─── COMMENT LIKES ──────────────────────────────────────────────
+  // ─── COMMENT INTERACTIONS ──────────────────────────────────────
   likes       CommentLike[]
+  reposts     CommentRepost[]
+  bookmarks   CommentBookmark[]
 
   @@index([postId])
   @@index([createdAt])
@@ -355,6 +355,34 @@ model PushSubscription {
 
 // ─── COMMENT LIKES ─────────────────────────────────────────────────
 model CommentLike {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId])
+  @@index([commentId])
+  @@index([userId])
+}
+
+// ─── COMMENT REPOSTS ──────────────────────────────────────────────
+model CommentRepost {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId])
+  @@index([commentId])
+  @@index([userId])
+}
+
+// ─── COMMENT BOOKMARKS ────────────────────────────────────────────
+model CommentBookmark {
   id        String   @id @default(cuid())
   commentId String
   comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
