@@ -10,13 +10,11 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const bookmarks = await prisma.bookmark.findMany({
-      where: {
-        userId: session.user.id,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+    const userId = session.user.id;
+
+    // ─── Fetch post bookmarks ──────────────────────────────────────
+    const postBookmarks = await prisma.bookmark.findMany({
+      where: { userId },
       include: {
         post: {
           include: {
@@ -30,31 +28,80 @@ export async function GET(req: NextRequest) {
               },
             },
             _count: {
+              select: { likes: true, comments: true, reposts: true },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    // ─── Fetch comment bookmarks ──────────────────────────────────
+    const commentBookmarks = await prisma.commentBookmark.findMany({
+      where: { userId },
+      include: {
+        comment: {
+          include: {
+            author: {
               select: {
-                likes: true,
-                comments: true,
-                reposts: true,
+                id: true,
+                username: true,
+                name: true,
+                avatarUrl: true,
+              },
+            },
+            post: {
+              select: {
+                id: true,
+                content: true,
+                author: {
+                  select: {
+                    username: true,
+                    name: true,
+                  },
+                },
               },
             },
           },
         },
       },
+      orderBy: { createdAt: "desc" },
     });
 
-    // Transform to include liked status
-    const posts = bookmarks.map((b) => b.post);
+    // ─── Add liked status to posts ────────────────────────────────
+    const postIds = postBookmarks.map((b) => b.post.id);
     const likedPosts = await prisma.like.findMany({
       where: {
-        userId: session.user.id,
-        postId: { in: posts.map((p) => p.id) },
+        userId: userId,
+        postId: { in: postIds },
       },
     });
     const likedIds = new Set(likedPosts.map((l) => l.postId));
-    posts.forEach((p) => {
-      (p as any).liked = likedIds.has(p.id);
-    });
 
-    return NextResponse.json(posts);
+    // ─── Format response ───────────────────────────────────────────
+    const formattedPosts = postBookmarks.map((b) => ({
+      type: "post" as const,
+      id: b.id,
+      createdAt: b.createdAt,
+      post: {
+        ...b.post,
+        liked: likedIds.has(b.post.id),
+      },
+    }));
+
+    const formattedComments = commentBookmarks.map((b) => ({
+      type: "comment" as const,
+      id: b.id,
+      createdAt: b.createdAt,
+      comment: b.comment,
+    }));
+
+    // ─── Sort by creation date (newest first) ──────────────────────
+    const allBookmarks = [...formattedPosts, ...formattedComments].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    return NextResponse.json(allBookmarks);
   } catch (error) {
     console.error("Error fetching bookmarks:", error);
     return NextResponse.json({ error: "Failed to fetch bookmarks" }, { status: 500 });
