@@ -20,10 +20,11 @@ interface Post {
     avatarUrl?: string;
     badgeType?: string | null;
   };
-  _count?: {
+  _count: {
     likes: number;
     comments: number;
     reposts: number;
+    quotedBy: number; // ✅ required
   };
   liked?: boolean;
 }
