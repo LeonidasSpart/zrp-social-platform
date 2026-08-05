@@ -11,11 +11,17 @@ export async function PUT(req: NextRequest) {
 
   const { publicLikes, publicFollowing } = await req.json();
 
+  // Update only the fields that are provided
+  const data: any = {};
+  if (publicLikes !== undefined) data.publicLikes = publicLikes;
+  if (publicFollowing !== undefined) data.publicFollowing = publicFollowing;
+
   const user = await prisma.user.update({
     where: { id: session.user.id },
-    data: {
-      publicLikes: publicLikes !== undefined ? publicLikes : undefined,
-      publicFollowing: publicFollowing !== undefined ? publicFollowing : undefined,
+    data,
+    select: {
+      publicLikes: true,
+      publicFollowing: true,
     },
   });
 
