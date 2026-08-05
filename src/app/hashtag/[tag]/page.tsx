@@ -24,6 +24,7 @@ interface Post {
     likes: number;
     comments: number;
     reposts: number;
+    quotedBy: number; // ✅ added
   };
   liked?: boolean;
 }
