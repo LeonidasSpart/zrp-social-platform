@@ -19,6 +19,7 @@ interface PostCardProps {
     id: string;
     content: string;
     imageUrl?: string;
+    mediaType?: string; // 👈 allow backend to specify "video"
     createdAt: string;
     updatedAt?: string;
     views?: number;
@@ -125,9 +126,12 @@ export default function PostCard({
   const isRepost = post.isRepost === true;
   const originalAuthor = post.repostOriginalAuthor;
 
-  // ─── Improved video detection ──────────────────────────────────────
+  // ─── ROBUST VIDEO DETECTION ──────────────────────────────────────
   const isVideo = () => {
+    // 1. If backend provides mediaType, use it
+    if (post.mediaType === "video") return true;
     if (!post.imageUrl) return false;
+
     const url = post.imageUrl.toLowerCase();
     const path = url.split('?')[0];
     const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'm4v', '3gp'];
@@ -135,8 +139,17 @@ export default function PostCard({
     if (url.includes('/video/') || url.includes('video')) return true;
     return false;
   };
-
   const video = isVideo();
+
+  // ─── Video ref to ensure controls are present ────────────────────
+  const videoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    if (video && videoRef.current) {
+      // Force controls to be enabled (some browsers may override)
+      videoRef.current.controls = true;
+      videoRef.current.setAttribute('controls', 'true');
+    }
+  }, [video]);
 
   // ─── FETCH REPOST STATUS ──────────────────────────────────────────
   useEffect(() => {
@@ -496,8 +509,8 @@ export default function PostCard({
                 <div
                   className="mt-2 rounded-lg overflow-hidden cursor-pointer group relative"
                   onClick={(e) => {
-                    // ✅ Allow video controls to work: if click is inside video element, do nothing
-                    if (video && (e.target as HTMLElement).closest('video')) {
+                    // 🔥 CRITICAL: if the click is directly on the video element, do NOT open lightbox
+                    if (e.target instanceof HTMLVideoElement) {
                       return;
                     }
                     e.stopPropagation();
@@ -511,12 +524,14 @@ export default function PostCard({
                   {video ? (
                     <div className="relative aspect-video w-full bg-black">
                       <video
+                        ref={videoRef}
                         src={post.imageUrl}
                         className="w-full h-full object-contain"
                         controls
                         playsInline
                         webkit-playsinline="true"
                         preload="metadata"
+                        controlsList="nodownload"
                         onError={(e) => {
                           // Fallback to image if video fails
                           const target = e.target as HTMLVideoElement;
