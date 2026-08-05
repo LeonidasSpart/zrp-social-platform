@@ -167,6 +167,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       const payload: any = {
         content: content.trim() || pollQuestion.trim(),
         imageUrl: imageUrl || undefined,
+        mediaType: mediaType || undefined, // ✅ add mediaType
         hashtags,
         mentions,
         isPoll: !!pollData,
