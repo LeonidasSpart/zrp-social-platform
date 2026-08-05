@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.png",
   },
-  manifest: "/manifest.json", // ✅ corrected extension
+  manifest: "/manifest",
 };
 
 export const viewport: Viewport = {
@@ -40,7 +40,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* ─── PWA Manifest ────────────────────────────────────────── */}
-        <link rel="manifest" href="/manifest.json" />
+        <link rel="manifest" href="/manifest" />
         <meta name="theme-color" content="#FF2D2D" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
