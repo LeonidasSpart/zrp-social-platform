@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import PageTransition from "@/components/PageTransition";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration"; // ✅ new
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
@@ -20,15 +21,14 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.png",
   },
-  manifest: "/manifest",
-  // ❌ themeColor removed from here – moved to viewport
+  manifest: "/manifest.json", // ✅ corrected extension
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#FF2D2D", // ✅ only here
+  themeColor: "#FF2D2D",
 };
 
 export default function RootLayout({
@@ -40,7 +40,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* ─── PWA Manifest ────────────────────────────────────────── */}
-        <link rel="manifest" href="/manifest" />
+        <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#FF2D2D" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -70,6 +70,7 @@ export default function RootLayout({
               <CookieConsent />
               <Footer />
               <PushNotificationManager />
+              <ServiceWorkerRegistration /> {/* ✅ registers SW */}
             </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>
