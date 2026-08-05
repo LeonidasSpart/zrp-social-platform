@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag,
-  Bookmark, BarChart3, Pin, PinOff, X, ZoomIn, Plus
+  Bookmark, BarChart3, Pin, PinOff, X, ZoomIn, Plus, ChevronDown
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Comments from "./Comments";
@@ -12,6 +12,7 @@ import EditPostModal from "./EditPostModal";
 import ReportModal from "./ReportModal";
 import VerifiedBadge from "./VerifiedBadge";
 import EmojiPicker from "emoji-picker-react";
+import QuotePostModal from "./QuotePostModal";
 
 interface PostCardProps {
   post: {
@@ -106,6 +107,10 @@ export default function PostCard({
   const [bookmarked, setBookmarked] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
   const hasCountedView = useRef(false);
+
+  // ─── Repost dropdown ──────────────────────────────────────────────
+  const [repostDropdownOpen, setRepostDropdownOpen] = useState(false);
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
 
   const [lastClickTime, setLastClickTime] = useState(0);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
@@ -486,28 +491,51 @@ export default function PostCard({
                 <span>{formatCount(post._count?.comments || 0)}</span>
               </button>
 
-              {/* Repost button + count (grouped, no label) */}
-              <div className="flex items-center gap-0.5">
+              {/* ─── Repost dropdown ───────────────────────────────────── */}
+              <div className="relative">
                 <button
-                  onClick={handleRepost}
+                  onClick={() => setRepostDropdownOpen(!repostDropdownOpen)}
                   className={`flex items-center text-sm ${reposted ? "text-green-500" : "text-gray-500 dark:text-gray-400 hover:text-green-500"} transition`}
                 >
                   <Repeat className={`w-4 h-4 ${reposted ? "fill-green-500" : ""}`} />
+                  <ChevronDown className="w-3 h-3 ml-0.5" />
                 </button>
-                <Link
-                  href={`/post/${post.id}/reposts`}
-                  className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
-                  title="Reposts"
-                >
-                  <span className="font-medium">{formatCount(repostsCount)}</span>
-                </Link>
+                {repostDropdownOpen && (
+                  <div className="absolute left-0 mt-1 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
+                    <button
+                      onClick={() => {
+                        handleRepost();
+                        setRepostDropdownOpen(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                    >
+                      Repost
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowQuoteModal(true);
+                        setRepostDropdownOpen(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                    >
+                      Quote
+                    </button>
+                  </div>
+                )}
               </div>
 
-              {/* Quotes – number only */}
+              {/* Repost count link */}
+              <Link
+                href={`/post/${post.id}/reposts`}
+                className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+              >
+                <span className="font-medium">{formatCount(repostsCount)}</span>
+              </Link>
+
+              {/* Quotes count link */}
               <Link
                 href={`/post/${post.id}/quotes`}
                 className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
-                title="Quotes"
               >
                 <span className="font-medium">{formatCount(post._count?.quotedBy || 0)}</span>
               </Link>
@@ -605,6 +633,15 @@ export default function PostCard({
             <EmojiPicker onEmojiClick={(emoji) => handleReaction(emoji.emoji)} width="100%" height={380} />
           </div>
         </div>
+      )}
+
+      {/* ─── Quote Post Modal ────────────────────────────────────────── */}
+      {showQuoteModal && (
+        <QuotePostModal
+          post={post}
+          onClose={() => setShowQuoteModal(false)}
+          onQuotePosted={onUpdate}
+        />
       )}
     </>
   );
