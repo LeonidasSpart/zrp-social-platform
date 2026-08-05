@@ -27,10 +27,11 @@ interface Post {
     avatarUrl?: string;
     badgeType?: string | null;
   };
-  _count?: {
+  _count: {                     // ✅ required, added quotedBy
     likes: number;
     comments: number;
     reposts: number;
+    quotedBy: number;
   };
   liked?: boolean;
 }
