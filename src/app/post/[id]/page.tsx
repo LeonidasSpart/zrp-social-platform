@@ -187,7 +187,8 @@ export default function PostPage({ params }: { params: { id: string } }) {
         </Link>
       </div>
 
-      <PostCard post={post} onUpdate={fetchPost} />
+      {/* ✅ Pass showInlineComments={false} to hide inline comments */}
+      <PostCard post={post} onUpdate={fetchPost} showInlineComments={false} />
 
       {/* ─── Comment Composer ────────────────────────────────────── */}
       {session && (
