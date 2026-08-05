@@ -115,7 +115,6 @@ export default function PostCard({
 
   const [lastClickTime, setLastClickTime] = useState(0);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
-  const [lightboxVideo, setLightboxVideo] = useState<string | null>(null);
   const [reactions, setReactions] = useState<Record<string, number>>({});
   const [userReaction, setUserReaction] = useState<string | null>(null);
   const [reactionsLoading, setReactionsLoading] = useState(true);
@@ -505,7 +504,14 @@ export default function PostCard({
                   onClick={(e) => {
                     e.stopPropagation();
                     if (video) {
-                      setLightboxVideo(post.imageUrl!);
+                      // Toggle play/pause inline, not lightbox
+                      if (videoRef.current) {
+                        if (videoRef.current.paused) {
+                          videoRef.current.play();
+                        } else {
+                          videoRef.current.pause();
+                        }
+                      }
                     } else {
                       setLightboxImage(post.imageUrl!);
                     }
@@ -547,7 +553,7 @@ export default function PostCard({
                           </div>
                         </div>
                       )}
-                      {/* Watermark – username */}
+                      {/* Watermark */}
                       <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/50 rounded text-xs text-white font-medium pointer-events-none select-none">
                         @{post.author.username}
                       </div>
@@ -728,34 +734,6 @@ export default function PostCard({
             />
             <button
               onClick={() => setLightboxImage(null)}
-              className="absolute top-2 right-2 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ─── Video lightbox ──────────────────────────────────────────── */}
-      {lightboxVideo && (
-        <div
-          className="fixed inset-0 bg-black/90 flex items-center justify-center z-[999] p-4"
-          onClick={() => setLightboxVideo(null)}
-        >
-          <div className="relative max-w-3xl w-full" onClick={(e) => e.stopPropagation()}>
-            <video
-              src={lightboxVideo}
-              className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
-              controls
-              playsInline
-              webkit-playsinline="true"
-              controlsList="nodownload noremoteplayback"
-              disablePictureInPicture
-              autoPlay
-              onContextMenu={(e) => e.preventDefault()}
-            />
-            <button
-              onClick={() => setLightboxVideo(null)}
               className="absolute top-2 right-2 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition"
             >
               <X className="w-6 h-6" />
