@@ -80,6 +80,9 @@ model User {
   commentReposts   CommentRepost[]
   commentBookmarks CommentBookmark[]
 
+  // ─── UPGRADE REQUESTS ──────────────────────────────────────────
+  upgradeRequests UpgradeRequest[]
+
   blockedUsers Blocked[] @relation("Blocker")
   blockedBy    Blocked[] @relation("Blocked")
   reports      Report[]  @relation("Reporter")
@@ -89,7 +92,7 @@ model Post {
   id          String    @id @default(cuid())
   content     String    @db.Text
   imageUrl    String?
-  mediaType   String?   // "image" or "video"  ✅ ADDED
+  mediaType   String?   // "image" or "video"
   linkUrl     String?
   authorId    String
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
@@ -352,6 +355,24 @@ model PushSubscription {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+// ─── UPGRADE REQUESTS ──────────────────────────────────────────────
+model UpgradeRequest {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requestedPlan  String    // "pro", "business", "enterprise"
+  paymentMethod  String?   // "bank", "paypal", "crypto"
+  message        String?   @db.Text
+  status         String    @default("pending") // "pending", "approved", "denied"
+  approvedBy     String?   // admin user ID
+  approvedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([status])
 }
 
 // ─── COMMENT LIKES ─────────────────────────────────────────────────
