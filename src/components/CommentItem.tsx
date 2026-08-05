@@ -2,7 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Heart, MessageCircle } from "lucide-react";
+import {
+  Heart,
+  MessageCircle,
+  Repeat,
+  Bookmark,
+  Share2,
+  Pencil,
+  Trash2,
+  X,
+  Check,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 
 interface Comment {
@@ -20,15 +30,19 @@ interface Comment {
   replies?: Comment[];
   _count?: {
     likes: number;
+    reposts: number;
+    bookmarks: number;
   };
   liked?: boolean;
+  reposted?: boolean;
+  bookmarked?: boolean;
 }
 
 interface CommentItemProps {
   comment: Comment;
   onReply: (commentId: string) => void;
   onUpdate: () => void;
-  isReply?: boolean; // for indentation
+  isReply?: boolean;
 }
 
 export default function CommentItem({
@@ -40,15 +54,29 @@ export default function CommentItem({
   const { data: session } = useSession();
   const [liked, setLiked] = useState(comment.liked || false);
   const [likesCount, setLikesCount] = useState(comment._count?.likes || 0);
-  const [isLiking, setIsLiking] = useState(false);
+  const [reposted, setReposted] = useState(comment.reposted || false);
+  const [repostsCount, setRepostsCount] = useState(comment._count?.reposts || 0);
+  const [bookmarked, setBookmarked] = useState(comment.bookmarked || false);
+  const [bookmarksCount, setBookmarksCount] = useState(comment._count?.bookmarks || 0);
+  const [loading, setLoading] = useState({
+    like: false,
+    repost: false,
+    bookmark: false,
+    delete: false,
+  });
+
+  // ─── EDIT STATE ──────────────────────────────────────────────────
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(comment.content);
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  const isAuthor = session?.user?.id === comment.author.id;
 
   const handleLike = async () => {
-    if (!session || isLiking) return;
-    setIsLiking(true);
+    if (!session || loading.like) return;
+    setLoading({ ...loading, like: true });
     try {
-      const res = await fetch(`/api/comments/${comment.id}/like`, {
-        method: "POST",
-      });
+      const res = await fetch(`/api/comments/${comment.id}/like`, { method: "POST" });
       if (res.ok) {
         const data = await res.json();
         setLiked(data.liked);
@@ -56,15 +84,101 @@ export default function CommentItem({
         onUpdate();
       }
     } catch (error) {
-      console.error("Error liking comment:", error);
+      console.error(error);
     } finally {
-      setIsLiking(false);
+      setLoading({ ...loading, like: false });
+    }
+  };
+
+  const handleRepost = async () => {
+    if (!session || loading.repost) return;
+    setLoading({ ...loading, repost: true });
+    try {
+      const res = await fetch(`/api/comments/${comment.id}/repost`, { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setReposted(data.reposted);
+        setRepostsCount((prev) => (data.reposted ? prev + 1 : prev - 1));
+        onUpdate();
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading({ ...loading, repost: false });
+    }
+  };
+
+  const handleBookmark = async () => {
+    if (!session || loading.bookmark) return;
+    setLoading({ ...loading, bookmark: true });
+    try {
+      const res = await fetch(`/api/comments/${comment.id}/bookmark`, { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setBookmarked(data.bookmarked);
+        setBookmarksCount((prev) => (data.bookmarked ? prev + 1 : prev - 1));
+        onUpdate();
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading({ ...loading, bookmark: false });
+    }
+  };
+
+  const handleShare = () => {
+    const url = `${window.location.origin}/post/${comment.postId}?comment=${comment.id}`;
+    if (navigator.share) {
+      navigator.share({ title: "Comment on ZRP", text: comment.content, url });
+    } else {
+      navigator.clipboard.writeText(url).then(() => alert("Link copied!"));
+    }
+  };
+
+  // ─── EDIT ──────────────────────────────────────────────────────────
+  const handleEdit = async () => {
+    if (!editContent.trim()) return;
+    setSavingEdit(true);
+    try {
+      const res = await fetch(`/api/comments/${comment.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: editContent }),
+      });
+      if (res.ok) {
+        setIsEditing(false);
+        onUpdate();
+      } else {
+        alert("Failed to edit comment");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to edit comment");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Delete this comment?")) return;
+    setLoading({ ...loading, delete: true });
+    try {
+      const res = await fetch(`/api/comments/${comment.id}`, { method: "DELETE" });
+      if (res.ok) {
+        onUpdate();
+      } else {
+        alert("Failed to delete comment");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to delete comment");
+    } finally {
+      setLoading({ ...loading, delete: false });
     }
   };
 
   return (
     <div className="relative">
-      {/* ─── Comment row ──────────────────────────────────────────── */}
       <div
         className={`
           flex items-start gap-3 py-3
@@ -107,25 +221,54 @@ export default function CommentItem({
           </div>
 
           {/* Content */}
-          <p className="mt-0.5 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words">
-            {comment.content}
-          </p>
-
-          {comment.imageUrl && (
-            <div className="mt-2 rounded-lg overflow-hidden max-h-40">
-              <img
-                src={comment.imageUrl}
-                alt="Comment image"
-                className="w-full h-full object-cover"
+          {isEditing ? (
+            <div className="mt-1 flex items-start gap-2">
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                className="flex-1 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
+                rows={2}
+                autoFocus
               />
+              <button
+                onClick={handleEdit}
+                disabled={savingEdit || !editContent.trim()}
+                className="p-1 text-green-500 hover:text-green-600 disabled:opacity-50"
+              >
+                <Check className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditContent(comment.content);
+                }}
+                className="p-1 text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
+          ) : (
+            <>
+              <p className="mt-0.5 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words">
+                {comment.content}
+              </p>
+              {comment.imageUrl && (
+                <div className="mt-2 rounded-lg overflow-hidden max-h-40">
+                  <img
+                    src={comment.imageUrl}
+                    alt="Comment image"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+            </>
           )}
 
           {/* Action buttons – X style */}
-          <div className="flex items-center gap-4 mt-1.5">
+          <div className="flex items-center gap-4 mt-1.5 flex-wrap">
             <button
               onClick={handleLike}
-              disabled={isLiking}
+              disabled={loading.like}
               className={`flex items-center gap-1 text-xs transition ${
                 liked ? "text-red-500" : "text-gray-500 hover:text-red-500"
               }`}
@@ -138,8 +281,54 @@ export default function CommentItem({
               className="flex items-center gap-1 text-xs text-gray-500 hover:text-zrp-red transition"
             >
               <MessageCircle className="w-3.5 h-3.5" />
-              <span className="text-xs">Reply</span>
             </button>
+            <button
+              onClick={handleRepost}
+              disabled={loading.repost}
+              className={`flex items-center gap-1 text-xs transition ${
+                reposted ? "text-green-500" : "text-gray-500 hover:text-green-500"
+              }`}
+            >
+              <Repeat className={`w-3.5 h-3.5 ${reposted ? "fill-green-500" : ""}`} />
+              {repostsCount > 0 && <span className="font-medium">{repostsCount}</span>}
+            </button>
+            <button
+              onClick={handleBookmark}
+              disabled={loading.bookmark}
+              className={`flex items-center gap-1 text-xs transition ${
+                bookmarked ? "text-blue-500" : "text-gray-500 hover:text-blue-500"
+              }`}
+            >
+              <Bookmark className={`w-3.5 h-3.5 ${bookmarked ? "fill-blue-500" : ""}`} />
+              {bookmarksCount > 0 && <span className="font-medium">{bookmarksCount}</span>}
+            </button>
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Edit / Delete (own comments) */}
+            {isAuthor && !isEditing && (
+              <>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="text-gray-400 hover:text-gray-600 transition"
+                  title="Edit"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={loading.delete}
+                  className="text-gray-400 hover:text-red-500 transition"
+                  title="Delete"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
