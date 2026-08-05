@@ -5,15 +5,17 @@ import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
 import { sendPushNotification } from "@/lib/push-notifications";
 
-// ─── GET: Fetch threaded comments ────────────────────────────────────
+// ─── GET: Fetch threaded comments with counts and user status ──────
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     const postId = params.id;
+    const session = await getServerSession(authOptions);
+    const viewerId = session?.user?.id;
 
-    // Fetch all comments for this post (including parentId)
+    // ─── Fetch all comments for this post (including replies) ──────
     const comments = await prisma.comment.findMany({
       where: { postId },
       orderBy: { createdAt: "asc" },
@@ -27,7 +29,6 @@ export async function GET(
             badgeType: true,
           },
         },
-        // Include nested replies (one level deep – but we'll build the full tree)
         replies: {
           include: {
             author: {
@@ -41,6 +42,13 @@ export async function GET(
             },
           },
         },
+        _count: {
+          select: {
+            likes: true,
+            reposts: true,
+            bookmarks: true,
+          },
+        },
       },
     });
 
@@ -49,9 +57,8 @@ export async function GET(
     const topLevelComments: any[] = [];
 
     comments.forEach((comment) => {
-      // Add replies array to each comment
-      const commentWithReplies = { ...comment, replies: [] };
-      commentMap.set(comment.id, commentWithReplies);
+      const withReplies = { ...comment, replies: [] };
+      commentMap.set(comment.id, withReplies);
     });
 
     comments.forEach((comment) => {
@@ -65,18 +72,62 @@ export async function GET(
       }
     });
 
-    // Sort top-level comments newest first
+    // ─── Sort top‑level comments (newest first) ────────────────────
     topLevelComments.sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
-    // Sort replies oldest first (threaded order)
+    // ─── Sort replies (oldest first, threaded order) ──────────────
     topLevelComments.forEach((comment) => {
       comment.replies.sort(
         (a: any, b: any) =>
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       );
     });
+
+    // ─── Add liked / reposted / bookmarked status for the viewer ──
+    if (viewerId) {
+      // Collect all comment IDs (including nested replies)
+      const allCommentIds: string[] = [];
+      const collectIds = (commentsArray: any[]) => {
+        commentsArray.forEach((c) => {
+          allCommentIds.push(c.id);
+          if (c.replies) collectIds(c.replies);
+        });
+      };
+      collectIds(topLevelComments);
+
+      // Fetch statuses in bulk
+      const [likes, reposts, bookmarks] = await Promise.all([
+        prisma.commentLike.findMany({
+          where: { commentId: { in: allCommentIds }, userId: viewerId },
+          select: { commentId: true },
+        }),
+        prisma.commentRepost.findMany({
+          where: { commentId: { in: allCommentIds }, userId: viewerId },
+          select: { commentId: true },
+        }),
+        prisma.commentBookmark.findMany({
+          where: { commentId: { in: allCommentIds }, userId: viewerId },
+          select: { commentId: true },
+        }),
+      ]);
+
+      const likedIds = new Set(likes.map((l) => l.commentId));
+      const repostedIds = new Set(reposts.map((r) => r.commentId));
+      const bookmarkedIds = new Set(bookmarks.map((b) => b.commentId));
+
+      // Recursively add status
+      const addStatus = (commentsArray: any[]) => {
+        commentsArray.forEach((c) => {
+          c.liked = likedIds.has(c.id);
+          c.reposted = repostedIds.has(c.id);
+          c.bookmarked = bookmarkedIds.has(c.id);
+          if (c.replies) addStatus(c.replies);
+        });
+      };
+      addStatus(topLevelComments);
+    }
 
     return NextResponse.json(topLevelComments);
   } catch (error) {
@@ -133,6 +184,13 @@ export async function POST(
             name: true,
             avatarUrl: true,
             badgeType: true,
+          },
+        },
+        _count: {
+          select: {
+            likes: true,
+            reposts: true,
+            bookmarks: true,
           },
         },
       },
