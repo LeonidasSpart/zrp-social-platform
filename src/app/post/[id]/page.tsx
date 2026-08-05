@@ -1,8 +1,8 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useRouter }from "next/navigation";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import PostCard from "@/components/PostCard";
@@ -33,6 +33,7 @@ interface Comment {
   content: string;
   imageUrl?: string;
   createdAt: string;
+  postId: string; // ✅ required for share
   author: {
     id: string;
     username: string;
@@ -43,8 +44,12 @@ interface Comment {
   replies?: Comment[];
   _count?: {
     likes: number;
+    reposts: number;
+    bookmarks: number;
   };
   liked?: boolean;
+  reposted?: boolean;
+  bookmarked?: boolean;
 }
 
 export default function PostPage({ params }: { params: { id: string } }) {
