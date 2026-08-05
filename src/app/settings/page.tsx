@@ -12,7 +12,7 @@ import { useUploadThing } from "@/lib/uploadthing-client";
 import EmailPreferences from "@/components/EmailPreferences";
 import PasswordInput from "@/components/PasswordInput";
 import LocationAutocomplete from "@/components/LocationAutocomplete";
-import { getPlanLimits } from "@/lib/limits";  // ✅ import plan limits
+import { getPlanLimits } from "@/lib/limits";
 
 interface UserData {
   id: string;
@@ -26,6 +26,8 @@ interface UserData {
   avatarUrl: string | null;
   createdAt: string;
   usernameChangedAt: string | null;
+  publicLikes: boolean;      // ✅ privacy settings
+  publicFollowing: boolean;
 }
 
 export default function SettingsPage() {
@@ -51,6 +53,11 @@ export default function SettingsPage() {
   const [emailPassword, setEmailPassword] = useState("");
   const [updatingEmail, setUpdatingEmail] = useState(false);
   const [emailMessage, setEmailMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Privacy states
+  const [publicLikes, setPublicLikes] = useState(true);
+  const [publicFollowing, setPublicFollowing] = useState(true);
+  const [updatingPrivacy, setUpdatingPrivacy] = useState(false);
 
   // Loading states for each section
   const [updatingProfile, setUpdatingProfile] = useState(false);
@@ -121,6 +128,8 @@ export default function SettingsPage() {
         setWebsite(data.website || "");
         setNewUsername(data.username || "");
         setAvatarPreview(data.avatarUrl || null);
+        setPublicLikes(data.publicLikes !== undefined ? data.publicLikes : true);
+        setPublicFollowing(data.publicFollowing !== undefined ? data.publicFollowing : true);
 
         if (data.usernameChangedAt) {
           const lastChange = new Date(data.usernameChangedAt);
@@ -321,6 +330,35 @@ export default function SettingsPage() {
       setEmailMessage({ type: "error", text: "Something went wrong" });
     } finally {
       setUpdatingEmail(false);
+    }
+  };
+
+  // ─── Update Privacy ──────────────────────────────────────────────
+  const handleUpdatePrivacy = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUpdatingPrivacy(true);
+    setMessage(null);
+
+    try {
+      const res = await fetch("/api/user/privacy", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ publicLikes, publicFollowing }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setPublicLikes(data.publicLikes);
+        setPublicFollowing(data.publicFollowing);
+        setMessage({ type: "success", text: "Privacy settings updated!" });
+        update();
+      } else {
+        setMessage({ type: "error", text: "Failed to update privacy settings" });
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: "Something went wrong" });
+    } finally {
+      setUpdatingPrivacy(false);
     }
   };
 
@@ -719,6 +757,54 @@ export default function SettingsPage() {
         </form>
       </div>
 
+      {/* ─── Privacy Settings ───────────────────────────────────────── */}
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Privacy Settings</h2>
+        <form onSubmit={handleUpdatePrivacy} className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium text-gray-900 dark:text-white">Public Likes</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Allow others to see what you like
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={publicLikes}
+                onChange={(e) => setPublicLikes(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-zrp-red rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-zrp-red"></div>
+            </label>
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium text-gray-900 dark:text-white">Public Following</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Show who you follow to everyone
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={publicFollowing}
+                onChange={(e) => setPublicFollowing(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-zrp-red rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-zrp-red"></div>
+            </label>
+          </div>
+          <button
+            type="submit"
+            disabled={updatingPrivacy}
+            className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            {updatingPrivacy ? "Saving..." : "Update Privacy"}
+          </button>
+        </form>
+      </div>
+
       {/* ─── Email Preferences Section ────────────────────────────── */}
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Email Notifications</h2>
@@ -728,7 +814,7 @@ export default function SettingsPage() {
         <EmailPreferences />
       </div>
 
-      {/* ─── Privacy Section ──────────────────────────────────────────── */}
+      {/* ─── Privacy Section (existing) ──────────────────────────────── */}
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Privacy</h2>
         <div className="space-y-2">
