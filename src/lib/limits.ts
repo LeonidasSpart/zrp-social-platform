@@ -13,6 +13,9 @@ export interface PlanLimits {
   apiAccess: boolean;
   prioritySupport: 'none' | 'standard' | 'priority' | '24/7';
   charityContribution: number;
+  // ─── PRICES ─────────────────────────────────────────────────────────
+  priceMonthly: number | null;
+  priceYearly?: number | null;
 }
 
 export const PLANS: Record<string, PlanLimits> = {
@@ -30,6 +33,8 @@ export const PLANS: Record<string, PlanLimits> = {
     apiAccess: false,
     prioritySupport: 'none',
     charityContribution: 35,
+    priceMonthly: 0,
+    priceYearly: 0,
   },
   pro: {
     postLength: 1000,
@@ -45,6 +50,8 @@ export const PLANS: Record<string, PlanLimits> = {
     apiAccess: false,
     prioritySupport: 'standard',
     charityContribution: 35,
+    priceMonthly: 9.99,
+    priceYearly: 99.99,
   },
   business: {
     postLength: 5000,
@@ -60,6 +67,8 @@ export const PLANS: Record<string, PlanLimits> = {
     apiAccess: true,
     prioritySupport: 'priority',
     charityContribution: 35,
+    priceMonthly: 49.99,
+    priceYearly: 499.99,
   },
   enterprise: {
     postLength: 999999,
@@ -75,6 +84,8 @@ export const PLANS: Record<string, PlanLimits> = {
     apiAccess: true,
     prioritySupport: '24/7',
     charityContribution: 35,
+    priceMonthly: 99.99,
+    priceYearly: 999.99,
   },
 };
 
