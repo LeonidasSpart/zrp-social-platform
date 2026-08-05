@@ -1,227 +1,426 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/db";
-import { createNotification } from "@/lib/notifications";
-import { sendPushNotification } from "@/lib/push-notifications";
-
-// ─── GET: Fetch threaded comments with counts and user status ──────
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const postId = params.id;
-    const session = await getServerSession(authOptions);
-    const viewerId = session?.user?.id;
-
-    // ─── Fetch all comments for this post (including replies) ──────
-    const comments = await prisma.comment.findMany({
-      where: { postId },
-      orderBy: { createdAt: "asc" },
-      include: {
-        author: {
-          select: {
-            id: true,
-            username: true,
-            name: true,
-            avatarUrl: true,
-            badgeType: true,
-          },
-        },
-        replies: {
-          include: {
-            author: {
-              select: {
-                id: true,
-                username: true,
-                name: true,
-                avatarUrl: true,
-                badgeType: true,
-              },
-            },
-          },
-        },
-        _count: {
-          select: {
-            likes: true,
-            reposts: true,
-            bookmarks: true,
-          },
-        },
-      },
-    });
-
-    // ─── Build a comment tree ──────────────────────────────────────
-    const commentMap = new Map();
-    const topLevelComments: any[] = [];
-
-    comments.forEach((comment) => {
-      const withReplies = { ...comment, replies: [] };
-      commentMap.set(comment.id, withReplies);
-    });
-
-    comments.forEach((comment) => {
-      if (comment.parentId) {
-        const parent = commentMap.get(comment.parentId);
-        if (parent) {
-          parent.replies.push(commentMap.get(comment.id));
-        }
-      } else {
-        topLevelComments.push(commentMap.get(comment.id));
-      }
-    });
-
-    // ─── Sort top‑level comments (newest first) ────────────────────
-    topLevelComments.sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-
-    // ─── Sort replies (oldest first, threaded order) ──────────────
-    topLevelComments.forEach((comment) => {
-      comment.replies.sort(
-        (a: any, b: any) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
-    });
-
-    // ─── Add liked / reposted / bookmarked status for the viewer ──
-    if (viewerId) {
-      // Collect all comment IDs (including nested replies)
-      const allCommentIds: string[] = [];
-      const collectIds = (commentsArray: any[]) => {
-        commentsArray.forEach((c) => {
-          allCommentIds.push(c.id);
-          if (c.replies) collectIds(c.replies);
-        });
-      };
-      collectIds(topLevelComments);
-
-      // Fetch statuses in bulk
-      const [likes, reposts, bookmarks] = await Promise.all([
-        prisma.commentLike.findMany({
-          where: { commentId: { in: allCommentIds }, userId: viewerId },
-          select: { commentId: true },
-        }),
-        prisma.commentRepost.findMany({
-          where: { commentId: { in: allCommentIds }, userId: viewerId },
-          select: { commentId: true },
-        }),
-        prisma.commentBookmark.findMany({
-          where: { commentId: { in: allCommentIds }, userId: viewerId },
-          select: { commentId: true },
-        }),
-      ]);
-
-      const likedIds = new Set(likes.map((l) => l.commentId));
-      const repostedIds = new Set(reposts.map((r) => r.commentId));
-      const bookmarkedIds = new Set(bookmarks.map((b) => b.commentId));
-
-      // Recursively add status
-      const addStatus = (commentsArray: any[]) => {
-        commentsArray.forEach((c) => {
-          c.liked = likedIds.has(c.id);
-          c.reposted = repostedIds.has(c.id);
-          c.bookmarked = bookmarkedIds.has(c.id);
-          if (c.replies) addStatus(c.replies);
-        });
-      };
-      addStatus(topLevelComments);
-    }
-
-    return NextResponse.json(topLevelComments);
-  } catch (error) {
-    console.error("Error fetching comments:", error);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
-  }
+generator client {
+  provider = "prisma-client-js"
 }
 
-// ─── POST: Create a comment (or reply) ──────────────────────────────
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
-  try {
-    const { content, parentId } = await req.json();
-    const postId = params.id;
+enum Role {
+  USER
+  MODERATOR
+  ADMIN
+}
 
-    if (!content?.trim()) {
-      return NextResponse.json({ error: "Comment cannot be empty" }, { status: 400 });
-    }
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  username    String    @unique
+  password    String
 
-    // ─── Validate parent comment if provided ────────────────────────
-    if (parentId) {
-      const parent = await prisma.comment.findUnique({
-        where: { id: parentId },
-        select: { id: true, postId: true },
-      });
-      if (!parent) {
-        return NextResponse.json({ error: "Parent comment not found" }, { status: 404 });
-      }
-      if (parent.postId !== postId) {
-        return NextResponse.json({ error: "Parent comment does not belong to this post" }, { status: 400 });
-      }
-    }
+  resetToken       String?   @unique
+  resetTokenExpiry DateTime?
 
-    // ─── Create comment ──────────────────────────────────────────────
-    const comment = await prisma.comment.create({
-      data: {
-        content: content.trim(),
-        postId,
-        authorId: session.user.id,
-        parentId: parentId || null,
-      },
-      include: {
-        author: {
-          select: {
-            id: true,
-            username: true,
-            name: true,
-            avatarUrl: true,
-            badgeType: true,
-          },
-        },
-        _count: {
-          select: {
-            likes: true,
-            reposts: true,
-            bookmarks: true,
-          },
-        },
-      },
-    });
+  emailVerified        DateTime?
+  verificationToken    String?     @unique
+  verificationTokenExpiry DateTime?
+  pendingEmail         String?     @unique
 
-    // ─── Get post author for notification ──────────────────────────
-    const post = await prisma.post.findUnique({
-      where: { id: postId },
-      select: { authorId: true },
-    });
+  deletionRequestedAt  DateTime?
+  deletionScheduledFor DateTime?
 
-    // ─── Send notification (if not the author) ──────────────────────
-    if (post && post.authorId !== session.user.id) {
-      await createNotification({
-        userId: post.authorId,
-        type: "comment",
-        fromUserId: session.user.id,
-        postId: postId,
-      });
+  name        String?
+  bio         String?   @db.Text
+  avatarUrl   String?   @db.Text
+  coverUrl    String?   @db.Text
+  isPrivate   Boolean   @default(false)
+  isAdmin     Boolean   @default(false)
+  badgeType   String?
+  location    String?
+  country     String?
+  website     String?
+  usernameChangedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-      await sendPushNotification(
-        post.authorId,
-        "New Comment",
-        `${session.user.name || session.user.username} commented on your post.`,
-        `/post/${postId}`
-      );
-    }
+  role        Role      @default(USER)
+  plan        String    @default("free")
+  onboardingCompleted Boolean @default(false)
+  banned      Boolean   @default(false)
 
-    return NextResponse.json(comment, { status: 201 });
-  } catch (error) {
-    console.error("Comment error:", error);
-    return NextResponse.json({ error: "Failed to post comment" }, { status: 500 });
-  }
+  emailPreferences Json?
+
+  pinnedPostId  String?   @unique
+  pinnedPost    Post?     @relation("PinnedPost", fields: [pinnedPostId], references: [id], onDelete: SetNull)
+
+  posts       Post[]
+  comments    Comment[]
+  following   Follow[]  @relation("Following")
+  followers   Follow[]  @relation("Followers")
+  likes       Like[]
+  reposts     Repost[]
+  reactions   Reaction[]
+  muter       Mute[]    @relation("Muter")
+  mutedBy     Mute[]    @relation("Muted")
+  notifications Notification[] @relation("Notification_user")
+  sentNotifications Notification[] @relation("Notification_fromUser")
+  sentMessages Message[] @relation("Message_sender")
+  receivedMessages Message[] @relation("Message_receiver")
+  pollVotes   PollVote[]
+  bookmarks   Bookmark[]
+  pushSubscriptions PushSubscription[]
+
+  // ─── STORIES ──────────────────────────────────────────────────────
+  stories     Story[]
+  storyViews  StoryView[]
+
+  // ─── COMMENT INTERACTIONS ──────────────────────────────────────
+  commentLikes     CommentLike[]
+  commentReposts   CommentRepost[]
+  commentBookmarks CommentBookmark[]
+
+  blockedUsers Blocked[] @relation("Blocker")
+  blockedBy    Blocked[] @relation("Blocked")
+  reports      Report[]  @relation("Reporter")
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  content     String    @db.Text
+  imageUrl    String?
+  linkUrl     String?
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  quotePostId String?
+  quotePost   Post?   @relation("QuotePost", fields: [quotePostId], references: [id], onDelete: SetNull)
+  quotedBy    Post[]  @relation("QuotePost")
+
+  views       Int       @default(0)
+  scheduledAt DateTime?
+  status      String    @default("published")
+
+  hashtags    String[]
+  mentions    String[]
+  pollId      String?   @unique
+  poll        Poll?     @relation(fields: [pollId], references: [id])
+  isPoll      Boolean   @default(false)
+
+  pinnedBy    User?     @relation("PinnedPost")
+
+  comments    Comment[]
+  likes       Like[]
+  reposts     Repost[]
+  reactions   Reaction[]
+  notifications Notification[] @relation("Notification_post")
+  reports     Report[]
+  bookmarks   Bookmark[]
+
+  @@index([createdAt])
+  @@index([authorId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([quotePostId])
+}
+
+model Comment {
+  id          String    @id @default(cuid())
+  content     String    @db.Text
+  imageUrl    String?
+  postId      String
+  post        Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  parentId    String?
+  parent      Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Comment[] @relation("CommentReplies")
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  reports     Report[]
+
+  // ─── COMMENT INTERACTIONS ──────────────────────────────────────
+  likes       CommentLike[]
+  reposts     CommentRepost[]
+  bookmarks   CommentBookmark[]
+
+  @@index([postId])
+  @@index([createdAt])
+  @@index([parentId])
+}
+
+model Follow {
+  id          String    @id @default(cuid())
+  followerId  String
+  follower    User      @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User      @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+model Like {
+  id          String    @id @default(cuid())
+  postId      String
+  post        Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+}
+
+model Repost {
+  id            String    @id @default(cuid())
+  postId        String
+  post          Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quoteContent  String?   @db.Text
+  createdAt     DateTime  @default(now())
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+}
+
+model Reaction {
+  id        String   @id @default(cuid())
+  emoji     String
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId, emoji])
+  @@index([postId])
+  @@index([userId])
+}
+
+model Mute {
+  id        String   @id @default(cuid())
+  muterId   String
+  muter     User     @relation("Muter", fields: [muterId], references: [id], onDelete: Cascade)
+  mutedId   String
+  muted     User     @relation("Muted", fields: [mutedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([muterId, mutedId])
+  @@index([muterId])
+  @@index([mutedId])
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation("Notification_user", fields: [userId], references: [id], onDelete: Cascade)
+  type        String
+  fromUserId  String
+  fromUser    User      @relation("Notification_fromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
+  postId      String?
+  post        Post?     @relation("Notification_post", fields: [postId], references: [id], onDelete: Cascade)
+  read        Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+  @@index([userId, read])
+  @@index([createdAt])
+  @@index([fromUserId])
+}
+
+model Message {
+  id          String    @id @default(cuid())
+  content     String    @db.Text
+  imageUrl    String?
+  senderId    String
+  sender      User      @relation("Message_sender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId  String
+  receiver    User      @relation("Message_receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  read        Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+  @@index([senderId, receiverId])
+}
+
+model Poll {
+  id          String    @id @default(cuid())
+  question    String    @db.Text
+  options     String[]
+  votes       Json?
+  post        Post?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  votes_user  PollVote[]
+}
+
+model PollVote {
+  id          String    @id @default(cuid())
+  pollId      String
+  poll        Poll      @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  optionIndex Int
+  createdAt   DateTime  @default(now())
+
+  @@unique([pollId, userId])
+  @@index([pollId])
+  @@index([userId])
+}
+
+model Gif {
+  id          String    @id @default(cuid())
+  url         String
+  title       String?
+  width       Int?
+  height      Int?
+  createdAt   DateTime  @default(now())
+}
+
+model Blocked {
+  id          String    @id @default(cuid())
+  blockerId   String
+  blocker     User      @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId   String
+  blocked     User      @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+}
+
+model Report {
+  id          String    @id @default(cuid())
+  reporterId  String
+  reporter    User      @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  postId      String?
+  post        Post?     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  commentId   String?
+  comment     Comment?  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  reason      String
+  details     String?   @db.Text
+  status      String    @default("pending")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  actionType   String?
+  actionNote   String?   @db.Text
+  actionedAt   DateTime?
+
+  @@index([postId])
+  @@index([commentId])
+  @@index([status])
+  @@index([reporterId])
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  keys      Json
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ─── COMMENT LIKES ─────────────────────────────────────────────────
+model CommentLike {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId])
+  @@index([commentId])
+  @@index([userId])
+}
+
+// ─── COMMENT REPOSTS ──────────────────────────────────────────────
+model CommentRepost {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId])
+  @@index([commentId])
+  @@index([userId])
+}
+
+// ─── COMMENT BOOKMARKS ────────────────────────────────────────────
+model CommentBookmark {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId])
+  @@index([commentId])
+  @@index([userId])
+}
+
+// ─── STORIES ─────────────────────────────────────────────────────────
+model Story {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content     String?   @db.Text
+  mediaUrl    String?
+  mediaType   String?   // "image" or "video"
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime   // set in application code (24h later)
+  views       StoryView[]
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([expiresAt])
+}
+
+model StoryView {
+  id          String    @id @default(cuid())
+  storyId     String
+  story       Story     @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  viewerId    String
+  viewer      User      @relation(fields: [viewerId], references: [id], onDelete: Cascade)
+  viewedAt    DateTime  @default(now())
+
+  @@unique([storyId, viewerId])
+  @@index([storyId])
+  @@index([viewerId])
 }
