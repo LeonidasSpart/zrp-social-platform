@@ -4,7 +4,14 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
-import { LayoutDashboard, Users, FileText, Flag, Settings } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  FileText,
+  Flag,
+  Settings,
+  DollarSign,
+} from "lucide-react";
 
 export default function AdminLayout({
   children,
@@ -34,6 +41,7 @@ export default function AdminLayout({
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/posts", label: "Posts", icon: FileText },
     { href: "/admin/reports", label: "Reports", icon: Flag },
+    { href: "/admin/upgrade-requests", label: "Upgrade Requests", icon: DollarSign }, // ✅ new
   ];
 
   return (
@@ -43,16 +51,23 @@ export default function AdminLayout({
           <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Admin</h2>
             <nav className="space-y-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition text-gray-700 dark:text-gray-300"
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span>{item.label}</span>
-                </Link>
-              ))}
+              {navItems.map((item) => {
+                const isActive = window.location.pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
+                      isActive
+                        ? "bg-zrp-red/10 text-zrp-red dark:bg-zrp-red/20 dark:text-zrp-red"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
             </nav>
           </div>
         </aside>
