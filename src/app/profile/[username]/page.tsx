@@ -32,7 +32,7 @@ interface UserProfile {
   badgeType: string | null;
   createdAt: string;
   isAdmin: boolean;
-  plan: string | null; // ✅ added
+  plan: string | null;
   _count: {
     posts: number;
     followers: number;
@@ -70,6 +70,7 @@ interface Post {
       name: string | null;
     };
   };
+  postId?: string; // ✅ added for replies
 }
 
 type TabType = "posts" | "replies" | "media" | "likes" | "analytics";
@@ -403,12 +404,24 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
   // ─── Render reply item ──────────────────────────────────────────────
   const renderReplyItem = (reply: any) => {
-    const isOwn = reply.author.id === session?.user?.id;
+    const postLink = reply.postId ? `/post/${reply.postId}#comment-${reply.id}` : '#';
 
     return (
-      <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+      <Link
+        href={postLink}
+        className="block border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+        onClick={(e) => {
+          // If the click is on an inner link, let the browser handle it
+          if (e.target instanceof HTMLAnchorElement) return;
+          // Otherwise, navigate to the post page
+        }}
+      >
         <div className="flex items-start gap-3">
-          <Link href={`/profile/${reply.author.username}`} className="flex-shrink-0">
+          <Link
+            href={`/profile/${reply.author.username}`}
+            className="flex-shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
               {reply.author.avatarUrl ? (
                 <img
@@ -428,6 +441,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
               <Link
                 href={`/profile/${reply.author.username}`}
                 className="font-semibold hover:underline text-gray-900 dark:text-white"
+                onClick={(e) => e.stopPropagation()}
               >
                 {reply.author.name || reply.author.username}
               </Link>
@@ -441,7 +455,12 @@ export default function ProfilePage({ params }: { params: { username: string } }
             {/* ─── Replying to ────────────────────────────────────────── */}
             {reply.replyTo && (
               <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Replying to <Link href={`/profile/${reply.replyTo.author.username}`} className="text-blue-600 hover:underline">
+                Replying to{' '}
+                <Link
+                  href={`/profile/${reply.replyTo.author.username}`}
+                  className="text-blue-600 hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   @{reply.replyTo.author.username}
                 </Link>
               </div>
@@ -462,7 +481,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
             )}
           </div>
         </div>
-      </div>
+      </Link>
     );
   };
 
