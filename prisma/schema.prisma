@@ -83,6 +83,9 @@ model User {
   // ─── UPGRADE REQUESTS ──────────────────────────────────────────
   upgradeRequests UpgradeRequest[]
 
+  // ─── PAYMENT REQUESTS (crypto) ─────────────────────────────────
+  paymentRequests PaymentRequest[]
+
   blockedUsers Blocked[] @relation("Blocker")
   blockedBy    Blocked[] @relation("Blocked")
   reports      Report[]  @relation("Reporter")
@@ -370,6 +373,23 @@ model UpgradeRequest {
   approvedAt     DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+// ─── PAYMENT REQUESTS (crypto) ────────────────────────────────────
+model PaymentRequest {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan          String   // "pro", "business", "enterprise"
+  amount        Float
+  currency      String   @default("USDC")
+  transactionId String?
+  status        String   @default("pending") // "pending", "verified", "failed"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@index([userId])
   @@index([status])
