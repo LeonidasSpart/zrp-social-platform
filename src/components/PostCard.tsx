@@ -32,7 +32,7 @@ interface PostCardProps {
       likes: number;
       comments: number;
       reposts: number;
-      quotedBy: number; // ✅ added
+      quotedBy: number;
     };
     liked?: boolean;
     isRepost?: boolean;
@@ -486,30 +486,30 @@ export default function PostCard({
                 <span>{formatCount(post._count?.comments || 0)}</span>
               </button>
 
-              {/* Repost button (icon only) */}
-              <button
-                onClick={handleRepost}
-                className={`flex items-center gap-1 text-sm ${reposted ? "text-green-500" : "text-gray-500 dark:text-gray-400 hover:text-green-500"} transition`}
-              >
-                <Repeat className={`w-4 h-4 ${reposted ? "fill-green-500" : ""}`} />
-              </button>
+              {/* Repost button + count (grouped, no label) */}
+              <div className="flex items-center gap-0.5">
+                <button
+                  onClick={handleRepost}
+                  className={`flex items-center text-sm ${reposted ? "text-green-500" : "text-gray-500 dark:text-gray-400 hover:text-green-500"} transition`}
+                >
+                  <Repeat className={`w-4 h-4 ${reposted ? "fill-green-500" : ""}`} />
+                </button>
+                <Link
+                  href={`/post/${post.id}/reposts`}
+                  className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+                  title="Reposts"
+                >
+                  <span className="font-medium">{formatCount(repostsCount)}</span>
+                </Link>
+              </div>
 
-              {/* Reposts count as link */}
-              <Link
-                href={`/post/${post.id}/reposts`}
-                className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
-              >
-                <span className="font-medium">{formatCount(repostsCount)}</span>
-                <span className="ml-1">Reposts</span>
-              </Link>
-
-              {/* Quotes count as link */}
+              {/* Quotes – number only */}
               <Link
                 href={`/post/${post.id}/quotes`}
                 className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+                title="Quotes"
               >
                 <span className="font-medium">{formatCount(post._count?.quotedBy || 0)}</span>
-                <span className="ml-1">Quotes</span>
               </Link>
 
               <span className="text-sm text-gray-400 dark:text-gray-500" title={`${viewsCount.toLocaleString()} views`}>
