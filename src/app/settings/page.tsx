@@ -26,7 +26,7 @@ interface UserData {
   avatarUrl: string | null;
   createdAt: string;
   usernameChangedAt: string | null;
-  publicLikes: boolean;      // ✅ privacy settings
+  publicLikes: boolean;
   publicFollowing: boolean;
 }
 
@@ -149,7 +149,6 @@ export default function SettingsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // ─── 2MB limit (matches uploadthing router) ───────────────────
     if (file.size > 2 * 1024 * 1024) {
       setMessage({ type: "error", text: "File too large. Max size is 2MB." });
       return;
@@ -321,7 +320,6 @@ export default function SettingsPage() {
         setEmailMessage({ type: "success", text: data.message });
         setNewEmail("");
         setEmailPassword("");
-        // Optionally update session after email change
         update();
       } else {
         setEmailMessage({ type: "error", text: data.error || "Failed to send verification email" });
@@ -346,16 +344,19 @@ export default function SettingsPage() {
         body: JSON.stringify({ publicLikes, publicFollowing }),
       });
 
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
+        // ✅ Update local state with the returned values
         setPublicLikes(data.publicLikes);
         setPublicFollowing(data.publicFollowing);
         setMessage({ type: "success", text: "Privacy settings updated!" });
-        update();
+        // Refresh session (optional)
+        await update();
       } else {
-        setMessage({ type: "error", text: "Failed to update privacy settings" });
+        setMessage({ type: "error", text: data.error || "Failed to update privacy settings" });
       }
     } catch (error) {
+      console.error("Error updating privacy:", error);
       setMessage({ type: "error", text: "Something went wrong" });
     } finally {
       setUpdatingPrivacy(false);
@@ -378,7 +379,6 @@ export default function SettingsPage() {
     });
   };
 
-  // Helper to display the email from session (or fallback)
   const currentEmail = session?.user?.email || userData?.email || "Not available";
   const userPlan = session?.user?.plan || "free";
   const planLimits = getPlanLimits(userPlan);
