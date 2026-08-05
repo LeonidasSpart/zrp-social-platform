@@ -32,6 +32,7 @@ interface PostCardProps {
       likes: number;
       comments: number;
       reposts: number;
+      quotedBy: number; // ✅ added
     };
     liked?: boolean;
     isRepost?: boolean;
@@ -46,7 +47,7 @@ interface PostCardProps {
   showPinOption?: boolean;
   isPinned?: boolean;
   onPinToggle?: () => void;
-  showInlineComments?: boolean; // ✅ new – default true
+  showInlineComments?: boolean;
 }
 
 // ─── PARSE HASHTAGS AND MENTIONS ──────────────────────────────────
@@ -88,7 +89,7 @@ export default function PostCard({
   showPinOption = false,
   isPinned = false,
   onPinToggle,
-  showInlineComments = true, // ✅ default true
+  showInlineComments = true,
 }: PostCardProps) {
   const { data: session } = useSession();
   const [liked, setLiked] = useState(post.liked || false);
@@ -211,6 +212,7 @@ export default function PostCard({
   }, [post.id]);
 
   // ─── HANDLERS ──────────────────────────────────────────────────────
+
   const handleLike = async () => {
     try {
       const res = await fetch(`/api/posts/${post.id}/like`, { method: "POST" });
@@ -466,7 +468,8 @@ export default function PostCard({
               )}
             </div>
 
-            <div className="flex items-center gap-6 mt-3 flex-wrap">
+            {/* ─── ACTION BAR ──────────────────────────────────────────── */}
+            <div className="flex items-center gap-4 mt-3 flex-wrap">
               <button
                 onClick={handleLike}
                 className={`flex items-center gap-1 text-sm ${liked ? "text-red-500" : "text-gray-500 dark:text-gray-400 hover:text-red-500"} transition`}
@@ -483,33 +486,52 @@ export default function PostCard({
                 <span>{formatCount(post._count?.comments || 0)}</span>
               </button>
 
+              {/* Repost button (icon only) */}
               <button
                 onClick={handleRepost}
                 className={`flex items-center gap-1 text-sm ${reposted ? "text-green-500" : "text-gray-500 dark:text-gray-400 hover:text-green-500"} transition`}
               >
                 <Repeat className={`w-4 h-4 ${reposted ? "fill-green-500" : ""}`} />
-                <span>{formatCount(repostsCount)}</span>
               </button>
 
-              <span className="flex items-center gap-1 text-sm text-gray-400 dark:text-gray-500" title={`${viewsCount.toLocaleString()} views`}>
-                <BarChart3 className="w-4 h-4" />
+              {/* Reposts count as link */}
+              <Link
+                href={`/post/${post.id}/reposts`}
+                className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+              >
+                <span className="font-medium">{formatCount(repostsCount)}</span>
+                <span className="ml-1">Reposts</span>
+              </Link>
+
+              {/* Quotes count as link */}
+              <Link
+                href={`/post/${post.id}/quotes`}
+                className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+              >
+                <span className="font-medium">{formatCount(post._count?.quotedBy || 0)}</span>
+                <span className="ml-1">Quotes</span>
+              </Link>
+
+              <span className="text-sm text-gray-400 dark:text-gray-500" title={`${viewsCount.toLocaleString()} views`}>
+                <BarChart3 className="w-4 h-4 inline mr-1" />
                 <span>{formatCount(viewsCount)}</span>
               </span>
 
-              <button onClick={handleShare} className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition">
+              <button onClick={handleShare} className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition">
                 <Share2 className="w-4 h-4" />
               </button>
 
               <button
                 onClick={handleBookmark}
                 disabled={bookmarkLoading}
-                className={`flex items-center gap-1 text-sm ${bookmarked ? "text-gray-900 dark:text-white" : "text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white"} transition`}
+                className={`text-sm ${bookmarked ? "text-gray-900 dark:text-white" : "text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white"} transition`}
                 title={bookmarked ? "Remove bookmark" : "Bookmark"}
               >
                 <Bookmark className={`w-4 h-4 ${bookmarked ? "fill-current" : ""}`} />
               </button>
             </div>
 
+            {/* ─── REACTIONS ────────────────────────────────────────── */}
             {!reactionsLoading && (
               <div className="flex items-center gap-2 mt-2 flex-wrap">
                 {Object.entries(reactions)
