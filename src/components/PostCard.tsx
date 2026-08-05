@@ -114,6 +114,7 @@ export default function PostCard({
 
   const [lastClickTime, setLastClickTime] = useState(0);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const [lightboxVideo, setLightboxVideo] = useState<string | null>(null); // ✅ for videos
   const [reactions, setReactions] = useState<Record<string, number>>({});
   const [userReaction, setUserReaction] = useState<string | null>(null);
   const [reactionsLoading, setReactionsLoading] = useState(true);
@@ -123,6 +124,9 @@ export default function PostCard({
   const contentParts = parseContent(post.content);
   const isRepost = post.isRepost === true;
   const originalAuthor = post.repostOriginalAuthor;
+
+  // ─── Detect if media is a video ──────────────────────────────────
+  const isVideo = post.imageUrl?.match(/\.(mp4|webm|mov|avi|mkv)$/i);
 
   // ─── FETCH REPOST STATUS ──────────────────────────────────────────
   useEffect(() => {
@@ -477,15 +481,44 @@ export default function PostCard({
                   return <span key={index}>{part.value}</span>;
                 })}
               </p>
+              {/* ─── Media rendering (image or video) ────────────────── */}
               {post.imageUrl && (
                 <div
                   className="mt-2 rounded-lg overflow-hidden cursor-pointer group relative"
-                  onClick={(e) => { e.stopPropagation(); setLightboxImage(post.imageUrl!); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (isVideo) {
+                      setLightboxVideo(post.imageUrl!);
+                    } else {
+                      setLightboxImage(post.imageUrl!);
+                    }
+                  }}
                 >
-                  <img src={post.imageUrl} alt="Post image" className="w-full" />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20">
-                    <ZoomIn className="w-8 h-8 text-white" />
-                  </div>
+                  {isVideo ? (
+                    <>
+                      <video
+                        src={post.imageUrl}
+                        className="w-full max-h-[400px] object-contain"
+                        controls
+                        playsInline
+                        poster={post.imageUrl} // fallback – some browsers show first frame
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20 pointer-events-none">
+                        <div className="bg-black/50 rounded-full p-3">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
+                            <polygon points="5,3 19,12 5,21" />
+                          </svg>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <img src={post.imageUrl} alt="Post image" className="w-full" />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20">
+                        <ZoomIn className="w-8 h-8 text-white" />
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -640,11 +673,46 @@ export default function PostCard({
 
       <ReportModal isOpen={showReportModal} onClose={() => setShowReportModal(false)} onSubmit={handleReport} />
 
+      {/* ─── Image lightbox ──────────────────────────────────────────── */}
       {lightboxImage && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[999] p-4" onClick={() => setLightboxImage(null)}>
+        <div
+          className="fixed inset-0 bg-black/90 flex items-center justify-center z-[999] p-4"
+          onClick={() => setLightboxImage(null)}
+        >
           <div className="relative max-w-3xl w-full" onClick={(e) => e.stopPropagation()}>
-            <img src={lightboxImage} alt="Full size" className="w-full h-auto max-h-[90vh] object-contain rounded-lg" />
-            <button onClick={() => setLightboxImage(null)} className="absolute top-2 right-2 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition">
+            <img
+              src={lightboxImage}
+              alt="Full size"
+              className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
+            />
+            <button
+              onClick={() => setLightboxImage(null)}
+              className="absolute top-2 right-2 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Video lightbox ──────────────────────────────────────────── */}
+      {lightboxVideo && (
+        <div
+          className="fixed inset-0 bg-black/90 flex items-center justify-center z-[999] p-4"
+          onClick={() => setLightboxVideo(null)}
+        >
+          <div className="relative max-w-3xl w-full" onClick={(e) => e.stopPropagation()}>
+            <video
+              src={lightboxVideo}
+              className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
+              controls
+              playsInline
+              autoPlay
+            />
+            <button
+              onClick={() => setLightboxVideo(null)}
+              className="absolute top-2 right-2 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition"
+            >
               <X className="w-6 h-6" />
             </button>
           </div>
