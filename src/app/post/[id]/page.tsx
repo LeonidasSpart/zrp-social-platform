@@ -1,8 +1,8 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter }from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import PostCard from "@/components/PostCard";
@@ -20,10 +20,11 @@ interface Post {
     avatarUrl?: string;
     badgeType?: string | null;
   };
-  _count?: {
+  _count: {
     likes: number;
     comments: number;
     reposts: number;
+    quotedBy: number; // ✅ added
   };
   liked?: boolean;
 }
@@ -33,7 +34,7 @@ interface Comment {
   content: string;
   imageUrl?: string;
   createdAt: string;
-  postId: string; // ✅ required for share
+  postId: string;
   author: {
     id: string;
     username: string;
@@ -62,6 +63,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
   const [commentContent, setCommentContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [parentId, setParentId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"recent" | "relevant" | "likes">("recent");
   const commentRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -163,9 +165,10 @@ export default function PostPage({ params }: { params: { id: string } }) {
           return {
             ...prev,
             _count: {
-              likes: prev._count?.likes ?? 0,
-              comments: (prev._count?.comments ?? 0) + 1,
-              reposts: prev._count?.reposts ?? 0,
+              likes: prev._count.likes,
+              comments: prev._count.comments + 1,
+              reposts: prev._count.reposts,
+              quotedBy: prev._count.quotedBy,
             },
           };
         });
@@ -180,6 +183,22 @@ export default function PostPage({ params }: { params: { id: string } }) {
       setSubmitting(false);
     }
   };
+
+  // ─── Sort comments ────────────────────────────────────────────────
+  const sortedComments = useMemo(() => {
+    const sortFn = (a: Comment, b: Comment) => {
+      if (sortBy === "recent") {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      } else if (sortBy === "likes") {
+        return (b._count?.likes || 0) - (a._count?.likes || 0);
+      } else { // relevant
+        const scoreA = (a._count?.likes || 0) + (a.replies?.length || 0);
+        const scoreB = (b._count?.likes || 0) + (b.replies?.length || 0);
+        return scoreB - scoreA;
+      }
+    };
+    return [...comments].sort(sortFn);
+  }, [comments, sortBy]);
 
   if (status === "loading" || loading) {
     return (
@@ -233,10 +252,26 @@ export default function PostPage({ params }: { params: { id: string } }) {
         </form>
       )}
 
-      {/* ─── Comments (threaded) ────────────────────────────────────── */}
+      {/* ─── Reply sorting ────────────────────────────────────────── */}
       {comments.length > 0 && (
-        <div className="mt-6 space-y-4">
-          {comments.map((comment) => (
+        <div className="flex items-center justify-between mt-6">
+          <span className="text-sm text-gray-500">{comments.length} replies</span>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+            className="text-sm border border-gray-300 dark:border-gray-600 rounded-full px-3 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
+          >
+            <option value="recent">Recent</option>
+            <option value="relevant">Relevant</option>
+            <option value="likes">Likes</option>
+          </select>
+        </div>
+      )}
+
+      {/* ─── Comments (threaded) ────────────────────────────────────── */}
+      {sortedComments.length > 0 && (
+        <div className="mt-4 space-y-4">
+          {sortedComments.map((comment) => (
             <div
               key={comment.id}
               ref={(el) => {
