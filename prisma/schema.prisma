@@ -49,7 +49,7 @@ model User {
   updatedAt   DateTime  @updatedAt
 
   role        Role      @default(USER)
-  plan        String    @default("free")   // ✅ account tier: free, pro, business, enterprise
+  plan        String    @default("free")
   onboardingCompleted Boolean @default(false)
   banned      Boolean   @default(false)
 
@@ -78,6 +78,9 @@ model User {
   // ─── STORIES ──────────────────────────────────────────────────────
   stories     Story[]
   storyViews  StoryView[]
+
+  // ─── COMMENT LIKES ──────────────────────────────────────────────
+  commentLikes CommentLike[]
 
   blockedUsers Blocked[] @relation("Blocker")
   blockedBy    Blocked[] @relation("Blocked")
@@ -142,6 +145,9 @@ model Comment {
   updatedAt   DateTime  @updatedAt
 
   reports     Report[]
+
+  // ─── COMMENT LIKES ──────────────────────────────────────────────
+  likes       CommentLike[]
 
   @@index([postId])
   @@index([createdAt])
@@ -344,6 +350,20 @@ model PushSubscription {
   keys      Json
   createdAt DateTime @default(now())
 
+  @@index([userId])
+}
+
+// ─── COMMENT LIKES ─────────────────────────────────────────────────
+model CommentLike {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId])
+  @@index([commentId])
   @@index([userId])
 }
 
