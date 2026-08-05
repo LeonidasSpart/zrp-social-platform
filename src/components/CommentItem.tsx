@@ -20,6 +20,7 @@ interface Comment {
   content: string;
   imageUrl?: string;
   createdAt: string;
+  postId: string; // ✅ required for share
   author: {
     id: string;
     username: string;
@@ -65,13 +66,13 @@ export default function CommentItem({
     delete: false,
   });
 
-  // ─── EDIT STATE ──────────────────────────────────────────────────
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
   const [savingEdit, setSavingEdit] = useState(false);
 
   const isAuthor = session?.user?.id === comment.author.id;
 
+  // ─── Actions ──────────────────────────────────────────────────────
   const handleLike = async () => {
     if (!session || loading.like) return;
     setLoading({ ...loading, like: true });
@@ -83,11 +84,8 @@ export default function CommentItem({
         setLikesCount((prev) => (data.liked ? prev + 1 : prev - 1));
         onUpdate();
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading({ ...loading, like: false });
-    }
+    } catch (error) { console.error(error); }
+    finally { setLoading({ ...loading, like: false }); }
   };
 
   const handleRepost = async () => {
@@ -101,11 +99,8 @@ export default function CommentItem({
         setRepostsCount((prev) => (data.reposted ? prev + 1 : prev - 1));
         onUpdate();
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading({ ...loading, repost: false });
-    }
+    } catch (error) { console.error(error); }
+    finally { setLoading({ ...loading, repost: false }); }
   };
 
   const handleBookmark = async () => {
@@ -119,11 +114,8 @@ export default function CommentItem({
         setBookmarksCount((prev) => (data.bookmarked ? prev + 1 : prev - 1));
         onUpdate();
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading({ ...loading, bookmark: false });
-    }
+    } catch (error) { console.error(error); }
+    finally { setLoading({ ...loading, bookmark: false }); }
   };
 
   const handleShare = () => {
@@ -135,7 +127,6 @@ export default function CommentItem({
     }
   };
 
-  // ─── EDIT ──────────────────────────────────────────────────────────
   const handleEdit = async () => {
     if (!editContent.trim()) return;
     setSavingEdit(true);
@@ -151,12 +142,8 @@ export default function CommentItem({
       } else {
         alert("Failed to edit comment");
       }
-    } catch (error) {
-      console.error(error);
-      alert("Failed to edit comment");
-    } finally {
-      setSavingEdit(false);
-    }
+    } catch (error) { console.error(error); alert("Failed to edit comment"); }
+    finally { setSavingEdit(false); }
   };
 
   const handleDelete = async () => {
@@ -169,12 +156,8 @@ export default function CommentItem({
       } else {
         alert("Failed to delete comment");
       }
-    } catch (error) {
-      console.error(error);
-      alert("Failed to delete comment");
-    } finally {
-      setLoading({ ...loading, delete: false });
-    }
+    } catch (error) { console.error(error); alert("Failed to delete comment"); }
+    finally { setLoading({ ...loading, delete: false }); }
   };
 
   return (
@@ -220,7 +203,7 @@ export default function CommentItem({
             </span>
           </div>
 
-          {/* Content */}
+          {/* Content (editable) */}
           {isEditing ? (
             <div className="mt-1 flex items-start gap-2">
               <textarea
@@ -276,12 +259,14 @@ export default function CommentItem({
               <Heart className={`w-3.5 h-3.5 ${liked ? "fill-red-500" : ""}`} />
               {likesCount > 0 && <span className="font-medium">{likesCount}</span>}
             </button>
+
             <button
               onClick={() => onReply(comment.id)}
               className="flex items-center gap-1 text-xs text-gray-500 hover:text-zrp-red transition"
             >
               <MessageCircle className="w-3.5 h-3.5" />
             </button>
+
             <button
               onClick={handleRepost}
               disabled={loading.repost}
@@ -292,6 +277,7 @@ export default function CommentItem({
               <Repeat className={`w-3.5 h-3.5 ${reposted ? "fill-green-500" : ""}`} />
               {repostsCount > 0 && <span className="font-medium">{repostsCount}</span>}
             </button>
+
             <button
               onClick={handleBookmark}
               disabled={loading.bookmark}
@@ -302,6 +288,7 @@ export default function CommentItem({
               <Bookmark className={`w-3.5 h-3.5 ${bookmarked ? "fill-blue-500" : ""}`} />
               {bookmarksCount > 0 && <span className="font-medium">{bookmarksCount}</span>}
             </button>
+
             <button
               onClick={handleShare}
               className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition"
@@ -309,7 +296,7 @@ export default function CommentItem({
               <Share2 className="w-3.5 h-3.5" />
             </button>
 
-            {/* Edit / Delete (own comments) */}
+            {/* Edit / Delete (own comments only) */}
             {isAuthor && !isEditing && (
               <>
                 <button
@@ -333,7 +320,7 @@ export default function CommentItem({
         </div>
       </div>
 
-      {/* ─── Nested replies ────────────────────────────────────────── */}
+      {/* Nested replies */}
       {comment.replies && comment.replies.length > 0 && (
         <div className="ml-8 border-l-2 border-gray-200 dark:border-gray-700 pl-4 space-y-0">
           {comment.replies.map((reply) => (
