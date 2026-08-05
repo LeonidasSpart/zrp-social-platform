@@ -79,13 +79,14 @@ export async function GET(
       },
     });
 
-    // ─── Format replies with replyTo context ────────────────────────
+    // ─── Format replies with replyTo context and postId ────────────
     const formattedReplies = replies.map((reply) => ({
       id: reply.id,
       content: reply.content,
       imageUrl: null,
       createdAt: reply.createdAt,
       author: reply.author,
+      postId: reply.post.id, // ✅ added explicit postId
       replyTo: {
         id: reply.post.id,
         content: reply.post.content,
