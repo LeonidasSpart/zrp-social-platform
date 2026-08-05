@@ -56,7 +56,7 @@ export async function POST(
         type: "like",
         fromUserId: userId,
         postId: comment.postId,
-        commentId: commentId,
+        // commentId removed – we don't have the field in Notification yet
       });
     }
     return NextResponse.json({ liked: true });
