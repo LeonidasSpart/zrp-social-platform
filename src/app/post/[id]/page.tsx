@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import PostCard from "@/components/PostCard";
@@ -41,6 +41,10 @@ interface Comment {
   };
   parentId?: string;
   replies?: Comment[];
+  _count?: {
+    likes: number;
+  };
+  liked?: boolean;
 }
 
 export default function PostPage({ params }: { params: { id: string } }) {
@@ -52,7 +56,9 @@ export default function PostPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string | null>(null);
   const [commentContent, setCommentContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [parentId, setParentId] = useState<string | null>(null);
   const commentRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -119,6 +125,14 @@ export default function PostPage({ params }: { params: { id: string } }) {
     }
   }, [comments]);
 
+  // ─── Handle reply ──────────────────────────────────────────────────
+  const handleReply = (commentId: string) => {
+    setParentId(commentId);
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
   // ─── Submit comment ──────────────────────────────────────────────
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,12 +143,16 @@ export default function PostPage({ params }: { params: { id: string } }) {
       const res = await fetch(`/api/posts/${params.id}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: commentContent }),
+        body: JSON.stringify({
+          content: commentContent,
+          parentId: parentId || undefined,
+        }),
       });
       if (res.ok) {
         setCommentContent("");
+        setParentId(null);
         fetchComments();
-        // Update post comment count safely
+        // Update post comment count
         setPost((prev) => {
           if (!prev) return prev;
           return {
@@ -187,17 +205,17 @@ export default function PostPage({ params }: { params: { id: string } }) {
         </Link>
       </div>
 
-      {/* ✅ Pass showInlineComments={false} to hide inline comments */}
       <PostCard post={post} onUpdate={fetchPost} showInlineComments={false} />
 
       {/* ─── Comment Composer ────────────────────────────────────── */}
       {session && (
         <form onSubmit={handleSubmitComment} className="mt-4 flex gap-2">
           <input
+            ref={inputRef}
             type="text"
             value={commentContent}
             onChange={(e) => setCommentContent(e.target.value)}
-            placeholder="Write a reply..."
+            placeholder={parentId ? "Write a reply..." : "Write a comment..."}
             className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
           />
           <button
@@ -222,7 +240,11 @@ export default function PostPage({ params }: { params: { id: string } }) {
               id={`comment-${comment.id}`}
               className="rounded-lg transition-colors duration-500"
             >
-              <CommentItem comment={comment} />
+              <CommentItem
+                comment={comment}
+                onReply={handleReply}
+                onUpdate={fetchComments}
+              />
             </div>
           ))}
         </div>
