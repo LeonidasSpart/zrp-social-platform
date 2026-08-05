@@ -12,6 +12,7 @@ import { useUploadThing } from "@/lib/uploadthing-client";
 import EmailPreferences from "@/components/EmailPreferences";
 import PasswordInput from "@/components/PasswordInput";
 import LocationAutocomplete from "@/components/LocationAutocomplete";
+import { getPlanLimits } from "@/lib/limits";  // ✅ import plan limits
 
 interface UserData {
   id: string;
@@ -341,6 +342,8 @@ export default function SettingsPage() {
 
   // Helper to display the email from session (or fallback)
   const currentEmail = session?.user?.email || userData?.email || "Not available";
+  const userPlan = session?.user?.plan || "free";
+  const planLimits = getPlanLimits(userPlan);
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
@@ -427,6 +430,59 @@ export default function SettingsPage() {
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
           A verification link will be sent to the new email address. You must click it to confirm the change.
         </p>
+      </div>
+
+      {/* ─── Your Plan Section ────────────────────────────────────── */}
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Your Plan</h2>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Current Plan</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white capitalize">
+              {userPlan}
+            </p>
+          </div>
+          <Link
+            href="/pricing"
+            className="px-4 py-2 bg-zrp-red text-white rounded-lg font-medium hover:bg-zrp-darkRed transition"
+          >
+            Upgrade Plan
+          </Link>
+        </div>
+
+        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {userPlan === "free" && "You're on the Free plan. Upgrade to Pro, Business, or Enterprise for more features."}
+            {userPlan === "pro" && "You're on the Pro plan. Upgrade to Business or Enterprise for even more features."}
+            {userPlan === "business" && "You're on the Business plan. Upgrade to Enterprise for unlimited everything."}
+            {userPlan === "enterprise" && "You're on the Enterprise plan – you have full access to all features."}
+          </p>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+          <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+            <p className="font-medium text-gray-900 dark:text-white">Posts</p>
+            <p className="text-gray-500 dark:text-gray-400">
+              {planLimits.postLength === 999999 ? "∞" : planLimits.postLength}
+            </p>
+          </div>
+          <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+            <p className="font-medium text-gray-900 dark:text-white">Images</p>
+            <p className="text-gray-500 dark:text-gray-400">
+              {planLimits.imagesPerPost === 999999 ? "∞" : planLimits.imagesPerPost}
+            </p>
+          </div>
+          <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+            <p className="font-medium text-gray-900 dark:text-white">Video</p>
+            <p className="text-gray-500 dark:text-gray-400">{planLimits.videoUploadMB}MB</p>
+          </div>
+          <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+            <p className="font-medium text-gray-900 dark:text-white">Scheduled</p>
+            <p className="text-gray-500 dark:text-gray-400">
+              {planLimits.scheduledPostsPerMonth === 999999 ? "∞" : planLimits.scheduledPostsPerMonth}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* ─── Profile Picture ────────────────────────────────────────── */}
