@@ -132,7 +132,6 @@ export default function PostCard({
     const path = url.split('?')[0];
     const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'm4v', '3gp'];
     if (videoExtensions.some(ext => path.endsWith('.' + ext))) return true;
-    // Additional hints
     if (url.includes('/video/') || url.includes('video')) return true;
     return false;
   };
@@ -506,24 +505,34 @@ export default function PostCard({
                   }}
                 >
                   {video ? (
-                    <video
-                      src={post.imageUrl}
-                      className="w-full max-h-[400px] object-contain"
-                      controls
-                      playsInline
-                      webkit-playsinline="true"
-                      preload="metadata"
-                      poster={post.imageUrl}
-                      onError={(e) => {
-                        // Fallback to image if video fails
-                        const target = e.target as HTMLVideoElement;
-                        target.style.display = 'none';
-                        const img = document.createElement('img');
-                        img.src = post.imageUrl!;
-                        img.className = 'w-full';
-                        target.parentNode?.appendChild(img);
-                      }}
-                    />
+                    // Video with responsive container like X
+                    <div className="relative aspect-video w-full bg-black">
+                      <video
+                        src={post.imageUrl}
+                        className="w-full h-full object-contain"
+                        controls
+                        playsInline
+                        webkit-playsinline="true"
+                        preload="metadata"
+                        onError={(e) => {
+                          // Fallback to image if video fails
+                          const target = e.target as HTMLVideoElement;
+                          target.style.display = 'none';
+                          const img = document.createElement('img');
+                          img.src = post.imageUrl!;
+                          img.className = 'w-full h-full object-contain';
+                          target.parentNode?.appendChild(img);
+                        }}
+                      />
+                      {/* Play button overlay (visible on hover) */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20 pointer-events-none">
+                        <div className="bg-black/60 rounded-full p-4">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="white">
+                            <polygon points="5,3 19,12 5,21" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
                     <>
                       <img src={post.imageUrl} alt="Post image" className="w-full" />
