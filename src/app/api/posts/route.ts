@@ -171,6 +171,7 @@ export async function POST(req: NextRequest) {
     const {
       content,
       imageUrl,
+      mediaType, // ✅ added
       linkUrl,
       hashtags,
       mentions,
@@ -197,7 +198,6 @@ export async function POST(req: NextRequest) {
     }
 
     // ─── 2. Check images per post ────────────────────────────────────
-    // Currently we have a single imageUrl; treat it as 1 if provided.
     const imageCount = imageUrl ? 1 : 0;
     const imageCheck = checkImagesPerPost(imageCount, plan);
     if (!imageCheck.allowed) {
@@ -268,6 +268,7 @@ export async function POST(req: NextRequest) {
     const postData: any = {
       content: content.trim() || poll.question.trim(),
       imageUrl: imageUrl || null,
+      mediaType: mediaType || null, // ✅ store mediaType
       linkUrl: linkUrl || null,
       authorId: session.user.id,
       hashtags: hashtags || [],
