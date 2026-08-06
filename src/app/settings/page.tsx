@@ -13,6 +13,7 @@ import EmailPreferences from "@/components/EmailPreferences";
 import PasswordInput from "@/components/PasswordInput";
 import LocationAutocomplete from "@/components/LocationAutocomplete";
 import { getPlanLimits } from "@/lib/limits";
+import CustomUrlSettings from "@/components/CustomUrlSettings";
 
 interface UserData {
   id: string;
@@ -28,6 +29,7 @@ interface UserData {
   usernameChangedAt: string | null;
   publicLikes: boolean;
   publicFollowing: boolean;
+  customUrl: string | null; // ✅ added
 }
 
 export default function SettingsPage() {
@@ -346,11 +348,9 @@ export default function SettingsPage() {
 
       const data = await res.json();
       if (res.ok) {
-        // ✅ Update local state with the returned values
         setPublicLikes(data.publicLikes);
         setPublicFollowing(data.publicFollowing);
         setMessage({ type: "success", text: "Privacy settings updated!" });
-        // Refresh session (optional)
         await update();
       } else {
         setMessage({ type: "error", text: data.error || "Failed to update privacy settings" });
@@ -649,6 +649,18 @@ export default function SettingsPage() {
             {updatingProfile ? "Saving..." : "Update Profile"}
           </button>
         </form>
+      </div>
+
+      {/* ─── Custom Profile URL ────────────────────────────────────── */}
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+        <CustomUrlSettings
+          currentUsername={userData.username}
+          currentCustomUrl={userData.customUrl}
+          onUpdate={() => {
+            fetchUserData();
+            update();
+          }}
+        />
       </div>
 
       {/* ─── Username Section ────────────────────────────────────────── */}
