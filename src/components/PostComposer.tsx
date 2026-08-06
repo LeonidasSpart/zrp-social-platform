@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Image, FileImage, BarChart3, Plus, Trash2, Clock } from "lucide-react";
+import { Image, FileImage, BarChart3, Plus, Trash2, Clock, MessageCircleOff } from "lucide-react";
 import GifPicker from "./GifPicker";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { getPlanLimits } from "@/lib/limits";
@@ -27,6 +27,9 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   // ─── Scheduling ──────────────────────────────────────────────────
   const [schedulePost, setSchedulePost] = useState(false);
   const [scheduledAt, setScheduledAt] = useState("");
+
+  // ─── Comments toggle ────────────────────────────────────────────
+  const [commentsEnabled, setCommentsEnabled] = useState(true);
 
   // GIF picker
   const [showGifPicker, setShowGifPicker] = useState(false);
@@ -101,7 +104,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
   // ─── GIF picker ──────────────────────────────────────────────────
   const handleGifSelect = (gifUrl: string) => {
-    // Check if user already has an image
     if (imageUrl) {
       setError(`Your plan allows ${limits.imagesPerPost} image(s) per post.`);
       return;
@@ -139,7 +141,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       return;
     }
 
-    // Validate scheduled date
     if (schedulePost && scheduledAt) {
       const selectedDate = new Date(scheduledAt);
       if (selectedDate <= new Date()) {
@@ -167,12 +168,13 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       const payload: any = {
         content: content.trim() || pollQuestion.trim(),
         imageUrl: imageUrl || undefined,
-        mediaType: mediaType || undefined, // ✅ add mediaType
+        mediaType: mediaType || undefined,
         hashtags,
         mentions,
         isPoll: !!pollData,
         status: schedulePost ? "scheduled" : "published",
         scheduledAt: schedulePost ? scheduledAt : null,
+        commentsEnabled, // ✅ added
       };
 
       if (pollData) {
@@ -191,7 +193,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
           const data = await res.json();
           errorMsg = data.error || errorMsg;
         } catch {
-          // If response isn't JSON, reload to recover from a possible server error
           window.location.reload();
           return;
         }
@@ -204,14 +205,12 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       try {
         post = await res.json();
       } catch {
-        // If no JSON returned, just refresh the feed
         onPostCreated(null);
         resetForm();
         setLoading(false);
         return;
       }
 
-      // ─── Success: notify parent and reset ──────────────────────────
       onPostCreated(post);
       resetForm();
     } catch (err) {
@@ -234,6 +233,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     setSchedulePost(false);
     setScheduledAt("");
     setError(null);
+    setCommentsEnabled(true);
   };
 
   // ─── Render helpers ─────────────────────────────────────────────
@@ -273,13 +273,12 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               maxLength={limits.postLength}
             />
 
-            {/* Error */}
             {error && (
               <div className="text-red-500 dark:text-red-400 text-sm">{error}</div>
             )}
 
-            {/* ─── Scheduling ──────────────────────────────────────────── */}
-            <div className="flex items-center gap-2 mt-2">
+            {/* ─── Scheduling & Comments toggle ────────────────────────── */}
+            <div className="flex flex-wrap items-center gap-3 mt-2">
               <button
                 type="button"
                 onClick={() => setSchedulePost(!schedulePost)}
@@ -300,6 +299,19 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   className="text-xs border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               )}
+
+              <label className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={commentsEnabled}
+                  onChange={(e) => setCommentsEnabled(e.target.checked)}
+                  className="w-3.5 h-3.5 rounded border-gray-300 dark:border-gray-600 text-zrp-red focus:ring-zrp-red"
+                />
+                <span className="flex items-center gap-1">
+                  <MessageCircleOff className="w-3.5 h-3.5" />
+                  Allow comments
+                </span>
+              </label>
             </div>
 
             {/* ─── Poll Builder ────────────────────────────────────── */}
@@ -417,7 +429,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   {isOverLimit && " (over limit!)"}
                 </span>
 
-                {/* ─── Plan indicator (optional) ───────────────────── */}
                 <span className="text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
                   {plan.charAt(0).toUpperCase() + plan.slice(1)}
                 </span>
