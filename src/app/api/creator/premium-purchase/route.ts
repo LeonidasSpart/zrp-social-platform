@@ -81,18 +81,13 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Create notification for creator
-    const buyer = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { username: true, name: true },
-    });
-
+    // ─── Create notification for creator (without content) ──────
     await prisma.notification.create({
       data: {
         userId: premiumPost.creatorProfile.userId,
         fromUserId: userId,
         type: "PURCHASE",
-        content: `${buyer?.name || buyer?.username} purchased your premium post.`,
+        // No 'content' field – the frontend will display based on type and fromUserId
       },
     });
 
