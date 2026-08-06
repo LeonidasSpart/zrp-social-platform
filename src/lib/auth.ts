@@ -2,6 +2,38 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./db";
 import bcrypt from "bcryptjs";
+import { getFeatureStatus, FeatureStatus } from "./permissions";
+
+// ─── Extend NextAuth types ────────────────────────────────────────
+declare module "next-auth" {
+  interface User {
+    plan?: string;
+    features?: FeatureStatus;
+  }
+  interface Session {
+    user: {
+      id: string;
+      email: string;
+      name?: string | null;
+      username?: string | null;
+      isAdmin?: boolean;
+      role?: "USER" | "MODERATOR" | "ADMIN";
+      badgeType?: string | null;
+      avatarUrl?: string | null;
+      onboardingCompleted?: boolean;
+      banned?: boolean;
+      emailVerified?: boolean;
+      plan?: string;
+      features?: FeatureStatus;
+    };
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    features?: FeatureStatus;
+  }
+}
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -26,7 +58,6 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
-          // ✅ Include plan field
           select: {
             id: true,
             email: true,
@@ -40,7 +71,7 @@ export const authOptions: NextAuthOptions = {
             onboardingCompleted: true,
             banned: true,
             emailVerified: true,
-            plan: true, // ✅ added
+            plan: true,
           },
         });
 
@@ -100,13 +131,14 @@ export const authOptions: NextAuthOptions = {
           onboardingCompleted: user.onboardingCompleted,
           banned: user.banned || false,
           emailVerified: !!user.emailVerified,
-          plan: user.plan || "free", // ✅ added
+          plan: user.plan || "free",
         };
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user, trigger }) {
+      // ─── On initial sign‑in ──────────────────────────────────────
       if (user) {
         token.id = user.id;
         token.username = user.username;
@@ -117,10 +149,11 @@ export const authOptions: NextAuthOptions = {
         token.onboardingCompleted = user.onboardingCompleted;
         token.banned = user.banned || false;
         token.emailVerified = !!user.emailVerified;
-        token.plan = (user as any).plan || "free"; // ✅ added
+        token.plan = (user as any).plan || "free";
+        token.features = getFeatureStatus({ plan: token.plan });
       }
 
-      // ─── Re-fetch fresh data from DB whenever the client calls update() ───
+      // ─── Re‑fetch fresh data on client update() ────────────────
       if (trigger === "update" && token.id) {
         const freshUser = await prisma.user.findUnique({
           where: { id: token.id as string },
@@ -131,7 +164,7 @@ export const authOptions: NextAuthOptions = {
             onboardingCompleted: true,
             banned: true,
             emailVerified: true,
-            plan: true, // ✅ added
+            plan: true,
           },
         });
         if (freshUser) {
@@ -141,7 +174,8 @@ export const authOptions: NextAuthOptions = {
           token.onboardingCompleted = freshUser.onboardingCompleted;
           token.banned = freshUser.banned || false;
           token.emailVerified = !!freshUser.emailVerified;
-          token.plan = freshUser.plan || "free"; // ✅ added
+          token.plan = freshUser.plan || "free";
+          token.features = getFeatureStatus({ plan: token.plan });
         }
       }
 
@@ -158,7 +192,8 @@ export const authOptions: NextAuthOptions = {
         session.user.onboardingCompleted = token.onboardingCompleted as boolean;
         session.user.banned = token.banned || false;
         session.user.emailVerified = token.emailVerified || false;
-        session.user.plan = token.plan as string || "free"; // ✅ added
+        session.user.plan = token.plan as string || "free";
+        session.user.features = token.features as FeatureStatus || getFeatureStatus({ plan: session.user.plan });
       }
       return session;
     },
