@@ -19,9 +19,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Creator profile not found." }, { status: 404 });
     }
 
-    // Get recent tips
+    // Get recent tips – use "COMPLETED" (uppercase)
     const recentTips = await prisma.tip.findMany({
-      where: { recipientId: userId, status: "completed" },
+      where: { recipientId: userId, status: "COMPLETED" },
       orderBy: { createdAt: "desc" },
       take: 10,
       include: {
@@ -51,13 +51,13 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Get recent purchases
+    // Get recent purchases – use "COMPLETED" (uppercase)
     const recentPurchases = await prisma.premiumPurchase.findMany({
       where: {
         premiumPost: {
           creatorProfileId: profile.id,
         },
-        status: "completed",
+        status: "COMPLETED",
       },
       orderBy: { createdAt: "desc" },
       take: 10,
