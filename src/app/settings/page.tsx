@@ -14,6 +14,7 @@ import PasswordInput from "@/components/PasswordInput";
 import LocationAutocomplete from "@/components/LocationAutocomplete";
 import { getPlanLimits } from "@/lib/limits";
 import CustomUrlSettings from "@/components/CustomUrlSettings";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface UserData {
   id: string;
@@ -48,6 +49,7 @@ interface CreatorProfile {
 export default function SettingsPage() {
   const { data: session, status, update } = useSession();
   const router = useRouter();
+  const { t, language } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -98,7 +100,7 @@ export default function SettingsPage() {
   // ─── Uploadthing hook for avatar ──────────────────────────────────
   const { startUpload } = useUploadThing("avatar", {
     onClientUploadComplete: (files) => {
-      const url = files[0].url;
+      const url = files[0].ufsUrl;
       setAvatarPreview(url);
       setUploadingAvatar(false);
       // Save the URL to the user profile
@@ -109,20 +111,20 @@ export default function SettingsPage() {
       })
         .then((res) => {
           if (res.ok) {
-            setMessage({ type: "success", text: "Avatar updated successfully!" });
+            setMessage({ type: "success", text: t("settings.successAvatarUpdated") });
             update();
             fetchUserData();
           } else {
-            setMessage({ type: "error", text: "Failed to save avatar URL" });
+            setMessage({ type: "error", text: t("settings.errAvatarSaveFailed") });
           }
         })
         .catch(() => {
-          setMessage({ type: "error", text: "Failed to save avatar" });
+          setMessage({ type: "error", text: t("settings.errAvatarUploadFailedGeneric") });
         });
     },
     onUploadError: (error) => {
       setUploadingAvatar(false);
-      setMessage({ type: "error", text: "Avatar upload failed: " + error.message });
+      setMessage({ type: "error", text: t("settings.errUploadFailedRetry") + " " + error.message });
     },
   });
 
@@ -202,13 +204,13 @@ export default function SettingsPage() {
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      setMessage({ type: "error", text: "File too large. Max size is 2MB." });
+      setMessage({ type: "error", text: t("settings.errFileTooLarge") });
       return;
     }
 
     const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!validTypes.includes(file.type)) {
-      setMessage({ type: "error", text: "Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed." });
+      setMessage({ type: "error", text: t("settings.errInvalidFileType") });
       return;
     }
 
@@ -218,7 +220,7 @@ export default function SettingsPage() {
       await startUpload([file]);
     } catch (err) {
       setUploadingAvatar(false);
-      setMessage({ type: "error", text: "Upload failed. Please try again." });
+      setMessage({ type: "error", text: t("settings.errUploadFailedRetry") });
     }
   };
 
@@ -243,12 +245,12 @@ export default function SettingsPage() {
 
       if (res.ok) {
         await update();
-        setMessage({ type: "success", text: "Profile updated successfully!" });
+        setMessage({ type: "success", text: t("settings.successProfileUpdated") });
       } else {
-        setMessage({ type: "error", text: "Failed to update profile" });
+        setMessage({ type: "error", text: t("settings.errProfileUpdateFailed") });
       }
     } catch (error) {
-      setMessage({ type: "error", text: "Something went wrong" });
+      setMessage({ type: "error", text: t("settings.errSomethingWrong") });
     } finally {
       setUpdatingProfile(false);
     }
@@ -261,17 +263,17 @@ export default function SettingsPage() {
     setMessage(null);
 
     if (!newUsername || newUsername.length < 3) {
-      setUsernameError("Username must be at least 3 characters");
+      setUsernameError(t("settings.errUsernameMinLength"));
       return;
     }
 
     if (newUsername === userData?.username) {
-      setUsernameError("New username is the same as current");
+      setUsernameError(t("settings.errUsernameSame"));
       return;
     }
 
     if (usernameCooldown && usernameCooldown > 0) {
-      setUsernameError(`You can change your username again in ${usernameCooldown} days`);
+      setUsernameError(t("settings.errUsernameCooldown", { n: usernameCooldown }));
       return;
     }
 
@@ -288,14 +290,14 @@ export default function SettingsPage() {
 
       if (res.ok) {
         await update();
-        setMessage({ type: "success", text: "Username updated successfully! You can change it again in 30 days." });
+        setMessage({ type: "success", text: t("settings.successUsernameUpdated") });
         setUsernameCooldown(30);
         setUserData(data.user);
       } else {
-        setUsernameError(data.error || "Failed to update username");
+        setUsernameError(data.error || t("settings.errUsernameUpdateFailed"));
       }
     } catch (error) {
-      setUsernameError("Something went wrong");
+      setUsernameError(t("settings.errSomethingWrong"));
     } finally {
       setUpdatingUsername(false);
     }
@@ -308,17 +310,17 @@ export default function SettingsPage() {
     setMessage(null);
 
     if (!currentPassword || !newPassword) {
-      setPasswordError("All fields are required");
+      setPasswordError(t("settings.errPasswordFieldsRequired"));
       return;
     }
 
     if (newPassword.length < 6) {
-      setPasswordError("New password must be at least 6 characters");
+      setPasswordError(t("settings.errPasswordMinLength"));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setPasswordError("Passwords do not match");
+      setPasswordError(t("settings.errPasswordsMismatch"));
       return;
     }
 
@@ -337,15 +339,15 @@ export default function SettingsPage() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage({ type: "success", text: "Password updated successfully!" });
+        setMessage({ type: "success", text: t("settings.successPasswordUpdated") });
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
       } else {
-        setPasswordError(data.error || "Failed to update password");
+        setPasswordError(data.error || t("settings.errPasswordUpdateFailed"));
       }
     } catch (error) {
-      setPasswordError("Something went wrong");
+      setPasswordError(t("settings.errSomethingWrong"));
     } finally {
       setUpdatingPassword(false);
     }
@@ -374,10 +376,10 @@ export default function SettingsPage() {
         setEmailPassword("");
         update();
       } else {
-        setEmailMessage({ type: "error", text: data.error || "Failed to send verification email" });
+        setEmailMessage({ type: "error", text: data.error || t("settings.errEmailSendFailed") });
       }
     } catch (error) {
-      setEmailMessage({ type: "error", text: "Something went wrong" });
+      setEmailMessage({ type: "error", text: t("settings.errSomethingWrong") });
     } finally {
       setUpdatingEmail(false);
     }
@@ -400,14 +402,14 @@ export default function SettingsPage() {
       if (res.ok) {
         setPublicLikes(data.publicLikes);
         setPublicFollowing(data.publicFollowing);
-        setMessage({ type: "success", text: "Privacy settings updated!" });
+        setMessage({ type: "success", text: t("settings.successPrivacyUpdated") });
         await update();
       } else {
-        setMessage({ type: "error", text: data.error || "Failed to update privacy settings" });
+        setMessage({ type: "error", text: data.error || t("settings.errPrivacyUpdateFailed") });
       }
     } catch (error) {
       console.error("Error updating privacy:", error);
-      setMessage({ type: "error", text: "Something went wrong" });
+      setMessage({ type: "error", text: t("settings.errSomethingWrong") });
     } finally {
       setUpdatingPrivacy(false);
     }
@@ -428,14 +430,14 @@ export default function SettingsPage() {
 
       if (res.ok) {
         await update();
-        setMessage({ type: "success", text: "Solana wallet updated successfully!" });
+        setMessage({ type: "success", text: t("settings.successWalletUpdated") });
         fetchUserData(); // refresh data
       } else {
         const data = await res.json();
-        setMessage({ type: "error", text: data.error || "Failed to update wallet address." });
+        setMessage({ type: "error", text: data.error || t("settings.errWalletUpdateFailed") });
       }
     } catch (error) {
-      setMessage({ type: "error", text: "Something went wrong" });
+      setMessage({ type: "error", text: t("settings.errSomethingWrong") });
     } finally {
       setUpdatingWallet(false);
     }
@@ -449,8 +451,9 @@ export default function SettingsPage() {
     );
   }
 
+  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("en-US", {
+    return new Date(date).toLocaleDateString(localeMap[language] || "en-US", {
       month: "long",
       day: "numeric",
       year: "numeric",
@@ -462,14 +465,21 @@ export default function SettingsPage() {
   const planLimits = getPlanLimits(userPlan);
   const isCreatorEligible = userPlan === "business" || userPlan === "enterprise";
 
+  const planNoteMap: Record<string, string> = {
+    free: t("settings.planNoteFree"),
+    pro: t("settings.planNotePro"),
+    business: t("settings.planNoteBusiness"),
+    enterprise: t("settings.planNoteEnterprise"),
+  };
+
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
       <div className="mb-4">
         <Link href={`/profile/${session?.user?.username}`} className="text-zrp-red hover:underline text-sm">
-          ← Back to profile
+          {t("settings.backToProfile")}
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mt-2">Settings</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">Manage your account settings</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{t("settings.title")}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t("settings.subtitle")}</p>
       </div>
 
       {message && (
@@ -484,10 +494,10 @@ export default function SettingsPage() {
 
       {/* ─── Account Info ──────────────────────────────────────────── */}
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Account Info</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.accountInfo")}</h2>
         <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
           <Calendar className="w-4 h-4" />
-          <span>Joined {formatDate(userData.createdAt)}</span>
+          <span>{t("settings.joined", { date: formatDate(userData.createdAt) })}</span>
         </div>
         <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400 mt-1">
           <Mail className="w-4 h-4" />
@@ -497,37 +507,37 @@ export default function SettingsPage() {
 
       {/* ─── Change Email Section ───────────────────────────────────── */}
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Change Email</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.changeEmail")}</h2>
         <form onSubmit={handleUpdateEmail} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Current Email
+              {t("settings.currentEmail")}
             </label>
             <p className="text-gray-600 dark:text-gray-400">{currentEmail}</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              New Email
+              {t("settings.newEmail")}
             </label>
             <input
               type="email"
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              placeholder="Enter new email address"
+              placeholder={t("settings.newEmailPlaceholder")}
               required
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Current Password <span className="text-red-500">*</span>
+              {t("settings.currentPasswordRequired")}
             </label>
             <input
               type="password"
               value={emailPassword}
               onChange={(e) => setEmailPassword(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              placeholder="Enter your current password"
+              placeholder={t("settings.currentPasswordPlaceholder")}
               required
             />
           </div>
@@ -541,20 +551,20 @@ export default function SettingsPage() {
             disabled={updatingEmail}
             className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
-            {updatingEmail ? "Sending..." : "Send Verification Email"}
+            {updatingEmail ? t("settings.sending") : t("settings.sendVerificationEmail")}
           </button>
         </form>
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-          A verification link will be sent to the new email address. You must click it to confirm the change.
+          {t("settings.emailVerifyNote")}
         </p>
       </div>
 
       {/* ─── Your Plan Section ────────────────────────────────────── */}
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Your Plan</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.yourPlan")}</h2>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Current Plan</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{t("settings.currentPlan")}</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white capitalize">
               {userPlan}
             </p>
@@ -563,38 +573,35 @@ export default function SettingsPage() {
             href="/pricing"
             className="px-4 py-2 bg-zrp-red text-white rounded-lg font-medium hover:bg-zrp-darkRed transition"
           >
-            Upgrade Plan
+            {t("settings.upgradePlan")}
           </Link>
         </div>
 
         <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            {userPlan === "free" && "You're on the Free plan. Upgrade to Pro, Business, or Enterprise for more features."}
-            {userPlan === "pro" && "You're on the Pro plan. Upgrade to Business or Enterprise for even more features."}
-            {userPlan === "business" && "You're on the Business plan. Upgrade to Enterprise for unlimited everything."}
-            {userPlan === "enterprise" && "You're on the Enterprise plan – you have full access to all features."}
+            {planNoteMap[userPlan]}
           </p>
         </div>
 
         <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
           <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-            <p className="font-medium text-gray-900 dark:text-white">Posts</p>
+            <p className="font-medium text-gray-900 dark:text-white">{t("settings.posts")}</p>
             <p className="text-gray-500 dark:text-gray-400">
               {planLimits.postLength === 999999 ? "∞" : planLimits.postLength}
             </p>
           </div>
           <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-            <p className="font-medium text-gray-900 dark:text-white">Images</p>
+            <p className="font-medium text-gray-900 dark:text-white">{t("settings.images")}</p>
             <p className="text-gray-500 dark:text-gray-400">
               {planLimits.imagesPerPost === 999999 ? "∞" : planLimits.imagesPerPost}
             </p>
           </div>
           <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-            <p className="font-medium text-gray-900 dark:text-white">Video</p>
+            <p className="font-medium text-gray-900 dark:text-white">{t("settings.video")}</p>
             <p className="text-gray-500 dark:text-gray-400">{planLimits.videoUploadMB}MB</p>
           </div>
           <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-            <p className="font-medium text-gray-900 dark:text-white">Scheduled</p>
+            <p className="font-medium text-gray-900 dark:text-white">{t("settings.scheduled")}</p>
             <p className="text-gray-500 dark:text-gray-400">
               {planLimits.scheduledPostsPerMonth === 999999 ? "∞" : planLimits.scheduledPostsPerMonth}
             </p>
@@ -606,43 +613,43 @@ export default function SettingsPage() {
       {isCreatorEligible && (
         <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Creator Monetisation</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t("settings.creatorMonetisation")}</h2>
             <Link
               href="/creator/dashboard"
               className="inline-flex items-center gap-1.5 text-sm bg-zrp-red text-white px-4 py-2 rounded-lg font-medium hover:bg-zrp-darkRed transition"
             >
               <TrendingUp className="w-4 h-4" />
-              Dashboard
+              {t("settings.dashboard")}
             </Link>
           </div>
 
           {loadingCreator ? (
             <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
               <Loader2 className="w-4 h-4 animate-spin" />
-              Loading...
+              {t("action.loading")}
             </div>
           ) : creatorProfile ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
               <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-                <p className="text-gray-500 dark:text-gray-400 text-xs">Balance</p>
+                <p className="text-gray-500 dark:text-gray-400 text-xs">{t("settings.balance")}</p>
                 <p className="font-bold text-gray-900 dark:text-white">
                   ${creatorProfile.balance.toFixed(2)}
                 </p>
               </div>
               <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-                <p className="text-gray-500 dark:text-gray-400 text-xs">Total Tips</p>
+                <p className="text-gray-500 dark:text-gray-400 text-xs">{t("settings.totalTips")}</p>
                 <p className="font-bold text-gray-900 dark:text-white">
                   ${creatorProfile.totalTips.toFixed(2)}
                 </p>
               </div>
               <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-                <p className="text-gray-500 dark:text-gray-400 text-xs">Premium Revenue</p>
+                <p className="text-gray-500 dark:text-gray-400 text-xs">{t("settings.premiumRevenue")}</p>
                 <p className="font-bold text-gray-900 dark:text-white">
                   ${creatorProfile.totalPremiumRevenue.toFixed(2)}
                 </p>
               </div>
               <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-                <p className="text-gray-500 dark:text-gray-400 text-xs">Withdrawn</p>
+                <p className="text-gray-500 dark:text-gray-400 text-xs">{t("settings.withdrawn")}</p>
                 <p className="font-bold text-gray-900 dark:text-white">
                   ${creatorProfile.totalWithdrawn.toFixed(2)}
                 </p>
@@ -650,25 +657,25 @@ export default function SettingsPage() {
             </div>
           ) : (
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              <p>Enable creator monetisation to start earning from tips and premium posts.</p>
+              <p>{t("settings.creatorCta")}</p>
               <Link
                 href="/creator/dashboard"
                 className="inline-block mt-2 text-zrp-red hover:underline"
               >
-                Get started →
+                {t("settings.getStarted")}
               </Link>
             </div>
           )}
 
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
-            💰 10% platform fee · 35% of platform fees go to charity.
+            {t("settings.platformFeeNote")}
           </p>
         </div>
       )}
 
       {/* ─── Profile Picture ────────────────────────────────────────── */}
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Profile Picture</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.profilePicture")}</h2>
         <div className="flex items-center gap-6">
           <div className="relative">
             <div className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-3xl font-bold overflow-hidden">
@@ -699,13 +706,13 @@ export default function SettingsPage() {
           </div>
           <div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Upload a profile picture. Max 2MB.
+              {t("settings.uploadProfilePicNote")}
             </p>
             <p className="text-xs text-gray-400 dark:text-gray-500">
-              Supported formats: JPEG, PNG, GIF, WebP
+              {t("settings.supportedFormats")}
             </p>
             {uploadingAvatar && (
-              <p className="text-sm text-zrp-red dark:text-zrp-red mt-1">Uploading...</p>
+              <p className="text-sm text-zrp-red dark:text-zrp-red mt-1">{t("settings.uploading")}</p>
             )}
           </div>
         </div>
@@ -713,11 +720,11 @@ export default function SettingsPage() {
 
       {/* ─── Profile Section ────────────────────────────────────────── */}
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Profile</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.profile")}</h2>
         <form onSubmit={handleUpdateProfile} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Display Name
+              {t("settings.displayName")}
             </label>
             <input
               type="text"
@@ -730,14 +737,14 @@ export default function SettingsPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Bio
+              {t("settings.bio")}
             </label>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               rows={3}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
-              placeholder="Tell us about yourself..."
+              placeholder={t("settings.bioPlaceholder")}
               maxLength={160}
             />
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{bio.length}/160</p>
@@ -748,21 +755,21 @@ export default function SettingsPage() {
               <LocationAutocomplete
                 value={location}
                 onChange={(val) => setLocation(val)}
-                placeholder="Search for a city..."
-                label="City"
+                placeholder={t("settings.cityPlaceholder")}
+                label={t("settings.city")}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Country
+                {t("settings.country")}
               </label>
               <input
                 type="text"
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="Country"
+                placeholder={t("settings.countryPlaceholder")}
                 maxLength={50}
               />
             </div>
@@ -770,7 +777,7 @@ export default function SettingsPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Website
+              {t("settings.website")}
             </label>
             <div className="relative">
               <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -779,7 +786,7 @@ export default function SettingsPage() {
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="https://your-website.com"
+                placeholder={t("settings.websitePlaceholder")}
               />
             </div>
           </div>
@@ -789,7 +796,7 @@ export default function SettingsPage() {
             disabled={updatingProfile}
             className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
-            {updatingProfile ? "Saving..." : "Update Profile"}
+            {updatingProfile ? t("settings.saving") : t("settings.updateProfile")}
           </button>
         </form>
       </div>
@@ -808,15 +815,14 @@ export default function SettingsPage() {
 
       {/* ─── Solana Wallet (for direct tips) ───────────────────────── */}
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Solana Wallet (for direct tips)</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.solanaWalletTitle")}</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-          Add your Solana wallet address to receive tips directly from users. 
-          Users will send USDC directly to this wallet – no platform fees are charged.
+          {t("settings.solanaWalletDesc")}
         </p>
         <form onSubmit={handleUpdateSolanaWallet} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Wallet Address
+              {t("settings.walletAddress")}
             </label>
             <div className="relative">
               <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -824,13 +830,13 @@ export default function SettingsPage() {
                 type="text"
                 value={solanaWallet}
                 onChange={(e) => setSolanaWallet(e.target.value)}
-                placeholder="Your Solana wallet address (e.g., 4zMMC...)"
+                placeholder={t("settings.walletAddressPlaceholder")}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 disabled={updatingWallet}
               />
             </div>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              This address will be displayed on your profile for direct tips.
+              {t("settings.walletAddressNote")}
             </p>
           </div>
           <button
@@ -838,25 +844,25 @@ export default function SettingsPage() {
             disabled={updatingWallet}
             className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
-            {updatingWallet ? "Saving..." : "Save Wallet"}
+            {updatingWallet ? t("settings.saving") : t("settings.saveWallet")}
           </button>
         </form>
       </div>
 
       {/* ─── Username Section ────────────────────────────────────────── */}
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Username</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.usernameTitle")}</h2>
 
         {usernameCooldown !== null && usernameCooldown > 0 && (
           <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-300 text-sm p-3 rounded-lg mb-4">
-            ⏳ You can change your username again in {usernameCooldown} days
+            {t("settings.usernameCooldownBanner", { n: usernameCooldown })}
           </div>
         )}
 
         <form onSubmit={handleUpdateUsername} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Current Username
+              {t("settings.currentUsername")}
             </label>
             <div className="flex items-center gap-2">
               <span className="text-gray-600 dark:text-gray-400">@{userData.username}</span>
@@ -865,7 +871,7 @@ export default function SettingsPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              New Username
+              {t("settings.newUsername")}
             </label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -874,7 +880,7 @@ export default function SettingsPage() {
                 value={newUsername}
                 onChange={(e) => setNewUsername(e.target.value.toLowerCase())}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="New username"
+                placeholder={t("settings.newUsernamePlaceholder")}
                 minLength={3}
                 maxLength={20}
                 disabled={usernameCooldown !== null && usernameCooldown > 0}
@@ -884,7 +890,7 @@ export default function SettingsPage() {
               <p className="text-red-500 dark:text-red-400 text-sm mt-1">{usernameError}</p>
             )}
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              Username must be 3-20 characters. Can only be changed once every 30 days.
+              {t("settings.usernameHint")}
             </p>
           </div>
 
@@ -893,14 +899,14 @@ export default function SettingsPage() {
             disabled={updatingUsername || (usernameCooldown !== null && usernameCooldown > 0)}
             className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
-            {updatingUsername ? "Updating..." : "Change Username"}
+            {updatingUsername ? t("settings.updating") : t("settings.changeUsername")}
           </button>
         </form>
       </div>
 
       {/* ─── Password Section ────────────────────────────────────────── */}
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Change Password</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.changePasswordTitle")}</h2>
         <form onSubmit={handleUpdatePassword} className="space-y-4">
           {passwordError && (
             <p className="text-red-500 dark:text-red-400 text-sm">{passwordError}</p>
@@ -911,8 +917,8 @@ export default function SettingsPage() {
             name="currentPassword"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
-            label="Current Password"
-            placeholder="Enter current password"
+            label={t("settings.currentPassword")}
+            placeholder={t("settings.currentPasswordPlaceholder2")}
             required
             autoComplete="current-password"
           />
@@ -922,8 +928,8 @@ export default function SettingsPage() {
             name="newPassword"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            label="New Password"
-            placeholder="Enter new password"
+            label={t("settings.newPassword")}
+            placeholder={t("settings.newPasswordPlaceholder")}
             required
             autoComplete="new-password"
           />
@@ -933,8 +939,8 @@ export default function SettingsPage() {
             name="confirmPassword"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            label="Confirm New Password"
-            placeholder="Confirm new password"
+            label={t("settings.confirmNewPassword")}
+            placeholder={t("settings.confirmNewPasswordPlaceholder")}
             required
             autoComplete="new-password"
           />
@@ -944,20 +950,20 @@ export default function SettingsPage() {
             disabled={updatingPassword}
             className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
-            {updatingPassword ? "Updating..." : "Change Password"}
+            {updatingPassword ? t("settings.updating") : t("settings.changePassword")}
           </button>
         </form>
       </div>
 
       {/* ─── Privacy Settings ───────────────────────────────────────── */}
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Privacy Settings</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.privacySettings")}</h2>
         <form onSubmit={handleUpdatePrivacy} className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-gray-900 dark:text-white">Public Likes</p>
+              <p className="font-medium text-gray-900 dark:text-white">{t("settings.publicLikes")}</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Allow others to see what you like
+                {t("settings.publicLikesDesc")}
               </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -972,9 +978,9 @@ export default function SettingsPage() {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-gray-900 dark:text-white">Public Following</p>
+              <p className="font-medium text-gray-900 dark:text-white">{t("settings.publicFollowing")}</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Show who you follow to everyone
+                {t("settings.publicFollowingDesc")}
               </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -992,23 +998,23 @@ export default function SettingsPage() {
             disabled={updatingPrivacy}
             className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
-            {updatingPrivacy ? "Saving..." : "Update Privacy"}
+            {updatingPrivacy ? t("settings.saving") : t("settings.updatePrivacy")}
           </button>
         </form>
       </div>
 
       {/* ─── Email Preferences Section ────────────────────────────── */}
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Email Notifications</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.emailNotifications")}</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          Choose which email notifications you want to receive.
+          {t("settings.emailNotificationsDesc")}
         </p>
         <EmailPreferences />
       </div>
 
       {/* ─── Privacy Section (existing) ──────────────────────────────── */}
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Privacy</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.privacyTitle")}</h2>
         <div className="space-y-2">
           <Link
             href="/settings/muted"
@@ -1016,7 +1022,7 @@ export default function SettingsPage() {
           >
             <div className="flex items-center gap-3">
               <BellOff className="w-5 h-5 text-gray-500" />
-              <span className="text-gray-900 dark:text-white">Muted Users</span>
+              <span className="text-gray-900 dark:text-white">{t("settings.mutedUsers")}</span>
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400" />
           </Link>
@@ -1026,25 +1032,25 @@ export default function SettingsPage() {
           >
             <div className="flex items-center gap-3">
               <Ban className="w-5 h-5 text-gray-500" />
-              <span className="text-gray-900 dark:text-white">Blocked Users</span>
+              <span className="text-gray-900 dark:text-white">{t("settings.blockedUsers")}</span>
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400" />
           </Link>
         </div>
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 pl-2">
-          View and manage users you have muted or blocked.
+          {t("settings.privacyManageNote")}
         </p>
       </div>
 
       {/* ─── Delete Account Section ──────────────────────────────────── */}
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Danger Zone</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.dangerZone")}</h2>
         <div className="border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900/10">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-gray-900 dark:text-white">Delete Account</p>
+              <p className="font-medium text-gray-900 dark:text-white">{t("settings.deleteAccount")}</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Permanently delete your account and all associated data. This action cannot be undone.
+                {t("settings.deleteAccountDesc")}
               </p>
             </div>
             <Link
@@ -1052,7 +1058,7 @@ export default function SettingsPage() {
               className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition"
             >
               <Trash2 className="w-4 h-4 inline mr-1" />
-              Delete Account
+              {t("settings.deleteAccount")}
             </Link>
           </div>
         </div>
