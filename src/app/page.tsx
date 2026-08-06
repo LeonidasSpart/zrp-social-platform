@@ -7,6 +7,7 @@ import PostComposer from "@/components/PostComposer";
 import PostCard from "@/components/PostCard";
 import StoriesBar from "@/components/StoriesBar";
 import { Sparkles, Users } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Post {
   id: string;
@@ -34,6 +35,7 @@ type FeedType = "for-you" | "following";
 export default function HomePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useLanguage();
   const [feedType, setFeedType] = useState<FeedType>("for-you");
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -162,13 +164,13 @@ export default function HomePage() {
         <div className="max-w-2xl mx-auto py-4 px-4">
           <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 text-center">
             <p className="text-yellow-700 dark:text-yellow-400 font-medium">
-              You are offline. Please check your internet connection.
+              {t("feed.offline")}
             </p>
             <button
               onClick={() => window.location.reload()}
               className="mt-2 bg-yellow-100 dark:bg-yellow-800 text-yellow-700 dark:text-yellow-300 px-3 py-1 rounded-full text-sm"
             >
-              Try again
+              {t("feed.tryAgain")}
             </button>
           </div>
         </div>
@@ -176,7 +178,7 @@ export default function HomePage() {
     }
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-gray-500">{t("action.loading")}</div>
       </div>
     );
   }
@@ -186,13 +188,13 @@ export default function HomePage() {
       <div className="max-w-2xl mx-auto py-4 px-4">
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
           <p className="text-red-700 dark:text-red-400 font-medium">
-            Error: {error.message}
+            {t("feed.error", { message: error.message })}
           </p>
           <button
             onClick={() => loadPosts()}
             className="mt-2 bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-300 px-3 py-1 rounded-full text-sm"
           >
-            Retry
+            {t("feed.retry")}
           </button>
         </div>
       </div>
@@ -217,7 +219,7 @@ export default function HomePage() {
           }`}
         >
           <Sparkles className="w-4 h-4" />
-          For you
+          {t("feed.forYou")}
         </button>
         <button
           onClick={() => handleTabChange("following")}
@@ -228,7 +230,7 @@ export default function HomePage() {
           }`}
         >
           <Users className="w-4 h-4" />
-          Following
+          {t("feed.following")}
         </button>
       </div>
 
@@ -240,12 +242,12 @@ export default function HomePage() {
           </div>
         ) : posts.length === 0 ? (
           <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-            <p>No posts yet.</p>
+            <p>{t("feed.noPosts")}</p>
             {feedType === "following" && (
-              <p className="text-sm">Follow someone to see their posts here.</p>
+              <p className="text-sm">{t("feed.followSomeone")}</p>
             )}
             {feedType === "for-you" && (
-              <p className="text-sm">Check back later for trending content.</p>
+              <p className="text-sm">{t("feed.checkBackLater")}</p>
             )}
           </div>
         ) : (
@@ -260,17 +262,17 @@ export default function HomePage() {
                 {loadingMore ? (
                   <div className="flex items-center gap-2 text-gray-400 text-sm">
                     <div className="w-4 h-4 border-2 border-zrp-red border-t-transparent rounded-full animate-spin" />
-                    Loading more...
+                    {t("feed.loadingMore")}
                   </div>
                 ) : (
-                  <span className="text-gray-400 text-sm">Load more</span>
+                  <span className="text-gray-400 text-sm">{t("feed.loadMore")}</span>
                 )}
               </div>
             )}
 
             {!hasMore && posts.length > 0 && (
               <div className="text-center py-4 text-gray-400 text-sm">
-                You've reached the end of the feed. 🎉
+                {t("feed.endOfFeed")}
               </div>
             )}
           </>
