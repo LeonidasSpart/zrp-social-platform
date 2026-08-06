@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
       members,
       owner: {
         ...owner,
-        role: "OWNER", // special role for the account holder
+        role: "OWNER",
       },
     });
   } catch (error) {
@@ -83,10 +83,10 @@ export async function POST(req: NextRequest) {
 
     const userId = token.id as string;
 
-    // Check permission
+    // Check permission – include name for the owner
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { plan: true, id: true, email: true },
+      select: { plan: true, id: true, email: true, name: true }, // ✅ added name
     });
     if (!user || !canManageTeam(user)) {
       return NextResponse.json(
@@ -172,13 +172,13 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Send invitation email (if you have a mail function)
+    // Send invitation email
     try {
       await sendTeamInvitation({
         to: invitedUser.email,
-        accountOwnerName: user.name || user.email,
+        accountOwnerName: user.name || user.email, // ✅ now user.name exists
         role,
-        teamLink: `${process.env.NEXTAUTH_URL}/dashboard/team`,
+        teamLink: `${process.env.NEXTAUTH_URL}/settings/team`, // corrected path
       });
     } catch (emailError) {
       console.warn("Failed to send invitation email:", emailError);
