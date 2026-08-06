@@ -6,6 +6,7 @@ import { Image, FileImage, BarChart3, Plus, Trash2, Clock, Briefcase, FileText, 
 import GifPicker from "./GifPicker";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { getPlanLimits } from "@/lib/limits";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface PostComposerProps {
   onPostCreated: (post: any) => void;
@@ -15,6 +16,7 @@ type PostType = "POST" | "RECRUITMENT" | "ARTICLE";
 
 export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const { data: session } = useSession();
+  const { t } = useLanguage();
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<"image" | "video" | null>(null);
@@ -56,12 +58,12 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const { startUpload, isUploading } = useUploadThing("postMedia", {
     onClientUploadComplete: (files) => {
       const file = files[0];
-      setImageUrl(file.url);
+      setImageUrl(file.ufsUrl);
       setMediaType(file.type.startsWith("video") ? "video" : "image");
       setUploading(false);
     },
     onUploadError: (error) => {
-      setError("Upload failed: " + error.message);
+      setError(t("composer.errUploadFailed") + ": " + error.message);
       setUploading(false);
     },
   });
@@ -81,7 +83,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     if (!file) return;
 
     if (imageUrl) {
-      setError(`You've already uploaded an image. Your plan allows ${limits.imagesPerPost} image(s) per post.`);
+      setError(t("composer.errAlreadyUploaded", { n: limits.imagesPerPost }));
       return;
     }
 
@@ -89,12 +91,12 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     const maxSize = isVideo ? limits.videoUploadMB * 1024 * 1024 : 4 * 1024 * 1024;
 
     if (file.size > maxSize) {
-      setError(`File too large. Max ${isVideo ? limits.videoUploadMB : 4}MB.`);
+      setError(t("composer.errFileTooLarge", { size: isVideo ? limits.videoUploadMB : 4 }));
       return;
     }
 
     if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
-      setError("Only images and videos are allowed.");
+      setError(t("composer.errOnlyMedia"));
       return;
     }
 
@@ -104,14 +106,14 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       await startUpload([file]);
     } catch (err) {
       console.error("Upload error:", err);
-      setError("Upload failed. Please try again.");
+      setError(t("composer.errUploadFailed"));
       setUploading(false);
     }
   };
 
   const handleGifSelect = (gifUrl: string) => {
     if (imageUrl) {
-      setError(`Your plan allows ${limits.imagesPerPost} image(s) per post.`);
+      setError(t("composer.errGifLimit", { n: limits.imagesPerPost }));
       return;
     }
     setImageUrl(gifUrl);
@@ -150,24 +152,24 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
     // Validation
     if (!content.trim() && !pollQuestion.trim() && postType !== "ARTICLE") {
-      setError("Please write something or ask a poll question.");
+      setError(t("composer.errWriteSomething"));
       return;
     }
 
     if (postType === "RECRUITMENT" && !company.trim()) {
-      setError("Please enter a company name for recruitment posts.");
+      setError(t("composer.errCompanyRequired"));
       return;
     }
 
     if (postType === "ARTICLE" && !articleBody.trim()) {
-      setError("Please write the article content.");
+      setError(t("composer.errArticleRequired"));
       return;
     }
 
     if (schedulePost && scheduledAt) {
       const selectedDate = new Date(scheduledAt);
       if (selectedDate <= new Date()) {
-        setError("Scheduled time must be in the future.");
+        setError(t("composer.errScheduleFuture"));
         return;
       }
     }
@@ -254,7 +256,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     } catch (err) {
       console.error("Error creating post:", err);
       setTimeout(() => window.location.reload(), 2000);
-      setError("Something went wrong. Check your feed to see if your post was published.");
+      setError(t("composer.errSomethingWrong"));
     } finally {
       setLoading(false);
     }
@@ -331,7 +333,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
             {/* ─── Post Type Selector ────────────────────────────────── */}
             {showTypeSelector && (
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Post as:</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">{t("composer.postAs")}</span>
                 <button
                   type="button"
                   onClick={() => setPostType("POST")}
@@ -341,7 +343,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                       : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                   }`}
                 >
-                  Post
+                  {t("action.post")}
                 </button>
                 {canPostRecruitment && (
                   <button
@@ -353,7 +355,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                         : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                   >
-                    <Briefcase className="w-3 h-3" /> Recruitment
+                    <Briefcase className="w-3 h-3" /> {t("composer.recruitment")}
                   </button>
                 )}
                 {canPublishArticle && (
@@ -366,7 +368,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                         : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                   >
-                    <FileText className="w-3 h-3" /> Article
+                    <FileText className="w-3 h-3" /> {t("composer.article")}
                   </button>
                 )}
               </div>
@@ -379,8 +381,8 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                 onChange={(e) => setContent(e.target.value)}
                 placeholder={
                   postType === "RECRUITMENT"
-                    ? "Describe the job opportunity... Use #hashtags and @mentions"
-                    : "What's happening? Use #hashtags and @mentions"
+                    ? t("composer.placeholderRecruitment")
+                    : t("composer.placeholderDefault")
                 }
                 className="w-full resize-none border-0 focus:ring-0 p-0 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 min-h-[80px] bg-transparent"
                 maxLength={limits.postLength}
@@ -390,17 +392,17 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="Article title / teaser (optional)"
+                  placeholder={t("composer.placeholderArticleTitle")}
                   className="w-full resize-none border-0 focus:ring-0 p-0 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 min-h-[40px] bg-transparent text-lg font-semibold"
                   maxLength={limits.postLength}
                 />
                 <textarea
                   value={articleBody}
                   onChange={(e) => setArticleBody(e.target.value)}
-                  placeholder="Write your article content in Markdown or HTML..."
+                  placeholder={t("composer.placeholderArticleBody")}
                   className="w-full resize-none border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 min-h-[200px] bg-gray-50 dark:bg-gray-800/50 font-mono text-sm"
                 />
-                <p className="text-xs text-gray-400">Supports Markdown and HTML</p>
+                <p className="text-xs text-gray-400">{t("composer.articleMarkdown")}</p>
               </div>
             )}
 
@@ -411,7 +413,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   type="text"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  placeholder="Company name *"
+                  placeholder={t("composer.companyPlaceholder")}
                   className="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-zrp-deepBlack text-gray-900 dark:text-white text-sm"
                   required
                 />
@@ -419,14 +421,14 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   type="text"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Location (e.g., Remote, New York, London)"
+                  placeholder={t("composer.locationPlaceholder")}
                   className="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-zrp-deepBlack text-gray-900 dark:text-white text-sm"
                 />
                 <input
                   type="url"
                   value={applyUrl}
                   onChange={(e) => setApplyUrl(e.target.value)}
-                  placeholder="Application URL (optional)"
+                  placeholder={t("composer.applyUrlPlaceholder")}
                   className="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-zrp-deepBlack text-gray-900 dark:text-white text-sm"
                 />
               </div>
@@ -448,7 +450,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                 }`}
               >
                 <Clock className="w-3.5 h-3.5" />
-                {schedulePost ? "Scheduling on" : "Schedule"}
+                {schedulePost ? t("composer.scheduleOn") : t("composer.schedule")}
               </button>
               {schedulePost && (
                 <input
@@ -466,7 +468,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   onChange={(e) => setCommentsEnabled(e.target.checked)}
                   className="w-3.5 h-3.5 rounded border-gray-300 dark:border-gray-600 text-zrp-red focus:ring-zrp-red"
                 />
-                <span>Allow comments</span>
+                <span>{t("composer.allowComments")}</span>
               </label>
             </div>
 
@@ -477,7 +479,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   type="text"
                   value={pollQuestion}
                   onChange={(e) => setPollQuestion(e.target.value)}
-                  placeholder="Poll question..."
+                  placeholder={t("composer.pollQuestion")}
                   className="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-zrp-deepBlack text-gray-900 dark:text-white text-sm"
                   maxLength={200}
                 />
@@ -488,7 +490,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                         type="text"
                         value={option}
                         onChange={(e) => updatePollOption(idx, e.target.value)}
-                        placeholder={`Option ${idx + 1}`}
+                        placeholder={t("composer.option", { n: idx + 1 })}
                         className="flex-1 px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-zrp-deepBlack text-gray-900 dark:text-white text-sm"
                         maxLength={60}
                       />
@@ -511,10 +513,10 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                     disabled={pollOptions.length >= 6}
                     className="text-blue-600 dark:text-blue-400 text-sm hover:underline disabled:opacity-50"
                   >
-                    <Plus className="w-4 h-4 inline mr-1" /> Add option
+                    <Plus className="w-4 h-4 inline mr-1" /> {t("composer.addOption")}
                   </button>
                   <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-500 dark:text-gray-400">Ends</label>
+                    <label className="text-sm text-gray-500 dark:text-gray-400">{t("composer.ends")}</label>
                     <input
                       type="datetime-local"
                       value={pollExpiry}
@@ -557,14 +559,14 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                     disabled={uploading || (!!imageUrl && !limits.imagesPerPost)}
                   />
                   <Image className="w-5 h-5" />
-                  {uploading && <span className="text-xs ml-1 text-gray-400 dark:text-gray-500">Uploading...</span>}
+                  {uploading && <span className="text-xs ml-1 text-gray-400 dark:text-gray-500">{t("composer.uploading")}</span>}
                 </label>
 
                 <button
                   type="button"
                   onClick={() => setShowGifPicker(true)}
                   className="text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition"
-                  title="Add GIF"
+                  title={t("composer.addGif")}
                 >
                   <FileImage className="w-5 h-5" />
                 </button>
@@ -576,7 +578,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                     className={`text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition ${
                       showPollBuilder ? "text-blue-500 dark:text-blue-400" : ""
                     }`}
-                    title="Add Poll"
+                    title={t("composer.addPoll")}
                   >
                     <BarChart3 className="w-5 h-5" />
                   </button>
@@ -586,7 +588,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   <>
                     <span className={`text-xs ${isOverLimit ? "text-red-500" : "text-gray-400 dark:text-gray-500"}`}>
                       {content.length}/{limits.postLength}
-                      {isOverLimit && " (over limit!)"}
+                      {isOverLimit && t("composer.overLimit")}
                     </span>
                   </>
                 )}
@@ -601,7 +603,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                 disabled={isSubmitDisabled}
                 className="bg-zrp-red text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
-                {loading ? "Posting..." : schedulePost ? "Schedule" : "Post"}
+                {loading ? t("composer.posting") : schedulePost ? t("composer.scheduleButton") : t("composer.postButton")}
               </button>
             </div>
           </div>
