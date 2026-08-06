@@ -11,8 +11,9 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import PageTransition from "@/components/PageTransition";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
-import ErrorBoundary from "@/components/ErrorBoundary"; // ✅ new
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { Suspense } from "react";
+import { SolanaProvider } from "@/contexts/SolanaContext";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
@@ -63,19 +64,21 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/favicon.png" />
       </head>
       <body className={`${inter.variable} ${orbitron.variable} font-inter min-h-screen flex flex-col overflow-x-hidden`}>
-        <ErrorBoundary> {/* ✅ wraps the entire app */}
+        <ErrorBoundary>
           <ThemeProvider>
             <LanguageProvider>
               <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-                <AuthProvider>
-                  <Header />
-                  <EmailVerificationBanner />
-                  <PageTransition>{children}</PageTransition>
-                  <CookieConsent />
-                  <Footer />
-                  <PushNotificationManager />
-                  <ServiceWorkerRegistration />
-                </AuthProvider>
+                <SolanaProvider>
+                  <AuthProvider>
+                    <Header />
+                    <EmailVerificationBanner />
+                    <PageTransition>{children}</PageTransition>
+                    <CookieConsent />
+                    <Footer />
+                    <PushNotificationManager />
+                    <ServiceWorkerRegistration />
+                  </AuthProvider>
+                </SolanaProvider>
               </Suspense>
             </LanguageProvider>
           </ThemeProvider>
