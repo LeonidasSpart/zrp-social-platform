@@ -83,28 +83,11 @@ const Button = ({
   );
 };
 
-const Input = ({
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-  disabled,
-  className = "",
-}: {
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
-  type?: string;
-  disabled?: boolean;
-  className?: string;
-}) => (
+// ─── Updated Input component with all HTML input props ─────────────
+const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input
-    type={type}
-    value={value}
-    onChange={onChange}
-    placeholder={placeholder}
-    disabled={disabled}
-    className={`flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 ${className}`}
+    {...props}
+    className={`flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 ${props.className || ""}`}
   />
 );
 
