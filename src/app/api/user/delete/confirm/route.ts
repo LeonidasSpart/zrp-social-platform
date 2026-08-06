@@ -18,14 +18,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Delete user and all associated data (cascade handles it)
     await prisma.user.delete({
       where: { id: session.user.id },
     });
 
-    // Clear session cookie
     const response = NextResponse.json({ success: true });
+    // Clear both possible cookie names (http and https/production variants)
     response.cookies.set("next-auth.session-token", "", { maxAge: 0, path: "/" });
+    response.cookies.set("__Secure-next-auth.session-token", "", { maxAge: 0, path: "/", secure: true });
 
     return response;
   } catch (error) {
