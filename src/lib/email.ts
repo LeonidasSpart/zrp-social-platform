@@ -245,10 +245,9 @@ export function buildNotificationEmail({
 export async function sendVerificationEmail(
   email: string,
   token: string,
-  customUrl?: string   // ✅ NEW – if provided, use this URL directly
+  customUrl?: string
 ) {
   const baseUrl = process.env.NEXTAUTH_URL;
-  // If customUrl is given, use it; else fallback to the old /verify-email link (for onboarding)
   const link = customUrl || `${baseUrl}/verify-email?token=${token}`;
 
   await resend.emails.send({
@@ -313,6 +312,63 @@ export async function sendPasswordResetEmail(
     return data;
   } catch (error) {
     console.error("Failed to send email:", error);
+    throw error;
+  }
+}
+
+// ─── NEW: Team Invitation Email ─────────────────────────────────────
+export async function sendTeamInvitation({
+  to,
+  accountOwnerName,
+  role,
+  teamLink,
+}: {
+  to: string;
+  accountOwnerName: string;
+  role: string;
+  teamLink: string;
+}) {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'noreply@zrp.one',
+      to,
+      subject: `You've been added to a team on ZRP Social`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 10px; border: 1px solid #e2e8f0;">
+          <h1 style="color: #FF2D2D; text-align: center;">Team Invitation</h1>
+          <p style="font-size: 16px; color: #333;">
+            Hello,
+          </p>
+          <p style="font-size: 16px; color: #333;">
+            <strong>${accountOwnerName}</strong> has added you to their team as a <strong>${role}</strong>.
+          </p>
+          <p style="font-size: 16px; color: #333;">
+            You now have access to team features. Click the button below to view your team dashboard:
+          </p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${teamLink}" style="background-color: #FF2D2D; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+              View Team Dashboard
+            </a>
+          </div>
+          <p style="font-size: 14px; color: #666;">
+            If you have any questions, contact your team owner directly.
+          </p>
+          <hr style="border: 1px solid #ddd;" />
+          <p style="font-size: 12px; color: #999; text-align: center;">
+            ZRP Social – Freedom of speech. 35% of profits to charity.
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Resend error:", error);
+      throw new Error(error.message);
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Failed to send team invitation email:", error);
     throw error;
   }
 }
