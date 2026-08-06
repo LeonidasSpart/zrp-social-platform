@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     const charityAmount = platformFee * CHARITY_PERCENTAGE;
     const creatorAmount = premiumPost.price - platformFee;
 
-    // Create purchase
+    // Create purchase – use "COMPLETED" (uppercase)
     const purchase = await prisma.premiumPurchase.create({
       data: {
         premiumPostId,
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
         platformFee,
         charityAmount,
         creatorAmount,
-        status: "completed",
+        status: "COMPLETED",
       },
     });
 
