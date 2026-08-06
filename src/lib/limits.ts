@@ -1,4 +1,7 @@
 // ─── Plan Definitions ──────────────────────────────────────────────
+
+export type Plan = 'free' | 'pro' | 'business' | 'enterprise';
+
 export interface PlanLimits {
   postLength: number;
   imagesPerPost: number;
@@ -13,12 +16,11 @@ export interface PlanLimits {
   apiAccess: boolean;
   prioritySupport: 'none' | 'standard' | 'priority' | '24/7';
   charityContribution: number;
-  // ─── PRICES ─────────────────────────────────────────────────────────
   priceMonthly: number | null;
   priceYearly?: number | null;
 }
 
-export const PLANS: Record<string, PlanLimits> = {
+export const PLANS: Record<Plan, PlanLimits> = {
   free: {
     postLength: 280,
     imagesPerPost: 1,
@@ -90,11 +92,21 @@ export const PLANS: Record<string, PlanLimits> = {
 };
 
 export function getPlanLimits(plan: string): PlanLimits {
-  return PLANS[plan] || PLANS.free;
+  return PLANS[plan as Plan] || PLANS.free;
 }
 
-export function getUserPlan(user: { plan?: string } | null): string {
-  return user?.plan || 'free';
+export function getUserPlan(user: { plan?: string } | null): Plan {
+  const plan = user?.plan || 'free';
+  return plan in PLANS ? (plan as Plan) : 'free';
+}
+
+// ─── NEW: Feature check helper ────────────────────────────────────
+export function hasFeature(
+  plan: Plan | string,
+  feature: keyof PlanLimits & keyof Omit<PlanLimits, 'priceMonthly' | 'priceYearly' | 'charityContribution' | 'postLength' | 'imagesPerPost' | 'videoUploadMB' | 'scheduledPostsPerMonth' | 'analytics' | 'prioritySupport'>
+): boolean {
+  const limits = getPlanLimits(plan);
+  return limits[feature] === true;
 }
 
 // ─── Limit Check Functions ──────────────────────────────────────────
