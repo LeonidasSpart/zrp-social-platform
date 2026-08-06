@@ -15,7 +15,7 @@ import {
   createTransferInstruction,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { USDC_MINT, PLATFORM_WALLET_PUBLIC_KEY, connection } from "@/lib/solana";
+import { USDC_MINT, PLATFORM_WALLET_PUBLIC_KEY, getConnection } from "@/lib/solana";
 
 interface TipModalProps {
   isOpen: boolean;
@@ -141,6 +141,9 @@ export default function TipModal({
     setError(null);
 
     try {
+      // ─── Get connection ─────────────────────────────────────────────
+      const connection = getConnection();
+
       // ─── Compute token accounts ─────────────────────────────────────
       const fromTokenAccount = await getAssociatedTokenAddress(
         USDC_MINT,
