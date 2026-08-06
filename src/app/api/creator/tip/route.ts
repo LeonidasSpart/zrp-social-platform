@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
         platformFee,
         charityAmount,
         creatorAmount,
-        status: "COMPLETED", // ✅ fixed
+        status: "COMPLETED",
       },
     });
 
@@ -65,18 +65,13 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Create notification for creator
-    const sender = await prisma.user.findUnique({
-      where: { id: senderId },
-      select: { username: true, name: true },
-    });
-
+    // ─── Create notification for creator (without content) ──────
     await prisma.notification.create({
       data: {
         userId: recipientId,
         fromUserId: senderId,
         type: "TIP",
-        content: `${sender?.name || sender?.username} sent you a tip of ${amount} USDC${message ? `: "${message}"` : ""}`,
+        // No 'content' field – the frontend will display based on type and fromUserId
       },
     });
 
