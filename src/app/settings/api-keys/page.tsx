@@ -5,8 +5,33 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Key, Plus, Trash2, Copy, Check, Loader2, X } from "lucide-react";
 
-// ─── Inline components ──────────────────────────────────────────────
-const Button = ({ children, onClick, variant = "default", disabled, className = "" }) => {
+// ─── Types ────────────────────────────────────────────────────────────
+interface ApiKey {
+  id: string;
+  name: string;
+  lastUsed: string | null;
+  expiresAt: string | null;
+  createdAt: string;
+  revoked: boolean;
+}
+
+interface Notification {
+  type: "success" | "error" | "info";
+  title: string;
+  description?: string;
+}
+
+// ─── Inline components with proper types ────────────────────────────
+
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: "default" | "outline" | "destructive" | "ghost";
+  disabled?: boolean;
+  className?: string;
+}
+
+const Button = ({ children, onClick, variant = "default", disabled, className = "" }: ButtonProps) => {
   const base =
     "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50 disabled:pointer-events-none px-4 py-2";
   const variants = {
@@ -26,7 +51,15 @@ const Button = ({ children, onClick, variant = "default", disabled, className = 
   );
 };
 
-const Input = ({ value, onChange, placeholder, disabled, className = "" }) => (
+interface InputProps {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  className?: string;
+}
+
+const Input = ({ value, onChange, placeholder, disabled, className = "" }: InputProps) => (
   <input
     type="text"
     value={value}
@@ -37,18 +70,24 @@ const Input = ({ value, onChange, placeholder, disabled, className = "" }) => (
   />
 );
 
-const Badge = ({ children, className = "" }) => (
+interface BadgeProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+const Badge = ({ children, className = "" }: BadgeProps) => (
   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${className}`}>
     {children}
   </span>
 );
 
 // ─── Main component ──────────────────────────────────────────────────
+
 export default function ApiKeysPage() {
   const { data: session } = useSession();
   const router = useRouter();
 
-  const [keys, setKeys] = useState<any[]>([]);
+  const [keys, setKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [keyName, setKeyName] = useState("");
@@ -56,11 +95,9 @@ export default function ApiKeysPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newKey, setNewKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [notification, setNotification] = useState<Notification | null>(null);
 
-  // Notification
-  const [notification, setNotification] = useState<{ type: "success" | "error" | "info"; title: string; description?: string } | null>(null);
-
-  const showToast = (notif: typeof notification) => {
+  const showToast = (notif: Notification) => {
     setNotification(notif);
     setTimeout(() => setNotification(null), 5000);
   };
@@ -127,14 +164,11 @@ export default function ApiKeysPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to create key");
 
-      // Show the plain key in a modal or alert
       setNewKey(data.plainKey);
-      // Refresh list
       await fetchKeys();
       setShowCreateDialog(false);
       setKeyName("");
       setExpiresIn(365);
-      // Do not auto-close the "new key" modal; it will show the key.
     } catch (error: any) {
       showToast({ type: "error", title: "Error", description: error.message });
     } finally {
@@ -289,7 +323,7 @@ export default function ApiKeysPage() {
                 >
                   <option value={30}>30 days</option>
                   <option value={90}>90 days</option>
-                  <option value={365} selected>365 days</option>
+                  <option value={365}>365 days</option>
                   <option value={0}>Never expires</option>
                 </select>
               </div>
