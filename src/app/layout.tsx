@@ -10,7 +10,8 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import PageTransition from "@/components/PageTransition";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
-import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration"; // ✅ new
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import { Suspense } from "react"; // ✅ added
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
@@ -63,15 +64,17 @@ export default function RootLayout({
       <body className={`${inter.variable} ${orbitron.variable} font-inter min-h-screen flex flex-col overflow-x-hidden`}>
         <ThemeProvider>
           <LanguageProvider>
-            <AuthProvider>
-              <Header />
-              <EmailVerificationBanner />
-              <PageTransition>{children}</PageTransition>
-              <CookieConsent />
-              <Footer />
-              <PushNotificationManager />
-              <ServiceWorkerRegistration /> {/* ✅ registers SW */}
-            </AuthProvider>
+            <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+              <AuthProvider>
+                <Header />
+                <EmailVerificationBanner />
+                <PageTransition>{children}</PageTransition>
+                <CookieConsent />
+                <Footer />
+                <PushNotificationManager />
+                <ServiceWorkerRegistration />
+              </AuthProvider>
+            </Suspense>
           </LanguageProvider>
         </ThemeProvider>
       </body>
