@@ -51,6 +51,7 @@ export async function GET(
         banned: true,
         publicLikes: true,
         publicFollowing: true,
+        solanaWallet: true, // ✅ added
         creatorProfile: {
           select: {
             tipsEnabled: true,
@@ -90,13 +91,15 @@ export async function GET(
         banned: boolean;
         publicLikes: boolean;
         publicFollowing: boolean;
+        solanaWallet: string | null; // ✅ added
       }>>`
         SELECT 
           id, username, "customUrl", name, bio, "avatarUrl", "coverUrl", 
           location, country, website, "createdAt", "usernameChangedAt", 
           "isPrivate", "badgeType", "isAdmin", "pinnedPostId",
           "banned",
-          "publicLikes", "publicFollowing"
+          "publicLikes", "publicFollowing",
+          "solanaWallet"
         FROM "User"
         WHERE username ILIKE ${slug} OR "customUrl" ILIKE ${slug}
         LIMIT 1
@@ -144,6 +147,7 @@ export async function GET(
         banned: raw.banned,
         publicLikes: raw.publicLikes,
         publicFollowing: raw.publicFollowing,
+        solanaWallet: raw.solanaWallet, // ✅ added
         creatorProfile,
         _count: {
           posts: postsCount,
