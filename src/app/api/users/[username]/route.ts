@@ -10,7 +10,6 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions);
 
-    // ─── DEBUG: Log the incoming username ──────────────────────────
     console.log("🔍 Looking for username:", params.username);
     console.log("🔍 Username length:", params.username.length);
 
@@ -38,7 +37,9 @@ export async function GET(
         badgeType: true,
         isAdmin: true,
         pinnedPostId: true,
-        banned: true, // ✅ always include – safe, admins only see it
+        banned: true,
+        publicLikes: true,      // ✅ added
+        publicFollowing: true,  // ✅ added
         _count: {
           select: {
             posts: true,
@@ -69,13 +70,16 @@ export async function GET(
         badgeType: string | null;
         isAdmin: boolean;
         pinnedPostId: string | null;
-        banned: boolean; // ✅ included
+        banned: boolean;
+        publicLikes: boolean;      // ✅ added
+        publicFollowing: boolean;  // ✅ added
       }>>`
         SELECT 
           id, username, name, bio, "avatarUrl", "coverUrl", 
           location, country, website, "createdAt", "usernameChangedAt", 
           "isPrivate", "badgeType", "isAdmin", "pinnedPostId",
-          "banned"  -- ✅ always included
+          "banned",
+          "publicLikes", "publicFollowing"
         FROM "User"
         WHERE username ILIKE ${params.username}
         LIMIT 1
@@ -88,12 +92,10 @@ export async function GET(
       }
 
       if (users.length === 0) {
-        // ─── 3. Final attempt: list all usernames ──────────────────
         const allUsers = await prisma.$queryRaw<Array<{ username: string }>>`
           SELECT username FROM "User"
         `;
         console.log("🔍 All usernames in database:", allUsers.map(u => u.username));
-
         return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
 
@@ -106,7 +108,6 @@ export async function GET(
         prisma.follow.count({ where: { followerId: raw.id } }),
       ]);
 
-      // ─── Build user object with all fields (including banned) ──
       user = {
         id: raw.id,
         username: raw.username,
@@ -123,7 +124,9 @@ export async function GET(
         badgeType: raw.badgeType,
         isAdmin: raw.isAdmin,
         pinnedPostId: raw.pinnedPostId,
-        banned: raw.banned, // ✅ always included
+        banned: raw.banned,
+        publicLikes: raw.publicLikes,       // ✅ added
+        publicFollowing: raw.publicFollowing, // ✅ added
         _count: {
           posts: postsCount,
           followers: followersCount,
@@ -157,13 +160,6 @@ export async function GET(
       });
       isBlocked = !!block;
     }
-
-    // ─── Only admins see banned status (optional – we can show to all) ──
-    // If you want to hide from non‑admins, you can do:
-    // if (session?.user?.role !== "ADMIN") {
-    //   delete (user as any).banned;
-    // }
-    // But we keep it for simplicity – it's not sensitive.
 
     return NextResponse.json({
       ...user,
