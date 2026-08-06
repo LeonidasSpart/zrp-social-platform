@@ -14,18 +14,20 @@ import {
   Check,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import VerifiedBadge from "./VerifiedBadge"; // ✅ import
 
 interface Comment {
   id: string;
   content: string;
   imageUrl?: string;
   createdAt: string;
-  postId: string; // ✅ required for share
+  postId: string;
   author: {
     id: string;
     username: string;
     name: string;
     avatarUrl?: string;
+    badgeType?: string | null; // ✅ added
   };
   parentId?: string;
   replies?: Comment[];
@@ -72,7 +74,6 @@ export default function CommentItem({
 
   const isAuthor = session?.user?.id === comment.author.id;
 
-  // ─── Actions ──────────────────────────────────────────────────────
   const handleLike = async () => {
     if (!session || loading.like) return;
     setLoading({ ...loading, like: true });
@@ -188,13 +189,14 @@ export default function CommentItem({
         </Link>
 
         <div className="flex-1 min-w-0">
-          {/* Header */}
+          {/* Header with badge */}
           <div className="flex items-center gap-2 flex-wrap">
             <Link
               href={`/profile/${comment.author.username}`}
-              className="font-semibold hover:underline text-gray-900 dark:text-white text-sm"
+              className="font-semibold hover:underline text-gray-900 dark:text-white text-sm flex items-center gap-1"
             >
               {comment.author.name || comment.author.username}
+              {comment.author.badgeType && <VerifiedBadge badgeType={comment.author.badgeType} />}
             </Link>
             <span className="text-xs text-gray-500">@{comment.author.username}</span>
             <span className="text-xs text-gray-400">·</span>
@@ -247,7 +249,7 @@ export default function CommentItem({
             </>
           )}
 
-          {/* Action buttons – X style */}
+          {/* Action buttons */}
           <div className="flex items-center gap-4 mt-1.5 flex-wrap">
             <button
               onClick={handleLike}
