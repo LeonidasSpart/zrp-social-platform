@@ -13,17 +13,32 @@ enum Role {
   ADMIN
 }
 
-// ─── NEW ENUMS ─────────────────────────────────────────────────────
+// ─── POST TYPE ──────────────────────────────────────────────────────
 enum PostType {
   POST
   RECRUITMENT
   ARTICLE
 }
 
+// ─── TEAM ROLE ──────────────────────────────────────────────────────
 enum TeamRole {
   ADMIN
   EDITOR
   VIEWER
+}
+
+// ─── CREATOR MONETISATION ENUMS ──────────────────────────────────
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum WithdrawalStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
 }
 
 model User {
@@ -65,7 +80,7 @@ model User {
   publicLikes     Boolean   @default(true)
   publicFollowing Boolean   @default(true)
 
-  // ─── NEW: Custom profile URL (Pro+) ───────────────────────────
+  // ─── Custom profile URL (Pro+) ────────────────────────────────
   customUrl       String?   @unique
 
   emailPreferences Json?
@@ -104,12 +119,19 @@ model User {
   blockedBy    Blocked[] @relation("Blocked")
   reports      Report[]  @relation("Reporter")
 
-  // ─── NEW: Team Management ──────────────────────────────────────
+  // ─── Team Management ────────────────────────────────────────────
   teamAccount  TeamMember[] @relation("TeamAccount")  // as owner
   teamMembers  TeamMember[] @relation("TeamMemberUser") // as member
 
-  // ─── NEW: API Keys ─────────────────────────────────────────────
+  // ─── API Keys ──────────────────────────────────────────────────
   apiKeys      ApiKey[]
+
+  // ─── Creator Monetisation ──────────────────────────────────────
+  creatorProfile   CreatorProfile?
+  sentTips         Tip[]           @relation("TipSender")
+  receivedTips     Tip[]           @relation("TipRecipient")
+  premiumPurchases PremiumPurchase[]
+  withdrawalRequests WithdrawalRequest[]
 }
 
 model Post {
@@ -139,7 +161,7 @@ model Post {
 
   commentsEnabled Boolean @default(true)
 
-  // ─── NEW: Post type & extra fields ─────────────────────────────
+  // ─── Post type & extra fields ──────────────────────────────────
   type        PostType  @default(POST)
   company     String?   // for recruitment
   location    String?   // for recruitment
@@ -156,12 +178,15 @@ model Post {
   reports     Report[]
   bookmarks   Bookmark[]
 
+  // ─── Premium post (if this post is paid) ──────────────────────
+  premiumPost PremiumPost?
+
   @@index([createdAt])
   @@index([authorId])
   @@index([status])
   @@index([scheduledAt])
   @@index([quotePostId])
-  @@index([type]) // added for filtering
+  @@index([type])
 }
 
 model Comment {
@@ -497,7 +522,7 @@ model StoryView {
   @@index([viewerId])
 }
 
-// ─── NEW: TEAM MEMBERS ─────────────────────────────────────────────
+// ─── TEAM MEMBERS ──────────────────────────────────────────────────
 model TeamMember {
   id         String    @id @default(cuid())
   accountId  String    // the user who owns the team (Business/Enterprise)
@@ -513,7 +538,7 @@ model TeamMember {
   @@index([userId])
 }
 
-// ─── NEW: API KEYS ──────────────────────────────────────────────────
+// ─── API KEYS ──────────────────────────────────────────────────────
 model ApiKey {
   id          String    @id @default(cuid())
   userId      String
@@ -526,4 +551,135 @@ model ApiKey {
   revoked     Boolean   @default(false)
 
   @@index([userId])
+}
+
+// ─── CREATOR MONETISATION ─────────────────────────────────────────
+
+// Enable monetisation for a user
+model CreatorProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Settings
+  tipsEnabled     Boolean  @default(true)
+  tipsMessage     String?  @db.Text  // Custom thank you message
+  premiumPostsEnabled Boolean @default(true)
+  
+  // Stats
+  totalTips       Float    @default(0)
+  totalPremiumRevenue Float @default(0)
+  totalEarnings   Float    @default(0)
+  totalWithdrawn  Float    @default(0)
+  balance         Float    @default(0) // Available balance (after fees)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tips            Tip[]
+  premiumPosts    PremiumPost[]
+  withdrawalRequests WithdrawalRequest[]
+}
+
+// Tip from one user to another
+model Tip {
+  id              String   @id @default(cuid())
+  senderId        String
+  sender          User     @relation("TipSender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipientId     String
+  recipient       User     @relation("TipRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
+  creatorProfileId String
+  
+  amount          Float
+  currency        String   @default("USDC")
+  message         String?  @db.Text
+  transactionId   String?  // Blockchain transaction hash
+  status          TransactionStatus @default(PENDING)
+  
+  // Platform fee (10% goes to platform, 35% of that to charity)
+  platformFee     Float    @default(0)
+  charityAmount   Float    @default(0)
+  creatorAmount   Float    @default(0) // After fees
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([recipientId])
+  @@index([senderId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// Premium post (pay-to-view)
+model PremiumPost {
+  id              String   @id @default(cuid())
+  postId          String   @unique
+  post            Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
+  creatorProfileId String
+  
+  price           Float    @default(1.0)
+  currency        String   @default("USDC")
+  previewContent  String?  @db.Text  // Preview text shown to non-paying users
+  
+  totalPurchases  Int      @default(0)
+  totalRevenue    Float    @default(0)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  purchases       PremiumPurchase[]
+  
+  @@index([postId])
+  @@index([price])
+}
+
+// Purchase of a premium post
+model PremiumPurchase {
+  id              String   @id @default(cuid())
+  premiumPostId   String
+  premiumPost     PremiumPost @relation(fields: [premiumPostId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  amount          Float
+  currency        String   @default("USDC")
+  transactionId   String?
+  status          TransactionStatus @default(PENDING)
+  
+  // Platform fee
+  platformFee     Float    @default(0)
+  charityAmount   Float    @default(0)
+  creatorAmount   Float    @default(0)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([premiumPostId, userId])
+  @@index([userId])
+  @@index([premiumPostId])
+  @@index([status])
+}
+
+// Withdrawal request
+model WithdrawalRequest {
+  id              String   @id @default(cuid())
+  creatorProfileId String
+  creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  amount          Float
+  currency        String   @default("USDC")
+  walletAddress   String   // Solana wallet address
+  status          WithdrawalStatus @default(PENDING)
+  transactionHash String?  // Blockchain transaction hash
+  
+  processedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([status])
 }
