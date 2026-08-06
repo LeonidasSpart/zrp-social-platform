@@ -50,8 +50,6 @@ export async function PUT(req: NextRequest) {
   const token = crypto.randomBytes(32).toString("hex");
   const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-  console.log(`🔑 Generated token for user ${session.user.id}: ${token}`);
-
   // Save pending email and token
   await prisma.user.update({
     where: { id: session.user.id },
@@ -62,13 +60,9 @@ export async function PUT(req: NextRequest) {
     },
   });
 
-  console.log(`💾 Token saved for user ${session.user.id}`);
-
   // Construct the full verification URL
   const baseUrl = process.env.NEXTAUTH_URL;
   const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${token}`;
-
-  console.log(`📧 Sending verification email to ${newEmail} with URL: ${verifyUrl}`);
 
   // Send the email
   await sendVerificationEmail(newEmail, token, verifyUrl);
