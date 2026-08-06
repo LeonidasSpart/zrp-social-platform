@@ -4,8 +4,17 @@ import { useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { Connection, PublicKey, Transaction } from "@solana/web3.js";
-import { getOrCreateAssociatedTokenAccount, transfer } from "@solana/spl-token";
+import {
+  Connection,
+  PublicKey,
+  Transaction,
+} from "@solana/web3.js";
+import {
+  getAssociatedTokenAddress,
+  createAssociatedTokenAccountInstruction,
+  createTransferInstruction,
+  TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
 import { USDC_MINT, PLATFORM_WALLET_PUBLIC_KEY, connection } from "@/lib/solana";
 
 interface TipModalProps {
@@ -110,7 +119,6 @@ export default function TipModal({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  // ─── Solana wallet hook ────────────────────────────────────────────
   const { publicKey, sendTransaction, connected } = useWallet();
 
   if (!isOpen) return null;
@@ -133,25 +141,46 @@ export default function TipModal({
     setError(null);
 
     try {
-      // ─── Build USDC transfer transaction ──────────────────────────
-      const fromTokenAccount = await getOrCreateAssociatedTokenAccount(
-        connection,
-        publicKey, // just for fee payer, not the actual signer? Actually we need a payer, but we'll use the user's wallet to sign.
+      // ─── Compute token accounts ─────────────────────────────────────
+      const fromTokenAccount = await getAssociatedTokenAddress(
         USDC_MINT,
         publicKey
       );
-
-      const toTokenAccount = await getOrCreateAssociatedTokenAccount(
-        connection,
-        publicKey,
+      const toTokenAccount = await getAssociatedTokenAddress(
         USDC_MINT,
         PLATFORM_WALLET_PUBLIC_KEY
       );
 
-      const tx = new Transaction().add(
-        transfer(
-          fromTokenAccount.address,
-          toTokenAccount.address,
+      // ─── Build transaction ──────────────────────────────────────────
+      const tx = new Transaction();
+
+      // Check if sender's token account exists
+      const fromAccountInfo = await connection.getAccountInfo(fromTokenAccount);
+      if (!fromAccountInfo) {
+        // Create the associated token account for the sender
+        tx.add(
+          createAssociatedTokenAccountInstruction(
+            publicKey, // payer
+            fromTokenAccount, // ata
+            publicKey, // owner
+            USDC_MINT // mint
+          )
+        );
+      }
+
+      // Check if platform's token account exists – assume it exists; if not, show error
+      const toAccountInfo = await connection.getAccountInfo(toTokenAccount);
+      if (!toAccountInfo) {
+        throw new Error(
+          "Platform wallet is not set up to receive USDC. Please contact support."
+        );
+      }
+
+      // Add transfer instruction
+      tx.add(
+        createTransferInstruction(
+          fromTokenAccount,
+          toTokenAccount,
           publicKey,
           parsedAmount * 1_000_000 // USDC has 6 decimals
         )
@@ -169,7 +198,7 @@ export default function TipModal({
           recipientId,
           amount: parsedAmount,
           message: message.trim() || undefined,
-          transactionId: signature, // the on-chain tx hash
+          transactionId: signature,
         }),
       });
 
@@ -218,7 +247,6 @@ export default function TipModal({
           </div>
         ) : (
           <>
-            {/* ─── Wallet connection button ──────────────────────────── */}
             {!connected ? (
               <div className="space-y-4">
                 <p className="text-sm text-gray-600 dark:text-gray-400">
