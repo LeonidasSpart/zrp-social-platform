@@ -83,6 +83,9 @@ model User {
   // ─── Custom profile URL (Pro+) ────────────────────────────────
   customUrl       String?   @unique
 
+  // ─── Solana wallet for direct tips ─────────────────────────────
+  solanaWallet    String?   // User's wallet address for receiving USDC directly
+
   emailPreferences Json?
 
   pinnedPostId  String?   @unique
