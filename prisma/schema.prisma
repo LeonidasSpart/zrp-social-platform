@@ -49,9 +49,8 @@ model User {
   onboardingCompleted Boolean @default(false)
   banned      Boolean   @default(false)
 
-  // ─── PRIVACY SETTINGS ──────────────────────────────────────────
-  publicLikes     Boolean   @default(true)   // true = visible to everyone
-  publicFollowing Boolean   @default(true)   // true = visible to everyone
+  publicLikes     Boolean   @default(true)
+  publicFollowing Boolean   @default(true)
 
   emailPreferences Json?
 
@@ -75,19 +74,14 @@ model User {
   bookmarks   Bookmark[]
   pushSubscriptions PushSubscription[]
 
-  // ─── STORIES ──────────────────────────────────────────────────────
   stories     Story[]
   storyViews  StoryView[]
 
-  // ─── COMMENT INTERACTIONS ──────────────────────────────────────
   commentLikes     CommentLike[]
   commentReposts   CommentRepost[]
   commentBookmarks CommentBookmark[]
 
-  // ─── UPGRADE REQUESTS ──────────────────────────────────────────
   upgradeRequests UpgradeRequest[]
-
-  // ─── PAYMENT REQUESTS (crypto) ─────────────────────────────────
   paymentRequests PaymentRequest[]
 
   blockedUsers Blocked[] @relation("Blocker")
@@ -119,6 +113,8 @@ model Post {
   pollId      String?   @unique
   poll        Poll?     @relation(fields: [pollId], references: [id])
   isPoll      Boolean   @default(false)
+
+  commentsEnabled Boolean @default(true) // ✅ added
 
   pinnedBy    User?     @relation("PinnedPost")
 
@@ -155,7 +151,6 @@ model Comment {
 
   reports     Report[]
 
-  // ─── COMMENT INTERACTIONS ──────────────────────────────────────
   likes       CommentLike[]
   reposts     CommentRepost[]
   bookmarks   CommentBookmark[]
