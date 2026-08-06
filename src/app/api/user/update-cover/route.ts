@@ -11,6 +11,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const contentType = req.headers.get("content-type") || "";
+
+    // ─── Case 1: client already uploaded to UploadThing, just persist the URL ───
+    if (contentType.includes("application/json")) {
+      const body = await req.json();
+      const coverUrl = body?.coverUrl;
+
+      if (!coverUrl || typeof coverUrl !== "string") {
+        return NextResponse.json({ error: "Missing coverUrl" }, { status: 400 });
+      }
+
+      if (!coverUrl.includes("utfs.io") && !coverUrl.includes("ufs.sh")) {
+        return NextResponse.json({ error: "Invalid cover URL" }, { status: 400 });
+      }
+
+      const user = await prisma.user.update({
+        where: { id: session.user.id },
+        data: { coverUrl },
+      });
+
+      return NextResponse.json({ coverUrl: user.coverUrl });
+    }
+
+    // ─── Case 2: legacy raw-file upload via FormData ───
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
     if (!file) {
