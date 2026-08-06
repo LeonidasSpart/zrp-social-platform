@@ -4,8 +4,10 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import PasswordInput from "@/components/PasswordInput"; // ✅ added
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function SignupPage() {
+  const { t } = useLanguage();
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -28,7 +30,7 @@ export default function SignupPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Something went wrong");
+        setError(data.error || t("auth.errSomethingWrong"));
         setLoading(false);
         return;
       }
@@ -42,7 +44,7 @@ export default function SignupPage() {
 
       window.location.href = "/";
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      setError(t("auth.errTryAgain"));
       setLoading(false);
     }
   };
@@ -51,8 +53,8 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zrp-deepBlack px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">ZRP Social</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">Join the community</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t("auth.welcomeTitle")}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">{t("auth.joinCommunity")}</p>
         </div>
 
         <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8">
@@ -65,7 +67,7 @@ export default function SignupPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Full Name
+                {t("auth.fullName")}
               </label>
               <input
                 type="text"
@@ -79,7 +81,7 @@ export default function SignupPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Username
+                {t("auth.username")}
               </label>
               <input
                 type="text"
@@ -93,7 +95,7 @@ export default function SignupPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Email
+                {t("auth.email")}
               </label>
               <input
                 type="email"
@@ -110,14 +112,14 @@ export default function SignupPage() {
               name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              label="Password"
-              placeholder="Create a password"
+              label={t("auth.password")}
+              placeholder={t("auth.createPassword")}
               required
               autoComplete="new-password"
             />
 
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Must be at least 6 characters
+              {t("auth.passwordMinLength")}
             </p>
 
             <button
@@ -125,14 +127,14 @@ export default function SignupPage() {
               disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-zrp-red dark:hover:bg-zrp-darkRed text-white py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {loading ? "Creating account..." : "Create account"}
+              {loading ? t("auth.creatingAccount") : t("auth.createAccount")}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
-            Already have an account?{" "}
+            {t("auth.alreadyHaveAccount")}{" "}
             <Link href="/login" className="text-blue-600 dark:text-blue-400 hover:underline">
-              Sign in
+              {t("auth.signIn")}
             </Link>
           </p>
         </div>
