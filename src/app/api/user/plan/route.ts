@@ -11,14 +11,18 @@ export async function PUT(req: NextRequest) {
 
   const { plan } = await req.json();
 
-  const validPlans = ['free', 'pro', 'business', 'enterprise'];
-  if (!validPlans.includes(plan)) {
-    return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+  // Self-service is only allowed to downgrade to free.
+  // Upgrades must go through payment verification (admin/payments/verify).
+  if (plan !== "free") {
+    return NextResponse.json(
+      { error: "Plan upgrades require payment verification" },
+      { status: 403 }
+    );
   }
 
   const user = await prisma.user.update({
     where: { id: session.user.id },
-    data: { plan },
+    data: { plan: "free" },
   });
 
   return NextResponse.json({ plan: user.plan });
