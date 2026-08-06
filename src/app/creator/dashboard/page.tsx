@@ -52,18 +52,21 @@ const StatCard = ({
   );
 };
 
+// ─── Button with type prop ───────────────────────────────────────────
 const Button = ({
   children,
   onClick,
   variant = "default",
   disabled,
   className = "",
+  type = "button",
 }: {
   children: React.ReactNode;
   onClick?: () => void;
   variant?: "default" | "outline" | "destructive";
   disabled?: boolean;
   className?: string;
+  type?: "button" | "submit" | "reset";
 }) => {
   const base =
     "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50 disabled:pointer-events-none px-4 py-2";
@@ -74,6 +77,7 @@ const Button = ({
   };
   return (
     <button
+      type={type}
       onClick={onClick}
       disabled={disabled}
       className={`${base} ${variants[variant] || variants.default} ${className}`}
@@ -83,7 +87,7 @@ const Button = ({
   );
 };
 
-// ─── Updated Input component with all HTML input props ─────────────
+// ─── Input with all HTML input props ───────────────────────────────
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input
     {...props}
