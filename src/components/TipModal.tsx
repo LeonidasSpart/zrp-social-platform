@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import { Loader2, X } from "lucide-react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { Connection, PublicKey, Transaction } from "@solana/web3.js";
+import { getOrCreateAssociatedTokenAccount, transfer } from "@solana/spl-token";
+import { USDC_MINT, PLATFORM_WALLET_PUBLIC_KEY, connection } from "@/lib/solana";
 
 interface TipModalProps {
   isOpen: boolean;
@@ -105,10 +110,19 @@ export default function TipModal({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  // ─── Solana wallet hook ────────────────────────────────────────────
+  const { publicKey, sendTransaction, connected } = useWallet();
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!connected || !publicKey) {
+      setError("Please connect your wallet first.");
+      return;
+    }
+
     const parsedAmount = parseFloat(amount);
     if (!parsedAmount || parsedAmount <= 0) {
       setError("Please enter a valid amount.");
@@ -117,7 +131,37 @@ export default function TipModal({
 
     setLoading(true);
     setError(null);
+
     try {
+      // ─── Build USDC transfer transaction ──────────────────────────
+      const fromTokenAccount = await getOrCreateAssociatedTokenAccount(
+        connection,
+        publicKey, // just for fee payer, not the actual signer? Actually we need a payer, but we'll use the user's wallet to sign.
+        USDC_MINT,
+        publicKey
+      );
+
+      const toTokenAccount = await getOrCreateAssociatedTokenAccount(
+        connection,
+        publicKey,
+        USDC_MINT,
+        PLATFORM_WALLET_PUBLIC_KEY
+      );
+
+      const tx = new Transaction().add(
+        transfer(
+          fromTokenAccount.address,
+          toTokenAccount.address,
+          publicKey,
+          parsedAmount * 1_000_000 // USDC has 6 decimals
+        )
+      );
+
+      // ─── Send transaction ──────────────────────────────────────────
+      const signature = await sendTransaction(tx, connection);
+      await connection.confirmTransaction(signature, "confirmed");
+
+      // ─── Call backend to credit the creator ──────────────────────
       const res = await fetch("/api/creator/tip", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -125,13 +169,13 @@ export default function TipModal({
           recipientId,
           amount: parsedAmount,
           message: message.trim() || undefined,
-          transactionId: `sim_${Date.now()}`,
+          transactionId: signature, // the on-chain tx hash
         }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Failed to send tip.");
+        throw new Error(data.error || "Failed to credit tip.");
       }
 
       setSuccess(true);
@@ -140,7 +184,8 @@ export default function TipModal({
         onClose();
       }, 1500);
     } catch (err: any) {
-      setError(err.message);
+      console.error(err);
+      setError(err.message || "Transaction failed.");
     } finally {
       setLoading(false);
     }
@@ -172,60 +217,75 @@ export default function TipModal({
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Amount (USDC)
-              </label>
-              <Input
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="Enter amount"
-                disabled={loading}
-              />
-            </div>
+          <>
+            {/* ─── Wallet connection button ──────────────────────────── */}
+            {!connected ? (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Connect your Solana wallet to send USDC tips.
+                </p>
+                <WalletMultiButton className="w-full bg-red-600 text-white rounded-lg py-2 font-medium hover:bg-red-700 transition" />
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Amount (USDC)
+                  </label>
+                  <Input
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="Enter amount"
+                    disabled={loading}
+                  />
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    Connected: {publicKey?.toBase58().slice(0, 8)}...
+                  </p>
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Message (optional)
-              </label>
-              <Textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Supportive message..."
-                disabled={loading}
-              />
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Message (optional)
+                  </label>
+                  <Textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Supportive message..."
+                    disabled={loading}
+                  />
+                </div>
 
-            {error && (
-              <div className="text-red-500 text-sm">{error}</div>
-            )}
-
-            <div className="flex gap-3 justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  "Send Tip"
+                {error && (
+                  <div className="text-red-500 text-sm">{error}</div>
                 )}
-              </Button>
-            </div>
 
-            <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
-              10% platform fee · 35% of fees go to charity
-            </p>
-          </form>
+                <div className="flex gap-3 justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onClose}
+                    disabled={loading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={loading}>
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      "Send Tip"
+                    )}
+                  </Button>
+                </div>
+
+                <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
+                  10% platform fee · 35% of fees go to charity
+                </p>
+              </form>
+            )}
+          </>
         )}
       </div>
     </div>
