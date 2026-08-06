@@ -17,8 +17,20 @@ const Card = ({ children, className = "" }: { children: React.ReactNode; classNa
   </div>
 );
 
-const StatCard = ({ label, value, icon: Icon, color = "blue" }: any) => {
-  const colors = {
+type ColorVariant = "blue" | "green" | "purple" | "orange" | "red";
+
+const StatCard = ({
+  label,
+  value,
+  icon: Icon,
+  color = "blue"
+}: {
+  label: string;
+  value: number | string;
+  icon: React.ElementType;
+  color?: ColorVariant;
+}) => {
+  const colors: Record<ColorVariant, string> = {
     blue: "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400",
     green: "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400",
     purple: "bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400",
