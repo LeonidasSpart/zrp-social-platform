@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag,
-  Bookmark, BarChart3, Pin, PinOff, X, ZoomIn, Plus, ChevronDown
+  Bookmark, BarChart3, Pin, PinOff, X, ZoomIn, Plus, ChevronDown,
+  Briefcase, FileText
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Comments from "./Comments";
@@ -44,7 +45,13 @@ interface PostCardProps {
       name: string;
     } | null;
     repostId?: string | null;
-    commentsEnabled?: boolean; // ✅ added
+    commentsEnabled?: boolean;
+    // ─── NEW FIELDS ──────────────────────────────────────────────
+    type?: "POST" | "RECRUITMENT" | "ARTICLE";
+    company?: string;
+    location?: string;
+    applyUrl?: string;
+    body?: string;
   };
   onUpdate: () => void;
   showPinOption?: boolean;
@@ -121,13 +128,19 @@ export default function PostCard({
   const [reactionsLoading, setReactionsLoading] = useState(true);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
+  // ─── Expand article body ──────────────────────────────────────────
+  const [articleExpanded, setArticleExpanded] = useState(false);
+
   const isAuthor = session?.user?.id === post.author.id;
   const contentParts = parseContent(post.content);
   const isRepost = post.isRepost === true;
   const originalAuthor = post.repostOriginalAuthor;
 
   // ─── Comments enabled? ────────────────────────────────────────────
-  const commentsEnabled = post.commentsEnabled !== false; // default true
+  const commentsEnabled = post.commentsEnabled !== false;
+
+  // ─── Post type ────────────────────────────────────────────────────
+  const postType = post.type || "POST";
 
   // ─── Video detection ──────────────────────────────────────────────
   const isVideo = () => {
@@ -425,7 +438,7 @@ export default function PostCard({
           </Link>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Link href={`/profile/${post.author.username}`}>
                   <span className="font-semibold hover:underline text-gray-900 dark:text-white inline-flex items-center gap-1">
                     {post.author.name || post.author.username}
@@ -439,6 +452,18 @@ export default function PostCard({
                 </Link>
                 <span className="text-gray-400 dark:text-gray-500 text-sm">·</span>
                 <span className="text-gray-400 dark:text-gray-500 text-sm">{timeAgo(post.createdAt)}</span>
+
+                {/* ─── Post type badge ─────────────────────────────────── */}
+                {postType === "RECRUITMENT" && (
+                  <span className="inline-flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">
+                    <Briefcase className="w-3 h-3" /> Recruitment
+                  </span>
+                )}
+                {postType === "ARTICLE" && (
+                  <span className="inline-flex items-center gap-1 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full">
+                    <FileText className="w-3 h-3" /> Article
+                  </span>
+                )}
               </div>
 
               {isAuthor ? (
@@ -501,6 +526,52 @@ export default function PostCard({
                   return <span key={index}>{part.value}</span>;
                 })}
               </p>
+
+              {/* ─── Recruitment extra info ───────────────────────────── */}
+              {postType === "RECRUITMENT" && (post.company || post.location || post.applyUrl) && (
+                <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 space-y-1 text-sm">
+                  {post.company && <p className="font-medium text-gray-900 dark:text-white">{post.company}</p>}
+                  {post.location && <p className="text-gray-600 dark:text-gray-400">{post.location}</p>}
+                  {post.applyUrl && (
+                    <a
+                      href={post.applyUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-1 text-zrp-red hover:underline text-sm font-medium"
+                    >
+                      Apply Now →
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* ─── Article body ─────────────────────────────────────── */}
+              {postType === "ARTICLE" && post.body && (
+                <div className="mt-2">
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    {articleExpanded ? (
+                      <div
+                        dangerouslySetInnerHTML={{ __html: post.body }}
+                        className="text-gray-800 dark:text-gray-200"
+                      />
+                    ) : (
+                      <div
+                        dangerouslySetInnerHTML={{ __html: post.body.slice(0, 300) + (post.body.length > 300 ? "..." : "") }}
+                        className="text-gray-800 dark:text-gray-200"
+                      />
+                    )}
+                  </div>
+                  {post.body.length > 300 && (
+                    <button
+                      onClick={() => setArticleExpanded(!articleExpanded)}
+                      className="text-sm text-zrp-red hover:underline mt-1"
+                    >
+                      {articleExpanded ? "Show less" : "Read more"}
+                    </button>
+                  )}
+                </div>
+              )}
+
               {/* ─── Media rendering (image or video) ────────────────── */}
               {post.imageUrl && (
                 <div
