@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Check, X, Globe, MapPin, User, Key, Calendar, Camera, Trash2, Loader2,
-  BellOff, ChevronRight, Ban, Mail
+  BellOff, ChevronRight, Ban, Mail, DollarSign, TrendingUp
 } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import EmailPreferences from "@/components/EmailPreferences";
@@ -29,7 +29,19 @@ interface UserData {
   usernameChangedAt: string | null;
   publicLikes: boolean;
   publicFollowing: boolean;
-  customUrl: string | null; // ✅ added
+  customUrl: string | null;
+}
+
+interface CreatorProfile {
+  id: string;
+  tipsEnabled: boolean;
+  tipsMessage: string | null;
+  premiumPostsEnabled: boolean;
+  totalEarnings: number;
+  balance: number;
+  totalTips: number;
+  totalPremiumRevenue: number;
+  totalWithdrawn: number;
 }
 
 export default function SettingsPage() {
@@ -38,6 +50,10 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
+
+  // ─── Creator monetisation state ──────────────────────────────────
+  const [creatorProfile, setCreatorProfile] = useState<CreatorProfile | null>(null);
+  const [loadingCreator, setLoadingCreator] = useState(false);
 
   // Form states
   const [name, setName] = useState("");
@@ -114,6 +130,7 @@ export default function SettingsPage() {
   useEffect(() => {
     if (session?.user) {
       fetchUserData();
+      fetchCreatorProfile();
     }
   }, [session]);
 
@@ -143,6 +160,33 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
+    }
+  };
+
+  // ─── Fetch creator profile ──────────────────────────────────────
+  const fetchCreatorProfile = async () => {
+    const userPlan = session?.user?.plan || "free";
+    // Only Business/Enterprise can have creator profiles
+    if (userPlan !== "business" && userPlan !== "enterprise") {
+      setCreatorProfile(null);
+      return;
+    }
+
+    setLoadingCreator(true);
+    try {
+      const res = await fetch("/api/creator/profile");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.profile) {
+          setCreatorProfile(data.profile);
+        } else {
+          setCreatorProfile(null);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching creator profile:", error);
+    } finally {
+      setLoadingCreator(false);
     }
   };
 
@@ -382,6 +426,7 @@ export default function SettingsPage() {
   const currentEmail = session?.user?.email || userData?.email || "Not available";
   const userPlan = session?.user?.plan || "free";
   const planLimits = getPlanLimits(userPlan);
+  const isCreatorEligible = userPlan === "business" || userPlan === "enterprise";
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
@@ -522,6 +567,70 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* ─── Creator Monetisation Section ──────────────────────────── */}
+      {isCreatorEligible && (
+        <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Creator Monetisation</h2>
+            <Link
+              href="/creator/dashboard"
+              className="inline-flex items-center gap-1.5 text-sm bg-zrp-red text-white px-4 py-2 rounded-lg font-medium hover:bg-zrp-darkRed transition"
+            >
+              <TrendingUp className="w-4 h-4" />
+              Dashboard
+            </Link>
+          </div>
+
+          {loadingCreator ? (
+            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Loading...
+            </div>
+          ) : creatorProfile ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+              <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                <p className="text-gray-500 dark:text-gray-400 text-xs">Balance</p>
+                <p className="font-bold text-gray-900 dark:text-white">
+                  ${creatorProfile.balance.toFixed(2)}
+                </p>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                <p className="text-gray-500 dark:text-gray-400 text-xs">Total Tips</p>
+                <p className="font-bold text-gray-900 dark:text-white">
+                  ${creatorProfile.totalTips.toFixed(2)}
+                </p>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                <p className="text-gray-500 dark:text-gray-400 text-xs">Premium Revenue</p>
+                <p className="font-bold text-gray-900 dark:text-white">
+                  ${creatorProfile.totalPremiumRevenue.toFixed(2)}
+                </p>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                <p className="text-gray-500 dark:text-gray-400 text-xs">Withdrawn</p>
+                <p className="font-bold text-gray-900 dark:text-white">
+                  ${creatorProfile.totalWithdrawn.toFixed(2)}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              <p>Enable creator monetisation to start earning from tips and premium posts.</p>
+              <Link
+                href="/creator/dashboard"
+                className="inline-block mt-2 text-zrp-red hover:underline"
+              >
+                Get started →
+              </Link>
+            </div>
+          )}
+
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
+            💰 10% platform fee · 35% of platform fees go to charity.
+          </p>
+        </div>
+      )}
 
       {/* ─── Profile Picture ────────────────────────────────────────── */}
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
