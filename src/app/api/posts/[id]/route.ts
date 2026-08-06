@@ -58,7 +58,7 @@ export async function GET(
             likes: true,
             comments: true,
             reposts: true,
-            quotedBy: true, // ✅ count of quotes on this post
+            quotedBy: true,
           },
         },
       },
