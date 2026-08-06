@@ -5,19 +5,23 @@ import { useSession } from "next-auth/react";
 import { Check, X, Loader2, ExternalLink } from "lucide-react";
 
 // ─── Inline components ──────────────────────────────────────────────
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: "default" | "outline" | "destructive";
+  disabled?: boolean;
+  className?: string;
+  type?: "button" | "submit" | "reset"; // ✅ added
+}
+
 const Button = ({
   children,
   onClick,
   variant = "default",
   disabled,
   className = "",
-}: {
-  children: React.ReactNode;
-  onClick?: () => void;
-  variant?: "default" | "outline" | "destructive";
-  disabled?: boolean;
-  className?: string;
-}) => {
+  type = "button",
+}: ButtonProps) => {
   const base =
     "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50 disabled:pointer-events-none px-4 py-2";
   const variants = {
@@ -27,6 +31,7 @@ const Button = ({
   };
   return (
     <button
+      type={type}
       onClick={onClick}
       disabled={disabled}
       className={`${base} ${variants[variant] || variants.default} ${className}`}
@@ -36,19 +41,15 @@ const Button = ({
   );
 };
 
-const Input = ({
-  value,
-  onChange,
-  placeholder,
-  disabled,
-  className = "",
-}: {
+interface InputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
-}) => (
+}
+
+const Input = ({ value, onChange, placeholder, disabled, className = "" }: InputProps) => (
   <input
     type="text"
     value={value}
@@ -94,7 +95,6 @@ export default function CustomUrlSettings({
       return;
     }
 
-    // Validate: only alphanumeric, underscore, hyphen
     if (!/^[a-z0-9_-]+$/.test(trimmed)) {
       setError("Only letters, numbers, underscores, and hyphens are allowed.");
       return;
@@ -129,7 +129,6 @@ export default function CustomUrlSettings({
       }
 
       setSuccess(`Your custom URL is now /@${trimmed}`);
-      // Update session to reflect new custom URL
       await update();
       onUpdate();
     } catch (err: any) {
