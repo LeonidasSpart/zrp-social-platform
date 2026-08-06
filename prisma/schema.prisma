@@ -594,7 +594,7 @@ model Tip {
   amount          Float
   currency        String   @default("USDC")
   message         String?  @db.Text
-  transactionId   String?  // Blockchain transaction hash
+  transactionId   String?  @unique   // ✅ added @unique
   status          TransactionStatus @default(PENDING)
   
   // Platform fee (10% goes to platform, 35% of that to charity)
@@ -645,7 +645,7 @@ model PremiumPurchase {
   
   amount          Float
   currency        String   @default("USDC")
-  transactionId   String?
+  transactionId   String?  @unique   // ✅ added @unique
   status          TransactionStatus @default(PENDING)
   
   // Platform fee
