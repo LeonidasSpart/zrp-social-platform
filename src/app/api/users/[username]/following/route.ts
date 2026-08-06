@@ -29,6 +29,7 @@ export async function GET(
             name: true,
             avatarUrl: true,
             bio: true,
+            badgeType: true, // ✅ added
           },
         },
       },
