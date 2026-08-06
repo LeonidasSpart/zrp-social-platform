@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Key, Plus, Trash2, Copy, Check, Loader2, X } from "lucide-react";
+import { Key, Plus, Trash2, Copy, Check, Loader2, X, ExternalLink, Code } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────
 interface ApiKey {
@@ -21,7 +21,7 @@ interface Notification {
   description?: string;
 }
 
-// ─── Inline components with proper types ────────────────────────────
+// ─── Inline components ──────────────────────────────────────────────
 
 interface ButtonProps {
   children: React.ReactNode;
@@ -293,7 +293,78 @@ export default function ApiKeysPage() {
         </div>
       </div>
 
-      {/* Create Key Dialog */}
+      {/* ─── How to use section ──────────────────────────────────── */}
+      <div className="border rounded-lg p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <Code className="w-5 h-5 text-gray-500" />
+          <h2 className="text-lg font-semibold">How to use your API keys</h2>
+        </div>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Use your API key to authenticate requests to the ZRP API. Include it in the <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-xs">Authorization</code> header as a Bearer token.
+        </p>
+
+        <div className="bg-gray-900 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-gray-400 font-mono">Example with curl</span>
+            <button
+              onClick={() => {
+                const example = `curl -H "Authorization: Bearer YOUR_API_KEY" \\\n  https://${window.location.host}/api/external/me`;
+                copyToClipboard(example);
+              }}
+              className="text-xs text-gray-400 hover:text-white transition flex items-center gap-1"
+            >
+              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+              {copied ? "Copied!" : "Copy"}
+            </button>
+          </div>
+          <pre className="text-xs text-green-400 font-mono whitespace-pre-wrap break-all">
+{`curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  https://${window.location.host}/api/external/me`}
+          </pre>
+        </div>
+
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200">Available endpoints</h4>
+          <ul className="mt-2 text-xs space-y-1 text-blue-700 dark:text-blue-300">
+            <li><code className="bg-blue-100 dark:bg-blue-800/50 px-1.5 py-0.5 rounded">GET /api/external/me</code> – Get your profile</li>
+            <li><code className="bg-blue-100 dark:bg-blue-800/50 px-1.5 py-0.5 rounded">GET /api/external/me/posts</code> – Get your posts (paginated)</li>
+          </ul>
+          <p className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+            More endpoints will be added in the future.
+          </p>
+        </div>
+
+        <div className="text-xs text-gray-500">
+          <p>
+            <strong>Security:</strong> Never share your API key publicly. Store it securely in environment variables.
+          </p>
+          <p className="mt-1">
+            <strong>Rate limiting:</strong> API requests are subject to rate limits based on your plan.
+          </p>
+        </div>
+      </div>
+
+      {/* Plan Info */}
+      <div className="border rounded-lg p-6">
+        <h2 className="text-lg font-semibold">API Access Plan</h2>
+        <p className="text-sm text-gray-500">Your current plan determines API access capabilities.</p>
+        <div className="mt-4 flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/30 rounded-lg">
+          <div>
+            <p className="font-medium">Current Plan</p>
+            <p className="text-sm text-gray-500 capitalize">{session?.user?.plan || "Free"}</p>
+          </div>
+          <Badge className={session?.user?.features?.apiAccess ? "bg-green-500 text-white" : "bg-red-500 text-white"}>
+            {session?.user?.features?.apiAccess ? "API Access Enabled" : "Upgrade Required"}
+          </Badge>
+        </div>
+        {!session?.user?.features?.apiAccess && (
+          <Button onClick={() => router.push("/pricing")} className="w-full mt-4">
+            Upgrade to Business or Enterprise
+          </Button>
+        )}
+      </div>
+
+      {/* ─── Create Key Dialog ───────────────────────────────────── */}
       {showCreateDialog && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-md w-full shadow-xl">
@@ -340,7 +411,7 @@ export default function ApiKeysPage() {
         </div>
       )}
 
-      {/* New Key Display Dialog */}
+      {/* ─── New Key Display Dialog ──────────────────────────────── */}
       {newKey && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-md w-full shadow-xl">
@@ -357,37 +428,21 @@ export default function ApiKeysPage() {
                 {copied ? <Check className="w-5 h-5 text-green-600" /> : <Copy className="w-5 h-5" />}
               </button>
             </div>
-            <div className="flex justify-end mt-6">
+
+            {/* ─── Quick usage example ──────────────────────────────── */}
+            <div className="mt-4 p-3 bg-gray-900 rounded-lg">
+              <p className="text-xs text-gray-400 mb-1">Try it now:</p>
+              <pre className="text-xs text-green-400 font-mono whitespace-pre-wrap break-all">
+{`curl -H "Authorization: Bearer ${newKey}" \\\n  https://${window.location.host}/api/external/me`}
+              </pre>
+            </div>
+
+            <div className="flex justify-end mt-4">
               <Button onClick={() => setNewKey(null)}>Done</Button>
             </div>
           </div>
         </div>
       )}
-
-      {/* Plan Info */}
-      <div className="border rounded-lg p-6">
-        <h2 className="text-lg font-semibold">API Access Plan</h2>
-        <p className="text-sm text-gray-500">Your current plan determines API access capabilities.</p>
-        <div className="mt-4 flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/30 rounded-lg">
-          <div>
-            <p className="font-medium">Current Plan</p>
-            <p className="text-sm text-gray-500 capitalize">{session?.user?.plan || "Free"}</p>
-          </div>
-          <Badge className={session?.user?.features?.apiAccess ? "bg-green-500 text-white" : "bg-red-500 text-white"}>
-            {session?.user?.features?.apiAccess ? "API Access Enabled" : "Upgrade Required"}
-          </Badge>
-        </div>
-        {!session?.user?.features?.apiAccess && (
-          <Button onClick={() => router.push("/pricing")} className="w-full mt-4">
-            Upgrade to Business or Enterprise
-          </Button>
-        )}
-        <div className="mt-4 text-xs text-gray-500 space-y-1">
-          <p>API keys allow you to interact with ZRP programmatically.</p>
-          <p>Each key can be named and optionally expires.</p>
-          <p>Keys are hashed and stored securely.</p>
-        </div>
-      </div>
     </div>
   );
 }
