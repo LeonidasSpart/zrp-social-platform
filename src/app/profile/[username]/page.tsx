@@ -33,8 +33,8 @@ interface UserProfile {
   createdAt: string;
   isAdmin: boolean;
   plan: string | null;
-  publicLikes: boolean;      // ✅ privacy setting
-  publicFollowing: boolean;  // ✅ privacy setting
+  publicLikes: boolean;
+  publicFollowing: boolean;
   _count: {
     posts: number;
     followers: number;
@@ -488,8 +488,8 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const showLikesTab = isOwnProfile || profile.publicLikes !== false;
   const showFollowingCount = isOwnProfile || profile.publicFollowing !== false;
 
-  // ─── Available tabs ──────────────────────────────────────────────
-  const allTabs: TabType[] = ["posts", "replies", "media", "likes", "reposts", "analytics"];
+  // ─── Available tabs in the NEW order: Posts → Reposts → Replies → Likes → Media → Analytics ──
+  const allTabs: TabType[] = ["posts", "reposts", "replies", "likes", "media", "analytics"];
   const visibleTabs = allTabs.filter((tab) => {
     if (tab === "analytics" && !isOwnProfile) return false;
     if (tab === "likes" && !showLikesTab) return false;
@@ -866,19 +866,19 @@ export default function ProfilePage({ params }: { params: { username: string } }
               </>
             )}
 
-            {/* ─── Replies Tab ────────────────────────────────────────── */}
-            {activeTab === "replies" && (
-              <>
-                {posts.map((reply) => renderReplyItem(reply))}
-              </>
-            )}
-
-            {/* ─── Media Tab ──────────────────────────────────────────── */}
-            {activeTab === "media" && (
+            {/* ─── Reposts Tab ────────────────────────────────────────── */}
+            {activeTab === "reposts" && (
               <>
                 {posts.map((post) => (
                   <PostCard key={post.id} post={post} onUpdate={fetchPosts} />
                 ))}
+              </>
+            )}
+
+            {/* ─── Replies Tab ────────────────────────────────────────── */}
+            {activeTab === "replies" && (
+              <>
+                {posts.map((reply) => renderReplyItem(reply))}
               </>
             )}
 
@@ -891,8 +891,8 @@ export default function ProfilePage({ params }: { params: { username: string } }
               </>
             )}
 
-            {/* ─── Reposts Tab ────────────────────────────────────────── */}
-            {activeTab === "reposts" && (
+            {/* ─── Media Tab ──────────────────────────────────────────── */}
+            {activeTab === "media" && (
               <>
                 {posts.map((post) => (
                   <PostCard key={post.id} post={post} onUpdate={fetchPosts} />
