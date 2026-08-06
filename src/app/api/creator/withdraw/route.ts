@@ -29,14 +29,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Insufficient balance." }, { status: 400 });
     }
 
-    // Create withdrawal request
+    // Create withdrawal request – use "PENDING" (uppercase)
     const withdrawal = await prisma.withdrawalRequest.create({
       data: {
         creatorProfileId: profile.id,
         userId,
         amount,
         walletAddress,
-        status: "pending",
+        status: "PENDING", // ✅ fixed
       },
     });
 
