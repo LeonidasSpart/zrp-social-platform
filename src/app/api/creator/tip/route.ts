@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     const charityAmount = platformFee * CHARITY_PERCENTAGE;
     const creatorAmount = amount - platformFee;
 
-    // Create tip record
+    // Create tip record – use "COMPLETED" (uppercase)
     const tip = await prisma.tip.create({
       data: {
         senderId,
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
         platformFee,
         charityAmount,
         creatorAmount,
-        status: "completed", // In production, verify blockchain tx first
+        status: "COMPLETED", // ✅ fixed
       },
     });
 
