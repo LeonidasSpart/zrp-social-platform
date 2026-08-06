@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
 import {
   UserPlus,
   MoreVertical,
@@ -144,10 +143,16 @@ const Select = ({
   </select>
 );
 
+// ─── Notification banner ──────────────────────────────────────────
+interface Notification {
+  type: "success" | "error" | "info";
+  title: string;
+  description?: string;
+}
+
 export default function TeamSettingsPage() {
   const { data: session } = useSession();
   const router = useRouter();
-  const { toast } = useToast();
 
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [owner, setOwner] = useState<TeamOwner | null>(null);
@@ -159,17 +164,25 @@ export default function TeamSettingsPage() {
   const [removeTarget, setRemoveTarget] = useState<TeamMember | null>(null);
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
 
+  // ─── Notification state ──────────────────────────────────────────
+  const [notification, setNotification] = useState<Notification | null>(null);
+
+  const showToast = (notif: Notification) => {
+    setNotification(notif);
+    setTimeout(() => setNotification(null), 5000);
+  };
+
   // ─── Check permission ────────────────────────────────────────────
   useEffect(() => {
     if (session?.user && !session.user.features?.teamManagement) {
-      toast({
+      showToast({
+        type: "error",
         title: "Upgrade Required",
         description: "Team management is available on Business and Enterprise plans.",
-        variant: "destructive",
       });
       router.push("/pricing?feature=team");
     }
-  }, [session, router, toast]);
+  }, [session, router]);
 
   // ─── Fetch team ──────────────────────────────────────────────────
   const fetchTeam = async () => {
@@ -178,10 +191,10 @@ export default function TeamSettingsPage() {
       const res = await fetch("/api/team");
       if (!res.ok) {
         if (res.status === 403) {
-          toast({
+          showToast({
+            type: "error",
             title: "Upgrade Required",
             description: "Team management requires a Business or Enterprise plan.",
-            variant: "destructive",
           });
           router.push("/pricing?feature=team");
           return;
@@ -193,7 +206,7 @@ export default function TeamSettingsPage() {
       setOwner(data.owner || null);
     } catch (error) {
       console.error(error);
-      toast({ title: "Error", description: "Failed to load team members.", variant: "destructive" });
+      showToast({ type: "error", title: "Error", description: "Failed to load team members." });
     } finally {
       setLoading(false);
     }
@@ -208,7 +221,7 @@ export default function TeamSettingsPage() {
   // ─── Add member ──────────────────────────────────────────────────
   const handleAddMember = async () => {
     if (!newMemberEmail) {
-      toast({ title: "Error", description: "Please enter an email address.", variant: "destructive" });
+      showToast({ type: "error", title: "Error", description: "Please enter an email address." });
       return;
     }
     setIsSubmitting(true);
@@ -220,13 +233,13 @@ export default function TeamSettingsPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to add member");
-      toast({ title: "Member Added", description: `${data.member.user.email} has been added.` });
+      showToast({ type: "success", title: "Member Added", description: `${data.member.user.email} has been added.` });
       setShowAddDialog(false);
       setNewMemberEmail("");
       setNewMemberRole("VIEWER");
       fetchTeam();
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      showToast({ type: "error", title: "Error", description: error.message });
     } finally {
       setIsSubmitting(false);
     }
@@ -244,10 +257,10 @@ export default function TeamSettingsPage() {
         const data = await res.json();
         throw new Error(data.error || "Failed to update role");
       }
-      toast({ title: "Role Updated", description: `Role updated to ${role}.` });
+      showToast({ type: "success", title: "Role Updated", description: `Role updated to ${role}.` });
       fetchTeam();
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      showToast({ type: "error", title: "Error", description: error.message });
     }
   };
 
@@ -260,12 +273,12 @@ export default function TeamSettingsPage() {
         const data = await res.json();
         throw new Error(data.error || "Failed to remove member");
       }
-      toast({ title: "Member Removed", description: `${removeTarget.user.email} removed.` });
+      showToast({ type: "success", title: "Member Removed", description: `${removeTarget.user.email} removed.` });
       setShowRemoveDialog(false);
       setRemoveTarget(null);
       fetchTeam();
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      showToast({ type: "error", title: "Error", description: error.message });
     }
   };
 
@@ -298,6 +311,30 @@ export default function TeamSettingsPage() {
 
   return (
     <div className="container max-w-6xl py-8 space-y-8">
+      {/* Notification Banner */}
+      {notification && (
+        <div
+          className={`p-4 rounded-lg border flex items-start justify-between ${
+            notification.type === "success"
+              ? "bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200"
+              : notification.type === "error"
+              ? "bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200"
+              : "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-200"
+          }`}
+        >
+          <div>
+            <div className="font-medium">{notification.title}</div>
+            {notification.description && <div className="text-sm mt-1">{notification.description}</div>}
+          </div>
+          <button
+            onClick={() => setNotification(null)}
+            className="p-1 hover:bg-black/10 rounded"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
