@@ -11,6 +11,31 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const contentType = req.headers.get("content-type") || "";
+
+    // ─── Case 1: client already uploaded to UploadThing, just persist the URL ───
+    if (contentType.includes("application/json")) {
+      const body = await req.json();
+      const avatarUrl = body?.avatarUrl;
+
+      if (!avatarUrl || typeof avatarUrl !== "string") {
+        return NextResponse.json({ error: "Missing avatarUrl" }, { status: 400 });
+      }
+
+      // Only allow URLs from our own UploadThing app to prevent arbitrary URL injection
+      if (!avatarUrl.includes("utfs.io") && !avatarUrl.includes("ufs.sh")) {
+        return NextResponse.json({ error: "Invalid avatar URL" }, { status: 400 });
+      }
+
+      const user = await prisma.user.update({
+        where: { id: session.user.id },
+        data: { avatarUrl },
+      });
+
+      return NextResponse.json({ success: true, avatarUrl: user.avatarUrl });
+    }
+
+    // ─── Case 2: legacy raw-file upload via FormData ───
     const formData = await req.formData();
     const file = formData.get("file") as File;
 
