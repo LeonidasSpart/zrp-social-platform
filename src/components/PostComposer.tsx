@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Image, FileImage, BarChart3, Plus, Trash2, Clock, MessageCircleOff } from "lucide-react";
+import { Image, FileImage, BarChart3, Plus, Trash2, Clock } from "lucide-react";
 import GifPicker from "./GifPicker";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { getPlanLimits } from "@/lib/limits";
@@ -20,21 +20,15 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ─── Get user's plan and limits ──────────────────────────────────
   const plan = session?.user?.plan || "free";
   const limits = getPlanLimits(plan);
 
-  // ─── Scheduling ──────────────────────────────────────────────────
   const [schedulePost, setSchedulePost] = useState(false);
   const [scheduledAt, setScheduledAt] = useState("");
-
-  // ─── Comments toggle ────────────────────────────────────────────
   const [commentsEnabled, setCommentsEnabled] = useState(true);
 
-  // GIF picker
   const [showGifPicker, setShowGifPicker] = useState(false);
 
-  // Poll state
   const [pollQuestion, setPollQuestion] = useState("");
   const [pollOptions, setPollOptions] = useState(["", ""]);
   const [pollExpiry, setPollExpiry] = useState("");
@@ -42,7 +36,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ─── Uploadthing upload hook ──────────────────────────────────────
   const { startUpload, isUploading } = useUploadThing("postMedia", {
     onClientUploadComplete: (files) => {
       const file = files[0];
@@ -56,7 +49,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     },
   });
 
-  // ─── Utility: extract hashtags & mentions ──────────────────────
   const extractHashtags = (text: string): string[] => {
     const matches = text.match(/#[\w\u0590-\u05fe]+/g) || [];
     return matches.map(tag => tag.slice(1).toLowerCase());
@@ -67,12 +59,10 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     return matches.map(tag => tag.slice(1).toLowerCase());
   };
 
-  // ─── Image / Video upload (with plan limit check) ────────────────
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // ─── Check if user already has an image (plan limit) ──────────
     if (imageUrl) {
       setError(`You've already uploaded an image. Your plan allows ${limits.imagesPerPost} image(s) per post.`);
       return;
@@ -102,7 +92,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     }
   };
 
-  // ─── GIF picker ──────────────────────────────────────────────────
   const handleGifSelect = (gifUrl: string) => {
     if (imageUrl) {
       setError(`Your plan allows ${limits.imagesPerPost} image(s) per post.`);
@@ -113,7 +102,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     setShowGifPicker(false);
   };
 
-  // ─── Poll management ────────────────────────────────────────────
   const addPollOption = () => {
     if (pollOptions.length < 6) {
       setPollOptions([...pollOptions, ""]);
@@ -133,7 +121,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     setPollOptions(newOptions);
   };
 
-  // ─── Submit post ──────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim() && !pollQuestion.trim()) {
@@ -174,7 +161,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
         isPoll: !!pollData,
         status: schedulePost ? "scheduled" : "published",
         scheduledAt: schedulePost ? scheduledAt : null,
-        commentsEnabled, // ✅ added
+        commentsEnabled,
       };
 
       if (pollData) {
@@ -236,7 +223,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     setCommentsEnabled(true);
   };
 
-  // ─── Render helpers ─────────────────────────────────────────────
   const displayName = session?.user?.name || session?.user?.username || "User";
   const initial = displayName?.[0]?.toUpperCase() || "?";
   const avatarUrl = session?.user?.avatarUrl;
@@ -252,7 +238,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
       <form onSubmit={handleSubmit}>
         <div className="flex items-start gap-3">
-          {/* ─── Avatar ─── */}
+          {/* Avatar */}
           <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-semibold flex-shrink-0 overflow-hidden">
             {avatarUrl ? (
               <img
@@ -277,7 +263,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               <div className="text-red-500 dark:text-red-400 text-sm">{error}</div>
             )}
 
-            {/* ─── Scheduling & Comments toggle ────────────────────────── */}
+            {/* Scheduling & Comments toggle */}
             <div className="flex flex-wrap items-center gap-3 mt-2">
               <button
                 type="button"
@@ -307,14 +293,11 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   onChange={(e) => setCommentsEnabled(e.target.checked)}
                   className="w-3.5 h-3.5 rounded border-gray-300 dark:border-gray-600 text-zrp-red focus:ring-zrp-red"
                 />
-                <span className="flex items-center gap-1">
-                  <MessageCircleOff className="w-3.5 h-3.5" />
-                  Allow comments
-                </span>
+                <span>Allow comments</span>
               </label>
             </div>
 
-            {/* ─── Poll Builder ────────────────────────────────────── */}
+            {/* Poll Builder */}
             {showPollBuilder && (
               <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
                 <input
@@ -370,7 +353,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               </div>
             )}
 
-            {/* ─── Media Preview ──────────────────────────────────── */}
+            {/* Media Preview */}
             {imageUrl && (
               <div className="relative mt-2 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
                 {mediaType === "video" ? (
@@ -388,7 +371,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               </div>
             )}
 
-            {/* ─── Toolbar ──────────────────────────────────────────── */}
+            {/* Toolbar */}
             <div className="flex items-center justify-between mt-2 border-t border-gray-100 dark:border-gray-700 pt-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <label className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition">
@@ -452,7 +435,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
         </div>
       </form>
 
-      {/* GIF Picker Modal */}
       {showGifPicker && (
         <GifPicker onSelect={handleGifSelect} onClose={() => setShowGifPicker(false)} />
       )}
