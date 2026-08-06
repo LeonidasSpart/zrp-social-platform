@@ -26,7 +26,7 @@ export async function GET(
             username: true,
             name: true,
             avatarUrl: true,
-            badgeType: true,
+            badgeType: true, // ✅ badgeType included
           },
         },
         replies: {
@@ -37,7 +37,7 @@ export async function GET(
                 username: true,
                 name: true,
                 avatarUrl: true,
-                badgeType: true,
+                badgeType: true, // ✅ badgeType included for replies
               },
             },
           },
@@ -183,7 +183,7 @@ export async function POST(
             username: true,
             name: true,
             avatarUrl: true,
-            badgeType: true,
+            badgeType: true, // ✅ badgeType included for new comments
           },
         },
         _count: {
