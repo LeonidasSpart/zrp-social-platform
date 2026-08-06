@@ -26,6 +26,16 @@ export async function POST(
       return NextResponse.json({ error: "Poll not found" }, { status: 404 });
     }
 
+    // ─── Validate optionIndex is a real, in-range option ───────────────
+    if (
+      typeof optionIndex !== "number" ||
+      !Number.isInteger(optionIndex) ||
+      optionIndex < 0 ||
+      optionIndex >= poll.options.length
+    ) {
+      return NextResponse.json({ error: "Invalid option" }, { status: 400 });
+    }
+
     // Check if poll expired
     if (poll.expiresAt && new Date(poll.expiresAt) < new Date()) {
       return NextResponse.json({ error: "Poll has ended" }, { status: 400 });
