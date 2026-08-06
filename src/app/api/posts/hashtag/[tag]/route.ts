@@ -9,10 +9,42 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const viewerId = session?.user?.id;
 
+    // ─── Normalise the hashtag ──────────────────────────────────────
+    const normalizedTag = params.tag.toLowerCase();
+
+    // ─── Get excluded users (blocked + blockers + muted) ──────────
+    let excludedAuthorIds: string[] = [];
+    if (viewerId) {
+      const [blocked, blockers, muted] = await Promise.all([
+        prisma.blocked.findMany({
+          where: { blockerId: viewerId },
+          select: { blockedId: true },
+        }),
+        prisma.blocked.findMany({
+          where: { blockedId: viewerId },
+          select: { blockerId: true },
+        }),
+        prisma.mute.findMany({
+          where: { muterId: viewerId },
+          select: { mutedId: true },
+        }),
+      ]);
+      excludedAuthorIds = [
+        ...blocked.map(b => b.blockedId),
+        ...blockers.map(b => b.blockerId),
+        ...muted.map(m => m.mutedId),
+      ];
+    }
+
+    // ─── Fetch posts with the given hashtag ──────────────────────────
     const posts = await prisma.post.findMany({
       where: {
-        hashtags: { has: params.tag },
+        hashtags: { has: normalizedTag },
+        status: "published",
+        scheduledAt: null,
+        authorId: { notIn: excludedAuthorIds },
       },
       take: 50,
       orderBy: { createdAt: "desc" },
@@ -23,6 +55,28 @@ export async function GET(
             username: true,
             name: true,
             avatarUrl: true,
+            badgeType: true,
+          },
+        },
+        quotePost: {
+          include: {
+            author: {
+              select: {
+                id: true,
+                username: true,
+                name: true,
+                avatarUrl: true,
+                badgeType: true,
+              },
+            },
+            _count: {
+              select: {
+                likes: true,
+                comments: true,
+                reposts: true,
+                quotedBy: true,
+              },
+            },
           },
         },
         _count: {
@@ -30,20 +84,23 @@ export async function GET(
             likes: true,
             comments: true,
             reposts: true,
+            quotedBy: true,
           },
         },
       },
     });
 
-    if (session && session.user) {
+    // ─── Add liked status for viewer ──────────────────────────────
+    if (viewerId && posts.length > 0) {
       const likes = await prisma.like.findMany({
         where: {
-          userId: session.user.id,
-          postId: { in: posts.map((p) => p.id) },
+          userId: viewerId,
+          postId: { in: posts.map(p => p.id) },
         },
+        select: { postId: true },
       });
-      const likedIds = new Set(likes.map((l) => l.postId));
-      posts.forEach((p) => {
+      const likedIds = new Set(likes.map(l => l.postId));
+      posts.forEach(p => {
         (p as any).liked = likedIds.has(p.id);
       });
     }
