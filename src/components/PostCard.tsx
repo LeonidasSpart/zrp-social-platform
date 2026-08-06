@@ -44,6 +44,7 @@ interface PostCardProps {
       name: string;
     } | null;
     repostId?: string | null;
+    commentsEnabled?: boolean; // ✅ added
   };
   onUpdate: () => void;
   showPinOption?: boolean;
@@ -124,6 +125,9 @@ export default function PostCard({
   const contentParts = parseContent(post.content);
   const isRepost = post.isRepost === true;
   const originalAuthor = post.repostOriginalAuthor;
+
+  // ─── Comments enabled? ────────────────────────────────────────────
+  const commentsEnabled = post.commentsEnabled !== false; // default true
 
   // ─── Video detection ──────────────────────────────────────────────
   const isVideo = () => {
@@ -564,9 +568,16 @@ export default function PostCard({
                 <span>{formatCount(likesCount)}</span>
               </button>
 
+              {/* ─── Comment button (disabled if comments off) ─────────── */}
               <button
                 onClick={() => setShowComments(!showComments)}
-                className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition"
+                className={`flex items-center gap-1 text-sm ${
+                  commentsEnabled
+                    ? "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                    : "text-gray-300 dark:text-gray-500 cursor-not-allowed opacity-50"
+                } transition`}
+                disabled={!commentsEnabled}
+                title={!commentsEnabled ? "Comments are disabled for this post" : ""}
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>{formatCount(post._count?.comments || 0)}</span>
@@ -650,6 +661,13 @@ export default function PostCard({
               >
                 <Bookmark className={`w-4 h-4 ${bookmarked ? "fill-current" : ""}`} />
               </button>
+
+              {/* ─── Comments disabled badge ───────────────────────────── */}
+              {!commentsEnabled && (
+                <span className="text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
+                  💬 Comments off
+                </span>
+              )}
             </div>
 
             {/* ─── REACTIONS ────────────────────────────────────────── */}
@@ -680,7 +698,7 @@ export default function PostCard({
             )}
 
             {/* ─── Inline comments ───────────────────────────────────── */}
-            {showInlineComments && showComments && <Comments postId={post.id} onCommentAdded={onUpdate} />}
+            {commentsEnabled && showInlineComments && showComments && <Comments postId={post.id} onCommentAdded={onUpdate} />}
           </div>
         </div>
       </div>
