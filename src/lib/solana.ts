@@ -9,7 +9,7 @@ export const PLATFORM_WALLET_PUBLIC_KEY = new PublicKey(
   process.env.NEXT_PUBLIC_PLATFORM_WALLET!
 );
 
-// ─── Lazy connection (avoids build‑time errors) ──────────────────
+// ─── Lazy connection ──────────────────────────────────────────────
 let _connection: Connection | null = null;
 
 export function getConnection(): Connection {
@@ -23,11 +23,20 @@ export function getConnection(): Connection {
   return _connection;
 }
 
-// ─── Platform wallet keypair ──────────────────────────────────────
-const privateKeyBase64 = process.env.SOLANA_PRIVATE_KEY;
-if (!privateKeyBase64) throw new Error("SOLANA_PRIVATE_KEY is not set");
-const privateKeyBytes = Buffer.from(privateKeyBase64, "base64");
-export const platformWallet = Keypair.fromSecretKey(privateKeyBytes);
+// ─── Lazy platform wallet ──────────────────────────────────────────
+let _platformWallet: Keypair | null = null;
+
+export function getPlatformWallet(): Keypair {
+  if (!_platformWallet) {
+    const privateKeyBase64 = process.env.SOLANA_PRIVATE_KEY;
+    if (!privateKeyBase64) {
+      throw new Error("SOLANA_PRIVATE_KEY is not set");
+    }
+    const privateKeyBytes = Buffer.from(privateKeyBase64, "base64");
+    _platformWallet = Keypair.fromSecretKey(privateKeyBytes);
+  }
+  return _platformWallet;
+}
 
 // ─── Verify USDC transaction ──────────────────────────────────────
 export async function verifyUsdcTransaction(txHash: string) {
@@ -51,27 +60,28 @@ export async function verifyUsdcTransaction(txHash: string) {
 // ─── Send USDC from platform wallet ──────────────────────────────
 export async function sendUsdc(toPublicKey: string, amount: number) {
   const connection = getConnection();
+  const wallet = getPlatformWallet();
   const toPubkey = new PublicKey(toPublicKey);
 
   const fromTokenAccount = await getOrCreateAssociatedTokenAccount(
     connection,
-    platformWallet,
+    wallet,
     USDC_MINT,
-    platformWallet.publicKey
+    wallet.publicKey
   );
   const toTokenAccount = await getOrCreateAssociatedTokenAccount(
     connection,
-    platformWallet,
+    wallet,
     USDC_MINT,
     toPubkey
   );
 
   const tx = await transfer(
     connection,
-    platformWallet,
+    wallet,
     fromTokenAccount.address,
     toTokenAccount.address,
-    platformWallet.publicKey,
+    wallet.publicKey,
     amount * 1_000_000 // USDC has 6 decimals
   );
   return tx;
