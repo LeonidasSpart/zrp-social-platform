@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const slug = params.username; // can be username or customUrl
+    const slug = params.username;
 
     console.log("🔍 Looking for slug:", slug);
 
@@ -34,7 +34,7 @@ export async function GET(
       select: {
         id: true,
         username: true,
-        customUrl: true,           // ✅ added
+        customUrl: true,
         name: true,
         bio: true,
         avatarUrl: true,
@@ -51,6 +51,11 @@ export async function GET(
         banned: true,
         publicLikes: true,
         publicFollowing: true,
+        creatorProfile: {
+          select: {
+            tipsEnabled: true,
+          },
+        },
         _count: {
           select: {
             posts: true,
@@ -99,7 +104,6 @@ export async function GET(
 
       console.log("🔍 Raw SQL result count:", users.length);
       if (users.length === 0) {
-        // Optionally log all usernames for debugging
         const allUsers = await prisma.$queryRaw<Array<{ username: string }>>`
           SELECT username FROM "User"
         `;
@@ -109,11 +113,15 @@ export async function GET(
 
       const raw = users[0];
 
-      // ─── Fetch counts separately ──────────────────────────────
-      const [postsCount, followersCount, followingCount] = await Promise.all([
+      // ─── Fetch counts & creatorProfile separately ──────────────
+      const [postsCount, followersCount, followingCount, creatorProfile] = await Promise.all([
         prisma.post.count({ where: { authorId: raw.id, status: "published" } }),
         prisma.follow.count({ where: { followingId: raw.id } }),
         prisma.follow.count({ where: { followerId: raw.id } }),
+        prisma.creatorProfile.findUnique({
+          where: { userId: raw.id },
+          select: { tipsEnabled: true },
+        }),
       ]);
 
       user = {
@@ -136,6 +144,7 @@ export async function GET(
         banned: raw.banned,
         publicLikes: raw.publicLikes,
         publicFollowing: raw.publicFollowing,
+        creatorProfile,
         _count: {
           posts: postsCount,
           followers: followersCount,
