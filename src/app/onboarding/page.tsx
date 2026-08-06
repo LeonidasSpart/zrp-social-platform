@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Loader2, Check } from "lucide-react";
 import LocationAutocomplete from "@/components/LocationAutocomplete"; // ✅ added
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SuggestedUser {
   id: string;
@@ -16,6 +17,7 @@ interface SuggestedUser {
 export default function OnboardingPage() {
   const { data: session, update, status } = useSession();
   const router = useRouter();
+  const { t } = useLanguage();
 
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
@@ -99,7 +101,7 @@ export default function OnboardingPage() {
         setStep(1);
       } catch (error: any) {
         console.error("Onboarding step 0 error:", error);
-        setError(error.message || "Failed to save profile. Please try again.");
+        setError(error.message || t("onboarding.errSaveProfile"));
       } finally {
         setSaving(false);
       }
@@ -134,7 +136,7 @@ export default function OnboardingPage() {
         window.location.href = "/";
       } catch (error: any) {
         console.error("Onboarding step 1 error:", error);
-        setError(error.message || "Failed to follow users. Please try again.");
+        setError(error.message || t("onboarding.errFollowUsers"));
       } finally {
         setLoading(false);
       }
@@ -156,7 +158,7 @@ export default function OnboardingPage() {
       }
     } catch (error: any) {
       console.error("Skip error:", error);
-      setError(error.message || "Failed to skip. Please try again.");
+      setError(error.message || t("onboarding.errSkip"));
     }
   };
 
@@ -177,7 +179,7 @@ export default function OnboardingPage() {
     );
   }
 
-  const steps = ["Profile", "Follow", "Done"];
+  const steps = [t("onboarding.stepProfile"), t("onboarding.stepFollow"), t("onboarding.stepDone")];
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-zrp-deepBlack px-4 py-8">
@@ -223,15 +225,15 @@ export default function OnboardingPage() {
           {step === 0 && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                Welcome to ZRP! 👋
+                {t("onboarding.welcomeTitle")}
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                Set up your profile to get started.
+                {t("onboarding.setupSubtitle")}
               </p>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Profile Picture
+                    {t("onboarding.profilePicture")}
                   </label>
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
@@ -244,29 +246,29 @@ export default function OnboardingPage() {
                       )}
                     </div>
                     <label className="cursor-pointer px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                      Upload
+                      {t("onboarding.upload")}
                       <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
                     </label>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Display Name</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t("onboarding.displayName")}</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Your name"
+                    placeholder={t("onboarding.displayNamePlaceholder")}
                     className="w-full mt-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
                     maxLength={50}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t("onboarding.bio")}</label>
                   <textarea
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                     rows={3}
-                    placeholder="Tell us about yourself..."
+                    placeholder={t("onboarding.bioPlaceholder")}
                     className="w-full mt-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent resize-none"
                     maxLength={160}
                   />
@@ -277,17 +279,17 @@ export default function OnboardingPage() {
                     <LocationAutocomplete
                       value={location}
                       onChange={(val) => setLocation(val)}
-                      placeholder="Search for a city..."
-                      label="Location"
+                      placeholder={t("onboarding.locationPlaceholder")}
+                      label={t("onboarding.locationLabel")}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Website</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t("onboarding.website")}</label>
                     <input
                       type="url"
                       value={website}
                       onChange={(e) => setWebsite(e.target.value)}
-                      placeholder="https://your-site.com"
+                      placeholder={t("onboarding.websitePlaceholder")}
                       className="w-full mt-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
                     />
                   </div>
@@ -299,13 +301,13 @@ export default function OnboardingPage() {
           {step === 1 && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                Follow some people 🧑‍🤝‍🧑
+                {t("onboarding.followTitle")}
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                Choose people to follow and fill your feed.
+                {t("onboarding.followSubtitle")}
               </p>
               {suggestedUsers.length === 0 ? (
-                <p className="text-gray-500">No suggestions available.</p>
+                <p className="text-gray-500">{t("onboarding.noSuggestions")}</p>
               ) : (
                 <div className="space-y-2 max-h-80 overflow-y-auto pr-2">
                   {suggestedUsers.map((user) => {
@@ -340,7 +342,7 @@ export default function OnboardingPage() {
                               : "bg-zrp-red text-white hover:bg-zrp-darkRed"
                           }`}
                         >
-                          {isFollowing ? "Following" : "Follow"}
+                          {isFollowing ? t("action.following") : t("action.follow")}
                         </button>
                       </div>
                     );
@@ -348,7 +350,7 @@ export default function OnboardingPage() {
                 </div>
               )}
               <p className="text-xs text-gray-400 mt-2">
-                {following.size} user{following.size !== 1 ? "s" : ""} selected
+                {t("onboarding.usersSelected", { n: following.size })}
               </p>
             </div>
           )}
@@ -357,10 +359,10 @@ export default function OnboardingPage() {
             <div className="text-center">
               <div className="text-6xl mb-4">🎉</div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                You're all set!
+                {t("onboarding.doneTitle")}
               </h2>
               <p className="text-gray-500 dark:text-gray-400">
-                Your profile is ready. Let's start exploring ZRP Social.
+                {t("onboarding.doneSubtitle")}
               </p>
             </div>
           )}
@@ -372,7 +374,7 @@ export default function OnboardingPage() {
               onClick={handleSkip}
               className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition"
             >
-              Skip for now
+              {t("onboarding.skip")}
             </button>
           )}
           <div className="flex gap-3 ml-auto">
@@ -385,9 +387,9 @@ export default function OnboardingPage() {
                 {saving || loading ? (
                   <Loader2 className="w-4 h-4 animate-spin inline mr-1" />
                 ) : step === 0 ? (
-                  "Continue"
+                  t("onboarding.continue")
                 ) : (
-                  "Finish"
+                  t("onboarding.finish")
                 )}
               </button>
             )}
@@ -396,7 +398,7 @@ export default function OnboardingPage() {
                 onClick={() => router.push("/")}
                 className="px-6 py-2 bg-zrp-red text-white rounded-full font-medium hover:bg-zrp-darkRed transition"
               >
-                Go to Home
+                {t("onboarding.goToHome")}
               </button>
             )}
           </div>
