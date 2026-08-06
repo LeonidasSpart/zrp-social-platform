@@ -5,9 +5,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import PasswordInput from "@/components/PasswordInput";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -16,9 +18,9 @@ export default function LoginPage() {
   useEffect(() => {
     const errorParam = searchParams.get("error");
     if (errorParam === "banned") {
-      setError("Your account has been banned. Please contact support.");
+      setError(t("auth.errBanned"));
     }
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,8 +54,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zrp-deepBlack px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">ZRP Social</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">Sign in to join the community</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t("auth.welcomeTitle")}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">{t("auth.signInSubtitle")}</p>
         </div>
 
         <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8">
@@ -73,10 +75,10 @@ export default function LoginPage() {
                       href="/forgot-password"
                       className="text-blue-600 dark:text-blue-400 underline text-sm hover:text-blue-800 dark:hover:text-blue-300"
                     >
-                      Resend verification email
+                      {t("auth.resendVerification")}
                     </Link>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Didn't receive the email? Check your spam folder or click the link above.
+                      {t("auth.checkSpam")}
                     </p>
                   </div>
                 )}
@@ -86,10 +88,10 @@ export default function LoginPage() {
                       href="mailto:support@zrp.one?subject=Account%20Ban%20Appeal"
                       className="text-blue-600 dark:text-blue-400 underline text-sm hover:text-blue-800 dark:hover:text-blue-300"
                     >
-                      📧 Contact support via email
+                      {t("auth.contactSupport")}
                     </a>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Please include your username and the reason you believe this is a mistake.
+                      {t("auth.banAppealNote")}
                     </p>
                   </div>
                 )}
@@ -98,7 +100,7 @@ export default function LoginPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Email
+                {t("auth.email")}
               </label>
               <input
                 type="email"
@@ -115,8 +117,8 @@ export default function LoginPage() {
               name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              label="Password"
-              placeholder="Enter your password"
+              label={t("auth.password")}
+              placeholder={t("auth.password")}
               required
               autoComplete="current-password"
             />
@@ -125,7 +127,7 @@ export default function LoginPage() {
               href="/forgot-password"
               className="text-sm text-blue-600 dark:text-blue-400 hover:underline block text-right mt-1"
             >
-              Forgot password?
+              {t("auth.forgotPassword")}
             </Link>
 
             <button
@@ -133,14 +135,14 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-zrp-red dark:hover:bg-zrp-darkRed text-white py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? t("auth.signingIn") : t("auth.signIn")}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
-            Don't have an account?{" "}
+            {t("auth.noAccount")}{" "}
             <Link href="/signup" className="text-blue-600 dark:text-blue-400 hover:underline">
-              Sign up
+              {t("auth.signUp")}
             </Link>
           </p>
         </div>
