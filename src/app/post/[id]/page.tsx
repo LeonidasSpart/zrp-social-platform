@@ -24,9 +24,10 @@ interface Post {
     likes: number;
     comments: number;
     reposts: number;
-    quotedBy: number; // ✅ added
+    quotedBy: number;
   };
   liked?: boolean;
+  commentsEnabled?: boolean; // ✅ added
 }
 
 interface Comment {
@@ -221,6 +222,8 @@ export default function PostPage({ params }: { params: { id: string } }) {
     );
   }
 
+  const commentsEnabled = post.commentsEnabled !== false;
+
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
       <div className="mb-4">
@@ -231,62 +234,70 @@ export default function PostPage({ params }: { params: { id: string } }) {
 
       <PostCard post={post} onUpdate={fetchPost} showInlineComments={false} />
 
-      {/* ─── Comment Composer ────────────────────────────────────── */}
-      {session && (
-        <form onSubmit={handleSubmitComment} className="mt-4 flex gap-2">
-          <input
-            ref={inputRef}
-            type="text"
-            value={commentContent}
-            onChange={(e) => setCommentContent(e.target.value)}
-            placeholder={parentId ? "Write a reply..." : "Write a comment..."}
-            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-          />
-          <button
-            type="submit"
-            disabled={submitting || !commentContent.trim()}
-            className="px-4 py-2 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 transition"
-          >
-            {submitting ? "Sending..." : "Reply"}
-          </button>
-        </form>
-      )}
-
-      {/* ─── Reply sorting ────────────────────────────────────────── */}
-      {comments.length > 0 && (
-        <div className="flex items-center justify-between mt-6">
-          <span className="text-sm text-gray-500">{comments.length} replies</span>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-            className="text-sm border border-gray-300 dark:border-gray-600 rounded-full px-3 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
-          >
-            <option value="recent">Recent</option>
-            <option value="relevant">Relevant</option>
-            <option value="likes">Likes</option>
-          </select>
-        </div>
-      )}
-
-      {/* ─── Comments (threaded) ────────────────────────────────────── */}
-      {sortedComments.length > 0 && (
-        <div className="mt-4 space-y-4">
-          {sortedComments.map((comment) => (
-            <div
-              key={comment.id}
-              ref={(el) => {
-                commentRefs.current[comment.id] = el;
-              }}
-              id={`comment-${comment.id}`}
-              className="rounded-lg transition-colors duration-500"
-            >
-              <CommentItem
-                comment={comment}
-                onReply={handleReply}
-                onUpdate={fetchComments}
+      {commentsEnabled ? (
+        <>
+          {/* ─── Comment Composer ────────────────────────────────────── */}
+          {session && (
+            <form onSubmit={handleSubmitComment} className="mt-4 flex gap-2">
+              <input
+                ref={inputRef}
+                type="text"
+                value={commentContent}
+                onChange={(e) => setCommentContent(e.target.value)}
+                placeholder={parentId ? "Write a reply..." : "Write a comment..."}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
               />
+              <button
+                type="submit"
+                disabled={submitting || !commentContent.trim()}
+                className="px-4 py-2 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 transition"
+              >
+                {submitting ? "Sending..." : "Reply"}
+              </button>
+            </form>
+          )}
+
+          {/* ─── Reply sorting ────────────────────────────────────────── */}
+          {comments.length > 0 && (
+            <div className="flex items-center justify-between mt-6">
+              <span className="text-sm text-gray-500">{comments.length} replies</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                className="text-sm border border-gray-300 dark:border-gray-600 rounded-full px-3 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
+              >
+                <option value="recent">Recent</option>
+                <option value="relevant">Relevant</option>
+                <option value="likes">Likes</option>
+              </select>
             </div>
-          ))}
+          )}
+
+          {/* ─── Comments (threaded) ────────────────────────────────────── */}
+          {sortedComments.length > 0 && (
+            <div className="mt-4 space-y-4">
+              {sortedComments.map((comment) => (
+                <div
+                  key={comment.id}
+                  ref={(el) => {
+                    commentRefs.current[comment.id] = el;
+                  }}
+                  id={`comment-${comment.id}`}
+                  className="rounded-lg transition-colors duration-500"
+                >
+                  <CommentItem
+                    comment={comment}
+                    onReply={handleReply}
+                    onUpdate={fetchComments}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="mt-6 text-center py-8 text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700">
+          <p className="text-sm">💬 Comments are disabled for this post.</p>
         </div>
       )}
     </div>
