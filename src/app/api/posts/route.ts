@@ -136,12 +136,11 @@ export async function POST(req: NextRequest) {
       poll,
       scheduledAt,
       commentsEnabled = true,
-      // ─── New fields ─────────────────────────────────────────────
-      type = "POST",          // "POST" | "RECRUITMENT" | "ARTICLE"
+      type = "POST",
       company,
       location,
       applyUrl,
-      articleBody,            // Markdown/HTML for articles
+      articleBody,
     } = body;
 
     // ─── Type‑specific plan checks ──────────────────────────────
@@ -162,13 +161,11 @@ export async function POST(req: NextRequest) {
     const plan = user.plan;
     const limits = getPlanLimits(plan);
 
-    // Character limit
     const lengthCheck = checkPostLength(content.length, plan);
     if (!lengthCheck.allowed) {
       return NextResponse.json({ error: lengthCheck.message }, { status: 400 });
     }
 
-    // Image count (if we ever support multiple, this will need adjustment)
     if (imageUrl) {
       const imageCheck = checkImagesPerPost(1, plan);
       if (!imageCheck.allowed) {
@@ -176,7 +173,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Scheduled posts limit
     if (scheduledAt) {
       const scheduledCount = await prisma.post.count({
         where: {
@@ -242,7 +238,39 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ post }, { status: 201 });
+    // ─── Fetch full post with author and counts ──────────────────
+    const fullPost = await prisma.post.findUnique({
+      where: { id: post.id },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            name: true,
+            avatarUrl: true,
+            badgeType: true,
+            plan: true,
+          },
+        },
+        poll: {
+          include: {
+            votes_user: {
+              where: token?.id ? { userId: token.id as string } : undefined,
+              select: { optionIndex: true },
+            },
+          },
+        },
+        _count: {
+          select: {
+            likes: true,
+            reposts: true,
+            comments: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({ post: fullPost }, { status: 201 });
   } catch (error) {
     console.error("Create post error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
