@@ -237,9 +237,10 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
         return;
       }
 
-      let post;
+      // ✅ FIX: Extract the actual post from the response
+      let result;
       try {
-        post = await res.json();
+        result = await res.json();
       } catch {
         onPostCreated(null);
         resetForm();
@@ -247,6 +248,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
         return;
       }
 
+      const post = result.post || result;
       onPostCreated(post);
       resetForm();
     } catch (err) {
