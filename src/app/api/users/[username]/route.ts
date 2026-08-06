@@ -9,21 +9,32 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const slug = params.username; // can be username or customUrl
 
-    console.log("🔍 Looking for username:", params.username);
-    console.log("🔍 Username length:", params.username.length);
+    console.log("🔍 Looking for slug:", slug);
 
-    // ─── 1. Try Prisma's case‑insensitive lookup ──────────────────
+    // ─── 1. Try Prisma with OR condition (case‑insensitive) ─────
     let user = await prisma.user.findFirst({
       where: {
-        username: {
-          equals: params.username,
-          mode: "insensitive",
-        },
+        OR: [
+          {
+            username: {
+              equals: slug,
+              mode: "insensitive",
+            },
+          },
+          {
+            customUrl: {
+              equals: slug,
+              mode: "insensitive",
+            },
+          },
+        ],
       },
       select: {
         id: true,
         username: true,
+        customUrl: true,           // ✅ added
         name: true,
         bio: true,
         avatarUrl: true,
@@ -38,8 +49,8 @@ export async function GET(
         isAdmin: true,
         pinnedPostId: true,
         banned: true,
-        publicLikes: true,      // ✅ added
-        publicFollowing: true,  // ✅ added
+        publicLikes: true,
+        publicFollowing: true,
         _count: {
           select: {
             posts: true,
@@ -50,13 +61,14 @@ export async function GET(
       },
     });
 
-    // ─── 2. If not found, try raw SQL with ILIKE ──────────────────
+    // ─── 2. If not found, try raw SQL with ILIKE on both fields ─
     if (!user) {
-      console.log("🔍 Prisma findFirst returned null, trying raw SQL...");
+      console.log("🔍 Prisma OR returned null, trying raw SQL...");
 
       const users = await prisma.$queryRaw<Array<{
         id: string;
         username: string;
+        customUrl: string | null;
         name: string | null;
         bio: string | null;
         avatarUrl: string | null;
@@ -71,27 +83,23 @@ export async function GET(
         isAdmin: boolean;
         pinnedPostId: string | null;
         banned: boolean;
-        publicLikes: boolean;      // ✅ added
-        publicFollowing: boolean;  // ✅ added
+        publicLikes: boolean;
+        publicFollowing: boolean;
       }>>`
         SELECT 
-          id, username, name, bio, "avatarUrl", "coverUrl", 
+          id, username, "customUrl", name, bio, "avatarUrl", "coverUrl", 
           location, country, website, "createdAt", "usernameChangedAt", 
           "isPrivate", "badgeType", "isAdmin", "pinnedPostId",
           "banned",
           "publicLikes", "publicFollowing"
         FROM "User"
-        WHERE username ILIKE ${params.username}
+        WHERE username ILIKE ${slug} OR "customUrl" ILIKE ${slug}
         LIMIT 1
       `;
 
       console.log("🔍 Raw SQL result count:", users.length);
-      if (users.length > 0) {
-        console.log("🔍 Found user in raw SQL:", users[0].username);
-        console.log("🔍 Raw username length:", users[0].username.length);
-      }
-
       if (users.length === 0) {
+        // Optionally log all usernames for debugging
         const allUsers = await prisma.$queryRaw<Array<{ username: string }>>`
           SELECT username FROM "User"
         `;
@@ -101,7 +109,7 @@ export async function GET(
 
       const raw = users[0];
 
-      // ─── Fetch counts separately ──────────────────────────────────
+      // ─── Fetch counts separately ──────────────────────────────
       const [postsCount, followersCount, followingCount] = await Promise.all([
         prisma.post.count({ where: { authorId: raw.id, status: "published" } }),
         prisma.follow.count({ where: { followingId: raw.id } }),
@@ -111,6 +119,7 @@ export async function GET(
       user = {
         id: raw.id,
         username: raw.username,
+        customUrl: raw.customUrl,
         name: raw.name,
         bio: raw.bio,
         avatarUrl: raw.avatarUrl,
@@ -125,8 +134,8 @@ export async function GET(
         isAdmin: raw.isAdmin,
         pinnedPostId: raw.pinnedPostId,
         banned: raw.banned,
-        publicLikes: raw.publicLikes,       // ✅ added
-        publicFollowing: raw.publicFollowing, // ✅ added
+        publicLikes: raw.publicLikes,
+        publicFollowing: raw.publicFollowing,
         _count: {
           posts: postsCount,
           followers: followersCount,
