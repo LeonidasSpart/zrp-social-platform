@@ -15,6 +15,17 @@ export async function GET(
     const session = await getServerSession(authOptions);
     const viewerId = session?.user?.id;
 
+    // ─── Check if comments are enabled for this post ────────────────
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { commentsEnabled: true },
+    });
+
+    // If post not found or comments disabled, return empty array
+    if (!post || post.commentsEnabled === false) {
+      return NextResponse.json([]);
+    }
+
     // ─── Fetch all comments for this post (including replies) ──────
     const comments = await prisma.comment.findMany({
       where: { postId },
@@ -26,7 +37,7 @@ export async function GET(
             username: true,
             name: true,
             avatarUrl: true,
-            badgeType: true, // ✅ badgeType included
+            badgeType: true,
           },
         },
         replies: {
@@ -37,7 +48,7 @@ export async function GET(
                 username: true,
                 name: true,
                 avatarUrl: true,
-                badgeType: true, // ✅ badgeType included for replies
+                badgeType: true,
               },
             },
           },
@@ -87,7 +98,6 @@ export async function GET(
 
     // ─── Add liked / reposted / bookmarked status for the viewer ──
     if (viewerId) {
-      // Collect all comment IDs (including nested replies)
       const allCommentIds: string[] = [];
       const collectIds = (commentsArray: any[]) => {
         commentsArray.forEach((c) => {
@@ -97,7 +107,6 @@ export async function GET(
       };
       collectIds(topLevelComments);
 
-      // Fetch statuses in bulk
       const [likes, reposts, bookmarks] = await Promise.all([
         prisma.commentLike.findMany({
           where: { commentId: { in: allCommentIds }, userId: viewerId },
@@ -117,7 +126,6 @@ export async function GET(
       const repostedIds = new Set(reposts.map((r) => r.commentId));
       const bookmarkedIds = new Set(bookmarks.map((b) => b.commentId));
 
-      // Recursively add status
       const addStatus = (commentsArray: any[]) => {
         commentsArray.forEach((c) => {
           c.liked = likedIds.has(c.id);
@@ -154,6 +162,19 @@ export async function POST(
       return NextResponse.json({ error: "Comment cannot be empty" }, { status: 400 });
     }
 
+    // ─── Check if comments are enabled for this post ────────────────
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { commentsEnabled: true },
+    });
+
+    if (!post || post.commentsEnabled === false) {
+      return NextResponse.json(
+        { error: "Comments are disabled for this post." },
+        { status: 403 }
+      );
+    }
+
     // ─── Validate parent comment if provided ────────────────────────
     if (parentId) {
       const parent = await prisma.comment.findUnique({
@@ -183,7 +204,7 @@ export async function POST(
             username: true,
             name: true,
             avatarUrl: true,
-            badgeType: true, // ✅ badgeType included for new comments
+            badgeType: true,
           },
         },
         _count: {
@@ -197,22 +218,22 @@ export async function POST(
     });
 
     // ─── Get post author for notification ──────────────────────────
-    const post = await prisma.post.findUnique({
+    const postAuthor = await prisma.post.findUnique({
       where: { id: postId },
       select: { authorId: true },
     });
 
     // ─── Send notification (if not the author) ──────────────────────
-    if (post && post.authorId !== session.user.id) {
+    if (postAuthor && postAuthor.authorId !== session.user.id) {
       await createNotification({
-        userId: post.authorId,
+        userId: postAuthor.authorId,
         type: "comment",
         fromUserId: session.user.id,
         postId: postId,
       });
 
       await sendPushNotification(
-        post.authorId,
+        postAuthor.authorId,
         "New Comment",
         `${session.user.name || session.user.username} commented on your post.`,
         `/post/${postId}`
