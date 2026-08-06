@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
     const {
       content,
       imageUrl,
-      mediaType, // ✅ added
+      mediaType,
       linkUrl,
       hashtags,
       mentions,
@@ -180,6 +180,7 @@ export async function POST(req: NextRequest) {
       status = "published",
       scheduledAt,
       quotePostId,
+      commentsEnabled = true, // ✅ added
     } = await req.json();
 
     // ─── Get user with plan ──────────────────────────────────────────
@@ -268,7 +269,7 @@ export async function POST(req: NextRequest) {
     const postData: any = {
       content: content.trim() || poll.question.trim(),
       imageUrl: imageUrl || null,
-      mediaType: mediaType || null, // ✅ store mediaType
+      mediaType: mediaType || null,
       linkUrl: linkUrl || null,
       authorId: session.user.id,
       hashtags: hashtags || [],
@@ -277,6 +278,7 @@ export async function POST(req: NextRequest) {
       status: status || "published",
       scheduledAt: status === "scheduled" ? new Date(scheduledAt) : null,
       quotePostId: quotePostId || null,
+      commentsEnabled: commentsEnabled, // ✅ added
     };
 
     // ─── Poll handling ──────────────────────────────────────────────
