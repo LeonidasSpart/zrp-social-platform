@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Check, X, Globe, MapPin, User, Key, Calendar, Camera, Trash2, Loader2,
-  BellOff, ChevronRight, Ban, Mail, DollarSign, TrendingUp
+  BellOff, ChevronRight, Ban, Mail, DollarSign, TrendingUp, Wallet
 } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import EmailPreferences from "@/components/EmailPreferences";
@@ -30,6 +30,7 @@ interface UserData {
   publicLikes: boolean;
   publicFollowing: boolean;
   customUrl: string | null;
+  solanaWallet: string | null; // ✅ added
 }
 
 interface CreatorProfile {
@@ -54,6 +55,10 @@ export default function SettingsPage() {
   // ─── Creator monetisation state ──────────────────────────────────
   const [creatorProfile, setCreatorProfile] = useState<CreatorProfile | null>(null);
   const [loadingCreator, setLoadingCreator] = useState(false);
+
+  // ─── Solana wallet state ──────────────────────────────────────────
+  const [solanaWallet, setSolanaWallet] = useState("");
+  const [updatingWallet, setUpdatingWallet] = useState(false);
 
   // Form states
   const [name, setName] = useState("");
@@ -149,6 +154,7 @@ export default function SettingsPage() {
         setAvatarPreview(data.avatarUrl || null);
         setPublicLikes(data.publicLikes !== undefined ? data.publicLikes : true);
         setPublicFollowing(data.publicFollowing !== undefined ? data.publicFollowing : true);
+        setSolanaWallet(data.solanaWallet || ""); // ✅ set from API
 
         if (data.usernameChangedAt) {
           const lastChange = new Date(data.usernameChangedAt);
@@ -404,6 +410,34 @@ export default function SettingsPage() {
       setMessage({ type: "error", text: "Something went wrong" });
     } finally {
       setUpdatingPrivacy(false);
+    }
+  };
+
+  // ─── Update Solana Wallet ──────────────────────────────────────
+  const handleUpdateSolanaWallet = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUpdatingWallet(true);
+    setMessage(null);
+
+    try {
+      const res = await fetch("/api/user", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ solanaWallet: solanaWallet.trim() }),
+      });
+
+      if (res.ok) {
+        await update();
+        setMessage({ type: "success", text: "Solana wallet updated successfully!" });
+        fetchUserData(); // refresh data
+      } else {
+        const data = await res.json();
+        setMessage({ type: "error", text: data.error || "Failed to update wallet address." });
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: "Something went wrong" });
+    } finally {
+      setUpdatingWallet(false);
     }
   };
 
@@ -770,6 +804,43 @@ export default function SettingsPage() {
             update();
           }}
         />
+      </div>
+
+      {/* ─── Solana Wallet (for direct tips) ───────────────────────── */}
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Solana Wallet (for direct tips)</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+          Add your Solana wallet address to receive tips directly from users. 
+          Users will send USDC directly to this wallet – no platform fees are charged.
+        </p>
+        <form onSubmit={handleUpdateSolanaWallet} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Wallet Address
+            </label>
+            <div className="relative">
+              <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                value={solanaWallet}
+                onChange={(e) => setSolanaWallet(e.target.value)}
+                placeholder="Your Solana wallet address (e.g., 4zMMC...)"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                disabled={updatingWallet}
+              />
+            </div>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+              This address will be displayed on your profile for direct tips.
+            </p>
+          </div>
+          <button
+            type="submit"
+            disabled={updatingWallet}
+            className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            {updatingWallet ? "Saving..." : "Save Wallet"}
+          </button>
+        </form>
       </div>
 
       {/* ─── Username Section ────────────────────────────────────────── */}
