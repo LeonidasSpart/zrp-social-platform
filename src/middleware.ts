@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { rateLimit } from "@/lib/rate-limit";
+import { getFeatureStatus } from "@/lib/permissions";
+
+// ─── Helper: Check feature from token ─────────────────────────────
+function hasFeature(token: any, feature: keyof ReturnType<typeof getFeatureStatus>): boolean {
+  // Token may not have features yet – compute on the fly
+  if (!token) return false;
+  const features = token.features || getFeatureStatus({ plan: token.plan || 'free' });
+  return features[feature] === true;
+}
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
@@ -46,9 +55,7 @@ export async function middleware(req: NextRequest) {
   // ─── BANNED CHECK ──────────────────────────────────────────────────
   if (token?.banned === true) {
     const response = NextResponse.redirect(new URL("/login?error=banned", req.url));
-    // Clear the session cookie to force logout
     response.cookies.delete("next-auth.session-token");
-    // Also clear any other next-auth cookies if needed (e.g., for secure/httponly)
     response.cookies.delete("next-auth.csrf-token");
     return response;
   }
@@ -56,6 +63,36 @@ export async function middleware(req: NextRequest) {
   // ─── ONBOARDING CHECK ─────────────────────────────────────────────
   if (token && token.onboardingCompleted === false) {
     return NextResponse.redirect(new URL("/onboarding", req.url));
+  }
+
+  // ─── FEATURE‑BASED ROUTE PROTECTION ──────────────────────────────
+  // These routes require specific plan features
+
+  // Team Management routes
+  if (
+    path.startsWith("/settings/team") ||
+    path.startsWith("/api/team")
+  ) {
+    if (!token) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+    if (!hasFeature(token, "teamManagement")) {
+      // Redirect to pricing or show 403
+      return NextResponse.redirect(new URL("/pricing?feature=team", req.url));
+    }
+  }
+
+  // API Access routes
+  if (
+    path.startsWith("/settings/api-keys") ||
+    path.startsWith("/api/api-keys")
+  ) {
+    if (!token) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+    if (!hasFeature(token, "apiAccess")) {
+      return NextResponse.redirect(new URL("/pricing?feature=api", req.url));
+    }
   }
 
   // ─── RATE LIMIT OTHER API ROUTES (if needed) ──────────────────
