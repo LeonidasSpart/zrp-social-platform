@@ -7,12 +7,13 @@ import Link from "next/link";
 import {
   MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff,
   Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck, Share2,
-  Eye, Bell, BellOff, Ban, CheckCircle, MoreHorizontal
+  Eye, Bell, BellOff, Ban, CheckCircle, MoreHorizontal, DollarSign
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import AnalyticsTab from "@/components/AnalyticsTab";
 import PostComposer from "@/components/PostComposer";
+import TipModal from "@/components/TipModal";
 
 function formatProfileCount(n: number) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
@@ -35,6 +36,9 @@ interface UserProfile {
   plan: string | null;
   publicLikes: boolean;
   publicFollowing: boolean;
+  creatorProfile: {
+    tipsEnabled: boolean;
+  } | null;
   _count: {
     posts: number;
     followers: number;
@@ -102,6 +106,9 @@ export default function ProfilePage({ params }: { params: { username: string } }
   // ─── MORE DROPDOWN ──────────────────────────────────────────────────
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
+
+  // ─── TIP MODAL STATE ──────────────────────────────────────────────
+  const [showTipModal, setShowTipModal] = useState(false);
 
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -496,6 +503,9 @@ export default function ProfilePage({ params }: { params: { username: string } }
     return true;
   });
 
+  // ─── Check if we should show the tip button ──────────────────────
+  const canReceiveTips = !isOwnProfile && profile.creatorProfile?.tipsEnabled === true;
+
   return (
     <div className="max-w-2xl mx-auto bg-white dark:bg-zrp-deepBlack min-h-screen">
       {/* ─── Banner ─── */}
@@ -628,6 +638,17 @@ export default function ProfilePage({ params }: { params: { username: string } }
                   <MessageCircle className="w-4 h-4" />
                   <span className="hidden sm:inline">Message</span>
                 </Link>
+
+                {/* ─── Tip Button ─────────────────────────────────────── */}
+                {canReceiveTips && (
+                  <button
+                    onClick={() => setShowTipModal(true)}
+                    className="flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap bg-green-600 text-white hover:bg-green-700"
+                  >
+                    <DollarSign className="w-4 h-4" />
+                    <span className="hidden sm:inline">Tip</span>
+                  </button>
+                )}
 
                 {/* ─── More dropdown ──────────────────────────────────── */}
                 <div className="relative" ref={moreMenuRef}>
@@ -902,6 +923,20 @@ export default function ProfilePage({ params }: { params: { username: string } }
           </div>
         )}
       </div>
+
+      {/* ─── Tip Modal ────────────────────────────────────────────────── */}
+      {showTipModal && profile && (
+        <TipModal
+          isOpen={showTipModal}
+          onClose={() => setShowTipModal(false)}
+          recipientId={profile.id}
+          recipientName={profile.name || profile.username}
+          onTipSent={() => {
+            // Optionally refresh profile to update stats
+            fetchProfile();
+          }}
+        />
+      )}
     </div>
   );
 }
