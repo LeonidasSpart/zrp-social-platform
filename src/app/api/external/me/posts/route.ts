@@ -4,8 +4,15 @@ import { prisma } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
   const auth = await validateApiKey(req);
+  
+  // ─── Check if authentication failed ──────────────────────────────
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+
+  // ─── TypeScript now knows auth.user exists ──────────────────────
+  if (!auth.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const userId = auth.user.id;
