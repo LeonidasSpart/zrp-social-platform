@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Image, FileImage, BarChart3, Plus, Trash2, Clock } from "lucide-react";
+import { Image, FileImage, BarChart3, Plus, Trash2, Clock, Briefcase, FileText, X } from "lucide-react";
 import GifPicker from "./GifPicker";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { getPlanLimits } from "@/lib/limits";
@@ -10,6 +10,8 @@ import { getPlanLimits } from "@/lib/limits";
 interface PostComposerProps {
   onPostCreated: (post: any) => void;
 }
+
+type PostType = "POST" | "RECRUITMENT" | "ARTICLE";
 
 export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const { data: session } = useSession();
@@ -22,17 +24,32 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
   const plan = session?.user?.plan || "free";
   const limits = getPlanLimits(plan);
+  const features = session?.user?.features;
 
+  // ─── Post type ────────────────────────────────────────────────────
+  const [postType, setPostType] = useState<PostType>("POST");
+
+  // ─── Schedule ────────────────────────────────────────────────────
   const [schedulePost, setSchedulePost] = useState(false);
   const [scheduledAt, setScheduledAt] = useState("");
   const [commentsEnabled, setCommentsEnabled] = useState(true);
 
+  // ─── GIF picker ──────────────────────────────────────────────────
   const [showGifPicker, setShowGifPicker] = useState(false);
 
+  // ─── Poll ────────────────────────────────────────────────────────
   const [pollQuestion, setPollQuestion] = useState("");
   const [pollOptions, setPollOptions] = useState(["", ""]);
   const [pollExpiry, setPollExpiry] = useState("");
   const [showPollBuilder, setShowPollBuilder] = useState(false);
+
+  // ─── Recruitment fields ──────────────────────────────────────────
+  const [company, setCompany] = useState("");
+  const [location, setLocation] = useState("");
+  const [applyUrl, setApplyUrl] = useState("");
+
+  // ─── Article fields ──────────────────────────────────────────────
+  const [articleBody, setArticleBody] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -121,10 +138,29 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     setPollOptions(newOptions);
   };
 
+  // ─── Check if user can use certain post types ──────────────────
+  const canPostRecruitment = features?.recruitmentProfiles ?? false;
+  const canPublishArticle = features?.articlePublishing ?? false;
+
+  // ─── Determine if we should show type selector ──────────────────
+  const showTypeSelector = canPostRecruitment || canPublishArticle;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim() && !pollQuestion.trim()) {
+
+    // Validation
+    if (!content.trim() && !pollQuestion.trim() && postType !== "ARTICLE") {
       setError("Please write something or ask a poll question.");
+      return;
+    }
+
+    if (postType === "RECRUITMENT" && !company.trim()) {
+      setError("Please enter a company name for recruitment posts.");
+      return;
+    }
+
+    if (postType === "ARTICLE" && !articleBody.trim()) {
+      setError("Please write the article content.");
       return;
     }
 
@@ -153,7 +189,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       }
 
       const payload: any = {
-        content: content.trim() || pollQuestion.trim(),
+        content: content.trim() || (postType === "ARTICLE" ? "" : pollQuestion.trim()),
         imageUrl: imageUrl || undefined,
         mediaType: mediaType || undefined,
         hashtags,
@@ -162,7 +198,20 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
         status: schedulePost ? "scheduled" : "published",
         scheduledAt: schedulePost ? scheduledAt : null,
         commentsEnabled,
+        type: postType,
       };
+
+      // ─── Recruitment fields ──────────────────────────────────────
+      if (postType === "RECRUITMENT") {
+        payload.company = company.trim();
+        payload.location = location.trim();
+        payload.applyUrl = applyUrl.trim();
+      }
+
+      // ─── Article fields ──────────────────────────────────────────
+      if (postType === "ARTICLE") {
+        payload.articleBody = articleBody;
+      }
 
       if (pollData) {
         payload.poll = pollData;
@@ -221,6 +270,11 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     setScheduledAt("");
     setError(null);
     setCommentsEnabled(true);
+    setPostType("POST");
+    setCompany("");
+    setLocation("");
+    setApplyUrl("");
+    setArticleBody("");
   };
 
   const displayName = session?.user?.name || session?.user?.username || "User";
@@ -233,6 +287,27 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
   const remaining = limits.postLength - content.length;
   const isOverLimit = remaining < 0;
+
+  // ─── Determine if submit should be disabled ─────────────────────
+  const isSubmitDisabled = (() => {
+    if (loading) return true;
+    if (isOverLimit) return true;
+    if (!!imageUrl && !limits.imagesPerPost) return true;
+
+    // Basic content check
+    if (!content.trim() && !pollQuestion.trim() && postType !== "ARTICLE") return true;
+
+    // Poll validation
+    if (showPollBuilder && !isPollValid) return true;
+
+    // Recruitment validation
+    if (postType === "RECRUITMENT" && !company.trim()) return true;
+
+    // Article validation
+    if (postType === "ARTICLE" && !articleBody.trim()) return true;
+
+    return false;
+  })();
 
   return (
     <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
@@ -251,13 +326,109 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
             )}
           </div>
           <div className="flex-1 space-y-2">
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="What's happening? Use #hashtags and @mentions"
-              className="w-full resize-none border-0 focus:ring-0 p-0 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 min-h-[80px] bg-transparent"
-              maxLength={limits.postLength}
-            />
+            {/* ─── Post Type Selector ────────────────────────────────── */}
+            {showTypeSelector && (
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Post as:</span>
+                <button
+                  type="button"
+                  onClick={() => setPostType("POST")}
+                  className={`text-xs px-3 py-1 rounded-full border transition ${
+                    postType === "POST"
+                      ? "bg-zrp-red text-white border-zrp-red"
+                      : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  Post
+                </button>
+                {canPostRecruitment && (
+                  <button
+                    type="button"
+                    onClick={() => setPostType("RECRUITMENT")}
+                    className={`text-xs px-3 py-1 rounded-full border transition flex items-center gap-1 ${
+                      postType === "RECRUITMENT"
+                        ? "bg-zrp-red text-white border-zrp-red"
+                        : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    <Briefcase className="w-3 h-3" /> Recruitment
+                  </button>
+                )}
+                {canPublishArticle && (
+                  <button
+                    type="button"
+                    onClick={() => setPostType("ARTICLE")}
+                    className={`text-xs px-3 py-1 rounded-full border transition flex items-center gap-1 ${
+                      postType === "ARTICLE"
+                        ? "bg-zrp-red text-white border-zrp-red"
+                        : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    <FileText className="w-3 h-3" /> Article
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* ─── Content Input ────────────────────────────────────── */}
+            {postType !== "ARTICLE" ? (
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder={
+                  postType === "RECRUITMENT"
+                    ? "Describe the job opportunity... Use #hashtags and @mentions"
+                    : "What's happening? Use #hashtags and @mentions"
+                }
+                className="w-full resize-none border-0 focus:ring-0 p-0 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 min-h-[80px] bg-transparent"
+                maxLength={limits.postLength}
+              />
+            ) : (
+              <div className="space-y-2">
+                <textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Article title / teaser (optional)"
+                  className="w-full resize-none border-0 focus:ring-0 p-0 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 min-h-[40px] bg-transparent text-lg font-semibold"
+                  maxLength={limits.postLength}
+                />
+                <textarea
+                  value={articleBody}
+                  onChange={(e) => setArticleBody(e.target.value)}
+                  placeholder="Write your article content in Markdown or HTML..."
+                  className="w-full resize-none border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 min-h-[200px] bg-gray-50 dark:bg-gray-800/50 font-mono text-sm"
+                />
+                <p className="text-xs text-gray-400">Supports Markdown and HTML</p>
+              </div>
+            )}
+
+            {/* ─── Recruitment extra fields ─────────────────────────── */}
+            {postType === "RECRUITMENT" && (
+              <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 space-y-2">
+                <input
+                  type="text"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  placeholder="Company name *"
+                  className="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-zrp-deepBlack text-gray-900 dark:text-white text-sm"
+                  required
+                />
+                <input
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="Location (e.g., Remote, New York, London)"
+                  className="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-zrp-deepBlack text-gray-900 dark:text-white text-sm"
+                />
+                <input
+                  type="url"
+                  value={applyUrl}
+                  onChange={(e) => setApplyUrl(e.target.value)}
+                  placeholder="Application URL (optional)"
+                  className="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-zrp-deepBlack text-gray-900 dark:text-white text-sm"
+                />
+              </div>
+            )}
 
             {error && (
               <div className="text-red-500 dark:text-red-400 text-sm">{error}</div>
@@ -396,21 +567,27 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   <FileImage className="w-5 h-5" />
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => setShowPollBuilder(!showPollBuilder)}
-                  className={`text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition ${
-                    showPollBuilder ? "text-blue-500 dark:text-blue-400" : ""
-                  }`}
-                  title="Add Poll"
-                >
-                  <BarChart3 className="w-5 h-5" />
-                </button>
+                {postType === "POST" && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPollBuilder(!showPollBuilder)}
+                    className={`text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition ${
+                      showPollBuilder ? "text-blue-500 dark:text-blue-400" : ""
+                    }`}
+                    title="Add Poll"
+                  >
+                    <BarChart3 className="w-5 h-5" />
+                  </button>
+                )}
 
-                <span className={`text-xs ${isOverLimit ? "text-red-500" : "text-gray-400 dark:text-gray-500"}`}>
-                  {content.length}/{limits.postLength}
-                  {isOverLimit && " (over limit!)"}
-                </span>
+                {postType !== "ARTICLE" && (
+                  <>
+                    <span className={`text-xs ${isOverLimit ? "text-red-500" : "text-gray-400 dark:text-gray-500"}`}>
+                      {content.length}/{limits.postLength}
+                      {isOverLimit && " (over limit!)"}
+                    </span>
+                  </>
+                )}
 
                 <span className="text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
                   {plan.charAt(0).toUpperCase() + plan.slice(1)}
@@ -419,14 +596,8 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
               <button
                 type="submit"
-                disabled={
-                  loading ||
-                  (!content.trim() && !pollQuestion.trim()) ||
-                  (showPollBuilder && !isPollValid) ||
-                  isOverLimit ||
-                  (!!imageUrl && !limits.imagesPerPost)
-                }
-                className="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                disabled={isSubmitDisabled}
+                className="bg-zrp-red text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {loading ? "Posting..." : schedulePost ? "Schedule" : "Post"}
               </button>
