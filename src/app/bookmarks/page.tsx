@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Bookmark, ArrowLeft, Heart, MessageCircle, Repeat } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Post {
   id: string;
@@ -68,9 +69,12 @@ function formatCount(n: number) {
 export default function BookmarksPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t, language } = useLanguage();
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -88,11 +92,11 @@ export default function BookmarksPage() {
     try {
       setLoading(true);
       const res = await fetch("/api/bookmarks");
-      if (!res.ok) throw new Error("Failed to fetch bookmarks");
+      if (!res.ok) throw new Error(t("bookmarks.errFetch"));
       const data = await res.json();
       setBookmarks(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load bookmarks");
+      setError(err instanceof Error ? err.message : t("bookmarks.errLoad"));
     } finally {
       setLoading(false);
     }
@@ -101,7 +105,7 @@ export default function BookmarksPage() {
   if (status === "loading" || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-gray-500">{t("action.loading")}</div>
       </div>
     );
   }
@@ -114,9 +118,9 @@ export default function BookmarksPage() {
         </Link>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <Bookmark className="w-6 h-6 text-yellow-500" />
-          Bookmarks
+          {t("bookmarks.title")}
         </h1>
-        <span className="text-sm text-gray-500 ml-auto">{bookmarks.length} saved</span>
+        <span className="text-sm text-gray-500 ml-auto">{t("bookmarks.savedCount", { n: bookmarks.length })}</span>
       </div>
 
       {error ? (
@@ -126,15 +130,15 @@ export default function BookmarksPage() {
       ) : bookmarks.length === 0 ? (
         <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8 border border-gray-200 dark:border-gray-700 text-center">
           <Bookmark className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 dark:text-gray-400">No bookmarks yet</p>
+          <p className="text-gray-500 dark:text-gray-400">{t("bookmarks.empty")}</p>
           <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-            Save posts and comments you want to revisit by clicking the bookmark icon.
+            {t("bookmarks.emptyDesc")}
           </p>
           <Link
             href="/"
             className="inline-block mt-4 text-blue-600 hover:underline text-sm"
           >
-            Explore posts
+            {t("bookmarks.explorePosts")}
           </Link>
         </div>
       ) : (
@@ -178,14 +182,14 @@ export default function BookmarksPage() {
                         <span className="text-xs text-gray-500">@{comment.author.username}</span>
                         <span className="text-xs text-gray-400">·</span>
                         <span className="text-xs text-gray-400">
-                          {new Date(comment.createdAt).toLocaleDateString()}
+                          {new Date(comment.createdAt).toLocaleDateString(localeMap[language] || "en-US")}
                         </span>
                       </div>
                       <p className="mt-0.5 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words">
                         {comment.content}
                       </p>
                       <div className="mt-1 text-xs text-gray-400">
-                        Replying to{" "}
+                        {t("bookmarks.replyingTo")}{" "}
                         <span className="text-zrp-red">
                           @{comment.post.author.username}
                         </span>
