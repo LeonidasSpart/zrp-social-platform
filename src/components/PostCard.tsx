@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag,
-  Bookmark, BarChart3, Pin, PinOff, X, ZoomIn, Plus, ChevronDown,
+  Bookmark, Eye, Pin, PinOff, X, ZoomIn, Plus, ChevronDown,
   Briefcase, FileText
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -715,8 +715,9 @@ export default function PostCard({
                 <span className="font-medium">{formatCount(post._count?.quotedBy || 0)}</span>
               </Link>
 
+              {/* ─── Views: now using Eye icon ─────────────────────────── */}
               <span className="text-sm text-gray-400 dark:text-gray-500" title={`${viewsCount.toLocaleString()} views`}>
-                <BarChart3 className="w-4 h-4 inline mr-1" />
+                <Eye className="w-4 h-4 inline mr-1" />
                 <span>{formatCount(viewsCount)}</span>
               </span>
 
