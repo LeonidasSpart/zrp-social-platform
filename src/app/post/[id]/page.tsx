@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import CommentItem from "@/components/CommentItem";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Post {
   id: string;
@@ -57,6 +58,7 @@ interface Comment {
 export default function PostPage({ params }: { params: { id: string } }) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useLanguage();
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,11 +86,11 @@ export default function PostPage({ params }: { params: { id: string } }) {
     try {
       setLoading(true);
       const res = await fetch(`/api/posts/${params.id}`);
-      if (!res.ok) throw new Error("Post not found");
+      if (!res.ok) throw new Error(t("postDetail.postNotFound"));
       const data = await res.json();
       setPost(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load post");
+      setError(err instanceof Error ? err.message : t("postDetail.errLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -175,11 +177,11 @@ export default function PostPage({ params }: { params: { id: string } }) {
         });
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to post comment");
+        alert(err.error || t("postDetail.errPostComment"));
       }
     } catch (error) {
       console.error("Error posting comment:", error);
-      alert("Failed to post comment");
+      alert(t("postDetail.errPostCommentGeneric"));
     } finally {
       setSubmitting(false);
     }
@@ -204,7 +206,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
   if (status === "loading" || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-gray-500">{t("action.loading")}</div>
       </div>
     );
   }
@@ -213,9 +215,9 @@ export default function PostPage({ params }: { params: { id: string } }) {
     return (
       <div className="max-w-2xl mx-auto py-4 px-4">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-700 font-medium">{error || "Post not found"}</p>
+          <p className="text-red-700 font-medium">{error || t("postDetail.postNotFound")}</p>
           <Link href="/" className="text-zrp-red hover:underline text-sm mt-2 block">
-            ← Back to home
+            {t("postDetail.backToHome")}
           </Link>
         </div>
       </div>
@@ -228,7 +230,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
     <div className="max-w-2xl mx-auto py-4 px-4">
       <div className="mb-4">
         <Link href="/" className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition flex items-center gap-2">
-          <ArrowLeft className="w-4 h-4" /> Back to feed
+          <ArrowLeft className="w-4 h-4" /> {t("postDetail.backToFeed")}
         </Link>
       </div>
 
@@ -244,7 +246,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
                 type="text"
                 value={commentContent}
                 onChange={(e) => setCommentContent(e.target.value)}
-                placeholder={parentId ? "Write a reply..." : "Write a comment..."}
+                placeholder={parentId ? t("postDetail.replyPlaceholder") : t("postDetail.commentPlaceholder")}
                 className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
               />
               <button
@@ -252,7 +254,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
                 disabled={submitting || !commentContent.trim()}
                 className="px-4 py-2 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 transition"
               >
-                {submitting ? "Sending..." : "Reply"}
+                {submitting ? t("postDetail.sending") : t("postDetail.reply")}
               </button>
             </form>
           )}
@@ -260,15 +262,15 @@ export default function PostPage({ params }: { params: { id: string } }) {
           {/* ─── Reply sorting ────────────────────────────────────────── */}
           {comments.length > 0 && (
             <div className="flex items-center justify-between mt-6">
-              <span className="text-sm text-gray-500">{comments.length} replies</span>
+              <span className="text-sm text-gray-500">{t("postDetail.repliesCount", { n: comments.length })}</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
                 className="text-sm border border-gray-300 dark:border-gray-600 rounded-full px-3 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
               >
-                <option value="recent">Recent</option>
-                <option value="relevant">Relevant</option>
-                <option value="likes">Likes</option>
+                <option value="recent">{t("postDetail.sortRecent")}</option>
+                <option value="relevant">{t("postDetail.sortRelevant")}</option>
+                <option value="likes">{t("postDetail.sortLikes")}</option>
               </select>
             </div>
           )}
@@ -297,7 +299,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
         </>
       ) : (
         <div className="mt-6 text-center py-8 text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700">
-          <p className="text-sm">💬 Comments are disabled for this post.</p>
+          <p className="text-sm">{t("postDetail.commentsDisabled")}</p>
         </div>
       )}
     </div>
