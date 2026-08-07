@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, UserCheck, UserPlus, Loader2 } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface User {
   id: string;
@@ -19,6 +20,7 @@ interface User {
 export default function FollowersPage({ params }: { params: { username: string } }) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useLanguage();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [followLoading, setFollowLoading] = useState<string | null>(null);
@@ -89,13 +91,13 @@ export default function FollowersPage({ params }: { params: { username: string }
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-          Followers
+          {t("followers.title")}
         </h1>
       </div>
 
       {users.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
-          <p>No followers yet.</p>
+          <p>{t("followers.empty")}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -149,12 +151,12 @@ export default function FollowersPage({ params }: { params: { username: string }
                   ) : user.isFollowing ? (
                     <>
                       <UserCheck className="w-4 h-4" />
-                      Following
+                      {t("action.following")}
                     </>
                   ) : (
                     <>
                       <UserPlus className="w-4 h-4" />
-                      Follow
+                      {t("action.follow")}
                     </>
                   )}
                 </button>
