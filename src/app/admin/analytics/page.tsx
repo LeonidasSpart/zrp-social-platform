@@ -18,6 +18,7 @@ import {
   Cell,
 } from "recharts";
 import { Users, FileText, MessageCircle, Heart, Repeat, TrendingUp, Award } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface AnalyticsData {
   summary: {
@@ -55,8 +56,11 @@ interface AnalyticsData {
 const COLORS = ["#FF2D2D", "#FF6B6B", "#FF9F9F", "#FFC1C1"];
 
 export default function AnalyticsPage() {
+  const { t, language } = useLanguage();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   useEffect(() => {
     fetch("/api/admin/analytics")
@@ -82,7 +86,7 @@ export default function AnalyticsPage() {
     return (
       <AdminLayout>
         <div className="text-center py-12 text-gray-500">
-          <p>Failed to load analytics data.</p>
+          <p>{t("analytics.errLoad")}</p>
         </div>
       </AdminLayout>
     );
@@ -92,7 +96,7 @@ export default function AnalyticsPage() {
 
   // Prepare daily data for charts
   const chartData = daily.map((d) => ({
-    date: new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    date: new Date(d.date).toLocaleDateString(localeMap[language] || "en-US", { month: "short", day: "numeric" }),
     signups: d.users,
     posts: d.posts,
     comments: d.comments,
@@ -102,17 +106,17 @@ export default function AnalyticsPage() {
 
   // Engagement pie data
   const pieData = [
-    { name: "Likes", value: engagement.totalLikes },
-    { name: "Comments", value: engagement.totalComments },
-    { name: "Reposts", value: summary.reposts },
+    { name: t("analytics.likes"), value: engagement.totalLikes },
+    { name: t("analytics.comments"), value: engagement.totalComments },
+    { name: t("analytics.reposts"), value: summary.reposts },
   ];
 
   return (
     <AdminLayout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Analytics Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("analytics.title")}</h1>
         <span className="text-sm text-gray-500 dark:text-gray-400">
-          Last 30 days
+          {t("analytics.last30Days")}
         </span>
       </div>
 
@@ -121,35 +125,35 @@ export default function AnalyticsPage() {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-3">
           <Users className="w-8 h-8 text-blue-500" />
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Users</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("analytics.users")}</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white">{summary.users}</p>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-3">
           <FileText className="w-8 h-8 text-green-500" />
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Posts</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("analytics.posts")}</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white">{summary.posts}</p>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-3">
           <MessageCircle className="w-8 h-8 text-purple-500" />
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Comments</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("analytics.comments")}</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white">{summary.comments}</p>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-3">
           <Heart className="w-8 h-8 text-red-500" />
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Likes</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("analytics.likes")}</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white">{summary.likes}</p>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-3">
           <Repeat className="w-8 h-8 text-orange-500" />
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Reposts</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("analytics.reposts")}</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white">{summary.reposts}</p>
           </div>
         </div>
@@ -160,21 +164,21 @@ export default function AnalyticsPage() {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-blue-500" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Avg. Likes per Post</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("analytics.avgLikesPerPost")}</span>
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{engagement.avgLikesPerPost}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
           <div className="flex items-center gap-2">
             <MessageCircle className="w-5 h-5 text-purple-500" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Avg. Comments per Post</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("analytics.avgCommentsPerPost")}</span>
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{engagement.avgCommentsPerPost}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
           <div className="flex items-center gap-2">
             <Award className="w-5 h-5 text-amber-500" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Posts</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("analytics.totalPosts")}</span>
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{engagement.totalPosts}</p>
         </div>
@@ -183,7 +187,7 @@ export default function AnalyticsPage() {
       {/* ─── Charts ────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Daily Activity</h3>
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">{t("analytics.dailyActivity")}</h3>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -191,15 +195,15 @@ export default function AnalyticsPage() {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="posts" stroke="#FF2D2D" name="Posts" />
-              <Line type="monotone" dataKey="comments" stroke="#8B5CF6" name="Comments" />
-              <Line type="monotone" dataKey="likes" stroke="#EC4899" name="Likes" />
+              <Line type="monotone" dataKey="posts" stroke="#FF2D2D" name={t("analytics.posts")} />
+              <Line type="monotone" dataKey="comments" stroke="#8B5CF6" name={t("analytics.comments")} />
+              <Line type="monotone" dataKey="likes" stroke="#EC4899" name={t("analytics.likes")} />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">User Growth</h3>
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">{t("analytics.userGrowth")}</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -207,7 +211,7 @@ export default function AnalyticsPage() {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="signups" fill="#FF2D2D" name="New Users" />
+              <Bar dataKey="signups" fill="#FF2D2D" name={t("analytics.newUsers")} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -216,7 +220,7 @@ export default function AnalyticsPage() {
       {/* ─── Engagement Pie Chart ─────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Engagement Breakdown</h3>
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">{t("analytics.engagementBreakdown")}</h3>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
@@ -240,7 +244,7 @@ export default function AnalyticsPage() {
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Top Posts</h3>
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">{t("analytics.topPosts")}</h3>
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {topPosts.map((post, idx) => (
               <div key={post.id} className="flex items-start gap-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
