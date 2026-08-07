@@ -102,7 +102,7 @@ export default function CallComponent({
             <div className="flex items-center justify-center h-full text-white text-2xl">
               {isIncoming ? (
                 <div className="text-center">
-                  <div className="w-24 h-24 rounded-full bg-blue-600/30 flex items-center justify-center mx-auto mb-4 text-6xl animate-pulse">
+                  <div className="w-24 h-24 rounded-full bg-zrp-red/30 flex items-center justify-center mx-auto mb-4 text-6xl animate-pulse">
                     📞
                   </div>
                   <p className="text-xl font-semibold">{callerName || "Someone"} is calling...</p>
@@ -112,7 +112,7 @@ export default function CallComponent({
                 </div>
               ) : isConnecting ? (
                 <div className="text-center">
-                  <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                  <div className="w-12 h-12 border-4 border-zrp-red border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                   <p className="text-gray-400">Connecting...</p>
                 </div>
               ) : (
