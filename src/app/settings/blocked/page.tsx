@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, Loader2, Ban, Calendar } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BlockedUser {
   id: string;
@@ -24,9 +25,12 @@ interface BlockedUser {
 export default function BlockedUsersPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t, language } = useLanguage();
   const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [unblocking, setUnblocking] = useState<string | null>(null);
+
+  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -72,11 +76,11 @@ export default function BlockedUsersPage() {
         setBlockedUsers((prev) => prev.filter((u) => u.id !== userId));
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to unblock user");
+        alert(err.error || t("blocked.errUnblock"));
       }
     } catch (error) {
       console.error("Unblock error:", error);
-      alert("Failed to unblock user");
+      alert(t("blocked.errUnblock"));
     } finally {
       setUnblocking(null);
     }
@@ -87,7 +91,7 @@ export default function BlockedUsersPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-zrp-red" />
-          <p className="text-gray-500 dark:text-gray-400">Loading blocked users...</p>
+          <p className="text-gray-500 dark:text-gray-400">{t("blocked.loading")}</p>
         </div>
       </div>
     );
@@ -104,15 +108,15 @@ export default function BlockedUsersPage() {
           <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
         </Link>
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-          Blocked Users
+          {t("blocked.title")}
         </h1>
         <span className="text-sm text-gray-500 dark:text-gray-400 ml-auto">
-          {blockedUsers.length} blocked
+          {t("blocked.count", { n: blockedUsers.length })}
         </span>
       </div>
 
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Users you block won't be able to interact with you, and their posts will be hidden from your feed.
+        {t("blocked.explanation")}
       </p>
 
       {blockedUsers.length === 0 ? (
@@ -121,10 +125,10 @@ export default function BlockedUsersPage() {
             <Ban className="w-8 h-8 text-gray-400" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            No blocked users
+            {t("blocked.emptyTitle")}
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            When you block someone, they'll appear here.
+            {t("blocked.emptyDesc")}
           </p>
         </div>
       ) : (
@@ -167,11 +171,11 @@ export default function BlockedUsersPage() {
                   </p>
                 )}
                 <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 dark:text-gray-500">
-                  <span>{user._count.followers} followers</span>
+                  <span>{t("blocked.followers", { n: user._count.followers })}</span>
                   <span>·</span>
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    Blocked {new Date(user.blockedAt).toLocaleDateString()}
+                    {t("blocked.blockedOn", { date: new Date(user.blockedAt).toLocaleDateString(localeMap[language] || "en-US") })}
                   </span>
                 </div>
               </div>
@@ -187,7 +191,7 @@ export default function BlockedUsersPage() {
                 ) : (
                   <>
                     <Ban className="w-4 h-4" />
-                    Unblock
+                    {t("blocked.unblock")}
                   </>
                 )}
               </button>
