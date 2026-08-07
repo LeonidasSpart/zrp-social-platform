@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Check, X, Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Request {
   id: string;
@@ -19,9 +20,12 @@ interface Request {
 }
 
 export default function AdminUpgradeRequests() {
+  const { t, language } = useLanguage();
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
+
+  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   const fetchRequests = async (status = "pending") => {
     setLoading(true);
@@ -52,10 +56,10 @@ export default function AdminUpgradeRequests() {
       if (res.ok) {
         fetchRequests();
       } else {
-        alert("Failed to process request.");
+        alert(t("upgradeReq.errProcessFailed"));
       }
     } catch (error) {
-      alert("Something went wrong.");
+      alert(t("upgradeReq.errSomethingWrong"));
     } finally {
       setProcessing(null);
     }
@@ -72,11 +76,11 @@ export default function AdminUpgradeRequests() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-        Upgrade Requests
+        {t("upgradeReq.title")}
       </h1>
 
       {requests.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">No pending requests.</div>
+        <div className="text-center py-12 text-gray-500">{t("upgradeReq.noPending")}</div>
       ) : (
         <div className="space-y-4">
           {requests.map((req) => (
@@ -109,7 +113,7 @@ export default function AdminUpgradeRequests() {
                     </p>
                   )}
                   <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                    Requested {new Date(req.createdAt).toLocaleString()}
+                    {t("upgradeReq.requested", { date: new Date(req.createdAt).toLocaleString(localeMap[language] || "en-US") })}
                   </p>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
