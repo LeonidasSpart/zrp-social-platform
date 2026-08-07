@@ -14,6 +14,7 @@ import {
   Loader2,
   X,
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface TeamMember {
   id: string;
@@ -153,6 +154,7 @@ interface Notification {
 export default function TeamSettingsPage() {
   const { data: session } = useSession();
   const router = useRouter();
+  const { t, language } = useLanguage();
 
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [owner, setOwner] = useState<TeamOwner | null>(null);
@@ -163,6 +165,8 @@ export default function TeamSettingsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<TeamMember | null>(null);
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
+
+  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   // ─── Notification state ──────────────────────────────────────────
   const [notification, setNotification] = useState<Notification | null>(null);
@@ -177,8 +181,8 @@ export default function TeamSettingsPage() {
     if (session?.user && !session.user.features?.teamManagement) {
       showToast({
         type: "error",
-        title: "Upgrade Required",
-        description: "Team management is available on Business and Enterprise plans.",
+        title: t("team.upgradeRequired"),
+        description: t("team.upgradeDesc"),
       });
       router.push("/pricing?feature=team");
     }
@@ -193,8 +197,8 @@ export default function TeamSettingsPage() {
         if (res.status === 403) {
           showToast({
             type: "error",
-            title: "Upgrade Required",
-            description: "Team management requires a Business or Enterprise plan.",
+            title: t("team.upgradeRequired"),
+            description: t("team.upgradeBusinessDesc"),
           });
           router.push("/pricing?feature=team");
           return;
@@ -206,7 +210,7 @@ export default function TeamSettingsPage() {
       setOwner(data.owner || null);
     } catch (error) {
       console.error(error);
-      showToast({ type: "error", title: "Error", description: "Failed to load team members." });
+      showToast({ type: "error", title: "Error", description: t("team.errLoadFailed") });
     } finally {
       setLoading(false);
     }
@@ -221,7 +225,7 @@ export default function TeamSettingsPage() {
   // ─── Add member ──────────────────────────────────────────────────
   const handleAddMember = async () => {
     if (!newMemberEmail) {
-      showToast({ type: "error", title: "Error", description: "Please enter an email address." });
+      showToast({ type: "error", title: "Error", description: t("team.errEnterEmail") });
       return;
     }
     setIsSubmitting(true);
@@ -233,7 +237,7 @@ export default function TeamSettingsPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to add member");
-      showToast({ type: "success", title: "Member Added", description: `${data.member.user.email} has been added.` });
+      showToast({ type: "success", title: t("team.memberAddedTitle"), description: t("team.memberAddedDesc", { email: data.member.user.email }) });
       setShowAddDialog(false);
       setNewMemberEmail("");
       setNewMemberRole("VIEWER");
@@ -257,7 +261,7 @@ export default function TeamSettingsPage() {
         const data = await res.json();
         throw new Error(data.error || "Failed to update role");
       }
-      showToast({ type: "success", title: "Role Updated", description: `Role updated to ${role}.` });
+      showToast({ type: "success", title: t("team.roleUpdatedTitle"), description: t("team.roleUpdatedDesc", { role }) });
       fetchTeam();
     } catch (error: any) {
       showToast({ type: "error", title: "Error", description: error.message });
@@ -273,7 +277,7 @@ export default function TeamSettingsPage() {
         const data = await res.json();
         throw new Error(data.error || "Failed to remove member");
       }
-      showToast({ type: "success", title: "Member Removed", description: `${removeTarget.user.email} removed.` });
+      showToast({ type: "success", title: t("team.memberRemovedTitle"), description: t("team.memberRemovedDesc", { email: removeTarget.user.email }) });
       setShowRemoveDialog(false);
       setRemoveTarget(null);
       fetchTeam();
@@ -286,13 +290,13 @@ export default function TeamSettingsPage() {
   const getRoleBadge = (role: string) => {
     switch (role) {
       case "OWNER":
-        return <Badge className="bg-yellow-500 text-white"><Crown className="w-3 h-3 mr-1" /> Owner</Badge>;
+        return <Badge className="bg-yellow-500 text-white"><Crown className="w-3 h-3 mr-1" /> {t("team.roleOwner")}</Badge>;
       case "ADMIN":
-        return <Badge className="bg-red-500 text-white"><ShieldAlert className="w-3 h-3 mr-1" /> Admin</Badge>;
+        return <Badge className="bg-red-500 text-white"><ShieldAlert className="w-3 h-3 mr-1" /> {t("team.roleAdmin")}</Badge>;
       case "EDITOR":
-        return <Badge className="bg-blue-500 text-white"><ShieldCheck className="w-3 h-3 mr-1" /> Editor</Badge>;
+        return <Badge className="bg-blue-500 text-white"><ShieldCheck className="w-3 h-3 mr-1" /> {t("team.roleEditor")}</Badge>;
       default:
-        return <Badge className="bg-gray-200 text-gray-800"><Shield className="w-3 h-3 mr-1" /> Viewer</Badge>;
+        return <Badge className="bg-gray-200 text-gray-800"><Shield className="w-3 h-3 mr-1" /> {t("team.roleViewer")}</Badge>;
     }
   };
 
@@ -338,29 +342,29 @@ export default function TeamSettingsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Team Management</h1>
-          <p className="text-gray-500 mt-1">Manage your team members and permissions.</p>
+          <h1 className="text-3xl font-bold">{t("team.title")}</h1>
+          <p className="text-gray-500 mt-1">{t("team.subtitle")}</p>
         </div>
         <Button onClick={() => setShowAddDialog(true)}>
-          <UserPlus className="w-4 h-4 mr-2" /> Add Member
+          <UserPlus className="w-4 h-4 mr-2" /> {t("team.addMember")}
         </Button>
       </div>
 
       {/* Team Members Table */}
       <div className="border rounded-lg overflow-hidden">
         <div className="p-4 border-b bg-gray-50 dark:bg-gray-800/50">
-          <h2 className="text-lg font-semibold">Team Members</h2>
-          <p className="text-sm text-gray-500">{members.length} member{members.length !== 1 ? "s" : ""}</p>
+          <h2 className="text-lg font-semibold">{t("team.teamMembers")}</h2>
+          <p className="text-sm text-gray-500">{t("team.memberCount", { n: members.length, s: members.length !== 1 ? "s" : "" })}</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-800/50 border-b">
               <tr>
-                <th className="text-left p-3 font-medium">User</th>
-                <th className="text-left p-3 font-medium">Email</th>
-                <th className="text-left p-3 font-medium">Role</th>
-                <th className="text-left p-3 font-medium">Joined</th>
-                <th className="text-right p-3 font-medium">Actions</th>
+                <th className="text-left p-3 font-medium">{t("team.colUser")}</th>
+                <th className="text-left p-3 font-medium">{t("team.colEmail")}</th>
+                <th className="text-left p-3 font-medium">{t("team.colRole")}</th>
+                <th className="text-left p-3 font-medium">{t("team.colJoined")}</th>
+                <th className="text-right p-3 font-medium">{t("team.colActions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -379,7 +383,7 @@ export default function TeamSettingsPage() {
                   <td className="p-3">{owner.email}</td>
                   <td className="p-3">{getRoleBadge("OWNER")}</td>
                   <td className="p-3">—</td>
-                  <td className="p-3 text-right text-gray-500 text-sm">Account Owner</td>
+                  <td className="p-3 text-right text-gray-500 text-sm">{t("team.accountOwner")}</td>
                 </tr>
               )}
 
@@ -396,7 +400,7 @@ export default function TeamSettingsPage() {
                   </td>
                   <td className="p-3">{member.user.email}</td>
                   <td className="p-3">{getRoleBadge(member.role)}</td>
-                  <td className="p-3">{new Date(member.createdAt).toLocaleDateString()}</td>
+                  <td className="p-3">{new Date(member.createdAt).toLocaleDateString(localeMap[language] || "en-US")}</td>
                   <td className="p-3 text-right">
                     <div className="relative inline-block text-left">
                       <button
@@ -414,19 +418,19 @@ export default function TeamSettingsPage() {
                             onClick={() => handleUpdateRole(member.id, "ADMIN")}
                             className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                           >
-                            Admin
+                            {t("team.roleAdmin")}
                           </button>
                           <button
                             onClick={() => handleUpdateRole(member.id, "EDITOR")}
                             className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                           >
-                            Editor
+                            {t("team.roleEditor")}
                           </button>
                           <button
                             onClick={() => handleUpdateRole(member.id, "VIEWER")}
                             className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                           >
-                            Viewer
+                            {t("team.roleViewer")}
                           </button>
                           <hr className="my-1" />
                           <button
@@ -436,7 +440,7 @@ export default function TeamSettingsPage() {
                             }}
                             className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                           >
-                            <UserMinus className="w-4 h-4 inline mr-2" /> Remove
+                            <UserMinus className="w-4 h-4 inline mr-2" /> {t("team.remove")}
                           </button>
                         </div>
                       </div>
@@ -446,7 +450,7 @@ export default function TeamSettingsPage() {
               ))}
               {members.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center py-8 text-gray-500">No team members yet.</td>
+                  <td colSpan={5} className="text-center py-8 text-gray-500">{t("team.noMembers")}</td>
                 </tr>
               )}
             </tbody>
@@ -456,29 +460,29 @@ export default function TeamSettingsPage() {
 
       {/* Plan Info */}
       <div className="border rounded-lg p-6">
-        <h2 className="text-lg font-semibold">Team Plan Information</h2>
-        <p className="text-sm text-gray-500">Your current plan determines team management capabilities.</p>
+        <h2 className="text-lg font-semibold">{t("team.planInfo")}</h2>
+        <p className="text-sm text-gray-500">{t("team.planInfoDesc")}</p>
         <div className="mt-4 flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/30 rounded-lg">
           <div>
-            <p className="font-medium">Current Plan</p>
+            <p className="font-medium">{t("team.currentPlan")}</p>
             <p className="text-sm text-gray-500 capitalize">{session?.user?.plan || "Free"}</p>
           </div>
           <Badge
             className={session?.user?.features?.teamManagement ? "bg-green-500 text-white" : "bg-red-500 text-white"}
           >
-            {session?.user?.features?.teamManagement ? "Team Management Enabled" : "Upgrade Required"}
+            {session?.user?.features?.teamManagement ? t("team.teamEnabled") : t("team.upgradeRequired")}
           </Badge>
         </div>
         {!session?.user?.features?.teamManagement && (
           <Button onClick={() => router.push("/pricing")} className="w-full mt-4">
-            Upgrade to Business or Enterprise
+            {t("team.upgradeButton")}
           </Button>
         )}
         <div className="mt-4 text-xs text-gray-500 space-y-1">
-          <p><strong>Owner:</strong> Full control. Can add, remove, and change roles.</p>
-          <p><strong>Admin:</strong> Can add/remove members and change roles (except owner).</p>
-          <p><strong>Editor:</strong> Can create and manage team content.</p>
-          <p><strong>Viewer:</strong> Can view team content only.</p>
+          <p>{t("team.roleOwnerDesc")}</p>
+          <p>{t("team.roleAdminDesc")}</p>
+          <p>{t("team.roleEditorDesc")}</p>
+          <p>{t("team.roleViewerDesc")}</p>
         </div>
       </div>
 
@@ -487,30 +491,30 @@ export default function TeamSettingsPage() {
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-md w-full shadow-xl">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">Add Team Member</h3>
+              <h3 className="text-xl font-bold">{t("team.addDialogTitle")}</h3>
               <button onClick={() => setShowAddDialog(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Email Address</label>
+                <label className="block text-sm font-medium mb-1">{t("team.emailAddress")}</label>
                 <Input
                   value={newMemberEmail}
                   onChange={(e) => setNewMemberEmail(e.target.value)}
-                  placeholder="user@example.com"
+                  placeholder={t("team.emailPlaceholder")}
                   disabled={isSubmitting}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Role</label>
+                <label className="block text-sm font-medium mb-1">{t("team.role")}</label>
                 <Select
                   value={newMemberRole}
                   onValueChange={(val) => setNewMemberRole(val as "ADMIN" | "EDITOR" | "VIEWER")}
                   options={[
-                    { value: "ADMIN", label: "Admin" },
-                    { value: "EDITOR", label: "Editor" },
-                    { value: "VIEWER", label: "Viewer" },
+                    { value: "ADMIN", label: t("team.roleAdmin") },
+                    { value: "EDITOR", label: t("team.roleEditor") },
+                    { value: "VIEWER", label: t("team.roleViewer") },
                   ]}
                   disabled={isSubmitting}
                 />
@@ -518,10 +522,10 @@ export default function TeamSettingsPage() {
             </div>
             <div className="flex justify-end gap-2 mt-6">
               <Button variant="outline" onClick={() => setShowAddDialog(false)} disabled={isSubmitting}>
-                Cancel
+                {t("team.cancel")}
               </Button>
               <Button onClick={handleAddMember} disabled={isSubmitting}>
-                {isSubmitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Adding...</> : "Add Member"}
+                {isSubmitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t("team.adding")}</> : t("team.addMember")}
               </Button>
             </div>
           </div>
@@ -532,13 +536,13 @@ export default function TeamSettingsPage() {
       {showRemoveDialog && removeTarget && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-md w-full shadow-xl">
-            <h3 className="text-xl font-bold">Remove Team Member</h3>
+            <h3 className="text-xl font-bold">{t("team.removeDialogTitle")}</h3>
             <p className="mt-2 text-gray-600 dark:text-gray-400">
-              Are you sure you want to remove <strong>{removeTarget.user.email}</strong> from your team? This cannot be undone.
+              {t("team.removeConfirm", { email: removeTarget.user.email })}
             </p>
             <div className="flex justify-end gap-2 mt-6">
-              <Button variant="outline" onClick={() => setShowRemoveDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={handleRemoveMember}>Remove</Button>
+              <Button variant="outline" onClick={() => setShowRemoveDialog(false)}>{t("team.cancel")}</Button>
+              <Button variant="destructive" onClick={handleRemoveMember}>{t("team.remove")}</Button>
             </div>
           </div>
         </div>
