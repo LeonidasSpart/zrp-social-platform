@@ -1,6 +1,19 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let _resend: Resend | null = null;
+
+function getResend() {
+  if (!_resend) {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.warn('RESEND_API_KEY is not set – email sending will fail.');
+      // Return a dummy instance that will throw when used, but won't break the build
+      return new Resend('dummy');
+    }
+    _resend = new Resend(apiKey);
+  }
+  return _resend;
+}
 
 // ─── Generic Email Sender (used by notifications) ──────────────────
 export async function sendEmail({
@@ -18,6 +31,7 @@ export async function sendEmail({
   }
 
   try {
+    const resend = getResend();
     const { data, error } = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'noreply@zrp.one',
       to,
@@ -247,6 +261,7 @@ export async function sendVerificationEmail(
   token: string,
   customUrl?: string
 ) {
+  const resend = getResend();
   const baseUrl = process.env.NEXTAUTH_URL;
   const link = customUrl || `${baseUrl}/verify-email?token=${token}`;
 
@@ -273,6 +288,7 @@ export async function sendPasswordResetEmail(
   name: string | undefined,
   resetLink: string
 ) {
+  const resend = getResend();
   try {
     const { data, error } = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'noreply@zrp.one',
@@ -328,6 +344,7 @@ export async function sendTeamInvitation({
   role: string;
   teamLink: string;
 }) {
+  const resend = getResend();
   try {
     const { data, error } = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'noreply@zrp.one',
