@@ -6,6 +6,7 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { Loader2, MessageCircle, Trash2 } from "lucide-react";
 import { getSocket } from "@/lib/socket-client";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Conversation {
   partner: {
@@ -26,6 +27,7 @@ interface Conversation {
 export default function MessagesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t, language } = useLanguage();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingConversation, setDeletingConversation] = useState<string | null>(null);
@@ -69,7 +71,7 @@ export default function MessagesPage() {
   };
 
   const handleDeleteConversation = async (userId: string) => {
-    if (!confirm("Delete this conversation? All messages will be removed.")) return;
+    if (!confirm(t("messages.deleteConfirm"))) return;
 
     setDeletingConversation(userId);
     try {
@@ -84,11 +86,11 @@ export default function MessagesPage() {
         });
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to delete conversation");
+        alert(err.error || t("messages.errDeleteFailed"));
       }
     } catch (error) {
       console.error("Delete conversation error:", error);
-      alert("Failed to delete conversation");
+      alert(t("messages.errDeleteFailed"));
     } finally {
       setDeletingConversation(null);
     }
@@ -102,15 +104,17 @@ export default function MessagesPage() {
     );
   }
 
+  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
+
   return (
     <div className="max-w-2xl mx-auto bg-white dark:bg-zrp-deepBlack min-h-screen p-4">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Messages</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{t("messages.title")}</h1>
 
       {conversations.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
           <MessageCircle className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
-          <p>No messages yet.</p>
-          <p className="text-sm">Start a conversation with someone!</p>
+          <p>{t("messages.noMessagesYet")}</p>
+          <p className="text-sm">{t("messages.startConversation")}</p>
         </div>
       ) : (
         <div className="space-y-1">
@@ -149,14 +153,14 @@ export default function MessagesPage() {
                         {partner.name || partner.username}
                       </p>
                       <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
-                        {new Date(lastMsg.createdAt).toLocaleDateString([], {
+                        {new Date(lastMsg.createdAt).toLocaleDateString(localeMap[language] || "en-US", {
                           month: "short",
                           day: "numeric",
                         })}
                       </span>
                     </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                      {isOwn ? `You: ${lastMsg.content}` : lastMsg.content}
+                      {isOwn ? t("messages.you", { msg: lastMsg.content }) : lastMsg.content}
                     </p>
                   </div>
 
@@ -172,7 +176,7 @@ export default function MessagesPage() {
                   onClick={() => handleDeleteConversation(partner.id)}
                   disabled={deletingConversation === partner.id}
                   className="text-gray-400 hover:text-red-500 transition p-2 opacity-0 group-hover:opacity-100 disabled:opacity-50"
-                  title="Delete conversation"
+                  title={t("messages.deleteConversation")}
                 >
                   {deletingConversation === partner.id ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
