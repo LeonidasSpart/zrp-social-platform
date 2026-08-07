@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Flag, Clock, CheckCircle, AlertTriangle, Filter, X, ExternalLink, User } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Report {
   id: string;
@@ -18,22 +19,32 @@ interface Report {
   comment: { id: string; content: string; author: { username: string } } | null;
 }
 
-const ACTION_TYPES = [
-  { value: "DELETE_POST", label: "Delete Post" },
-  { value: "WARN_USER", label: "Warn User" },
-  { value: "BAN_USER", label: "Ban User" },
-  { value: "MUTE_USER", label: "Mute User" },
-  { value: "DELETE_COMMENT", label: "Delete Comment" },
-  { value: "OTHER", label: "Other" },
-];
-
 export default function AdminReports() {
+  const { t, language } = useLanguage();
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("pending");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
+
+  const ACTION_TYPES = [
+    { value: "DELETE_POST", label: t("adminReports.actionDeletePost") },
+    { value: "WARN_USER", label: t("adminReports.actionWarnUser") },
+    { value: "BAN_USER", label: t("adminReports.actionBanUser") },
+    { value: "MUTE_USER", label: t("adminReports.actionMuteUser") },
+    { value: "DELETE_COMMENT", label: t("adminReports.actionDeleteComment") },
+    { value: "OTHER", label: t("adminReports.actionOther") },
+  ];
+
+  const statusLabel: Record<string, string> = {
+    pending: t("adminReports.statusPending"),
+    reviewed: t("adminReports.statusReviewed"),
+    dismissed: t("adminReports.statusDismissed"),
+    actioned: t("adminReports.statusActioned"),
+  };
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -67,14 +78,14 @@ export default function AdminReports() {
         body: JSON.stringify({ status: newStatus, ...extraData }),
       });
       if (res.ok) {
-        setMessage({ type: "success", text: `Report ${newStatus}.` });
+        setMessage({ type: "success", text: t("adminReports.reportUpdated", { status: statusLabel[newStatus] || newStatus }) });
         fetchReports();
         setTimeout(() => setMessage(null), 3000);
       } else {
-        setMessage({ type: "error", text: "Failed to update report." });
+        setMessage({ type: "error", text: t("adminReports.errUpdateFailed") });
       }
     } catch (error) {
-      setMessage({ type: "error", text: "Something went wrong." });
+      setMessage({ type: "error", text: t("adminReports.errSomethingWrong") });
     }
   };
 
@@ -93,7 +104,7 @@ export default function AdminReports() {
   const handleActionSubmit = async () => {
     if (!selectedReportId) return;
     if (!actionType) {
-      setMessage({ type: "error", text: "Please select an action type." });
+      setMessage({ type: "error", text: t("adminReports.errSelectActionType") });
       return;
     }
     await updateStatus(selectedReportId, "actioned", { actionType, actionNote });
@@ -129,7 +140,7 @@ export default function AdminReports() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Reports</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("adminReports.title")}</h1>
         <div className="flex items-center gap-3">
           <Filter className="w-4 h-4 text-gray-400" />
           <select
@@ -137,11 +148,11 @@ export default function AdminReports() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-zrp-red focus:border-transparent"
           >
-            <option value="all">All</option>
-            <option value="pending">Pending</option>
-            <option value="reviewed">Reviewed</option>
-            <option value="dismissed">Dismissed</option>
-            <option value="actioned">Actioned</option>
+            <option value="all">{t("adminReports.all")}</option>
+            <option value="pending">{t("adminReports.statusPending")}</option>
+            <option value="reviewed">{t("adminReports.statusReviewed")}</option>
+            <option value="dismissed">{t("adminReports.statusDismissed")}</option>
+            <option value="actioned">{t("adminReports.statusActioned")}</option>
           </select>
         </div>
       </div>
@@ -151,35 +162,35 @@ export default function AdminReports() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
           <Flag className="w-5 h-5 text-blue-500" />
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("adminReports.total")}</p>
             <p className="text-lg font-bold text-gray-900 dark:text-white">{stats.total}</p>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
           <Clock className="w-5 h-5 text-yellow-500" />
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Pending</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("adminReports.pending")}</p>
             <p className="text-lg font-bold text-yellow-600 dark:text-yellow-400">{stats.pending}</p>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
           <CheckCircle className="w-5 h-5 text-blue-500" />
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Reviewed</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("adminReports.reviewed")}</p>
             <p className="text-lg font-bold text-blue-600 dark:text-blue-400">{stats.reviewed}</p>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
           <AlertTriangle className="w-5 h-5 text-gray-500" />
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Dismissed</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("adminReports.dismissed")}</p>
             <p className="text-lg font-bold text-gray-600 dark:text-gray-400">{stats.dismissed}</p>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
           <CheckCircle className="w-5 h-5 text-green-500" />
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Actioned</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("adminReports.actioned")}</p>
             <p className="text-lg font-bold text-green-600 dark:text-green-400">{stats.actioned}</p>
           </div>
         </div>
@@ -198,14 +209,14 @@ export default function AdminReports() {
       {/* Report List */}
       <div className="space-y-3">
         {reports.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">No reports to show.</div>
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">{t("adminReports.noReports")}</div>
         ) : (
           reports.map((report) => {
             const content = report.post || report.comment;
             const author = content?.author;
             const viewPostLink = report.post ? `/post/${report.post.id}` : null;
             const viewAuthorLink = author ? `/profile/${author.username}` : null;
-            const contentType = report.post ? "Post" : "Comment";
+            const contentLabel = report.post ? t("adminReports.viewPost") : t("adminReports.viewComment");
 
             return (
               <div
@@ -217,7 +228,7 @@ export default function AdminReports() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium text-gray-900 dark:text-white">{report.reason}</span>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor(report.status)}`}>
-                        {report.status.toUpperCase()}
+                        {(statusLabel[report.status] || report.status).toUpperCase()}
                       </span>
                       {report.actionType && (
                         <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded">
@@ -226,7 +237,7 @@ export default function AdminReports() {
                       )}
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                      Reported by @{report.reporter.username}
+                      {t("adminReports.reportedBy", { username: report.reporter.username })}
                     </p>
 
                     {/* Content preview + navigation links */}
@@ -244,7 +255,7 @@ export default function AdminReports() {
                               className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition"
                             >
                               <ExternalLink className="w-3 h-3" />
-                              View {contentType}
+                              {contentLabel}
                             </Link>
                           )}
                           {viewAuthorLink && (
@@ -255,31 +266,30 @@ export default function AdminReports() {
                               className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition"
                             >
                               <User className="w-3 h-3" />
-                              View Author
+                              {t("adminReports.viewAuthor")}
                             </Link>
                           )}
-                          {/* If it's a comment but no post link, we could add a "View Thread" link if we had postId */}
                         </div>
                       </div>
                     )}
 
                     {report.details && (
                       <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                        Details: {report.details}
+                        {t("adminReports.details", { details: report.details })}
                       </p>
                     )}
                     {report.actionNote && (
                       <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                        Note: {report.actionNote}
+                        {t("adminReports.note", { note: report.actionNote })}
                       </p>
                     )}
                     {report.actionedAt && (
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                        Actioned on {new Date(report.actionedAt).toLocaleString()}
+                        {t("adminReports.actionedOn", { date: new Date(report.actionedAt).toLocaleString(localeMap[language] || "en-US") })}
                       </p>
                     )}
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                      {new Date(report.createdAt).toLocaleString()}
+                      {new Date(report.createdAt).toLocaleString(localeMap[language] || "en-US")}
                     </p>
                   </div>
                   <div className="flex gap-2 flex-shrink-0">
@@ -289,19 +299,19 @@ export default function AdminReports() {
                           onClick={() => updateStatus(report.id, "dismissed")}
                           className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                         >
-                          Dismiss
+                          {t("adminReports.dismiss")}
                         </button>
                         <button
                           onClick={() => updateStatus(report.id, "reviewed")}
                           className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                         >
-                          Review
+                          {t("adminReports.review")}
                         </button>
                         <button
                           onClick={() => openActionModal(report.id)}
                           className="px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
                         >
-                          Action
+                          {t("adminReports.action")}
                         </button>
                       </>
                     )}
@@ -320,17 +330,17 @@ export default function AdminReports() {
             disabled={page === 1}
             className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
           >
-            Previous
+            {t("adminReports.previous")}
           </button>
           <span className="px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
-            Page {page} of {totalPages}
+            {t("adminReports.pageOf", { page, total: totalPages })}
           </span>
           <button
             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
             className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
           >
-            Next
+            {t("adminReports.next")}
           </button>
         </div>
       )}
@@ -345,11 +355,11 @@ export default function AdminReports() {
             >
               <X className="w-5 h-5" />
             </button>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Choose Action</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{t("adminReports.chooseAction")}</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Action Type
+                  {t("adminReports.actionType")}
                 </label>
                 <select
                   value={actionType}
@@ -365,14 +375,14 @@ export default function AdminReports() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Note (optional)
+                  {t("adminReports.noteOptional")}
                 </label>
                 <textarea
                   value={actionNote}
                   onChange={(e) => setActionNote(e.target.value)}
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none focus:ring-2 focus:ring-zrp-red focus:border-transparent"
-                  placeholder="Add any details about the action taken..."
+                  placeholder={t("adminReports.notePlaceholder")}
                 />
               </div>
             </div>
@@ -381,13 +391,13 @@ export default function AdminReports() {
                 onClick={closeModal}
                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
               >
-                Cancel
+                {t("adminReports.cancel")}
               </button>
               <button
                 onClick={handleActionSubmit}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
               >
-                Confirm Action
+                {t("adminReports.confirmAction")}
               </button>
             </div>
           </div>
