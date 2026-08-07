@@ -7,6 +7,7 @@ import {
   BadgeCheck, Building2, Landmark, Circle, CircleDot,
   ChevronDown, ChevronUp, Users, UserX, UserCheck, Award
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface User {
   id: string;
@@ -16,40 +17,15 @@ interface User {
   role: "USER" | "MODERATOR" | "ADMIN";
   badgeType: string | null;
   banned: boolean;
-  plan: string; // ✅ added
+  plan: string;
   _count: {
     posts: number;
     comments: number;
   };
 }
 
-const ROLE_OPTIONS = [
-  { value: "USER", label: "User", icon: User, color: "bg-gray-100 text-gray-700" },
-  { value: "MODERATOR", label: "Moderator", icon: Shield, color: "bg-orange-100 text-orange-700" },
-  { value: "ADMIN", label: "Admin", icon: ShieldAlert, color: "bg-rose-100 text-rose-700" },
-];
-
-const BADGE_OPTIONS = [
-  { value: "", label: "None", color: "bg-gray-100 text-gray-400" },
-  { value: "verified", label: "Verified", icon: BadgeCheck, color: "bg-blue-100 text-blue-700" },
-  { value: "organization", label: "Organization", icon: Building2, color: "bg-yellow-100 text-yellow-700" },
-  { value: "government", label: "Government", icon: Landmark, color: "bg-gray-200 text-gray-700" },
-];
-
-const STATUS_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "ACTIVE", label: "Active" },
-  { value: "BANNED", label: "Banned" },
-];
-
-const PLAN_OPTIONS = [
-  { value: "free", label: "Free" },
-  { value: "pro", label: "Pro" },
-  { value: "business", label: "Business" },
-  { value: "enterprise", label: "Enterprise" },
-];
-
 export default function AdminUsers() {
+  const { t } = useLanguage();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -58,6 +34,32 @@ export default function AdminUsers() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  const ROLE_OPTIONS = [
+    { value: "USER", label: t("adminUsers.roleUser"), icon: User, color: "bg-gray-100 text-gray-700" },
+    { value: "MODERATOR", label: t("adminUsers.roleModerator"), icon: Shield, color: "bg-orange-100 text-orange-700" },
+    { value: "ADMIN", label: t("adminUsers.roleAdmin"), icon: ShieldAlert, color: "bg-rose-100 text-rose-700" },
+  ];
+
+  const BADGE_OPTIONS = [
+    { value: "", label: t("adminUsers.badgeNone"), color: "bg-gray-100 text-gray-400" },
+    { value: "verified", label: t("adminUsers.badgeVerified"), icon: BadgeCheck, color: "bg-blue-100 text-blue-700" },
+    { value: "organization", label: t("adminUsers.badgeOrganization"), icon: Building2, color: "bg-yellow-100 text-yellow-700" },
+    { value: "government", label: t("adminUsers.badgeGovernment"), icon: Landmark, color: "bg-gray-200 text-gray-700" },
+  ];
+
+  const STATUS_OPTIONS = [
+    { value: "ALL", label: t("adminUsers.statusAll") },
+    { value: "ACTIVE", label: t("adminUsers.statusActive") },
+    { value: "BANNED", label: t("adminUsers.statusBanned") },
+  ];
+
+  const PLAN_OPTIONS = [
+    { value: "free", label: t("adminUsers.planFree") },
+    { value: "pro", label: t("adminUsers.planPro") },
+    { value: "business", label: t("adminUsers.planBusiness") },
+    { value: "enterprise", label: t("adminUsers.planEnterprise") },
+  ];
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -98,7 +100,7 @@ export default function AdminUsers() {
   const mods = filteredUsers.filter(u => u.role === "MODERATOR").length;
 
   const handleDelete = async (userId: string) => {
-    if (!confirm("Delete this user? This cannot be undone.")) return;
+    if (!confirm(t("adminUsers.deleteConfirm"))) return;
     try {
       const res = await fetch(`/api/admin/users/${userId}`, { method: "DELETE" });
       if (res.ok) fetchUsers();
@@ -134,18 +136,18 @@ export default function AdminUsers() {
   };
 
   const toggleBan = async (userId: string, currentStatus: boolean) => {
-    const action = currentStatus ? "unban" : "ban";
-    if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+    const actionLabel = currentStatus ? t("adminUsers.unban").toLowerCase() : t("adminUsers.ban").toLowerCase();
+    if (!confirm(t("adminUsers.banConfirm", { action: actionLabel }))) return;
     try {
       const res = await fetch(`/api/admin/users/${userId}/ban`, { method: "POST" });
       if (res.ok) fetchUsers();
       else {
         const err = await res.json();
-        alert(err.error || "Failed to toggle ban");
+        alert(err.error || t("adminUsers.errToggleBan"));
       }
     } catch (error) {
       console.error("Ban toggle error:", error);
-      alert("Failed to toggle ban");
+      alert(t("adminUsers.errToggleBan"));
     }
   };
 
@@ -161,11 +163,11 @@ export default function AdminUsers() {
         fetchUsers();
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to update plan");
+        alert(err.error || t("adminUsers.errUpdatePlan"));
       }
     } catch (error) {
       console.error("Plan update error:", error);
-      alert("Failed to update plan");
+      alert(t("adminUsers.errUpdatePlan"));
     }
   };
 
@@ -181,12 +183,12 @@ export default function AdminUsers() {
     <div>
       {/* ─── Header ────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Users</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("adminUsers.title")}</h1>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search users..."
+            placeholder={t("adminUsers.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-zrp-red focus:border-transparent"
@@ -199,35 +201,35 @@ export default function AdminUsers() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
           <Users className="w-5 h-5 text-blue-500" />
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("adminUsers.total")}</p>
             <p className="text-lg font-bold text-gray-900 dark:text-white">{total}</p>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
           <CheckCircle className="w-5 h-5 text-green-500" />
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("adminUsers.active")}</p>
             <p className="text-lg font-bold text-green-600 dark:text-green-400">{active}</p>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
           <Ban className="w-5 h-5 text-red-500" />
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Banned</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("adminUsers.banned")}</p>
             <p className="text-lg font-bold text-red-600 dark:text-red-400">{banned}</p>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
           <ShieldAlert className="w-5 h-5 text-rose-500" />
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Admins</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("adminUsers.admins")}</p>
             <p className="text-lg font-bold text-rose-600 dark:text-rose-400">{admins}</p>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
           <Shield className="w-5 h-5 text-orange-500" />
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Mods</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("adminUsers.mods")}</p>
             <p className="text-lg font-bold text-orange-600 dark:text-orange-400">{mods}</p>
           </div>
         </div>
@@ -240,10 +242,10 @@ export default function AdminUsers() {
           onChange={(e) => setRoleFilter(e.target.value)}
           className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-zrp-red focus:border-transparent"
         >
-          <option value="ALL">All Roles</option>
-          <option value="USER">User</option>
-          <option value="MODERATOR">Moderator</option>
-          <option value="ADMIN">Admin</option>
+          <option value="ALL">{t("adminUsers.allRoles")}</option>
+          <option value="USER">{t("adminUsers.roleUser")}</option>
+          <option value="MODERATOR">{t("adminUsers.roleModerator")}</option>
+          <option value="ADMIN">{t("adminUsers.roleAdmin")}</option>
         </select>
 
         <select
@@ -251,11 +253,11 @@ export default function AdminUsers() {
           onChange={(e) => setBadgeFilter(e.target.value)}
           className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-zrp-red focus:border-transparent"
         >
-          <option value="ALL">All Badges</option>
-          <option value="NONE">None</option>
-          <option value="verified">Verified</option>
-          <option value="organization">Organization</option>
-          <option value="government">Government</option>
+          <option value="ALL">{t("adminUsers.allBadges")}</option>
+          <option value="NONE">{t("adminUsers.badgeNone")}</option>
+          <option value="verified">{t("adminUsers.badgeVerified")}</option>
+          <option value="organization">{t("adminUsers.badgeOrganization")}</option>
+          <option value="government">{t("adminUsers.badgeGovernment")}</option>
         </select>
 
         <select
@@ -271,7 +273,7 @@ export default function AdminUsers() {
         </select>
 
         <span className="text-sm text-gray-500 dark:text-gray-400 ml-auto">
-          {filteredUsers.length} users shown
+          {t("adminUsers.usersShown", { n: filteredUsers.length })}
         </span>
       </div>
 
@@ -281,21 +283,21 @@ export default function AdminUsers() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">User</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium hidden sm:table-cell">Email</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Posts</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Role</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Badge</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Plan</th>  {/* ✅ new */}
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">Status</th>
-                <th className="px-4 py-3 text-right text-gray-500 dark:text-gray-300 font-medium">Actions</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colUser")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium hidden sm:table-cell">{t("adminUsers.colEmail")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colPosts")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colRole")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colBadge")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colPlan")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colStatus")}</th>
+                <th className="px-4 py-3 text-right text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colActions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                    No users match your filters.
+                    {t("adminUsers.noMatch")}
                   </td>
                 </tr>
               ) : (
@@ -386,11 +388,11 @@ export default function AdminUsers() {
                       <td className="px-4 py-3">
                         {user.banned ? (
                           <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400">
-                            <Circle className="w-2 h-2 fill-red-600" /> Banned
+                            <Circle className="w-2 h-2 fill-red-600" /> {t("adminUsers.statusBanned")}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400">
-                            <CircleDot className="w-2 h-2 fill-green-600" /> Active
+                            <CircleDot className="w-2 h-2 fill-green-600" /> {t("adminUsers.statusActive")}
                           </span>
                         )}
                       </td>
@@ -403,13 +405,13 @@ export default function AdminUsers() {
                               : "text-red-600 hover:text-red-800"
                           }`}
                         >
-                          {user.banned ? "Unban" : "Ban"}
+                          {user.banned ? t("adminUsers.unban") : t("adminUsers.ban")}
                         </button>
                         <button
                           onClick={() => handleDelete(user.id)}
                           className="text-red-600 hover:text-red-800 text-xs font-medium transition"
                         >
-                          Delete
+                          {t("adminUsers.delete")}
                         </button>
                       </td>
                     </tr>
@@ -429,17 +431,17 @@ export default function AdminUsers() {
             disabled={page === 1}
             className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
           >
-            Previous
+            {t("adminUsers.previous")}
           </button>
           <span className="text-sm text-gray-700 dark:text-gray-300">
-            Page {page} of {totalPages}
+            {t("adminUsers.pageOf", { page, total: totalPages })}
           </span>
           <button
             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
             className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
           >
-            Next
+            {t("adminUsers.next")}
           </button>
         </div>
       )}
