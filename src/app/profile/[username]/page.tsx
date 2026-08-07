@@ -14,6 +14,7 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import AnalyticsTab from "@/components/AnalyticsTab";
 import PostComposer from "@/components/PostComposer";
 import TipModal from "@/components/TipModal";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function formatProfileCount(n: number) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
@@ -85,6 +86,7 @@ type TabType = "posts" | "replies" | "media" | "likes" | "reposts" | "analytics"
 export default function ProfilePage({ params }: { params: { username: string } }) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t, language } = useLanguage();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [pinnedPost, setPinnedPost] = useState<Post | null>(null);
@@ -114,6 +116,8 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const isOwnProfile = session?.user?.id === profile?.id;
+
+  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   // ─── Click outside to close dropdown ──────────────────────────────
   useEffect(() => {
@@ -309,9 +313,9 @@ export default function ProfilePage({ params }: { params: { username: string } }
     } else {
       try {
         await navigator.clipboard.writeText(url);
-        alert("Profile link copied to clipboard!");
+        alert(t("profile.linkCopied"));
       } catch {
-        alert("Share not supported on this device.");
+        alert(t("profile.shareNotSupported"));
       }
     }
   };
@@ -335,11 +339,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
         const data = await res.json();
         setProfile((prev) => prev ? { ...prev, coverUrl: data.coverUrl } : null);
       } else {
-        alert("Failed to upload banner");
+        alert(t("profile.uploadBannerFailed"));
       }
     } catch (error) {
       console.error("Banner upload error:", error);
-      alert("Failed to upload banner");
+      alert(t("profile.uploadBannerFailed"));
     } finally {
       setUploadingBanner(false);
       if (bannerInputRef.current) bannerInputRef.current.value = "";
@@ -365,11 +369,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
         const data = await res.json();
         setProfile((prev) => prev ? { ...prev, avatarUrl: data.avatarUrl } : null);
       } else {
-        alert("Failed to upload avatar");
+        alert(t("profile.uploadAvatarFailed"));
       }
     } catch (error) {
       console.error("Avatar upload error:", error);
-      alert("Failed to upload avatar");
+      alert(t("profile.uploadAvatarFailed"));
     } finally {
       setUploadingAvatar(false);
       if (avatarInputRef.current) avatarInputRef.current.value = "";
@@ -379,17 +383,17 @@ export default function ProfilePage({ params }: { params: { username: string } }
   if (loading && !profile) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-gray-500">{t("action.loading")}</div>
       </div>
     );
   }
 
   if (!profile) {
-    return <div className="text-center py-12 text-gray-500">User not found</div>;
+    return <div className="text-center py-12 text-gray-500">{t("profile.userNotFound")}</div>;
   }
 
   const joinDate = new Date(profile.createdAt);
-  const formattedJoinDate = joinDate.toLocaleDateString("en-US", {
+  const formattedJoinDate = joinDate.toLocaleDateString(localeMap[language] || "en-US", {
     month: "long",
     year: "numeric",
   });
@@ -411,6 +415,29 @@ export default function ProfilePage({ params }: { params: { username: string } }
       default:
         return "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300";
     }
+  };
+
+  const planLabelMap: Record<string, string> = {
+    free: t("adminUsers.planFree"),
+    pro: t("adminUsers.planPro"),
+    business: t("adminUsers.planBusiness"),
+    enterprise: t("adminUsers.planEnterprise"),
+  };
+
+  const tabLabelMap: Record<Exclude<TabType, "analytics">, string> = {
+    posts: t("profile.posts"),
+    reposts: t("profile.reposts"),
+    replies: t("profile.replies"),
+    likes: t("profile.likes"),
+    media: t("profile.media"),
+  };
+
+  const emptyStateMap: Record<Exclude<TabType, "analytics">, string> = {
+    posts: t("profile.noPosts"),
+    reposts: t("profile.noReposts"),
+    replies: t("profile.noReplies"),
+    likes: t("profile.noLikes"),
+    media: t("profile.noMedia"),
   };
 
   // ─── Render reply item ──────────────────────────────────────────────
@@ -454,17 +481,17 @@ export default function ProfilePage({ params }: { params: { username: string } }
               <span className="text-sm text-gray-500">@{reply.author.username}</span>
               <span className="text-sm text-gray-400">·</span>
               <span className="text-sm text-gray-400">
-                {new Date(reply.createdAt).toLocaleDateString()}
+                {new Date(reply.createdAt).toLocaleDateString(localeMap[language] || "en-US")}
               </span>
             </div>
 
             {/* ─── Replying to ────────────────────────────────────────── */}
             {reply.replyTo && (
               <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Replying to{" "}
+                {t("profile.replyingTo")}{" "}
                 <Link
                   href={`/profile/${reply.replyTo.author.username}`}
-                  className="text-blue-600 hover:underline"
+                  className="text-zrp-red hover:underline"
                   onClick={(e) => e.stopPropagation()}
                 >
                   @{reply.replyTo.author.username}
@@ -525,7 +552,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
               onClick={() => bannerInputRef.current?.click()}
               disabled={uploadingBanner}
               className="bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
-              title="Change banner"
+              title={t("profile.changeBanner")}
             >
               {uploadingBanner ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -566,7 +593,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
                   onClick={() => avatarInputRef.current?.click()}
                   disabled={uploadingAvatar}
                   className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white"
-                  title="Change avatar"
+                  title={t("profile.changeAvatar")}
                 >
                   {uploadingAvatar ? (
                     <Loader2 className="w-6 h-6 animate-spin" />
@@ -592,7 +619,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
               className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
             >
               <Share2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Share</span>
+              <span className="hidden sm:inline">{t("profile.share")}</span>
             </button>
 
             {isOwnProfile ? (
@@ -601,7 +628,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
                 className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
               >
                 <Pencil className="w-4 h-4" />
-                <span className="hidden sm:inline">Edit</span>
+                <span className="hidden sm:inline">{t("profile.edit")}</span>
               </Link>
             ) : (
               <>
@@ -620,12 +647,12 @@ export default function ProfilePage({ params }: { params: { username: string } }
                   ) : isFollowing ? (
                     <>
                       <UserCheck className="w-4 h-4" />
-                      <span className="hidden sm:inline">Following</span>
+                      <span className="hidden sm:inline">{t("action.following")}</span>
                     </>
                   ) : (
                     <>
                       <UserPlus className="w-4 h-4" />
-                      <span>Follow</span>
+                      <span>{t("action.follow")}</span>
                     </>
                   )}
                 </button>
@@ -636,7 +663,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
                   className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
                 >
                   <MessageCircle className="w-4 h-4" />
-                  <span className="hidden sm:inline">Message</span>
+                  <span className="hidden sm:inline">{t("action.message")}</span>
                 </Link>
 
                 {/* ─── Tip Button ─────────────────────────────────────── */}
@@ -646,7 +673,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
                     className="flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap bg-green-600 text-white hover:bg-green-700"
                   >
                     <DollarSign className="w-4 h-4" />
-                    <span className="hidden sm:inline">Tip</span>
+                    <span className="hidden sm:inline">{t("profile.tip")}</span>
                   </button>
                 )}
 
@@ -655,7 +682,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
                   <button
                     onClick={() => setMoreMenuOpen(!moreMenuOpen)}
                     className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
-                    title="More actions"
+                    title={t("profile.moreActions")}
                   >
                     <MoreHorizontal className="w-4 h-4" />
                   </button>
@@ -675,12 +702,12 @@ export default function ProfilePage({ params }: { params: { username: string } }
                         ) : isMuted ? (
                           <>
                             <BellOff className="w-4 h-4" />
-                            Unmute
+                            {t("profile.unmute")}
                           </>
                         ) : (
                           <>
                             <Bell className="w-4 h-4" />
-                            Mute
+                            {t("profile.mute")}
                           </>
                         )}
                       </button>
@@ -698,12 +725,12 @@ export default function ProfilePage({ params }: { params: { username: string } }
                         ) : isBlocked ? (
                           <>
                             <CheckCircle className="w-4 h-4" />
-                            Unblock
+                            {t("profile.unblock")}
                           </>
                         ) : (
                           <>
                             <Ban className="w-4 h-4" />
-                            Block
+                            {t("profile.block")}
                           </>
                         )}
                       </button>
@@ -743,7 +770,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
                 href={profile.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-blue-600 hover:underline"
+                className="flex items-center gap-1 text-zrp-red hover:underline"
               >
                 <LinkIcon className="w-4 h-4" />
                 {profile.website.replace(/^https?:\/\//, "")}
@@ -751,7 +778,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
             )}
             <span className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
-              Joined {formattedJoinDate}
+              {t("profile.joined")} {formattedJoinDate}
             </span>
           </div>
 
@@ -759,7 +786,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
           {profile.plan && (
             <div className="mt-2">
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getPlanBadgeColor(profile.plan)}`}>
-                {profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)}
+                {planLabelMap[profile.plan.toLowerCase()] || profile.plan}
               </span>
             </div>
           )}
@@ -773,11 +800,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
                 <span className="font-semibold text-gray-900 dark:text-white">
                   {formatProfileCount(profile._count.following)}
                 </span>{" "}
-                Following
+                {t("profile.following")}
               </Link>
             ) : (
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                <span className="font-semibold text-gray-900 dark:text-white">—</span> Following
+                <span className="font-semibold text-gray-900 dark:text-white">—</span> {t("profile.following")}
               </span>
             )}
             <Link
@@ -787,17 +814,17 @@ export default function ProfilePage({ params }: { params: { username: string } }
               <span className="font-semibold text-gray-900 dark:text-white">
                 {formatProfileCount(profile._count.followers)}
               </span>{" "}
-              Followers
+              {t("profile.followers")}
             </Link>
           </div>
 
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
             <span className="bg-zrp-red/10 text-zrp-red px-3 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap">
               <Heart className="w-3.5 h-3.5" />
-              Impact: {impactMeals} meals 🧡
+              {t("profile.impact", { n: impactMeals })} 🧡
             </span>
             <span className="text-gray-400 text-xs">
-              35% of profits go to charity
+              {t("profile.charityNote", { pct: 35 })}
             </span>
           </div>
         </div>
@@ -826,10 +853,10 @@ export default function ProfilePage({ params }: { params: { username: string } }
               {tab === "analytics" ? (
                 <span className="flex items-center justify-center gap-1">
                   <Eye className="w-4 h-4" />
-                  Analytics
+                  {t("profile.analytics")}
                 </span>
               ) : (
-                tab.charAt(0).toUpperCase() + tab.slice(1)
+                tabLabelMap[tab]
               )}
               {activeTab === tab && (
                 <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-1 bg-zrp-red rounded-full" />
@@ -849,7 +876,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
           <AnalyticsTab userId={profile.id} />
         ) : posts.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
-            <p>No {activeTab} yet.</p>
+            <p>{emptyStateMap[activeTab as Exclude<TabType, "analytics">]}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -860,7 +887,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
                   <div className="relative border border-blue-200 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-900/10 rounded-xl p-3">
                     <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-medium mb-2">
                       <Pin className="w-3.5 h-3.5" />
-                      Pinned
+                      {t("profile.pinned")}
                     </div>
                     <PostCard
                       post={pinnedPost}
