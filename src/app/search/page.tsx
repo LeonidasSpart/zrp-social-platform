@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Search, Loader2 } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import PostCard from "@/components/PostCard";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface User {
   id: string;
@@ -39,6 +40,7 @@ interface Post {
 export default function SearchPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useLanguage();
   const query = searchParams.get("q") || "";
   const [users, setUsers] = useState<User[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -76,7 +78,7 @@ export default function SearchPage() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
         <input
           type="text"
-          placeholder="Search users, posts, hashtags..."
+          placeholder={t("search.placeholder")}
           value={query}
           onChange={(e) => {
             const newQuery = e.target.value;
@@ -104,7 +106,7 @@ export default function SearchPage() {
                   : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               }`}
             >
-              Users ({users.length})
+              {t("search.usersTab", { n: users.length })}
             </button>
             <button
               onClick={() => setActiveTab("posts")}
@@ -114,7 +116,7 @@ export default function SearchPage() {
                   : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               }`}
             >
-              Posts ({posts.length})
+              {t("search.postsTab", { n: posts.length })}
             </button>
           </div>
 
@@ -122,7 +124,7 @@ export default function SearchPage() {
             {activeTab === "users" && (
               <>
                 {users.length === 0 ? (
-                  <p className="text-center py-8 text-gray-500">No users found.</p>
+                  <p className="text-center py-8 text-gray-500">{t("search.noUsers")}</p>
                 ) : (
                   <div className="space-y-2">
                     {users.map((user) => (
@@ -167,7 +169,7 @@ export default function SearchPage() {
             {activeTab === "posts" && (
               <>
                 {posts.length === 0 ? (
-                  <p className="text-center py-8 text-gray-500">No posts found.</p>
+                  <p className="text-center py-8 text-gray-500">{t("search.noPosts")}</p>
                 ) : (
                   <div className="space-y-4">
                     {posts.map((post) => (
