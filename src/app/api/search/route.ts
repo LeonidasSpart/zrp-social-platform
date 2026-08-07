@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
   const query = req.nextUrl.searchParams.get("q") || "";
+  const type = req.nextUrl.searchParams.get("type") || "all";
 
   if (query.length < 2) {
     return NextResponse.json({ users: [], posts: [] });
@@ -37,12 +38,21 @@ export async function GET(req: NextRequest) {
       excludedAuthorIds = [...blockedIds, ...blockerIds, ...mutedIds];
     }
 
-    const [users, posts] = await Promise.all([
-      prisma.user.findMany({
+    const results: any = {};
+
+    // ─── Search users ──────────────────────────────────────────────
+    if (type === "users" || type === "all") {
+      const users = await prisma.user.findMany({
         where: {
-          OR: [
-            { username: { contains: query, mode: "insensitive" } },
-            { name: { contains: query, mode: "insensitive" } },
+          AND: [
+            {
+              OR: [
+                { username: { contains: query, mode: "insensitive" } },
+                { name: { contains: query, mode: "insensitive" } },
+              ],
+            },
+            { id: { notIn: excludedAuthorIds } }, // ✅ exclude blocked/muted
+            { banned: false },
           ],
         },
         select: {
@@ -52,9 +62,14 @@ export async function GET(req: NextRequest) {
           avatarUrl: true,
           badgeType: true,
         },
-        take: 20,
-      }),
-      prisma.post.findMany({
+        take: 10, // limit to 10 for mention autocomplete
+      });
+      results.users = users;
+    }
+
+    // ─── Search posts ──────────────────────────────────────────────
+    if (type === "posts" || type === "all") {
+      const posts = await prisma.post.findMany({
         where: {
           AND: [
             {
@@ -79,7 +94,6 @@ export async function GET(req: NextRequest) {
               badgeType: true,
             },
           },
-          // ✅ QUOTE REPOST – include the quoted post
           quotePost: {
             include: {
               author: {
@@ -110,10 +124,11 @@ export async function GET(req: NextRequest) {
             },
           },
         },
-      }),
-    ]);
+      });
+      results.posts = posts;
+    }
 
-    return NextResponse.json({ users, posts });
+    return NextResponse.json(results);
   } catch (error) {
     console.error("Search error:", error);
     return NextResponse.json({ error: "Search failed" }, { status: 500 });
