@@ -19,8 +19,58 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
 
 export const metadata: Metadata = {
-  title: "ZRP Social",
-  description: "A social platform for the ZRP community",
+  title: {
+    default: "ZRP Social – Connect Freely. Share Securely. Build Together.",
+    template: "%s | ZRP Social",
+  },
+  description:
+    "The first Swiss European social media platform. Connect freely, share securely, and build together. 35% of profits go to charity.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://zrp-social-platform-production.up.railway.app"),
+  keywords: [
+    "Swiss social media",
+    "European social platform",
+    "freedom of speech",
+    "privacy",
+    "charity",
+    "ZRP Social",
+    "decentralized",
+  ],
+  authors: [{ name: "ZRP Social" }],
+  creator: "ZRP Social",
+  publisher: "ZRP Social",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: process.env.NEXT_PUBLIC_APP_URL || "https://zrp-social-platform-production.up.railway.app",
+    siteName: "ZRP Social",
+    title: "ZRP Social – Connect Freely. Share Securely. Build Together.",
+    description:
+      "The first Swiss European social media platform. Connect freely, share securely, and build together. 35% of profits go to charity.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "ZRP Social – Swiss European Social Media Platform | 35% to Charity | Built in Switzerland",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ZRP Social – Connect Freely. Share Securely. Build Together.",
+    description:
+      "The first Swiss European social media platform. Connect freely, share securely, and build together. 35% of profits go to charity.",
+    images: ["/og-image.png"],
+    creator: "@zrp_social",
+  },
   icons: {
     icon: "/favicon.png",
   },
