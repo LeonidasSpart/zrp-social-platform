@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import PostCard from "@/components/PostCard";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Post {
   id: string;
@@ -32,6 +33,7 @@ interface Post {
 export default function ExplorePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useLanguage();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,14 +54,14 @@ export default function ExplorePage() {
       const data = await res.json();
       setPosts(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load");
+      setError(err instanceof Error ? err.message : t("explore.errFailedLoad"));
     } finally {
       setLoading(false);
     }
   };
 
   if (status === "loading" || loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    return <div className="flex items-center justify-center min-h-screen">{t("action.loading")}</div>;
   }
 
   return (
@@ -70,9 +72,9 @@ export default function ExplorePage() {
         </Link>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <Sparkles className="w-6 h-6 text-yellow-500" />
-          Explore
+          {t("explore.title")}
         </h1>
-        <span className="text-sm text-gray-500 ml-auto">{posts.length} posts</span>
+        <span className="text-sm text-gray-500 ml-auto">{t("explore.postCount", { n: posts.length })}</span>
       </div>
 
       {error ? (
@@ -80,7 +82,7 @@ export default function ExplorePage() {
       ) : posts.length === 0 ? (
         <div className="text-center py-12 text-gray-500 dark:text-gray-400">
           <Sparkles className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
-          <p>No trending posts yet.</p>
+          <p>{t("explore.noTrending")}</p>
         </div>
       ) : (
         <div className="space-y-4">
