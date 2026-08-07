@@ -56,7 +56,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
   // ─── Mention autocomplete ──────────────────────────────────────
   const [cursorPosition, setCursorPosition] = useState(0);
-  const [showMentionAutocomplete, setShowMentionAutocomplete] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const composerRef = useRef<HTMLDivElement>(null);
 
@@ -159,7 +158,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     const newContent = e.target.value;
     setContent(newContent);
     setCursorPosition(e.target.selectionStart || 0);
-    // The autocomplete will detect '@' automatically via its own effect.
   };
 
   // ─── Mention selection handler ──────────────────────────────────
@@ -171,7 +169,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       const start = before.length - match[0].length;
       const newContent = before.slice(0, start) + mention + after;
       setContent(newContent);
-      setShowMentionAutocomplete(false);
       // Update cursor position after insertion
       setTimeout(() => {
         if (textareaRef.current) {
@@ -181,21 +178,11 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
           textareaRef.current.focus();
         }
       }, 0);
-    } else {
-      setShowMentionAutocomplete(false);
     }
-  };
-
-  // ─── Handle autocomplete close ──────────────────────────────────
-  const handleAutocompleteClose = () => {
-    setShowMentionAutocomplete(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // If mention autocomplete is open, prevent submit
-    if (showMentionAutocomplete) return;
 
     // Validation
     if (!content.trim() && !pollQuestion.trim() && postType !== "ARTICLE") {
@@ -286,7 +273,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
         return;
       }
 
-      // ✅ FIX: Extract the actual post from the response
       let result;
       try {
         result = await res.json();
@@ -326,7 +312,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     setLocation("");
     setApplyUrl("");
     setArticleBody("");
-    setShowMentionAutocomplete(false);
   };
 
   const displayName = session?.user?.name || session?.user?.username || "User";
@@ -346,16 +331,9 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     if (isOverLimit) return true;
     if (!!imageUrl && !limits.imagesPerPost) return true;
 
-    // Basic content check
     if (!content.trim() && !pollQuestion.trim() && postType !== "ARTICLE") return true;
-
-    // Poll validation
     if (showPollBuilder && !isPollValid) return true;
-
-    // Recruitment validation
     if (postType === "RECRUITMENT" && !company.trim()) return true;
-
-    // Article validation
     if (postType === "ARTICLE" && !articleBody.trim()) return true;
 
     return false;
@@ -428,9 +406,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                 ref={textareaRef}
                 value={content}
                 onChange={handleContentChange}
-                onKeyDown={(e) => {
-                  // If autocomplete is open and user presses Escape or Enter, the autocomplete handles it.
-                }}
                 placeholder={
                   postType === "RECRUITMENT"
                     ? t("composer.placeholderRecruitment")
@@ -459,17 +434,13 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               </div>
             )}
 
-            {/* ─── Mention Autocomplete ────────────────────────────── */}
-            {showMentionAutocomplete && (
-              <div className="relative">
-                <MentionAutocomplete
-                  text={content}
-                  cursorPosition={cursorPosition}
-                  onSelect={handleMentionSelect}
-                  onClose={handleAutocompleteClose}
-                />
-              </div>
-            )}
+            {/* ─── Mention Autocomplete (always rendered) ──────────── */}
+            <MentionAutocomplete
+              text={content}
+              cursorPosition={cursorPosition}
+              onSelect={handleMentionSelect}
+              onClose={() => {}} // no-op – component manages internal visibility
+            />
 
             {/* ─── Recruitment extra fields ─────────────────────────── */}
             {postType === "RECRUITMENT" && (
