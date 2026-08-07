@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, User, Loader2, BellOff, Calendar } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface MutedUser {
   id: string;
@@ -24,9 +25,12 @@ interface MutedUser {
 export default function MutedUsersPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t, language } = useLanguage();
   const [mutedUsers, setMutedUsers] = useState<MutedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [unmuting, setUnmuting] = useState<string | null>(null);
+
+  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   // ─── Redirect if not authenticated ──────────────────────────────────
   useEffect(() => {
@@ -72,11 +76,11 @@ export default function MutedUsersPage() {
         setMutedUsers((prev) => prev.filter((user) => user.id !== userId));
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to unmute user");
+        alert(err.error || t("muted.errUnmute"));
       }
     } catch (error) {
       console.error("Unmute error:", error);
-      alert("Failed to unmute user");
+      alert(t("muted.errUnmute"));
     } finally {
       setUnmuting(null);
     }
@@ -87,7 +91,7 @@ export default function MutedUsersPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-zrp-red" />
-          <p className="text-gray-500 dark:text-gray-400">Loading muted users...</p>
+          <p className="text-gray-500 dark:text-gray-400">{t("muted.loading")}</p>
         </div>
       </div>
     );
@@ -104,16 +108,16 @@ export default function MutedUsersPage() {
           <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
         </Link>
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-          Muted Users
+          {t("muted.title")}
         </h1>
         <span className="text-sm text-gray-500 dark:text-gray-400 ml-auto">
-          {mutedUsers.length} muted
+          {t("muted.count", { n: mutedUsers.length })}
         </span>
       </div>
 
       {/* ─── Description ─────────────────────────────────────────────── */}
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Users you mute won't be able to interact with you, and their posts will be hidden from your feed.
+        {t("muted.explanation")}
       </p>
 
       {/* ─── List ────────────────────────────────────────────────────── */}
@@ -123,10 +127,10 @@ export default function MutedUsersPage() {
             <BellOff className="w-8 h-8 text-gray-400" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            No muted users
+            {t("muted.emptyTitle")}
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            When you mute someone, they'll appear here.
+            {t("muted.emptyDesc")}
           </p>
         </div>
       ) : (
@@ -169,11 +173,11 @@ export default function MutedUsersPage() {
                   </p>
                 )}
                 <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 dark:text-gray-500">
-                  <span>{user._count.followers} followers</span>
+                  <span>{t("muted.followers", { n: user._count.followers })}</span>
                   <span>·</span>
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    Muted {new Date(user.mutedAt).toLocaleDateString()}
+                    {t("muted.mutedOn", { date: new Date(user.mutedAt).toLocaleDateString(localeMap[language] || "en-US") })}
                   </span>
                 </div>
               </div>
@@ -189,7 +193,7 @@ export default function MutedUsersPage() {
                 ) : (
                   <>
                     <BellOff className="w-4 h-4" />
-                    Unmute
+                    {t("muted.unmute")}
                   </>
                 )}
               </button>
