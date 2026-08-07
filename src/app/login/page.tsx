@@ -73,7 +73,7 @@ export default function LoginPage() {
                   <div className="mt-2">
                     <Link
                       href="/forgot-password"
-                      className="text-blue-600 dark:text-blue-400 underline text-sm hover:text-blue-800 dark:hover:text-blue-300"
+                      className="text-zrp-red dark:text-zrp-red underline text-sm hover:text-zrp-darkRed dark:hover:text-red-300"
                     >
                       {t("auth.resendVerification")}
                     </Link>
@@ -86,7 +86,7 @@ export default function LoginPage() {
                   <div className="mt-2">
                     <a
                       href="mailto:support@zrp.one?subject=Account%20Ban%20Appeal"
-                      className="text-blue-600 dark:text-blue-400 underline text-sm hover:text-blue-800 dark:hover:text-blue-300"
+                      className="text-zrp-red dark:text-zrp-red underline text-sm hover:text-zrp-darkRed dark:hover:text-red-300"
                     >
                       {t("auth.contactSupport")}
                     </a>
@@ -125,7 +125,7 @@ export default function LoginPage() {
 
             <Link
               href="/forgot-password"
-              className="text-sm text-blue-600 dark:text-blue-400 hover:underline block text-right mt-1"
+              className="text-sm text-zrp-red dark:text-zrp-red hover:underline block text-right mt-1"
             >
               {t("auth.forgotPassword")}
             </Link>
@@ -133,7 +133,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-zrp-red dark:hover:bg-zrp-darkRed text-white py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="w-full bg-zrp-red hover:bg-zrp-darkRed text-white py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               {loading ? t("auth.signingIn") : t("auth.signIn")}
             </button>
@@ -141,7 +141,7 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
             {t("auth.noAccount")}{" "}
-            <Link href="/signup" className="text-blue-600 dark:text-blue-400 hover:underline">
+            <Link href="/signup" className="text-zrp-red dark:text-zrp-red hover:underline">
               {t("auth.signUp")}
             </Link>
           </p>
