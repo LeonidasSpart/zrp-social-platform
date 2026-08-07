@@ -9,10 +9,12 @@ import ChatInterface from "@/components/ChatInterface";
 import CallComponent from "@/components/CallComponent";
 import { getSocket } from "@/lib/socket-client";
 import Peer from "simple-peer";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ChatPage({ params }: { params: { username: string } }) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useLanguage();
   const [receiver, setReceiver] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [callState, setCallState] = useState<"idle" | "calling" | "incoming" | "active">("idle");
@@ -83,7 +85,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     socket.on("call-rejected", () => {
       console.log("❌ Call rejected");
       endCall();
-      setCallError("Call was rejected");
+      setCallError(t("chat.callRejected"));
     });
 
     socket.on("call-ended", () => {
@@ -151,7 +153,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       newPeer.on("connect", () => console.log("✅ Peer connected!"));
       newPeer.on("error", (err) => {
         console.error("❌ Peer error:", err);
-        setCallError("Connection error: " + (err?.message || String(err)));
+        setCallError(t("chat.connectionError") + " " + (err?.message || String(err)));
         endCall();
       });
 
@@ -159,7 +161,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     } catch (error: any) {
       console.error("Error starting call:", error);
       setCallError(
-        "Could not access microphone/camera: " + (error?.name || "") + " " + (error?.message || String(error))
+        t("chat.micCameraError") + " " + (error?.name || "") + " " + (error?.message || String(error))
       );
       setCallState("idle");
     }
@@ -191,7 +193,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
           });
         } else {
           console.error("❌ No callerId to accept");
-          setCallError("Cannot accept: missing caller ID");
+          setCallError(t("chat.missingCallerId"));
         }
       });
 
@@ -205,7 +207,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       newPeer.on("connect", () => console.log("✅ Peer connected (accept)!"));
       newPeer.on("error", (err) => {
         console.error("❌ Peer error (accept):", err);
-        setCallError("Connection error: " + (err?.message || String(err)));
+        setCallError(t("chat.connectionError") + " " + (err?.message || String(err)));
         endCall();
       });
 
@@ -218,7 +220,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     } catch (error: any) {
       console.error("Error accepting call:", error);
       setCallError(
-        "Could not access microphone/camera: " + (error?.name || "") + " " + (error?.message || String(error))
+        t("chat.micCameraError") + " " + (error?.name || "") + " " + (error?.message || String(error))
       );
       rejectCall();
     }
@@ -243,15 +245,15 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   };
 
   if (status === "loading" || loading) {
-    return <div className="flex items-center justify-center min-h-screen"><div className="text-gray-500">Loading...</div></div>;
+    return <div className="flex items-center justify-center min-h-screen"><div className="text-gray-500">{t("action.loading")}</div></div>;
   }
 
   if (!receiver) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-4">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-700 font-medium">User not found</p>
-          <Link href="/messages" className="text-blue-600 hover:underline text-sm mt-2 block">← Back to messages</Link>
+          <p className="text-red-700 font-medium">{t("chat.userNotFound")}</p>
+          <Link href="/messages" className="text-blue-600 hover:underline text-sm mt-2 block">← {t("chat.backToMessages")}</Link>
         </div>
       </div>
     );
@@ -266,7 +268,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
             onClick={() => setCallError(null)}
             className="ml-3 underline"
           >
-            Dismiss
+            {t("chat.dismiss")}
           </button>
         </div>
       )}
@@ -275,7 +277,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
           <div className="mb-2 sm:mb-4">
             <Link href="/messages" className="text-blue-600 hover:underline text-sm flex items-center gap-1">
               <ArrowLeft className="w-4 h-4" />
-              Back to messages
+              {t("chat.backToMessages")}
             </Link>
           </div>
           <div className="flex-1 min-h-0">
