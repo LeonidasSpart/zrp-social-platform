@@ -6,6 +6,7 @@ import {
   Users, FileText, MessageCircle, Flag, UserCheck, UserPlus,
   Activity, AlertTriangle, UserX, CheckCircle, CreditCard
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Stats {
   users: number;
@@ -18,9 +19,12 @@ interface Stats {
 }
 
 export default function AdminDashboard() {
+  const { t, language } = useLanguage();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [pendingPayments, setPendingPayments] = useState(0);
+
+  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   useEffect(() => {
     // Fetch main stats
@@ -55,56 +59,56 @@ export default function AdminDashboard() {
   // Card configuration with safe color classes
   const cards = [
     {
-      label: "Total Users",
+      label: t("adminDash.totalUsers"),
       value: stats?.users || 0,
       icon: Users,
       bgColor: "bg-blue-100 dark:bg-blue-900/30",
       textColor: "text-blue-600 dark:text-blue-400",
     },
     {
-      label: "Total Posts",
+      label: t("adminDash.totalPosts"),
       value: stats?.posts || 0,
       icon: FileText,
       bgColor: "bg-green-100 dark:bg-green-900/30",
       textColor: "text-green-600 dark:text-green-400",
     },
     {
-      label: "Total Comments",
+      label: t("adminDash.totalComments"),
       value: stats?.comments || 0,
       icon: MessageCircle,
       bgColor: "bg-purple-100 dark:bg-purple-900/30",
       textColor: "text-purple-600 dark:text-purple-400",
     },
     {
-      label: "Pending Reports",
+      label: t("adminDash.pendingReports"),
       value: stats?.pendingReports || 0,
       icon: AlertTriangle,
       bgColor: "bg-red-100 dark:bg-red-900/30",
       textColor: "text-red-600 dark:text-red-400",
     },
     {
-      label: "Total Reports",
+      label: t("adminDash.totalReports"),
       value: stats?.reports || 0,
       icon: Flag,
       bgColor: "bg-yellow-100 dark:bg-yellow-900/30",
       textColor: "text-yellow-600 dark:text-yellow-400",
     },
     {
-      label: "Admins",
+      label: t("adminDash.admins"),
       value: stats?.roleCounts?.ADMIN || 0,
       icon: UserCheck,
       bgColor: "bg-rose-100 dark:bg-rose-900/30",
       textColor: "text-rose-600 dark:text-rose-400",
     },
     {
-      label: "Moderators",
+      label: t("adminDash.moderators"),
       value: stats?.roleCounts?.MODERATOR || 0,
       icon: UserPlus,
       bgColor: "bg-orange-100 dark:bg-orange-900/30",
       textColor: "text-orange-600 dark:text-orange-400",
     },
     {
-      label: "Active Users",
+      label: t("adminDash.activeUsers"),
       value: stats?.activeUsers ?? stats?.users ?? 0,
       icon: CheckCircle,
       bgColor: "bg-teal-100 dark:bg-teal-900/30",
@@ -116,10 +120,10 @@ export default function AdminDashboard() {
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("adminDash.title")}</h1>
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           <Activity className="w-4 h-4" />
-          <span>Updated: {new Date().toLocaleTimeString()}</span>
+          <span>{t("adminDash.updated", { time: new Date().toLocaleTimeString(localeMap[language] || "en-US") })}</span>
         </div>
       </div>
 
@@ -147,7 +151,7 @@ export default function AdminDashboard() {
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* User Roles Breakdown */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">User Roles</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t("adminDash.userRoles")}</h2>
           <div className="space-y-2">
             {stats?.roleCounts ? (
               Object.entries(stats.roleCounts).map(([role, count]) => (
@@ -157,28 +161,28 @@ export default function AdminDashboard() {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-gray-500">No role data available</p>
+              <p className="text-sm text-gray-500">{t("adminDash.noRoleData")}</p>
             )}
           </div>
         </div>
 
         {/* Quick Actions */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t("adminDash.quickActions")}</h2>
           <div className="space-y-3">
             <Link
               href="/admin/users"
               className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition"
             >
               <Users className="w-5 h-5 text-blue-500" />
-              <span>Manage Users</span>
+              <span>{t("adminDash.manageUsers")}</span>
             </Link>
             <Link
               href="/admin/posts"
               className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition"
             >
               <FileText className="w-5 h-5 text-green-500" />
-              <span>Manage Posts</span>
+              <span>{t("adminDash.managePosts")}</span>
             </Link>
             <Link
               href="/admin/reports"
@@ -186,7 +190,7 @@ export default function AdminDashboard() {
             >
               <Flag className="w-5 h-5 text-red-500" />
               <span>
-                View Reports {stats?.pendingReports ? `(${stats.pendingReports} pending)` : ""}
+                {t("adminDash.viewReports")} {stats?.pendingReports ? t("adminDash.pendingSuffix", { n: stats.pendingReports }) : ""}
               </span>
             </Link>
             <Link
@@ -195,7 +199,7 @@ export default function AdminDashboard() {
             >
               <CreditCard className="w-5 h-5 text-green-500" />
               <span>
-                Payment Requests
+                {t("adminDash.paymentRequests")}
                 {pendingPayments > 0 && (
                   <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
                     {pendingPayments}
