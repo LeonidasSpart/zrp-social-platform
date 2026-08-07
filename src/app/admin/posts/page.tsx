@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Post {
   id: string;
@@ -12,11 +13,14 @@ interface Post {
 }
 
 export default function AdminPosts() {
+  const { t, language } = useLanguage();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -37,7 +41,7 @@ export default function AdminPosts() {
   }, [page, search]);
 
   const handleDelete = async (postId: string) => {
-    if (!confirm("Delete this post?")) return;
+    if (!confirm(t("adminPosts.deleteConfirm"))) return;
     try {
       const res = await fetch(`/api/admin/posts/${postId}`, { method: "DELETE" });
       if (res.ok) fetchPosts();
@@ -46,16 +50,16 @@ export default function AdminPosts() {
     }
   };
 
-  if (loading) return <div className="text-center py-12 text-gray-500">Loading...</div>;
+  if (loading) return <div className="text-center py-12 text-gray-500">{t("action.loading")}</div>;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Posts</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{t("adminPosts.title")}</h1>
 
       <div className="flex gap-2 mb-4">
         <input
           type="text"
-          placeholder="Search posts..."
+          placeholder={t("adminPosts.searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -69,17 +73,17 @@ export default function AdminPosts() {
               <div className="flex-1 min-w-0">
                 <p className="text-gray-900 dark:text-white">{post.content}</p>
                 <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
-                  <span>By {post.author.name || post.author.username}</span>
+                  <span>{t("adminPosts.by", { name: post.author.name || post.author.username })}</span>
                   <span>❤️ {post._count.likes}</span>
                   <span>💬 {post._count.comments}</span>
-                  <span>{new Date(post.createdAt).toLocaleString()}</span>
+                  <span>{new Date(post.createdAt).toLocaleString(localeMap[language] || "en-US")}</span>
                 </div>
               </div>
               <button
                 onClick={() => handleDelete(post.id)}
                 className="text-red-600 hover:text-red-800 text-sm font-medium ml-4"
               >
-                Delete
+                {t("adminPosts.delete")}
               </button>
             </div>
           </div>
@@ -88,9 +92,9 @@ export default function AdminPosts() {
 
       {totalPages > 1 && (
         <div className="flex justify-center gap-2 mt-4">
-          <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page===1} className="px-3 py-1 border rounded disabled:opacity-50">Previous</button>
-          <span className="px-3 py-1">Page {page} of {totalPages}</span>
-          <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page===totalPages} className="px-3 py-1 border rounded disabled:opacity-50">Next</button>
+          <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page===1} className="px-3 py-1 border rounded disabled:opacity-50">{t("adminPosts.previous")}</button>
+          <span className="px-3 py-1">{t("adminPosts.pageOf", { page, total: totalPages })}</span>
+          <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page===totalPages} className="px-3 py-1 border rounded disabled:opacity-50">{t("adminPosts.next")}</button>
         </div>
       )}
     </div>
