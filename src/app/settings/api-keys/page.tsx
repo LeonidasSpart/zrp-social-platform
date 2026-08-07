@@ -34,9 +34,9 @@ interface ButtonProps {
 
 const Button = ({ children, onClick, variant = "default", disabled, className = "" }: ButtonProps) => {
   const base =
-    "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50 disabled:pointer-events-none px-4 py-2";
+    "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zrp-red disabled:opacity-50 disabled:pointer-events-none px-4 py-2";
   const variants = {
-    default: "bg-red-600 text-white hover:bg-red-700",
+    default: "bg-zrp-red text-white hover:bg-zrp-darkRed",
     outline: "border border-gray-300 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800",
     destructive: "bg-red-600 text-white hover:bg-red-700",
     ghost: "hover:bg-gray-100 dark:hover:bg-gray-800",
@@ -67,7 +67,7 @@ const Input = ({ value, onChange, placeholder, disabled, className = "" }: Input
     onChange={onChange}
     placeholder={placeholder}
     disabled={disabled}
-    className={`flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 ${className}`}
+    className={`flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zrp-red focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 ${className}`}
   />
 );
 
@@ -207,7 +207,7 @@ export default function ApiKeysPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-red-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-zrp-red" />
       </div>
     );
   }
@@ -327,13 +327,13 @@ export default function ApiKeysPage() {
           </pre>
         </div>
 
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-          <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200">{t("apiKeys.availableEndpoints")}</h4>
-          <ul className="mt-2 text-xs space-y-1 text-blue-700 dark:text-blue-300">
-            <li><code className="bg-blue-100 dark:bg-blue-800/50 px-1.5 py-0.5 rounded">GET /api/external/me</code> – {t("apiKeys.endpointMe")}</li>
-            <li><code className="bg-blue-100 dark:bg-blue-800/50 px-1.5 py-0.5 rounded">GET /api/external/me/posts</code> – {t("apiKeys.endpointPosts")}</li>
+        <div className="bg-zrp-red/5 dark:bg-zrp-red/10 border border-zrp-red/20 dark:border-zrp-red/30 rounded-lg p-4">
+          <h4 className="text-sm font-medium text-zrp-red dark:text-zrp-red">{t("apiKeys.availableEndpoints")}</h4>
+          <ul className="mt-2 text-xs space-y-1 text-gray-700 dark:text-gray-300">
+            <li><code className="bg-zrp-red/10 dark:bg-zrp-red/20 px-1.5 py-0.5 rounded">GET /api/external/me</code> – {t("apiKeys.endpointMe")}</li>
+            <li><code className="bg-zrp-red/10 dark:bg-zrp-red/20 px-1.5 py-0.5 rounded">GET /api/external/me/posts</code> – {t("apiKeys.endpointPosts")}</li>
           </ul>
-          <p className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
             {t("apiKeys.moreEndpoints")}
           </p>
         </div>
@@ -394,7 +394,7 @@ export default function ApiKeysPage() {
                   value={expiresIn}
                   onChange={(e) => setExpiresIn(Number(e.target.value))}
                   disabled={isSubmitting}
-                  className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800"
+                  className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zrp-red focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800"
                 >
                   <option value={30}>{t("apiKeys.days30")}</option>
                   <option value={90}>{t("apiKeys.days90")}</option>
