@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import PasswordInput from "@/components/PasswordInput"; // ✅ added
+import PasswordInput from "@/components/PasswordInput";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function SignupPage() {
@@ -125,7 +125,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-zrp-red dark:hover:bg-zrp-darkRed text-white py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="w-full bg-zrp-red hover:bg-zrp-darkRed text-white py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               {loading ? t("auth.creatingAccount") : t("auth.createAccount")}
             </button>
@@ -133,7 +133,7 @@ export default function SignupPage() {
 
           <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
             {t("auth.alreadyHaveAccount")}{" "}
-            <Link href="/login" className="text-blue-600 dark:text-blue-400 hover:underline">
+            <Link href="/login" className="text-zrp-red dark:text-zrp-red hover:underline">
               {t("auth.signIn")}
             </Link>
           </p>
