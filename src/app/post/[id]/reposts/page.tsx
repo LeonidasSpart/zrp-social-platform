@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Repeat } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface User {
   id: string;
@@ -19,6 +20,7 @@ interface User {
 export default function RepostsPage({ params }: { params: { id: string } }) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useLanguage();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,18 +41,18 @@ export default function RepostsPage({ params }: { params: { id: string } }) {
     try {
       setLoading(true);
       const res = await fetch(`/api/posts/${params.id}/reposts`);
-      if (!res.ok) throw new Error("Failed to fetch reposts");
+      if (!res.ok) throw new Error(t("reposts.errFetch"));
       const data = await res.json();
       setUsers(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load reposts");
+      setError(err instanceof Error ? err.message : t("reposts.errLoad"));
     } finally {
       setLoading(false);
     }
   };
 
   if (status === "loading" || loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    return <div className="flex items-center justify-center min-h-screen">{t("action.loading")}</div>;
   }
 
   return (
@@ -61,15 +63,15 @@ export default function RepostsPage({ params }: { params: { id: string } }) {
         </Link>
         <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <Repeat className="w-5 h-5 text-green-500" />
-          Reposts
+          {t("reposts.title")}
         </h1>
-        <span className="text-sm text-gray-500 ml-auto">{users.length} reposts</span>
+        <span className="text-sm text-gray-500 ml-auto">{t("reposts.count", { n: users.length })}</span>
       </div>
 
       {error ? (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">{error}</div>
       ) : users.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">No reposts yet.</div>
+        <div className="text-center py-12 text-gray-500">{t("reposts.empty")}</div>
       ) : (
         <div className="space-y-3">
           {users.map((user) => (
@@ -102,7 +104,7 @@ export default function RepostsPage({ params }: { params: { id: string } }) {
               </div>
               {user.isFollowing && (
                 <span className="ml-auto text-xs bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">
-                  Following
+                  {t("action.following")}
                 </span>
               )}
             </Link>
