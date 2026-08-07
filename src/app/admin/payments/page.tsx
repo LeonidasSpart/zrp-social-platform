@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Loader2, CheckCircle, XCircle, Clock } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Payment {
   id: string;
@@ -23,10 +24,13 @@ interface Payment {
 export default function AdminPayments() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t, language } = useLanguage();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -49,7 +53,7 @@ export default function AdminPayments() {
       const data = await res.json();
       setPayments(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : t("adminPayments.errSomethingWrong"));
     } finally {
       setLoading(false);
     }
@@ -65,12 +69,12 @@ export default function AdminPayments() {
       });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || "Verification failed");
+        throw new Error(err.error || t("adminPayments.errVerifyFailed"));
       }
       // Remove from list or refresh
       await fetchPayments();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to verify");
+      alert(err instanceof Error ? err.message : t("adminPayments.errVerifyGeneric"));
     } finally {
       setProcessing(null);
     }
@@ -98,17 +102,17 @@ export default function AdminPayments() {
     <div className="max-w-4xl mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Payment Requests
+          {t("adminPayments.title")}
         </h1>
         <span className="text-sm text-gray-500">
-          {payments.length} pending
+          {t("adminPayments.pendingCount", { n: payments.length })}
         </span>
       </div>
 
       {payments.length === 0 ? (
         <div className="text-center py-12 text-gray-500 dark:text-gray-400">
           <CheckCircle className="w-12 h-12 mx-auto text-green-500 mb-3" />
-          <p>No pending payment requests.</p>
+          <p>{t("adminPayments.noPending")}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -132,16 +136,16 @@ export default function AdminPayments() {
                     </span>
                   </div>
                   <div className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                    <span className="font-medium">Tx:</span>{" "}
+                    <span className="font-medium">{t("adminPayments.tx")}</span>{" "}
                     <code className="text-xs bg-gray-100 dark:bg-gray-700 px-1 rounded">
-                      {payment.transactionId || "Not provided"}
+                      {payment.transactionId || t("adminPayments.notProvided")}
                     </code>
                   </div>
                   <div className="mt-1 flex items-center gap-2 text-xs text-gray-400">
                     <Clock className="w-3 h-3" />
-                    <span>{new Date(payment.createdAt).toLocaleString()}</span>
+                    <span>{new Date(payment.createdAt).toLocaleString(localeMap[language] || "en-US")}</span>
                     <span className="inline-flex items-center gap-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded-full">
-                      pending
+                      {t("adminPayments.pendingBadge")}
                     </span>
                   </div>
                 </div>
@@ -155,7 +159,7 @@ export default function AdminPayments() {
                   ) : (
                     <CheckCircle className="w-4 h-4" />
                   )}
-                  Verify
+                  {t("adminPayments.verify")}
                 </button>
               </div>
             </div>
