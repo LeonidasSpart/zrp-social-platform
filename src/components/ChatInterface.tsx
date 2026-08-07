@@ -221,14 +221,11 @@ export default function ChatInterface({
 
     setDeletingMessageId(messageId);
     try {
-      // ✅ FIXED: Use the nested /delete/[id] endpoint
       const res = await fetch(`/api/messages/delete/${messageId}`, {
         method: "DELETE",
       });
       if (res.ok) {
-        // Remove from local state
         setMessages((prev) => prev.filter((m) => m.id !== messageId));
-        // Emit socket event for real-time update
         const message = messages.find((m) => m.id === messageId);
         if (message) {
           socketRef.current?.emit("delete-message", {
@@ -335,7 +332,7 @@ export default function ChatInterface({
           href={`/profile/${receiverUsername}`}
           className="flex items-center gap-2 sm:gap-3 min-w-0 hover:opacity-80 transition"
         >
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold flex-shrink-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-zrp-red/10 flex items-center justify-center text-zrp-red font-semibold flex-shrink-0">
             {receiverAvatar ? (
               <img
                 src={receiverAvatar}
@@ -350,7 +347,7 @@ export default function ChatInterface({
             <p className="font-semibold text-gray-900 dark:text-white truncate text-sm sm:text-base hover:underline">
               {receiverName}
             </p>
-            {receiverTyping && <p className="text-xs text-blue-500">{t("chat.typing")}</p>}
+            {receiverTyping && <p className="text-xs text-zrp-red">{t("chat.typing")}</p>}
           </div>
           <div className="hidden sm:flex items-center gap-1 ml-2 flex-shrink-0">
             <span
@@ -397,7 +394,7 @@ export default function ChatInterface({
                 <div
                   className={`relative group max-w-[80%] sm:max-w-[75%] rounded-2xl px-3 sm:px-4 py-2 break-words ${
                     isOwn
-                      ? "bg-blue-600 text-white rounded-br-none"
+                      ? "bg-zrp-red text-white rounded-br-none"
                       : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-none"
                   }`}
                 >
@@ -434,7 +431,7 @@ export default function ChatInterface({
                   {displayContent && <p className="text-sm">{displayContent}</p>}
                   <p
                     className={`text-[10px] mt-1 ${
-                      isOwn ? "text-blue-200" : "text-gray-400"
+                      isOwn ? "text-red-100" : "text-gray-400"
                     }`}
                   >
                     {new Date(message.createdAt).toLocaleTimeString(localeMap[language] || "en-US", {
@@ -460,11 +457,11 @@ export default function ChatInterface({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploadingImage}
-          className="text-gray-500 hover:text-blue-500 transition flex-shrink-0 disabled:opacity-50 p-1.5"
+          className="text-gray-500 hover:text-zrp-red transition flex-shrink-0 disabled:opacity-50 p-1.5"
           title={t("chat.uploadImage")}
         >
           {uploadingImage ? (
-            <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-zrp-red border-t-transparent rounded-full animate-spin" />
           ) : (
             <Image className="w-5 h-5" />
           )}
@@ -480,7 +477,7 @@ export default function ChatInterface({
         <button
           type="button"
           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          className="text-gray-500 hover:text-blue-500 transition flex-shrink-0 p-1.5"
+          className="text-gray-500 hover:text-zrp-red transition flex-shrink-0 p-1.5"
           title={t("chat.addEmoji")}
         >
           <Smile className="w-5 h-5" />
@@ -491,13 +488,13 @@ export default function ChatInterface({
           value={newMessage}
           onChange={handleTyping}
           placeholder={t("chat.messagePlaceholder", { name: receiverName })}
-          className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm min-w-0"
+          className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm min-w-0"
         />
 
         <button
           type="submit"
           disabled={!newMessage.trim() || sending}
-          className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition flex-shrink-0"
+          className="bg-zrp-red text-white p-2 rounded-full hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition flex-shrink-0"
         >
           <Send className="w-5 h-5" />
         </button>
@@ -554,7 +551,7 @@ export default function ChatInterface({
             </button>
             <button
               onClick={downloadImage}
-              className="absolute bottom-4 right-4 text-white bg-blue-600 rounded-full p-3 hover:bg-blue-700 transition shadow-lg"
+              className="absolute bottom-4 right-4 text-white bg-zrp-red rounded-full p-3 hover:bg-zrp-darkRed transition shadow-lg"
               title={t("chat.downloadImage")}
             >
               <Download className="w-5 h-5" />
