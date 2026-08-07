@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Heart, MessageCircle, Repeat, UserPlus } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Notification {
   id: string;
@@ -26,6 +27,7 @@ interface Notification {
 export default function NotificationsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useLanguage();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -86,13 +88,13 @@ export default function NotificationsPage() {
     const name = notification.fromUser.name || notification.fromUser.username;
     switch (notification.type) {
       case "like":
-        return `${name} liked your post`;
+        return t("notifications.likedPost", { name });
       case "comment":
-        return `${name} commented on your post`;
+        return t("notifications.commentedPost", { name });
       case "follow":
-        return `${name} started following you`;
+        return t("notifications.startedFollowing", { name });
       case "repost":
-        return `${name} reposted your post`;
+        return t("notifications.repostedPost", { name });
       default:
         return "";
     }
@@ -101,7 +103,7 @@ export default function NotificationsPage() {
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
     const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return "Just now";
+    if (minutes < 1) return t("notifications.justNow");
     if (minutes < 60) return `${minutes}m`;
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h`;
@@ -112,19 +114,19 @@ export default function NotificationsPage() {
   if (status === "loading" || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-gray-500">{t("action.loading")}</div>
       </div>
     );
   }
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">Notifications</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-4">{t("notifications.title")}</h1>
 
       {notifications.length === 0 ? (
         <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8 border border-gray-200 text-center">
-          <p className="text-gray-500">No notifications yet</p>
-          <p className="text-sm text-gray-400 mt-1">When someone interacts with you, it will appear here</p>
+          <p className="text-gray-500">{t("notifications.empty")}</p>
+          <p className="text-sm text-gray-400 mt-1">{t("notifications.emptyDesc")}</p>
         </div>
       ) : (
         <div className="space-y-2">
