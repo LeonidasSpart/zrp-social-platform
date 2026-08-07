@@ -2,11 +2,12 @@
 
 import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Image, FileImage, BarChart3, Plus, Trash2, Clock, Briefcase, FileText, X } from "lucide-react";
+import { Image, FileImage, BarChart3, Plus, Trash2, Clock, Briefcase, FileText } from "lucide-react";
 import GifPicker from "./GifPicker";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { getPlanLimits } from "@/lib/limits";
 import { useLanguage } from "@/contexts/LanguageContext";
+import MentionAutocomplete from "./MentionAutocomplete";
 
 interface PostComposerProps {
   onPostCreated: (post: any) => void;
@@ -52,6 +53,12 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
   // ─── Article fields ──────────────────────────────────────────────
   const [articleBody, setArticleBody] = useState("");
+
+  // ─── Mention autocomplete ──────────────────────────────────────
+  const [cursorPosition, setCursorPosition] = useState(0);
+  const [showMentionAutocomplete, setShowMentionAutocomplete] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const composerRef = useRef<HTMLDivElement>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -147,8 +154,48 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   // ─── Determine if we should show type selector ──────────────────
   const showTypeSelector = canPostRecruitment || canPublishArticle;
 
+  // ─── Textarea change handler ────────────────────────────────────
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newContent = e.target.value;
+    setContent(newContent);
+    setCursorPosition(e.target.selectionStart || 0);
+    // The autocomplete will detect '@' automatically via its own effect.
+  };
+
+  // ─── Mention selection handler ──────────────────────────────────
+  const handleMentionSelect = (mention: string) => {
+    const before = content.slice(0, cursorPosition);
+    const after = content.slice(cursorPosition);
+    const match = before.match(/@\w*$/);
+    if (match) {
+      const start = before.length - match[0].length;
+      const newContent = before.slice(0, start) + mention + after;
+      setContent(newContent);
+      setShowMentionAutocomplete(false);
+      // Update cursor position after insertion
+      setTimeout(() => {
+        if (textareaRef.current) {
+          const newPos = start + mention.length;
+          textareaRef.current.selectionStart = newPos;
+          textareaRef.current.selectionEnd = newPos;
+          textareaRef.current.focus();
+        }
+      }, 0);
+    } else {
+      setShowMentionAutocomplete(false);
+    }
+  };
+
+  // ─── Handle autocomplete close ──────────────────────────────────
+  const handleAutocompleteClose = () => {
+    setShowMentionAutocomplete(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // If mention autocomplete is open, prevent submit
+    if (showMentionAutocomplete) return;
 
     // Validation
     if (!content.trim() && !pollQuestion.trim() && postType !== "ARTICLE") {
@@ -279,6 +326,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     setLocation("");
     setApplyUrl("");
     setArticleBody("");
+    setShowMentionAutocomplete(false);
   };
 
   const displayName = session?.user?.name || session?.user?.username || "User";
@@ -314,7 +362,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   })();
 
   return (
-    <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
+    <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700" ref={composerRef}>
       <form onSubmit={handleSubmit}>
         <div className="flex items-start gap-3">
           {/* Avatar */}
@@ -329,7 +377,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               initial
             )}
           </div>
-          <div className="flex-1 space-y-2">
+          <div className="flex-1 space-y-2 relative">
             {/* ─── Post Type Selector ────────────────────────────────── */}
             {showTypeSelector && (
               <div className="flex items-center gap-2 mb-2">
@@ -377,8 +425,12 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
             {/* ─── Content Input ────────────────────────────────────── */}
             {postType !== "ARTICLE" ? (
               <textarea
+                ref={textareaRef}
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={handleContentChange}
+                onKeyDown={(e) => {
+                  // If autocomplete is open and user presses Escape or Enter, the autocomplete handles it.
+                }}
                 placeholder={
                   postType === "RECRUITMENT"
                     ? t("composer.placeholderRecruitment")
@@ -390,8 +442,9 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
             ) : (
               <div className="space-y-2">
                 <textarea
+                  ref={textareaRef}
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  onChange={handleContentChange}
                   placeholder={t("composer.placeholderArticleTitle")}
                   className="w-full resize-none border-0 focus:ring-0 p-0 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 min-h-[40px] bg-transparent text-lg font-semibold"
                   maxLength={limits.postLength}
@@ -403,6 +456,18 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   className="w-full resize-none border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 min-h-[200px] bg-gray-50 dark:bg-gray-800/50 font-mono text-sm"
                 />
                 <p className="text-xs text-gray-400">{t("composer.articleMarkdown")}</p>
+              </div>
+            )}
+
+            {/* ─── Mention Autocomplete ────────────────────────────── */}
+            {showMentionAutocomplete && (
+              <div className="relative">
+                <MentionAutocomplete
+                  text={content}
+                  cursorPosition={cursorPosition}
+                  onSelect={handleMentionSelect}
+                  onClose={handleAutocompleteClose}
+                />
               </div>
             )}
 
