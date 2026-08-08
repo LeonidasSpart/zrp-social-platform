@@ -69,12 +69,12 @@ export default function UpgradeRequestModal({ plan, limits, onClose, onSuccess }
           Price: <span className="font-semibold">CHF {price.toFixed(2)} / month</span>
         </p>
 
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
-          <p className="text-sm text-blue-800 dark:text-blue-300 font-medium">Bank Transfer Instructions</p>
-          <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+        <div className="bg-zrp-red/5 dark:bg-zrp-red/10 border border-zrp-red/20 dark:border-zrp-red/30 rounded-lg p-4 mb-4">
+          <p className="text-sm text-zrp-red dark:text-zrp-red font-medium">Bank Transfer Instructions</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
             Please transfer the amount to the following bank account:
           </p>
-          <div className="mt-2 text-xs font-mono bg-white dark:bg-gray-700 p-2 rounded border border-blue-200 dark:border-blue-800">
+          <div className="mt-2 text-xs font-mono bg-white dark:bg-gray-700 p-2 rounded border border-zrp-red/20 dark:border-zrp-red/30">
             <p>Bank: Swissquote Bank SA</p>
             <p>Account: 1234-5678-90</p>
             <p>IBAN: CH93 1234 5678 9012 3456 7</p>
