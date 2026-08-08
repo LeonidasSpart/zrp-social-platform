@@ -11,7 +11,7 @@ import {
   PenSquare,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useEffect } from "react";
+import { useUnreadCount } from "@/contexts/UnreadCountContext";
 
 type NavItem = {
   href: string;
@@ -24,27 +24,11 @@ export default function Sidebar() {
   const { data: session } = useSession();
   const pathname = usePathname();
   const { t } = useLanguage();
-  const [unreadCount, setUnreadCount] = useState(0);
+  const { unreadCount } = useUnreadCount();
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
 
   const isAuthenticated = !!session;
   const features = session?.user?.features;
-
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    const fetchUnread = async () => {
-      try {
-        const res = await fetch("/api/notifications/unread");
-        if (res.ok) {
-          const data = await res.json();
-          setUnreadCount(data.count);
-        }
-      } catch {}
-    };
-    fetchUnread();
-    const interval = setInterval(fetchUnread, 30000);
-    return () => clearInterval(interval);
-  }, [isAuthenticated]);
 
   if (!isAuthenticated || pathname?.startsWith("/onboarding")) return null;
 
