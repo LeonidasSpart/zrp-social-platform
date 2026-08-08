@@ -204,7 +204,7 @@ export default function Header() {
                     <Link
                       href={`/profile/${session.user.username}`}
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                     >
                       <User className="w-4 h-4" />
                       <span>{t("nav.profile")}</span>
@@ -212,7 +212,7 @@ export default function Header() {
                     <Link
                       href="/settings"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                     >
                       <Settings className="w-4 h-4" />
                       <span>Settings</span>
@@ -223,7 +223,7 @@ export default function Header() {
                       <Link
                         href="/settings/team"
                         onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                       >
                         <Users className="w-4 h-4" />
                         <span>Team Management</span>
@@ -235,7 +235,7 @@ export default function Header() {
                       <Link
                         href="/settings/api-keys"
                         onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                       >
                         <Key className="w-4 h-4" />
                         <span>API Keys</span>
