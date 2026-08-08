@@ -260,21 +260,21 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 type="text"
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
+                className="flex-1 min-w-0 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
                 autoFocus
                 maxLength={280}
               />
               <button
                 onClick={() => saveEdit(comment.id)}
                 disabled={!editContent.trim() || editing}
-                className="text-green-600 hover:text-green-700 p-1 disabled:opacity-50"
+                className="flex-shrink-0 text-green-600 hover:text-green-700 p-1 disabled:opacity-50"
                 title="Save"
               >
                 <Check className="w-4 h-4" />
               </button>
               <button
                 onClick={cancelEdit}
-                className="text-gray-400 hover:text-gray-600 p-1"
+                className="flex-shrink-0 text-gray-400 hover:text-gray-600 p-1"
                 title="Cancel"
               >
                 <X className="w-4 h-4" />
@@ -292,7 +292,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 setReplyingTo(replyingTo === comment.id ? null : comment.id);
                 setReplyContent("");
               }}
-              className="text-xs text-gray-400 hover:text-zrp-red transition mt-0.5 flex items-center gap-1"
+              className="text-xs text-gray-400 hover:text-zrp-red transition mt-0.5 flex items-center gap-1 whitespace-nowrap"
             >
               <Reply className="w-3 h-3" />
               Reply
@@ -306,7 +306,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
                 placeholder={`Reply to ${comment.author.name || comment.author.username}...`}
-                className="flex-1 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
+                className="flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
                 maxLength={280}
                 autoFocus
                 onKeyDown={(e) => {
@@ -319,7 +319,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
               <button
                 onClick={() => handleReply(comment.id)}
                 disabled={!replyContent.trim()}
-                className="px-3 py-1.5 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 transition"
+                className="flex-shrink-0 whitespace-nowrap px-3 py-1.5 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 transition"
               >
                 Reply
               </button>
@@ -328,7 +328,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                   setReplyingTo(null);
                   setReplyContent("");
                 }}
-                className="text-gray-400 hover:text-gray-600 text-sm"
+                className="flex-shrink-0 whitespace-nowrap text-gray-400 hover:text-gray-600 text-sm"
               >
                 Cancel
               </button>
@@ -378,13 +378,13 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Write a comment..."
-            className="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="flex-1 min-w-0 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             maxLength={280}
           />
           <button
             type="submit"
             disabled={!newComment.trim() || submitting}
-            className="bg-zrp-red text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-1"
+            className="flex-shrink-0 whitespace-nowrap bg-zrp-red text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-1"
           >
             <Send className="w-4 h-4" />
             Reply
