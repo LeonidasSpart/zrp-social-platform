@@ -108,7 +108,7 @@ export function FeedItem({ post, userId }: FeedItemProps) {
                   <Link
                     key={index}
                     href={`/hashtag/${tag}`}
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-zrp-red hover:underline"
                   >
                     {part.value}
                   </Link>
@@ -120,7 +120,7 @@ export function FeedItem({ post, userId }: FeedItemProps) {
                   <Link
                     key={index}
                     href={`/profile/${username}`}
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-zrp-red hover:underline"
                   >
                     {part.value}
                   </Link>
