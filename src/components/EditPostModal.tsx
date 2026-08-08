@@ -75,7 +75,7 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditP
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none min-h-[120px] text-gray-800"
+            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-zrp-red focus:border-transparent resize-none min-h-[120px] text-gray-800"
             placeholder="What's happening?"
             maxLength={280}
           />
@@ -92,7 +92,7 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditP
               <button
                 type="submit"
                 disabled={!content.trim() || loading}
-                className="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                className="bg-zrp-red text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {loading ? "Saving..." : "Save"}
               </button>
