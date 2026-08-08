@@ -11,57 +11,39 @@ import {
 
 /*
  * ============================================================
- * SOLANA CONFIGURATION
+ * Configuration
  * ============================================================
  */
 
-const DEFAULT_USDC_MINT =
-  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
-
-const DEFAULT_RPC_URL =
-  "https://api.devnet.solana.com";
+const DEFAULT_RPC_URL = "https://api.devnet.solana.com";
 
 /*
  * IMPORTANT:
- * Do NOT create PublicKey objects at module load time.
+ * Do NOT create PublicKey objects at module import time.
  *
- * Next.js evaluates imported modules during build.
- * If an environment variable is missing, something like:
- *
- * new PublicKey(undefined)
- *
- * can produce:
- *
- * Cannot read properties of undefined (reading '_bn')
- *
- * Everything is therefore created lazily.
+ * This prevents Next.js build-time crashes when environment
+ * variables are temporarily unavailable.
  */
-
-/* ============================================================
- * USDC
- * ============================================================ */
 
 export function getUsdcMint(): PublicKey {
   const address =
     process.env.NEXT_PUBLIC_USDC_MINT ||
-    DEFAULT_USDC_MINT;
+    process.env.NEXT_PUBLIC_USDC_MINT_ADDRESS;
 
   if (!address) {
-    throw new Error("USDC mint address is not configured.");
+    throw new Error(
+      "NEXT_PUBLIC_USDC_MINT is not configured."
+    );
   }
 
   try {
     return new PublicKey(address);
   } catch {
     throw new Error(
-      `Invalid USDC mint address: ${address}`
+      `Invalid NEXT_PUBLIC_USDC_MINT: ${address}`
     );
   }
 }
-
-/* ============================================================
- * PLATFORM WALLET PUBLIC KEY
- * ============================================================ */
 
 export function getPlatformWalletPublicKey(): PublicKey {
   const address =
@@ -70,7 +52,7 @@ export function getPlatformWalletPublicKey(): PublicKey {
 
   if (!address) {
     throw new Error(
-      "Platform wallet address is not configured. Set NEXT_PUBLIC_PLATFORM_WALLET."
+      "NEXT_PUBLIC_PLATFORM_WALLET or SOLANA_WALLET_ADDRESS is not configured."
     );
   }
 
@@ -83,9 +65,11 @@ export function getPlatformWalletPublicKey(): PublicKey {
   }
 }
 
-/* ============================================================
- * SOLANA CONNECTION
- * ============================================================ */
+/*
+ * ============================================================
+ * Solana connection
+ * ============================================================
+ */
 
 let connection: Connection | null = null;
 
@@ -116,11 +100,12 @@ export function getConnection(): Connection {
   return connection;
 }
 
-/* ============================================================
- * PLATFORM WALLET
- *
+/*
+ * ============================================================
+ * Platform wallet
  * SERVER ONLY
- * ============================================================ */
+ * ============================================================
+ */
 
 let platformWallet: Keypair | null = null;
 
@@ -143,7 +128,7 @@ export function getPlatformWallet(): Keypair {
   try {
     privateKeyBytes =
       Buffer.from(
-        privateKeyBase64.trim(),
+        privateKeyBase64,
         "base64"
       );
   } catch {
@@ -158,16 +143,10 @@ export function getPlatformWallet(): Keypair {
     );
   }
 
-  try {
-    platformWallet =
-      Keypair.fromSecretKey(
-        privateKeyBytes
-      );
-  } catch {
-    throw new Error(
-      "Unable to create Solana platform wallet from SOLANA_PRIVATE_KEY."
+  const wallet =
+    Keypair.fromSecretKey(
+      privateKeyBytes
     );
-  }
 
   const configuredAddress =
     process.env.NEXT_PUBLIC_PLATFORM_WALLET ||
@@ -175,27 +154,36 @@ export function getPlatformWallet(): Keypair {
 
   if (
     configuredAddress &&
-    platformWallet.publicKey.toBase58() !==
+    wallet.publicKey.toBase58() !==
       configuredAddress
   ) {
-    platformWallet = null;
-
     throw new Error(
       "SOLANA_PRIVATE_KEY does not match the configured platform wallet address."
     );
   }
 
+  platformWallet = wallet;
+
   return platformWallet;
 }
 
-/* ============================================================
- * VERIFY USDC TRANSACTION
- * ============================================================ */
+/*
+ * ============================================================
+ * Verify USDC transaction
+ * ============================================================
+ *
+ * IMPORTANT:
+ * The current implementation verifies that the transaction
+ * exists and succeeded, but does NOT yet parse the SPL token
+ * transfer amount.
+ *
+ * We should harden this before accepting real tips.
+ */
 
 export async function verifyUsdcTransaction(
   txHash: string
 ) {
-  if (!txHash || typeof txHash !== "string") {
+  if (!txHash) {
     throw new Error(
       "Transaction signature is required."
     );
@@ -214,7 +202,7 @@ export async function verifyUsdcTransaction(
 
   if (!tx) {
     throw new Error(
-      "Transaction not found on Solana."
+      "Transaction not found."
     );
   }
 
@@ -230,13 +218,16 @@ export async function verifyUsdcTransaction(
     valid: true,
     amount: 0,
     from: "",
-    to: getPlatformWalletPublicKey().toBase58(),
+    to:
+      getPlatformWalletPublicKey().toBase58(),
   };
 }
 
-/* ============================================================
- * SEND USDC
- * ============================================================ */
+/*
+ * ============================================================
+ * Send USDC from platform wallet
+ * ============================================================
+ */
 
 export async function sendUsdc(
   toPublicKey: string,
@@ -257,12 +248,16 @@ export async function sendUsdc(
     );
   }
 
+  const connection = getConnection();
+
+  const wallet =
+    getPlatformWallet();
+
+  const usdcMint =
+    getUsdcMint();
+
   const recipient =
     new PublicKey(toPublicKey);
-
-  const connection = getConnection();
-  const wallet = getPlatformWallet();
-  const usdcMint = getUsdcMint();
 
   const fromTokenAccount =
     await getOrCreateAssociatedTokenAccount(
@@ -280,9 +275,14 @@ export async function sendUsdc(
       recipient
     );
 
-  const rawAmount = Math.round(
-    amount * 1_000_000
-  );
+  /*
+   * USDC uses 6 decimals.
+   */
+
+  const rawAmount =
+    Math.round(
+      amount * 1_000_000
+    );
 
   if (rawAmount <= 0) {
     throw new Error(
@@ -290,12 +290,15 @@ export async function sendUsdc(
     );
   }
 
-  return await transfer(
-    connection,
-    wallet,
-    fromTokenAccount.address,
-    toTokenAccount.address,
-    wallet.publicKey,
-    rawAmount
-  );
+  const signature =
+    await transfer(
+      connection,
+      wallet,
+      fromTokenAccount.address,
+      toTokenAccount.address,
+      wallet.publicKey,
+      rawAmount
+    );
+
+  return signature;
 }
