@@ -30,7 +30,7 @@ interface UserData {
   usernameChangedAt: string | null;
   publicLikes: boolean;
   publicFollowing: boolean;
-  isPrivate: boolean; // ✅ added
+  isPrivate: boolean;
   customUrl: string | null;
   solanaWallet: string | null;
 }
@@ -66,7 +66,7 @@ export default function SettingsPage() {
   // ─── Privacy states ──────────────────────────────────────────────
   const [publicLikes, setPublicLikes] = useState(true);
   const [publicFollowing, setPublicFollowing] = useState(true);
-  const [isPrivate, setIsPrivate] = useState(false); // ✅ added
+  const [isPrivate, setIsPrivate] = useState(false);
   const [updatingPrivacy, setUpdatingPrivacy] = useState(false);
 
   // Form states
@@ -158,7 +158,7 @@ export default function SettingsPage() {
         setAvatarPreview(data.avatarUrl || null);
         setPublicLikes(data.publicLikes !== undefined ? data.publicLikes : true);
         setPublicFollowing(data.publicFollowing !== undefined ? data.publicFollowing : true);
-        setIsPrivate(data.isPrivate || false); // ✅ set from API
+        setIsPrivate(data.isPrivate || false);
         setSolanaWallet(data.solanaWallet || "");
 
         if (data.usernameChangedAt) {
@@ -401,7 +401,7 @@ export default function SettingsPage() {
         body: JSON.stringify({
           publicLikes,
           publicFollowing,
-          isPrivate, // ✅ include the private account toggle
+          isPrivate,
         }),
       });
 
@@ -502,7 +502,7 @@ export default function SettingsPage() {
       )}
 
       {/* ─── Account Info ──────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+      <div id="account-info" className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4 scroll-mt-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.accountInfo")}</h2>
         <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
           <Calendar className="w-4 h-4" />
@@ -728,7 +728,7 @@ export default function SettingsPage() {
       </div>
 
       {/* ─── Profile Section ────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+      <div id="profile" className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4 scroll-mt-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.profile")}</h2>
         <form onSubmit={handleUpdateProfile} className="space-y-4">
           <div>
@@ -914,7 +914,7 @@ export default function SettingsPage() {
       </div>
 
       {/* ─── Password Section ────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+      <div id="password" className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4 scroll-mt-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.changePasswordTitle")}</h2>
         <form onSubmit={handleUpdatePassword} className="space-y-4">
           {passwordError && (
@@ -965,7 +965,7 @@ export default function SettingsPage() {
       </div>
 
       {/* ─── Privacy Settings ───────────────────────────────────────── */}
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+      <div id="privacy" className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4 scroll-mt-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.privacySettings")}</h2>
         <form onSubmit={handleUpdatePrivacy} className="space-y-4">
           <div className="flex items-center justify-between">
