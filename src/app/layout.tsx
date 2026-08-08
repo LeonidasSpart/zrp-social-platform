@@ -10,6 +10,7 @@ import CookieConsent from "@/components/CookieConsent";
 import PushNotificationManager from "@/components/PushNotificationManager";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { UnreadCountProvider } from "@/contexts/UnreadCountContext";
 import PageTransition from "@/components/PageTransition";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
@@ -123,26 +124,28 @@ export default function RootLayout({
                 <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
                   <SolanaProvider>
                     <AuthProvider>
-                      <Header />
-                      <EmailVerificationBanner />
+                      <UnreadCountProvider>
+                        <Header />
+                        <EmailVerificationBanner />
 
-                      {/* ─── 3-column layout shell (Facebook-style) ─────────
-                          Sidebar only appears at lg+ (≥1024px).
-                          RightPanel only appears at xl+ (≥1280px).
-                          Below lg, pages render full-width as before,
-                          using the existing top Header for navigation. ─── */}
-                      <div className="flex justify-center w-full max-w-[1400px] mx-auto">
-                        <Sidebar />
-                        <main className="flex-1 min-w-0">
-                          <PageTransition>{children}</PageTransition>
-                        </main>
-                        <RightPanel />
-                      </div>
+                        {/* ─── 3-column layout shell (Facebook-style) ─────────
+                            Sidebar only appears at lg+ (≥1024px).
+                            RightPanel only appears at xl+ (≥1280px).
+                            Below lg, pages render full-width as before,
+                            using the existing top Header for navigation. ─── */}
+                        <div className="flex justify-center w-full max-w-[1400px] mx-auto">
+                          <Sidebar />
+                          <main className="flex-1 min-w-0">
+                            <PageTransition>{children}</PageTransition>
+                          </main>
+                          <RightPanel />
+                        </div>
 
-                      <CookieConsent />
-                      <Footer />
-                      <PushNotificationManager />
-                      <ServiceWorkerRegistration />
+                        <CookieConsent />
+                        <Footer />
+                        <PushNotificationManager />
+                        <ServiceWorkerRegistration />
+                      </UnreadCountProvider>
                     </AuthProvider>
                   </SolanaProvider>
                 </Suspense>
