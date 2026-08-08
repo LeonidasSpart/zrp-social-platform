@@ -232,7 +232,7 @@ export async function POST(req: NextRequest) {
       await prisma.post.update({
         where: { id: post.id },
         data: {
-          hashtags: hashtags.map((h: string) => h.slice(1)),
+          hashtags: hashtags.map((h: string) => h.slice(1).toLowerCase()),
           mentions: mentions.map((m: string) => m.slice(1)),
         },
       });
