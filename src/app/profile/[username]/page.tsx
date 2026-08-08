@@ -616,7 +616,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
             {/* ─── Share Profile ──────────────────────────────────────── */}
             <button
               onClick={handleShareProfile}
-              className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+              className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
             >
               <Share2 className="w-4 h-4" />
               <span className="hidden sm:inline">{t("profile.share")}</span>
@@ -625,7 +625,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
             {isOwnProfile ? (
               <Link
                 href="/settings"
-                className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+                className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
               >
                 <Pencil className="w-4 h-4" />
                 <span className="hidden sm:inline">{t("profile.edit")}</span>
@@ -660,7 +660,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
                 {/* ─── Message ────────────────────────────────────────── */}
                 <Link
                   href={`/messages/${profile.username}`}
-                  className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+                  className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
                 >
                   <MessageCircle className="w-4 h-4" />
                   <span className="hidden sm:inline">{t("action.message")}</span>
@@ -681,7 +681,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
                 <div className="relative" ref={moreMenuRef}>
                   <button
                     onClick={() => setMoreMenuOpen(!moreMenuOpen)}
-                    className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+                    className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
                     title={t("profile.moreActions")}
                   >
                     <MoreHorizontal className="w-4 h-4" />
