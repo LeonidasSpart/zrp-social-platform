@@ -46,7 +46,7 @@ export default function Sidebar() {
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated || pathname?.startsWith("/onboarding")) return null;
 
   const navItems: NavItem[] = [
     { href: "/", icon: Home, label: t("nav.home") },
