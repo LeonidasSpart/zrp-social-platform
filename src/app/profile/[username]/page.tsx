@@ -7,7 +7,7 @@ import Link from "next/link";
 import {
   MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff,
   Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck, Share2,
-  Eye, Bell, BellOff, Ban, CheckCircle, MoreHorizontal, DollarSign
+  Eye, Bell, BellOff, Ban, CheckCircle, MoreHorizontal, DollarSign, Lock
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -59,6 +59,7 @@ interface UserProfile {
   plan: string | null;
   publicLikes: boolean;
   publicFollowing: boolean;
+  isPrivate: boolean; // ✅ added
   creatorProfile: {
     tipsEnabled: boolean;
   } | null;
@@ -70,6 +71,7 @@ interface UserProfile {
   pinnedPostId: string | null;
   isFollowing: boolean;
   isBlocked: boolean;
+  followRequestStatus?: "pending" | "none"; // ✅ added
 }
 
 interface Post {
@@ -118,6 +120,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const [followRequestStatus, setFollowRequestStatus] = useState<"none" | "pending">("none");
 
   // ─── MUTE STATE ──────────────────────────────────────────────────────
   const [isMuted, setIsMuted] = useState(false);
@@ -164,6 +167,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
       setProfile(data);
       setIsFollowing(data.isFollowing || false);
       setIsBlocked(data.isBlocked || false);
+      setFollowRequestStatus(data.followRequestStatus || "none");
       if (data.pinnedPostId) {
         fetchPinnedPost(data.pinnedPostId);
       } else {
@@ -247,19 +251,27 @@ export default function ProfilePage({ params }: { params: { username: string } }
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: isFollowing ? "unfollow" : "follow" }),
       });
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
-        setIsFollowing(data.following);
-        setProfile((prev) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            _count: {
-              ...prev._count,
-              followers: data.following ? prev._count.followers + 1 : prev._count.followers - 1,
-            },
-          };
-        });
+        if (data.requested) {
+          // Follow request sent
+          setFollowRequestStatus("pending");
+          setProfile((prev) => prev ? { ...prev, followRequestStatus: "pending" } : null);
+        } else {
+          setIsFollowing(data.following);
+          setFollowRequestStatus("none");
+          setProfile((prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              _count: {
+                ...prev._count,
+                followers: data.following ? prev._count.followers + 1 : prev._count.followers - 1,
+              },
+              isFollowing: data.following,
+            };
+          });
+        }
       }
     } catch (error) {
       console.error("Follow error:", error);
@@ -556,6 +568,27 @@ export default function ProfilePage({ params }: { params: { username: string } }
   // ─── Check if we should show the tip button ──────────────────────
   const canReceiveTips = !isOwnProfile && profile.creatorProfile?.tipsEnabled === true;
 
+  // ─── Check if we can view posts ──────────────────────────────────
+  const canViewPosts = isOwnProfile || !profile.isPrivate || (isFollowing && !followRequestStatus);
+
+  // ─── Protected account message ──────────────────────────────────
+  const renderProtectedMessage = () => (
+    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+      <div className="bg-gray-100 dark:bg-gray-800 rounded-full p-6 mb-4">
+        <Lock className="w-12 h-12 text-gray-500 dark:text-gray-400" />
+      </div>
+      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+        {t("profile.protectedAccount")}
+      </h3>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-md">
+        {t("profile.protectedMessage")}
+      </p>
+    </div>
+  );
+
+  // ─── Determine if follow button should show "Requested" ─────────
+  const isFollowRequested = followRequestStatus === "pending";
+
   return (
     <div className="max-w-2xl mx-auto bg-white dark:bg-zrp-deepBlack min-h-screen">
       {/* ─── Banner ─── */}
@@ -655,18 +688,22 @@ export default function ProfilePage({ params }: { params: { username: string } }
               </Link>
             ) : (
               <>
-                {/* ─── Follow / Following ────────────────────────────── */}
+                {/* ─── Follow / Following / Requested ────────────────── */}
                 <button
                   onClick={handleFollow}
                   disabled={followLoading}
                   className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap ${
-                    isFollowing
+                    isFollowRequested
+                      ? "bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 cursor-default"
+                      : isFollowing
                       ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
                       : "bg-zrp-red text-white hover:bg-zrp-darkRed"
                   }`}
                 >
                   {followLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : isFollowRequested ? (
+                    "Requested"
                   ) : isFollowing ? (
                     <>
                       <UserCheck className="w-4 h-4" />
@@ -772,6 +809,9 @@ export default function ProfilePage({ params }: { params: { username: string } }
               {profile.name || profile.username}
             </h1>
             {profile.badgeType && <VerifiedBadge badgeType={profile.badgeType} />}
+            {profile.isPrivate && !isOwnProfile && (
+              <Lock className="w-4 h-4 text-gray-500 dark:text-gray-400 ml-1" />
+            )}
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">@{profile.username}</p>
 
@@ -922,6 +962,9 @@ export default function ProfilePage({ params }: { params: { username: string } }
           <div className="flex justify-center py-8">
             <Loader2 className="w-6 h-6 animate-spin text-zrp-red" />
           </div>
+        ) : !canViewPosts ? (
+          // Protected account – hide posts
+          renderProtectedMessage()
         ) : activeTab === "analytics" ? (
           <AnalyticsTab userId={profile.id} />
         ) : posts.length === 0 ? (
