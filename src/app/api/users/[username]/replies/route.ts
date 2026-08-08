@@ -1,76 +1,105 @@
-const renderReplyItem = (reply: any) => {
-  const postLink = reply.postId ? `/post/${reply.postId}#comment-${reply.id}` : '#';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 
-  return (
-    <Link
-      href={postLink}
-      className="block border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-    >
-      <div className="flex items-start gap-3">
-        <Link
-          href={`/profile/${reply.author.username}`}
-          className="flex-shrink-0"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-            {reply.author.avatarUrl ? (
-              <img
-                src={reply.author.avatarUrl}
-                alt={reply.author.name || reply.author.username}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold">
-                {(reply.author.name || reply.author.username)[0].toUpperCase()}
-              </div>
-            )}
-          </div>
-        </Link>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Link
-              href={`/profile/${reply.author.username}`}
-              className="font-semibold hover:underline text-gray-900 dark:text-white inline-flex items-center gap-1"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {reply.author.name || reply.author.username}
-              <VerifiedBadge badgeType={reply.author.badgeType} /> {/* ✅ Added */}
-            </Link>
-            <span className="text-sm text-gray-500">@{reply.author.username}</span>
-            <span className="text-sm text-gray-400">·</span>
-            <span className="text-sm text-gray-400">
-              {new Date(reply.createdAt).toLocaleDateString()}
-            </span>
-          </div>
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { username: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    const viewerId = session?.user?.id;
 
-          {reply.replyTo && (
-            <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Replying to{" "}
-              <Link
-                href={`/profile/${reply.replyTo.author.username}`}
-                className="text-blue-600 hover:underline"
-                onClick={(e) => e.stopPropagation()}
-              >
-                @{reply.replyTo.author.username}
-              </Link>
-            </div>
-          )}
+    // ─── Find profile owner ──────────────────────────────────────────
+    const profileOwner = await prisma.user.findUnique({
+      where: { username: params.username },
+      select: { id: true },
+    });
 
-          <p className="mt-1 text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-            {reply.content}
-          </p>
+    if (!profileOwner) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
-          {reply.imageUrl && (
-            <div className="mt-2 rounded-lg overflow-hidden">
-              <img
-                src={reply.imageUrl}
-                alt="Reply image"
-                className="w-full max-h-60 object-cover"
-              />
-            </div>
-          )}
-        </div>
-      </div>
-    </Link>
-  );
-};
+    // ─── Get excluded users (blocked + blockers + muted) ──────────
+    let excludedAuthorIds: string[] = [];
+    if (viewerId) {
+      const [blocked, blockers, muted] = await Promise.all([
+        prisma.blocked.findMany({
+          where: { blockerId: viewerId },
+          select: { blockedId: true },
+        }),
+        prisma.blocked.findMany({
+          where: { blockedId: viewerId },
+          select: { blockerId: true },
+        }),
+        prisma.mute.findMany({
+          where: { muterId: viewerId },
+          select: { mutedId: true },
+        }),
+      ]);
+      const blockedIds = blocked.map(b => b.blockedId);
+      const blockerIds = blockers.map(b => b.blockerId);
+      const mutedIds = muted.map(m => m.mutedId);
+      excludedAuthorIds = [...blockedIds, ...blockerIds, ...mutedIds];
+    }
+
+    // ─── If profile owner is excluded, return empty ──────────────────
+    const isExcluded = excludedAuthorIds.includes(profileOwner.id);
+    if (isExcluded) {
+      return NextResponse.json([]);
+    }
+
+    // ─── Fetch replies (comments) by this user ──────────────────────
+    const replies = await prisma.comment.findMany({
+      where: { authorId: profileOwner.id },
+      orderBy: { createdAt: "desc" },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            name: true,
+            avatarUrl: true,
+            badgeType: true, // ✅ included – frontend uses this for VerifiedBadge
+          },
+        },
+        post: {
+          select: {
+            id: true,
+            content: true,
+            author: {
+              select: {
+                username: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // ─── Format replies with replyTo context and postId ────────────
+    const formattedReplies = replies.map((reply) => ({
+      id: reply.id,
+      content: reply.content,
+      imageUrl: null,
+      createdAt: reply.createdAt,
+      author: reply.author, // includes badgeType
+      postId: reply.post.id,
+      replyTo: {
+        id: reply.post.id,
+        content: reply.post.content,
+        author: {
+          username: reply.post.author.username,
+          name: reply.post.author.name,
+        },
+      },
+    }));
+
+    return NextResponse.json(formattedReplies);
+  } catch (error) {
+    console.error("Error fetching replies:", error);
+    return NextResponse.json({ error: "Failed to fetch replies" }, { status: 500 });
+  }
+}
