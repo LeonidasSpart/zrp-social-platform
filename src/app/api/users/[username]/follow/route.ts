@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
-import { sendPushNotification } from "@/lib/push-notifications"; // ← Added
+import { sendPushNotification } from "@/lib/push-notifications";
 
 export async function POST(
   req: NextRequest,
@@ -18,65 +18,149 @@ export async function POST(
   const username = params.username;
 
   try {
-    const userToFollow = await prisma.user.findUnique({
+    // ─── Get target user with privacy setting ──────────────────────
+    const targetUser = await prisma.user.findUnique({
       where: { username },
-      select: { id: true, name: true },
+      select: {
+        id: true,
+        name: true,
+        isPrivate: true,
+      },
     });
 
-    if (!userToFollow) {
+    if (!targetUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const followingId = userToFollow.id;
+    const targetId = targetUser.id;
 
-    if (followerId === followingId) {
+    if (followerId === targetId) {
       return NextResponse.json({ error: "Cannot follow yourself" }, { status: 400 });
     }
 
-    const existing = await prisma.follow.findUnique({
+    // ─── Check if already following ──────────────────────────────────
+    const existingFollow = await prisma.follow.findUnique({
       where: {
         followerId_followingId: {
           followerId,
-          followingId,
+          followingId: targetId,
         },
       },
     });
 
-    if (existing) {
+    // ─── If already following -> unfollow ────────────────────────────
+    if (existingFollow) {
       await prisma.follow.delete({
         where: {
           followerId_followingId: {
             followerId,
-            followingId,
+            followingId: targetId,
           },
         },
       });
-      return NextResponse.json({ following: false });
-    } else {
-      await prisma.follow.create({
-        data: {
-          followerId,
-          followingId,
+
+      // Also delete any pending follow request (if it exists)
+      await prisma.followRequest.deleteMany({
+        where: {
+          requesterId: followerId,
+          targetId: targetId,
+          status: "pending",
         },
       });
 
-      // ─── Send database notification ──────────────────────────────
+      return NextResponse.json({ following: false, requested: false });
+    }
+
+    // ─── If target account is private ──────────────────────────────
+    if (targetUser.isPrivate) {
+      // Check if there's already a pending request
+      const existingRequest = await prisma.followRequest.findUnique({
+        where: {
+          requesterId_targetId: {
+            requesterId: followerId,
+            targetId: targetId,
+          },
+        },
+      });
+
+      if (existingRequest) {
+        if (existingRequest.status === "pending") {
+          // Request already sent
+          return NextResponse.json({
+            following: false,
+            requested: true,
+            message: "Follow request already sent.",
+          });
+        } else if (existingRequest.status === "rejected") {
+          // Optionally allow re-request by updating status to pending
+          await prisma.followRequest.update({
+            where: { id: existingRequest.id },
+            data: { status: "pending" },
+          });
+          return NextResponse.json({
+            following: false,
+            requested: true,
+            message: "Follow request re-sent.",
+          });
+        }
+        // If approved, they would already be following (handled earlier)
+      }
+
+      // Create a new follow request
+      await prisma.followRequest.create({
+        data: {
+          requesterId: followerId,
+          targetId: targetId,
+          status: "pending",
+        },
+      });
+
+      // ─── Notify target user about follow request ──────────────────
       await createNotification({
-        userId: followingId,
-        type: "follow",
+        userId: targetId,
+        type: "follow_request",
         fromUserId: followerId,
       });
 
-      // ─── Send push notification ──────────────────────────────────
+      // Optional: send push notification about follow request
       await sendPushNotification(
-        followingId,
-        "New Follower",
-        `${session.user.name || session.user.username} started following you.`,
+        targetId,
+        "New Follow Request",
+        `${session.user.name || session.user.username} wants to follow you.`,
         `/profile/${session.user.username}`
       );
 
-      return NextResponse.json({ following: true });
+      return NextResponse.json({
+        following: false,
+        requested: true,
+        message: "Follow request sent.",
+      });
     }
+
+    // ─── Public account: follow directly ────────────────────────────
+    await prisma.follow.create({
+      data: {
+        followerId,
+        followingId: targetId,
+      },
+    });
+
+    // ─── Send database notification ──────────────────────────────────
+    await createNotification({
+      userId: targetId,
+      type: "follow",
+      fromUserId: followerId,
+    });
+
+    // ─── Send push notification ──────────────────────────────────────
+    await sendPushNotification(
+      targetId,
+      "New Follower",
+      `${session.user.name || session.user.username} started following you.`,
+      `/profile/${session.user.username}`
+    );
+
+    return NextResponse.json({ following: true, requested: false });
   } catch (error) {
     console.error("Follow error:", error);
     return NextResponse.json({ error: "Failed to toggle follow" }, { status: 500 });
