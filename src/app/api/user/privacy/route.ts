@@ -9,12 +9,14 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { publicLikes, publicFollowing } = await req.json();
+  const body = await req.json();
+  const { publicLikes, publicFollowing, isPrivate } = body; // ✅ include isPrivate
 
   // Update only the fields that are provided
   const data: any = {};
   if (publicLikes !== undefined) data.publicLikes = publicLikes;
   if (publicFollowing !== undefined) data.publicFollowing = publicFollowing;
+  if (isPrivate !== undefined) data.isPrivate = isPrivate; // ✅ added
 
   const user = await prisma.user.update({
     where: { id: session.user.id },
@@ -22,11 +24,13 @@ export async function PUT(req: NextRequest) {
     select: {
       publicLikes: true,
       publicFollowing: true,
+      isPrivate: true, // ✅ include in response
     },
   });
 
   return NextResponse.json({
     publicLikes: user.publicLikes,
     publicFollowing: user.publicFollowing,
+    isPrivate: user.isPrivate, // ✅ return it
   });
 }
