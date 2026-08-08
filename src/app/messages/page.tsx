@@ -274,7 +274,8 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       )}
       {callState === "idle" ? (
         <>
-          <div className="mb-2 sm:mb-4">
+          {/* ─── Back link: mobile only — desktop uses the persistent sidebar ─── */}
+          <div className="mb-2 sm:mb-4 lg:hidden">
             <Link href="/messages" className="text-zrp-red hover:underline text-sm flex items-center gap-1">
               <ArrowLeft className="w-4 h-4" />
               {t("chat.backToMessages")}
