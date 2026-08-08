@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, X } from "lucide-react";
+
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
@@ -17,62 +18,15 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 
-import { getConnection } from "@/lib/solana";
+import {
+  getConnection,
+  getClientUsdcMint,
+  getClientPlatformWallet,
+} from "@/lib/solana-client";
 
 /*
  * ============================================================
- * CLIENT-SAFE SOLANA CONFIGURATION
- * ============================================================
- *
- * IMPORTANT:
- * We do NOT import USDC_MINT or PLATFORM_WALLET_PUBLIC_KEY
- * from "@/lib/solana".
- *
- * Those values are created lazily here so Next.js does not
- * attempt to construct PublicKey objects during build time
- * from undefined environment variables.
- */
-
-const DEFAULT_USDC_MINT =
-  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
-
-function getClientUsdcMint(): PublicKey {
-  const address =
-    process.env.NEXT_PUBLIC_USDC_MINT ||
-    DEFAULT_USDC_MINT;
-
-  try {
-    return new PublicKey(address);
-  } catch {
-    throw new Error(
-      "Invalid NEXT_PUBLIC_USDC_MINT configuration."
-    );
-  }
-}
-
-function getClientPlatformWallet(): PublicKey {
-  const address =
-    process.env.NEXT_PUBLIC_PLATFORM_WALLET ||
-    process.env.SOLANA_WALLET_ADDRESS;
-
-  if (!address) {
-    throw new Error(
-      "Platform wallet is not configured. Please contact support."
-    );
-  }
-
-  try {
-    return new PublicKey(address);
-  } catch {
-    throw new Error(
-      "Invalid platform wallet address."
-    );
-  }
-}
-
-/*
- * ============================================================
- * PROPS
+ * TYPES
  * ============================================================
  */
 
@@ -192,6 +146,7 @@ const Textarea = ({
     onChange={onChange}
     placeholder={placeholder}
     disabled={disabled}
+    maxLength={1000}
     className={`flex min-h-[80px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 ${className}`}
   />
 );
@@ -231,8 +186,9 @@ export default function TipModal({
   } = useWallet();
 
   /*
-   * Don't render anything when modal is closed.
+   * Don't render when closed.
    */
+
   if (!isOpen) {
     return null;
   }
@@ -251,8 +207,11 @@ export default function TipModal({
     setError(null);
 
     /*
+     * ----------------------------------------------------------
      * Wallet validation
+     * ----------------------------------------------------------
      */
+
     if (!connected || !publicKey) {
       setError(
         "Please connect your Solana wallet first."
@@ -261,8 +220,11 @@ export default function TipModal({
     }
 
     /*
+     * ----------------------------------------------------------
      * Amount validation
+     * ----------------------------------------------------------
      */
+
     const parsedAmount =
       Number.parseFloat(amount);
 
@@ -277,9 +239,9 @@ export default function TipModal({
     }
 
     /*
-     * Maximum reasonable precision for USDC.
-     * USDC has 6 decimals.
+     * USDC uses 6 decimals.
      */
+
     const rawAmount =
       Math.round(parsedAmount * 1_000_000);
 
@@ -290,13 +252,35 @@ export default function TipModal({
       return;
     }
 
+    /*
+     * Prevent numbers that cannot safely be represented.
+     */
+
+    if (
+      rawAmount >
+      Number.MAX_SAFE_INTEGER
+    ) {
+      setError(
+        "The USDC amount is too large."
+      );
+      return;
+    }
+
     setLoading(true);
 
     try {
       /*
-       * ======================================================
+       * ========================================================
        * SOLANA CONFIGURATION
-       * ======================================================
+       * ========================================================
+       *
+       * IMPORTANT:
+       * These values come from the client-safe module.
+       *
+       * We DO NOT import "@/lib/solana" here.
+       *
+       * "@/lib/solana" contains server-only functionality,
+       * including the platform private key.
        */
 
       const connection =
@@ -309,9 +293,9 @@ export default function TipModal({
         getClientPlatformWallet();
 
       /*
-       * ======================================================
+       * ========================================================
        * TOKEN ACCOUNTS
-       * ======================================================
+       * ========================================================
        */
 
       const fromTokenAccount =
@@ -331,18 +315,21 @@ export default function TipModal({
         );
 
       /*
-       * ======================================================
+       * ========================================================
        * BUILD TRANSACTION
-       * ======================================================
+       * ========================================================
        */
 
       const transaction =
         new Transaction();
 
       /*
-       * Check sender's USDC ATA.
+       * --------------------------------------------------------
+       * Sender USDC ATA
+       * --------------------------------------------------------
        *
-       * If it doesn't exist, create it.
+       * If the sender does not have a USDC associated token
+       * account, create it.
        */
 
       const fromAccountInfo =
@@ -363,10 +350,12 @@ export default function TipModal({
       }
 
       /*
-       * Check platform wallet USDC ATA.
+       * --------------------------------------------------------
+       * Platform USDC ATA
+       * --------------------------------------------------------
        *
-       * We intentionally do not create the platform ATA
-       * from the user's wallet.
+       * We intentionally do NOT create the platform ATA using
+       * the user's wallet.
        */
 
       const toAccountInfo =
@@ -381,9 +370,9 @@ export default function TipModal({
       }
 
       /*
-       * ======================================================
+       * ========================================================
        * USDC TRANSFER
-       * ======================================================
+       * ========================================================
        */
 
       transaction.add(
@@ -398,7 +387,9 @@ export default function TipModal({
       );
 
       /*
-       * Get a recent blockhash.
+       * ========================================================
+       * RECENT BLOCKHASH
+       * ========================================================
        */
 
       const latestBlockhash =
@@ -413,9 +404,9 @@ export default function TipModal({
         publicKey;
 
       /*
-       * ======================================================
+       * ========================================================
        * SEND TRANSACTION
-       * ======================================================
+       * ========================================================
        */
 
       const signature =
@@ -425,9 +416,9 @@ export default function TipModal({
         );
 
       /*
-       * ======================================================
+       * ========================================================
        * CONFIRM TRANSACTION
-       * ======================================================
+       * ========================================================
        */
 
       await connection.confirmTransaction(
@@ -442,9 +433,12 @@ export default function TipModal({
       );
 
       /*
-       * ======================================================
+       * ========================================================
        * CREDIT TIP THROUGH BACKEND
-       * ======================================================
+       * ========================================================
+       *
+       * The backend MUST independently verify the transaction.
+       * The browser amount is never trusted by the server.
        */
 
       const response =
@@ -460,14 +454,24 @@ export default function TipModal({
 
             body: JSON.stringify({
               recipientId,
-              amount: parsedAmount,
+
+              amount:
+                parsedAmount,
+
               message:
                 message.trim() || undefined,
+
               transactionId:
                 signature,
             }),
           }
         );
+
+      /*
+       * ========================================================
+       * READ BACKEND RESPONSE
+       * ========================================================
+       */
 
       let data: any = null;
 
@@ -486,9 +490,9 @@ export default function TipModal({
       }
 
       /*
-       * ======================================================
+       * ========================================================
        * SUCCESS
-       * ======================================================
+       * ========================================================
        */
 
       setSuccess(true);
@@ -498,8 +502,9 @@ export default function TipModal({
         onClose();
 
         /*
-         * Reset modal state for next use.
+         * Reset modal state.
          */
+
         setSuccess(false);
         setMessage("");
         setAmount("5");
@@ -548,6 +553,7 @@ export default function TipModal({
             onClick={onClose}
             disabled={loading}
             className="rounded p-1 hover:bg-gray-100 disabled:opacity-50 dark:hover:bg-gray-700"
+            aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
@@ -591,6 +597,7 @@ export default function TipModal({
 
               </div>
             ) : (
+
               <form
                 onSubmit={handleSubmit}
                 className="space-y-4"
@@ -643,6 +650,10 @@ export default function TipModal({
                     placeholder="Supportive message..."
                     disabled={loading}
                   />
+
+                  <p className="mt-1 text-right text-xs text-gray-400 dark:text-gray-500">
+                    {message.length}/1000
+                  </p>
 
                 </div>
 
