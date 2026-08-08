@@ -6,6 +6,7 @@ import {
 
 import {
   getOrCreateAssociatedTokenAccount,
+  getAssociatedTokenAddress,
   transfer,
 } from "@solana/spl-token";
 
@@ -171,55 +172,106 @@ export function getPlatformWallet(): Keypair {
  * ============================================================
  * Verify USDC transaction
  * ============================================================
- *
- * IMPORTANT:
- * The current implementation verifies that the transaction
- * exists and succeeded, but does NOT yet parse the SPL token
- * transfer amount.
- *
- * We should harden this before accepting real tips.
  */
 
-export async function verifyUsdcTransaction(
-  txHash: string
-) {
+export async function verifyUsdcTransaction(txHash: string) {
   if (!txHash) {
-    throw new Error(
-      "Transaction signature is required."
-    );
+    throw new Error("Transaction signature is required.");
   }
 
   const connection = getConnection();
 
-  const tx =
-    await connection.getTransaction(
-      txHash,
-      {
-        commitment: "confirmed",
-        maxSupportedTransactionVersion: 0,
-      }
-    );
+  const tx = await connection.getTransaction(txHash, {
+    commitment: "confirmed",
+    maxSupportedTransactionVersion: 0,
+  });
 
   if (!tx) {
-    throw new Error(
-      "Transaction not found."
-    );
+    throw new Error("Transaction not found.");
   }
 
   if (tx.meta?.err) {
+    throw new Error(`Transaction failed: ${JSON.stringify(tx.meta.err)}`);
+  }
+
+  const usdcMint = getUsdcMint();
+  const platformPubkey = getPlatformWalletPublicKey();
+
+  // Derive the platform's associated token account for USDC.
+  const platformAta = await getAssociatedTokenAddress(
+    usdcMint,
+    platformPubkey
+  );
+  const platformAtaStr = platformAta.toBase58();
+
+  const preBalances = tx.meta?.preTokenBalances ?? [];
+  const postBalances = tx.meta?.postTokenBalances ?? [];
+
+  // Resolve account keys so we can map accountIndex -> pubkey string.
+  const accountKeys = tx.transaction.message.getAccountKeys
+    ? tx.transaction.message.getAccountKeys().staticAccountKeys
+    : (tx.transaction.message as any).accountKeys;
+
+  const indexToAddress = (index: number): string =>
+    accountKeys[index]?.toBase58?.() ?? String(accountKeys[index]);
+
+  // Find the platform's USDC token account balance before/after.
+  const postPlatform = postBalances.find(
+    (b) =>
+      b.mint === usdcMint.toBase58() &&
+      indexToAddress(b.accountIndex) === platformAtaStr
+  );
+  const prePlatform = preBalances.find(
+    (b) =>
+      b.mint === usdcMint.toBase58() &&
+      indexToAddress(b.accountIndex) === platformAtaStr
+  );
+
+  if (!postPlatform) {
     throw new Error(
-      `Transaction failed: ${JSON.stringify(
-        tx.meta.err
-      )}`
+      "Transaction did not credit the platform's USDC account."
     );
+  }
+
+  const postAmount = postPlatform.uiTokenAmount.uiAmount ?? 0;
+  const preAmount = prePlatform?.uiTokenAmount.uiAmount ?? 0;
+
+  const received = postAmount - preAmount;
+
+  if (!Number.isFinite(received) || received <= 0) {
+    throw new Error(
+      "No positive USDC transfer detected to the platform wallet."
+    );
+  }
+
+  // Identify the sender: whichever non-platform USDC account lost balance.
+  let fromAddress = "";
+
+  for (const post of postBalances) {
+    if (post.mint !== usdcMint.toBase58()) continue;
+
+    const addr = indexToAddress(post.accountIndex);
+    if (addr === platformAtaStr) continue;
+
+    const pre = preBalances.find(
+      (b) => b.accountIndex === post.accountIndex && b.mint === usdcMint.toBase58()
+    );
+
+    const preAmt = pre?.uiTokenAmount.uiAmount ?? 0;
+    const postAmt = post.uiTokenAmount.uiAmount ?? 0;
+
+    if (preAmt - postAmt > 0) {
+      // This account's balance decreased — treat it as the sender's token account owner.
+      fromAddress = post.owner ?? "";
+      break;
+    }
   }
 
   return {
     valid: true,
-    amount: 0,
-    from: "",
-    to:
-      getPlatformWalletPublicKey().toBase58(),
+    amount: received,
+    from: fromAddress,
+    to: platformPubkey.toBase58(),
   };
 }
 
