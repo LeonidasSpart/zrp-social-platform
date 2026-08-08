@@ -69,9 +69,9 @@ const Button = ({
   type?: "button" | "submit" | "reset";
 }) => {
   const base =
-    "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50 disabled:pointer-events-none px-4 py-2";
+    "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zrp-red disabled:opacity-50 disabled:pointer-events-none px-4 py-2";
   const variants = {
-    default: "bg-red-600 text-white hover:bg-red-700",
+    default: "bg-zrp-red text-white hover:bg-zrp-darkRed",
     outline: "border border-gray-300 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700",
     destructive: "bg-red-600 text-white hover:bg-red-700",
   };
@@ -91,7 +91,7 @@ const Button = ({
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input
     {...props}
-    className={`flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 ${props.className || ""}`}
+    className={`flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zrp-red focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 ${props.className || ""}`}
   />
 );
 
@@ -210,7 +210,7 @@ export default function CreatorDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-red-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-zrp-red" />
       </div>
     );
   }
@@ -308,7 +308,7 @@ export default function CreatorDashboard() {
                   });
                   if (res.ok) fetchDashboard();
                 }}
-                className="w-4 h-4 text-red-600 focus:ring-red-500"
+                className="w-4 h-4 text-zrp-red focus:ring-zrp-red"
               />
               Tips
             </label>
@@ -324,7 +324,7 @@ export default function CreatorDashboard() {
                   });
                   if (res.ok) fetchDashboard();
                 }}
-                className="w-4 h-4 text-red-600 focus:ring-red-500"
+                className="w-4 h-4 text-zrp-red focus:ring-zrp-red"
               />
               Premium Posts
             </label>
