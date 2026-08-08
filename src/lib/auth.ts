@@ -43,7 +43,7 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        email: { label: "Email or Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
@@ -51,13 +51,17 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
+        const identifier = credentials.email.trim();
         const inputPassword = credentials.password.trim();
+        const isEmail = identifier.includes("@");
 
-        console.log("🔑 Login attempt for:", credentials.email);
+        console.log("🔑 Login attempt for:", identifier, isEmail ? "(email)" : "(username)");
         console.log("🔑 Input password length:", inputPassword.length);
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: isEmail
+            ? { email: identifier.toLowerCase() }
+            : { username: identifier },
           select: {
             id: true,
             email: true,
