@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Search, Loader2 } from "lucide-react";
@@ -24,6 +24,7 @@ interface SuggestedUser {
 export default function RightPanel() {
   const { data: session } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
   const { t } = useLanguage();
   const [query, setQuery] = useState("");
   const [trending, setTrending] = useState<TrendingTag[]>([]);
@@ -74,7 +75,7 @@ export default function RightPanel() {
     }
   };
 
-  if (!session) return null;
+  if (!session || pathname?.startsWith("/admin")) return null;
 
   return (
     <aside className="hidden xl:flex flex-col w-80 flex-shrink-0 h-screen sticky top-0 py-4 pl-4 overflow-y-auto">
