@@ -4,18 +4,77 @@ import { useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+
 import {
-  Connection,
   PublicKey,
   Transaction,
 } from "@solana/web3.js";
+
 import {
   getAssociatedTokenAddress,
   createAssociatedTokenAccountInstruction,
   createTransferInstruction,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { USDC_MINT, PLATFORM_WALLET_PUBLIC_KEY, getConnection } from "@/lib/solana";
+
+import { getConnection } from "@/lib/solana";
+
+/*
+ * ============================================================
+ * CLIENT-SAFE SOLANA CONFIGURATION
+ * ============================================================
+ *
+ * IMPORTANT:
+ * We do NOT import USDC_MINT or PLATFORM_WALLET_PUBLIC_KEY
+ * from "@/lib/solana".
+ *
+ * Those values are created lazily here so Next.js does not
+ * attempt to construct PublicKey objects during build time
+ * from undefined environment variables.
+ */
+
+const DEFAULT_USDC_MINT =
+  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+
+function getClientUsdcMint(): PublicKey {
+  const address =
+    process.env.NEXT_PUBLIC_USDC_MINT ||
+    DEFAULT_USDC_MINT;
+
+  try {
+    return new PublicKey(address);
+  } catch {
+    throw new Error(
+      "Invalid NEXT_PUBLIC_USDC_MINT configuration."
+    );
+  }
+}
+
+function getClientPlatformWallet(): PublicKey {
+  const address =
+    process.env.NEXT_PUBLIC_PLATFORM_WALLET ||
+    process.env.SOLANA_WALLET_ADDRESS;
+
+  if (!address) {
+    throw new Error(
+      "Platform wallet is not configured. Please contact support."
+    );
+  }
+
+  try {
+    return new PublicKey(address);
+  } catch {
+    throw new Error(
+      "Invalid platform wallet address."
+    );
+  }
+}
+
+/*
+ * ============================================================
+ * PROPS
+ * ============================================================
+ */
 
 interface TipModalProps {
   isOpen: boolean;
@@ -24,6 +83,12 @@ interface TipModalProps {
   recipientName: string;
   onTipSent: () => void;
 }
+
+/*
+ * ============================================================
+ * BUTTON
+ * ============================================================
+ */
 
 const Button = ({
   children,
@@ -42,22 +107,37 @@ const Button = ({
 }) => {
   const base =
     "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50 disabled:pointer-events-none px-4 py-2";
+
   const variants = {
-    default: "bg-red-600 text-white hover:bg-red-700",
-    outline: "border border-gray-300 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800",
-    destructive: "bg-red-600 text-white hover:bg-red-700",
+    default:
+      "bg-red-600 text-white hover:bg-red-700",
+
+    outline:
+      "border border-gray-300 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800",
+
+    destructive:
+      "bg-red-600 text-white hover:bg-red-700",
   };
+
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`${base} ${variants[variant] || variants.default} ${className}`}
+      className={`${base} ${
+        variants[variant] || variants.default
+      } ${className}`}
     >
       {children}
     </button>
   );
 };
+
+/*
+ * ============================================================
+ * INPUT
+ * ============================================================
+ */
 
 const Input = ({
   value,
@@ -67,7 +147,9 @@ const Input = ({
   className = "",
 }: {
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
@@ -75,7 +157,7 @@ const Input = ({
   <input
     type="number"
     step="0.01"
-    min="1"
+    min="0.01"
     value={value}
     onChange={onChange}
     placeholder={placeholder}
@@ -83,6 +165,12 @@ const Input = ({
     className={`flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 ${className}`}
   />
 );
+
+/*
+ * ============================================================
+ * TEXTAREA
+ * ============================================================
+ */
 
 const Textarea = ({
   value,
@@ -92,7 +180,9 @@ const Textarea = ({
   className = "",
 }: {
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onChange: (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
@@ -106,6 +196,12 @@ const Textarea = ({
   />
 );
 
+/*
+ * ============================================================
+ * TIP MODAL
+ * ============================================================
+ */
+
 export default function TipModal({
   isOpen,
   onClose,
@@ -113,184 +209,455 @@ export default function TipModal({
   recipientName,
   onTipSent,
 }: TipModalProps) {
-  const [amount, setAmount] = useState<string>("5");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [amount, setAmount] =
+    useState<string>("5");
 
-  const { publicKey, sendTransaction, connected } = useWallet();
+  const [message, setMessage] =
+    useState("");
 
-  if (!isOpen) return null;
+  const [loading, setLoading] =
+    useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const [error, setError] =
+    useState<string | null>(null);
+
+  const [success, setSuccess] =
+    useState(false);
+
+  const {
+    publicKey,
+    sendTransaction,
+    connected,
+  } = useWallet();
+
+  /*
+   * Don't render anything when modal is closed.
+   */
+  if (!isOpen) {
+    return null;
+  }
+
+  /*
+   * ==========================================================
+   * SEND TIP
+   * ==========================================================
+   */
+
+  const handleSubmit = async (
+    e: React.FormEvent
+  ) => {
     e.preventDefault();
 
+    setError(null);
+
+    /*
+     * Wallet validation
+     */
     if (!connected || !publicKey) {
-      setError("Please connect your wallet first.");
+      setError(
+        "Please connect your Solana wallet first."
+      );
       return;
     }
 
-    const parsedAmount = parseFloat(amount);
-    if (!parsedAmount || parsedAmount <= 0) {
-      setError("Please enter a valid amount.");
+    /*
+     * Amount validation
+     */
+    const parsedAmount =
+      Number.parseFloat(amount);
+
+    if (
+      !Number.isFinite(parsedAmount) ||
+      parsedAmount <= 0
+    ) {
+      setError(
+        "Please enter a valid USDC amount."
+      );
+      return;
+    }
+
+    /*
+     * Maximum reasonable precision for USDC.
+     * USDC has 6 decimals.
+     */
+    const rawAmount =
+      Math.round(parsedAmount * 1_000_000);
+
+    if (rawAmount <= 0) {
+      setError(
+        "The USDC amount is too small."
+      );
       return;
     }
 
     setLoading(true);
-    setError(null);
 
     try {
-      // ─── Get connection ─────────────────────────────────────────────
-      const connection = getConnection();
+      /*
+       * ======================================================
+       * SOLANA CONFIGURATION
+       * ======================================================
+       */
 
-      // ─── Compute token accounts ─────────────────────────────────────
-      const fromTokenAccount = await getAssociatedTokenAddress(
-        USDC_MINT,
-        publicKey
-      );
-      const toTokenAccount = await getAssociatedTokenAddress(
-        USDC_MINT,
-        PLATFORM_WALLET_PUBLIC_KEY
-      );
+      const connection =
+        getConnection();
 
-      // ─── Build transaction ──────────────────────────────────────────
-      const tx = new Transaction();
+      const usdcMint =
+        getClientUsdcMint();
 
-      // Check if sender's token account exists
-      const fromAccountInfo = await connection.getAccountInfo(fromTokenAccount);
+      const platformWallet =
+        getClientPlatformWallet();
+
+      /*
+       * ======================================================
+       * TOKEN ACCOUNTS
+       * ======================================================
+       */
+
+      const fromTokenAccount =
+        await getAssociatedTokenAddress(
+          usdcMint,
+          publicKey,
+          false,
+          TOKEN_PROGRAM_ID
+        );
+
+      const toTokenAccount =
+        await getAssociatedTokenAddress(
+          usdcMint,
+          platformWallet,
+          false,
+          TOKEN_PROGRAM_ID
+        );
+
+      /*
+       * ======================================================
+       * BUILD TRANSACTION
+       * ======================================================
+       */
+
+      const transaction =
+        new Transaction();
+
+      /*
+       * Check sender's USDC ATA.
+       *
+       * If it doesn't exist, create it.
+       */
+
+      const fromAccountInfo =
+        await connection.getAccountInfo(
+          fromTokenAccount
+        );
+
       if (!fromAccountInfo) {
-        // Create the associated token account for the sender
-        tx.add(
+        transaction.add(
           createAssociatedTokenAccountInstruction(
-            publicKey, // payer
-            fromTokenAccount, // ata
-            publicKey, // owner
-            USDC_MINT // mint
+            publicKey,
+            fromTokenAccount,
+            publicKey,
+            usdcMint,
+            TOKEN_PROGRAM_ID
           )
         );
       }
 
-      // Check if platform's token account exists – assume it exists; if not, show error
-      const toAccountInfo = await connection.getAccountInfo(toTokenAccount);
+      /*
+       * Check platform wallet USDC ATA.
+       *
+       * We intentionally do not create the platform ATA
+       * from the user's wallet.
+       */
+
+      const toAccountInfo =
+        await connection.getAccountInfo(
+          toTokenAccount
+        );
+
       if (!toAccountInfo) {
         throw new Error(
-          "Platform wallet is not set up to receive USDC. Please contact support."
+          "The ZRP platform wallet is not configured to receive USDC. Please contact support."
         );
       }
 
-      // Add transfer instruction
-      tx.add(
+      /*
+       * ======================================================
+       * USDC TRANSFER
+       * ======================================================
+       */
+
+      transaction.add(
         createTransferInstruction(
           fromTokenAccount,
           toTokenAccount,
           publicKey,
-          parsedAmount * 1_000_000 // USDC has 6 decimals
+          rawAmount,
+          [],
+          TOKEN_PROGRAM_ID
         )
       );
 
-      // ─── Send transaction ──────────────────────────────────────────
-      const signature = await sendTransaction(tx, connection);
-      await connection.confirmTransaction(signature, "confirmed");
+      /*
+       * Get a recent blockhash.
+       */
 
-      // ─── Call backend to credit the creator ──────────────────────
-      const res = await fetch("/api/creator/tip", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          recipientId,
-          amount: parsedAmount,
-          message: message.trim() || undefined,
-          transactionId: signature,
-        }),
-      });
+      const latestBlockhash =
+        await connection.getLatestBlockhash(
+          "confirmed"
+        );
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to credit tip.");
+      transaction.recentBlockhash =
+        latestBlockhash.blockhash;
+
+      transaction.feePayer =
+        publicKey;
+
+      /*
+       * ======================================================
+       * SEND TRANSACTION
+       * ======================================================
+       */
+
+      const signature =
+        await sendTransaction(
+          transaction,
+          connection
+        );
+
+      /*
+       * ======================================================
+       * CONFIRM TRANSACTION
+       * ======================================================
+       */
+
+      await connection.confirmTransaction(
+        {
+          signature,
+          blockhash:
+            latestBlockhash.blockhash,
+          lastValidBlockHeight:
+            latestBlockhash.lastValidBlockHeight,
+        },
+        "confirmed"
+      );
+
+      /*
+       * ======================================================
+       * CREDIT TIP THROUGH BACKEND
+       * ======================================================
+       */
+
+      const response =
+        await fetch(
+          "/api/creator/tip",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              recipientId,
+              amount: parsedAmount,
+              message:
+                message.trim() || undefined,
+              transactionId:
+                signature,
+            }),
+          }
+        );
+
+      let data: any = null;
+
+      try {
+        data =
+          await response.json();
+      } catch {
+        data = null;
       }
 
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+            "The transaction succeeded, but the tip could not be credited."
+        );
+      }
+
+      /*
+       * ======================================================
+       * SUCCESS
+       * ======================================================
+       */
+
       setSuccess(true);
+
       setTimeout(() => {
         onTipSent();
         onClose();
+
+        /*
+         * Reset modal state for next use.
+         */
+        setSuccess(false);
+        setMessage("");
+        setAmount("5");
+        setError(null);
       }, 1500);
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Transaction failed.");
+    } catch (err: unknown) {
+      console.error(
+        "Tip transaction error:",
+        err
+      );
+
+      let errorMessage =
+        "Transaction failed.";
+
+      if (err instanceof Error) {
+        errorMessage =
+          err.message;
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
+  /*
+   * ============================================================
+   * UI
+   * ============================================================
+   */
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-lg max-w-md w-full p-6 shadow-xl">
-        <div className="flex justify-between items-center mb-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-900">
+
+        {/* Header */}
+
+        <div className="mb-4 flex items-center justify-between">
+
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             Send Tip to {recipientName}
           </h2>
+
           <button
+            type="button"
             onClick={onClose}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+            disabled={loading}
+            className="rounded p-1 hover:bg-gray-100 disabled:opacity-50 dark:hover:bg-gray-700"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
+
         </div>
 
+        {/* Success */}
+
         {success ? (
-          <div className="text-center py-8">
-            <div className="text-green-500 text-4xl mb-2">✓</div>
-            <p className="text-gray-800 dark:text-gray-200 font-medium">
+          <div className="py-8 text-center">
+
+            <div className="mb-2 text-4xl text-green-500">
+              ✓
+            </div>
+
+            <p className="font-medium text-gray-800 dark:text-gray-200">
               Tip sent successfully!
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Thank you for supporting {recipientName}.
+
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Thank you for supporting{" "}
+              {recipientName}.
             </p>
+
           </div>
         ) : (
           <>
+            {/* Wallet disconnected */}
+
             {!connected ? (
               <div className="space-y-4">
+
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Connect your Solana wallet to send USDC tips.
+                  Connect your Solana wallet
+                  to send a USDC tip.
                 </p>
-                <WalletMultiButton className="w-full bg-red-600 text-white rounded-lg py-2 font-medium hover:bg-red-700 transition" />
+
+                <WalletMultiButton
+                  className="w-full rounded-lg bg-red-600 py-2 font-medium text-white transition hover:bg-red-700"
+                />
+
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form
+                onSubmit={handleSubmit}
+                className="space-y-4"
+              >
+
+                {/* Amount */}
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Amount (USDC)
                   </label>
+
                   <Input
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={(e) =>
+                      setAmount(
+                        e.target.value
+                      )
+                    }
                     placeholder="Enter amount"
                     disabled={loading}
                   />
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                    Connected: {publicKey?.toBase58().slice(0, 8)}...
+
+                  <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                    Connected:{" "}
+                    {publicKey
+                      ?.toBase58()
+                      .slice(0, 8)}
+                    ...
                   </p>
+
                 </div>
 
+                {/* Message */}
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Message (optional)
                   </label>
+
                   <Textarea
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    onChange={(e) =>
+                      setMessage(
+                        e.target.value
+                      )
+                    }
                     placeholder="Supportive message..."
                     disabled={loading}
                   />
+
                 </div>
 
+                {/* Error */}
+
                 {error && (
-                  <div className="text-red-500 text-sm">{error}</div>
+                  <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950/30 dark:text-red-400">
+                    {error}
+                  </div>
                 )}
 
-                <div className="flex gap-3 justify-end">
+                {/* Buttons */}
+
+                <div className="flex justify-end gap-3">
+
                   <Button
                     type="button"
                     variant="outline"
@@ -299,25 +666,35 @@ export default function TipModal({
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={loading}>
+
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                  >
                     {loading ? (
                       <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Sending...
                       </>
                     ) : (
                       "Send Tip"
                     )}
                   </Button>
+
                 </div>
 
-                <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
-                  10% platform fee · 35% of fees go to charity
+                {/* Fee information */}
+
+                <p className="text-center text-xs text-gray-400 dark:text-gray-500">
+                  10% platform fee · 35% of
+                  platform fees go to charity
                 </p>
+
               </form>
             )}
           </>
         )}
+
       </div>
     </div>
   );
