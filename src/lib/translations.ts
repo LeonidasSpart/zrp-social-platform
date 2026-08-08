@@ -23,6 +23,7 @@ type TranslationKey =
   | "profile.uploadAvatarFailed" | "profile.linkCopied" | "profile.shareNotSupported"
   | "profile.share" | "profile.edit" | "profile.mute" | "profile.unmute"
   | "profile.block" | "profile.unblock" | "profile.moreActions" | "profile.analytics"
+  | "profile.protectedAccount" | "profile.protectedMessage" // ✅ added
   | "feed.forYou" | "feed.following" | "feed.offline" | "feed.tryAgain" | "feed.error"
   | "feed.retry" | "feed.noPosts" | "feed.followSomeone" | "feed.checkBackLater"
   | "feed.loadingMore" | "feed.loadMore" | "feed.endOfFeed"
@@ -212,6 +213,8 @@ export const translations: Record<Language, TranslationDict> = {
     "profile.unblock": "Unblock",
     "profile.moreActions": "More actions",
     "profile.analytics": "Analytics",
+    "profile.protectedAccount": "These posts are protected.",
+    "profile.protectedMessage": "Only confirmed followers have access to @{username}'s posts and complete profile. Tap the \"Follow\" button to send a follow request.",
     "feed.forYou": "For you",
     "feed.following": "Following",
     "feed.offline": "You are offline. Please check your internet connection.",
@@ -873,6 +876,8 @@ export const translations: Record<Language, TranslationDict> = {
     "profile.unblock": "Débloquer",
     "profile.moreActions": "Plus d'actions",
     "profile.analytics": "Statistiques",
+    "profile.protectedAccount": "Ces publications sont protégées.",
+    "profile.protectedMessage": "Seuls les abonnés confirmés ont accès aux publications et au profil complet de @{username}. Appuyez sur le bouton \"Suivre\" pour envoyer une demande d'abonnement.",
     "feed.forYou": "Pour vous",
     "feed.following": "Abonnements",
     "feed.offline": "Vous êtes hors ligne. Veuillez vérifier votre connexion internet.",
@@ -1534,6 +1539,8 @@ export const translations: Record<Language, TranslationDict> = {
     "profile.unblock": "Entsperren",
     "profile.moreActions": "Weitere Aktionen",
     "profile.analytics": "Analysen",
+    "profile.protectedAccount": "Diese Beiträge sind geschützt.",
+    "profile.protectedMessage": "Nur bestätigte Follower haben Zugriff auf die Beiträge und das vollständige Profil von @{username}. Tippe auf den \"Folgen\"-Button, um eine Folgeanfrage zu senden.",
     "feed.forYou": "Für dich",
     "feed.following": "Folge ich",
     "feed.offline": "Du bist offline. Bitte überprüfe deine Internetverbindung.",
@@ -2195,6 +2202,8 @@ export const translations: Record<Language, TranslationDict> = {
     "profile.unblock": "Sblocca",
     "profile.moreActions": "Altre azioni",
     "profile.analytics": "Statistiche",
+    "profile.protectedAccount": "Questi post sono protetti.",
+    "profile.protectedMessage": "Solo i follower confermati hanno accesso ai post e al profilo completo di @{username}. Tocca il pulsante \"Segui\" per inviare una richiesta di follow.",
     "feed.forYou": "Per te",
     "feed.following": "Seguiti",
     "feed.offline": "Sei offline. Controlla la tua connessione internet.",
@@ -2794,5 +2803,3 @@ export const translations: Record<Language, TranslationDict> = {
     "rightPanel.footerText": "Il 35% dei profitti va in beneficenza 🧡",
   },
 };
-
-export type { TranslationKey };
