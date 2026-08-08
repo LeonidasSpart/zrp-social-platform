@@ -3,7 +3,7 @@ import { sendEmail, buildNotificationEmail } from "./email";
 
 interface CreateNotificationParams {
   userId: string;
-  type: "like" | "comment" | "follow" | "repost" | "mention";
+  type: "like" | "comment" | "follow" | "repost" | "mention" | "follow_request";
   fromUserId: string;
   postId?: string;
 }
@@ -15,6 +15,7 @@ const defaultPreferences = {
   reposts: true,
   mentions: true,
   messages: true,
+  followRequests: true, // ✅ added for follow requests
 };
 
 type Preferences = typeof defaultPreferences;
@@ -58,6 +59,7 @@ export async function createNotification({
       follow: "follows",
       repost: "reposts",
       mention: "mentions",
+      follow_request: "followRequests", // ✅ added
     };
     const prefKey = typeMap[type];
     if (!prefKey || prefs[prefKey] === false) return;
@@ -78,6 +80,7 @@ export async function createNotification({
       follow: { action: "started following you", emoji: "👋" },
       repost: { action: "reposted your post", emoji: "🔄" },
       mention: { action: "mentioned you in a post", emoji: "📝" },
+      follow_request: { action: "sent you a follow request", emoji: "🔒" }, // ✅ added
     };
     const { action, emoji } = actionMap[type] || { action: "interacted with you", emoji: "🔔" };
 
@@ -111,6 +114,7 @@ export async function createNotification({
       follow: `${actorName} started following you`,
       repost: `${actorName} reposted your post`,
       mention: `${actorName} mentioned you in a post`,
+      follow_request: `${actorName} sent you a follow request`, // ✅ added
     };
     const subject = subjectMap[type] || "New notification from ZRP";
 
