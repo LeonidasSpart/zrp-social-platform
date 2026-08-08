@@ -6,10 +6,7 @@ import { Loader2, X } from "lucide-react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
-import {
-  PublicKey,
-  Transaction,
-} from "@solana/web3.js";
+import { Transaction } from "@solana/web3.js";
 
 import {
   getAssociatedTokenAddress,
@@ -243,7 +240,9 @@ export default function TipModal({
      */
 
     const rawAmount =
-      Math.round(parsedAmount * 1_000_000);
+      Math.round(
+        parsedAmount * 1_000_000
+      );
 
     if (rawAmount <= 0) {
       setError(
@@ -266,6 +265,20 @@ export default function TipModal({
       return;
     }
 
+    /*
+     * Optional safety limit.
+     *
+     * This protects against accidental huge values
+     * being entered into the tip form.
+     */
+
+    if (parsedAmount > 1_000_000) {
+      setError(
+        "The maximum tip amount is 1,000,000 USDC."
+      );
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -275,12 +288,17 @@ export default function TipModal({
        * ========================================================
        *
        * IMPORTANT:
-       * These values come from the client-safe module.
        *
-       * We DO NOT import "@/lib/solana" here.
+       * This component is a CLIENT component.
+       *
+       * Therefore we NEVER import "@/lib/solana" here.
        *
        * "@/lib/solana" contains server-only functionality,
        * including the platform private key.
+       *
+       * Client-safe configuration comes from:
+       *
+       * "@/lib/solana-client"
        */
 
       const connection =
@@ -328,8 +346,10 @@ export default function TipModal({
        * Sender USDC ATA
        * --------------------------------------------------------
        *
-       * If the sender does not have a USDC associated token
-       * account, create it.
+       * If the sender does not have a USDC associated
+       * token account, create it.
+       *
+       * The user's wallet pays the account creation fee.
        */
 
       const fromAccountInfo =
@@ -354,8 +374,11 @@ export default function TipModal({
        * Platform USDC ATA
        * --------------------------------------------------------
        *
-       * We intentionally do NOT create the platform ATA using
-       * the user's wallet.
+       * We intentionally do NOT create the platform ATA
+       * using the user's wallet.
+       *
+       * The ZRP platform wallet should already have its
+       * USDC associated token account configured.
        */
 
       const toAccountInfo =
@@ -437,8 +460,23 @@ export default function TipModal({
        * CREDIT TIP THROUGH BACKEND
        * ========================================================
        *
-       * The backend MUST independently verify the transaction.
-       * The browser amount is never trusted by the server.
+       * IMPORTANT:
+       *
+       * The browser sends the transaction signature to the
+       * backend.
+       *
+       * The backend MUST independently verify:
+       *
+       * 1. Transaction exists
+       * 2. Transaction succeeded
+       * 3. Correct USDC mint
+       * 4. Correct platform wallet
+       * 5. Correct sender
+       * 6. Correct amount
+       * 7. Transaction has not already been processed
+       *
+       * The backend must NEVER blindly trust "amount"
+       * coming from this browser.
        */
 
       const response =
@@ -459,7 +497,8 @@ export default function TipModal({
                 parsedAmount,
 
               message:
-                message.trim() || undefined,
+                message.trim() ||
+                undefined,
 
               transactionId:
                 signature,
@@ -473,7 +512,10 @@ export default function TipModal({
        * ========================================================
        */
 
-      let data: any = null;
+      let data: {
+        error?: string;
+        success?: boolean;
+      } | null = null;
 
       try {
         data =
