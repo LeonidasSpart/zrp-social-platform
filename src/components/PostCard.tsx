@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag,
-  Bookmark, Eye, Pin, PinOff, X, ZoomIn, Plus, ChevronDown,
+  Bookmark, BarChart3, Pin, PinOff, X, ZoomIn, Plus, ChevronDown,
   Briefcase, FileText
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -510,7 +510,7 @@ export default function PostCard({
                   if (part.type === "hashtag") {
                     const tag = part.value.slice(1);
                     return (
-                      <Link key={index} href={`/hashtag/${tag}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+                      <Link key={index} href={`/hashtag/${tag}`} className="text-zrp-red hover:underline">
                         {part.value}
                       </Link>
                     );
@@ -518,7 +518,7 @@ export default function PostCard({
                   if (part.type === "mention") {
                     const username = part.value.slice(1);
                     return (
-                      <Link key={index} href={`/profile/${username}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+                      <Link key={index} href={`/profile/${username}`} className="text-zrp-red hover:underline">
                         {part.value}
                       </Link>
                     );
@@ -715,9 +715,8 @@ export default function PostCard({
                 <span className="font-medium">{formatCount(post._count?.quotedBy || 0)}</span>
               </Link>
 
-              {/* ─── Views: now using Eye icon ─────────────────────────── */}
               <span className="text-sm text-gray-400 dark:text-gray-500" title={`${viewsCount.toLocaleString()} views`}>
-                <Eye className="w-4 h-4 inline mr-1" />
+                <BarChart3 className="w-4 h-4 inline mr-1" />
                 <span>{formatCount(viewsCount)}</span>
               </span>
 
