@@ -60,7 +60,6 @@
 
 /* Mobile responsiveness */
 html, body {
-  overflow-x: hidden !important;
   max-width: 100% !important;
   margin: 0;
   padding: 0;
