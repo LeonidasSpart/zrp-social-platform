@@ -473,10 +473,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
             <div className="flex items-center gap-2 flex-wrap">
               <Link
                 href={`/profile/${reply.author.username}`}
-                className="font-semibold hover:underline text-gray-900 dark:text-white"
+                className="font-semibold hover:underline text-gray-900 dark:text-white inline-flex items-center gap-1"
                 onClick={(e) => e.stopPropagation()}
               >
                 {reply.author.name || reply.author.username}
+                <VerifiedBadge badgeType={reply.author.badgeType} />
               </Link>
               <span className="text-sm text-gray-500">@{reply.author.username}</span>
               <span className="text-sm text-gray-400">·</span>
@@ -959,7 +960,6 @@ export default function ProfilePage({ params }: { params: { username: string } }
           recipientId={profile.id}
           recipientName={profile.name || profile.username}
           onTipSent={() => {
-            // Optionally refresh profile to update stats
             fetchProfile();
           }}
         />
