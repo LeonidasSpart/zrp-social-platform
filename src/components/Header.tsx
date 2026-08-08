@@ -28,6 +28,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SUPPORTED_LANGUAGES } from "@/lib/translations";
 import { getSocket } from "@/lib/socket-client";
+import { useUnreadCount } from "@/contexts/UnreadCountContext";
 
 // ─── Type for navigation items ──────────────────────────────────────
 type NavItem = {
@@ -41,38 +42,13 @@ export default function Header() {
   const { data: session } = useSession();
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
-  const [unreadCount, setUnreadCount] = useState(0);
+  const { unreadCount } = useUnreadCount();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const isAuthenticated = !!session;
   const features = session?.user?.features;
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchUnreadCount();
-    }
-  }, [isAuthenticated]);
-
-  const fetchUnreadCount = async () => {
-    try {
-      const res = await fetch("/api/notifications/unread");
-      if (res.ok) {
-        const data = await res.json();
-        setUnreadCount(data.count);
-      }
-    } catch (error) {
-      console.error("Error fetching unread count:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      const interval = setInterval(fetchUnreadCount, 30000);
-      return () => clearInterval(interval);
-    }
-  }, [isAuthenticated]);
 
   useEffect(() => {
     const handleResize = () => {
