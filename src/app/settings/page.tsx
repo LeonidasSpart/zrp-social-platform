@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Check, X, Globe, MapPin, User, Key, Calendar, Camera, Trash2, Loader2,
-  BellOff, ChevronRight, Ban, Mail, DollarSign, TrendingUp, Wallet
+  BellOff, ChevronRight, Ban, Mail, DollarSign, TrendingUp, Wallet, Lock
 } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import EmailPreferences from "@/components/EmailPreferences";
@@ -30,8 +30,9 @@ interface UserData {
   usernameChangedAt: string | null;
   publicLikes: boolean;
   publicFollowing: boolean;
+  isPrivate: boolean; // ✅ added
   customUrl: string | null;
-  solanaWallet: string | null; // ✅ added
+  solanaWallet: string | null;
 }
 
 interface CreatorProfile {
@@ -62,6 +63,12 @@ export default function SettingsPage() {
   const [solanaWallet, setSolanaWallet] = useState("");
   const [updatingWallet, setUpdatingWallet] = useState(false);
 
+  // ─── Privacy states ──────────────────────────────────────────────
+  const [publicLikes, setPublicLikes] = useState(true);
+  const [publicFollowing, setPublicFollowing] = useState(true);
+  const [isPrivate, setIsPrivate] = useState(false); // ✅ added
+  const [updatingPrivacy, setUpdatingPrivacy] = useState(false);
+
   // Form states
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
@@ -78,11 +85,6 @@ export default function SettingsPage() {
   const [emailPassword, setEmailPassword] = useState("");
   const [updatingEmail, setUpdatingEmail] = useState(false);
   const [emailMessage, setEmailMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-
-  // Privacy states
-  const [publicLikes, setPublicLikes] = useState(true);
-  const [publicFollowing, setPublicFollowing] = useState(true);
-  const [updatingPrivacy, setUpdatingPrivacy] = useState(false);
 
   // Loading states for each section
   const [updatingProfile, setUpdatingProfile] = useState(false);
@@ -156,7 +158,8 @@ export default function SettingsPage() {
         setAvatarPreview(data.avatarUrl || null);
         setPublicLikes(data.publicLikes !== undefined ? data.publicLikes : true);
         setPublicFollowing(data.publicFollowing !== undefined ? data.publicFollowing : true);
-        setSolanaWallet(data.solanaWallet || ""); // ✅ set from API
+        setIsPrivate(data.isPrivate || false); // ✅ set from API
+        setSolanaWallet(data.solanaWallet || "");
 
         if (data.usernameChangedAt) {
           const lastChange = new Date(data.usernameChangedAt);
@@ -385,7 +388,7 @@ export default function SettingsPage() {
     }
   };
 
-  // ─── Update Privacy ──────────────────────────────────────────────
+  // ─── Update Privacy & Private Account ───────────────────────────
   const handleUpdatePrivacy = async (e: React.FormEvent) => {
     e.preventDefault();
     setUpdatingPrivacy(true);
@@ -395,15 +398,21 @@ export default function SettingsPage() {
       const res = await fetch("/api/user/privacy", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ publicLikes, publicFollowing }),
+        body: JSON.stringify({
+          publicLikes,
+          publicFollowing,
+          isPrivate, // ✅ include the private account toggle
+        }),
       });
 
       const data = await res.json();
       if (res.ok) {
         setPublicLikes(data.publicLikes);
         setPublicFollowing(data.publicFollowing);
+        setIsPrivate(data.isPrivate || false);
         setMessage({ type: "success", text: t("settings.successPrivacyUpdated") });
         await update();
+        fetchUserData();
       } else {
         setMessage({ type: "error", text: data.error || t("settings.errPrivacyUpdateFailed") });
       }
@@ -993,6 +1002,29 @@ export default function SettingsPage() {
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-zrp-red rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-zrp-red"></div>
             </label>
           </div>
+
+          {/* ─── Private Account Toggle ───────────────────────────── */}
+          <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+            <div>
+              <p className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                <Lock className="w-4 h-4" />
+                {t("settings.privateAccount")}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {t("settings.privateAccountDesc")}
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isPrivate}
+                onChange={(e) => setIsPrivate(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-zrp-red rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-zrp-red"></div>
+            </label>
+          </div>
+
           <button
             type="submit"
             disabled={updatingPrivacy}
