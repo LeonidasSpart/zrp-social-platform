@@ -22,6 +22,28 @@ function formatProfileCount(n: number) {
   return n.toString();
 }
 
+// ─── Parse bio for @mentions and #hashtags ──────────────────────────
+function parseBio(bio: string) {
+  const parts: { type: "text" | "mention" | "hashtag"; value: string }[] = [];
+  let lastIndex = 0;
+  const regex = /(@\w+)|(#\w+)/g;
+  let match;
+  while ((match = regex.exec(bio)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({ type: "text", value: bio.slice(lastIndex, match.index) });
+    }
+    parts.push({
+      type: match[0].startsWith("@") ? "mention" : "hashtag",
+      value: match[0],
+    });
+    lastIndex = match.index + match[0].length;
+  }
+  if (lastIndex < bio.length) {
+    parts.push({ type: "text", value: bio.slice(lastIndex) });
+  }
+  return parts;
+}
+
 interface UserProfile {
   id: string;
   username: string;
@@ -753,9 +775,36 @@ export default function ProfilePage({ params }: { params: { username: string } }
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">@{profile.username}</p>
 
+          {/* ─── Bio with parsed mentions and hashtags ───────────────── */}
           {profile.bio && (
             <p className="mt-2 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-              {profile.bio}
+              {parseBio(profile.bio).map((part, index) => {
+                if (part.type === "mention") {
+                  const username = part.value.slice(1);
+                  return (
+                    <Link
+                      key={index}
+                      href={`/profile/${username}`}
+                      className="text-zrp-red hover:underline"
+                    >
+                      {part.value}
+                    </Link>
+                  );
+                }
+                if (part.type === "hashtag") {
+                  const tag = part.value.slice(1);
+                  return (
+                    <Link
+                      key={index}
+                      href={`/hashtag/${tag}`}
+                      className="text-zrp-red hover:underline"
+                    >
+                      {part.value}
+                    </Link>
+                  );
+                }
+                return <span key={index}>{part.value}</span>;
+              })}
             </p>
           )}
 
