@@ -8,6 +8,7 @@ import { Send, Phone, Video, Image, Smile, X, Download, ZoomIn, Trash2, Loader2 
 import EmojiPicker from "emoji-picker-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 interface Message {
   id: string;
@@ -24,6 +25,7 @@ interface ChatInterfaceProps {
   receiverName: string;
   receiverUsername: string;
   receiverAvatar?: string;
+  receiverBadgeType?: string | null;
   onVoiceCall?: () => void;
   onVideoCall?: () => void;
 }
@@ -33,6 +35,7 @@ export default function ChatInterface({
   receiverName,
   receiverUsername,
   receiverAvatar,
+  receiverBadgeType,
   onVoiceCall,
   onVideoCall,
 }: ChatInterfaceProps) {
@@ -344,8 +347,9 @@ export default function ChatInterface({
             )}
           </div>
           <div className="min-w-0">
-            <p className="font-semibold text-gray-900 dark:text-white truncate text-sm sm:text-base hover:underline">
-              {receiverName}
+            <p className="font-semibold text-gray-900 dark:text-white truncate text-sm sm:text-base hover:underline flex items-center gap-1">
+              <span className="truncate">{receiverName}</span>
+              <VerifiedBadge badgeType={receiverBadgeType} />
             </p>
             {receiverTyping && <p className="text-xs text-zrp-red">{t("chat.typing")}</p>}
           </div>
