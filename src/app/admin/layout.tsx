@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
 import {
@@ -20,6 +20,7 @@ export default function AdminLayout({
 }) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (status === "loading") return;
@@ -41,18 +42,18 @@ export default function AdminLayout({
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/posts", label: "Posts", icon: FileText },
     { href: "/admin/reports", label: "Reports", icon: Flag },
-    { href: "/admin/upgrade-requests", label: "Upgrade Requests", icon: DollarSign }, // ✅ new
+    { href: "/admin/upgrade-requests", label: "Upgrade Requests", icon: DollarSign },
   ];
 
   return (
-    <div className="max-w-7xl mx-auto py-4 px-4">
+    <div className="max-w-5xl mx-auto py-4 px-4">
       <div className="flex flex-col md:flex-row gap-6">
         <aside className="md:w-64 flex-shrink-0">
           <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Admin</h2>
             <nav className="space-y-1">
               {navItems.map((item) => {
-                const isActive = window.location.pathname === item.href;
+                const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.href}
