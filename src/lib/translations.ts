@@ -23,7 +23,7 @@ type TranslationKey =
   | "profile.uploadAvatarFailed" | "profile.linkCopied" | "profile.shareNotSupported"
   | "profile.share" | "profile.edit" | "profile.mute" | "profile.unmute"
   | "profile.block" | "profile.unblock" | "profile.moreActions" | "profile.analytics"
-  | "profile.protectedAccount" | "profile.protectedMessage" // ✅ added
+  | "profile.protectedAccount" | "profile.protectedMessage"
   | "feed.forYou" | "feed.following" | "feed.offline" | "feed.tryAgain" | "feed.error"
   | "feed.retry" | "feed.noPosts" | "feed.followSomeone" | "feed.checkBackLater"
   | "feed.loadingMore" | "feed.loadMore" | "feed.endOfFeed"
@@ -2803,3 +2803,6 @@ export const translations: Record<Language, TranslationDict> = {
     "rightPanel.footerText": "Il 35% dei profitti va in beneficenza 🧡",
   },
 };
+
+// ─── EXPORT THE TYPE ──────────────────────────────────────────────
+export type { TranslationKey };
