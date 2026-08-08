@@ -253,7 +253,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       <div className="max-w-2xl mx-auto px-4 py-4">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-700 font-medium">{t("chat.userNotFound")}</p>
-          <Link href="/messages" className="text-blue-600 hover:underline text-sm mt-2 block">← {t("chat.backToMessages")}</Link>
+          <Link href="/messages" className="text-zrp-red hover:underline text-sm mt-2 block">← {t("chat.backToMessages")}</Link>
         </div>
       </div>
     );
@@ -275,7 +275,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
       {callState === "idle" ? (
         <>
           <div className="mb-2 sm:mb-4">
-            <Link href="/messages" className="text-blue-600 hover:underline text-sm flex items-center gap-1">
+            <Link href="/messages" className="text-zrp-red hover:underline text-sm flex items-center gap-1">
               <ArrowLeft className="w-4 h-4" />
               {t("chat.backToMessages")}
             </Link>
