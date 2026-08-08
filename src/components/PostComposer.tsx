@@ -344,7 +344,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       <form onSubmit={handleSubmit}>
         <div className="flex items-start gap-3">
           {/* Avatar */}
-          <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-semibold flex-shrink-0 overflow-hidden">
+          <div className="w-10 h-10 rounded-full bg-zrp-red/10 flex items-center justify-center text-zrp-red font-semibold flex-shrink-0 overflow-hidden">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -547,7 +547,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                     type="button"
                     onClick={addPollOption}
                     disabled={pollOptions.length >= 6}
-                    className="text-blue-600 dark:text-blue-400 text-sm hover:underline disabled:opacity-50"
+                    className="text-zrp-red text-sm hover:underline disabled:opacity-50"
                   >
                     <Plus className="w-4 h-4 inline mr-1" /> {t("composer.addOption")}
                   </button>
@@ -585,7 +585,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
             {/* Toolbar */}
             <div className="flex items-center justify-between mt-2 border-t border-gray-100 dark:border-gray-700 pt-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <label className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition">
+                <label className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition">
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -601,7 +601,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                 <button
                   type="button"
                   onClick={() => setShowGifPicker(true)}
-                  className="text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition"
+                  className="text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition"
                   title={t("composer.addGif")}
                 >
                   <FileImage className="w-5 h-5" />
@@ -611,8 +611,8 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   <button
                     type="button"
                     onClick={() => setShowPollBuilder(!showPollBuilder)}
-                    className={`text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition ${
-                      showPollBuilder ? "text-blue-500 dark:text-blue-400" : ""
+                    className={`text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition ${
+                      showPollBuilder ? "text-zrp-red dark:text-zrp-red" : ""
                     }`}
                     title={t("composer.addPoll")}
                   >
@@ -637,7 +637,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               <button
                 type="submit"
                 disabled={isSubmitDisabled}
-                className="bg-zrp-red text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                className="bg-zrp-red text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {loading ? t("composer.posting") : schedulePost ? t("composer.scheduleButton") : t("composer.postButton")}
               </button>
