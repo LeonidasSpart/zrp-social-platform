@@ -34,10 +34,15 @@ export default function StoriesBar() {
   const fetchStories = async () => {
     try {
       const res = await fetch("/api/stories");
+      if (!res.ok) {
+        setGroups([]);
+        return;
+      }
       const data = await res.json();
-      setGroups(data);
+      setGroups(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching stories:", error);
+      setGroups([]);
     } finally {
       setLoading(false);
     }
