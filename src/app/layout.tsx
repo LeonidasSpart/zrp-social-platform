@@ -3,6 +3,8 @@ import { Inter, Orbitron } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
+import RightPanel from "@/components/RightPanel";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
 import PushNotificationManager from "@/components/PushNotificationManager";
@@ -122,7 +124,20 @@ export default function RootLayout({
                   <AuthProvider>
                     <Header />
                     <EmailVerificationBanner />
-                    <PageTransition>{children}</PageTransition>
+
+                    {/* ─── 3-column layout shell (Facebook-style) ─────────
+                        Sidebar only appears at lg+ (≥1024px).
+                        RightPanel only appears at xl+ (≥1280px).
+                        Below lg, pages render full-width as before,
+                        using the existing top Header for navigation. ─── */}
+                    <div className="flex justify-center w-full max-w-[1400px] mx-auto">
+                      <Sidebar />
+                      <main className="flex-1 min-w-0">
+                        <PageTransition>{children}</PageTransition>
+                      </main>
+                      <RightPanel />
+                    </div>
+
                     <CookieConsent />
                     <Footer />
                     <PushNotificationManager />
