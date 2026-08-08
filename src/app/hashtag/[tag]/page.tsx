@@ -75,7 +75,7 @@ export default function HashtagPage({ params }: { params: { tag: string } }) {
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
       <div className="mb-4">
-        <Link href="/" className="text-blue-600 hover:underline text-sm">
+        <Link href="/" className="text-zrp-red hover:underline text-sm">
           {t("hashtag.backToHome")}
         </Link>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
