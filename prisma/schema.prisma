@@ -84,7 +84,7 @@ model User {
   customUrl       String?   @unique
 
   // ─── Solana wallet for direct tips ─────────────────────────────
-  solanaWallet    String?   // User's wallet address for receiving USDC directly
+  solanaWallet    String?
 
   emailPreferences Json?
 
@@ -135,6 +135,10 @@ model User {
   receivedTips     Tip[]           @relation("TipRecipient")
   premiumPurchases PremiumPurchase[]
   withdrawalRequests WithdrawalRequest[]
+
+  // ─── Follow Requests (for private accounts) ────────────────────
+  followRequestsSent   FollowRequest[] @relation("FollowRequester")   // requests this user sent
+  followRequestsReceived FollowRequest[] @relation("FollowTarget")     // requests this user received
 }
 
 model Post {
@@ -230,6 +234,23 @@ model Follow {
   @@unique([followerId, followingId])
   @@index([followerId])
   @@index([followingId])
+}
+
+// ─── FOLLOW REQUEST ──────────────────────────────────────────────────
+model FollowRequest {
+  id          String   @id @default(cuid())
+  requesterId String
+  requester   User     @relation("FollowRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  targetId    String
+  target      User     @relation("FollowTarget", fields: [targetId], references: [id], onDelete: Cascade)
+  status      String   @default("pending") // pending, approved, rejected
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([requesterId, targetId])
+  @@index([requesterId])
+  @@index([targetId])
+  @@index([status])
 }
 
 model Like {
