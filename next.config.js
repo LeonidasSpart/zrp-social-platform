@@ -4,12 +4,7 @@
 const { withSentryConfig } = require('@sentry/nextjs');
 
 const nextConfig = {
-  // ─── Static export (required for Capacitor) ──────────────────────
-  output: 'export',
-  trailingSlash: true,
-
   images: {
-    unoptimized: true, // Required for static export (image optimization needs a server)
     remotePatterns: [
       {
         protocol: "https",
@@ -22,7 +17,6 @@ const nextConfig = {
     optimizeCss: true,
   },
 
-  // ─── Headers are only used in server mode – they are ignored in static export ───
   async headers() {
     return [
       {
@@ -61,7 +55,8 @@ const nextConfig = {
 
 // ─── Wrap with Sentry configuration ──────────────────────────────
 module.exports = withSentryConfig(nextConfig, {
-  silent: true,
+  // Additional Sentry options (optional – these are defaults)
+  silent: true, // Suppress logs
   hideSourceMaps: false,
   widenClientFileUpload: true,
   transpileClientSDK: true,
