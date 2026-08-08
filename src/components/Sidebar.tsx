@@ -120,7 +120,7 @@ export default function Sidebar() {
             className="w-full flex items-center gap-4 px-3 py-2.5 rounded-full text-lg font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
           >
             <MoreHorizontal className="w-6 h-6" />
-            <span>{t("action.more") || "More"}</span>
+            <span>More</span>
           </button>
           {moreMenuOpen && (
             <>
