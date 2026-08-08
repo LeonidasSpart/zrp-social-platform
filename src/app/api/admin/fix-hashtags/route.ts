@@ -3,8 +3,8 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/admin";
 
 export async function GET() {
-  const adminCheck = await requireAdmin();
-  if (adminCheck) return adminCheck;
+  const { authorized, response } = await requireAdmin();
+  if (!authorized) return response;
 
   try {
     // ─── Find all posts that have at least one hashtag ──────────────
