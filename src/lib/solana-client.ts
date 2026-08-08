@@ -1,4 +1,7 @@
-import { Connection, PublicKey } from "@solana/web3.js";
+import {
+  Connection,
+  PublicKey,
+} from "@solana/web3.js";
 
 const DEFAULT_USDC_MINT =
   "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
@@ -22,12 +25,11 @@ export function getClientUsdcMint(): PublicKey {
 
 export function getClientPlatformWallet(): PublicKey {
   const address =
-    process.env.NEXT_PUBLIC_PLATFORM_WALLET ||
-    process.env.NEXT_PUBLIC_SOLANA_WALLET_ADDRESS;
+    process.env.NEXT_PUBLIC_PLATFORM_WALLET;
 
   if (!address) {
     throw new Error(
-      "Platform wallet is not configured."
+      "NEXT_PUBLIC_PLATFORM_WALLET is not configured."
     );
   }
 
@@ -35,7 +37,7 @@ export function getClientPlatformWallet(): PublicKey {
     return new PublicKey(address);
   } catch {
     throw new Error(
-      "Invalid platform wallet address."
+      "Invalid NEXT_PUBLIC_PLATFORM_WALLET address."
     );
   }
 }
@@ -55,7 +57,9 @@ export function getConnection(): Connection {
     !rpcUrl.startsWith("http://") &&
     !rpcUrl.startsWith("https://")
   ) {
-    throw new Error("Invalid Solana RPC URL.");
+    throw new Error(
+      "Invalid NEXT_PUBLIC_SOLANA_RPC_URL."
+    );
   }
 
   connection = new Connection(
