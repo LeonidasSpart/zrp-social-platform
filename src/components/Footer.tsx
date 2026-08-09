@@ -25,7 +25,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter max-w-xs">
-              The first Swiss European social media platform. Free speech, privacy, and security — built for the people.
+              The first Swiss European social media platform. Free speech, privacy, and security built for the people.
             </p>
             <div className="mt-4 inline-flex items-center gap-1.5 bg-zrp-red/10 text-zrp-red text-xs font-medium font-inter px-3 py-1.5 rounded-full">
               🧡 35% of profits go to charity
