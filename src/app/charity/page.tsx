@@ -36,13 +36,13 @@ const CAUSES = [
 
 export default function CharityPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-deep-black font-inter">
+    <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter">
       {/* Header removed – no navigation menu */}
 
       {/* Main content */}
       <main>
         {/* Hero – dark red to black gradient */}
-        <section className="relative bg-gradient-to-br from-dark-red-black to-black py-20 px-4">
+        <section className="relative bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack py-20 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl font-extrabold font-orbitron text-white leading-tight">
               Giving Back, <br />
@@ -61,7 +61,7 @@ export default function CharityPage() {
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <Link
                 href="#how-it-works"
-                className="px-6 py-3 bg-white text-dark-red-black font-semibold rounded-full shadow-lg hover:bg-gray-200 transition font-inter"
+                className="px-6 py-3 bg-white text-zrp-darkRed font-semibold rounded-full shadow-lg hover:bg-gray-200 transition font-inter"
               >
                 Learn How It Works
               </Link>
@@ -77,46 +77,46 @@ export default function CharityPage() {
 
         {/* How It Works */}
         <section id="how-it-works" className="py-16 px-4 max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-charcoal dark:text-white font-orbitron mb-12">
+          <h2 className="text-3xl font-bold text-center text-zrp-charcoal dark:text-white font-orbitron mb-12">
             How ZRP Gives to Charity
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6 bg-silver/20 dark:bg-charcoal/50 rounded-xl shadow-sm border border-silver/30 dark:border-charcoal">
+            <div className="text-center p-6 bg-zrp-silver/20 dark:bg-zrp-charcoal/50 rounded-xl shadow-sm border border-zrp-silver/30 dark:border-zrp-charcoal">
               <div className="text-4xl mb-4">💰</div>
-              <h3 className="text-xl font-semibold text-charcoal dark:text-white font-orbitron">1. Platform Profits</h3>
-              <p className="mt-2 text-charcoal/80 dark:text-white/70 font-inter">
+              <h3 className="text-xl font-semibold text-zrp-charcoal dark:text-white font-orbitron">1. Platform Profits</h3>
+              <p className="mt-2 text-zrp-charcoal/80 dark:text-white/70 font-inter">
                 Revenue comes from premium subscriptions, tips, and business plans.
-                After operational costs, <strong className="text-dark-red-black">35% of net profits</strong> are set aside for charity.
+                After operational costs, <strong className="text-zrp-red">35% of net profits</strong> are set aside for charity.
               </p>
             </div>
-            <div className="text-center p-6 bg-silver/20 dark:bg-charcoal/50 rounded-xl shadow-sm border border-silver/30 dark:border-charcoal">
+            <div className="text-center p-6 bg-zrp-silver/20 dark:bg-zrp-charcoal/50 rounded-xl shadow-sm border border-zrp-silver/30 dark:border-zrp-charcoal">
               <div className="text-4xl mb-4">⚖️</div>
-              <h3 className="text-xl font-semibold text-charcoal dark:text-white font-orbitron">2. Transparent Allocation</h3>
-              <p className="mt-2 text-charcoal/80 dark:text-white/70 font-inter">
+              <h3 className="text-xl font-semibold text-zrp-charcoal dark:text-white font-orbitron">2. Transparent Allocation</h3>
+              <p className="mt-2 text-zrp-charcoal/80 dark:text-white/70 font-inter">
                 Funds are split across our four pillars: orphans, education,
-                healthcare, and climate. We publish detailed reports <strong className="text-dark-red-black">every three months</strong>.
+                healthcare, and climate. We publish detailed reports <strong className="text-zrp-red">every three months</strong>.
               </p>
             </div>
-            <div className="text-center p-6 bg-silver/20 dark:bg-charcoal/50 rounded-xl shadow-sm border border-silver/30 dark:border-charcoal">
+            <div className="text-center p-6 bg-zrp-silver/20 dark:bg-zrp-charcoal/50 rounded-xl shadow-sm border border-zrp-silver/30 dark:border-zrp-charcoal">
               <div className="text-4xl mb-4">🤝</div>
-              <h3 className="text-xl font-semibold text-charcoal dark:text-white font-orbitron">3. Direct Impact</h3>
-              <p className="mt-2 text-charcoal/80 dark:text-white/70 font-inter">
+              <h3 className="text-xl font-semibold text-zrp-charcoal dark:text-white font-orbitron">3. Direct Impact</h3>
+              <p className="mt-2 text-zrp-charcoal/80 dark:text-white/70 font-inter">
                 We partner with vetted NGOs and local organisations to ensure
                 your contributions reach those who need them most.
                 <br />
-                <span className="text-sm text-dark-red-black font-medium">First official donation report: Q3 2026</span>
+                <span className="text-sm text-zrp-red font-medium">First official donation report: Q3 2026</span>
               </p>
             </div>
           </div>
         </section>
 
         {/* Causes – Where the 35% Goes */}
-        <section className="bg-silver/10 dark:bg-charcoal/30 py-16 px-4">
+        <section className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 py-16 px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center text-charcoal dark:text-white font-orbitron mb-4">
+            <h2 className="text-3xl font-bold text-center text-zrp-charcoal dark:text-white font-orbitron mb-4">
               Where the 35% Goes
             </h2>
-            <p className="text-center text-charcoal/70 dark:text-white/70 mb-12 max-w-2xl mx-auto font-inter">
+            <p className="text-center text-zrp-charcoal/70 dark:text-white/70 mb-12 max-w-2xl mx-auto font-inter">
               The charity budget is distributed across these four causes. We believe in
               holistic impact – from a child's first classroom to a community's
               clean water.
@@ -125,21 +125,21 @@ export default function CharityPage() {
               {CAUSES.map((cause) => (
                 <div
                   key={cause.title}
-                  className="bg-white dark:bg-charcoal/80 p-6 rounded-xl shadow-md border border-silver/30 dark:border-charcoal flex items-start gap-4"
+                  className="bg-white dark:bg-zrp-charcoal/80 p-6 rounded-xl shadow-md border border-zrp-silver/30 dark:border-zrp-charcoal flex items-start gap-4"
                 >
                   <span className="text-3xl">{cause.icon}</span>
                   <div>
-                    <h3 className="text-xl font-semibold text-charcoal dark:text-white font-orbitron">
+                    <h3 className="text-xl font-semibold text-zrp-charcoal dark:text-white font-orbitron">
                       {cause.title}
                     </h3>
-                    <p className="text-charcoal/70 dark:text-white/70 mt-1 font-inter">{cause.description}</p>
-                    <div className="mt-3 w-full bg-silver/50 dark:bg-charcoal rounded-full h-2.5">
+                    <p className="text-zrp-charcoal/70 dark:text-white/70 mt-1 font-inter">{cause.description}</p>
+                    <div className="mt-3 w-full bg-zrp-silver/50 dark:bg-zrp-charcoal rounded-full h-2.5">
                       <div
-                        className="bg-dark-red-black h-2.5 rounded-full"
+                        className="bg-zrp-red h-2.5 rounded-full"
                         style={{ width: `${cause.percentage}%` }}
                       ></div>
                     </div>
-                    <span className="text-sm text-charcoal/60 dark:text-white/60 font-inter">
+                    <span className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">
                       {cause.percentage}% of charity budget
                     </span>
                   </div>
@@ -151,61 +151,61 @@ export default function CharityPage() {
 
         {/* Transparency & Impact – No data shared yet */}
         <section id="transparency" className="py-16 px-4 max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-charcoal dark:text-white font-orbitron mb-4">
+          <h2 className="text-3xl font-bold text-center text-zrp-charcoal dark:text-white font-orbitron mb-4">
             Transparency & Impact
           </h2>
-          <p className="text-center text-charcoal/70 dark:text-white/70 mb-12 max-w-2xl mx-auto font-inter">
-            We believe in full transparency. <strong className="text-dark-red-black">No donation data has been shared yet</strong> – 
-            we will publish our first official report <strong className="text-dark-red-black">every three months</strong>.
+          <p className="text-center text-zrp-charcoal/70 dark:text-white/70 mb-12 max-w-2xl mx-auto font-inter">
+            We believe in full transparency. <strong className="text-zrp-red">No donation data has been shared yet</strong> – 
+            we will publish our first official report <strong className="text-zrp-red">every three months</strong>.
             <br />
-            <span className="text-sm text-dark-red-black font-medium">
+            <span className="text-sm text-zrp-red font-medium">
               📅 First report: Q3 2026
             </span>
           </p>
 
           {/* Placeholder stats */}
           <div className="grid md:grid-cols-3 gap-6 text-center">
-            <div className="bg-silver/20 dark:bg-charcoal/50 p-6 rounded-xl border border-silver/30 dark:border-charcoal">
-              <div className="text-4xl font-bold text-dark-red-black font-orbitron">—</div>
-              <p className="text-charcoal/70 dark:text-white/70 mt-2 font-inter">Total Donated (coming soon)</p>
+            <div className="bg-zrp-silver/20 dark:bg-zrp-charcoal/50 p-6 rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal">
+              <div className="text-4xl font-bold text-zrp-red font-orbitron">—</div>
+              <p className="text-zrp-charcoal/70 dark:text-white/70 mt-2 font-inter">Total Donated (coming soon)</p>
             </div>
-            <div className="bg-silver/20 dark:bg-charcoal/50 p-6 rounded-xl border border-silver/30 dark:border-charcoal">
-              <div className="text-4xl font-bold text-dark-red-black font-orbitron">—</div>
-              <p className="text-charcoal/70 dark:text-white/70 mt-2 font-inter">Lives Impacted (coming soon)</p>
+            <div className="bg-zrp-silver/20 dark:bg-zrp-charcoal/50 p-6 rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal">
+              <div className="text-4xl font-bold text-zrp-red font-orbitron">—</div>
+              <p className="text-zrp-charcoal/70 dark:text-white/70 mt-2 font-inter">Lives Impacted (coming soon)</p>
             </div>
-            <div className="bg-silver/20 dark:bg-charcoal/50 p-6 rounded-xl border border-silver/30 dark:border-charcoal">
-              <div className="text-4xl font-bold text-dark-red-black font-orbitron">—</div>
-              <p className="text-charcoal/70 dark:text-white/70 mt-2 font-inter">Projects Supported (coming soon)</p>
+            <div className="bg-zrp-silver/20 dark:bg-zrp-charcoal/50 p-6 rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal">
+              <div className="text-4xl font-bold text-zrp-red font-orbitron">—</div>
+              <p className="text-zrp-charcoal/70 dark:text-white/70 mt-2 font-inter">Projects Supported (coming soon)</p>
             </div>
           </div>
 
           {/* Cause breakdown – placeholder */}
           <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div className="bg-silver/10 dark:bg-charcoal/30 p-4 rounded-lg border border-silver/30 dark:border-charcoal">
-              <p className="text-2xl font-bold text-charcoal dark:text-white font-orbitron">—</p>
-              <p className="text-sm text-charcoal/60 dark:text-white/60 font-inter">Orphanages</p>
+            <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal">
+              <p className="text-2xl font-bold text-zrp-charcoal dark:text-white font-orbitron">—</p>
+              <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">Orphanages</p>
             </div>
-            <div className="bg-silver/10 dark:bg-charcoal/30 p-4 rounded-lg border border-silver/30 dark:border-charcoal">
-              <p className="text-2xl font-bold text-charcoal dark:text-white font-orbitron">—</p>
-              <p className="text-sm text-charcoal/60 dark:text-white/60 font-inter">Schools</p>
+            <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal">
+              <p className="text-2xl font-bold text-zrp-charcoal dark:text-white font-orbitron">—</p>
+              <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">Schools</p>
             </div>
-            <div className="bg-silver/10 dark:bg-charcoal/30 p-4 rounded-lg border border-silver/30 dark:border-charcoal">
-              <p className="text-2xl font-bold text-charcoal dark:text-white font-orbitron">—</p>
-              <p className="text-sm text-charcoal/60 dark:text-white/60 font-inter">Hospitals</p>
+            <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal">
+              <p className="text-2xl font-bold text-zrp-charcoal dark:text-white font-orbitron">—</p>
+              <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">Hospitals</p>
             </div>
-            <div className="bg-silver/10 dark:bg-charcoal/30 p-4 rounded-lg border border-silver/30 dark:border-charcoal">
-              <p className="text-2xl font-bold text-charcoal dark:text-white font-orbitron">—</p>
-              <p className="text-sm text-charcoal/60 dark:text-white/60 font-inter">Climate Projects</p>
+            <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal">
+              <p className="text-2xl font-bold text-zrp-charcoal dark:text-white font-orbitron">—</p>
+              <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">Climate Projects</p>
             </div>
           </div>
 
-          <div className="mt-8 text-center text-charcoal/50 dark:text-white/50 text-sm border-t border-silver/30 dark:border-charcoal pt-6 font-inter">
+          <div className="mt-8 text-center text-zrp-charcoal/50 dark:text-white/50 text-sm border-t border-zrp-silver/30 dark:border-zrp-charcoal pt-6 font-inter">
             ⏳ We are currently accumulating funds. The first quarterly report will include verified donation amounts and project details.
           </div>
         </section>
 
         {/* Call to Action – dark red background */}
-        <section className="bg-gradient-to-r from-dark-red-black to-black py-16 px-4">
+        <section className="bg-gradient-to-r from-zrp-darkRed to-zrp-deepBlack py-16 px-4">
           <div className="max-w-4xl mx-auto text-center text-white">
             <h2 className="text-3xl font-bold font-orbitron">Be Part of Something Bigger</h2>
             <p className="mt-4 text-lg opacity-90 font-inter">
@@ -217,7 +217,7 @@ export default function CharityPage() {
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <Link
                 href="/signup"
-                className="px-8 py-3 bg-white text-dark-red-black font-semibold rounded-full shadow-lg hover:bg-gray-200 transition font-inter"
+                className="px-8 py-3 bg-white text-zrp-darkRed font-semibold rounded-full shadow-lg hover:bg-gray-200 transition font-inter"
               >
                 Create Your Account
               </Link>
