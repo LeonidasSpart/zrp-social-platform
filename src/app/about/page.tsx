@@ -29,7 +29,7 @@ export default function AboutPage() {
       </div>
 
       {/* ─── Story ─── */}
-      <div className="prose prose-lg dark:prose-invert max-w-none space-y-6 text-gray-800 dark:text-gray-200">
+      <div className="max-w-none space-y-6 text-base md:text-lg leading-relaxed text-gray-800 dark:text-gray-200">
         <p>
           <span className="font-semibold text-zrp-red dark:text-zrp-red">ZRP Social</span> {t("about.p1")}
           <strong className="text-gray-900 dark:text-white"> {t("about.p1Bold")}</strong>
