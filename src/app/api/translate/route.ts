@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Official LibreTranslate hosted instance — free tier works without an
-// API key but is rate-limited. If translation volume grows, consider
-// getting a free/paid API key at https://portal.libretranslate.com
-// and setting LIBRETRANSLATE_API_KEY, or self-hosting your own instance
-// and pointing LIBRETRANSLATE_URL at it.
-const LIBRETRANSLATE_URL =
-  process.env.LIBRETRANSLATE_URL || "https://libretranslate.com/translate";
+// MyMemory Translation API — free, no API key required.
+// Rate limit: ~5,000 words/day per IP (10,000/day if MYMEMORY_EMAIL is set,
+// per their fair-use policy for identifying good-faith usage).
+const MYMEMORY_URL = "https://api.mymemory.translated.net/get";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,26 +15,27 @@ export async function POST(req: NextRequest) {
 
     const target = (targetLang || "en").toLowerCase();
 
-    const body: Record<string, string> = {
-      q: text,
-      source: "auto",
-      target,
-      format: "text",
-    };
+    // MyMemory wants a source|target language pair. We don't know the
+    // source language ahead of time, so we ask it to auto-detect by
+    // passing "autodetect" as the source.
+    const langPair = `autodetect|${target}`;
 
-    if (process.env.LIBRETRANSLATE_API_KEY) {
-      body.api_key = process.env.LIBRETRANSLATE_API_KEY;
+    const params = new URLSearchParams({
+      q: text,
+      langpair: langPair,
+    });
+
+    if (process.env.MYMEMORY_EMAIL) {
+      params.set("de", process.env.MYMEMORY_EMAIL);
     }
 
-    const res = await fetch(LIBRETRANSLATE_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+    const res = await fetch(`${MYMEMORY_URL}?${params.toString()}`, {
+      method: "GET",
     });
 
     if (!res.ok) {
       const errText = await res.text();
-      console.error("LibreTranslate error:", res.status, errText);
+      console.error("MyMemory error:", res.status, errText);
       return NextResponse.json(
         { error: "Translation service unavailable" },
         { status: 502 }
@@ -46,9 +44,27 @@ export async function POST(req: NextRequest) {
 
     const data = await res.json();
 
+    if (!data?.responseData?.translatedText) {
+      console.error("MyMemory unexpected response:", JSON.stringify(data));
+      return NextResponse.json(
+        { error: "Translation service unavailable" },
+        { status: 502 }
+      );
+    }
+
+    // MyMemory sometimes echoes back an error message inside a 200 response
+    // (e.g. quota exceeded) instead of returning a proper HTTP error code.
+    if (data.responseStatus && data.responseStatus !== 200) {
+      console.error("MyMemory responseStatus error:", data.responseStatus, data.responseDetails);
+      return NextResponse.json(
+        { error: "Translation service unavailable" },
+        { status: 502 }
+      );
+    }
+
     return NextResponse.json({
-      translatedText: data.translatedText,
-      detectedSourceLang: data.detectedLanguage?.language || null,
+      translatedText: data.responseData.translatedText,
+      detectedSourceLang: data.responseData.match ? null : null, // MyMemory doesn't return detected source lang directly
     });
   } catch (error) {
     console.error("Translate route error:", error);
