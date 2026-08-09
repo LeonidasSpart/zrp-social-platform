@@ -145,7 +145,8 @@ type TranslationKey =
   | "postDetail.errPostComment" | "postDetail.errPostCommentGeneric"
   | "reposts.title" | "reposts.count" | "reposts.empty" | "reposts.errFetch" | "reposts.errLoad"
   | "quotes.title" | "quotes.count" | "quotes.empty" | "quotes.errFetch" | "quotes.errLoad"
-  | "followers.title" | "followers.empty" | "following.title" | "following.empty" | "hashtag.backToHome" | "hashtag.postCount" | "hashtag.errLoad" | "hashtag.noPosts" | "adminPosts.title" | "adminPosts.searchPlaceholder" | "adminPosts.by" | "adminPosts.delete" | "adminPosts.deleteConfirm" | "adminPosts.previous" | "adminPosts.next" | "adminPosts.pageOf" | "upgradeReq.title" | "upgradeReq.noPending" | "upgradeReq.requested" | "upgradeReq.errProcessFailed" | "upgradeReq.errSomethingWrong" | "adminPayments.title" | "adminPayments.pendingCount" | "adminPayments.noPending" | "adminPayments.tx" | "adminPayments.notProvided" | "adminPayments.pendingBadge" | "adminPayments.verify" | "adminPayments.errFetch" | "adminPayments.errSomethingWrong" | "adminPayments.errVerifyFailed" | "adminPayments.errVerifyGeneric" | "adminDash.title" | "adminDash.updated" | "adminDash.totalUsers" | "adminDash.totalPosts" | "adminDash.totalComments" | "adminDash.pendingReports" | "adminDash.totalReports" | "adminDash.admins" | "adminDash.moderators" | "adminDash.activeUsers" | "adminDash.userRoles" | "adminDash.noRoleData" | "adminDash.quickActions" | "adminDash.manageUsers" | "adminDash.managePosts" | "adminDash.viewReports" | "adminDash.pendingSuffix" | "adminDash.paymentRequests" | "analytics.title" | "analytics.last30Days" | "analytics.errLoad" | "analytics.users" | "analytics.posts" | "analytics.comments" | "analytics.likes" | "analytics.reposts" | "analytics.avgLikesPerPost" | "analytics.avgCommentsPerPost" | "analytics.totalPosts" | "analytics.dailyActivity" | "analytics.userGrowth" | "analytics.newUsers" | "analytics.engagementBreakdown" | "analytics.topPosts" | "adminReports.title" | "adminReports.all" | "adminReports.statusPending" | "adminReports.statusReviewed" | "adminReports.statusDismissed" | "adminReports.statusActioned" | "adminReports.actionDeletePost" | "adminReports.actionWarnUser" | "adminReports.actionBanUser" | "adminReports.actionMuteUser" | "adminReports.actionDeleteComment" | "adminReports.actionOther" | "adminReports.total" | "adminReports.pending" | "adminReports.reviewed" | "adminReports.dismissed" | "adminReports.actioned" | "adminReports.reportUpdated" | "adminReports.errUpdateFailed" | "adminReports.errSomethingWrong" | "adminReports.errSelectActionType" | "adminReports.reportedBy" | "adminReports.viewPost" | "adminReports.viewComment" | "adminReports.viewAuthor" | "adminReports.details" | "adminReports.note" | "adminReports.actionedOn" | "adminReports.noReports" | "adminReports.dismiss" | "adminReports.review" | "adminReports.action" | "adminReports.previous" | "adminReports.next" | "adminReports.pageOf" | "adminReports.chooseAction" | "adminReports.actionType" | "adminReports.noteOptional" | "adminReports.notePlaceholder" | "adminReports.cancel" | "adminReports.confirmAction" | "adminUsers.title" | "adminUsers.searchPlaceholder" | "adminUsers.total" | "adminUsers.active" | "adminUsers.banned" | "adminUsers.admins" | "adminUsers.mods" | "adminUsers.allRoles" | "adminUsers.roleUser" | "adminUsers.roleModerator" | "adminUsers.roleAdmin" | "adminUsers.allBadges" | "adminUsers.badgeNone" | "adminUsers.badgeVerified" | "adminUsers.badgeOrganization" | "adminUsers.badgeGovernment" | "adminUsers.statusAll" | "adminUsers.statusActive" | "adminUsers.statusBanned" | "adminUsers.usersShown" | "adminUsers.colUser" | "adminUsers.colEmail" | "adminUsers.colPosts" | "adminUsers.colRole" | "adminUsers.colBadge" | "adminUsers.colPlan" | "adminUsers.colStatus" | "adminUsers.colActions" | "adminUsers.noMatch" | "adminUsers.unban" | "adminUsers.ban" | "adminUsers.delete" | "adminUsers.previous" | "adminUsers.next" | "adminUsers.pageOf" | "adminUsers.deleteConfirm" | "adminUsers.banConfirm" | "adminUsers.errToggleBan" | "adminUsers.errUpdatePlan" | "adminUsers.planFree" | "adminUsers.planPro" | "adminUsers.planBusiness" | "adminUsers.planEnterprise" | "about.title" | "about.subtitle" | "about.p1" | "about.p1Bold" | "about.p2" | "about.p3" | "about.p3Bold" | "about.p4" | "about.p4Bold" | "about.p5" | "about.p5Em" | "about.p6" | "about.tagline" | "about.value1Title" | "about.value1Desc" | "about.value2Title" | "about.value2Desc" | "about.value3Title" | "about.value3Desc" | "about.ctaText" | "about.ctaButton" | "profile.reposts" | "profile.tip" | "profile.noReposts" | "sidebar.postButton" | "rightPanel.searchPlaceholder" | "rightPanel.trending" | "rightPanel.postsCount" | "rightPanel.noTrending" | "rightPanel.whoToFollow" | "rightPanel.noSuggestions" | "rightPanel.showMore" | "rightPanel.footerText" | "settings.privateAccount" | "settings.privateAccountDesc" | "profile.protectedAccount" | "profile.protectedMessage" | "messages.selectConversation" | "messages.selectConversationDesc" | "auth.emailOrUsername" | "auth.emailOrUsernamePlaceholder" | "auth.continueWithGoogle" | "auth.or";
+  | "followers.title" | "followers.empty" | "following.title" | "following.empty" | "hashtag.backToHome" | "hashtag.postCount" | "hashtag.errLoad" | "hashtag.noPosts" | "adminPosts.title" | "adminPosts.searchPlaceholder" | "adminPosts.by" | "adminPosts.delete" | "adminPosts.deleteConfirm" | "adminPosts.previous" | "adminPosts.next" | "adminPosts.pageOf" | "upgradeReq.title" | "upgradeReq.noPending" | "upgradeReq.requested" | "upgradeReq.errProcessFailed" | "upgradeReq.errSomethingWrong" | "adminPayments.title" | "adminPayments.pendingCount" | "adminPayments.noPending" | "adminPayments.tx" | "adminPayments.notProvided" | "adminPayments.pendingBadge" | "adminPayments.verify" | "adminPayments.errFetch" | "adminPayments.errSomethingWrong" | "adminPayments.errVerifyFailed" | "adminPayments.errVerifyGeneric" | "adminDash.title" | "adminDash.updated" | "adminDash.totalUsers" | "adminDash.totalPosts" | "adminDash.totalComments" | "adminDash.pendingReports" | "adminDash.totalReports" | "adminDash.admins" | "adminDash.moderators" | "adminDash.activeUsers" | "adminDash.userRoles" | "adminDash.noRoleData" | "adminDash.quickActions" | "adminDash.manageUsers" | "adminDash.managePosts" | "adminDash.viewReports" | "adminDash.pendingSuffix" | "adminDash.paymentRequests" | "analytics.title" | "analytics.last30Days" | "analytics.errLoad" | "analytics.users" | "analytics.posts" | "analytics.comments" | "analytics.likes" | "analytics.reposts" | "analytics.avgLikesPerPost" | "analytics.avgCommentsPerPost" | "analytics.totalPosts" | "analytics.dailyActivity" | "analytics.userGrowth" | "analytics.newUsers" | "analytics.engagementBreakdown" | "analytics.topPosts" | "adminReports.title" | "adminReports.all" | "adminReports.statusPending" | "adminReports.statusReviewed" | "adminReports.statusDismissed" | "adminReports.statusActioned" | "adminReports.actionDeletePost" | "adminReports.actionWarnUser" | "adminReports.actionBanUser" | "adminReports.actionMuteUser" | "adminReports.actionDeleteComment" | "adminReports.actionOther" | "adminReports.total" | "adminReports.pending" | "adminReports.reviewed" | "adminReports.dismissed" | "adminReports.actioned" | "adminReports.reportUpdated" | "adminReports.errUpdateFailed" | "adminReports.errSomethingWrong" | "adminReports.errSelectActionType" | "adminReports.reportedBy" | "adminReports.viewPost" | "adminReports.viewComment" | "adminReports.viewAuthor" | "adminReports.details" | "adminReports.note" | "adminReports.actionedOn" | "adminReports.noReports" | "adminReports.dismiss" | "adminReports.review" | "adminReports.action" | "adminReports.previous" | "adminReports.next" | "adminReports.pageOf" | "adminReports.chooseAction" | "adminReports.actionType" | "adminReports.noteOptional" | "adminReports.notePlaceholder" | "adminReports.cancel" | "adminReports.confirmAction" | "adminUsers.title" | "adminUsers.searchPlaceholder" | "adminUsers.total" | "adminUsers.active" | "adminUsers.banned" | "adminUsers.admins" | "adminUsers.mods" | "adminUsers.allRoles" | "adminUsers.roleUser" | "adminUsers.roleModerator" | "adminUsers.roleAdmin" | "adminUsers.allBadges" | "adminUsers.badgeNone" | "adminUsers.badgeVerified" | "adminUsers.badgeOrganization" | "adminUsers.badgeGovernment" | "adminUsers.statusAll" | "adminUsers.statusActive" | "adminUsers.statusBanned" | "adminUsers.usersShown" | "adminUsers.colUser" | "adminUsers.colEmail" | "adminUsers.colPosts" | "adminUsers.colRole" | "adminUsers.colBadge" | "adminUsers.colPlan" | "adminUsers.colStatus" | "adminUsers.colActions" | "adminUsers.noMatch" | "adminUsers.unban" | "adminUsers.ban" | "adminUsers.delete" | "adminUsers.previous" | "adminUsers.next" | "adminUsers.pageOf" | "adminUsers.deleteConfirm" | "adminUsers.banConfirm" | "adminUsers.errToggleBan" | "adminUsers.errUpdatePlan" | "adminUsers.planFree" | "adminUsers.planPro" | "adminUsers.planBusiness" | "adminUsers.planEnterprise" | "about.title" | "about.subtitle" | "about.p1" | "about.p1Bold" | "about.p2" | "about.p3" | "about.p3Bold" | "about.p4" | "about.p4Bold" | "about.p5" | "about.p5Em" | "about.p6" | "about.tagline" | "about.value1Title" | "about.value1Desc" | "about.value2Title" | "about.value2Desc" | "about.value3Title" | "about.value3Desc" | "about.ctaText" | "about.ctaButton" | "profile.reposts" | "profile.tip" | "profile.noReposts" | "sidebar.postButton" | "rightPanel.searchPlaceholder" | "rightPanel.trending" | "rightPanel.postsCount" | "rightPanel.noTrending" | "rightPanel.whoToFollow" | "rightPanel.noSuggestions" | "rightPanel.showMore" | "rightPanel.footerText" | "settings.privateAccount" | "settings.privateAccountDesc" | "profile.protectedAccount" | "profile.protectedMessage" | "messages.selectConversation" | "messages.selectConversationDesc" | "auth.emailOrUsername" | "auth.emailOrUsernamePlaceholder" | "auth.continueWithGoogle" | "auth.or"
+  | "contact.title" | "contact.subtitle" | "contact.generalSupport" | "contact.generalSupportDesc" | "contact.reportIssue" | "contact.reportIssueDesc" | "contact.moreHelp" | "contact.moreHelpDesc" | "contact.faqLabel" | "contact.helpCenterLabel";
 
 type TranslationDict = Record<TranslationKey, string>;
 
@@ -824,6 +825,16 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.emailOrUsernamePlaceholder": "you@example.com or username",
     "auth.continueWithGoogle": "Continue with Google",
     "auth.or": "or",
+    "contact.title": "Contact Us",
+    "contact.subtitle": "We'd love to hear from you.",
+    "contact.generalSupport": "General support",
+    "contact.generalSupportDesc": "Questions about your account, billing, or anything else — reach out and we'll get back to you.",
+    "contact.reportIssue": "Report an issue",
+    "contact.reportIssueDesc": "Found a bug, a security concern, or content that violates our guidelines?",
+    "contact.moreHelp": "More help",
+    "contact.moreHelpDesc": "Check our {faq} or {help} for quick answers.",
+    "contact.faqLabel": "FAQ",
+    "contact.helpCenterLabel": "Help Center",
   },
   fr: {
     "nav.home": "Accueil",
@@ -1499,6 +1510,16 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.emailOrUsernamePlaceholder": "vous@exemple.com ou nom d'utilisateur",
     "auth.continueWithGoogle": "Continuer avec Google",
     "auth.or": "ou",
+    "contact.title": "Nous contacter",
+    "contact.subtitle": "Nous aimerions avoir de vos nouvelles.",
+    "contact.generalSupport": "Assistance générale",
+    "contact.generalSupportDesc": "Des questions sur votre compte, la facturation ou autre chose ? Contactez-nous, nous vous répondrons.",
+    "contact.reportIssue": "Signaler un problème",
+    "contact.reportIssueDesc": "Vous avez trouvé un bug, un problème de sécurité ou un contenu qui enfreint nos règles ?",
+    "contact.moreHelp": "Besoin d'aide supplémentaire",
+    "contact.moreHelpDesc": "Consultez notre {faq} ou notre {help} pour des réponses rapides.",
+    "contact.faqLabel": "FAQ",
+    "contact.helpCenterLabel": "Centre d'aide",
   },
   de: {
     "nav.home": "Startseite",
@@ -2174,6 +2195,16 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.emailOrUsernamePlaceholder": "du@beispiel.com oder Benutzername",
     "auth.continueWithGoogle": "Mit Google fortfahren",
     "auth.or": "oder",
+    "contact.title": "Kontakt",
+    "contact.subtitle": "Wir freuen uns, von dir zu hören.",
+    "contact.generalSupport": "Allgemeiner Support",
+    "contact.generalSupportDesc": "Fragen zu deinem Konto, zur Abrechnung oder zu etwas anderem? Melde dich bei uns, wir antworten dir.",
+    "contact.reportIssue": "Problem melden",
+    "contact.reportIssueDesc": "Einen Fehler, ein Sicherheitsproblem oder Inhalte gefunden, die gegen unsere Richtlinien verstoßen?",
+    "contact.moreHelp": "Weitere Hilfe",
+    "contact.moreHelpDesc": "Schau in unsere {faq} oder unser {help} für schnelle Antworten.",
+    "contact.faqLabel": "FAQ",
+    "contact.helpCenterLabel": "Hilfecenter",
   },
   it: {
     "nav.home": "Home",
@@ -2849,6 +2880,16 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.emailOrUsernamePlaceholder": "tu@esempio.com o nome utente",
     "auth.continueWithGoogle": "Continua con Google",
     "auth.or": "o",
+    "contact.title": "Contattaci",
+    "contact.subtitle": "Ci piacerebbe sentirti.",
+    "contact.generalSupport": "Assistenza generale",
+    "contact.generalSupportDesc": "Domande sul tuo account, sulla fatturazione o su altro? Contattaci e ti risponderemo.",
+    "contact.reportIssue": "Segnala un problema",
+    "contact.reportIssueDesc": "Hai trovato un bug, un problema di sicurezza o contenuti che violano le nostre linee guida?",
+    "contact.moreHelp": "Ulteriore assistenza",
+    "contact.moreHelpDesc": "Consulta le nostre {faq} o il nostro {help} per risposte rapide.",
+    "contact.faqLabel": "FAQ",
+    "contact.helpCenterLabel": "Centro assistenza",
   },
 };
 
