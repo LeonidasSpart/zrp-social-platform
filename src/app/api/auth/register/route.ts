@@ -29,14 +29,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ─── Check existing user ────────────────────────────────────
-    const existing = await prisma.user.findFirst({
-      where: {
-        OR: [{ email }, { username: trimmedUsername }],
-      },
+    // ─── Check existing user (specific error per field) ────────────
+    const existingEmail = await prisma.user.findFirst({ where: { email } });
+    if (existingEmail) {
+      return NextResponse.json({ error: "Email already registered", field: "email" }, { status: 400 });
+    }
+
+    const existingUsername = await prisma.user.findFirst({
+      where: { username: { equals: trimmedUsername, mode: "insensitive" } },
     });
-    if (existing) {
-      return NextResponse.json({ error: "Email or username already taken" }, { status: 400 });
+    if (existingUsername) {
+      return NextResponse.json({ error: "Username already taken", field: "username" }, { status: 400 });
     }
 
     // ─── Hash password & generate token ────────────────────────
