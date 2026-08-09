@@ -8,10 +8,12 @@ import { useSession, signOut } from "next-auth/react";
 import {
   Home, Compass, Search, MessageSquare, Bell, Bookmark, User,
   LayoutDashboard, Settings, Users, Key, LogOut, MoreHorizontal,
-  PenSquare,
+  PenSquare, Sun, Moon, Globe,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useUnreadCount } from "@/contexts/UnreadCountContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { SUPPORTED_LANGUAGES } from "@/lib/translations";
+import { useEffect } from "react";
 
 type NavItem = {
   href: string;
@@ -23,12 +25,30 @@ type NavItem = {
 export default function Sidebar() {
   const { data: session } = useSession();
   const pathname = usePathname();
-  const { t } = useLanguage();
-  const { unreadCount } = useUnreadCount();
+  const { t, language, setLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
+  const [unreadCount, setUnreadCount] = useState(0);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
 
   const isAuthenticated = !!session;
   const features = session?.user?.features;
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const fetchUnread = async () => {
+      try {
+        const res = await fetch("/api/notifications/unread");
+        if (res.ok) {
+          const data = await res.json();
+          setUnreadCount(data.count);
+        }
+      } catch {}
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   if (!isAuthenticated || pathname?.startsWith("/onboarding")) return null;
 
@@ -50,6 +70,8 @@ export default function Sidebar() {
   const handleLogout = async () => {
     await signOut({ callbackUrl: "/login" });
   };
+
+  const currentLangLabel = SUPPORTED_LANGUAGES.find((l) => l.code === language)?.code.toUpperCase() || "EN";
 
   return (
     <aside className="hidden lg:flex flex-col w-64 flex-shrink-0 h-screen sticky top-0 px-2 py-4 border-r border-gray-200 dark:border-gray-800">
@@ -96,6 +118,50 @@ export default function Sidebar() {
             <span>{t("nav.admin")}</span>
           </Link>
         )}
+
+        {/* ─── Quick theme toggle ──────────────────────────────────── */}
+        <button
+          onClick={toggleTheme}
+          className="w-full flex items-center gap-4 px-3 py-2.5 rounded-full text-lg font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+        >
+          {theme === "light" ? <Moon className="w-6 h-6" /> : <Sun className="w-6 h-6" />}
+          <span>{theme === "light" ? t("nav.darkMode") : t("nav.lightMode")}</span>
+        </button>
+
+        {/* ─── Language selector ──────────────────────────────────── */}
+        <div className="relative">
+          <button
+            onClick={() => setLangMenuOpen(!langMenuOpen)}
+            className="w-full flex items-center gap-4 px-3 py-2.5 rounded-full text-lg font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          >
+            <Globe className="w-6 h-6" />
+            <span>{t("nav.language")}</span>
+            <span className="ml-auto text-sm text-gray-400">{currentLangLabel}</span>
+          </button>
+          {langMenuOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setLangMenuOpen(false)} />
+              <div className="absolute left-0 bottom-full mb-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => {
+                      setLanguage(lang.code);
+                      setLangMenuOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 text-sm transition ${
+                      language === lang.code
+                        ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white font-medium"
+                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
 
         {/* ─── More menu (Settings, Team, API Keys) ──────────────── */}
         <div className="relative">
