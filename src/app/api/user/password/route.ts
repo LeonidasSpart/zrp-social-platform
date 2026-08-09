@@ -13,8 +13,8 @@ export async function PUT(req: NextRequest) {
   try {
     const { currentPassword, newPassword } = await req.json();
 
-    if (!currentPassword || !newPassword) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+    if (!newPassword) {
+      return NextResponse.json({ error: "New password is required" }, { status: 400 });
     }
 
     if (newPassword.length < 6) {
@@ -28,6 +28,21 @@ export async function PUT(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // ─── Accounts with no password yet (e.g. Google sign-in) ────────
+    // Let them set an initial password without requiring a "current" one.
+    if (!user.password) {
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: { password: hashedPassword },
+      });
+      return NextResponse.json({ message: "Password set successfully" });
+    }
+
+    if (!currentPassword) {
+      return NextResponse.json({ error: "Current password is required" }, { status: 400 });
     }
 
     const isValid = await bcrypt.compare(currentPassword, user.password);
