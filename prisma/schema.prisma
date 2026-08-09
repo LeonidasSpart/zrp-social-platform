@@ -38,7 +38,6 @@ enum WithdrawalStatus {
   FAILED
 }
 
-// ─── SUPPORT TICKET ENUMS (NEW) ──────────────────────────────────
 enum TicketCategory {
   GENERAL
   ACCOUNT
@@ -712,7 +711,7 @@ model WithdrawalRequest {
   @@index([status])
 }
 
-// ─── SUPPORT TICKET SYSTEM (NEW) ─────────────────────────────────
+// ─── SUPPORT TICKET SYSTEM ─────────────────────────────────
 
 model SupportTicket {
   id          String    @id @default(cuid())
@@ -725,7 +724,7 @@ model SupportTicket {
   status      TicketStatus  @default(OPEN)
   message     String    @db.Text
 
-  attachments String[]  // URLs to uploaded files (max 5)
+  attachments String[]
 
   assignedTo  String?
   assignedAdmin User?   @relation("AssignedTickets", fields: [assignedTo], references: [id], onDelete: SetNull)
@@ -741,6 +740,9 @@ model SupportTicket {
   updatedAt   DateTime  @updatedAt
 
   replies     TicketReply[]
+
+  // ✅ Added the missing opposite relation
+  feedback    TicketFeedback?
 
   @@index([userId])
   @@index([status])
@@ -772,7 +774,6 @@ model TicketReply {
   @@index([isInternal])
 }
 
-// Optional: feedback after ticket resolution
 model TicketFeedback {
   id          String   @id @default(cuid())
   ticketId    String   @unique
