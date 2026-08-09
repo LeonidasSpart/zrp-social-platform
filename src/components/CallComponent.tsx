@@ -102,13 +102,9 @@ export default function CallComponent({
             <div className="flex items-center justify-center h-full text-white text-2xl">
               {isIncoming ? (
                 <div className="text-center">
-                  <div className="w-24 h-24 rounded-full bg-zrp-red/30 flex items-center justify-center mx-auto mb-4 text-6xl animate-pulse">
+                  <div className="w-24 h-24 rounded-full bg-zrp-red/30 flex items-center justify-center mx-auto text-6xl animate-pulse">
                     📞
                   </div>
-                  <p className="text-xl font-semibold">{callerName || "Someone"} is calling...</p>
-                  <p className="text-sm text-gray-400 mt-1">
-                    {isVideo ? "Video call" : "Voice call"}
-                  </p>
                 </div>
               ) : isConnecting ? (
                 <div className="text-center">
@@ -142,7 +138,11 @@ export default function CallComponent({
           {!isIncoming && remoteStream && (
             <p className="text-sm text-gray-300">{formatDuration(callDuration)}</p>
           )}
-          {isIncoming && <p className="text-sm text-gray-300">Incoming call...</p>}
+          {isIncoming && (
+            <p className="text-sm text-gray-300">
+              Incoming {isVideo ? "video" : "voice"} call...
+            </p>
+          )}
           {!isIncoming && !remoteStream && (
             <p className="text-sm text-gray-400">Ringing...</p>
           )}
