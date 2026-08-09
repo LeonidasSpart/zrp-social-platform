@@ -7,7 +7,8 @@ import Link from "next/link";
 import {
   MapPin, Link as LinkIcon, Calendar, Users, Pencil, Pin, PinOff,
   Heart, Camera, Loader2, MessageCircle, UserPlus, UserCheck, Share2,
-  Eye, Bell, BellOff, Ban, CheckCircle, MoreHorizontal, DollarSign, Lock
+  Eye, Bell, BellOff, Ban, CheckCircle, MoreHorizontal, DollarSign, Lock,
+  FileText, Repeat, MessageSquare, Image as ImageIcon, Award, Sparkles
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -42,6 +43,40 @@ function parseBio(bio: string) {
     parts.push({ type: "text", value: bio.slice(lastIndex) });
   }
   return parts;
+}
+
+// ─── Compute milestone badges from data we already have ─────────────
+// No new API needed — purely derived from profile.createdAt and counts.
+interface Milestone {
+  icon: string;
+  label: string;
+}
+
+function getMilestones(profile: UserProfile): Milestone[] {
+  const badges: Milestone[] = [];
+
+  const joined = new Date(profile.createdAt);
+  const monthsSinceJoin =
+    (Date.now() - joined.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
+
+  if (monthsSinceJoin >= 12) {
+    badges.push({ icon: "🎂", label: `${Math.floor(monthsSinceJoin / 12)}yr on ZRP` });
+  } else if (monthsSinceJoin >= 6) {
+    badges.push({ icon: "🎉", label: "6 months on ZRP" });
+  } else if (monthsSinceJoin >= 1) {
+    badges.push({ icon: "🌱", label: "New member" });
+  }
+
+  const posts = profile._count.posts;
+  if (posts >= 500) badges.push({ icon: "🏆", label: "500+ posts" });
+  else if (posts >= 100) badges.push({ icon: "📝", label: "100+ posts" });
+  else if (posts >= 10) badges.push({ icon: "✍️", label: "10+ posts" });
+
+  const followers = profile._count.followers;
+  if (followers >= 1000) badges.push({ icon: "⭐", label: "1K+ followers" });
+  else if (followers >= 100) badges.push({ icon: "👥", label: "100+ followers" });
+
+  return badges;
 }
 
 interface UserProfile {
@@ -106,6 +141,15 @@ interface Post {
 }
 
 type TabType = "posts" | "replies" | "media" | "likes" | "reposts" | "analytics";
+
+// ─── Icon per tab ─────────────────────────────────────────────────
+const tabIconMap: Record<Exclude<TabType, "analytics">, React.ElementType> = {
+  posts: FileText,
+  reposts: Repeat,
+  replies: MessageSquare,
+  likes: Heart,
+  media: ImageIcon,
+};
 
 export default function ProfilePage({ params }: { params: { username: string } }) {
   const { data: session, status } = useSession();
@@ -433,6 +477,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
   });
 
   const impactMeals = Math.floor(Math.random() * 50) + 5;
+  const milestones = getMilestones(profile);
 
   // ─── Plan badge color ───────────────────────────────────────────────
   const getPlanBadgeColor = (plan: string | null) => {
@@ -917,6 +962,22 @@ export default function ProfilePage({ params }: { params: { username: string } }
               {t("profile.charityNote", { pct: 35 })}
             </span>
           </div>
+
+          {/* ─── Milestone badges ──────────────────────────────────────── */}
+          {milestones.length > 0 && (
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {milestones.map((m, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center gap-1 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2.5 py-1 rounded-full border border-gray-200 dark:border-gray-700"
+                  title={m.label}
+                >
+                  <span>{m.icon}</span>
+                  {m.label}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -930,6 +991,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
       {/* ─── Tabs ─── */}
       <div className="flex mt-4 px-4 border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
         {visibleTabs.map((tab) => {
+          const TabIcon = tab === "analytics" ? Eye : tabIconMap[tab];
           return (
             <button
               key={tab}
@@ -940,14 +1002,10 @@ export default function ProfilePage({ params }: { params: { username: string } }
                   : "text-gray-500 dark:text-gray-400"
               }`}
             >
-              {tab === "analytics" ? (
-                <span className="flex items-center justify-center gap-1">
-                  <Eye className="w-4 h-4" />
-                  {t("profile.analytics")}
-                </span>
-              ) : (
-                tabLabelMap[tab]
-              )}
+              <span className="flex items-center justify-center gap-1.5">
+                <TabIcon className="w-4 h-4" />
+                {tab === "analytics" ? t("profile.analytics") : tabLabelMap[tab]}
+              </span>
               {activeTab === tab && (
                 <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-1 bg-zrp-red rounded-full" />
               )}
