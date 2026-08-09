@@ -1,5 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "./db";
 import bcrypt from "bcryptjs";
 import { getFeatureStatus, FeatureStatus } from "./permissions";
@@ -35,11 +36,43 @@ declare module "next-auth/jwt" {
   }
 }
 
+// ─── Helper: generate a unique username from an email/name ─────────
+async function generateUniqueUsername(base: string): Promise<string> {
+  let candidate = base
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .slice(0, 15) || "user";
+
+  if (candidate.length < 3) {
+    candidate = candidate.padEnd(3, "0");
+  }
+
+  let username = candidate;
+  let attempt = 0;
+
+  while (await prisma.user.findUnique({ where: { username } })) {
+    attempt += 1;
+    const suffix = Math.floor(1000 + Math.random() * 9000).toString();
+    username = `${candidate.slice(0, 15 - suffix.length)}${suffix}`;
+    if (attempt > 10) {
+      // Extremely unlikely fallback
+      username = `${candidate.slice(0, 10)}${Date.now().toString().slice(-6)}`;
+      break;
+    }
+  }
+
+  return username;
+}
+
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -141,8 +174,62 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user, trigger }) {
-      // ─── On initial sign‑in ──────────────────────────────────────
+    // ─── Handle Google account creation / linking ──────────────────
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        if (!user.email) return false;
+
+        const existing = await prisma.user.findUnique({
+          where: { email: user.email.toLowerCase() },
+        });
+
+        if (existing) {
+          if (existing.banned) return false;
+          return true;
+        }
+
+        // ─── Create a new user for this Google account ────────────
+        const baseHandle = user.email.split("@")[0] || user.name || "user";
+        const username = await generateUniqueUsername(baseHandle);
+
+        await prisma.user.create({
+          data: {
+            email: user.email.toLowerCase(),
+            username,
+            name: user.name || null,
+            avatarUrl: user.image || null,
+            password: null,
+            emailVerified: new Date(),
+            role: "USER",
+            onboardingCompleted: false,
+          },
+        });
+      }
+      return true;
+    },
+    async jwt({ token, user, account, trigger }) {
+      // ─── On initial sign‑in via Google ─────────────────────────
+      if (account?.provider === "google" && user?.email) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: user.email.toLowerCase() },
+        });
+        if (dbUser) {
+          token.id = dbUser.id;
+          token.username = dbUser.username;
+          token.isAdmin = dbUser.isAdmin;
+          token.role = dbUser.role;
+          token.badgeType = dbUser.badgeType;
+          token.avatarUrl = dbUser.avatarUrl;
+          token.onboardingCompleted = dbUser.onboardingCompleted;
+          token.banned = dbUser.banned || false;
+          token.emailVerified = !!dbUser.emailVerified;
+          token.plan = dbUser.plan || "free";
+          token.features = getFeatureStatus({ plan: token.plan });
+        }
+        return token;
+      }
+
+      // ─── On initial sign‑in via credentials ────────────────────
       if (user) {
         token.id = user.id;
         token.username = user.username;
