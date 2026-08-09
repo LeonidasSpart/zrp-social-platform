@@ -11,6 +11,13 @@ import { getSocket } from "@/lib/socket-client";
 import Peer from "simple-peer";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+// Fallback if the TURN credential fetch fails — STUN-only, so calls
+// between two open networks can still connect even without TURN relay.
+const FALLBACK_ICE_SERVERS = [
+  { urls: "stun:stun.l.google.com:19302" },
+  { urls: "stun:stun1.l.google.com:19302" },
+];
+
 export default function ChatPage({ params }: { params: { username: string } }) {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -28,7 +35,23 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   const [callError, setCallError] = useState<string | null>(null);
   const socketRef = useRef<any>(null);
 
+  // ─── Fresh TURN/STUN credentials, fetched once on mount ────────────
+  const iceServersRef = useRef<any[]>(FALLBACK_ICE_SERVERS);
+
   const userId = session?.user?.id;
+
+  useEffect(() => {
+    fetch("/api/turn-credentials")
+      .then((res) => res.json())
+      .then((servers) => {
+        if (Array.isArray(servers) && servers.length > 0) {
+          iceServersRef.current = servers;
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch TURN credentials, using fallback:", err);
+      });
+  }, []);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -94,26 +117,6 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     });
   };
 
-  const iceServers = [
-    { urls: "stun:stun.l.google.com:19302" },
-    { urls: "stun:stun1.l.google.com:19302" },
-    {
-      urls: "turn:openrelay.metered.ca:80",
-      username: "openrelayproject",
-      credential: "openrelayproject",
-    },
-    {
-      urls: "turn:openrelay.metered.ca:443",
-      username: "openrelayproject",
-      credential: "openrelayproject",
-    },
-    {
-      urls: "turn:openrelay.metered.ca:5349",
-      username: "openrelayproject",
-      credential: "openrelayproject",
-    },
-  ];
-
   const startCall = async (isVideo: boolean) => {
     setCallError(null);
     try {
@@ -129,7 +132,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
         initiator: true,
         trickle: false,
         stream,
-        config: { iceServers },
+        config: { iceServers: iceServersRef.current },
       });
 
       newPeer.on("signal", (signal) => {
@@ -181,7 +184,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
         initiator: false,
         trickle: false,
         stream,
-        config: { iceServers },
+        config: { iceServers: iceServersRef.current },
       });
 
       newPeer.on("signal", (signal) => {
