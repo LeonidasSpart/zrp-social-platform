@@ -396,15 +396,7 @@ export default function HelpPage() {
       </div>
 
       {/* ─── Footer Links ─── */}
-      <div className="mt-8 flex flex-wrap justify-center gap-4 text-sm text-gray-400 dark:text-gray-500">
-        <Link href="/about" className="hover:text-zrp-red transition">About</Link>
-        <Link href="/privacy" className="hover:text-zrp-red transition">Privacy</Link>
-        <Link href="/terms" className="hover:text-zrp-red transition">Terms</Link>
-        <Link href="/contact" className="hover:text-zrp-red transition">Contact</Link>
-        <Link href="/charity" className="hover:text-zrp-red transition">Charity</Link>
-        <Link href="/faq" className="hover:text-zrp-red transition">FAQ</Link>
-        <Link href="/help" className="hover:text-zrp-red transition">Help Center</Link>
-      </div>
+      {/* ❌ REMOVED – to avoid duplication with global footer */}
     </div>
   );
 }
