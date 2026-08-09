@@ -33,6 +33,7 @@ export async function GET(req: NextRequest) {
             username: true,
             name: true,
             avatarUrl: true,
+            badgeType: true,
           },
         },
         receiver: {
@@ -41,6 +42,7 @@ export async function GET(req: NextRequest) {
             username: true,
             name: true,
             avatarUrl: true,
+            badgeType: true,
           },
         },
       },
@@ -132,6 +134,7 @@ export async function POST(req: NextRequest) {
             username: true,
             name: true,
             avatarUrl: true,
+            badgeType: true,
           },
         },
         receiver: {
@@ -140,6 +143,7 @@ export async function POST(req: NextRequest) {
             username: true,
             name: true,
             avatarUrl: true,
+            badgeType: true,
           },
         },
       },
