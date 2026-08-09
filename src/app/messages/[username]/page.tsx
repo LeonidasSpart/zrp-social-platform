@@ -18,6 +18,22 @@ const FALLBACK_ICE_SERVERS = [
   { urls: "stun:stun1.l.google.com:19302" },
 ];
 
+async function getIceServers(): Promise<any[]> {
+  try {
+    const res = await fetch("/api/turn-credentials");
+    const servers = await res.json();
+    if (Array.isArray(servers) && servers.length > 0) {
+      console.log("🧊 Using fetched TURN/STUN servers:", servers.length, "entries");
+      return servers;
+    }
+    console.warn("🧊 TURN fetch returned empty/invalid, using fallback");
+    return FALLBACK_ICE_SERVERS;
+  } catch (err) {
+    console.error("🧊 Failed to fetch TURN credentials, using fallback:", err);
+    return FALLBACK_ICE_SERVERS;
+  }
+}
+
 export default function ChatPage({ params }: { params: { username: string } }) {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -35,23 +51,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   const [callError, setCallError] = useState<string | null>(null);
   const socketRef = useRef<any>(null);
 
-  // ─── Fresh TURN/STUN credentials, fetched once on mount ────────────
-  const iceServersRef = useRef<any[]>(FALLBACK_ICE_SERVERS);
-
   const userId = session?.user?.id;
-
-  useEffect(() => {
-    fetch("/api/turn-credentials")
-      .then((res) => res.json())
-      .then((servers) => {
-        if (Array.isArray(servers) && servers.length > 0) {
-          iceServersRef.current = servers;
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to fetch TURN credentials, using fallback:", err);
-      });
-  }, []);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -120,10 +120,10 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   const startCall = async (isVideo: boolean) => {
     setCallError(null);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: isVideo,
-        audio: true,
-      });
+      const [stream, iceServers] = await Promise.all([
+        navigator.mediaDevices.getUserMedia({ video: isVideo, audio: true }),
+        getIceServers(),
+      ]);
       setLocalStream(stream);
       setIsVideoCall(isVideo);
       setCallState("calling");
@@ -132,7 +132,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
         initiator: true,
         trickle: false,
         stream,
-        config: { iceServers: iceServersRef.current },
+        config: { iceServers },
       });
 
       newPeer.on("signal", (signal) => {
@@ -174,17 +174,17 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     setCallError(null);
     try {
       console.log("🔵 Accepting call...");
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: isVideoCall,
-        audio: true,
-      });
+      const [stream, iceServers] = await Promise.all([
+        navigator.mediaDevices.getUserMedia({ video: isVideoCall, audio: true }),
+        getIceServers(),
+      ]);
       setLocalStream(stream);
 
       const newPeer = new Peer({
         initiator: false,
         trickle: false,
         stream,
-        config: { iceServers: iceServersRef.current },
+        config: { iceServers },
       });
 
       newPeer.on("signal", (signal) => {
