@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import PasswordInput from "@/components/PasswordInput";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -37,7 +38,6 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        // ✅ Show the actual error from the server
         setError(result.error);
         setLoading(false);
       } else {
@@ -58,27 +58,86 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zrp-deepBlack px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t("auth.welcomeTitle")}</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">{t("auth.signInSubtitle")}</p>
-        </div>
+    <div className="min-h-screen flex bg-white dark:bg-zrp-deepBlack">
+      {/* ─── Left brand panel — desktop only ─────────────────────────── */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-zrp-darkRed via-zrp-red to-zrp-darkRed">
+        <div
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, #fff 1.5px, transparent 1.5px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+        <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16 w-full">
+          <Link href="/" className="inline-block w-fit">
+            <Image
+              src="/logo.png"
+              alt="ZRP"
+              width={56}
+              height={56}
+              className="w-14 h-14 object-contain"
+            />
+          </Link>
 
-        <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8">
+          <div>
+            <h1 className="font-orbitron font-bold text-white text-5xl xl:text-6xl leading-[1.05] mb-6">
+              {t("auth.welcomeTitle")}
+            </h1>
+            <p className="text-white/80 text-xl xl:text-2xl max-w-md leading-snug">
+              {t("about.subtitle")}
+            </p>
+          </div>
+
+          <p className="text-white/60 text-sm">
+            {t("rightPanel.footerText")}
+          </p>
+        </div>
+      </div>
+
+      {/* ─── Right / mobile form panel ───────────────────────────────── */}
+      <div className="flex-1 flex items-center justify-center px-4 py-12 sm:py-16">
+        <div className="w-full max-w-md">
+          {/* ─── Mobile & tablet hero — big and bold, like a native app ─── */}
+          <div className="lg:hidden text-center mb-10 sm:mb-14">
+            <Link href="/" className="inline-block mb-6 sm:mb-8">
+              <Image
+                src="/logo.png"
+                alt="ZRP"
+                width={96}
+                height={96}
+                className="w-20 h-20 sm:w-24 sm:h-24 object-contain mx-auto"
+                priority
+              />
+            </Link>
+            <h1 className="text-4xl sm:text-5xl font-orbitron font-bold text-gray-900 dark:text-white leading-[1.05]">
+              {t("auth.welcomeTitle")}
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-3 text-base sm:text-lg max-w-sm mx-auto">
+              {t("about.subtitle")}
+            </p>
+          </div>
+
+          <div className="hidden lg:block mb-8">
+            <h2 className="text-2xl font-orbitron font-bold text-gray-900 dark:text-white">
+              {t("auth.signIn")}
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">{t("auth.signInSubtitle")}</p>
+          </div>
+
           <button
             type="button"
             onClick={handleGoogleSignIn}
             disabled={googleLoading}
-            className="w-full flex items-center justify-center gap-3 border border-gray-300 dark:border-gray-600 rounded-lg py-2.5 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-3 border border-gray-300 dark:border-gray-600 rounded-full py-3.5 sm:py-3 font-medium text-gray-700 dark:text-gray-100 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed text-base"
           >
             <GoogleIcon className="w-5 h-5" />
             {googleLoading ? t("auth.signingIn") : t("auth.continueWithGoogle")}
           </button>
 
-          <div className="flex items-center gap-3 my-6">
+          <div className="flex items-center gap-3 my-6 sm:my-6">
             <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-            <span className="text-xs text-gray-400 dark:text-gray-500 uppercase">{t("auth.or")}</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">{t("auth.or")}</span>
             <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
           </div>
 
@@ -129,7 +188,7 @@ export default function LoginPage() {
                 type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-3.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base"
                 placeholder={t("auth.emailOrUsernamePlaceholder")}
                 autoComplete="username"
                 required
@@ -147,25 +206,27 @@ export default function LoginPage() {
               autoComplete="current-password"
             />
 
-            <Link
-              href="/forgot-password"
-              className="text-sm text-zrp-red dark:text-zrp-red hover:underline block text-right mt-1"
-            >
-              {t("auth.forgotPassword")}
-            </Link>
+            <div className="flex justify-end -mt-2">
+              <Link
+                href="/forgot-password"
+                className="text-sm text-zrp-red dark:text-zrp-red hover:underline"
+              >
+                {t("auth.forgotPassword")}
+              </Link>
+            </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-zrp-red hover:bg-zrp-darkRed text-white py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="w-full bg-zrp-red hover:bg-zrp-darkRed text-white py-3.5 sm:py-3 rounded-full font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm text-base"
             >
               {loading ? t("auth.signingIn") : t("auth.signIn")}
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
+          <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
             {t("auth.noAccount")}{" "}
-            <Link href="/signup" className="text-zrp-red dark:text-zrp-red hover:underline">
+            <Link href="/signup" className="text-zrp-red dark:text-zrp-red hover:underline font-medium">
               {t("auth.signUp")}
             </Link>
           </p>
