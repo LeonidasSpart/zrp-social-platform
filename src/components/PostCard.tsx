@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag,
   Bookmark, BarChart3, Pin, PinOff, X, ZoomIn, Plus, ChevronDown,
-  Briefcase, FileText
+  Briefcase, FileText, Globe, Loader2
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Comments from "./Comments";
@@ -14,6 +14,7 @@ import ReportModal from "./ReportModal";
 import VerifiedBadge from "./VerifiedBadge";
 import EmojiPicker from "emoji-picker-react";
 import QuotePostModal from "./QuotePostModal";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface PostCardProps {
   post: {
@@ -102,6 +103,7 @@ export default function PostCard({
   showInlineComments = true,
 }: PostCardProps) {
   const { data: session } = useSession();
+  const { language: uiLanguage } = useLanguage();
   const [liked, setLiked] = useState(post.liked || false);
   const [likesCount, setLikesCount] = useState(post._count?.likes || 0);
   const [showComments, setShowComments] = useState(false);
@@ -130,6 +132,12 @@ export default function PostCard({
 
   // ─── Expand article body ──────────────────────────────────────────
   const [articleExpanded, setArticleExpanded] = useState(false);
+
+  // ─── Translation ────────────────────────────────────────────────
+  const [translatedText, setTranslatedText] = useState<string | null>(null);
+  const [showTranslation, setShowTranslation] = useState(false);
+  const [translating, setTranslating] = useState(false);
+  const [translateError, setTranslateError] = useState(false);
 
   const isAuthor = session?.user?.id === post.author.id;
   const contentParts = parseContent(post.content);
@@ -386,6 +394,35 @@ export default function PostCard({
     }
   };
 
+  // ─── TRANSLATE POST ────────────────────────────────────────────────
+  const handleTranslate = async () => {
+    if (translatedText) {
+      setShowTranslation(!showTranslation);
+      return;
+    }
+    setTranslating(true);
+    setTranslateError(false);
+    try {
+      const res = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: post.content, targetLang: uiLanguage }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTranslatedText(data.translatedText);
+        setShowTranslation(true);
+      } else {
+        setTranslateError(true);
+      }
+    } catch (error) {
+      console.error("Translate error:", error);
+      setTranslateError(true);
+    } finally {
+      setTranslating(false);
+    }
+  };
+
   // ─── DOUBLE‑CLICK TO LIKE ──────────────────────────────────────────
   const handlePostClick = (e: React.MouseEvent) => {
     const now = Date.now();
@@ -526,6 +563,34 @@ export default function PostCard({
                   return <span key={index}>{part.value}</span>;
                 })}
               </p>
+
+              {/* ─── Translate post ───────────────────────────────────── */}
+              {post.content.trim().length > 0 && (
+                <div className="mt-1" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={handleTranslate}
+                    disabled={translating}
+                    className="inline-flex items-center gap-1 text-sm text-zrp-red hover:underline disabled:opacity-60"
+                  >
+                    {translating ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Globe className="w-3.5 h-3.5" />
+                    )}
+                    {showTranslation ? "Show original" : "Show translation"}
+                  </button>
+                  {translateError && (
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                      Translation unavailable right now.
+                    </p>
+                  )}
+                  {showTranslation && translatedText && (
+                    <p className="text-gray-800 dark:text-gray-200 mt-1.5 whitespace-pre-wrap break-words border-l-2 border-gray-200 dark:border-gray-700 pl-2">
+                      {translatedText}
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* ─── Recruitment extra info ───────────────────────────── */}
               {postType === "RECRUITMENT" && (post.company || post.location || post.applyUrl) && (
