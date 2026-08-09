@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Heart, MessageCircle, Repeat, UserPlus } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 interface Notification {
   id: string;
@@ -17,6 +18,7 @@ interface Notification {
     username: string;
     name: string;
     avatarUrl?: string;
+    badgeType?: string | null;
   };
   post?: {
     id: string;
@@ -46,10 +48,15 @@ export default function NotificationsPage() {
   const fetchNotifications = async () => {
     try {
       const res = await fetch("/api/notifications");
+      if (!res.ok) {
+        setNotifications([]);
+        return;
+      }
       const data = await res.json();
-      setNotifications(data);
+      setNotifications(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching notifications:", error);
+      setNotifications([]);
     } finally {
       setLoading(false);
     }
@@ -84,17 +91,17 @@ export default function NotificationsPage() {
     }
   };
 
-  const getMessage = (notification: Notification) => {
-    const name = notification.fromUser.name || notification.fromUser.username;
-    switch (notification.type) {
+  // ─── Action text WITHOUT the name, since name+badge render separately ──
+  const getActionSuffix = (type: string) => {
+    switch (type) {
       case "like":
-        return t("notifications.likedPost", { name });
+        return t("notifications.likedPostSuffix");
       case "comment":
-        return t("notifications.commentedPost", { name });
+        return t("notifications.commentedPostSuffix");
       case "follow":
-        return t("notifications.startedFollowing", { name });
+        return t("notifications.startedFollowingSuffix");
       case "repost":
-        return t("notifications.repostedPost", { name });
+        return t("notifications.repostedPostSuffix");
       default:
         return "";
     }
@@ -114,72 +121,81 @@ export default function NotificationsPage() {
   if (status === "loading" || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">{t("action.loading")}</div>
+        <div className="text-gray-500 dark:text-gray-400">{t("action.loading")}</div>
       </div>
     );
   }
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">{t("notifications.title")}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{t("notifications.title")}</h1>
 
       {notifications.length === 0 ? (
-        <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8 border border-gray-200 text-center">
-          <p className="text-gray-500">{t("notifications.empty")}</p>
-          <p className="text-sm text-gray-400 mt-1">{t("notifications.emptyDesc")}</p>
+        <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8 border border-gray-200 dark:border-gray-800 text-center">
+          <p className="text-gray-500 dark:text-gray-400">{t("notifications.empty")}</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">{t("notifications.emptyDesc")}</p>
         </div>
       ) : (
         <div className="space-y-2">
-          {notifications.map((notification) => (
-            <div
-              key={notification.id}
-              className={`bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border transition ${
-                notification.read ? "border-gray-200" : "border-blue-200 bg-blue-50/30"
-              }`}
-            >
-              <Link
-                href={
-                  notification.post
-                    ? `/post/${notification.post.id}`
-                    : `/profile/${notification.fromUser.username}`
-                }
-                className="flex items-start gap-3"
+          {notifications.map((notification) => {
+            const name = notification.fromUser.name || notification.fromUser.username;
+            return (
+              <div
+                key={notification.id}
+                className={`bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border transition ${
+                  notification.read
+                    ? "border-gray-200 dark:border-gray-800"
+                    : "border-blue-200 dark:border-blue-900 bg-blue-50/30 dark:bg-blue-900/10"
+                }`}
               >
-                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                  {notification.fromUser.avatarUrl ? (
-                    <img
-                      src={notification.fromUser.avatarUrl}
-                      alt=""
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-gray-600 font-semibold">
-                      {notification.fromUser.name?.[0] || "?"}
-                    </span>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    {getIcon(notification.type)}
-                    <p className="text-sm text-gray-800">
-                      {getMessage(notification)}
+                <Link
+                  href={
+                    notification.post
+                      ? `/post/${notification.post.id}`
+                      : `/profile/${notification.fromUser.username}`
+                  }
+                  className="flex items-start gap-3"
+                >
+                  <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {notification.fromUser.avatarUrl ? (
+                      <img
+                        src={notification.fromUser.avatarUrl}
+                        alt=""
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-gray-600 dark:text-gray-300 font-semibold">
+                        {name?.[0] || "?"}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {getIcon(notification.type)}
+                      <p className="text-sm text-gray-800 dark:text-gray-200">
+                        <span className="font-semibold text-gray-900 dark:text-white inline-flex items-center gap-1">
+                          {name}
+                          <VerifiedBadge badgeType={notification.fromUser.badgeType} />
+                        </span>{" "}
+                        {getActionSuffix(notification.type)}
+                      </p>
+                    </div>
+                    {notification.post && (
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 truncate">
+                        "{notification.post.content.substring(0, 60)}..."
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                      {timeAgo(notification.createdAt)}
                     </p>
                   </div>
-                  {notification.post && (
-                    <p className="text-xs text-gray-400 mt-1 truncate">
-                      "{notification.post.content.substring(0, 60)}..."
-                    </p>
+                  {!notification.read && (
+                    <div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-2" />
                   )}
-                  <p className="text-xs text-gray-400 mt-1">
-                    {timeAgo(notification.createdAt)}
-                  </p>
-                </div>
-                {!notification.read && (
-                  <div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-2" />
-                )}
-              </Link>
-            </div>
-          ))}
+                </Link>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
