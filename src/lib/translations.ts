@@ -135,6 +135,7 @@ type TranslationKey =
   | "notifications.title" | "notifications.empty" | "notifications.emptyDesc"
   | "notifications.justNow" | "notifications.likedPost" | "notifications.commentedPost"
   | "notifications.startedFollowing" | "notifications.repostedPost"
+  | "notifications.likedPostSuffix" | "notifications.commentedPostSuffix" | "notifications.startedFollowingSuffix" | "notifications.repostedPostSuffix"
   | "bookmarks.title" | "bookmarks.savedCount" | "bookmarks.empty" | "bookmarks.emptyDesc"
   | "bookmarks.explorePosts" | "bookmarks.replyingTo" | "bookmarks.errFetch" | "bookmarks.errLoad"
   | "postDetail.postNotFound" | "postDetail.errLoadFailed" | "postDetail.backToHome"
@@ -593,6 +594,10 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.commentedPost": "{name} commented on your post",
     "notifications.startedFollowing": "{name} started following you",
     "notifications.repostedPost": "{name} reposted your post",
+    "notifications.likedPostSuffix": "liked your post",
+    "notifications.commentedPostSuffix": "commented on your post",
+    "notifications.startedFollowingSuffix": "started following you",
+    "notifications.repostedPostSuffix": "reposted your post",
     "bookmarks.title": "Bookmarks",
     "bookmarks.savedCount": "{n} saved",
     "bookmarks.empty": "No bookmarks yet",
@@ -1264,6 +1269,10 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.commentedPost": "{name} a commenté votre publication",
     "notifications.startedFollowing": "{name} a commencé à vous suivre",
     "notifications.repostedPost": "{name} a repartagé votre publication",
+    "notifications.likedPostSuffix": "a aimé votre publication",
+    "notifications.commentedPostSuffix": "a commenté votre publication",
+    "notifications.startedFollowingSuffix": "a commencé à vous suivre",
+    "notifications.repostedPostSuffix": "a repartagé votre publication",
     "bookmarks.title": "Favoris",
     "bookmarks.savedCount": "{n} enregistré(s)",
     "bookmarks.empty": "Aucun favori pour le moment",
@@ -1935,6 +1944,10 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.commentedPost": "{name} hat deinen Beitrag kommentiert",
     "notifications.startedFollowing": "{name} folgt dir jetzt",
     "notifications.repostedPost": "{name} hat deinen Beitrag repostet",
+    "notifications.likedPostSuffix": "gefällt dein Beitrag",
+    "notifications.commentedPostSuffix": "hat deinen Beitrag kommentiert",
+    "notifications.startedFollowingSuffix": "folgt dir jetzt",
+    "notifications.repostedPostSuffix": "hat deinen Beitrag repostet",
     "bookmarks.title": "Lesezeichen",
     "bookmarks.savedCount": "{n} gespeichert",
     "bookmarks.empty": "Noch keine Lesezeichen",
@@ -2311,7 +2324,7 @@ export const translations: Record<Language, TranslationDict> = {
     "onboarding.locationPlaceholder": "Cerca una città...",
     "onboarding.website": "Sito web",
     "onboarding.websitePlaceholder": "https://il-tuo-sito.com",
-    "onboarding.followTitle": "Segui alcune persone 🧑‍🤝‍",
+    "onboarding.followTitle": "Segui alcune persone 🧑‍🤝‍🧑",
     "onboarding.followSubtitle": "Scegli le persone da seguire per riempire il tuo feed.",
     "onboarding.noSuggestions": "Nessun suggerimento disponibile.",
     "onboarding.usersSelected": "{n} utente/i selezionato/i",
@@ -2606,6 +2619,10 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.commentedPost": "{name} ha commentato il tuo post",
     "notifications.startedFollowing": "{name} ha iniziato a seguirti",
     "notifications.repostedPost": "{name} ha ripubblicato il tuo post",
+    "notifications.likedPostSuffix": "ha messo mi piace al tuo post",
+    "notifications.commentedPostSuffix": "ha commentato il tuo post",
+    "notifications.startedFollowingSuffix": "ha iniziato a seguirti",
+    "notifications.repostedPostSuffix": "ha ripubblicato il tuo post",
     "bookmarks.title": "Preferiti",
     "bookmarks.savedCount": "{n} salvati",
     "bookmarks.empty": "Ancora nessun preferito",
