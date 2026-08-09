@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Loader2, MessageCircle } from "lucide-react";
 import { getSocket } from "@/lib/socket-client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 interface Conversation {
   partner: {
@@ -14,6 +15,7 @@ interface Conversation {
     username: string;
     name: string | null;
     avatarUrl: string | null;
+    badgeType: string | null;
   };
   lastMessage: {
     id: string;
@@ -129,8 +131,9 @@ export default function MessagesLayout({ children }: { children: React.ReactNode
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className={`text-sm truncate ${isActive ? "font-bold" : "font-semibold"} text-gray-900 dark:text-white`}>
-                        {partner.name || partner.username}
+                      <p className={`text-sm truncate ${isActive ? "font-bold" : "font-semibold"} text-gray-900 dark:text-white flex items-center gap-1`}>
+                        <span className="truncate">{partner.name || partner.username}</span>
+                        <VerifiedBadge badgeType={partner.badgeType} className="flex-shrink-0" />
                       </p>
                       <span className="text-[11px] text-gray-400 dark:text-gray-500 flex-shrink-0">
                         {new Date(lastMsg.createdAt).toLocaleDateString(localeMap[language] || "en-US", {
