@@ -64,7 +64,7 @@ export default function StoriesBar() {
 
   return (
     <>
-      <div className="flex gap-4 overflow-x-auto py-3 px-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex gap-4 overflow-x-auto py-3 px-4 bg-white dark:bg-zrp-deepBlack border-b border-gray-200 dark:border-gray-800">
         {/* Your Story */}
         <button
           onClick={() => setShowComposer(true)}
