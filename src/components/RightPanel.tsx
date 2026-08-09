@@ -78,7 +78,7 @@ export default function RightPanel() {
   if (!session || pathname?.startsWith("/admin") || pathname?.startsWith("/onboarding")) return null;
 
   return (
-    <aside className="hidden xl:flex flex-col w-80 flex-shrink-0 h-screen sticky top-0 py-4 pl-4 overflow-y-auto">
+    <aside className="hidden xl:flex flex-col w-80 flex-shrink-0 h-screen sticky top-0 py-4 pl-4 overflow-y-auto overscroll-contain">
       {/* ─── Search ─────────────────────────────────────────────── */}
       <form onSubmit={handleSearch} className="mb-4">
         <div className="relative">
