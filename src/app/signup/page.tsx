@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import PasswordInput from "@/components/PasswordInput";
 import { useLanguage } from "@/contexts/LanguageContext";
 import GoogleIcon from "@/components/icons/GoogleIcon";
+import { useDebounce } from "@/hooks/useDebounce";
+import { Check, X, Loader2 } from "lucide-react";
+
+type UsernameStatus = "idle" | "checking" | "available" | "taken" | "invalid";
 
 export default function SignupPage() {
   const { t } = useLanguage();
@@ -18,8 +22,56 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  // ─── Live username availability check ───────────────────────────
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
+  const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([]);
+  const debouncedUsername = useDebounce(username, 400);
+
+  useEffect(() => {
+    const trimmed = debouncedUsername.trim();
+    if (trimmed.length === 0) {
+      setUsernameStatus("idle");
+      setUsernameSuggestions([]);
+      return;
+    }
+    if (trimmed.length < 3 || trimmed.length > 20 || !/^[a-zA-Z0-9_]+$/.test(trimmed)) {
+      setUsernameStatus("invalid");
+      setUsernameSuggestions([]);
+      return;
+    }
+
+    let cancelled = false;
+    setUsernameStatus("checking");
+
+    fetch(`/api/auth/check-username?username=${encodeURIComponent(trimmed)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data.available) {
+          setUsernameStatus("available");
+          setUsernameSuggestions([]);
+        } else {
+          setUsernameStatus("taken");
+          setUsernameSuggestions(data.suggestions || []);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setUsernameStatus("idle");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedUsername]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (usernameStatus === "taken") {
+      setError("That username is taken. Pick a suggestion below or try another.");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -56,6 +108,13 @@ export default function SignupPage() {
     setGoogleLoading(true);
     await signIn("google", { callbackUrl: "/" });
   };
+
+  const usernameFieldBorder =
+    usernameStatus === "available"
+      ? "border-green-500 focus:ring-green-500"
+      : usernameStatus === "taken" || usernameStatus === "invalid"
+      ? "border-red-400 focus:ring-red-400"
+      : "border-gray-300 dark:border-gray-600 focus:ring-zrp-red";
 
   return (
     <div className="min-h-screen flex bg-white dark:bg-zrp-deepBlack">
@@ -165,14 +224,55 @@ export default function SignupPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {t("auth.username")}
               </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base"
-                placeholder="johndoe"
-                required
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className={`w-full px-4 py-3.5 sm:py-3 pr-10 border rounded-xl focus:ring-2 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base ${usernameFieldBorder}`}
+                  placeholder="johndoe"
+                  required
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {usernameStatus === "checking" && (
+                    <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
+                  )}
+                  {usernameStatus === "available" && (
+                    <Check className="w-4 h-4 text-green-500" />
+                  )}
+                  {(usernameStatus === "taken" || usernameStatus === "invalid") && (
+                    <X className="w-4 h-4 text-red-400" />
+                  )}
+                </div>
+              </div>
+
+              {usernameStatus === "invalid" && username.trim().length > 0 && (
+                <p className="text-xs text-red-500 mt-1">
+                  3–20 characters, letters/numbers/underscores only
+                </p>
+              )}
+
+              {usernameStatus === "taken" && (
+                <div className="mt-2">
+                  <p className="text-xs text-red-500">That username is taken.</p>
+                  {usernameSuggestions.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-1.5">
+                      {usernameSuggestions.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => setUsername(s)}
+                          className="text-xs px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-zrp-red hover:text-white transition"
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div>
@@ -206,7 +306,7 @@ export default function SignupPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || usernameStatus === "checking"}
               className="w-full bg-zrp-red hover:bg-zrp-darkRed text-white py-3.5 sm:py-3 rounded-full font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm text-base"
             >
               {loading ? t("auth.creatingAccount") : t("auth.createAccount")}
