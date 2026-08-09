@@ -37,8 +37,11 @@ export async function PUT(req: NextRequest) {
     where: { id: session.user.id },
     select: { password: true },
   });
-  if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  if (!user || !user.password) {
+    return NextResponse.json(
+      { error: "This account doesn't have a password set. Please use your sign-in provider to manage your account." },
+      { status: 400 }
+    );
   }
 
   const isValid = await bcrypt.compare(currentPassword, user.password);
