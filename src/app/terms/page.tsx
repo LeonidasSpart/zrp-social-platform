@@ -25,7 +25,7 @@ export default function TermsPage() {
         </p>
       </div>
 
-      <div className="prose prose-lg dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 space-y-6">
+      <div className="max-w-none text-gray-700 dark:text-gray-300 space-y-6">
 
         {/* ─── 1. INTRODUCTION ─── */}
         <section>
@@ -53,7 +53,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-2xl font-orbitron text-gray-900 dark:text-white mt-8 mb-4">2. Eligibility</h2>
           <p>To use ZRP Social, you must:</p>
-          <ul>
+          <ul className="list-disc pl-6 space-y-1">
             <li>Be at least <strong>16 years old</strong> (or the age of digital consent in your jurisdiction).</li>
             <li>Provide accurate and truthful information during registration.</li>
             <li>Not be located in a country subject to sanctions or embargoes.</li>
@@ -72,7 +72,7 @@ export default function TermsPage() {
           <p>
             To access certain features, you must create an account. You agree to:
           </p>
-          <ul>
+          <ul className="list-disc pl-6 space-y-1">
             <li>Provide accurate, current, and complete information during registration.</li>
             <li>Maintain and update your account information as necessary.</li>
             <li>Keep your password secure and confidential.</li>
@@ -103,7 +103,7 @@ export default function TermsPage() {
           <p>
             However, freedom of speech is not absolute. We reserve the right to moderate or remove content that:
           </p>
-          <ul>
+          <ul className="list-disc pl-6 space-y-1">
             <li>Violates applicable laws (e.g., hate speech, defamation, threats, harassment).</li>
             <li>Incites violence, terrorism, or illegal activities.</li>
             <li>Contains child sexual abuse material or other illegal content.</li>
@@ -122,7 +122,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-2xl font-orbitron text-gray-900 dark:text-white mt-8 mb-4">5. User Conduct</h2>
           <p>You agree to use ZRP Social responsibly and lawfully. You shall not:</p>
-          <ul>
+          <ul className="list-disc pl-6 space-y-1">
             <li>Post, share, or distribute content that is illegal, harmful, obscene, defamatory, or threatening.</li>
             <li>Harass, bully, intimidate, or threaten others.</li>
             <li>Impersonate any person or entity, or falsely claim affiliation with any person or entity.</li>
@@ -204,7 +204,7 @@ export default function TermsPage() {
             (e.g., removal, suspension, or ban), you will be notified of the reason and have the right to appeal.
           </p>
           <p>Actions we may take include:</p>
-          <ul>
+          <ul className="list-disc pl-6 space-y-1">
             <li>Removing content that violates our policies.</li>
             <li>Issuing warnings to users who violate our policies.</li>
             <li>Suspending or banning accounts for serious or repeated violations.</li>
@@ -223,7 +223,7 @@ export default function TermsPage() {
             These Terms are governed by the laws of <strong>Switzerland</strong>, without regard to conflict of law principles.
             Any dispute arising out of or in connection with these Terms shall be resolved:
           </p>
-          <ul>
+          <ul className="list-disc pl-6 space-y-1">
             <li>First, through informal negotiations between you and us.</li>
             <li>If negotiations fail, through mediation or arbitration.</li>
             <li>If still unresolved, before the competent courts of Switzerland (or the courts of your jurisdiction, where applicable).</li>
@@ -301,7 +301,7 @@ export default function TermsPage() {
             We may update these Terms from time to time to reflect changes in our services, legal requirements,
             or industry standards. We will notify you of any significant changes:
           </p>
-          <ul>
+          <ul className="list-disc pl-6 space-y-1">
             <li>By email (if you have provided one).</li>
             <li>Through a notice on the platform.</li>
             <li>By updating the "Last updated" date at the top of this page.</li>
@@ -374,15 +374,6 @@ export default function TermsPage() {
           </div>
         </section>
 
-        <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>© {new Date().getFullYear()} ZRP. All rights reserved.</p>
-          <p className="mt-1">
-            Built with purpose. 35% of profits go to charity.
-          </p>
-          <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
-            ZRP Social – The first Swiss European social media platform. Freedom of speech, by the people, for the people.
-          </p>
-        </div>
       </div>
     </div>
   );
