@@ -934,7 +934,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`relative flex-1 py-3 text-sm font-medium transition hover:bg-gray-50 dark:hover:bg-gray-800/50 whitespace-nowrap ${
+              className={`relative flex-shrink-0 px-4 py-3 text-sm font-medium transition hover:bg-gray-50 dark:hover:bg-gray-800/50 whitespace-nowrap ${
                 activeTab === tab
                   ? "text-gray-900 dark:text-white"
                   : "text-gray-500 dark:text-gray-400"
