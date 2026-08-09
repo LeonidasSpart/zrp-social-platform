@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import PasswordInput from "@/components/PasswordInput";
 import { useLanguage } from "@/contexts/LanguageContext";
+import GoogleIcon from "@/components/icons/GoogleIcon";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   useEffect(() => {
     const errorParam = searchParams.get("error");
@@ -50,6 +52,11 @@ export default function LoginPage() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    await signIn("google", { callbackUrl: "/" });
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zrp-deepBlack px-4">
       <div className="w-full max-w-md">
@@ -59,6 +66,22 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8">
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={googleLoading}
+            className="w-full flex items-center justify-center gap-3 border border-gray-300 dark:border-gray-600 rounded-lg py-2.5 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <GoogleIcon className="w-5 h-5" />
+            {googleLoading ? t("auth.signingIn") : t("auth.continueWithGoogle")}
+          </button>
+
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+            <span className="text-xs text-gray-400 dark:text-gray-500 uppercase">{t("auth.or")}</span>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className={`p-3 rounded-lg text-sm ${
