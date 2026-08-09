@@ -13,21 +13,18 @@ enum Role {
   ADMIN
 }
 
-// ─── POST TYPE ──────────────────────────────────────────────────────
 enum PostType {
   POST
   RECRUITMENT
   ARTICLE
 }
 
-// ─── TEAM ROLE ──────────────────────────────────────────────────────
 enum TeamRole {
   ADMIN
   EDITOR
   VIEWER
 }
 
-// ─── CREATOR MONETISATION ENUMS ──────────────────────────────────
 enum TransactionStatus {
   PENDING
   COMPLETED
@@ -39,6 +36,36 @@ enum WithdrawalStatus {
   PROCESSING
   COMPLETED
   FAILED
+}
+
+// ─── SUPPORT TICKET ENUMS (NEW) ──────────────────────────────────
+enum TicketCategory {
+  GENERAL
+  ACCOUNT
+  PRIVACY
+  CONTENT
+  MODERATION
+  PAYMENT
+  MONETISATION
+  BUG
+  FEATURE_REQUEST
+  SECURITY
+  OTHER
+}
+
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  AWAITING_REPLY
+  RESOLVED
+  CLOSED
 }
 
 model User {
@@ -80,10 +107,8 @@ model User {
   publicLikes     Boolean   @default(true)
   publicFollowing Boolean   @default(true)
 
-  // ─── Custom profile URL (Pro+) ────────────────────────────────
   customUrl       String?   @unique
 
-  // ─── Solana wallet for direct tips ─────────────────────────────
   solanaWallet    String?
 
   emailPreferences Json?
@@ -122,30 +147,31 @@ model User {
   blockedBy    Blocked[] @relation("Blocked")
   reports      Report[]  @relation("Reporter")
 
-  // ─── Team Management ────────────────────────────────────────────
-  teamAccount  TeamMember[] @relation("TeamAccount")  // as owner
-  teamMembers  TeamMember[] @relation("TeamMemberUser") // as member
+  teamAccount  TeamMember[] @relation("TeamAccount")
+  teamMembers  TeamMember[] @relation("TeamMemberUser")
 
-  // ─── API Keys ──────────────────────────────────────────────────
   apiKeys      ApiKey[]
 
-  // ─── Creator Monetisation ──────────────────────────────────────
   creatorProfile   CreatorProfile?
   sentTips         Tip[]           @relation("TipSender")
   receivedTips     Tip[]           @relation("TipRecipient")
   premiumPurchases PremiumPurchase[]
   withdrawalRequests WithdrawalRequest[]
 
-  // ─── Follow Requests (for private accounts) ────────────────────
-  followRequestsSent   FollowRequest[] @relation("FollowRequester")   // requests this user sent
-  followRequestsReceived FollowRequest[] @relation("FollowTarget")     // requests this user received
+  followRequestsSent   FollowRequest[] @relation("FollowRequester")
+  followRequestsReceived FollowRequest[] @relation("FollowTarget")
+
+  // ─── Support Tickets ────────────────────────────────────────────
+  supportTickets      SupportTicket[]   // tickets created by user
+  assignedTickets     SupportTicket[]   @relation("AssignedTickets") // tickets assigned to admin
+  ticketReplies       TicketReply[]     // replies sent by user/admin
 }
 
 model Post {
   id          String    @id @default(cuid())
   content     String    @db.Text
   imageUrl    String?
-  mediaType   String?   // "image" or "video"
+  mediaType   String?
   linkUrl     String?
   authorId    String
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
@@ -168,12 +194,11 @@ model Post {
 
   commentsEnabled Boolean @default(true)
 
-  // ─── Post type & extra fields ──────────────────────────────────
   type        PostType  @default(POST)
-  company     String?   // for recruitment
-  location    String?   // for recruitment
-  applyUrl    String?   // for recruitment
-  body        String?   @db.Text // for articles (Markdown/HTML)
+  company     String?
+  location    String?
+  applyUrl    String?
+  body        String?   @db.Text
 
   pinnedBy    User?     @relation("PinnedPost")
 
@@ -185,7 +210,6 @@ model Post {
   reports     Report[]
   bookmarks   Bookmark[]
 
-  // ─── Premium post (if this post is paid) ──────────────────────
   premiumPost PremiumPost?
 
   @@index([createdAt])
@@ -236,14 +260,13 @@ model Follow {
   @@index([followingId])
 }
 
-// ─── FOLLOW REQUEST ──────────────────────────────────────────────────
 model FollowRequest {
   id          String   @id @default(cuid())
   requesterId String
   requester   User     @relation("FollowRequester", fields: [requesterId], references: [id], onDelete: Cascade)
   targetId    String
   target      User     @relation("FollowTarget", fields: [targetId], references: [id], onDelete: Cascade)
-  status      String   @default("pending") // pending, approved, rejected
+  status      String   @default("pending")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -439,16 +462,15 @@ model PushSubscription {
   @@index([userId])
 }
 
-// ─── UPGRADE REQUESTS ──────────────────────────────────────────────
 model UpgradeRequest {
   id             String    @id @default(cuid())
   userId         String
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  requestedPlan  String    // "pro", "business", "enterprise"
-  paymentMethod  String?   // "bank", "paypal", "crypto"
+  requestedPlan  String
+  paymentMethod  String?
   message        String?   @db.Text
-  status         String    @default("pending") // "pending", "approved", "denied"
-  approvedBy     String?   // admin user ID
+  status         String    @default("pending")
+  approvedBy     String?
   approvedAt     DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -457,16 +479,15 @@ model UpgradeRequest {
   @@index([status])
 }
 
-// ─── PAYMENT REQUESTS (crypto) ────────────────────────────────────
 model PaymentRequest {
   id            String   @id @default(cuid())
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan          String   // "pro", "business", "enterprise"
+  plan          String
   amount        Float
   currency      String   @default("USDC")
   transactionId String?
-  status        String   @default("pending") // "pending", "verified", "failed"
+  status        String   @default("pending")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -474,7 +495,6 @@ model PaymentRequest {
   @@index([status])
 }
 
-// ─── COMMENT LIKES ─────────────────────────────────────────────────
 model CommentLike {
   id        String   @id @default(cuid())
   commentId String
@@ -488,7 +508,6 @@ model CommentLike {
   @@index([userId])
 }
 
-// ─── COMMENT REPOSTS ──────────────────────────────────────────────
 model CommentRepost {
   id        String   @id @default(cuid())
   commentId String
@@ -502,7 +521,6 @@ model CommentRepost {
   @@index([userId])
 }
 
-// ─── COMMENT BOOKMARKS ────────────────────────────────────────────
 model CommentBookmark {
   id        String   @id @default(cuid())
   commentId String
@@ -516,16 +534,15 @@ model CommentBookmark {
   @@index([userId])
 }
 
-// ─── STORIES ─────────────────────────────────────────────────────────
 model Story {
   id          String    @id @default(cuid())
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   content     String?   @db.Text
   mediaUrl    String?
-  mediaType   String?   // "image" or "video"
+  mediaType   String?
   createdAt   DateTime  @default(now())
-  expiresAt   DateTime   // set in application code (24h later)
+  expiresAt   DateTime
   views       StoryView[]
 
   @@index([userId])
@@ -546,11 +563,10 @@ model StoryView {
   @@index([viewerId])
 }
 
-// ─── TEAM MEMBERS ──────────────────────────────────────────────────
 model TeamMember {
   id         String    @id @default(cuid())
-  accountId  String    // the user who owns the team (Business/Enterprise)
-  userId     String    // the member user
+  accountId  String
+  userId     String
   role       TeamRole  @default(VIEWER)
   createdAt  DateTime  @default(now())
 
@@ -562,13 +578,12 @@ model TeamMember {
   @@index([userId])
 }
 
-// ─── API KEYS ──────────────────────────────────────────────────────
 model ApiKey {
   id          String    @id @default(cuid())
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  keyHash     String    @unique   // store hashed key (bcrypt or SHA256)
-  name        String              // human-readable label
+  keyHash     String    @unique
+  name        String
   lastUsed    DateTime?
   expiresAt   DateTime?
   createdAt   DateTime  @default(now())
@@ -577,26 +592,21 @@ model ApiKey {
   @@index([userId])
 }
 
-// ─── CREATOR MONETISATION ─────────────────────────────────────────
-
-// Enable monetisation for a user
 model CreatorProfile {
   id              String   @id @default(cuid())
   userId          String   @unique
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Settings
+
   tipsEnabled     Boolean  @default(true)
-  tipsMessage     String?  @db.Text  // Custom thank you message
+  tipsMessage     String?  @db.Text
   premiumPostsEnabled Boolean @default(true)
-  
-  // Stats
+
   totalTips       Float    @default(0)
   totalPremiumRevenue Float @default(0)
   totalEarnings   Float    @default(0)
   totalWithdrawn  Float    @default(0)
-  balance         Float    @default(0) // Available balance (after fees)
-  
+  balance         Float    @default(0)
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -605,105 +615,172 @@ model CreatorProfile {
   withdrawalRequests WithdrawalRequest[]
 }
 
-// Tip from one user to another
 model Tip {
   id              String   @id @default(cuid())
   senderId        String
   sender          User     @relation("TipSender", fields: [senderId], references: [id], onDelete: Cascade)
   recipientId     String
   recipient       User     @relation("TipRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
-  creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
   creatorProfileId String
-  
+  creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
+
   amount          Float
   currency        String   @default("USDC")
   message         String?  @db.Text
-  transactionId   String?  @unique   // ✅ added @unique
+  transactionId   String?  @unique
   status          TransactionStatus @default(PENDING)
-  
-  // Platform fee (10% goes to platform, 35% of that to charity)
+
   platformFee     Float    @default(0)
   charityAmount   Float    @default(0)
-  creatorAmount   Float    @default(0) // After fees
-  
+  creatorAmount   Float    @default(0)
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  
+
   @@index([recipientId])
   @@index([senderId])
   @@index([status])
   @@index([createdAt])
 }
 
-// Premium post (pay-to-view)
 model PremiumPost {
   id              String   @id @default(cuid())
   postId          String   @unique
   post            Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
   creatorProfileId String
-  
+  creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
+
   price           Float    @default(1.0)
   currency        String   @default("USDC")
-  previewContent  String?  @db.Text  // Preview text shown to non-paying users
-  
+  previewContent  String?  @db.Text
+
   totalPurchases  Int      @default(0)
   totalRevenue    Float    @default(0)
-  
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   purchases       PremiumPurchase[]
-  
+
   @@index([postId])
   @@index([price])
 }
 
-// Purchase of a premium post
 model PremiumPurchase {
   id              String   @id @default(cuid())
   premiumPostId   String
   premiumPost     PremiumPost @relation(fields: [premiumPostId], references: [id], onDelete: Cascade)
   userId          String
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   amount          Float
   currency        String   @default("USDC")
-  transactionId   String?  @unique   // ✅ added @unique
+  transactionId   String?  @unique
   status          TransactionStatus @default(PENDING)
-  
-  // Platform fee
+
   platformFee     Float    @default(0)
   charityAmount   Float    @default(0)
   creatorAmount   Float    @default(0)
-  
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  
+
   @@unique([premiumPostId, userId])
   @@index([userId])
   @@index([premiumPostId])
   @@index([status])
 }
 
-// Withdrawal request
 model WithdrawalRequest {
   id              String   @id @default(cuid())
   creatorProfileId String
   creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
   userId          String
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   amount          Float
   currency        String   @default("USDC")
-  walletAddress   String   // Solana wallet address
+  walletAddress   String
   status          WithdrawalStatus @default(PENDING)
-  transactionHash String?  // Blockchain transaction hash
-  
+  transactionHash String?
+
   processedAt     DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  
+
   @@index([userId])
   @@index([status])
+}
+
+// ─── SUPPORT TICKET SYSTEM (NEW) ─────────────────────────────────
+
+model SupportTicket {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  subject     String
+  category    TicketCategory @default(GENERAL)
+  priority    TicketPriority @default(NORMAL)
+  status      TicketStatus  @default(OPEN)
+  message     String    @db.Text
+
+  attachments String[]  // URLs to uploaded files (max 5)
+
+  assignedTo  String?
+  assignedAdmin User?   @relation("AssignedTickets", fields: [assignedTo], references: [id], onDelete: SetNull)
+
+  resolvedAt  DateTime?
+  resolution  String?   @db.Text
+
+  userAgent   String?
+  ipAddress   String?
+  referrer    String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  replies     TicketReply[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+  @@index([category])
+  @@index([assignedTo])
+  @@index([createdAt])
+  @@index([status, priority])
+}
+
+model TicketReply {
+  id          String   @id @default(cuid())
+  ticketId    String
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  message     String   @db.Text
+  isInternal  Boolean  @default(false)
+  attachments String[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([ticketId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([isInternal])
+}
+
+// Optional: feedback after ticket resolution
+model TicketFeedback {
+  id          String   @id @default(cuid())
+  ticketId    String   @unique
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  rating      Int?     // 1-5 stars
+  comment     String?  @db.Text
+  resolved    Boolean? // Was the issue fully resolved?
+
+  createdAt   DateTime @default(now())
 }
