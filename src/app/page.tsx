@@ -260,18 +260,23 @@ export default function HomePage() {
             {hasMore && (
               <div ref={observerRef} className="h-10 flex items-center justify-center">
                 {loadingMore ? (
-                  <div className="flex items-center gap-2 text-gray-400 text-sm">
+                  <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500 text-sm">
                     <div className="w-4 h-4 border-2 border-zrp-red border-t-transparent rounded-full animate-spin" />
                     {t("feed.loadingMore")}
                   </div>
                 ) : (
-                  <span className="text-gray-400 text-sm">{t("feed.loadMore")}</span>
+                  <button
+                    onClick={loadMore}
+                    className="text-gray-400 dark:text-gray-500 hover:text-zrp-red dark:hover:text-zrp-red text-sm transition"
+                  >
+                    {t("feed.loadMore")}
+                  </button>
                 )}
               </div>
             )}
 
             {!hasMore && posts.length > 0 && (
-              <div className="text-center py-4 text-gray-400 text-sm">
+              <div className="text-center py-4 text-gray-400 dark:text-gray-500 text-sm">
                 {t("feed.endOfFeed")}
               </div>
             )}
