@@ -287,6 +287,7 @@ export default function ChatPage({ params }: { params: { username: string } }) {
               receiverName={receiver.name || receiver.username}
               receiverUsername={receiver.username} // ✅ NEW
               receiverAvatar={receiver.avatarUrl}
+              receiverBadgeType={receiver.badgeType}
               onVoiceCall={() => startCall(false)}
               onVideoCall={() => startCall(true)}
             />
