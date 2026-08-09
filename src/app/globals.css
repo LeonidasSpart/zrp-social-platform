@@ -92,3 +92,10 @@ img, video, iframe, svg {
     padding: 0.75rem !important;
   }
 }
+
+/* Clips horizontal overflow on the app shell without turning it into
+   a scroll container (unlike overflow-x: hidden, which forces
+   overflow-y: auto per spec and breaks position: sticky). */
+.app-shell-clip {
+  overflow-x: clip;
+}
