@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 interface UserSuggestion {
   id: string;
   username: string;
   name: string | null;
   avatarUrl: string | null;
+  badgeType: string | null;
 }
 
 interface MentionAutocompleteProps {
@@ -134,8 +136,9 @@ export default function MentionAutocomplete({
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  {user.name || user.username}
+                <p className="text-sm font-medium text-gray-900 dark:text-white truncate flex items-center gap-1">
+                  <span className="truncate">{user.name || user.username}</span>
+                  <VerifiedBadge badgeType={user.badgeType} className="flex-shrink-0" />
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">@{user.username}</p>
               </div>
