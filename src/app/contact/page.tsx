@@ -2,8 +2,35 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ContactPage() {
+  const { t } = useLanguage();
+
+  // Splits "Check our {faq} or {help} for quick answers." into text/link parts,
+  // so each language's word order is preserved while the two links stay live.
+  const renderMoreHelp = () => {
+    const template = t("contact.moreHelpDesc");
+    const parts = template.split(/(\{faq\}|\{help\})/g);
+    return parts.map((part, i) => {
+      if (part === "{faq}") {
+        return (
+          <Link key={i} href="/faq" className="text-zrp-red hover:underline">
+            {t("contact.faqLabel")}
+          </Link>
+        );
+      }
+      if (part === "{help}") {
+        return (
+          <Link key={i} href="/help" className="text-zrp-red hover:underline">
+            {t("contact.helpCenterLabel")}
+          </Link>
+        );
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-12 md:py-20 text-gray-800 dark:text-gray-200">
       {/* ─── Header ─── */}
@@ -18,10 +45,10 @@ export default function ContactPage() {
           />
         </div>
         <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-zrp-red">
-          Contact Us
+          {t("contact.title")}
         </h1>
         <p className="text-lg text-gray-600 dark:text-gray-400 mt-3">
-          We'd love to hear from you.
+          {t("contact.subtitle")}
         </p>
       </div>
 
@@ -29,10 +56,10 @@ export default function ContactPage() {
       <div className="space-y-6">
         <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
           <h2 className="font-orbitron text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            General support
+            {t("contact.generalSupport")}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-            Questions about your account, billing, or anything else — reach out and we'll get back to you.
+            {t("contact.generalSupportDesc")}
           </p>
           <a
             href="mailto:support@zrp.one"
@@ -44,10 +71,10 @@ export default function ContactPage() {
 
         <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
           <h2 className="font-orbitron text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            Report an issue
+            {t("contact.reportIssue")}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-            Found a bug, a security concern, or content that violates our guidelines?
+            {t("contact.reportIssueDesc")}
           </p>
           <a
             href="mailto:security@zrp.one"
@@ -59,18 +86,10 @@ export default function ContactPage() {
 
         <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
           <h2 className="font-orbitron text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            More help
+            {t("contact.moreHelp")}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 text-sm">
-            Check our{" "}
-            <Link href="/faq" className="text-zrp-red hover:underline">
-              FAQ
-            </Link>{" "}
-            or{" "}
-            <Link href="/help" className="text-zrp-red hover:underline">
-              Help Center
-            </Link>{" "}
-            for quick answers.
+            {renderMoreHelp()}
           </p>
         </div>
       </div>
