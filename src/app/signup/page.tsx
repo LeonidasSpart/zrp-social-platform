@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import PasswordInput from "@/components/PasswordInput";
 import { useLanguage } from "@/contexts/LanguageContext";
+import GoogleIcon from "@/components/icons/GoogleIcon";
 
 export default function SignupPage() {
   const { t } = useLanguage();
@@ -14,6 +15,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +51,11 @@ export default function SignupPage() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    await signIn("google", { callbackUrl: "/" });
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zrp-deepBlack px-4">
       <div className="w-full max-w-md">
@@ -58,6 +65,22 @@ export default function SignupPage() {
         </div>
 
         <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8">
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={googleLoading}
+            className="w-full flex items-center justify-center gap-3 border border-gray-300 dark:border-gray-600 rounded-lg py-2.5 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <GoogleIcon className="w-5 h-5" />
+            {googleLoading ? t("auth.signingIn") : t("auth.continueWithGoogle")}
+          </button>
+
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+            <span className="text-xs text-gray-400 dark:text-gray-500 uppercase">{t("auth.or")}</span>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg text-sm">
