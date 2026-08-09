@@ -4,17 +4,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Charity – ZRP Social',
-  description: 'ZRP Social donates 35% of profits to orphans, schools, hospitals, and climate relief. Learn how we give back.',
-};
-
-// You can replace these with real values from your database later
-const CHARITY_STATS = {
-  totalDonated: 28450, // USD
-  orphans: 32,
-  schools: 5,
-  hospitals: 2,
-  climateProjects: 3,
-  beneficiaries: 1250,
+  description: 'ZRP Social donates 35% of profits to orphans, schools, hospitals, and climate relief. Quarterly transparency reports coming soon.',
 };
 
 const CAUSES = [
@@ -47,7 +37,7 @@ const CAUSES = [
 export default function CharityPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      {/* Header */}
+      {/* Header – only once */}
       <header className="border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-blue-600 dark:text-blue-400">
@@ -78,8 +68,13 @@ export default function CharityPage() {
             </h1>
             <p className="mt-6 text-xl text-gray-700 dark:text-gray-200 max-w-2xl mx-auto">
               At ZRP Social, we believe social media should have a social impact.
-              That's why we donate 35% of all platform profits to charities supporting
-              orphans, schools, hospitals, and climate relief.
+              That's why <strong>35% of our platform profits</strong> are dedicated to
+              charities supporting orphans, schools, hospitals, and climate relief.
+            </p>
+            <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              <span className="bg-blue-100 dark:bg-blue-900/40 px-3 py-1 rounded-full text-sm font-medium">
+                📅 Quarterly transparency reports
+              </span>
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <Link
@@ -109,16 +104,15 @@ export default function CharityPage() {
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white">1. Platform Profits</h3>
               <p className="mt-2 text-gray-600 dark:text-gray-300">
                 Revenue comes from premium subscriptions, tips, and business plans.
-                After covering operational costs, 35% of net profits are set aside for charity.
+                After operational costs, <strong>35% of net profits</strong> are set aside for charity.
               </p>
             </div>
             <div className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-sm">
               <div className="text-4xl mb-4">⚖️</div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white">2. Transparent Allocation</h3>
               <p className="mt-2 text-gray-600 dark:text-gray-300">
-                Funds are distributed equally among our four pillars:
-                orphans, education, healthcare, and climate.
-                We publish quarterly transparency reports.
+                Funds are split across our four pillars: orphans, education,
+                healthcare, and climate. We publish detailed reports <strong>every three months</strong>.
               </p>
             </div>
             <div className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-sm">
@@ -126,21 +120,22 @@ export default function CharityPage() {
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white">3. Direct Impact</h3>
               <p className="mt-2 text-gray-600 dark:text-gray-300">
                 We partner with vetted NGOs and local organisations to ensure
-                your contributions reach those who need them most.
-                No middlemen, no overhead – just real change.
+                your contributions reach those who need them most. 
+                <br />
+                <span className="text-sm text-blue-600 dark:text-blue-400">First official donation report: Q3 2026</span>
               </p>
             </div>
           </div>
         </section>
 
-        {/* Causes */}
+        {/* Causes – Where the 35% Goes */}
         <section className="bg-gray-50 dark:bg-gray-800 py-16 px-4">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-4">
-              Where Your Support Goes
+              Where the 35% Goes
             </h2>
             <p className="text-center text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto">
-              Every donation is split across these four causes. We believe in
+              The charity budget is distributed across these four causes. We believe in
               holistic impact – from a child's first classroom to a community's
               clean water.
             </p>
@@ -172,52 +167,58 @@ export default function CharityPage() {
           </div>
         </section>
 
-        {/* Transparency & Impact */}
+        {/* Transparency & Impact – No data shared yet */}
         <section id="transparency" className="py-16 px-4 max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-4">
             Transparency & Impact
           </h2>
           <p className="text-center text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto">
-            We believe in full transparency. Here's what we've achieved together so far.
-            All numbers are verified and updated quarterly.
+            We believe in full transparency. <strong>No donation data has been shared yet</strong> – 
+            we will publish our first official report <strong>every three months</strong>.
+            <br />
+            <span className="text-sm text-blue-600 dark:text-blue-400">
+              📅 First report: Q3 2026
+            </span>
           </p>
+
+          {/* Placeholder stats */}
           <div className="grid md:grid-cols-3 gap-6 text-center">
             <div className="bg-blue-50 dark:bg-gray-700 p-6 rounded-xl">
-              <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">
-                ${CHARITY_STATS.totalDonated.toLocaleString()}
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 mt-2">Total Donated</p>
+              <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">—</div>
+              <p className="text-gray-600 dark:text-gray-300 mt-2">Total Donated (coming soon)</p>
             </div>
             <div className="bg-green-50 dark:bg-gray-700 p-6 rounded-xl">
-              <div className="text-4xl font-bold text-green-600 dark:text-green-400">
-                {CHARITY_STATS.beneficiaries.toLocaleString()}+
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 mt-2">Lives Impacted</p>
+              <div className="text-4xl font-bold text-green-600 dark:text-green-400">—</div>
+              <p className="text-gray-600 dark:text-gray-300 mt-2">Lives Impacted (coming soon)</p>
             </div>
             <div className="bg-purple-50 dark:bg-gray-700 p-6 rounded-xl">
-              <div className="text-4xl font-bold text-purple-600 dark:text-purple-400">
-                {Object.values(CHARITY_STATS).reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0)}
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 mt-2">Projects Supported</p>
+              <div className="text-4xl font-bold text-purple-600 dark:text-purple-400">—</div>
+              <p className="text-gray-600 dark:text-gray-300 mt-2">Projects Supported (coming soon)</p>
             </div>
           </div>
+
+          {/* Cause breakdown – placeholder */}
           <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-              <p className="text-2xl font-bold text-gray-800 dark:text-white">{CHARITY_STATS.orphans}</p>
+              <p className="text-2xl font-bold text-gray-800 dark:text-white">—</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">Orphanages</p>
             </div>
             <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-              <p className="text-2xl font-bold text-gray-800 dark:text-white">{CHARITY_STATS.schools}</p>
+              <p className="text-2xl font-bold text-gray-800 dark:text-white">—</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">Schools</p>
             </div>
             <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-              <p className="text-2xl font-bold text-gray-800 dark:text-white">{CHARITY_STATS.hospitals}</p>
+              <p className="text-2xl font-bold text-gray-800 dark:text-white">—</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">Hospitals</p>
             </div>
             <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-              <p className="text-2xl font-bold text-gray-800 dark:text-white">{CHARITY_STATS.climateProjects}</p>
+              <p className="text-2xl font-bold text-gray-800 dark:text-white">—</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">Climate Projects</p>
             </div>
+          </div>
+
+          <div className="mt-8 text-center text-gray-500 dark:text-gray-400 text-sm border-t border-gray-200 dark:border-gray-700 pt-6">
+            ⏳ We are currently accumulating funds. The first quarterly report will include verified donation amounts and project details.
           </div>
         </section>
 
@@ -227,7 +228,8 @@ export default function CharityPage() {
             <h2 className="text-3xl font-bold">Be Part of Something Bigger</h2>
             <p className="mt-4 text-lg opacity-90">
               Every time you post, like, or subscribe on ZRP Social, you're
-              contributing to real change. Join us in making social media a
+              contributing to real change – because <strong>35% of our profits</strong>
+              go to those who need it most. Join us in making social media a
               force for good.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
@@ -248,12 +250,14 @@ export default function CharityPage() {
         </section>
       </main>
 
-      {/* Footer */}
+      {/* 
+        🧹 FOOTER REMOVED to avoid duplication with your global layout.
+        If you don't have a global footer, uncomment the block below.
+      */}
+      {/* 
       <footer className="bg-gray-900 text-white py-8 px-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between">
-          <p className="text-sm text-gray-400">
-            © {new Date().getFullYear()} ZRP Social. Built with ❤️ in Switzerland.
-          </p>
+          <p className="text-sm text-gray-400">© {new Date().getFullYear()} ZRP Social. Built with ❤️ in Switzerland.</p>
           <div className="flex space-x-6 mt-4 md:mt-0 text-sm">
             <Link href="/privacy" className="text-gray-400 hover:text-white">Privacy</Link>
             <Link href="/terms" className="text-gray-400 hover:text-white">Terms</Link>
@@ -261,6 +265,7 @@ export default function CharityPage() {
           </div>
         </div>
       </footer>
+      */}
     </div>
   );
 }
