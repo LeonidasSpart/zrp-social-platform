@@ -116,7 +116,7 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
         <link rel="shortcut icon" href="/favicon.png" />
       </head>
-      <body className={`${inter.variable} ${orbitron.variable} font-inter min-h-screen flex flex-col`}>
+      <body className={`${inter.variable} ${orbitron.variable} font-inter min-h-screen flex flex-col bg-white dark:bg-zrp-deepBlack`}>
         <div className="app-shell-clip w-full flex flex-col min-h-screen">
           <ErrorBoundary>
             <ThemeProvider>
