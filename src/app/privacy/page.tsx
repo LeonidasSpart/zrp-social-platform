@@ -22,7 +22,7 @@ export default function PrivacyPage() {
         </p>
       </div>
 
-      <div className="prose prose-lg dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 space-y-6">
+      <div className="max-w-none text-gray-700 dark:text-gray-300 space-y-6">
 
         <section>
           <h2 className="text-2xl font-orbitron text-gray-900 dark:text-white mt-8 mb-4">1. Introduction</h2>
@@ -53,7 +53,7 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-2xl font-orbitron text-gray-900 dark:text-white mt-8 mb-4">3. What Data We Collect</h2>
           <p>We collect only the data necessary to provide and improve our services. This includes:</p>
-          <ul>
+          <ul className="list-disc pl-6 space-y-1">
             <li><strong>Account Information:</strong> Username, email address, display name, and password (hashed).</li>
             <li><strong>Profile Information:</strong> Bio, profile picture, location, country, website, and any other information you choose to add.</li>
             <li><strong>Content:</strong> Posts, comments, images, videos, GIFs, polls, and any other content you create or share.</li>
@@ -69,7 +69,7 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-2xl font-orbitron text-gray-900 dark:text-white mt-8 mb-4">4. How We Use Your Data</h2>
           <p>Your data is used to:</p>
-          <ul>
+          <ul className="list-disc pl-6 space-y-1">
             <li>Provide, operate, and maintain the platform.</li>
             <li>Improve user experience and develop new features.</li>
             <li>Communicate with you (e.g., service updates, security alerts).</li>
@@ -84,7 +84,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="text-2xl font-orbitron text-gray-900 dark:text-white mt-8 mb-4">5. Legal Basis for Processing (GDPR)</h2>
-          <ul>
+          <ul className="list-disc pl-6 space-y-1">
             <li><strong>Contractual necessity:</strong> To perform our contract with you (the Terms of Service).</li>
             <li><strong>Legitimate interests:</strong> To improve the platform, ensure security, and prevent fraud.</li>
             <li><strong>Consent:</strong> For optional features like cookies or location data.</li>
@@ -141,7 +141,7 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-2xl font-orbitron text-gray-900 dark:text-white mt-8 mb-4">10. Your Rights</h2>
           <p>Under GDPR and Swiss law, you have the following rights:</p>
-          <ul>
+          <ul className="list-disc pl-6 space-y-1">
             <li><strong>Right to Access:</strong> Request a copy of your personal data.</li>
             <li><strong>Right to Rectification:</strong> Correct inaccurate data.</li>
             <li><strong>Right to Erasure:</strong> Request deletion of your data (“right to be forgotten”).</li>
@@ -161,7 +161,7 @@ export default function PrivacyPage() {
           <p>
             We implement robust security measures to protect your data, including:
           </p>
-          <ul>
+          <ul className="list-disc pl-6 space-y-1">
             <li>Encryption of data in transit (TLS) and at rest.</li>
             <li>Regular security audits and vulnerability assessments.</li>
             <li>Strict access controls for employees and contractors.</li>
@@ -228,9 +228,6 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>© {new Date().getFullYear()} ZRP. All rights reserved. Built with purpose. 35% of profits go to charity.</p>
-        </div>
       </div>
     </div>
   );
