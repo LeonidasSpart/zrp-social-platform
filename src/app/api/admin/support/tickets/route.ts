@@ -1,0 +1,59 @@
+// src/app/api/admin/support/tickets/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { prisma } from '@/lib/prisma';
+
+export async function GET(req: NextRequest) {
+  const session = await getServerSession();
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const searchParams = req.nextUrl.searchParams;
+  const status = searchParams.get('status');
+  const priority = searchParams.get('priority');
+  const category = searchParams.get('category');
+  const assignedTo = searchParams.get('assignedTo');
+  const page = parseInt(searchParams.get('page') || '1');
+  const limit = parseInt(searchParams.get('limit') || '20');
+  const search = searchParams.get('search');
+
+  const where: any = {};
+  if (status) where.status = status;
+  if (priority) where.priority = priority;
+  if (category) where.category = category;
+  if (assignedTo) where.assignedTo = assignedTo;
+  if (search) {
+    where.OR = [
+      { subject: { contains: search, mode: 'insensitive' } },
+      { message: { contains: search, mode: 'insensitive' } },
+      { user: { username: { contains: search, mode: 'insensitive' } } },
+      { user: { email: { contains: search, mode: 'insensitive' } } },
+    ];
+  }
+
+  const [tickets, total] = await Promise.all([
+    prisma.supportTicket.findMany({
+      where,
+      include: {
+        user: { select: { id: true, username: true, email: true, avatarUrl: true, plan: true } },
+        assignedAdmin: { select: { id: true, username: true, email: true } },
+        replies: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          include: { user: { select: { id: true, username: true, avatarUrl: true, role: true } } },
+        },
+        _count: { select: { replies: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.supportTicket.count({ where }),
+  ]);
+
+  return NextResponse.json({
+    tickets,
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+  });
+}
