@@ -37,31 +37,12 @@ const CAUSES = [
 export default function CharityPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-deep-black font-inter">
-      {/* Header – brand colors */}
-      <header className="border-b border-silver/30 dark:border-charcoal/50 bg-white/80 dark:bg-deep-black/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold font-orbitron">
-            <span className="text-zrp-red">ZRP</span>
-            <span className="text-charcoal dark:text-white">Social</span>
-          </Link>
-          <nav className="space-x-6 text-sm font-medium">
-            <Link href="/" className="text-charcoal/70 hover:text-zrp-red dark:text-white/70 dark:hover:text-zrp-red transition">
-              Home
-            </Link>
-            <Link href="/about" className="text-charcoal/70 hover:text-zrp-red dark:text-white/70 dark:hover:text-zrp-red transition">
-              About
-            </Link>
-            <Link href="/charity" className="text-zrp-red font-semibold">
-              Charity
-            </Link>
-          </nav>
-        </div>
-      </header>
+      {/* Header removed – no navigation menu */}
 
       {/* Main content */}
       <main>
-        {/* Hero – brand gradient (red to dark red) */}
-        <section className="relative bg-gradient-to-br from-zrp-red to-dark-red py-20 px-4">
+        {/* Hero – dark red to black gradient */}
+        <section className="relative bg-gradient-to-br from-dark-red-black to-black py-20 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl font-extrabold font-orbitron text-white leading-tight">
               Giving Back, <br />
@@ -73,14 +54,14 @@ export default function CharityPage() {
               charities supporting orphans, schools, hospitals, and climate relief.
             </p>
             <p className="mt-4 text-lg text-white/80 max-w-2xl mx-auto">
-              <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
                 📅 Quarterly transparency reports
               </span>
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <Link
                 href="#how-it-works"
-                className="px-6 py-3 bg-white text-zrp-red font-semibold rounded-full shadow-lg hover:bg-silver transition font-inter"
+                className="px-6 py-3 bg-white text-dark-red-black font-semibold rounded-full shadow-lg hover:bg-gray-200 transition font-inter"
               >
                 Learn How It Works
               </Link>
@@ -105,7 +86,7 @@ export default function CharityPage() {
               <h3 className="text-xl font-semibold text-charcoal dark:text-white font-orbitron">1. Platform Profits</h3>
               <p className="mt-2 text-charcoal/80 dark:text-white/70 font-inter">
                 Revenue comes from premium subscriptions, tips, and business plans.
-                After operational costs, <strong className="text-zrp-red">35% of net profits</strong> are set aside for charity.
+                After operational costs, <strong className="text-dark-red-black">35% of net profits</strong> are set aside for charity.
               </p>
             </div>
             <div className="text-center p-6 bg-silver/20 dark:bg-charcoal/50 rounded-xl shadow-sm border border-silver/30 dark:border-charcoal">
@@ -113,7 +94,7 @@ export default function CharityPage() {
               <h3 className="text-xl font-semibold text-charcoal dark:text-white font-orbitron">2. Transparent Allocation</h3>
               <p className="mt-2 text-charcoal/80 dark:text-white/70 font-inter">
                 Funds are split across our four pillars: orphans, education,
-                healthcare, and climate. We publish detailed reports <strong className="text-zrp-red">every three months</strong>.
+                healthcare, and climate. We publish detailed reports <strong className="text-dark-red-black">every three months</strong>.
               </p>
             </div>
             <div className="text-center p-6 bg-silver/20 dark:bg-charcoal/50 rounded-xl shadow-sm border border-silver/30 dark:border-charcoal">
@@ -123,7 +104,7 @@ export default function CharityPage() {
                 We partner with vetted NGOs and local organisations to ensure
                 your contributions reach those who need them most.
                 <br />
-                <span className="text-sm text-zrp-red font-medium">First official donation report: Q3 2026</span>
+                <span className="text-sm text-dark-red-black font-medium">First official donation report: Q3 2026</span>
               </p>
             </div>
           </div>
@@ -154,7 +135,7 @@ export default function CharityPage() {
                     <p className="text-charcoal/70 dark:text-white/70 mt-1 font-inter">{cause.description}</p>
                     <div className="mt-3 w-full bg-silver/50 dark:bg-charcoal rounded-full h-2.5">
                       <div
-                        className="bg-zrp-red h-2.5 rounded-full"
+                        className="bg-dark-red-black h-2.5 rounded-full"
                         style={{ width: `${cause.percentage}%` }}
                       ></div>
                     </div>
@@ -174,10 +155,10 @@ export default function CharityPage() {
             Transparency & Impact
           </h2>
           <p className="text-center text-charcoal/70 dark:text-white/70 mb-12 max-w-2xl mx-auto font-inter">
-            We believe in full transparency. <strong className="text-zrp-red">No donation data has been shared yet</strong> – 
-            we will publish our first official report <strong className="text-zrp-red">every three months</strong>.
+            We believe in full transparency. <strong className="text-dark-red-black">No donation data has been shared yet</strong> – 
+            we will publish our first official report <strong className="text-dark-red-black">every three months</strong>.
             <br />
-            <span className="text-sm text-zrp-red font-medium">
+            <span className="text-sm text-dark-red-black font-medium">
               📅 First report: Q3 2026
             </span>
           </p>
@@ -185,15 +166,15 @@ export default function CharityPage() {
           {/* Placeholder stats */}
           <div className="grid md:grid-cols-3 gap-6 text-center">
             <div className="bg-silver/20 dark:bg-charcoal/50 p-6 rounded-xl border border-silver/30 dark:border-charcoal">
-              <div className="text-4xl font-bold text-zrp-red font-orbitron">—</div>
+              <div className="text-4xl font-bold text-dark-red-black font-orbitron">—</div>
               <p className="text-charcoal/70 dark:text-white/70 mt-2 font-inter">Total Donated (coming soon)</p>
             </div>
             <div className="bg-silver/20 dark:bg-charcoal/50 p-6 rounded-xl border border-silver/30 dark:border-charcoal">
-              <div className="text-4xl font-bold text-zrp-red font-orbitron">—</div>
+              <div className="text-4xl font-bold text-dark-red-black font-orbitron">—</div>
               <p className="text-charcoal/70 dark:text-white/70 mt-2 font-inter">Lives Impacted (coming soon)</p>
             </div>
             <div className="bg-silver/20 dark:bg-charcoal/50 p-6 rounded-xl border border-silver/30 dark:border-charcoal">
-              <div className="text-4xl font-bold text-zrp-red font-orbitron">—</div>
+              <div className="text-4xl font-bold text-dark-red-black font-orbitron">—</div>
               <p className="text-charcoal/70 dark:text-white/70 mt-2 font-inter">Projects Supported (coming soon)</p>
             </div>
           </div>
@@ -223,8 +204,8 @@ export default function CharityPage() {
           </div>
         </section>
 
-        {/* Call to Action – brand red */}
-        <section className="bg-gradient-to-r from-zrp-red to-dark-red py-16 px-4">
+        {/* Call to Action – dark red background */}
+        <section className="bg-gradient-to-r from-dark-red-black to-black py-16 px-4">
           <div className="max-w-4xl mx-auto text-center text-white">
             <h2 className="text-3xl font-bold font-orbitron">Be Part of Something Bigger</h2>
             <p className="mt-4 text-lg opacity-90 font-inter">
@@ -236,7 +217,7 @@ export default function CharityPage() {
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <Link
                 href="/signup"
-                className="px-8 py-3 bg-white text-zrp-red font-semibold rounded-full shadow-lg hover:bg-silver transition font-inter"
+                className="px-8 py-3 bg-white text-dark-red-black font-semibold rounded-full shadow-lg hover:bg-gray-200 transition font-inter"
               >
                 Create Your Account
               </Link>
