@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/db';
 import { authOptions } from '@/lib/auth';
+import { notifyTicketResolved, notifyTicketClosed } from '@/lib/notifications';
 
 export async function GET(
   req: NextRequest,
@@ -130,10 +131,20 @@ export async function PUT(
       }
     }
 
+    // ─── Get current ticket to check for status change ───────────────
+    const currentTicket = await prisma.supportTicket.findUnique({
+      where: { id: params.id },
+      select: { status: true, userId: true, subject: true },
+    });
+
+    if (!currentTicket) {
+      return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
+    }
+
     const data: any = {};
     if (status !== undefined) data.status = status;
     if (priority !== undefined) data.priority = priority;
-    if (assignedTo !== undefined) data.assignedTo = assignedToId; // validated ID or null
+    if (assignedTo !== undefined) data.assignedTo = assignedToId;
     if (resolution !== undefined) data.resolution = resolution || null;
 
     if (status === 'RESOLVED') {
@@ -163,6 +174,25 @@ export async function PUT(
         },
       },
     });
+
+    // ─── 🆕 Notify user on status change ──────────────────────────────
+    if (status && status !== currentTicket.status) {
+      if (status === 'RESOLVED') {
+        await notifyTicketResolved({
+          ticketId: params.id,
+          ticketSubject: currentTicket.subject || 'Support Ticket',
+          userId: currentTicket.userId,
+          fromUserId: session.user.id,
+        });
+      } else if (status === 'CLOSED') {
+        await notifyTicketClosed({
+          ticketId: params.id,
+          ticketSubject: currentTicket.subject || 'Support Ticket',
+          userId: currentTicket.userId,
+          fromUserId: session.user.id,
+        });
+      }
+    }
 
     return NextResponse.json(ticket);
   } catch (error) {
