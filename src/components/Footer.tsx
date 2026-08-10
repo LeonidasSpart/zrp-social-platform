@@ -54,6 +54,7 @@ export default function Footer() {
               <li><Link href="/faq" className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition">FAQ</Link></li>
               <li><Link href="/help" className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition">Help Center</Link></li>
               <li><Link href="/contact" className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition">Contact Support</Link></li>
+              <li><Link href="/support/tickets" className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition">My Tickets</Link></li>
             </ul>
           </div>
 
