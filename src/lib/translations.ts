@@ -89,6 +89,7 @@ type TranslationKey =
   | "settings.successWalletUpdated" | "settings.errWalletUpdateFailed" | "settings.usernameCooldownBanner"
   | "settings.supportTickets" | "settings.supportTicketsDesc"
   | "settings.viewTickets"
+  | "settings.newTicket"
   | "messages.title" | "messages.noMessagesYet" | "messages.startConversation"
   | "messages.you" | "messages.deleteConversation" | "messages.deleteConfirm"
   | "messages.errDeleteFailed"
@@ -430,6 +431,7 @@ export const translations: Record<Language, TranslationDict> = {
     "settings.supportTickets": "Support Tickets",
     "settings.supportTicketsDesc": "View and manage your support tickets.",
     "settings.viewTickets": "My Tickets",
+    "settings.newTicket": "New Ticket",
     "messages.title": "Messages",
     "messages.noMessagesYet": "No messages yet.",
     "messages.startConversation": "Start a conversation with someone!",
@@ -1118,6 +1120,7 @@ export const translations: Record<Language, TranslationDict> = {
     "settings.supportTickets": "Tickets de support",
     "settings.supportTicketsDesc": "Consultez et gérez vos tickets de support.",
     "settings.viewTickets": "Mes tickets",
+    "settings.newTicket": "Nouveau ticket",
     "messages.title": "Messages",
     "messages.noMessagesYet": "Aucun message pour le moment.",
     "messages.startConversation": "Démarrez une conversation avec quelqu'un !",
@@ -1806,6 +1809,7 @@ export const translations: Record<Language, TranslationDict> = {
     "settings.supportTickets": "Support-Tickets",
     "settings.supportTicketsDesc": "Sehen und verwalten Sie Ihre Support-Tickets.",
     "settings.viewTickets": "Meine Tickets",
+    "settings.newTicket": "Neues Ticket",
     "messages.title": "Nachrichten",
     "messages.noMessagesYet": "Noch keine Nachrichten.",
     "messages.startConversation": "Starte eine Unterhaltung mit jemandem!",
@@ -2494,6 +2498,7 @@ export const translations: Record<Language, TranslationDict> = {
     "settings.supportTickets": "Ticket di supporto",
     "settings.supportTicketsDesc": "Visualizza e gestisci i tuoi ticket di supporto.",
     "settings.viewTickets": "I miei ticket",
+    "settings.newTicket": "Nuovo ticket",
     "messages.title": "Messaggi",
     "messages.noMessagesYet": "Ancora nessun messaggio.",
     "messages.startConversation": "Inizia una conversazione con qualcuno!",
