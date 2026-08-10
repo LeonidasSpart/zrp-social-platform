@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/db';
 import { authOptions } from '@/lib/auth';
+import { notifyTicketReply } from '@/lib/notifications';
 
 export async function POST(
   req: NextRequest,
@@ -24,7 +25,12 @@ export async function POST(
     // Get the ticket and verify ownership
     const ticket = await prisma.supportTicket.findUnique({
       where: { id: params.id },
-      select: { userId: true, status: true },
+      select: { 
+        userId: true, 
+        status: true,
+        subject: true,
+        assignedTo: true,
+      },
     });
 
     if (!ticket) {
@@ -66,7 +72,39 @@ export async function POST(
       data: { status: newStatus },
     });
 
-    // TODO: Send email notification to the other party
+    // ─── 🆕 Notify the other party ──────────────────────────────────
+    const isAdminReply = session.user.role === 'ADMIN';
+    
+    // If admin replies → notify the ticket owner (user)
+    // If user replies → notify the assigned admin (or fallback to first admin)
+    let recipientId: string | null = null;
+    
+    if (isAdminReply) {
+      // Admin replied → notify the ticket owner
+      recipientId = ticket.userId;
+    } else {
+      // User replied → notify assigned admin, or get any admin
+      if (ticket.assignedTo) {
+        recipientId = ticket.assignedTo;
+      } else {
+        // If no admin assigned, find the first admin
+        const firstAdmin = await prisma.user.findFirst({
+          where: { role: 'ADMIN' },
+          select: { id: true },
+        });
+        if (firstAdmin) recipientId = firstAdmin.id;
+      }
+    }
+
+    if (recipientId) {
+      await notifyTicketReply({
+        ticketId: params.id,
+        ticketSubject: ticket.subject || 'Support Ticket',
+        userId: recipientId,
+        fromUserId: session.user.id,
+        isAdminReply,
+      });
+    }
 
     return NextResponse.json(reply, { status: 201 });
   } catch (error) {
