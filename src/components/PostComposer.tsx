@@ -84,9 +84,16 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     return matches.map(tag => tag.slice(1).toLowerCase());
   };
 
+  // ─── Updated handleFileUpload with proper error handling ────────
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      setError("No file selected");
+      return;
+    }
+
+    // Debug: log the file
+    console.log("📁 File selected:", file.name, file.type, file.size);
 
     if (imageUrl) {
       setError(t("composer.errAlreadyUploaded", { n: limits.imagesPerPost }));
@@ -108,12 +115,27 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
     setUploading(true);
     setError(null);
+
     try {
-      await startUpload([file]);
+      const result = await startUpload([file]);
+      console.log("✅ Upload result:", result);
+
+      if (result && result.length > 0) {
+        const uploadedFile = result[0];
+        setImageUrl(uploadedFile.ufsUrl);
+        setMediaType(uploadedFile.type?.startsWith("video") ? "video" : "image");
+      } else {
+        throw new Error("No file returned from upload");
+      }
     } catch (err) {
-      console.error("Upload error:", err);
-      setError(t("composer.errUploadFailed"));
+      console.error("❌ Upload error:", err);
+      setError(t("composer.errUploadFailed") + ": " + (err as Error).message);
+    } finally {
       setUploading(false);
+      // Reset the file input so the same file can be uploaded again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
