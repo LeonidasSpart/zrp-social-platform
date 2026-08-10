@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Users, FileText, MessageCircle, Flag, UserCheck, UserPlus,
-  Activity, AlertTriangle, UserX, CheckCircle, CreditCard
+  Activity, AlertTriangle, UserX, CheckCircle, CreditCard,
+  Ticket // ➕ ADDED
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -18,11 +19,28 @@ interface Stats {
   activeUsers?: number;
 }
 
+// ➕ ADDED: interface for ticket stats
+interface TicketStats {
+  open: number;
+  inProgress: number;
+  awaitingReply: number;
+  resolved: number;
+  total: number;
+}
+
 export default function AdminDashboard() {
   const { t, language } = useLanguage();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [pendingPayments, setPendingPayments] = useState(0);
+  // ➕ ADDED: ticket stats state
+  const [ticketStats, setTicketStats] = useState<TicketStats>({
+    open: 0,
+    inProgress: 0,
+    awaitingReply: 0,
+    resolved: 0,
+    total: 0,
+  });
 
   const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
@@ -44,6 +62,14 @@ export default function AdminDashboard() {
       .then((res) => res.json())
       .then((data) => {
         setPendingPayments(data.length || 0);
+      })
+      .catch(() => {});
+
+    // ➕ ADDED: fetch ticket stats
+    fetch("/api/admin/support/tickets/stats")
+      .then((res) => res.json())
+      .then((data) => {
+        setTicketStats(data);
       })
       .catch(() => {});
   }, []);
@@ -113,6 +139,14 @@ export default function AdminDashboard() {
       icon: CheckCircle,
       bgColor: "bg-teal-100 dark:bg-teal-900/30",
       textColor: "text-teal-600 dark:text-teal-400",
+    },
+    // ➕ ADDED: Support Tickets card
+    {
+      label: "Open Support Tickets",
+      value: ticketStats.open,
+      icon: Ticket,
+      bgColor: "bg-indigo-100 dark:bg-indigo-900/30",
+      textColor: "text-indigo-600 dark:text-indigo-400",
     },
   ];
 
@@ -203,6 +237,21 @@ export default function AdminDashboard() {
                 {pendingPayments > 0 && (
                   <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
                     {pendingPayments}
+                  </span>
+                )}
+              </span>
+            </Link>
+            {/* ➕ ADDED: Support Tickets quick action */}
+            <Link
+              href="/admin/support"
+              className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition"
+            >
+              <Ticket className="w-5 h-5 text-indigo-500" />
+              <span>
+                Support Tickets
+                {ticketStats.open > 0 && (
+                  <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    {ticketStats.open}
                   </span>
                 )}
               </span>
