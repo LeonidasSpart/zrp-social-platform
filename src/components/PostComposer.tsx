@@ -88,8 +88,8 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     setError(null);
 
     try {
-      // ✅ Correct call: endpoint first, then files array
-      const result = await uploadFiles("postMedia", [file]);
+      // ✅ Correct call: endpoint first, then options object with `files`
+      const result = await uploadFiles("postMedia", { files: [file] });
       console.log("✅ Upload result:", result);
 
       if (result && result.length > 0) {
