@@ -113,7 +113,6 @@ If someone asks who you are, say: "I'm ZRP AI, powered by DeepSeek's Responses A
 `;
 
     // ─── Build input history for Responses API ──────────────────────
-    // The Responses API expects a different format
     const inputItems: any[] = [];
 
     // Add system instruction as a developer message
@@ -165,14 +164,14 @@ If someone asks who you are, say: "I'm ZRP AI, powered by DeepSeek's Responses A
             try {
               for await (const event of streamResponse) {
                 if (event.type === "response.output_text.delta") {
-                  const delta = event.delta || "";
+                  const delta = (event as any).delta || "";
                   fullResponse += delta;
                   controller.enqueue(
                     encoder.encode(`data: ${JSON.stringify({ delta })}\n\n`)
                   );
                 } else if (event.type === "response.completed") {
-                  if (event.response?.id) {
-                    messageId = event.response.id;
+                  if ((event as any).response?.id) {
+                    messageId = (event as any).response.id;
                   }
                   // Save the full response to database
                   const [userMessage, assistantMessage] = await prisma.$transaction([
@@ -226,10 +225,11 @@ If someone asks who you are, say: "I'm ZRP AI, powered by DeepSeek's Responses A
                   );
                   controller.close();
                 } else if (event.type === "response.failed") {
+                  const errorMessage = (event as any).error?.message || "Stream failed";
                   controller.enqueue(
                     encoder.encode(
                       `data: ${JSON.stringify({
-                        error: event.error?.message || "Stream failed",
+                        error: errorMessage,
                       })}\n\n`
                     )
                   );
@@ -266,7 +266,7 @@ If someone asks who you are, say: "I'm ZRP AI, powered by DeepSeek's Responses A
           max_output_tokens: limits.maxTokens,
         });
 
-        const fullResponse = response.output_text || "No response generated.";
+        const fullResponse = (response as any).output_text || "No response generated.";
 
         const [userMessage, assistantMessage] = await prisma.$transaction([
           prisma.aIMessage.create({
