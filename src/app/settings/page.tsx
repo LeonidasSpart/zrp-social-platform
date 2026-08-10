@@ -6,7 +6,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Check, X, Globe, MapPin, User, Key, Calendar, Camera, Trash2, Loader2,
-  BellOff, ChevronRight, Ban, Mail, DollarSign, TrendingUp, Wallet, Lock
+  BellOff, ChevronRight, Ban, Mail, DollarSign, TrendingUp, Wallet, Lock,
+  Ticket, // ➕ ADDED for support tickets icon
 } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import EmailPreferences from "@/components/EmailPreferences";
@@ -1042,6 +1043,29 @@ export default function SettingsPage() {
           {t("settings.emailNotificationsDesc")}
         </p>
         <EmailPreferences />
+      </div>
+
+      {/* ─── ➕ ADDED: Support Tickets Section ─────────────────────── */}
+      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.supportTickets") || "Support Tickets"}</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          {t("settings.supportTicketsDesc") || "View and manage your support tickets."}
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/support/tickets"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-zrp-red text-white rounded-lg font-medium hover:bg-zrp-darkRed transition"
+          >
+            <Ticket className="w-4 h-4" />
+            {t("settings.viewTickets") || "My Tickets"}
+          </Link>
+          <Link
+            href="/support"
+            className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+          >
+            {t("settings.newTicket") || "New Ticket"}
+          </Link>
+        </div>
       </div>
 
       {/* ─── Privacy Section (existing) ──────────────────────────────── */}
