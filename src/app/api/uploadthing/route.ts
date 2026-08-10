@@ -5,8 +5,7 @@ export const { GET, POST } = createRouteHandler({
   router: ourFileRouter,
   config: {
     isDev: process.env.NODE_ENV === 'development',
+    // ✅ Add callback URL explicitly
+    callbackUrl: process.env.NEXTAUTH_URL || "https://zrp.one",
   },
 });
-
-// ✅ Optional: force dynamic if needed (not required for uploads, but safe)
-export const dynamic = 'force-dynamic';
