@@ -11,6 +11,7 @@ import {
   FileText, Repeat, MessageSquare, Image as ImageIcon, Award, Sparkles
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
+import ActivityHeatmap from "@/components/ActivityHeatmap";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import AnalyticsTab from "@/components/AnalyticsTab";
 import PostComposer from "@/components/PostComposer";
@@ -978,6 +979,9 @@ export default function ProfilePage({ params }: { params: { username: string } }
               ))}
             </div>
           )}
+
+          {/* ─── Activity heatmap ────────────────────────────────────── */}
+          {canViewPosts && <ActivityHeatmap username={profile.username} />}
         </div>
       </div>
 
