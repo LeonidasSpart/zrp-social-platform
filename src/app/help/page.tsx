@@ -28,6 +28,7 @@ import {
   Video,
   Image,
   Lock,
+  Ticket, // ➕ ADDED
 } from "lucide-react";
 
 interface HelpSection {
@@ -270,6 +271,42 @@ export default function HelpPage() {
         </div>
       ),
     },
+    // ─── NEW: Support Tickets ──────────────────────────────────────
+    {
+      id: "support-tickets",
+      title: "Support Tickets",
+      icon: Ticket,
+      content: (
+        <div className="space-y-4">
+          <p className="text-gray-600 dark:text-gray-300">
+            If you need help with your account, payments, or any other issue, you can submit a support ticket. Our team will get back to you as soon as possible.
+          </p>
+          <h4 className="font-semibold text-gray-900 dark:text-white">How to submit a ticket</h4>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Go to the <Link href="/support" className="text-zrp-red hover:underline">Support</Link> page.</li>
+            <li>Fill in the <strong>Subject</strong>, <strong>Category</strong>, and <strong>Message</strong> fields.</li>
+            <li>Click <strong>Submit Ticket</strong>.</li>
+            <li>You'll receive a confirmation and our team will review your request.</li>
+          </ol>
+          <h4 className="font-semibold text-gray-900 dark:text-white">Track your tickets</h4>
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>Go to <Link href="/support/tickets" className="text-zrp-red hover:underline">My Tickets</Link> to see all your tickets.</li>
+            <li>Click on any ticket to view the full conversation and reply.</li>
+            <li>You'll receive email notifications when your ticket is updated.</li>
+          </ul>
+          <h4 className="font-semibold text-gray-900 dark:text-white">Response times</h4>
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li><strong>Free:</strong> 48 hours</li>
+            <li><strong>Pro:</strong> 24 hours</li>
+            <li><strong>Business:</strong> 12 hours</li>
+            <li><strong>Enterprise:</strong> 4 hours (24/7)</li>
+          </ul>
+          <div className="mt-3 p-3 bg-zrp-red/5 border border-zrp-red/20 rounded-lg text-sm">
+            🧡 All support tickets are handled with care and confidentiality.
+          </div>
+        </div>
+      ),
+    },
     {
       id: "faq",
       title: "Frequently Asked Questions",
@@ -381,10 +418,10 @@ export default function HelpPage() {
         </p>
         <div className="flex flex-wrap justify-center gap-3 mt-4">
           <Link
-            href="/contact"
+            href="/support" // ✅ changed from /contact to /support
             className="px-4 py-2 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed transition"
           >
-            Contact Support
+            Open Ticket
           </Link>
           <Link
             href="/faq"
