@@ -8,9 +8,5 @@ export const { GET, POST } = createRouteHandler({
   },
 });
 
-// ✅ Critical: Disable Next.js body parser so UploadThing can parse raw files
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// ✅ Optional: force dynamic if needed (not required for uploads, but safe)
+export const dynamic = 'force-dynamic';
