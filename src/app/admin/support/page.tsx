@@ -58,10 +58,10 @@ export default function AdminSupportPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-orbitron text-charcoal dark:text-white">Support Tickets</h1>
+        <h1 className="text-3xl font-orbitron text-zrp-charcoal dark:text-white">Support Tickets</h1>
         <div className="flex gap-2">
           <select
-            className="px-3 py-2 border border-silver/30 dark:border-charcoal rounded-lg bg-white dark:bg-charcoal/50 text-sm"
+            className="px-3 py-2 border border-zrp-silver/30 dark:border-zrp-charcoal rounded-lg bg-white dark:bg-zrp-charcoal/50 text-sm"
             value={filters.status}
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
           >
@@ -73,7 +73,7 @@ export default function AdminSupportPage() {
             <option value="CLOSED">Closed</option>
           </select>
           <select
-            className="px-3 py-2 border border-silver/30 dark:border-charcoal rounded-lg bg-white dark:bg-charcoal/50 text-sm"
+            className="px-3 py-2 border border-zrp-silver/30 dark:border-zrp-charcoal rounded-lg bg-white dark:bg-zrp-charcoal/50 text-sm"
             value={filters.priority}
             onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
           >
@@ -89,11 +89,11 @@ export default function AdminSupportPage() {
       {loading ? (
         <div className="text-center py-12">Loading...</div>
       ) : tickets.length === 0 ? (
-        <div className="text-center py-12 text-charcoal/50 dark:text-white/50">No tickets found</div>
+        <div className="text-center py-12 text-zrp-charcoal/50 dark:text-white/50">No tickets found</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="text-left text-charcoal/60 dark:text-white/60 border-b border-silver/30 dark:border-charcoal">
+            <thead className="text-left text-zrp-charcoal/60 dark:text-white/60 border-b border-zrp-silver/30 dark:border-zrp-charcoal">
               <tr>
                 <th className="py-3 px-4">Ticket</th>
                 <th className="py-3 px-4">User</th>
@@ -107,7 +107,7 @@ export default function AdminSupportPage() {
             </thead>
             <tbody>
               {tickets.map((ticket) => (
-                <tr key={ticket.id} className="border-b border-silver/20 dark:border-charcoal/50 hover:bg-silver/10 dark:hover:bg-charcoal/30 transition">
+                <tr key={ticket.id} className="border-b border-zrp-silver/20 dark:border-zrp-charcoal/50 hover:bg-zrp-silver/10 dark:hover:bg-zrp-charcoal/30 transition">
                   <td className="py-3 px-4">
                     <Link href={`/admin/support/${ticket.id}`} className="text-zrp-red hover:underline font-medium">
                       {ticket.subject.length > 40 ? ticket.subject.slice(0, 40) + '...' : ticket.subject}
@@ -115,7 +115,7 @@ export default function AdminSupportPage() {
                   </td>
                   <td className="py-3 px-4">
                     <div className="font-medium">{ticket.user.username}</div>
-                    <div className="text-xs text-charcoal/50 dark:text-white/50">{ticket.user.plan}</div>
+                    <div className="text-xs text-zrp-charcoal/50 dark:text-white/50">{ticket.user.plan}</div>
                   </td>
                   <td className="py-3 px-4 capitalize">{ticket.category.toLowerCase()}</td>
                   <td className={`py-3 px-4 ${priorityColors[ticket.priority as keyof typeof priorityColors]}`}>
@@ -128,7 +128,7 @@ export default function AdminSupportPage() {
                   </td>
                   <td className="py-3 px-4 text-center">{ticket._count.replies}</td>
                   <td className="py-3 px-4">{ticket.assignedAdmin?.username || '—'}</td>
-                  <td className="py-3 px-4 text-charcoal/50 dark:text-white/50 text-xs">
+                  <td className="py-3 px-4 text-zrp-charcoal/50 dark:text-white/50 text-xs">
                     {new Date(ticket.createdAt).toLocaleDateString()}
                   </td>
                 </tr>
