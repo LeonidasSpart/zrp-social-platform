@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { Image, FileImage, BarChart3, Plus, Trash2, Clock, Briefcase, FileText } from "lucide-react";
 import GifPicker from "./GifPicker";
-import { uploadFiles } from "@/lib/uploadthing-client"; // ✅ use direct upload function
+import { uploadFiles } from "@/lib/uploadthing-client";
 import { getPlanLimits } from "@/lib/limits";
 import { useLanguage } from "@/contexts/LanguageContext";
 import MentionAutocomplete from "./MentionAutocomplete";
@@ -29,39 +29,23 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const limits = getPlanLimits(plan);
   const features = session?.user?.features;
 
-  // ─── Post type ────────────────────────────────────────────────────
   const [postType, setPostType] = useState<PostType>("POST");
-
-  // ─── Schedule ────────────────────────────────────────────────────
   const [schedulePost, setSchedulePost] = useState(false);
   const [scheduledAt, setScheduledAt] = useState("");
   const [commentsEnabled, setCommentsEnabled] = useState(true);
-
-  // ─── GIF picker ──────────────────────────────────────────────────
   const [showGifPicker, setShowGifPicker] = useState(false);
-
-  // ─── Poll ────────────────────────────────────────────────────────
   const [pollQuestion, setPollQuestion] = useState("");
   const [pollOptions, setPollOptions] = useState(["", ""]);
   const [pollExpiry, setPollExpiry] = useState("");
   const [showPollBuilder, setShowPollBuilder] = useState(false);
-
-  // ─── Recruitment fields ──────────────────────────────────────────
   const [company, setCompany] = useState("");
   const [location, setLocation] = useState("");
   const [applyUrl, setApplyUrl] = useState("");
-
-  // ─── Article fields ──────────────────────────────────────────────
   const [articleBody, setArticleBody] = useState("");
-
-  // ─── Mention autocomplete ──────────────────────────────────────
   const [cursorPosition, setCursorPosition] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const composerRef = useRef<HTMLDivElement>(null);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // ─── Remove useUploadThing hook ────────────────────────────────
 
   const extractHashtags = (text: string): string[] => {
     const matches = text.match(/#[\w\u0590-\u05fe]+/g) || [];
@@ -73,7 +57,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     return matches.map(tag => tag.slice(1).toLowerCase());
   };
 
-  // ─── handleFileUpload using uploadFiles directly ──────────────
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) {
@@ -105,12 +88,8 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     setError(null);
 
     try {
-      // ✅ Use uploadFiles directly
-      const result = await uploadFiles({
-        endpoint: "postMedia",
-        files: [file],
-      });
-
+      // ✅ Correct call: endpoint first, then files array
+      const result = await uploadFiles("postMedia", [file]);
       console.log("✅ Upload result:", result);
 
       if (result && result.length > 0) {
@@ -160,21 +139,16 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     setPollOptions(newOptions);
   };
 
-  // ─── Check if user can use certain post types ──────────────────
   const canPostRecruitment = features?.recruitmentProfiles ?? false;
   const canPublishArticle = features?.articlePublishing ?? false;
-
-  // ─── Determine if we should show type selector ──────────────────
   const showTypeSelector = canPostRecruitment || canPublishArticle;
 
-  // ─── Textarea change handler ────────────────────────────────────
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newContent = e.target.value;
     setContent(newContent);
     setCursorPosition(e.target.selectionStart || 0);
   };
 
-  // ─── Mention selection handler ──────────────────────────────────
   const handleMentionSelect = (mention: string) => {
     const before = content.slice(0, cursorPosition);
     const after = content.slice(cursorPosition);
@@ -352,20 +326,14 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700" ref={composerRef}>
       <form onSubmit={handleSubmit}>
         <div className="flex items-start gap-3">
-          {/* Avatar */}
           <div className="w-10 h-10 rounded-full bg-zrp-red/10 flex items-center justify-center text-zrp-red font-semibold flex-shrink-0 overflow-hidden">
             {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={displayName}
-                className="w-full h-full object-cover"
-              />
+              <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
             ) : (
               initial
             )}
           </div>
           <div className="flex-1 space-y-2 relative">
-            {/* ─── Post Type Selector ────────────────────────────────── */}
             {showTypeSelector && (
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">{t("composer.postAs")}</span>
@@ -409,17 +377,12 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               </div>
             )}
 
-            {/* ─── Content Input ────────────────────────────────────── */}
             {postType !== "ARTICLE" ? (
               <textarea
                 ref={textareaRef}
                 value={content}
                 onChange={handleContentChange}
-                placeholder={
-                  postType === "RECRUITMENT"
-                    ? t("composer.placeholderRecruitment")
-                    : t("composer.placeholderDefault")
-                }
+                placeholder={postType === "RECRUITMENT" ? t("composer.placeholderRecruitment") : t("composer.placeholderDefault")}
                 className="w-full resize-none border-0 focus:ring-0 p-0 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 min-h-[80px] bg-transparent"
                 maxLength={limits.postLength}
               />
@@ -443,15 +406,13 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               </div>
             )}
 
-            {/* ─── Mention Autocomplete (always rendered) ──────────── */}
             <MentionAutocomplete
               text={content}
               cursorPosition={cursorPosition}
               onSelect={handleMentionSelect}
-              onClose={() => {}} // no-op – component manages internal visibility
+              onClose={() => {}}
             />
 
-            {/* ─── Recruitment extra fields ─────────────────────────── */}
             {postType === "RECRUITMENT" && (
               <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 space-y-2">
                 <input
@@ -483,7 +444,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               <div className="text-red-500 dark:text-red-400 text-sm">{error}</div>
             )}
 
-            {/* Scheduling & Comments toggle */}
             <div className="flex flex-wrap items-center gap-3 mt-2">
               <button
                 type="button"
@@ -505,7 +465,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   className="text-xs border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               )}
-
               <label className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 cursor-pointer">
                 <input
                   type="checkbox"
@@ -517,7 +476,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               </label>
             </div>
 
-            {/* Poll Builder */}
             {showPollBuilder && (
               <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
                 <input
@@ -573,7 +531,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               </div>
             )}
 
-            {/* Media Preview */}
             {imageUrl && (
               <div className="relative mt-2 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
                 {mediaType === "video" ? (
@@ -591,7 +548,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               </div>
             )}
 
-            {/* Toolbar */}
             <div className="flex items-center justify-between mt-2 border-t border-gray-100 dark:border-gray-700 pt-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <label className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition">
@@ -630,12 +586,10 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                 )}
 
                 {postType !== "ARTICLE" && (
-                  <>
-                    <span className={`text-xs ${isOverLimit ? "text-red-500" : "text-gray-400 dark:text-gray-500"}`}>
-                      {content.length}/{limits.postLength}
-                      {isOverLimit && t("composer.overLimit")}
-                    </span>
-                  </>
+                  <span className={`text-xs ${isOverLimit ? "text-red-500" : "text-gray-400 dark:text-gray-500"}`}>
+                    {content.length}/{limits.postLength}
+                    {isOverLimit && t("composer.overLimit")}
+                  </span>
                 )}
 
                 <span className="text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
