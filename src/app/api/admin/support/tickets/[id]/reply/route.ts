@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { prisma } from '@/lib/db';        // ✅ changed
-import { authOptions } from '@/lib/auth';  // ✅ changed
+import { prisma } from '@/lib/db';
+import { authOptions } from '@/lib/auth';
 
 export async function POST(
   req: NextRequest,
@@ -51,7 +51,6 @@ export async function POST(
       },
     });
 
-    // Update ticket status to IN_PROGRESS if it was OPEN
     await prisma.supportTicket.update({
       where: { id: params.id },
       data: { status: 'IN_PROGRESS' },
