@@ -137,12 +137,9 @@ export default function PressKitPage() {
                 Data as of 8.8.2026 – growing daily
               </span>
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4 max-w-sm mx-auto">
               {[
                 { label: 'Registered Users', value: '195,000+' },
-                { label: 'Monthly Active Users', value: '850+' },
-                { label: 'Daily Posts', value: '2,500+' },
-                { label: 'Countries', value: '14' },
               ].map((stat) => (
                 <div key={stat.label} className="bg-white dark:bg-zrp-charcoal/80 p-6 rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal text-center">
                   <div className="text-2xl font-bold font-orbitron text-zrp-red">{stat.value}</div>
