@@ -5,7 +5,9 @@ export const { GET, POST } = createRouteHandler({
   router: ourFileRouter,
   config: {
     isDev: process.env.NODE_ENV === 'development',
-    // ✅ Add callback URL explicitly
-    callbackUrl: process.env.NEXTAUTH_URL || "https://zrp.one",
+    // ✅ Set the full callback URL (including /api/uploadthing path)
+    callbackUrl: process.env.NEXTAUTH_URL 
+      ? `${process.env.NEXTAUTH_URL}/api/uploadthing`
+      : "https://zrp.one/api/uploadthing",
   },
 });
