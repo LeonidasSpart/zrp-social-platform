@@ -112,14 +112,34 @@ RESPONSE GUIDELINES:
 If someone asks who you are, say: "I'm ZRP AI, powered by DeepSeek's Responses API - the open-source AI integrated into ZRP Social!"
 `;
 
-    // ─── Build input history ────────────────────────────────────────
-    const inputHistory = [
-      ...(conversation?.messages || []).map((msg: any) => ({
-        role: msg.role === "assistant" ? "assistant" : "user",
-        content: msg.content,
-      })),
-      { role: "user", content: message },
-    ];
+    // ─── Build input history for Responses API ──────────────────────
+    // The Responses API expects a different format
+    const inputItems: any[] = [];
+
+    // Add system instruction as a developer message
+    inputItems.push({
+      type: "message",
+      role: "developer",
+      content: systemInstructions,
+    });
+
+    // Add conversation history
+    if (conversation?.messages) {
+      for (const msg of conversation.messages) {
+        inputItems.push({
+          type: "message",
+          role: msg.role === "assistant" ? "assistant" : "user",
+          content: msg.content,
+        });
+      }
+    }
+
+    // Add current user message
+    inputItems.push({
+      type: "message",
+      role: "user",
+      content: message,
+    });
 
     // ─── Call DeepSeek Responses API ────────────────────────────────
     const startTime = Date.now();
@@ -129,8 +149,7 @@ If someone asks who you are, say: "I'm ZRP AI, powered by DeepSeek's Responses A
         // ─── Streaming response ────────────────────────────────────
         const streamResponse = await deepseek.responses.create({
           model: "deepseek-v4-flash",
-          instructions: systemInstructions,
-          input: inputHistory,
+          input: inputItems,
           stream: true,
           temperature: 0.7,
           max_output_tokens: limits.maxTokens,
@@ -241,8 +260,7 @@ If someone asks who you are, say: "I'm ZRP AI, powered by DeepSeek's Responses A
         // ─── Non-streaming response ──────────────────────────────
         const response = await deepseek.responses.create({
           model: "deepseek-v4-flash",
-          instructions: systemInstructions,
-          input: inputHistory,
+          input: inputItems,
           stream: false,
           temperature: 0.7,
           max_output_tokens: limits.maxTokens,
