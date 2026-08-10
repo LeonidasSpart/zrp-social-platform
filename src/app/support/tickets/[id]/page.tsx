@@ -21,6 +21,7 @@ interface Ticket {
   status: string;
   priority: string;
   createdAt: string;
+  userId: string; // ✅ added – the foreign key to the user
   user: { username: string; email: string; avatarUrl: string | null; plan: string };
   assignedAdmin: { username: string; avatarUrl: string | null } | null;
   replies: Reply[];
@@ -90,7 +91,8 @@ export default function TicketDetailPage() {
   if (loading) return <div className="p-8 text-center">Loading...</div>;
   if (!ticket) return <div className="p-8 text-center">Ticket not found</div>;
 
-  const isOwner = session?.user?.id === ticket.user?.id;
+  // ✅ fix: use ticket.userId (the direct foreign key) instead of ticket.user?.id
+  const isOwner = session?.user?.id === ticket.userId;
 
   return (
     <div className="min-h-screen bg-white dark:bg-deep-black font-inter py-8 px-4">
