@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { Image, FileImage, BarChart3, Plus, Trash2, Clock, Briefcase, FileText } from "lucide-react";
 import GifPicker from "./GifPicker";
-import { useUploadThing } from "@/lib/uploadthing-client";
+import { uploadFiles } from "@/lib/uploadthing-client"; // ✅ use direct upload function
 import { getPlanLimits } from "@/lib/limits";
 import { useLanguage } from "@/contexts/LanguageContext";
 import MentionAutocomplete from "./MentionAutocomplete";
@@ -61,18 +61,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { startUpload, isUploading } = useUploadThing("postMedia", {
-    onClientUploadComplete: (files) => {
-      const file = files[0];
-      setImageUrl(file.ufsUrl);
-      setMediaType(file.type.startsWith("video") ? "video" : "image");
-      setUploading(false);
-    },
-    onUploadError: (error) => {
-      setError(t("composer.errUploadFailed") + ": " + error.message);
-      setUploading(false);
-    },
-  });
+  // ─── Remove useUploadThing hook ────────────────────────────────
 
   const extractHashtags = (text: string): string[] => {
     const matches = text.match(/#[\w\u0590-\u05fe]+/g) || [];
@@ -84,7 +73,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     return matches.map(tag => tag.slice(1).toLowerCase());
   };
 
-  // ─── Updated handleFileUpload with proper error handling ────────
+  // ─── handleFileUpload using uploadFiles directly ──────────────
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) {
@@ -92,7 +81,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       return;
     }
 
-    // Debug: log the file
     console.log("📁 File selected:", file.name, file.type, file.size);
 
     if (imageUrl) {
@@ -117,7 +105,12 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     setError(null);
 
     try {
-      const result = await startUpload([file]);
+      // ✅ Use uploadFiles directly
+      const result = await uploadFiles({
+        endpoint: "postMedia",
+        files: [file],
+      });
+
       console.log("✅ Upload result:", result);
 
       if (result && result.length > 0) {
@@ -132,7 +125,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       setError(t("composer.errUploadFailed") + ": " + (err as Error).message);
     } finally {
       setUploading(false);
-      // Reset the file input so the same file can be uploaded again
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -191,7 +183,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       const start = before.length - match[0].length;
       const newContent = before.slice(0, start) + mention + after;
       setContent(newContent);
-      // Update cursor position after insertion
       setTimeout(() => {
         if (textareaRef.current) {
           const newPos = start + mention.length;
@@ -206,7 +197,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation
     if (!content.trim() && !pollQuestion.trim() && postType !== "ARTICLE") {
       setError(t("composer.errWriteSomething"));
       return;
@@ -259,14 +249,12 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
         type: postType,
       };
 
-      // ─── Recruitment fields ──────────────────────────────────────
       if (postType === "RECRUITMENT") {
         payload.company = company.trim();
         payload.location = location.trim();
         payload.applyUrl = applyUrl.trim();
       }
 
-      // ─── Article fields ──────────────────────────────────────────
       if (postType === "ARTICLE") {
         payload.articleBody = articleBody;
       }
@@ -347,7 +335,6 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const remaining = limits.postLength - content.length;
   const isOverLimit = remaining < 0;
 
-  // ─── Determine if submit should be disabled ─────────────────────
   const isSubmitDisabled = (() => {
     if (loading) return true;
     if (isOverLimit) return true;
