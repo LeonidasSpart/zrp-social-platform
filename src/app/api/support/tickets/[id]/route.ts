@@ -43,3 +43,55 @@ export async function GET(
     );
   }
 }
+
+// ─── DELETE: Delete a ticket (only if resolved/closed, or admin) ───
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Get the ticket to verify ownership and status
+    const ticket = await prisma.supportTicket.findUnique({
+      where: { id: params.id },
+      select: { userId: true, status: true },
+    });
+
+    if (!ticket) {
+      return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
+    }
+
+    const isAdmin = session.user.role === 'ADMIN';
+    const isOwner = ticket.userId === session.user.id;
+
+    // Only owner or admin can delete
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // If user (not admin), only allow deletion of RESOLVED or CLOSED tickets
+    if (!isAdmin && ticket.status !== 'RESOLVED' && ticket.status !== 'CLOSED') {
+      return NextResponse.json(
+        { error: 'Only resolved or closed tickets can be deleted' },
+        { status: 400 }
+      );
+    }
+
+    // Delete the ticket (replies will cascade due to onDelete: Cascade)
+    await prisma.supportTicket.delete({
+      where: { id: params.id },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting ticket:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
