@@ -88,6 +88,7 @@ type TranslationKey =
   | "settings.errEmailSendFailed" | "settings.successPrivacyUpdated" | "settings.errPrivacyUpdateFailed"
   | "settings.successWalletUpdated" | "settings.errWalletUpdateFailed" | "settings.usernameCooldownBanner"
   | "settings.supportTickets" | "settings.supportTicketsDesc"
+  | "settings.viewTickets"
   | "messages.title" | "messages.noMessagesYet" | "messages.startConversation"
   | "messages.you" | "messages.deleteConversation" | "messages.deleteConfirm"
   | "messages.errDeleteFailed"
@@ -428,6 +429,7 @@ export const translations: Record<Language, TranslationDict> = {
     "settings.usernameCooldownBanner": "⏳ You can change your username again in {n} days",
     "settings.supportTickets": "Support Tickets",
     "settings.supportTicketsDesc": "View and manage your support tickets.",
+    "settings.viewTickets": "My Tickets",
     "messages.title": "Messages",
     "messages.noMessagesYet": "No messages yet.",
     "messages.startConversation": "Start a conversation with someone!",
@@ -1115,6 +1117,7 @@ export const translations: Record<Language, TranslationDict> = {
     "settings.usernameCooldownBanner": "⏳ Vous pourrez changer de nom d'utilisateur dans {n} jours",
     "settings.supportTickets": "Tickets de support",
     "settings.supportTicketsDesc": "Consultez et gérez vos tickets de support.",
+    "settings.viewTickets": "Mes tickets",
     "messages.title": "Messages",
     "messages.noMessagesYet": "Aucun message pour le moment.",
     "messages.startConversation": "Démarrez une conversation avec quelqu'un !",
@@ -1802,6 +1805,7 @@ export const translations: Record<Language, TranslationDict> = {
     "settings.usernameCooldownBanner": "⏳ Du kannst deinen Benutzernamen in {n} Tagen wieder ändern",
     "settings.supportTickets": "Support-Tickets",
     "settings.supportTicketsDesc": "Sehen und verwalten Sie Ihre Support-Tickets.",
+    "settings.viewTickets": "Meine Tickets",
     "messages.title": "Nachrichten",
     "messages.noMessagesYet": "Noch keine Nachrichten.",
     "messages.startConversation": "Starte eine Unterhaltung mit jemandem!",
@@ -2489,6 +2493,7 @@ export const translations: Record<Language, TranslationDict> = {
     "settings.usernameCooldownBanner": "⏳ Potrai cambiare di nuovo il nome utente tra {n} giorni",
     "settings.supportTickets": "Ticket di supporto",
     "settings.supportTicketsDesc": "Visualizza e gestisci i tuoi ticket di supporto.",
+    "settings.viewTickets": "I miei ticket",
     "messages.title": "Messaggi",
     "messages.noMessagesYet": "Ancora nessun messaggio.",
     "messages.startConversation": "Inizia una conversazione con qualcuno!",
