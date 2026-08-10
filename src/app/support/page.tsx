@@ -43,12 +43,12 @@ export default function SupportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-deep-black font-inter py-8 px-4">
+    <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter py-8 px-4">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-orbitron text-charcoal dark:text-white mb-6">
+        <h1 className="text-3xl font-orbitron text-zrp-charcoal dark:text-white mb-6">
           Contact Support
         </h1>
-        <p className="text-charcoal/70 dark:text-white/70 mb-6">
+        <p className="text-zrp-charcoal/70 dark:text-white/70 mb-6">
           Have an issue or question? Submit a ticket and we'll get back to you.
         </p>
 
@@ -60,7 +60,7 @@ export default function SupportPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-charcoal dark:text-white/80 mb-1">
+            <label className="block text-sm font-medium text-zrp-charcoal dark:text-white/80 mb-1">
               Subject <span className="text-zrp-red">*</span>
             </label>
             <input
@@ -68,19 +68,19 @@ export default function SupportPage() {
               required
               value={form.subject}
               onChange={(e) => setForm({ ...form, subject: e.target.value })}
-              className="w-full px-4 py-2 border border-silver/30 dark:border-charcoal rounded-lg bg-white dark:bg-charcoal/50 text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
+              className="w-full px-4 py-2 border border-zrp-silver/30 dark:border-zrp-charcoal rounded-lg bg-white dark:bg-zrp-charcoal/50 text-zrp-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
               placeholder="Brief summary of your issue"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-charcoal dark:text-white/80 mb-1">
+            <label className="block text-sm font-medium text-zrp-charcoal dark:text-white/80 mb-1">
               Category
             </label>
             <select
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="w-full px-4 py-2 border border-silver/30 dark:border-charcoal rounded-lg bg-white dark:bg-charcoal/50 text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
+              className="w-full px-4 py-2 border border-zrp-silver/30 dark:border-zrp-charcoal rounded-lg bg-white dark:bg-zrp-charcoal/50 text-zrp-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
             >
               <option value="GENERAL">General</option>
               <option value="ACCOUNT">Account</option>
@@ -97,7 +97,7 @@ export default function SupportPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-charcoal dark:text-white/80 mb-1">
+            <label className="block text-sm font-medium text-zrp-charcoal dark:text-white/80 mb-1">
               Message <span className="text-zrp-red">*</span>
             </label>
             <textarea
@@ -105,7 +105,7 @@ export default function SupportPage() {
               rows={6}
               value={form.message}
               onChange={(e) => setForm({ ...form, message: e.target.value })}
-              className="w-full px-4 py-2 border border-silver/30 dark:border-charcoal rounded-lg bg-white dark:bg-charcoal/50 text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red resize-none"
+              className="w-full px-4 py-2 border border-zrp-silver/30 dark:border-zrp-charcoal rounded-lg bg-white dark:bg-zrp-charcoal/50 text-zrp-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red resize-none"
               placeholder="Describe your issue in detail..."
             />
           </div>
@@ -113,13 +113,13 @@ export default function SupportPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-zrp-red text-white font-semibold rounded-lg hover:bg-dark-red transition disabled:opacity-50"
+            className="w-full py-3 bg-zrp-red text-white font-semibold rounded-lg hover:bg-zrp-darkRed transition disabled:opacity-50"
           >
             {loading ? 'Submitting...' : 'Submit Ticket'}
           </button>
         </form>
 
-        <p className="mt-4 text-sm text-charcoal/50 dark:text-white/50 text-center">
+        <p className="mt-4 text-sm text-zrp-charcoal/50 dark:text-white/50 text-center">
           Your ticket will be reviewed within 24-48 hours. You can track its status
           in the <a href="/support/tickets" className="text-zrp-red hover:underline">My Tickets</a> page.
         </p>
