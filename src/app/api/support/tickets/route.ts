@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/db';
 import { authOptions } from '@/lib/auth';
+import { notifyTicketCreated } from '@/lib/notifications';
 
 // ─── GET: List user's own tickets ──────────────────────────────
 export async function GET(req: NextRequest) {
@@ -66,7 +67,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Determine priority based on user plan (optional)
+    // Determine priority based on user plan
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { plan: true },
@@ -75,6 +76,7 @@ export async function POST(req: NextRequest) {
       : user?.plan === 'business' ? 'HIGH'
       : 'NORMAL';
 
+    // ─── Create the ticket ──────────────────────────────────────────
     const ticket = await prisma.supportTicket.create({
       data: {
         userId: session.user.id,
@@ -82,7 +84,6 @@ export async function POST(req: NextRequest) {
         category: category || 'GENERAL',
         priority,
         message: message.trim(),
-        // Attachments can be added later
         userAgent: req.headers.get('user-agent') || undefined,
         ipAddress: req.headers.get('x-forwarded-for') || req.ip || undefined,
         referrer: req.headers.get('referer') || undefined,
@@ -92,7 +93,20 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // TODO: Send email notification to admin(s) (optional)
+    // ─── 🆕 Notify all admins about the new ticket ──────────────────
+    const admins = await prisma.user.findMany({
+      where: { role: 'ADMIN' },
+      select: { id: true },
+    });
+
+    if (admins.length > 0) {
+      await notifyTicketCreated({
+        ticketId: ticket.id,
+        ticketSubject: ticket.subject,
+        adminIds: admins.map(a => a.id),
+        fromUserId: session.user.id,
+      });
+    }
 
     return NextResponse.json(ticket, { status: 201 });
   } catch (error) {
