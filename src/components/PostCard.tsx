@@ -613,7 +613,7 @@ export default function PostCard({
               {/* ─── Article body ─────────────────────────────────────── */}
               {postType === "ARTICLE" && post.body && (
                 <div className="mt-2">
-                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-800 dark:prose-p:text-gray-200 prose-strong:text-gray-900 dark:prose-strong:text-white prose-li:text-gray-800 dark:prose-li:text-gray-200 prose-a:text-zrp-red hover:prose-a:underline">
                     {articleExpanded ? (
                       <div
                         dangerouslySetInnerHTML={{ __html: post.body }}
