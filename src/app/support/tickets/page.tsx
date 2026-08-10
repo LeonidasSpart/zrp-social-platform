@@ -54,22 +54,22 @@ export default function MyTicketsPage() {
   if (loading) return <div className="p-8 text-center">Loading your tickets...</div>;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-deep-black font-inter py-8 px-4">
+    <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-orbitron text-charcoal dark:text-white">
+          <h1 className="text-3xl font-orbitron text-zrp-charcoal dark:text-white">
             My Support Tickets
           </h1>
           <Link
             href="/support"
-            className="px-4 py-2 bg-zrp-red text-white rounded-lg hover:bg-dark-red transition text-sm font-medium"
+            className="px-4 py-2 bg-zrp-red text-white rounded-lg hover:bg-zrp-darkRed transition text-sm font-medium"
           >
             + New Ticket
           </Link>
         </div>
 
         {tickets.length === 0 ? (
-          <div className="text-center py-12 text-charcoal/50 dark:text-white/50">
+          <div className="text-center py-12 text-zrp-charcoal/50 dark:text-white/50">
             <p className="text-lg">You haven't created any tickets yet.</p>
             <Link href="/support" className="text-zrp-red hover:underline mt-2 inline-block">
               Create your first ticket →
@@ -81,14 +81,14 @@ export default function MyTicketsPage() {
               <Link
                 key={ticket.id}
                 href={`/support/tickets/${ticket.id}`}
-                className="block p-4 border border-silver/30 dark:border-charcoal rounded-xl hover:bg-silver/10 dark:hover:bg-charcoal/30 transition"
+                className="block p-4 border border-zrp-silver/30 dark:border-zrp-charcoal rounded-xl hover:bg-zrp-silver/10 dark:hover:bg-zrp-charcoal/30 transition"
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-semibold text-charcoal dark:text-white">
+                    <h3 className="font-semibold text-zrp-charcoal dark:text-white">
                       {ticket.subject}
                     </h3>
-                    <p className="text-sm text-charcoal/60 dark:text-white/60">
+                    <p className="text-sm text-zrp-charcoal/60 dark:text-white/60">
                       Category: {ticket.category.toLowerCase()} · Created:{' '}
                       {new Date(ticket.createdAt).toLocaleDateString()}
                     </p>
@@ -99,7 +99,7 @@ export default function MyTicketsPage() {
                     >
                       {ticket.status.replace('_', ' ')}
                     </span>
-                    <span className="text-xs text-charcoal/50 dark:text-white/50">
+                    <span className="text-xs text-zrp-charcoal/50 dark:text-white/50">
                       {ticket._count.replies} replies
                     </span>
                   </div>
