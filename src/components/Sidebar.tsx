@@ -13,6 +13,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { SUPPORTED_LANGUAGES } from "@/lib/translations";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { useEffect } from "react";
 
 type NavItem = {
@@ -74,7 +75,7 @@ export default function Sidebar() {
   const currentLangLabel = SUPPORTED_LANGUAGES.find((l) => l.code === language)?.code.toUpperCase() || "EN";
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 flex-shrink-0 h-screen sticky top-0 px-2 py-4 border-r border-gray-200 dark:border-gray-800">
+    <aside className="hidden lg:flex flex-col w-64 flex-shrink-0 h-screen sticky top-0 px-2 py-4 border-r border-gray-200 dark:border-gray-800 overflow-y-auto">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2 px-3 py-2 mb-2">
         <Image src="/logo.png" alt="ZRP" width={40} height={40} className="w-9 h-9 object-contain" />
@@ -241,8 +242,9 @@ export default function Sidebar() {
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-              {session.user.name || session.user.username}
+            <p className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-1 min-w-0">
+              <span className="truncate">{session.user.name || session.user.username}</span>
+              <VerifiedBadge badgeType={session.user.badgeType} className="flex-shrink-0" />
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
               @{session.user.username}
