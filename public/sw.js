@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zrp-v3'; // ✅ Incremented to force update
+const CACHE_NAME = 'zrp-v4'; // ✅ Incremented to force update
 const STATIC_ASSETS = [
   '/favicon.ico',
   '/logo.png',
@@ -43,9 +43,13 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // 1. Skip API calls and non-GET requests
+  // 1. Skip API calls and non-GET requests — let the browser handle
+  // these natively. Calling event.respondWith(fetch(event.request))
+  // here is known to corrupt multipart/form-data bodies (e.g. image
+  // uploads) on Safari/WebKit, since it re-issues the request through
+  // the service worker instead of passing it through untouched.
   if (url.pathname.startsWith('/api/') || event.request.method !== 'GET') {
-    return event.respondWith(fetch(event.request));
+    return;
   }
 
   // 2. For the home page – try network first, fallback to cache
