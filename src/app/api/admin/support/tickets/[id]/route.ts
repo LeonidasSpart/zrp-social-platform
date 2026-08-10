@@ -1,9 +1,7 @@
-// src/app/api/admin/support/tickets/[id]/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { prisma } from '@/lib/prisma';
-import { authOptions } from '@/lib/auth'; // adjust path to your auth config
+import { prisma } from '@/lib/db';        // ✅ changed
+import { authOptions } from '@/lib/auth';  // ✅ changed
 
 export async function GET(
   req: NextRequest,
@@ -15,8 +13,6 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check if user is admin
-    // Assuming you have a role field on session.user
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { role: true },
@@ -99,7 +95,6 @@ export async function PUT(
     const body = await req.json();
     const { status, priority, assignedTo, resolution } = body;
 
-    // Validate status if provided
     if (status && !['OPEN', 'IN_PROGRESS', 'AWAITING_REPLY', 'RESOLVED', 'CLOSED'].includes(status)) {
       return NextResponse.json(
         { error: 'Invalid status value' },
@@ -114,28 +109,19 @@ export async function PUT(
       );
     }
 
-    // Build update data
     const data: any = {};
     if (status !== undefined) data.status = status;
     if (priority !== undefined) data.priority = priority;
     if (assignedTo !== undefined) {
-      // If assignedTo is an empty string, set to null
       data.assignedTo = assignedTo || null;
     }
     if (resolution !== undefined) {
       data.resolution = resolution || null;
     }
 
-    // If status is being set to RESOLVED, set resolvedAt
-    if (status === 'RESOLVED' && !resolution) {
-      // Resolution note is optional; if not provided, we can still mark resolved
+    if (status === 'RESOLVED') {
       data.resolvedAt = new Date();
-    } else if (status === 'RESOLVED' && resolution) {
-      data.resolvedAt = new Date();
-    }
-
-    // If status is not RESOLVED, clear resolvedAt if it was set
-    if (status && status !== 'RESOLVED') {
+    } else if (status && status !== 'RESOLVED') {
       data.resolvedAt = null;
     }
 
