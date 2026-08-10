@@ -95,7 +95,7 @@ export default function TicketDetailPage() {
   const isOwner = session?.user?.id === ticket.userId;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-deep-black font-inter py-8 px-4">
+    <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter py-8 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Back link */}
         <Link href="/support/tickets" className="text-zrp-red hover:underline mb-4 inline-block">
@@ -105,10 +105,10 @@ export default function TicketDetailPage() {
         {/* Ticket header */}
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h1 className="text-2xl font-orbitron text-charcoal dark:text-white">
+            <h1 className="text-2xl font-orbitron text-zrp-charcoal dark:text-white">
               {ticket.subject}
             </h1>
-            <div className="flex flex-wrap gap-3 mt-2 text-sm text-charcoal/60 dark:text-white/60">
+            <div className="flex flex-wrap gap-3 mt-2 text-sm text-zrp-charcoal/60 dark:text-white/60">
               <span>Status: <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${statusColors[ticket.status]}`}>{ticket.status}</span></span>
               <span>Priority: {ticket.priority}</span>
               <span>Category: {ticket.category}</span>
@@ -118,15 +118,15 @@ export default function TicketDetailPage() {
         </div>
 
         {/* Original message */}
-        <div className="bg-silver/10 dark:bg-charcoal/30 p-4 rounded-xl mb-6 border border-silver/30 dark:border-charcoal">
+        <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-xl mb-6 border border-zrp-silver/30 dark:border-zrp-charcoal">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-8 h-8 rounded-full bg-zrp-red/20 flex items-center justify-center text-zrp-red font-bold text-sm">
               {ticket.user.username[0].toUpperCase()}
             </div>
             <span className="font-medium">{ticket.user.username}</span>
-            <span className="text-xs text-charcoal/50 dark:text-white/50">{new Date(ticket.createdAt).toLocaleString()}</span>
+            <span className="text-xs text-zrp-charcoal/50 dark:text-white/50">{new Date(ticket.createdAt).toLocaleString()}</span>
           </div>
-          <p className="text-charcoal/80 dark:text-white/80 whitespace-pre-wrap">{ticket.message}</p>
+          <p className="text-zrp-charcoal/80 dark:text-white/80 whitespace-pre-wrap">{ticket.message}</p>
         </div>
 
         {/* Replies */}
@@ -134,7 +134,7 @@ export default function TicketDetailPage() {
           {ticket.replies.map((reply) => (
             <div
               key={reply.id}
-              className={`p-4 rounded-xl border ${reply.isInternal ? 'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-300 dark:border-yellow-700' : 'bg-white dark:bg-charcoal/50 border-silver/30 dark:border-charcoal'}`}
+              className={`p-4 rounded-xl border ${reply.isInternal ? 'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-300 dark:border-yellow-700' : 'bg-white dark:bg-zrp-charcoal/50 border-zrp-silver/30 dark:border-zrp-charcoal'}`}
             >
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-8 h-8 rounded-full bg-zrp-red/20 flex items-center justify-center text-zrp-red font-bold text-sm">
@@ -143,27 +143,27 @@ export default function TicketDetailPage() {
                 <span className="font-medium">{reply.user.username}</span>
                 {reply.user.role === 'ADMIN' && <span className="text-xs text-zrp-red font-medium">(Support)</span>}
                 {reply.isInternal && <span className="text-xs bg-yellow-200 dark:bg-yellow-800 px-2 py-0.5 rounded">Internal Note</span>}
-                <span className="text-xs text-charcoal/50 dark:text-white/50">{new Date(reply.createdAt).toLocaleString()}</span>
+                <span className="text-xs text-zrp-charcoal/50 dark:text-white/50">{new Date(reply.createdAt).toLocaleString()}</span>
               </div>
-              <p className="text-charcoal/80 dark:text-white/80 whitespace-pre-wrap">{reply.message}</p>
+              <p className="text-zrp-charcoal/80 dark:text-white/80 whitespace-pre-wrap">{reply.message}</p>
             </div>
           ))}
         </div>
 
         {/* Reply form – only if ticket is not closed/resolved (or always for admins) */}
         {ticket.status !== 'CLOSED' && ticket.status !== 'RESOLVED' && (
-          <div className="bg-silver/10 dark:bg-charcoal/30 p-4 rounded-xl border border-silver/30 dark:border-charcoal">
+          <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal">
             <textarea
               value={replyMessage}
               onChange={(e) => setReplyMessage(e.target.value)}
               placeholder="Type your reply..."
-              className="w-full p-3 rounded-lg border border-silver/30 dark:border-charcoal bg-white dark:bg-charcoal/50 text-charcoal dark:text-white resize-none min-h-[100px]"
+              className="w-full p-3 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal bg-white dark:bg-zrp-charcoal/50 text-zrp-charcoal dark:text-white resize-none min-h-[100px]"
             />
             <div className="flex justify-end mt-3">
               <button
                 onClick={sendReply}
                 disabled={!replyMessage.trim() || submitting}
-                className="px-6 py-2 bg-zrp-red text-white rounded-lg hover:bg-dark-red transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 bg-zrp-red text-white rounded-lg hover:bg-zrp-darkRed transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? 'Sending...' : 'Send Reply'}
               </button>
