@@ -88,8 +88,11 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     setError(null);
 
     try {
-      // ✅ Correct call: endpoint first, then options object with `files`
-      const result = await uploadFiles("postMedia", { files: [file] });
+      // ✅ Use `skipPolling: true` to avoid waiting for the callback
+      const result = await uploadFiles("postMedia", {
+        files: [file],
+        skipPolling: true,
+      });
       console.log("✅ Upload result:", result);
 
       if (result && result.length > 0) {
