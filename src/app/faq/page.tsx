@@ -25,6 +25,7 @@ import {
   Globe,
   Lock,
   CheckCircle,
+  Ticket, // ➕ ADDED
 } from "lucide-react";
 
 interface FaqItem {
@@ -523,6 +524,90 @@ export default function FAQPage() {
         </div>
       ),
     },
+
+    // ─── NEW: Support & Tickets ──────────────────────────────────────
+    {
+      id: "support-tickets",
+      category: "Support & Tickets",
+      question: "How do I submit a support ticket?",
+      icon: Ticket,
+      answer: (
+        <div className="space-y-2">
+          <p>If you need help or have an issue, you can submit a support ticket:</p>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Go to the <Link href="/support" className="text-zrp-red hover:underline">Support</Link> page.</li>
+            <li>Fill in the <strong>Subject</strong>, <strong>Category</strong>, and <strong>Message</strong> fields.</li>
+            <li>Click <strong>Submit Ticket</strong>.</li>
+            <li>You'll receive a confirmation and our team will review your request.</li>
+          </ol>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            ⏳ Response times depend on your plan: Free (48h), Pro (24h), Business (12h), Enterprise (4h).
+          </p>
+        </div>
+      ),
+    },
+    {
+      id: "track-support-tickets",
+      category: "Support & Tickets",
+      question: "How do I track my support tickets?",
+      icon: MessageSquare,
+      answer: (
+        <div className="space-y-2">
+          <p>You can track all your support tickets in one place:</p>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Go to the <Link href="/support/tickets" className="text-zrp-red hover:underline">My Tickets</Link> page.</li>
+            <li>See a list of all your tickets with their current status.</li>
+            <li>Click on any ticket to view the full conversation and reply.</li>
+          </ol>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            📊 Ticket statuses: <span className="text-zrp-red">OPEN</span>, <span className="text-blue-500">IN_PROGRESS</span>, <span className="text-yellow-500">AWAITING_REPLY</span>, <span className="text-green-500">RESOLVED</span>, <span className="text-gray-500">CLOSED</span>.
+          </p>
+        </div>
+      ),
+    },
+    {
+      id: "admin-ticket-management",
+      category: "Support & Tickets",
+      question: "How do admins manage tickets?",
+      icon: Shield,
+      answer: (
+        <div className="space-y-2">
+          <p>Admins can manage all support tickets from the admin dashboard:</p>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Go to <Link href="/admin/support" className="text-zrp-red hover:underline">Admin → Support Tickets</Link>.</li>
+            <li>View all tickets with filters by status, priority, and category.</li>
+            <li>Click a ticket to view the full conversation and user details.</li>
+            <li>Update ticket status, priority, or assign to another admin.</li>
+            <li>Reply to the user (with optional internal notes for other admins).</li>
+            <li>Resolve the ticket when the issue is resolved.</li>
+          </ol>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            🛡️ Only admins can access the ticket management dashboard.
+          </p>
+        </div>
+      ),
+    },
+    {
+      id: "ticket-statuses",
+      category: "Support & Tickets",
+      question: "What do the different ticket statuses mean?",
+      icon: CheckCircle,
+      answer: (
+        <div className="space-y-2">
+          <p>Each ticket goes through a status lifecycle:</p>
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li><span className="text-zrp-red font-semibold">OPEN</span> – Ticket created, awaiting admin review.</li>
+            <li><span className="text-blue-500 font-semibold">IN_PROGRESS</span> – Admin is actively working on the ticket.</li>
+            <li><span className="text-yellow-500 font-semibold">AWAITING_REPLY</span> – Waiting for user response.</li>
+            <li><span className="text-green-500 font-semibold">RESOLVED</span> – Issue has been resolved.</li>
+            <li><span className="text-gray-500 font-semibold">CLOSED</span> – Ticket is closed (can be reopened by admin).</li>
+          </ul>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            🔄 Users can reply to OPEN, IN_PROGRESS, and AWAITING_REPLY tickets.
+          </p>
+        </div>
+      ),
+    },
   ];
 
   // ─── Group FAQs by category ─────────────────────────────────────────
@@ -623,10 +708,10 @@ export default function FAQPage() {
         </p>
         <div className="flex flex-wrap justify-center gap-3 mt-4">
           <Link
-            href="/contact"
+            href="/support"
             className="px-4 py-2 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed transition"
           >
-            Contact Support
+            Submit a Ticket
           </Link>
           <Link
             href="/about"
