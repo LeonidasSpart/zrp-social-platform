@@ -57,6 +57,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     return matches.map(tag => tag.slice(1).toLowerCase());
   };
 
+  // ─── Updated handleFileUpload – no skipPolling ──────────────────
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) {
@@ -88,11 +89,8 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     setError(null);
 
     try {
-      // ✅ Use `skipPolling: true` to avoid waiting for the callback
-      const result = await uploadFiles("postMedia", {
-        files: [file],
-        skipPolling: true,
-      });
+      // ✅ Correct call: endpoint + options object with `files`
+      const result = await uploadFiles("postMedia", { files: [file] });
       console.log("✅ Upload result:", result);
 
       if (result && result.length > 0) {
