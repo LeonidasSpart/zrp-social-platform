@@ -39,6 +39,7 @@ export default function Footer() {
             </h3>
             <ul className="space-y-2 text-sm font-inter">
               <li><Link href="/about" className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition">About</Link></li>
+              <li><Link href="/careers" className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition">Careers</Link></li>
               <li><Link href="/charity" className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition">Charity</Link></li>
               <li><Link href="/press" className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition">Press Kit</Link></li>
               <li><Link href="/contact" className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition">Contact</Link></li>
