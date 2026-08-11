@@ -148,6 +148,8 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     const newContent = e.target.value;
     setContent(newContent);
     setCursorPosition(e.target.selectionStart || 0);
+    e.target.style.height = "auto";
+    e.target.style.height = `${e.target.scrollHeight}px`;
   };
 
   const handleMentionSelect = (mention: string) => {
@@ -399,7 +401,11 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                 />
                 <textarea
                   value={articleBody}
-                  onChange={(e) => setArticleBody(e.target.value)}
+                  onChange={(e) => {
+                    setArticleBody(e.target.value);
+                    e.target.style.height = "auto";
+                    e.target.style.height = `${e.target.scrollHeight}px`;
+                  }}
                   placeholder={t("composer.placeholderArticleBody")}
                   className="w-full resize-none border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 min-h-[200px] bg-gray-50 dark:bg-gray-800/50 font-mono text-sm"
                 />
