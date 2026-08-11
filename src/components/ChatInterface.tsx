@@ -591,7 +591,7 @@ export default function ChatInterface({
                       <button
                         onClick={() => setReplyingTo(message)}
                         className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-                        title={t("chat.reply") || "Reply"}
+                        title="Reply"
                       >
                         <Reply className="w-3.5 h-3.5 text-gray-500 dark:text-gray-300" />
                       </button>
@@ -599,7 +599,7 @@ export default function ChatInterface({
                         <button
                           onClick={() => startEdit(message)}
                           className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-                          title={t("chat.editMessage") || "Edit"}
+                          title="Edit"
                         >
                           <Pencil className="w-3.5 h-3.5 text-gray-500 dark:text-gray-300" />
                         </button>
@@ -722,7 +722,7 @@ export default function ChatInterface({
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
-                      {message.edited && <span>· {t("chat.edited") || "edited"}</span>}
+                      {message.edited && <span>· edited</span>}
                       {isOwn && message.read && <span className="ml-1">✓✓</span>}
                     </p>
                   </div>
@@ -764,7 +764,7 @@ export default function ChatInterface({
           <div className="flex items-center gap-2 min-w-0 text-xs text-gray-500 dark:text-gray-400">
             <Reply className="w-3.5 h-3.5 flex-shrink-0" />
             <span className="truncate">
-              {t("chat.replyingTo") || "Replying to"}{" "}
+              Replying to{" "}
               <span className="font-medium text-gray-700 dark:text-gray-300">
                 {replyingTo.senderId === userId ? "yourself" : receiverName}
               </span>
