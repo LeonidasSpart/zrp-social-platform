@@ -34,6 +34,18 @@ export async function GET(
             badgeType: true,
           },
         },
+        replyTo: {
+          include: {
+            sender: {
+              select: { id: true, username: true, name: true, avatarUrl: true, badgeType: true },
+            },
+          },
+        },
+        reactions: {
+          include: {
+            user: { select: { id: true, username: true, name: true, avatarUrl: true } },
+          },
+        },
       },
     });
 
