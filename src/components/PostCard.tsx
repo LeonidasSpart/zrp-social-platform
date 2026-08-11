@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag,
   Bookmark, BarChart3, Pin, PinOff, X, ZoomIn, Plus, ChevronDown,
-  Briefcase, FileText, Globe, Loader2
+  Briefcase, FileText, Globe, Loader2, Play
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Comments from "./Comments";
@@ -14,6 +14,7 @@ import ReportModal from "./ReportModal";
 import VerifiedBadge from "./VerifiedBadge";
 import EmojiPicker from "emoji-picker-react";
 import QuotePostModal from "./QuotePostModal";
+import VideoFeedViewer from "./VideoFeedViewer";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface PostCardProps {
@@ -167,7 +168,7 @@ export default function PostCard({
 
   // ─── Video playing state ──────────────────────────────────────────
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [showVideoFeed, setShowVideoFeed] = useState(false);
 
   // ─── FETCH REPOST STATUS ──────────────────────────────────────────
   useEffect(() => {
@@ -644,13 +645,7 @@ export default function PostCard({
                   onClick={(e) => {
                     e.stopPropagation();
                     if (video) {
-                      if (videoRef.current) {
-                        if (videoRef.current.paused) {
-                          videoRef.current.play();
-                        } else {
-                          videoRef.current.pause();
-                        }
-                      }
+                      setShowVideoFeed(true);
                     } else {
                       setLightboxImage(post.imageUrl!);
                     }
@@ -661,16 +656,12 @@ export default function PostCard({
                       <video
                         ref={videoRef}
                         src={post.imageUrl}
-                        className="w-full h-full object-contain"
-                        controls
+                        className="w-full h-full object-contain pointer-events-none"
+                        muted
+                        loop
                         playsInline
                         webkit-playsinline="true"
                         preload="metadata"
-                        controlsList="nodownload noremoteplayback"
-                        disablePictureInPicture
-                        onPlay={() => setIsVideoPlaying(true)}
-                        onPause={() => setIsVideoPlaying(false)}
-                        onEnded={() => setIsVideoPlaying(false)}
                         onContextMenu={(e) => e.preventDefault()}
                         onError={(e) => {
                           const target = e.target as HTMLVideoElement;
@@ -681,6 +672,11 @@ export default function PostCard({
                           target.parentNode?.appendChild(img);
                         }}
                       />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition">
+                        <div className="bg-black/50 rounded-full p-3">
+                          <Play className="w-8 h-8 text-white fill-white" />
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <>
@@ -899,6 +895,14 @@ export default function PostCard({
           post={post}
           onClose={() => setShowQuoteModal(false)}
           onQuotePosted={onUpdate}
+        />
+      )}
+
+      {/* ─── Fullscreen swipeable video viewer ─────────────────────────── */}
+      {showVideoFeed && (
+        <VideoFeedViewer
+          startPostId={post.id}
+          onClose={() => setShowVideoFeed(false)}
         />
       )}
     </>
