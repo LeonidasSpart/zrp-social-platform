@@ -235,7 +235,7 @@ export default function HomePage() {
       </div>
 
       {/* ─── Feed ────────────────────────────────────────────────────── */}
-      <div className="mt-4 space-y-4">
+      <div className="mt-4">
         {loading ? (
           <div className="flex justify-center py-8">
             <div className="w-6 h-6 border-2 border-zrp-red border-t-transparent rounded-full animate-spin" />
