@@ -1036,12 +1036,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
             <p>{emptyStateMap[activeTab as Exclude<TabType, "analytics">]}</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {/* ─── Posts Tab ──────────────────────────────────────────── */}
+          <div>
             {activeTab === "posts" && (
               <>
                 {pinnedPost && (
-                  <div className="relative border border-blue-200 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-900/10 rounded-xl p-3">
+                  <div className="relative border border-blue-200 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-900/10 rounded-xl p-3 mb-3">
                     <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-medium mb-2">
                       <Pin className="w-3.5 h-3.5" />
                       {t("profile.pinned")}
