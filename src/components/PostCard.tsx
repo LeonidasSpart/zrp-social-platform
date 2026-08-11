@@ -22,6 +22,7 @@ interface PostCardProps {
     id: string;
     content: string;
     imageUrl?: string;
+    imageUrls?: string[];
     mediaType?: string;
     createdAt: string;
     updatedAt?: string;
@@ -459,7 +460,7 @@ export default function PostCard({
 
   return (
     <>
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+      <div className="bg-white dark:bg-zrp-deepBlack px-4 py-3 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50/70 dark:hover:bg-white/[0.03] transition">
         <div className="flex items-start gap-3">
           <Link href={`/profile/${post.author.username}`}>
             <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 font-semibold flex-shrink-0 overflow-hidden">
@@ -638,91 +639,124 @@ export default function PostCard({
                 </div>
               )}
 
-              {/* ─── Media rendering (image or video) ────────────────── */}
-              {post.imageUrl && (
+              {/* ─── Media rendering (image grid, single image, or video) ─ */}
+              {!video && post.imageUrls && post.imageUrls.length > 1 ? (
                 <div
-                  className="mt-2 rounded-lg overflow-hidden cursor-pointer group relative"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (video) {
-                      setShowVideoFeed(true);
-                    } else {
-                      setLightboxImage(post.imageUrl!);
-                    }
-                  }}
+                  className={`mt-2 rounded-2xl overflow-hidden grid gap-0.5 ${
+                    post.imageUrls.length === 2
+                      ? "grid-cols-2"
+                      : "grid-cols-2 grid-rows-2"
+                  }`}
                 >
-                  {video ? (
-                    <div className="relative aspect-video w-full bg-black">
-                      <video
-                        ref={videoRef}
-                        src={post.imageUrl}
-                        className="w-full h-full object-contain pointer-events-none"
-                        muted
-                        loop
-                        playsInline
-                        webkit-playsinline="true"
-                        preload="metadata"
-                        onContextMenu={(e) => e.preventDefault()}
-                        onError={(e) => {
-                          const target = e.target as HTMLVideoElement;
-                          target.style.display = 'none';
-                          const img = document.createElement('img');
-                          img.src = post.imageUrl!;
-                          img.className = 'w-full h-full object-contain';
-                          target.parentNode?.appendChild(img);
-                        }}
+                  {post.imageUrls.slice(0, 4).map((url, idx) => (
+                    <div
+                      key={url}
+                      className={`relative cursor-pointer group bg-gray-100 dark:bg-gray-800 ${
+                        post.imageUrls!.length === 3 && idx === 0 ? "row-span-2" : ""
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightboxImage(url);
+                      }}
+                    >
+                      <img
+                        src={url}
+                        alt={`Post image ${idx + 1}`}
+                        className={`w-full h-full object-cover ${
+                          post.imageUrls!.length === 3 && idx === 0 ? "" : "aspect-square"
+                        }`}
                       />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition">
-                        <div className="bg-black/50 rounded-full p-3">
-                          <Play className="w-8 h-8 text-white fill-white" />
-                        </div>
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20">
+                        <ZoomIn className="w-6 h-6 text-white" />
                       </div>
                     </div>
-                  ) : (
-                    <>
-                      <img src={post.imageUrl} alt="Post image" className="w-full" />
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20">
-                        <ZoomIn className="w-8 h-8 text-white" />
-                      </div>
-                    </>
-                  )}
+                  ))}
                 </div>
+              ) : (
+                post.imageUrl && (
+                  <div
+                    className="mt-2 rounded-2xl overflow-hidden cursor-pointer group relative"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (video) {
+                        setShowVideoFeed(true);
+                      } else {
+                        setLightboxImage(post.imageUrl!);
+                      }
+                    }}
+                  >
+                    {video ? (
+                      <div className="relative aspect-video w-full bg-black">
+                        <video
+                          ref={videoRef}
+                          src={post.imageUrl}
+                          className="w-full h-full object-contain pointer-events-none"
+                          muted
+                          loop
+                          playsInline
+                          webkit-playsinline="true"
+                          preload="metadata"
+                          onContextMenu={(e) => e.preventDefault()}
+                          onError={(e) => {
+                            const target = e.target as HTMLVideoElement;
+                            target.style.display = 'none';
+                            const img = document.createElement('img');
+                            img.src = post.imageUrl!;
+                            img.className = 'w-full h-full object-contain';
+                            target.parentNode?.appendChild(img);
+                          }}
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition">
+                          <div className="bg-black/50 rounded-full p-3">
+                            <Play className="w-8 h-8 text-white fill-white" />
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <img src={post.imageUrl} alt="Post image" className="w-full" />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20">
+                          <ZoomIn className="w-8 h-8 text-white" />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )
               )}
             </div>
 
             {/* ─── ACTION BAR ──────────────────────────────────────────── */}
-            <div className="flex items-center gap-4 mt-3 flex-wrap">
-              <button
-                onClick={handleLike}
-                className={`flex items-center gap-1 text-sm ${liked ? "text-red-500" : "text-gray-500 dark:text-gray-400 hover:text-red-500"} transition`}
-              >
-                <Heart className={`w-4 h-4 ${liked ? "fill-red-500" : ""}`} />
-                <span>{formatCount(likesCount)}</span>
-              </button>
-
+            <div className="flex items-center justify-between max-w-md mt-3">
               {/* ─── Comment button (disabled if comments off) ─────────── */}
               <button
                 onClick={() => setShowComments(!showComments)}
-                className={`flex items-center gap-1 text-sm ${
+                className={`group flex items-center gap-1 text-sm ${
                   commentsEnabled
-                    ? "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                    ? "text-gray-500 dark:text-gray-400"
                     : "text-gray-300 dark:text-gray-500 cursor-not-allowed opacity-50"
                 } transition`}
                 disabled={!commentsEnabled}
                 title={!commentsEnabled ? "Comments are disabled for this post" : ""}
               >
-                <MessageCircle className="w-4 h-4" />
-                <span>{formatCount(post._count?.comments || 0)}</span>
+                <span className={`p-2 rounded-full transition ${commentsEnabled ? "group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:text-blue-500" : ""}`}>
+                  <MessageCircle className="w-[18px] h-[18px]" />
+                </span>
+                <span className="group-hover:text-blue-500 transition">{formatCount(post._count?.comments || 0)}</span>
               </button>
 
               {/* ─── Repost dropdown ───────────────────────────────────── */}
               <div className="relative">
                 <button
                   onClick={() => setRepostDropdownOpen(!repostDropdownOpen)}
-                  className={`flex items-center text-sm ${reposted ? "text-green-500" : "text-gray-500 dark:text-gray-400 hover:text-green-500"} transition`}
+                  className={`group flex items-center text-sm ${reposted ? "text-green-500" : "text-gray-500 dark:text-gray-400"} transition`}
                 >
-                  <Repeat className={`w-4 h-4 ${reposted ? "fill-green-500" : ""}`} />
-                  <ChevronDown className="w-3 h-3 ml-0.5" />
+                  <span className="p-2 rounded-full transition group-hover:bg-green-50 dark:group-hover:bg-green-900/20 group-hover:text-green-500">
+                    <Repeat className={`w-[18px] h-[18px] ${reposted ? "fill-green-500" : ""}`} />
+                  </span>
+                  <span className="group-hover:text-green-500 transition -ml-1">
+                    {formatCount(repostsCount + (post._count?.quotedBy || 0))}
+                  </span>
+                  <ChevronDown className="w-3 h-3 ml-0.5 group-hover:text-green-500 transition" />
                 </button>
                 {repostDropdownOpen && (
                   <div className="absolute left-0 mt-1 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
@@ -756,43 +790,56 @@ export default function PostCard({
                     >
                       Quote
                     </button>
+                    <Link
+                      href={`/post/${post.id}/reposts`}
+                      className="block w-full text-left px-4 py-2 text-xs text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition border-t border-gray-100 dark:border-gray-700"
+                    >
+                      {formatCount(repostsCount)} reposts
+                    </Link>
+                    <Link
+                      href={`/post/${post.id}/quotes`}
+                      className="block w-full text-left px-4 py-2 text-xs text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                    >
+                      {formatCount(post._count?.quotedBy || 0)} quotes
+                    </Link>
                   </div>
                 )}
               </div>
 
-              {/* Repost count link */}
-              <Link
-                href={`/post/${post.id}/reposts`}
-                className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+              <button
+                onClick={handleLike}
+                className={`group flex items-center gap-1 text-sm ${liked ? "text-red-500" : "text-gray-500 dark:text-gray-400"} transition`}
               >
-                <span className="font-medium">{formatCount(repostsCount)}</span>
-              </Link>
+                <span className="p-2 rounded-full transition group-hover:bg-red-50 dark:group-hover:bg-red-900/20 group-hover:text-red-500">
+                  <Heart className={`w-[18px] h-[18px] ${liked ? "fill-red-500" : ""}`} />
+                </span>
+                <span className="group-hover:text-red-500 transition -ml-1">{formatCount(likesCount)}</span>
+              </button>
 
-              {/* Quotes count link */}
-              <Link
-                href={`/post/${post.id}/quotes`}
-                className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
-              >
-                <span className="font-medium">{formatCount(post._count?.quotedBy || 0)}</span>
-              </Link>
-
-              <span className="text-sm text-gray-400 dark:text-gray-500" title={`${viewsCount.toLocaleString()} views`}>
-                <BarChart3 className="w-4 h-4 inline mr-1" />
-                <span>{formatCount(viewsCount)}</span>
+              <span className="flex items-center gap-1 text-sm text-gray-400 dark:text-gray-500" title={`${viewsCount.toLocaleString()} views`}>
+                <span className="p-2">
+                  <BarChart3 className="w-[18px] h-[18px]" />
+                </span>
+                <span className="-ml-1">{formatCount(viewsCount)}</span>
               </span>
 
-              <button onClick={handleShare} className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition">
-                <Share2 className="w-4 h-4" />
-              </button>
+              <div className="flex items-center">
+                <button
+                  onClick={handleBookmark}
+                  disabled={bookmarkLoading}
+                  className={`group p-2 rounded-full transition hover:bg-blue-50 dark:hover:bg-blue-900/20 ${bookmarked ? "text-blue-500" : "text-gray-400 dark:text-gray-500 hover:text-blue-500"}`}
+                  title={bookmarked ? "Remove bookmark" : "Bookmark"}
+                >
+                  <Bookmark className={`w-[18px] h-[18px] ${bookmarked ? "fill-current" : ""}`} />
+                </button>
 
-              <button
-                onClick={handleBookmark}
-                disabled={bookmarkLoading}
-                className={`text-sm ${bookmarked ? "text-gray-900 dark:text-white" : "text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white"} transition`}
-                title={bookmarked ? "Remove bookmark" : "Bookmark"}
-              >
-                <Bookmark className={`w-4 h-4 ${bookmarked ? "fill-current" : ""}`} />
-              </button>
+                <button
+                  onClick={handleShare}
+                  className="p-2 rounded-full transition text-gray-400 dark:text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-500"
+                >
+                  <Share2 className="w-[18px] h-[18px]" />
+                </button>
+              </div>
 
               {/* ─── Comments disabled badge ───────────────────────────── */}
               {!commentsEnabled && (
