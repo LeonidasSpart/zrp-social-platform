@@ -82,7 +82,7 @@ export default function QuotesPage({ params }: { params: { id: string } }) {
       ) : quotes.length === 0 ? (
         <div className="text-center py-12 text-gray-500">{t("quotes.empty")}</div>
       ) : (
-        <div className="space-y-4">
+        <div>
           {quotes.map((post) => (
             <PostCard key={post.id} post={post} onUpdate={fetchQuotes} />
           ))}
