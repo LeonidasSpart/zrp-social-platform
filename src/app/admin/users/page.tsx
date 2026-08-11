@@ -46,6 +46,7 @@ export default function AdminUsers() {
     { value: "verified", label: t("adminUsers.badgeVerified"), icon: BadgeCheck, color: "bg-blue-100 text-blue-700" },
     { value: "organization", label: t("adminUsers.badgeOrganization"), icon: Building2, color: "bg-yellow-100 text-yellow-700" },
     { value: "government", label: t("adminUsers.badgeGovernment"), icon: Landmark, color: "bg-gray-200 text-gray-700" },
+    { value: "team", label: t("adminUsers.badgeTeam") || "ZRP Team", icon: Award, color: "bg-red-100 text-red-700" },
   ];
 
   const STATUS_OPTIONS = [
@@ -258,6 +259,7 @@ export default function AdminUsers() {
           <option value="verified">{t("adminUsers.badgeVerified")}</option>
           <option value="organization">{t("adminUsers.badgeOrganization")}</option>
           <option value="government">{t("adminUsers.badgeGovernment")}</option>
+          <option value="team">{t("adminUsers.badgeTeam") || "ZRP Team"}</option>
         </select>
 
         <select
