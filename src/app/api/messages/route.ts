@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { content, receiverId, imageUrl } = await req.json();
+    const { content, receiverId, imageUrl, replyToId } = await req.json();
 
     // Allow empty content only if there is an image
     if ((!content || content.trim().length === 0) && !imageUrl) {
@@ -119,6 +119,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // ─── If replying, verify the target message belongs to this conversation ──
+    let validReplyToId: string | null = null;
+    if (replyToId) {
+      const target = await prisma.message.findUnique({
+        where: { id: replyToId },
+        select: { senderId: true, receiverId: true },
+      });
+      const belongsToConversation =
+        target &&
+        [target.senderId, target.receiverId].includes(session.user.id) &&
+        [target.senderId, target.receiverId].includes(receiverId);
+      if (belongsToConversation) validReplyToId = replyToId;
+    }
+
     // ─── Save message ──────────────────────────────────────────────────
     const message = await prisma.message.create({
       data: {
@@ -126,6 +140,7 @@ export async function POST(req: NextRequest) {
         senderId: session.user.id,
         receiverId,
         imageUrl: imageUrl || null,
+        replyToId: validReplyToId,
       },
       include: {
         sender: {
@@ -146,6 +161,14 @@ export async function POST(req: NextRequest) {
             badgeType: true,
           },
         },
+        replyTo: {
+          include: {
+            sender: {
+              select: { id: true, username: true, name: true, avatarUrl: true, badgeType: true },
+            },
+          },
+        },
+        reactions: true,
       },
     });
 
