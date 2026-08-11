@@ -171,7 +171,7 @@ export default function SearchPage() {
                 {posts.length === 0 ? (
                   <p className="text-center py-8 text-gray-500">{t("search.noPosts")}</p>
                 ) : (
-                  <div className="space-y-4">
+                  <div>
                     {posts.map((post) => (
                       <PostCard key={post.id} post={post} onUpdate={() => {}} />
                     ))}
