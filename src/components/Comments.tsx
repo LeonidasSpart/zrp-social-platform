@@ -63,8 +63,8 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   }, [postId]);
 
   // ─── Add top‑level comment ──────────────────────────────────────
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // ✅ Prevents page refresh
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault(); // ✅ Prevents page refresh
     if (!newComment.trim() || !session) return;
 
     setSubmitting(true);
@@ -255,12 +255,22 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
           </div>
 
           {isEditing ? (
-            <div className="mt-1 flex items-center gap-2">
-              <input
-                type="text"
+            <div className="mt-1 flex items-end gap-2">
+              <textarea
                 value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                className="flex-1 min-w-0 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
+                onChange={(e) => {
+                  setEditContent(e.target.value);
+                  e.target.style.height = "auto";
+                  e.target.style.height = `${e.target.scrollHeight}px`;
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    saveEdit(comment.id);
+                  }
+                }}
+                rows={1}
+                className="flex-1 min-w-0 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red resize-none overflow-hidden max-h-40"
                 autoFocus
                 maxLength={280}
               />
@@ -300,17 +310,21 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
           )}
 
           {isReplying && (
-            <div className="mt-2 flex items-center gap-2">
-              <input
-                type="text"
+            <div className="mt-2 flex items-end gap-2">
+              <textarea
                 value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
+                onChange={(e) => {
+                  setReplyContent(e.target.value);
+                  e.target.style.height = "auto";
+                  e.target.style.height = `${e.target.scrollHeight}px`;
+                }}
                 placeholder={`Reply to ${comment.author.name || comment.author.username}...`}
-                className="flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
+                rows={1}
+                className="flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent resize-none overflow-hidden max-h-40"
                 maxLength={280}
                 autoFocus
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+                  if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     handleReply(comment.id);
                   }
@@ -372,13 +386,23 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       )}
 
       {session && (
-        <form onSubmit={handleSubmit} className="mt-3 flex gap-2">
-          <input
-            type="text"
+        <form onSubmit={handleSubmit} className="mt-3 flex gap-2 items-end">
+          <textarea
             value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
+            onChange={(e) => {
+              setNewComment(e.target.value);
+              e.target.style.height = "auto";
+              e.target.style.height = `${e.target.scrollHeight}px`;
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit();
+              }
+            }}
             placeholder="Write a comment..."
-            className="flex-1 min-w-0 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            rows={1}
+            className="flex-1 min-w-0 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none overflow-hidden max-h-40"
             maxLength={280}
           />
           <button
