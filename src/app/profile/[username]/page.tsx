@@ -83,6 +83,7 @@ function getMilestones(profile: UserProfile): Milestone[] {
 interface UserProfile {
   id: string;
   username: string;
+  customUrl: string | null;
   name: string | null;
   bio: string | null;
   avatarUrl: string | null;
@@ -378,7 +379,8 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
   // ─── Share Profile ──────────────────────────────────────────────────
   const handleShareProfile = async () => {
-    const url = `${window.location.origin}/profile/${profile?.username}`;
+    const shortSlug = profile?.customUrl || profile?.username;
+    const url = `${window.location.origin}/${shortSlug}`;
     if (navigator.share) {
       try {
         await navigator.share({
