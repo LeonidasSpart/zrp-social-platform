@@ -19,7 +19,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const { data: session } = useSession();
   const { t } = useLanguage();
   const [content, setContent] = useState("");
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [mediaType, setMediaType] = useState<"image" | "video" | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -57,46 +57,57 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     return matches.map(tag => tag.slice(1).toLowerCase());
   };
 
-  // ─── Updated handleFileUpload – no skipPolling ──────────────────
+  // ─── Multi-image upload (up to 4, matching X, or the plan's lower limit) ──
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) {
       setError("No file selected");
       return;
     }
 
-    console.log("📁 File selected:", file.name, file.type, file.size);
+    const maxImages = Math.min(limits.imagesPerPost || 1, 4);
 
-    if (imageUrl) {
-      setError(t("composer.errAlreadyUploaded", { n: limits.imagesPerPost }));
+    // ─── Video: strictly single-file, cannot mix with images ─────────
+    const hasVideo = files.some((f) => f.type.startsWith("video/"));
+    if (hasVideo) {
+      if (files.length > 1 || imageUrls.length > 0) {
+        setError(t("composer.errOnlyMedia"));
+        return;
+      }
+    } else if (imageUrls.length + files.length > maxImages) {
+      setError(t("composer.errAlreadyUploaded", { n: maxImages }));
       return;
     }
 
-    const isVideo = file.type.startsWith("video/");
-    const maxSize = isVideo ? limits.videoUploadMB * 1024 * 1024 : 4 * 1024 * 1024;
-
-    if (file.size > maxSize) {
-      setError(t("composer.errFileTooLarge", { size: isVideo ? limits.videoUploadMB : 4 }));
-      return;
-    }
-
-    if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
-      setError(t("composer.errOnlyMedia"));
-      return;
+    for (const file of files) {
+      const isVideo = file.type.startsWith("video/");
+      const maxSize = isVideo ? limits.videoUploadMB * 1024 * 1024 : 4 * 1024 * 1024;
+      if (file.size > maxSize) {
+        setError(t("composer.errFileTooLarge", { size: isVideo ? limits.videoUploadMB : 4 }));
+        return;
+      }
+      if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+        setError(t("composer.errOnlyMedia"));
+        return;
+      }
     }
 
     setUploading(true);
     setError(null);
 
     try {
-      // ✅ Correct call: endpoint + options object with `files`
-      const result = await uploadFiles("postMedia", { files: [file] });
+      const result = await uploadFiles("postMedia", { files });
       console.log("✅ Upload result:", result);
 
       if (result && result.length > 0) {
-        const uploadedFile = result[0];
-        setImageUrl(uploadedFile.ufsUrl);
-        setMediaType(uploadedFile.type?.startsWith("video") ? "video" : "image");
+        const isVideoUpload = result[0].type?.startsWith("video");
+        if (isVideoUpload) {
+          setImageUrls([result[0].ufsUrl]);
+          setMediaType("video");
+        } else {
+          setImageUrls((prev) => [...prev, ...result.map((f) => f.ufsUrl)]);
+          setMediaType("image");
+        }
       } else {
         throw new Error("No file returned from upload");
       }
@@ -112,11 +123,11 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   };
 
   const handleGifSelect = (gifUrl: string) => {
-    if (imageUrl) {
+    if (imageUrls.length > 0) {
       setError(t("composer.errGifLimit", { n: limits.imagesPerPost }));
       return;
     }
-    setImageUrl(gifUrl);
+    setImageUrls([gifUrl]);
     setMediaType("image");
     setShowGifPicker(false);
   };
@@ -215,7 +226,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
       const payload: any = {
         content: content.trim() || (postType === "ARTICLE" ? "" : pollQuestion.trim()),
-        imageUrl: imageUrl || undefined,
+        imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
         mediaType: mediaType || undefined,
         hashtags,
         mentions,
@@ -284,7 +295,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
   const resetForm = () => {
     setContent("");
-    setImageUrl(null);
+    setImageUrls([]);
     setMediaType(null);
     setPollQuestion("");
     setPollOptions(["", ""]);
@@ -315,7 +326,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const isSubmitDisabled = (() => {
     if (loading) return true;
     if (isOverLimit) return true;
-    if (!!imageUrl && !limits.imagesPerPost) return true;
+    if (imageUrls.length > 0 && !limits.imagesPerPost) return true;
 
     if (!content.trim() && !pollQuestion.trim() && postType !== "ARTICLE") return true;
     if (showPollBuilder && !isPollValid) return true;
@@ -538,33 +549,70 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               </div>
             )}
 
-            {imageUrl && (
-              <div className="relative mt-2 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+            {imageUrls.length > 0 && (
+              <div
+                className={`relative mt-2 rounded-xl overflow-hidden grid gap-0.5 ${
+                  mediaType === "video" || imageUrls.length === 1
+                    ? "grid-cols-1"
+                    : imageUrls.length === 2
+                    ? "grid-cols-2"
+                    : imageUrls.length === 3
+                    ? "grid-cols-2 grid-rows-2"
+                    : "grid-cols-2 grid-rows-2"
+                }`}
+              >
                 {mediaType === "video" ? (
-                  <video src={imageUrl} controls className="max-h-60 w-auto rounded-lg" />
+                  <video src={imageUrls[0]} controls className="max-h-80 w-full rounded-xl" />
                 ) : (
-                  <img src={imageUrl} alt="Upload preview" className="max-h-60 w-auto rounded-lg" />
+                  imageUrls.map((url, idx) => (
+                    <div
+                      key={url}
+                      className={`relative bg-gray-100 dark:bg-gray-800 ${
+                        imageUrls.length === 3 && idx === 0 ? "row-span-2" : ""
+                      }`}
+                    >
+                      <img
+                        src={url}
+                        alt={`Upload preview ${idx + 1}`}
+                        className={`w-full object-cover ${
+                          imageUrls.length === 1 ? "max-h-80" : "h-40 sm:h-48"
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setImageUrls((prev) => prev.filter((u) => u !== url))}
+                        className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 text-lg leading-none w-6 h-6 flex items-center justify-center"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))
                 )}
-                <button
-                  type="button"
-                  onClick={() => { setImageUrl(null); setMediaType(null); }}
-                  className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 text-xl leading-none w-7 h-7 flex items-center justify-center"
-                >
-                  ×
-                </button>
+                {mediaType === "video" && (
+                  <button
+                    type="button"
+                    onClick={() => { setImageUrls([]); setMediaType(null); }}
+                    className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 text-xl leading-none w-7 h-7 flex items-center justify-center"
+                  >
+                    ×
+                  </button>
+                )}
               </div>
             )}
 
             <div className="flex items-center justify-between mt-2 border-t border-gray-100 dark:border-gray-700 pt-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <label className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition">
+                <label className={`text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition ${
+                  uploading || (imageUrls.length >= Math.min(limits.imagesPerPost || 1, 4)) ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                }`}>
                   <input
                     ref={fileInputRef}
                     type="file"
                     accept="image/*,video/*"
+                    multiple
                     onChange={handleFileUpload}
                     className="hidden"
-                    disabled={uploading || (!!imageUrl && !limits.imagesPerPost)}
+                    disabled={uploading || imageUrls.length >= Math.min(limits.imagesPerPost || 1, 4)}
                   />
                   <Image className="w-5 h-5" />
                   {uploading && <span className="text-xs ml-1 text-gray-400 dark:text-gray-500">{t("composer.uploading")}</span>}
