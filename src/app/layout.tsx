@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
 
   title: {
-    default: "ZRP Social — The First Swiss-European Social Media Platform",
+    default: "ZRP Social - The First Swiss-European Social Media Platform",
     template: "%s | ZRP Social",
   },
 
