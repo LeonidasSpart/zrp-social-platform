@@ -3557,7 +3557,7 @@ export const translations: Record<Language, TranslationDict> = {
     "adminUsers.planEnterprise": "Enterprise",
     "about.title": "Rreth ZRP Social",
     "about.subtitle": "Platforma e Parë Zvicerane Evropiane e Mediave Sociale",
-    "about.p1": "ZRP Social lindi nga një ide e thjeshtë por e fuqishme:",
+    "about.p1": "lindi nga një ide e thjeshtë por e fuqishme:",
     "about.p1Bold": "Liria e fjalës i përket të gjithëve.",
     "about.p2": "Në një botë ku zërat po heshten gjithnjë e më shumë, ne vendosëm të ndërtojmë një platformë që vendos njerëzit në radhë të parë. Pa censurë. Pa manipulim. Pa agjenda të fshehura.",
     "about.p3": "Jemi krenarë të jemi platforma e parë zvicerane evropiane e mediave sociale, e ndërtuar mbi parimet e neutralitetit, privatësisë dhe sigurisë. Kuadri i fortë ligjor i Zvicrës dhe përkushtimi i saj ndaj shprehjes së lirë e bëjnë atë shtëpinë e përsosur për ZRP Social.",
