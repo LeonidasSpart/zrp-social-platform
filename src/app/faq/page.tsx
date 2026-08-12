@@ -25,7 +25,9 @@ import {
   Globe,
   Lock,
   CheckCircle,
-  Ticket, // ➕ ADDED
+  Ticket,
+  Trash2,    // ➕ ADDED
+  Crown,     // ➕ ADDED
 } from "lucide-react";
 
 interface FaqItem {
@@ -451,6 +453,27 @@ export default function FAQPage() {
         </div>
       ),
     },
+    // ─── NEW: How to delete your account ─────────────────────────────
+    {
+      id: "delete-account",
+      category: "Privacy & Safety",
+      question: "How do I delete my account?",
+      icon: Trash2,
+      answer: (
+        <div className="space-y-2">
+          <p>To permanently delete your account:</p>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Go to <Link href="/settings" className="text-zrp-red hover:underline">Settings</Link>.</li>
+            <li>Navigate to the <strong>Account</strong> tab.</li>
+            <li>Scroll to the bottom and tap <strong>Delete Account</strong>.</li>
+            <li>Confirm your password and tap <strong>Permanently Delete</strong>.</li>
+          </ol>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            ⚠️ Deletion is permanent and cannot be undone. All your data will be removed within 30 days.
+          </p>
+        </div>
+      ),
+    },
 
     // ─── Charity & Impact ────────────────────────────────────────────
     {
@@ -524,8 +547,29 @@ export default function FAQPage() {
         </div>
       ),
     },
+    // ─── NEW: Enterprise Plan ─────────────────────────────────────────
+    {
+      id: "enterprise-plan",
+      category: "Administration",
+      question: "What is the Enterprise plan?",
+      icon: Crown,
+      answer: (
+        <div className="space-y-2">
+          <p>The <strong>Enterprise</strong> plan is designed for large organisations and power users:</p>
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>Unlimited posts</li>
+            <li>Full API access</li>
+            <li>24/7 priority support</li>
+            <li>Custom solutions and dedicated account manager</li>
+          </ul>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            📧 Contact sales for custom pricing.
+          </p>
+        </div>
+      ),
+    },
 
-    // ─── NEW: Support & Tickets ──────────────────────────────────────
+    // ─── Support & Tickets ──────────────────────────────────────────
     {
       id: "support-tickets",
       category: "Support & Tickets",
@@ -721,9 +765,6 @@ export default function FAQPage() {
           </Link>
         </div>
       </div>
-
-      {/* ─── Footer Links ─── */}
-      {/* ❌ REMOVED – to avoid duplication with global footer */}
     </div>
   );
 }
