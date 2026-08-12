@@ -3608,7 +3608,7 @@ export const translations: Record<Language, TranslationDict> = {
     "contact.moreHelpDesc": "Kontrolloni {faq} ose {help} për përgjigje të shpejta.",
     "contact.faqLabel": "Pyetjet e shpeshta",
     "contact.helpCenterLabel": "Qendra e ndihmës"
-}
+},
   es: {
     "nav.home": "Inicio",
     "nav.explore": "Explorar",
