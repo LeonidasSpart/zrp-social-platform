@@ -3460,7 +3460,7 @@ export const translations: Record<Language, TranslationDict> = {
     "analytics.users": "Përdoruesit",
     "analytics.posts": "Postimet",
     "analytics.comments": "Komentet",
-    "analytics.likes": "Pëlqimet",
+    "analytics.likes": "Pëlqimes",
     "analytics.reposts": "Ripublikimet",
     "analytics.avgLikesPerPost": "Mesatara e pëlqimeve për postim",
     "analytics.avgCommentsPerPost": "Mesatara e komenteve për postim",
@@ -3607,8 +3607,8 @@ export const translations: Record<Language, TranslationDict> = {
     "contact.moreHelp": "Më shumë ndihmë",
     "contact.moreHelpDesc": "Kontrolloni {faq} ose {help} për përgjigje të shpejta.",
     "contact.faqLabel": "Pyetjet e shpeshta",
-    "contact.helpCenterLabel": "Qendra e ndihmës",
-  },
+    "contact.helpCenterLabel": "Qendra e ndihmës"
+}
   es: {
     "nav.home": "Inicio",
     "nav.explore": "Explorar",
