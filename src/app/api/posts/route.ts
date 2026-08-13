@@ -3,6 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { prisma } from "@/lib/db";
 import { getPlanLimits, checkPostLength, checkImagesPerPost } from "@/lib/limits";
 import { canPostRecruitment, canPublishArticle } from "@/lib/permissions";
+import { rateLimit } from "@/lib/rate-limit";
 
 // ─── GET (Feed) ─────────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
@@ -112,6 +113,11 @@ export async function GET(req: NextRequest) {
 
 // ─── POST (Create) ──────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
+  // Rate limit: 20 posts per 10 minutes - generous for normal use,
+  // blocks spam-posting bots/scripts.
+  const limit = await rateLimit(req, { limit: 20, window: 600, type: "posts-create" });
+  if (!limit.success) return limit.response;
+
   try {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     if (!token) {
