@@ -666,7 +666,8 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   className={`text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition ${
                     showEmojiPicker ? "text-zrp-red dark:text-zrp-red" : ""
                   }`}
-                  title={t("composer.addEmoji") || "Add emoji"}
+title="Add emoji"
+
                 >
                   <Smile className="w-5 h-5" />
                 </button>
