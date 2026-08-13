@@ -105,8 +105,8 @@ export default function PostPage({ params }: { params: { id: string } }) {
       // paginated with a "Show more" button.
       let all: Comment[] = [];
       let cursor: string | null = null;
-      do {
-        const url = cursor
+      while (true) {
+        const url: string = cursor
           ? `/api/posts/${params.id}/comments?limit=50&cursor=${cursor}`
           : `/api/posts/${params.id}/comments?limit=50`;
         const res = await fetch(url);
@@ -114,7 +114,8 @@ export default function PostPage({ params }: { params: { id: string } }) {
         const data = await res.json();
         all = [...all, ...(data.comments || [])];
         cursor = data.nextCursor || null;
-      } while (cursor);
+        if (!cursor) break;
+      }
       setComments(all);
     } catch (error) {
       console.error("Error fetching comments:", error);
