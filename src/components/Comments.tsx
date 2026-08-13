@@ -24,7 +24,7 @@ interface Comment {
 
 interface CommentsProps {
   postId: string;
-  onCommentAdded: () => void;
+  onCommentAdded: (delta?: number) => void;
 }
 
 export default function Comments({ postId, onCommentAdded }: CommentsProps) {
@@ -78,7 +78,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       if (res.ok) {
         setNewComment("");
         await fetchComments();
-        onCommentAdded(); // Only updates state, never reloads
+        onCommentAdded(1); // Local count update only, never reloads the feed
       } else {
         console.error("Failed to post comment");
       }
@@ -107,7 +107,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         setReplyContent("");
         setReplyingTo(null);
         await fetchComments();
-        onCommentAdded();
+        onCommentAdded(1);
       }
     } catch (error) {
       console.error("Error replying:", error);
@@ -140,10 +140,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         setEditingId(null);
         setEditContent("");
         await fetchComments();
-        onCommentAdded();
-      } else {
-        const err = await res.json();
-        alert(err.error || "Failed to update comment");
+        onCommentAdded(0);
       }
     } catch (error) {
       console.error("Error editing comment:", error);
@@ -171,10 +168,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         setShowDeleteModal(false);
         setCommentToDelete(null);
         await fetchComments();
-        onCommentAdded();
-      } else {
-        const err = await res.json();
-        alert(err.error || "Failed to delete comment");
+        onCommentAdded(-1);
       }
     } catch (error) {
       console.error("Error deleting comment:", error);
