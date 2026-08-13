@@ -2,8 +2,9 @@
 
 import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Image, FileImage, BarChart3, Plus, Trash2, Clock, Briefcase, FileText } from "lucide-react";
+import { Image, FileImage, BarChart3, Plus, Trash2, Clock, Briefcase, FileText, Smile } from "lucide-react";
 import GifPicker from "./GifPicker";
+import EmojiPicker from "emoji-picker-react";
 import { uploadFiles } from "@/lib/uploadthing-client";
 import { getPlanLimits } from "@/lib/limits";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -34,6 +35,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const [scheduledAt, setScheduledAt] = useState("");
   const [commentsEnabled, setCommentsEnabled] = useState(true);
   const [showGifPicker, setShowGifPicker] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [pollQuestion, setPollQuestion] = useState("");
   const [pollOptions, setPollOptions] = useState(["", ""]);
   const [pollExpiry, setPollExpiry] = useState("");
@@ -180,6 +182,29 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
         }
       }, 0);
     }
+  };
+
+  // ─── Insert an emoji at the current cursor position (not just appended
+  // to the end) and restore the cursor right after the inserted emoji ──
+  const handleEmojiSelect = (emojiData: { emoji: string }) => {
+    const start = textareaRef.current?.selectionStart ?? cursorPosition;
+    const end = textareaRef.current?.selectionEnd ?? cursorPosition;
+    const before = content.slice(0, start);
+    const after = content.slice(end);
+    const newContent = before + emojiData.emoji + after;
+    setContent(newContent);
+    setShowEmojiPicker(false);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        const newPos = start + emojiData.emoji.length;
+        textareaRef.current.selectionStart = newPos;
+        textareaRef.current.selectionEnd = newPos;
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+        textareaRef.current.focus();
+        setCursorPosition(newPos);
+      }
+    }, 0);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -627,6 +652,25 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   <FileImage className="w-5 h-5" />
                 </button>
 
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Capture where the cursor actually is right before
+                    // opening the picker, since focus will move away from
+                    // the textarea onto the picker itself.
+                    if (textareaRef.current) {
+                      setCursorPosition(textareaRef.current.selectionStart || 0);
+                    }
+                    setShowEmojiPicker((v) => !v);
+                  }}
+                  className={`text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition ${
+                    showEmojiPicker ? "text-zrp-red dark:text-zrp-red" : ""
+                  }`}
+                  title={t("composer.addEmoji") || "Add emoji"}
+                >
+                  <Smile className="w-5 h-5" />
+                </button>
+
                 {postType === "POST" && (
                   <button
                     type="button"
@@ -666,6 +710,30 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
       {showGifPicker && (
         <GifPicker onSelect={handleGifSelect} onClose={() => setShowGifPicker(false)} />
+      )}
+
+      {showEmojiPicker && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center bg-black/40"
+          onClick={() => setShowEmojiPicker(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:w-auto p-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-end mb-1">
+              <button
+                type="button"
+                onClick={() => setShowEmojiPicker(false)}
+                className="p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="sr-only">Close</span>
+                ✕
+              </button>
+            </div>
+            <EmojiPicker onEmojiClick={handleEmojiSelect} width="100%" height={380} />
+          </div>
+        </div>
       )}
     </div>
   );
