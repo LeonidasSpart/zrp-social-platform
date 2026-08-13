@@ -6,7 +6,11 @@ import { createNotification } from "@/lib/notifications";
 import { sendPushNotification } from "@/lib/push-notifications";
 import { rateLimit } from "@/lib/rate-limit";
 
-// ─── GET: Fetch threaded comments with counts and user status ──────
+// ─── GET: Fetch a page of threaded comments with counts and status ──
+// Paginates by top-level comment (cursor + limit), then loads only the
+// reply subtrees belonging to that page's threads - not every comment on
+// the post. This avoids one giant query/payload on posts with thousands
+// of comments while keeping full nested reply threads intact.
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -16,97 +20,78 @@ export async function GET(
     const session = await getServerSession(authOptions);
     const viewerId = session?.user?.id;
 
+    const { searchParams } = new URL(req.url);
+    const cursor = searchParams.get("cursor");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "10", 10) || 10, 50);
+
     // ─── Check if comments are enabled for this post ────────────────
     const post = await prisma.post.findUnique({
       where: { id: postId },
       select: { commentsEnabled: true },
     });
 
-    // If post not found or comments disabled, return empty array
+    // If post not found or comments disabled, return empty page
     if (!post || post.commentsEnabled === false) {
-      return NextResponse.json([]);
+      return NextResponse.json({ comments: [], nextCursor: null });
     }
 
-    // ─── Fetch all comments for this post (including replies) ──────
-    const comments = await prisma.comment.findMany({
-      where: { postId },
-      orderBy: { createdAt: "asc" },
-      include: {
-        author: {
-          select: {
-            id: true,
-            username: true,
-            name: true,
-            avatarUrl: true,
-            badgeType: true,
-          },
-        },
-        replies: {
-          include: {
-            author: {
-              select: {
-                id: true,
-                username: true,
-                name: true,
-                avatarUrl: true,
-                badgeType: true,
-              },
-            },
-          },
-        },
-        _count: {
-          select: {
-            likes: true,
-            reposts: true,
-            bookmarks: true,
-          },
-        },
-      },
+    const authorSelect = {
+      id: true,
+      username: true,
+      name: true,
+      avatarUrl: true,
+      badgeType: true,
+    } as const;
+    const countSelect = {
+      _count: { select: { likes: true, reposts: true, bookmarks: true } },
+    } as const;
+
+    // ─── Page of top-level threads (newest first) ────────────────────
+    const topLevelPage = await prisma.comment.findMany({
+      where: { postId, parentId: null },
+      orderBy: { createdAt: "desc" },
+      take: limit + 1,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { id: cursor } : undefined,
+      include: { author: { select: authorSelect }, ...countSelect },
     });
 
-    // ─── Build a comment tree ──────────────────────────────────────
+    let nextCursor: string | null = null;
+    if (topLevelPage.length > limit) {
+      const next = topLevelPage.pop();
+      nextCursor = next!.id;
+    }
+
+    // ─── BFS down the reply tree, but only for this page's threads ───
+    const allComments: any[] = [...topLevelPage];
+    let frontier = topLevelPage.map((c) => c.id);
+    while (frontier.length > 0) {
+      const children = await prisma.comment.findMany({
+        where: { parentId: { in: frontier } },
+        orderBy: { createdAt: "asc" },
+        include: { author: { select: authorSelect }, ...countSelect },
+      });
+      if (children.length === 0) break;
+      allComments.push(...children);
+      frontier = children.map((c) => c.id);
+    }
+
+    // ─── Build the comment tree from this page's comments only ──────
     const commentMap = new Map();
-    const topLevelComments: any[] = [];
-
-    comments.forEach((comment) => {
-      const withReplies = { ...comment, replies: [] };
-      commentMap.set(comment.id, withReplies);
+    allComments.forEach((comment) => {
+      commentMap.set(comment.id, { ...comment, replies: [] });
     });
-
-    comments.forEach((comment) => {
+    allComments.forEach((comment) => {
       if (comment.parentId) {
         const parent = commentMap.get(comment.parentId);
-        if (parent) {
-          parent.replies.push(commentMap.get(comment.id));
-        }
-      } else {
-        topLevelComments.push(commentMap.get(comment.id));
+        if (parent) parent.replies.push(commentMap.get(comment.id));
       }
     });
-
-    // ─── Sort top‑level comments (newest first) ────────────────────
-    topLevelComments.sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-
-    // ─── Sort replies (oldest first, threaded order) ──────────────
-    topLevelComments.forEach((comment) => {
-      comment.replies.sort(
-        (a: any, b: any) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
-    });
+    const topLevelComments = topLevelPage.map((c) => commentMap.get(c.id));
 
     // ─── Add liked / reposted / bookmarked status for the viewer ──
     if (viewerId) {
-      const allCommentIds: string[] = [];
-      const collectIds = (commentsArray: any[]) => {
-        commentsArray.forEach((c) => {
-          allCommentIds.push(c.id);
-          if (c.replies) collectIds(c.replies);
-        });
-      };
-      collectIds(topLevelComments);
+      const allCommentIds = allComments.map((c) => c.id);
 
       const [likes, reposts, bookmarks] = await Promise.all([
         prisma.commentLike.findMany({
@@ -138,7 +123,7 @@ export async function GET(
       addStatus(topLevelComments);
     }
 
-    return NextResponse.json(topLevelComments);
+    return NextResponse.json({ comments: topLevelComments, nextCursor });
   } catch (error) {
     console.error("Error fetching comments:", error);
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
