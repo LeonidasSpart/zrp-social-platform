@@ -8,7 +8,7 @@ import { useSession, signOut } from "next-auth/react";
 import {
   Home, Compass, Search, MessageSquare, Bell, Bookmark, User,
   LayoutDashboard, Settings, Users, Key, LogOut, MoreHorizontal,
-  PenSquare, Sun, Moon, Globe,
+  PenSquare, Sun, Moon, Globe, Film,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -51,10 +51,11 @@ export default function Sidebar() {
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
-  if (!isAuthenticated || pathname?.startsWith("/onboarding")) return null;
+  if (!isAuthenticated || pathname?.startsWith("/onboarding") || pathname?.startsWith("/shorts")) return null;
 
   const navItems: NavItem[] = [
     { href: "/", icon: Home, label: t("nav.home") },
+    { href: "/shorts", icon: Film, label: "Shorts" },
     { href: "/explore", icon: Compass, label: t("nav.explore") },
     { href: "/search", icon: Search, label: t("nav.search") },
     { href: "/messages", icon: MessageSquare, label: t("nav.messages") },
