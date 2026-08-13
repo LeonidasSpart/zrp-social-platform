@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Send, Pencil, Trash2, X, Check, Reply } from "lucide-react";
+import { Send, Pencil, Trash2, X, Check, Reply, Heart, Repeat, Bookmark } from "lucide-react";
 import VerifiedBadge from "./VerifiedBadge";
 import { timeAgo } from "@/lib/utils";
 
@@ -20,6 +20,14 @@ interface Comment {
   };
   replies: Comment[];
   parentId?: string | null;
+  liked?: boolean;
+  reposted?: boolean;
+  bookmarked?: boolean;
+  _count?: {
+    likes: number;
+    reposts: number;
+    bookmarks: number;
+  };
 }
 
 // A single flattened row: X never nests reply DOM inside reply DOM (which is
@@ -66,18 +74,39 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
 
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   const fetchComments = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/posts/${postId}/comments`);
+      const res = await fetch(`/api/posts/${postId}/comments?limit=10`);
       if (res.ok) {
         const data = await res.json();
-        setComments(data);
+        setComments(data.comments || []);
+        setNextCursor(data.nextCursor || null);
       }
     } catch (error) {
       console.error("Error fetching comments:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMoreComments = async () => {
+    if (!nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/posts/${postId}/comments?limit=10&cursor=${nextCursor}`);
+      if (res.ok) {
+        const data = await res.json();
+        setComments((prev) => [...prev, ...(data.comments || [])]);
+        setNextCursor(data.nextCursor || null);
+      }
+    } catch (error) {
+      console.error("Error loading more comments:", error);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -99,8 +128,11 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       });
 
       if (res.ok) {
+        const created = await res.json();
         setNewComment("");
-        await fetchComments();
+        // Prepend directly instead of refetching - a full refetch would
+        // reset pagination and drop any "load more" pages already loaded.
+        setComments((prev) => [{ ...created, replies: created.replies || [] }, ...prev]);
         onCommentAdded(1); // Local count update only, never reloads the feed
       } else {
         console.error("Failed to post comment");
@@ -127,9 +159,13 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       });
 
       if (res.ok) {
+        const created = await res.json();
         setReplyContent("");
         setReplyingTo(null);
-        await fetchComments();
+        updateCommentInTree(parentId, (c) => ({
+          ...c,
+          replies: [...(c.replies || []), { ...created, replies: [] }],
+        }));
         onCommentAdded(1);
       }
     } catch (error) {
@@ -160,9 +196,10 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       });
 
       if (res.ok) {
+        const updated = await res.json();
         setEditingId(null);
         setEditContent("");
-        await fetchComments();
+        updateCommentInTree(commentId, (c) => ({ ...c, content: updated.content }));
         onCommentAdded(0);
       }
     } catch (error) {
@@ -179,6 +216,16 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
     setShowDeleteModal(true);
   };
 
+  // Remove a comment (and its subtree, since deletion cascades in the DB)
+  // from anywhere in the local tree without a full refetch.
+  const removeCommentFromTree = (commentId: string) => {
+    const walk = (list: Comment[]): Comment[] =>
+      list
+        .filter((c) => c.id !== commentId)
+        .map((c) => (c.replies?.length ? { ...c, replies: walk(c.replies) } : c));
+    setComments((prev) => walk(prev));
+  };
+
   const handleDelete = async () => {
     if (!commentToDelete) return;
 
@@ -189,8 +236,8 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
 
       if (res.ok) {
         setShowDeleteModal(false);
+        removeCommentFromTree(commentToDelete);
         setCommentToDelete(null);
-        await fetchComments();
         onCommentAdded(-1);
       }
     } catch (error) {
@@ -201,6 +248,89 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
 
   const getAvatarSrc = (author: Comment["author"]) => {
     return author.avatarUrl || "/default-avatar.png";
+  };
+
+  // ─── Update a comment anywhere in the tree (top-level or nested) ──
+  const updateCommentInTree = (
+    commentId: string,
+    updater: (comment: Comment) => Comment
+  ) => {
+    const walk = (list: Comment[]): Comment[] =>
+      list.map((c) => {
+        if (c.id === commentId) return updater(c);
+        if (c.replies?.length) return { ...c, replies: walk(c.replies) };
+        return c;
+      });
+    setComments((prev) => walk(prev));
+  };
+
+  // ─── Like / repost / bookmark a comment (optimistic, reverts on failure) ──
+  const handleLikeComment = async (comment: Comment) => {
+    if (!session) return;
+    const wasLiked = !!comment.liked;
+    updateCommentInTree(comment.id, (c) => ({
+      ...c,
+      liked: !wasLiked,
+      _count: {
+        likes: (c._count?.likes || 0) + (wasLiked ? -1 : 1),
+        reposts: c._count?.reposts || 0,
+        bookmarks: c._count?.bookmarks || 0,
+      },
+    }));
+    try {
+      const res = await fetch(`/api/comments/${comment.id}/like`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed");
+    } catch {
+      updateCommentInTree(comment.id, (c) => ({
+        ...c,
+        liked: wasLiked,
+        _count: {
+          likes: (c._count?.likes || 0) + (wasLiked ? 1 : -1),
+          reposts: c._count?.reposts || 0,
+          bookmarks: c._count?.bookmarks || 0,
+        },
+      }));
+    }
+  };
+
+  const handleRepostComment = async (comment: Comment) => {
+    if (!session) return;
+    const wasReposted = !!comment.reposted;
+    updateCommentInTree(comment.id, (c) => ({
+      ...c,
+      reposted: !wasReposted,
+      _count: {
+        likes: c._count?.likes || 0,
+        reposts: (c._count?.reposts || 0) + (wasReposted ? -1 : 1),
+        bookmarks: c._count?.bookmarks || 0,
+      },
+    }));
+    try {
+      const res = await fetch(`/api/comments/${comment.id}/repost`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed");
+    } catch {
+      updateCommentInTree(comment.id, (c) => ({
+        ...c,
+        reposted: wasReposted,
+        _count: {
+          likes: c._count?.likes || 0,
+          reposts: (c._count?.reposts || 0) + (wasReposted ? 1 : -1),
+          bookmarks: c._count?.bookmarks || 0,
+        },
+      }));
+    }
+  };
+
+  const handleBookmarkComment = async (comment: Comment) => {
+    if (!session) return;
+    const wasBookmarked = !!comment.bookmarked;
+    updateCommentInTree(comment.id, (c) => ({ ...c, bookmarked: !wasBookmarked }));
+    try {
+      const res = await fetch(`/api/comments/${comment.id}/bookmark`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed");
+    } catch {
+      updateCommentInTree(comment.id, (c) => ({ ...c, bookmarked: wasBookmarked }));
+    }
   };
 
   const getDisplayName = (author: Comment["author"]) => {
@@ -321,16 +451,59 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
           )}
 
           {!isEditing && (
-            <button
-              onClick={() => {
-                setReplyingTo(replyingTo === comment.id ? null : comment.id);
-                setReplyContent("");
-              }}
-              className="text-xs text-gray-400 hover:text-zrp-red transition mt-0.5 flex items-center gap-1 whitespace-nowrap"
-            >
-              <Reply className="w-3 h-3" />
-              Reply
-            </button>
+            <div className="flex items-center gap-4 mt-1">
+              <button
+                onClick={() => {
+                  setReplyingTo(replyingTo === comment.id ? null : comment.id);
+                  setReplyContent("");
+                }}
+                className="text-xs text-gray-400 hover:text-zrp-red transition flex items-center gap-1 whitespace-nowrap"
+              >
+                <Reply className="w-3.5 h-3.5" />
+                {comment.replies?.length ? comment.replies.length : ""}
+              </button>
+
+              <button
+                onClick={() => handleRepostComment(comment)}
+                disabled={!session}
+                className={`text-xs transition flex items-center gap-1 whitespace-nowrap ${
+                  comment.reposted
+                    ? "text-green-500"
+                    : "text-gray-400 hover:text-green-500"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                title="Repost"
+              >
+                <Repeat className="w-3.5 h-3.5" />
+                {comment._count?.reposts ? comment._count.reposts : ""}
+              </button>
+
+              <button
+                onClick={() => handleLikeComment(comment)}
+                disabled={!session}
+                className={`text-xs transition flex items-center gap-1 whitespace-nowrap ${
+                  comment.liked
+                    ? "text-red-500"
+                    : "text-gray-400 hover:text-red-500"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                title="Like"
+              >
+                <Heart className={`w-3.5 h-3.5 ${comment.liked ? "fill-red-500" : ""}`} />
+                {comment._count?.likes ? comment._count.likes : ""}
+              </button>
+
+              <button
+                onClick={() => handleBookmarkComment(comment)}
+                disabled={!session}
+                className={`text-xs transition flex items-center gap-1 whitespace-nowrap ${
+                  comment.bookmarked
+                    ? "text-zrp-red"
+                    : "text-gray-400 hover:text-zrp-red"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                title="Bookmark"
+              >
+                <Bookmark className={`w-3.5 h-3.5 ${comment.bookmarked ? "fill-zrp-red" : ""}`} />
+              </button>
+            </div>
           )}
 
           {isReplying && (
@@ -404,6 +577,17 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
               {flattenThread(comment).map((row) => renderCommentRow(row))}
             </div>
           ))}
+          {nextCursor && (
+            <div className="pt-3 first:pt-0">
+              <button
+                onClick={loadMoreComments}
+                disabled={loadingMore}
+                className="text-sm text-zrp-red hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loadingMore ? "Loading..." : "Show more comments"}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
