@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
 import { sendPushNotification } from "@/lib/push-notifications";
+import { rateLimit } from "@/lib/rate-limit";
 
 // ─── GET: Fetch threaded comments with counts and user status ──────
 export async function GET(
@@ -149,6 +150,11 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // Rate limit: 30 comments per 5 minutes - generous for active
+  // conversations, blocks comment-flooding/spam scripts.
+  const limit = await rateLimit(req, { limit: 30, window: 300, type: "comment-create" });
+  if (!limit.success) return limit.response;
+
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
