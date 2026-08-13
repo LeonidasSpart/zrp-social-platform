@@ -22,6 +22,29 @@ interface Comment {
   parentId?: string | null;
 }
 
+// A single flattened row: X never nests reply DOM inside reply DOM (which is
+// what compounds indentation the deeper a thread goes). Instead every reply,
+// no matter how deep in the tree, becomes a sibling row with one flat indent
+// level and a "Replying to @x" label carrying the lost context.
+interface FlatRow {
+  comment: Comment;
+  depth: number;
+  parentAuthorUsername?: string;
+}
+
+function flattenThread(
+  comment: Comment,
+  depth = 0,
+  parentAuthorUsername?: string
+): FlatRow[] {
+  const row: FlatRow = { comment, depth, parentAuthorUsername };
+  const childRows = (comment.replies || []).flatMap((reply) =>
+    flattenThread(reply, depth + 1, comment.author.username)
+  );
+  return [row, ...childRows];
+}
+
+
 interface CommentsProps {
   postId: string;
   onCommentAdded: (delta?: number) => void;
@@ -184,18 +207,11 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
     return author.name || author.username;
   };
 
-  // ─── Render a single comment (recursive) ──────────────────────────
-  const renderComment = (
-    comment: Comment,
-    depth = 0,
-    parentAuthorUsername?: string
-  ) => {
+  // ─── Render a single flat row (no recursive DOM nesting) ──────────
+  const renderCommentRow = ({ comment, depth, parentAuthorUsername }: FlatRow) => {
     const isAuthor = session?.user?.id === comment.author.id;
     const isEditing = editingId === comment.id;
     const isReplying = replyingTo === comment.id;
-
-    // Flat indentation like X: every reply sits at the same single indent
-    // level regardless of how deep the thread actually goes.
     const isNested = depth > 0;
 
     return (
@@ -356,14 +372,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
               </button>
             </div>
           )}
-
-          {comment.replies && comment.replies.length > 0 && (
-            <div className="mt-3 space-y-3">
-              {comment.replies.map((reply) =>
-                renderComment(reply, depth + 1, comment.author.username)
-              )}
-            </div>
-          )}
         </div>
       </div>
     );
@@ -392,14 +400,14 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       ) : (
         <div className="divide-y divide-gray-100 dark:divide-gray-800">
           {comments.map((comment) => (
-            <div key={comment.id} className="py-3 first:pt-0 last:pb-0">
-              {renderComment(comment, 0)}
+            <div key={comment.id} className="py-3 first:pt-0 last:pb-0 space-y-3">
+              {flattenThread(comment).map((row) => renderCommentRow(row))}
             </div>
           ))}
         </div>
       )}
 
-      {session && (
+      {session && !replyingTo && (
         <form onSubmit={handleSubmit} className="mt-3 flex gap-2 items-end">
           <textarea
             value={newComment}
