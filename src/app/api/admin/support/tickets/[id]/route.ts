@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { requireAdmin } from '@/lib/admin';
 import { prisma } from '@/lib/db';
-import { authOptions } from '@/lib/auth';
 import { notifyTicketResolved, notifyTicketClosed } from '@/lib/notifications';
 
 export async function GET(
@@ -9,19 +8,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true },
-    });
-
-    if (user?.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    const adminCheck = await requireAdmin();
+    if (!adminCheck.authorized) return adminCheck.response;
 
     const ticket = await prisma.supportTicket.findUnique({
       where: { id: params.id },
@@ -79,19 +67,9 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true },
-    });
-
-    if (user?.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    const adminCheck = await requireAdmin();
+    if (!adminCheck.authorized) return adminCheck.response;
+    const session = adminCheck.session;
 
     const body = await req.json();
     const { status, priority, assignedTo, resolution } = body;
@@ -210,19 +188,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true },
-    });
-
-    if (user?.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    const adminCheck = await requireAdmin();
+    if (!adminCheck.authorized) return adminCheck.response;
 
     // Verify ticket exists
     const ticket = await prisma.supportTicket.findUnique({
