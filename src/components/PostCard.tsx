@@ -171,6 +171,24 @@ export default function PostCard({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showVideoFeed, setShowVideoFeed] = useState(false);
 
+  // ─── Fixes black video thumbnail before playback ───────────────────
+  // preload="metadata" only fetches duration/dimensions on many mobile
+  // browsers/WebViews - it does NOT guarantee a decoded, painted frame,
+  // so the <video> element can render solid black until the user presses
+  // play. Nudging currentTime forward slightly forces the browser to
+  // decode and paint a real frame, same end result as X/TikTok's poster
+  // thumbnails, without needing a canvas capture or CORS headers.
+  const posterNudged = useRef(false);
+  const nudgeVideoFrame = (el: HTMLVideoElement) => {
+    if (posterNudged.current) return;
+    posterNudged.current = true;
+    try {
+      el.currentTime = Math.min(0.1, (el.duration || 1) * 0.05);
+    } catch {
+      // no-op - some browsers throw if duration isn't ready yet
+    }
+  };
+
   // ─── FETCH REPOST STATUS ──────────────────────────────────────────
   useEffect(() => {
     const checkRepost = async () => {
@@ -697,6 +715,8 @@ export default function PostCard({
                           webkit-playsinline="true"
                           preload="metadata"
                           onContextMenu={(e) => e.preventDefault()}
+                          onLoadedMetadata={(e) => nudgeVideoFrame(e.currentTarget)}
+                          onLoadedData={(e) => nudgeVideoFrame(e.currentTarget)}
                           onError={(e) => {
                             const target = e.target as HTMLVideoElement;
                             target.style.display = 'none';
