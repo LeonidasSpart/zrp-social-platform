@@ -18,6 +18,7 @@ import {
   LayoutDashboard,
   Bookmark,
   LogOut,
+  Film,
   Globe,
   Settings,
   Users,
@@ -87,6 +88,7 @@ export default function Header() {
   // Authenticated nav links (excludes User icon – we'll use dropdown)
   const authNavLinks: NavItem[] = [
     { href: "/", icon: Home, label: t("nav.home") },
+    { href: "/shorts", icon: Film, label: "Shorts" },
     { href: "/explore", icon: Compass, label: t("nav.explore") },
     { href: "/search", icon: Search, label: t("nav.search") },
     { href: "/messages", icon: MessageSquare, label: t("nav.messages") },
