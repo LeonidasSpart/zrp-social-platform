@@ -1,12 +1,7 @@
-import { getServerSession } from "next-auth";
+import { getServerSession, type Session } from "next-auth";
 import { authOptions } from "./auth";
 import { NextResponse } from "next/server";
 import { prisma } from "./db";
-
-// Using the actual (already-augmented) session type from getServerSession
-// itself, rather than hardcoding it, so this stays correct if the session
-// shape changes elsewhere.
-type Session = NonNullable<Awaited<ReturnType<typeof getServerSession>>>;
 
 // Explicit discriminated union return type. Without this, TypeScript
 // widens the `authorized: true/false` literals to plain `boolean` on
