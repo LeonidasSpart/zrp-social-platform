@@ -185,22 +185,30 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   };
 
   // ─── Render a single comment (recursive) ──────────────────────────
-  const renderComment = (comment: Comment, depth = 0) => {
+  const renderComment = (
+    comment: Comment,
+    depth = 0,
+    parentAuthorUsername?: string
+  ) => {
     const isAuthor = session?.user?.id === comment.author.id;
     const isEditing = editingId === comment.id;
     const isReplying = replyingTo === comment.id;
 
+    // Flat indentation like X: every reply sits at the same single indent
+    // level regardless of how deep the thread actually goes.
+    const isNested = depth > 0;
+
     return (
       <div
         key={comment.id}
-        className={`flex gap-3 group ${depth > 0 ? "ml-8 pl-4 border-l-2 border-gray-200 dark:border-gray-700" : ""}`}
+        className={`flex gap-3 group ${isNested ? "ml-11" : ""}`}
       >
         {/* Avatar */}
         <Link
           href={`/profile/${comment.author.username}`}
           className="flex-shrink-0"
         >
-          <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-sm font-semibold overflow-hidden hover:ring-2 hover:ring-zrp-red transition">
+          <div className={`${isNested ? "w-7 h-7" : "w-8 h-8"} rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-sm font-semibold overflow-hidden hover:ring-2 hover:ring-zrp-red transition`}>
             <img
               src={getAvatarSrc(comment.author)}
               alt={getDisplayName(comment.author)}
@@ -210,6 +218,12 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         </Link>
 
         <div className="flex-1 min-w-0">
+          {depth > 1 && parentAuthorUsername && (
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">
+              Replying to{" "}
+              <span className="text-zrp-red">@{parentAuthorUsername}</span>
+            </p>
+          )}
           <div className="flex items-center gap-1.5 flex-wrap">
             <Link
               href={`/profile/${comment.author.username}`}
@@ -344,8 +358,10 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
           )}
 
           {comment.replies && comment.replies.length > 0 && (
-            <div className="mt-2 space-y-2">
-              {comment.replies.map((reply) => renderComment(reply, depth + 1))}
+            <div className="mt-3 space-y-3">
+              {comment.replies.map((reply) =>
+                renderComment(reply, depth + 1, comment.author.username)
+              )}
             </div>
           )}
         </div>
@@ -374,8 +390,12 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       {comments.length === 0 ? (
         <p className="text-sm text-gray-400 dark:text-gray-500">No comments yet.</p>
       ) : (
-        <div className="space-y-3">
-          {comments.map((comment) => renderComment(comment, 0))}
+        <div className="divide-y divide-gray-100 dark:divide-gray-800">
+          {comments.map((comment) => (
+            <div key={comment.id} className="py-3 first:pt-0 last:pb-0">
+              {renderComment(comment, 0)}
+            </div>
+          ))}
         </div>
       )}
 
