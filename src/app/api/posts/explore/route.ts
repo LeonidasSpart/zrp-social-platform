@@ -28,6 +28,15 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
 
+    const { searchParams } = new URL(req.url);
+    const cursorParam = searchParams.get("cursor");
+    // Cursor here is a numeric offset into the ranked list, since ranking
+    // is score-based (engagement/age), not something a DB cursor can walk
+    // directly. The ranked list itself is cached so the offset stays
+    // consistent across pages within the cache window.
+    const offset = cursorParam ? Math.max(0, parseInt(cursorParam, 10) || 0) : 0;
+    const limit = Math.min(parseInt(searchParams.get("limit") || "20", 10) || 20, 50);
+
     // ─── Exclude blocked / muted users ──────────────────────────────
     let excludedAuthorIds: string[] = [];
     if (userId) {
@@ -51,99 +60,103 @@ export async function GET(req: NextRequest) {
       excludedAuthorIds = [...blockedIds, ...blockerIds, ...mutedIds];
     }
 
-    // ─── Cache key ────────────────────────────────────────────────────
-    const cacheKey = `explore:${userId || 'anon'}:v4`;
-    const cached = await getCached(cacheKey);
-    if (cached) {
-      return NextResponse.json(cached);
+    // ─── Cache key (v5: caches the full ranked list, not just page 1,
+    // and no longer bakes per-user liked status into the cached payload -
+    // that's now computed fresh per request so a like/unlike is reflected
+    // immediately instead of only after the 5-minute cache expires) ────
+    const cacheKey = `explore:${userId || 'anon'}:v5`;
+    let ranked: any[] | null = await getCached(cacheKey);
+
+    if (!ranked) {
+      // ─── Fetch a wider candidate pool so pagination has real depth ──
+      const posts = await prisma.post.findMany({
+        take: 200,
+        orderBy: { createdAt: "desc" },
+        where: {
+          authorId: { notIn: excludedAuthorIds },
+          status: "published",
+          scheduledAt: null,
+        },
+        select: {
+          id: true,
+          content: true,
+          imageUrl: true,
+          createdAt: true,
+          views: true,
+          author: {
+            select: {
+              id: true,
+              username: true,
+              name: true,
+              avatarUrl: true,
+              badgeType: true,
+            },
+          },
+          quotePost: {
+            select: {
+              id: true,
+              content: true,
+              imageUrl: true,
+              createdAt: true,
+              author: {
+                select: {
+                  id: true,
+                  username: true,
+                  name: true,
+                  avatarUrl: true,
+                  badgeType: true,
+                },
+              },
+              _count: {
+                select: {
+                  likes: true,
+                  comments: true,
+                  reposts: true,
+                  quotedBy: true,
+                },
+              },
+            },
+          },
+          _count: {
+            select: {
+              likes: true,
+              comments: true,
+              reposts: true,
+              quotedBy: true,
+            },
+          },
+        },
+      });
+
+      // ─── Compute scores and sort ─────────────────────────────────────
+      ranked = posts
+        .map((post) => ({
+          ...post,
+          score: calculateScore(post),
+        }))
+        .sort((a, b) => b.score - a.score);
+
+      // ─── Cache the full ranked list for 5 minutes ────────────────────
+      await setCached(cacheKey, ranked, 300);
     }
 
-    // ─── Fetch recent posts ──────────────────────────────────────────
-    const posts = await prisma.post.findMany({
-      take: 50,
-      orderBy: { createdAt: "desc" },
-      where: {
-        authorId: { notIn: excludedAuthorIds },
-        status: "published",
-        scheduledAt: null,
-      },
-      select: {
-        id: true,
-        content: true,
-        imageUrl: true,
-        createdAt: true,
-        views: true,
-        author: {
-          select: {
-            id: true,
-            username: true,
-            name: true,
-            avatarUrl: true,
-            badgeType: true,
-          },
-        },
-        quotePost: {
-          select: {
-            id: true,
-            content: true,
-            imageUrl: true,
-            createdAt: true,
-            author: {
-              select: {
-                id: true,
-                username: true,
-                name: true,
-                avatarUrl: true,
-                badgeType: true,
-              },
-            },
-            _count: {
-              select: {
-                likes: true,
-                comments: true,
-                reposts: true,
-                quotedBy: true,
-              },
-            },
-          },
-        },
-        _count: {
-          select: {
-            likes: true,
-            comments: true,
-            reposts: true,
-            quotedBy: true,
-          },
-        },
-      },
-    });
+    const page = ranked.slice(offset, offset + limit);
+    const nextCursor = offset + limit < ranked.length ? String(offset + limit) : null;
 
-    // ─── Compute scores and sort ─────────────────────────────────────
-    const ranked = posts
-      .map((post) => ({
-        ...post,
-        score: calculateScore(post),
-      }))
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 20);
-
-    // ─── Add liked status if logged in ──────────────────────────────
-    if (userId && ranked.length > 0) {
+    // ─── Add liked status for this page only (always fresh, never cached) ──
+    if (userId && page.length > 0) {
       const likes = await prisma.like.findMany({
         where: {
           userId: userId,
-          postId: { in: ranked.map(p => p.id) },
+          postId: { in: page.map((p: any) => p.id) },
         },
         select: { postId: true },
       });
       const likedIds = new Set(likes.map(l => l.postId));
-      ranked.forEach(p => (p as any).liked = likedIds.has(p.id));
+      page.forEach((p: any) => (p.liked = likedIds.has(p.id)));
     }
 
-    // ─── Cache for 5 minutes ─────────────────────────────────────────
-    await setCached(cacheKey, ranked, 300);
-
-    return NextResponse.json(ranked);
+    return NextResponse.json({ posts: page, nextCursor });
   } catch (error) {
     console.error("Explore error:", error);
     return NextResponse.json({ error: "Failed to fetch explore posts" }, { status: 500 });
