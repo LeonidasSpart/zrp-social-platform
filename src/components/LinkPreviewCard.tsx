@@ -15,9 +15,10 @@ interface LinkPreviewCardProps {
   url: string;
   compact?: boolean; // used in the composer's smaller inline preview
   onRemove?: () => void;
+  onLoaded?: (found: boolean) => void;
 }
 
-export default function LinkPreviewCard({ url, compact = false, onRemove }: LinkPreviewCardProps) {
+export default function LinkPreviewCard({ url, compact = false, onRemove, onLoaded }: LinkPreviewCardProps) {
   const [preview, setPreview] = useState<LinkPreview | null>(null);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -34,12 +35,17 @@ export default function LinkPreviewCard({ url, compact = false, onRemove }: Link
         if (cancelled) return;
         if (data && (data.title || data.image)) {
           setPreview(data);
+          onLoaded?.(true);
         } else {
           setFailed(true);
+          onLoaded?.(false);
         }
       })
       .catch(() => {
-        if (!cancelled) setFailed(true);
+        if (!cancelled) {
+          setFailed(true);
+          onLoaded?.(false);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
