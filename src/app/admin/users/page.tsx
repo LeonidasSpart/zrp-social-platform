@@ -34,6 +34,11 @@ export default function AdminUsers() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  // Real aggregate counts across the whole (search-filtered) dataset,
+  // from the server - not derived from just the current page of users,
+  // which is why "Total" used to always cap out at the page size (20)
+  // instead of matching the real user count shown on the Dashboard.
+  const [stats, setStats] = useState({ total: 0, active: 0, banned: 0, admins: 0, mods: 0 });
 
   const ROLE_OPTIONS = [
     { value: "USER", label: t("adminUsers.roleUser"), icon: User, color: "bg-gray-100 text-gray-700" },
@@ -69,6 +74,7 @@ export default function AdminUsers() {
       const data = await res.json();
       setUsers(data.users);
       setTotalPages(data.totalPages);
+      if (data.stats) setStats(data.stats);
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -93,12 +99,12 @@ export default function AdminUsers() {
     return true;
   });
 
-  // ─── Stats from filtered data ──────────────────────────────────────
-  const total = filteredUsers.length;
-  const active = filteredUsers.filter(u => !u.banned).length;
-  const banned = filteredUsers.filter(u => u.banned).length;
-  const admins = filteredUsers.filter(u => u.role === "ADMIN").length;
-  const mods = filteredUsers.filter(u => u.role === "MODERATOR").length;
+  // ─── Stats: real totals from the server (not just this page) ──────
+  const total = stats.total;
+  const active = stats.active;
+  const banned = stats.banned;
+  const admins = stats.admins;
+  const mods = stats.mods;
 
   const handleDelete = async (userId: string) => {
     if (!confirm(t("adminUsers.deleteConfirm"))) return;
@@ -282,17 +288,17 @@ export default function AdminUsers() {
       {/* ─── Table ──────────────────────────────────────────────────── */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[900px] text-sm">
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colUser")}</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium hidden sm:table-cell">{t("adminUsers.colEmail")}</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colPosts")}</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colRole")}</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colBadge")}</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colPlan")}</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colStatus")}</th>
-                <th className="px-4 py-3 text-right text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colActions")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium whitespace-nowrap">{t("adminUsers.colUser")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium hidden sm:table-cell whitespace-nowrap">{t("adminUsers.colEmail")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium whitespace-nowrap">{t("adminUsers.colPosts")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium whitespace-nowrap">{t("adminUsers.colRole")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium whitespace-nowrap">{t("adminUsers.colBadge")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium whitespace-nowrap">{t("adminUsers.colPlan")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium whitespace-nowrap">{t("adminUsers.colStatus")}</th>
+                <th className="px-4 py-3 text-right text-gray-500 dark:text-gray-300 font-medium whitespace-nowrap">{t("adminUsers.colActions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
