@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag,
   Bookmark, BarChart3, Pin, PinOff, X, ZoomIn, Plus, ChevronDown,
-  Briefcase, FileText, Globe, Loader2, Play
+  Briefcase, FileText, Globe, Loader2, Play, Volume2, VolumeX
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Comments from "./Comments";
@@ -56,7 +56,11 @@ interface PostCardProps {
     applyUrl?: string;
     body?: string;
   };
-  onUpdate: () => void;
+  // Optionally receives the id of a post that was just deleted, so the
+  // parent can remove just that one post locally instead of refetching
+  // and resetting the whole feed (which used to reset everyone's scroll
+  // position back to the top every time anything happened anywhere).
+  onUpdate: (deletedPostId?: string) => void;
   showPinOption?: boolean;
   isPinned?: boolean;
   onPinToggle?: () => void;
@@ -108,6 +112,7 @@ export default function PostCard({
   const { language: uiLanguage } = useLanguage();
   const [liked, setLiked] = useState(post.liked || false);
   const [likesCount, setLikesCount] = useState(post._count?.likes || 0);
+  const [commentsCount, setCommentsCount] = useState(post._count?.comments || 0);
   const [showComments, setShowComments] = useState(false);
   const [reposted, setReposted] = useState(false);
   const [repostsCount, setRepostsCount] = useState(post._count?.reposts || 0);
@@ -157,15 +162,28 @@ export default function PostCard({
     if (post.mediaType === 'video') return true;
     if (post.mediaType === 'image') return false;
     if (!post.imageUrl) return false;
+    // Multi-image posts are never single videos in this data model - guard
+    // this before the "default to video" fallback below can misfire on them.
+    if (post.imageUrls && post.imageUrls.length > 1) return false;
     const url = post.imageUrl.toLowerCase();
     const path = url.split('?')[0];
     const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'm4v', '3gp'];
     if (videoExtensions.some(ext => path.endsWith('.' + ext))) return true;
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'avif', 'bmp'];
+    if (imageExtensions.some(ext => path.endsWith('.' + ext))) return false;
     if (url.includes('/video/') || url.includes('video')) return true;
-    return false;
+    // Inconclusive: mediaType wasn't stored (older posts) and the URL has
+    // no extension at all, which is normal for UploadThing CDN links
+    // (e.g. https://xxx.ufs.sh/f/<key>). Defaulting to "image" here was the
+    // actual bug - it silently skipped the <video> element entirely, so
+    // there was never any playback or sound to begin with. Default to
+    // trying video instead; the onError handler below already swaps back
+    // to a plain <img> if the resource genuinely isn't a decodable video.
+    return true;
   };
 
   const video = isVideo();
+  const [videoLoadFailed, setVideoLoadFailed] = useState(false);
 
   // ─── Video playing state ──────────────────────────────────────────
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -188,6 +206,38 @@ export default function PostCard({
       // no-op - some browsers throw if duration isn't ready yet
     }
   };
+
+  // ─── Feed autoplay (X/TikTok style) ─────────────────────────────────
+  // Videos in the scrolling feed autoplay muted once they're mostly in
+  // view, and pause again once scrolled away - browsers require muted
+  // for unattended autoplay, so we offer a tap-to-unmute control that
+  // doesn't fight with the video's own click-to-open-fullscreen area.
+  const videoContainerRef = useRef<HTMLDivElement>(null);
+  const [videoInView, setVideoInView] = useState(false);
+  const [videoMuted, setVideoMuted] = useState(true);
+
+  useEffect(() => {
+    if (!video || !videoContainerRef.current) return;
+    const el = videoContainerRef.current;
+    const observer = new IntersectionObserver(
+      ([entry]) => setVideoInView(entry.isIntersecting),
+      { threshold: 0.6 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [video]);
+
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    if (videoInView) {
+      el.muted = videoMuted;
+      const playPromise = el.play();
+      if (playPromise) playPromise.catch(() => {});
+    } else {
+      el.pause();
+    }
+  }, [videoInView, videoMuted]);
 
   // ─── FETCH REPOST STATUS ──────────────────────────────────────────
   useEffect(() => {
@@ -300,6 +350,14 @@ export default function PostCard({
 
   // ─── HANDLERS ──────────────────────────────────────────────────────
 
+  // ─── Local comment count only - never triggers a parent feed reload.
+  // This used to be wired straight to the parent's onUpdate (full feed
+  // refetch), which meant commenting on any post reset everyone's scroll
+  // position back to the top of the whole feed.
+  const handleCommentCountChange = (delta?: number) => {
+    setCommentsCount((prev) => Math.max(0, prev + (delta || 0)));
+  };
+
   const handleLike = async () => {
     try {
       const res = await fetch(`/api/posts/${post.id}/like`, { method: "POST" });
@@ -319,7 +377,6 @@ export default function PostCard({
         const data = await res.json();
         setReposted(data.reposted);
         setRepostsCount(data.reposted ? repostsCount + 1 : repostsCount - 1);
-        onUpdate();
       }
     } catch (error) {
       console.error("Error reposting:", error);
@@ -349,7 +406,7 @@ export default function PostCard({
     try {
       const res = await fetch(`/api/posts/${post.id}`, { method: "DELETE" });
       if (res.ok) {
-        onUpdate();
+        onUpdate(post.id);
         setShowDeleteConfirm(false);
       } else {
         alert("Failed to delete post");
@@ -388,7 +445,6 @@ export default function PostCard({
       if (res.ok) {
         const data = await res.json();
         setBookmarked(data.bookmarked);
-        onUpdate();
       }
     } catch (error) {
       console.error("Error toggling bookmark:", error);
@@ -696,20 +752,20 @@ export default function PostCard({
                     className="mt-2 rounded-2xl overflow-hidden cursor-pointer group relative"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (video) {
+                      if (video && !videoLoadFailed) {
                         setShowVideoFeed(true);
                       } else {
                         setLightboxImage(post.imageUrl!);
                       }
                     }}
                   >
-                    {video ? (
-                      <div className="relative aspect-video w-full bg-black">
+                    {video && !videoLoadFailed ? (
+                      <div ref={videoContainerRef} className="relative aspect-video w-full bg-black">
                         <video
                           ref={videoRef}
                           src={post.imageUrl}
                           className="w-full h-full object-contain pointer-events-none"
-                          muted
+                          muted={videoMuted}
                           loop
                           playsInline
                           webkit-playsinline="true"
@@ -717,20 +773,31 @@ export default function PostCard({
                           onContextMenu={(e) => e.preventDefault()}
                           onLoadedMetadata={(e) => nudgeVideoFrame(e.currentTarget)}
                           onLoadedData={(e) => nudgeVideoFrame(e.currentTarget)}
-                          onError={(e) => {
-                            const target = e.target as HTMLVideoElement;
-                            target.style.display = 'none';
-                            const img = document.createElement('img');
-                            img.src = post.imageUrl!;
-                            img.className = 'w-full h-full object-contain';
-                            target.parentNode?.appendChild(img);
-                          }}
+                          onError={() => setVideoLoadFailed(true)}
                         />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition">
-                          <div className="bg-black/50 rounded-full p-3">
-                            <Play className="w-8 h-8 text-white fill-white" />
+                        {!videoInView && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition">
+                            <div className="bg-black/50 rounded-full p-3">
+                              <Play className="w-8 h-8 text-white fill-white" />
+                            </div>
                           </div>
-                        </div>
+                        )}
+                        {videoInView && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setVideoMuted((m) => !m);
+                            }}
+                            className="absolute bottom-2 right-2 bg-black/50 hover:bg-black/70 rounded-full p-2 transition"
+                            title={videoMuted ? "Unmute" : "Mute"}
+                          >
+                            {videoMuted ? (
+                              <VolumeX className="w-4 h-4 text-white" />
+                            ) : (
+                              <Volume2 className="w-4 h-4 text-white" />
+                            )}
+                          </button>
+                        )}
                       </div>
                     ) : (
                       <>
@@ -761,7 +828,7 @@ export default function PostCard({
                 <span className={`p-2 rounded-full transition ${commentsEnabled ? "group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:text-blue-500" : ""}`}>
                   <MessageCircle className="w-[18px] h-[18px]" />
                 </span>
-                <span className="group-hover:text-blue-500 transition">{formatCount(post._count?.comments || 0)}</span>
+                <span className="group-hover:text-blue-500 transition">{formatCount(commentsCount)}</span>
               </button>
 
               {/* ─── Repost dropdown ───────────────────────────────────── */}
@@ -897,7 +964,7 @@ export default function PostCard({
             )}
 
             {/* ─── Inline comments ───────────────────────────────────── */}
-            {commentsEnabled && showInlineComments && showComments && <Comments postId={post.id} onCommentAdded={onUpdate} />}
+            {commentsEnabled && showInlineComments && showComments && <Comments postId={post.id} onCommentAdded={handleCommentCountChange} />}
           </div>
         </div>
       </div>
