@@ -7,6 +7,7 @@ import {
   Ban, Loader2,
 } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SharedMediaMessage {
   id: string;
@@ -35,6 +36,7 @@ export default function ChatContactDrawer({
   onVoiceCall,
   onVideoCall,
 }: ChatContactDrawerProps) {
+  const { t } = useLanguage();
   const [showMore, setShowMore] = useState(false);
   const [blocking, setBlocking] = useState(false);
   const [blocked, setBlocked] = useState(false);
@@ -114,7 +116,7 @@ export default function ChatContactDrawer({
             <span className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
               <User className="w-5 h-5" />
             </span>
-            <span className="text-xs">Profile</span>
+            <span className="text-xs">{t("chat.contactProfile")}</span>
           </Link>
 
           <button
@@ -128,7 +130,7 @@ export default function ChatContactDrawer({
             <span className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
               <Phone className="w-5 h-5" />
             </span>
-            <span className="text-xs">Call</span>
+            <span className="text-xs">{t("chat.contactCall")}</span>
           </button>
 
           <button
@@ -142,7 +144,7 @@ export default function ChatContactDrawer({
             <span className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
               <Video className="w-5 h-5" />
             </span>
-            <span className="text-xs">Video</span>
+            <span className="text-xs">{t("chat.contactVideo")}</span>
           </button>
 
           <div className="relative">
@@ -153,7 +155,7 @@ export default function ChatContactDrawer({
               <span className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                 <MoreHorizontal className="w-5 h-5" />
               </span>
-              <span className="text-xs">More</span>
+              <span className="text-xs">{t("chat.contactMore")}</span>
             </button>
 
             {showMore && (
@@ -164,7 +166,7 @@ export default function ChatContactDrawer({
                   className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition disabled:opacity-50"
                 >
                   {blocking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ban className="w-4 h-4" />}
-                  {blocked ? "Unblock" : "Block"} @{receiverUsername}
+                  {blocked ? t("chat.unblock") : t("chat.block")} @{receiverUsername}
                 </button>
               </div>
             )}
@@ -176,7 +178,7 @@ export default function ChatContactDrawer({
           <div className="flex items-center justify-between mb-2">
             <p className="font-semibold text-sm text-gray-900 dark:text-white flex items-center gap-1.5">
               <ImageIcon className="w-4 h-4" />
-              Shared media
+              {t("chat.sharedMedia")}
             </p>
             {sharedMedia.length > 0 && (
               <span className="text-xs text-gray-400">{sharedMedia.length}</span>
@@ -185,7 +187,7 @@ export default function ChatContactDrawer({
 
           {sharedMedia.length === 0 ? (
             <p className="text-sm text-gray-400 dark:text-gray-500 py-4 text-center">
-              No shared photos yet
+              {t("chat.noSharedMedia")}
             </p>
           ) : (
             <div className="grid grid-cols-4 gap-1.5 pb-2">
