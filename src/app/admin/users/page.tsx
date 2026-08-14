@@ -124,9 +124,15 @@ export default function AdminUsers() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role: newRole }),
       });
-      if (res.ok) fetchUsers();
+      if (res.ok) {
+        fetchUsers();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || "Failed to update role");
+      }
     } catch (error) {
       console.error("Role update error:", error);
+      alert("Failed to update role");
     }
   };
 
@@ -137,9 +143,15 @@ export default function AdminUsers() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ badgeType: badgeType || null }),
       });
-      if (res.ok) fetchUsers();
+      if (res.ok) {
+        fetchUsers();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || "Failed to update badge");
+      }
     } catch (error) {
       console.error("Badge update error:", error);
+      alert("Failed to update badge");
     }
   };
 
@@ -336,9 +348,9 @@ export default function AdminUsers() {
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
                         {user._count.posts}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${roleStyle}`}>
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${roleStyle}`}>
                             {user.role === "ADMIN" && <ShieldAlert className="w-3 h-3" />}
                             {user.role === "MODERATOR" && <Shield className="w-3 h-3" />}
                             {user.role === "USER" && <User className="w-3 h-3" />}
@@ -357,10 +369,10 @@ export default function AdminUsers() {
                           </select>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           {user.badgeType ? (
-                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${badgeStyle}`}>
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${badgeStyle}`}>
                               {BadgeIcon && <BadgeIcon className="w-3 h-3" />}
                               {badgeInfo?.label}
                             </span>
@@ -381,7 +393,7 @@ export default function AdminUsers() {
                         </div>
                       </td>
                       {/* ─── Plan column ───────────────────────────── */}
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <select
                           value={user.plan || "free"}
                           onChange={(e) => updatePlan(user.id, e.target.value)}
@@ -394,18 +406,18 @@ export default function AdminUsers() {
                           ))}
                         </select>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         {user.banned ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400">
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400 whitespace-nowrap">
                             <Circle className="w-2 h-2 fill-red-600" /> {t("adminUsers.statusBanned")}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400">
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400 whitespace-nowrap">
                             <CircleDot className="w-2 h-2 fill-green-600" /> {t("adminUsers.statusActive")}
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-right space-x-2">
+                      <td className="px-4 py-3 text-right space-x-2 whitespace-nowrap">
                         <button
                           onClick={() => toggleBan(user.id, user.banned)}
                           className={`text-xs font-medium transition ${
