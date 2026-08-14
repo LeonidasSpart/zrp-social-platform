@@ -70,7 +70,14 @@ export default function AdminUsers() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/users?search=${encodeURIComponent(search)}&page=${page}`);
+      const params = new URLSearchParams({
+        search,
+        page: String(page),
+        role: roleFilter,
+        badge: badgeFilter,
+        status: statusFilter,
+      });
+      const res = await fetch(`/api/admin/users?${params.toString()}`);
       const data = await res.json();
       setUsers(data.users);
       setTotalPages(data.totalPages);
@@ -84,20 +91,14 @@ export default function AdminUsers() {
 
   useEffect(() => {
     fetchUsers();
-  }, [page, search]);
+  }, [page, search, roleFilter, badgeFilter, statusFilter]);
 
-  // ─── Client‑side filtering ──────────────────────────────────────────
-  const filteredUsers = users.filter((user) => {
-    if (roleFilter !== "ALL" && user.role !== roleFilter) return false;
-    if (badgeFilter !== "ALL") {
-      const badge = user.badgeType || "";
-      if (badgeFilter === "NONE" && badge !== "") return false;
-      if (badgeFilter !== "NONE" && badge !== badgeFilter) return false;
-    }
-    if (statusFilter === "ACTIVE" && user.banned) return false;
-    if (statusFilter === "BANNED" && !user.banned) return false;
-    return true;
-  });
+  // Filters are now applied server-side (role/badge/status query params
+  // above), so `users` already reflects them - no client-side re-filter
+  // needed anymore. Filtering on the current page's 20 rows used to mean
+  // e.g. selecting "Admins" could show nothing if the one admin happened
+  // to be on a different page than the one currently loaded.
+  const filteredUsers = users;
 
   // ─── Stats: real totals from the server (not just this page) ──────
   const total = stats.total;
@@ -197,7 +198,7 @@ export default function AdminUsers() {
             type="text"
             placeholder={t("adminUsers.searchPlaceholder")}
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             className="pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-zrp-red focus:border-transparent"
           />
         </div>
@@ -246,7 +247,7 @@ export default function AdminUsers() {
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <select
           value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value)}
+          onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
           className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-zrp-red focus:border-transparent"
         >
           <option value="ALL">{t("adminUsers.allRoles")}</option>
@@ -257,7 +258,7 @@ export default function AdminUsers() {
 
         <select
           value={badgeFilter}
-          onChange={(e) => setBadgeFilter(e.target.value)}
+          onChange={(e) => { setBadgeFilter(e.target.value); setPage(1); }}
           className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-zrp-red focus:border-transparent"
         >
           <option value="ALL">{t("adminUsers.allBadges")}</option>
@@ -270,7 +271,7 @@ export default function AdminUsers() {
 
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
           className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-zrp-red focus:border-transparent"
         >
           {STATUS_OPTIONS.map((opt) => (
