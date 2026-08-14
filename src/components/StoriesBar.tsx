@@ -95,8 +95,17 @@ export default function StoriesBar() {
 
         {/* Other stories */}
         {groups.map((group) => {
-          const firstStoryWithMedia = group.stories.find((s) => s.mediaUrl);
-          const previewUrl = firstStoryWithMedia?.mediaUrl || null;
+          // Prefer an actual photo for the tray thumbnail (renders
+          // simply and reliably); if the person's only story is a
+          // video, fall back to that and let StoryCircle render it as
+          // a real video frame instead of blindly treating it as an
+          // image, which is what was causing video stories to show
+          // blank/broken in the tray - mediaType was already available
+          // here and simply wasn't being used.
+          const imageStory = group.stories.find((s) => s.mediaUrl && s.mediaType !== "video");
+          const previewStory = imageStory || group.stories.find((s) => s.mediaUrl);
+          const previewUrl = previewStory?.mediaUrl || null;
+          const previewType = previewStory?.mediaType || null;
 
           return (
             <StoryCircle
@@ -105,6 +114,7 @@ export default function StoriesBar() {
               hasUnseen={hasUnseen(group)}
               onClick={() => setSelectedGroup(group)}
               storyPreview={previewUrl}
+              storyPreviewType={previewType}
             />
           );
         })}
