@@ -733,7 +733,7 @@ export default function ChatInterface({
                         >
                           <FileText className="w-6 h-6 flex-shrink-0" />
                           <span className="text-sm font-medium flex-1 min-w-0 truncate">
-                            {t("chat.attachment") || "Document"}
+                            Document
                           </span>
                           <Download className="w-4 h-4 flex-shrink-0" />
                         </a>
@@ -893,7 +893,7 @@ export default function ChatInterface({
           onClick={() => documentInputRef.current?.click()}
           disabled={uploadingImage}
           className="text-gray-500 hover:text-zrp-red transition flex-shrink-0 disabled:opacity-50 p-1.5"
-          title={t("chat.uploadDocument") || "Attach document"}
+          title="Attach document"
         >
           <Paperclip className="w-5 h-5" />
         </button>
