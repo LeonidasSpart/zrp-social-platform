@@ -4,8 +4,9 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { Heart, MessageCircle, Repeat, UserPlus, BadgeCheck, Loader2 } from "lucide-react";
+import { Heart, MessageCircle, Repeat, UserPlus, BadgeCheck, Loader2, Mail } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUnreadCount } from "@/contexts/UnreadCountContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
 interface FromUser {
@@ -18,7 +19,7 @@ interface FromUser {
 
 interface Notification {
   id: string;
-  type: "like" | "comment" | "follow" | "repost";
+  type: "like" | "comment" | "follow" | "repost" | "message";
   read: boolean;
   createdAt: string;
   fromUser: FromUser;
@@ -92,6 +93,7 @@ export default function NotificationsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t } = useLanguage();
+  const { refreshUnreadCount } = useUnreadCount();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
@@ -128,7 +130,19 @@ export default function NotificationsPage() {
 
   const markAsRead = async () => {
     try {
-      await fetch("/api/notifications", { method: "PUT" });
+      const res = await fetch("/api/notifications", { method: "PUT" });
+      if (res.ok) {
+        // The server now has every notification marked read, but the
+        // local state still shows whatever `read` values were fetched
+        // originally - without this, the unread highlighting (blue
+        // border/background) would keep showing until the next full
+        // page reload, even though it's already been marked read.
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+        // Also refresh the bell icon's badge count immediately, instead
+        // of leaving it stuck showing a stale number for up to 30
+        // seconds (its normal background polling interval).
+        refreshUnreadCount();
+      }
     } catch (error) {
       console.error("Error marking notifications read:", error);
     }
@@ -169,6 +183,8 @@ export default function NotificationsPage() {
         return <UserPlus className="w-4 h-4 text-green-500" />;
       case "repost":
         return <Repeat className="w-4 h-4 text-green-500" />;
+      case "message":
+        return <Mail className="w-4 h-4 text-zrp-red" />;
       default:
         return null;
     }
@@ -186,6 +202,8 @@ export default function NotificationsPage() {
         return plural ? "started following you" : t("notifications.startedFollowingSuffix");
       case "repost":
         return plural ? "reposted your post" : t("notifications.repostedPostSuffix");
+      case "message":
+        return "sent you a message";
       default:
         return "";
     }
@@ -267,9 +285,11 @@ export default function NotificationsPage() {
             const others = g.users.length - 1;
             const followState = followingBack[primaryUser.id] || "idle";
 
-            const linkHref = g.postId
-              ? `/post/${g.postId}`
-              : `/profile/${primaryUser.username}`;
+            const linkHref = g.type === "message"
+              ? `/messages/${primaryUser.username}`
+              : g.postId
+                ? `/post/${g.postId}`
+                : `/profile/${primaryUser.username}`;
 
             return (
               <div
