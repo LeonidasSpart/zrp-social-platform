@@ -80,6 +80,20 @@ export const ourFileRouter = {
       return { url: file.url, name: file.name };
     }),
 
+  // ─── Chat voice message upload ───────────────────────────────────
+  chatAudio: f({
+    audio: { maxFileSize: "8MB", maxFileCount: 1 },
+  })
+    .middleware(async () => {
+      const session = await getServerSession(authOptions);
+      if (!session?.user) throw new UploadThingError("Unauthorized");
+      return { userId: session.user.id };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log("Chat voice message uploaded:", file.url);
+      return { url: file.url };
+    }),
+
   // ─── Story media upload (image or video) ────────────────────────
   storyMedia: f({
     image: { maxFileSize: "4MB", maxFileCount: 1 },
