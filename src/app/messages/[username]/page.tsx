@@ -65,16 +65,26 @@ export default function ChatPage({ params }: { params: { username: string } }) {
     const updateHeight = () => {
       if (containerRef.current) {
         const top = containerRef.current.getBoundingClientRect().top;
-        setAvailableHeight(window.innerHeight - top);
+        // visualViewport reflects the actual visible area on iOS Safari
+        // when the on-screen keyboard is open - window.innerHeight alone
+        // doesn't reliably shrink (or fire a resize event) when the
+        // keyboard appears, which is exactly what let the input drift
+        // out of view again once someone tapped into the message box.
+        const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+        setAvailableHeight(viewportHeight - top);
       }
     };
     updateHeight();
     window.addEventListener("resize", updateHeight);
+    window.visualViewport?.addEventListener("resize", updateHeight);
+    window.visualViewport?.addEventListener("scroll", updateHeight);
     // Re-measure shortly after mount too, in case a banner/header above
     // this page loads its real height asynchronously (e.g. session data).
     const timeoutId = setTimeout(updateHeight, 300);
     return () => {
       window.removeEventListener("resize", updateHeight);
+      window.visualViewport?.removeEventListener("resize", updateHeight);
+      window.visualViewport?.removeEventListener("scroll", updateHeight);
       clearTimeout(timeoutId);
     };
   }, []);
