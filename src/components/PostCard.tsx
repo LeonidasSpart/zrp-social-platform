@@ -69,9 +69,17 @@ interface PostCardProps {
 
 // ─── PARSE HASHTAGS AND MENTIONS ──────────────────────────────────
 function parseContent(content: string) {
-  const parts: { type: "text" | "hashtag" | "mention"; value: string }[] = [];
+  const parts: { type: "text" | "hashtag" | "mention" | "url"; value: string }[] = [];
   let lastIndex = 0;
-  const regex = /(@\w+)|(#\w+)/g;
+  // Detects @mentions, #hashtags, full URLs (http/https), and bare
+  // www.-prefixed URLs (the most common case people actually paste/type -
+  // e.g. sharing a YouTube link or "www.example.com" - none of which were
+  // being detected before, so links just rendered as plain, dead text).
+  const regex = /(@\w+)|(#\w+)|(https?:\/\/[^\s]+)|(www\.[^\s]+)/g;
+  // Trailing sentence punctuation commonly swept up into a URL match by
+  // mistake (e.g. "check this out: https://example.com." shouldn't turn
+  // the period into part of the link).
+  const trailingPunctuation = /[.,!?;:'")\]}]+$/;
   let match;
 
   while ((match = regex.exec(content)) !== null) {
@@ -81,11 +89,27 @@ function parseContent(content: string) {
         value: content.slice(lastIndex, match.index),
       });
     }
-    parts.push({
-      type: match[0].startsWith("@") ? "mention" : "hashtag",
-      value: match[0],
-    });
-    lastIndex = match.index + match[0].length;
+
+    const raw = match[0];
+    const type: "hashtag" | "mention" | "url" = raw.startsWith("@")
+      ? "mention"
+      : raw.startsWith("#")
+      ? "hashtag"
+      : "url";
+
+    if (type === "url") {
+      const trailingMatch = raw.match(trailingPunctuation);
+      const trimmed = trailingMatch ? raw.slice(0, raw.length - trailingMatch[0].length) : raw;
+      if (trailingMatch && trimmed.length > 0) {
+        parts.push({ type: "url", value: trimmed });
+        parts.push({ type: "text", value: trailingMatch[0] });
+        lastIndex = match.index + raw.length;
+        continue;
+      }
+    }
+
+    parts.push({ type, value: raw });
+    lastIndex = match.index + raw.length;
   }
   if (lastIndex < content.length) {
     parts.push({ type: "text", value: content.slice(lastIndex) });
@@ -634,6 +658,21 @@ export default function PostCard({
                       <Link key={index} href={`/profile/${username}`} className="text-zrp-red hover:underline">
                         {part.value}
                       </Link>
+                    );
+                  }
+                  if (part.type === "url") {
+                    const href = part.value.startsWith("http") ? part.value : `https://${part.value}`;
+                    return (
+                      <a
+                        key={index}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-zrp-red hover:underline break-all"
+                      >
+                        {part.value}
+                      </a>
                     );
                   }
                   return <span key={index}>{part.value}</span>;
