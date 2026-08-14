@@ -45,7 +45,7 @@ export default function RightPanel() {
 
     fetch("/api/users/suggested")
       .then((res) => (res.ok ? res.json() : []))
-      .then((data) => setSuggestions(Array.isArray(data) ? data.slice(0, 5) : []))
+      .then((data) => setSuggestions(Array.isArray(data) ? data : []))
       .catch(() => {})
       .finally(() => setLoadingSuggestions(false));
   }, [session]);
@@ -136,7 +136,7 @@ export default function RightPanel() {
         ) : suggestions.length === 0 ? (
           <p className="text-sm text-gray-400 px-4 pb-4">{t("rightPanel.noSuggestions")}</p>
         ) : (
-          <div className="pb-2">
+          <div className="pb-2 max-h-[340px] overflow-y-auto overscroll-contain">
             {suggestions.map((user) => {
               const alreadyFollowing = followingIds.has(user.id);
               return (
