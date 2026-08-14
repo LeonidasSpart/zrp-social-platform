@@ -580,7 +580,7 @@ export default function ChatInterface({
       }, 1000);
     } catch (err) {
       console.error("Microphone access error:", err);
-      alert("Couldn't access your microphone. Please check your permissions.");
+      alert(t("chat.errMicAccess"));
     }
   };
 
@@ -919,7 +919,7 @@ export default function ChatInterface({
                         >
                           <FileText className="w-6 h-6 flex-shrink-0" />
                           <span className="text-sm font-medium flex-1 min-w-0 truncate">
-                            Document
+                            {t("chat.attachment")}
                           </span>
                           <Download className="w-4 h-4 flex-shrink-0" />
                         </a>
@@ -1059,7 +1059,7 @@ export default function ChatInterface({
               type="button"
               onClick={cancelRecording}
               className="text-gray-500 hover:text-red-500 transition flex-shrink-0 p-1.5"
-              title="Cancel"
+              title={t("chat.cancelRecording")}
             >
               <Trash2 className="w-5 h-5" />
             </button>
@@ -1068,13 +1068,13 @@ export default function ChatInterface({
               {formatRecordingTime(recordingSeconds)}
             </span>
             <span className="flex-1 text-sm text-gray-400 dark:text-gray-500">
-              Recording...
+              {t("chat.recording")}
             </span>
             <button
               type="button"
               onClick={stopAndSendRecording}
               className="bg-zrp-red text-white p-2 rounded-full hover:bg-zrp-darkRed transition flex-shrink-0"
-              title="Send"
+              title={t("chat.sendVoiceMessage")}
             >
               <Send className="w-5 h-5" />
             </button>
@@ -1107,7 +1107,7 @@ export default function ChatInterface({
               onClick={() => documentInputRef.current?.click()}
               disabled={uploadingImage}
               className="text-gray-500 hover:text-zrp-red transition flex-shrink-0 disabled:opacity-50 p-1.5"
-              title="Attach document"
+              title={t("chat.uploadDocument")}
             >
               <Paperclip className="w-5 h-5" />
             </button>
@@ -1157,7 +1157,7 @@ export default function ChatInterface({
                 onClick={startRecording}
                 disabled={uploadingImage}
                 className="bg-zrp-red text-white p-2 rounded-full hover:bg-zrp-darkRed disabled:opacity-50 transition flex-shrink-0"
-                title="Record a voice message"
+                title={t("chat.recordVoiceMessage")}
               >
                 <Mic className="w-5 h-5" />
               </button>
