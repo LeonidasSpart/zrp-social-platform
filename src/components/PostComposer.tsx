@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Image, FileImage, BarChart3, Plus, Trash2, Clock, Briefcase, FileText, Smile } from "lucide-react";
 import GifPicker from "./GifPicker";
@@ -48,6 +48,51 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const composerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ─── Draft protection ────────────────────────────────────────────
+  // Composer text should never be lost to an accidental navigation,
+  // refresh, or tab close. Auto-saves to localStorage as the person
+  // types, restores it the next time the composer mounts, and clears
+  // it once a post is actually published. One shared draft slot across
+  // both places the composer is mounted (home feed + profile page),
+  // matching how a single "in progress" draft is the expected behavior.
+  const DRAFT_KEY = "zrp:composer:draft";
+  const hasRestoredDraft = useRef(false);
+
+  useEffect(() => {
+    if (hasRestoredDraft.current) return;
+    hasRestoredDraft.current = true;
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (saved) {
+        const draft = JSON.parse(saved);
+        if (draft.content) setContent(draft.content);
+        if (draft.imageUrls?.length) setImageUrls(draft.imageUrls);
+        if (draft.mediaType) setMediaType(draft.mediaType);
+        if (draft.postType) setPostType(draft.postType);
+      }
+    } catch {
+      // Corrupt/unavailable localStorage - just start with an empty composer
+    }
+  }, []);
+
+  useEffect(() => {
+    // Nothing worth saving yet - avoid writing an empty draft over a
+    // potentially-still-loading restored one on the very first render.
+    if (!hasRestoredDraft.current) return;
+    try {
+      if (!content.trim() && imageUrls.length === 0) {
+        localStorage.removeItem(DRAFT_KEY);
+      } else {
+        localStorage.setItem(
+          DRAFT_KEY,
+          JSON.stringify({ content, imageUrls, mediaType, postType })
+        );
+      }
+    } catch {
+      // Storage full/unavailable - draft protection is best-effort, not critical
+    }
+  }, [content, imageUrls, mediaType, postType]);
 
   const extractHashtags = (text: string): string[] => {
     const matches = text.match(/#[\w\u0590-\u05fe]+/g) || [];
@@ -319,6 +364,11 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   };
 
   const resetForm = () => {
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      // no-op
+    }
     setContent("");
     setImageUrls([]);
     setMediaType(null);
@@ -666,8 +716,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   className={`text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition ${
                     showEmojiPicker ? "text-zrp-red dark:text-zrp-red" : ""
                   }`}
-title="Add emoji"
-
+                  title="Add emoji"
                 >
                   <Smile className="w-5 h-5" />
                 </button>
