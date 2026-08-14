@@ -24,21 +24,38 @@ function formatProfileCount(n: number) {
   return n.toString();
 }
 
-// ─── Parse bio for @mentions and #hashtags ──────────────────────────
+// ─── Parse bio for @mentions, #hashtags, and URLs ───────────────────
 function parseBio(bio: string) {
-  const parts: { type: "text" | "mention" | "hashtag"; value: string }[] = [];
+  const parts: { type: "text" | "mention" | "hashtag" | "url"; value: string }[] = [];
   let lastIndex = 0;
-  const regex = /(@\w+)|(#\w+)/g;
+  const regex = /(@\w+)|(#\w+)|(https?:\/\/[^\s]+)|(www\.[^\s]+)/g;
+  const trailingPunctuation = /[.,!?;:'")\]}]+$/;
   let match;
   while ((match = regex.exec(bio)) !== null) {
     if (match.index > lastIndex) {
       parts.push({ type: "text", value: bio.slice(lastIndex, match.index) });
     }
-    parts.push({
-      type: match[0].startsWith("@") ? "mention" : "hashtag",
-      value: match[0],
-    });
-    lastIndex = match.index + match[0].length;
+
+    const raw = match[0];
+    const type: "mention" | "hashtag" | "url" = raw.startsWith("@")
+      ? "mention"
+      : raw.startsWith("#")
+      ? "hashtag"
+      : "url";
+
+    if (type === "url") {
+      const trailingMatch = raw.match(trailingPunctuation);
+      const trimmed = trailingMatch ? raw.slice(0, raw.length - trailingMatch[0].length) : raw;
+      if (trailingMatch && trimmed.length > 0) {
+        parts.push({ type: "url", value: trimmed });
+        parts.push({ type: "text", value: trailingMatch[0] });
+        lastIndex = match.index + raw.length;
+        continue;
+      }
+    }
+
+    parts.push({ type, value: raw });
+    lastIndex = match.index + raw.length;
   }
   if (lastIndex < bio.length) {
     parts.push({ type: "text", value: bio.slice(lastIndex) });
@@ -889,6 +906,20 @@ export default function ProfilePage({ params }: { params: { username: string } }
                     >
                       {part.value}
                     </Link>
+                  );
+                }
+                if (part.type === "url") {
+                  const href = part.value.startsWith("http") ? part.value : `https://${part.value}`;
+                  return (
+                    <a
+                      key={index}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-zrp-red hover:underline break-all"
+                    >
+                      {part.value}
+                    </a>
                   );
                 }
                 return <span key={index}>{part.value}</span>;
