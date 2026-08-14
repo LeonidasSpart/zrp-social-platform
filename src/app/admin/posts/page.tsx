@@ -70,18 +70,23 @@ export default function AdminPosts() {
         {posts.map((post) => (
           <div key={post.id} className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-start">
-              <div className="flex-1 min-w-0">
-                <p className="text-gray-900 dark:text-white">{post.content}</p>
+              <Link
+                href={`/post/${post.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 min-w-0 hover:opacity-80 transition"
+              >
+                <p className="text-gray-900 dark:text-white hover:underline">{post.content}</p>
                 <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
                   <span>{t("adminPosts.by", { name: post.author.name || post.author.username })}</span>
                   <span>❤️ {post._count.likes}</span>
                   <span>💬 {post._count.comments}</span>
                   <span>{new Date(post.createdAt).toLocaleString(localeMap[language] || "en-US")}</span>
                 </div>
-              </div>
+              </Link>
               <button
                 onClick={() => handleDelete(post.id)}
-                className="text-red-600 hover:text-red-800 text-sm font-medium ml-4"
+                className="text-red-600 hover:text-red-800 text-sm font-medium ml-4 flex-shrink-0"
               >
                 {t("adminPosts.delete")}
               </button>
