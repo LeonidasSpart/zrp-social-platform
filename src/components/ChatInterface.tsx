@@ -6,7 +6,7 @@ import Link from "next/link";
 import { getSocket } from "@/lib/socket-client";
 import {
   Send, Phone, Video, Image, Smile, X, Download, ZoomIn, Trash2,
-  Loader2, Reply, Pencil, Check,
+  Loader2, Reply, Pencil, Check, Paperclip, FileText,
 } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
@@ -84,12 +84,19 @@ export default function ChatInterface({
   const [socketConnected, setSocketConnected] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  // Message attachments are all stored as a single imageUrl with no
+  // stored file type/name (no schema field for it) - so instead of
+  // guessing from the URL, we just try rendering it as an image and
+  // fall back to a generic document card if it fails to actually load
+  // as one (e.g. it's a PDF, not an image).
+  const [failedImageIds, setFailedImageIds] = useState<Set<string>>(new Set());
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<any>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
   const lastMessageCountRef = useRef(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -112,6 +119,22 @@ export default function ChatInterface({
       const url = files[0].ufsUrl;
       setUploadingImage(false);
       sendMessage("", url);
+    },
+    onUploadError: (error) => {
+      setUploadingImage(false);
+      alert(t("chat.errImageUploadFailed") + " " + error.message);
+    },
+  });
+
+  // ─── Uploadthing hook for chat documents (PDF, Word, Excel, etc.) ──
+  const { startUpload: startFileUpload } = useUploadThing("chatFile", {
+    onClientUploadComplete: (files) => {
+      const url = files[0].ufsUrl;
+      setUploadingImage(false);
+      // Prefix the message content with the original filename so it's
+      // still recoverable even though the URL itself carries no name -
+      // the bubble renderer below reads this back out for display.
+      sendMessage(`📎 ${files[0].name}`, url);
     },
     onUploadError: (error) => {
       setUploadingImage(false);
@@ -420,6 +443,42 @@ export default function ChatInterface({
     e.target.value = "";
   };
 
+  // ─── Document attachments (PDF, Word, Excel, PowerPoint, plain text) ──
+  const DOCUMENT_TYPES = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-powerpoint",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "text/plain",
+  ];
+
+  const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 8 * 1024 * 1024) {
+      alert(t("chat.errFileTooLarge"));
+      return;
+    }
+    if (!DOCUMENT_TYPES.includes(file.type)) {
+      alert(t("chat.errInvalidFileType"));
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      await startFileUpload([file]);
+    } catch (err) {
+      console.error("Upload error:", err);
+      setUploadingImage(false);
+      alert(t("chat.errUploadFailedRetry"));
+    }
+    e.target.value = "";
+  };
+
   const handleEmojiClick = (emoji: any) => {
     setNewMessage((prev) => prev + emoji.emoji);
     setShowEmojiPicker(false);
@@ -660,19 +719,42 @@ export default function ChatInterface({
                     )}
 
                     {message.imageUrl && (
-                      <div
-                        className="cursor-pointer group relative"
-                        onClick={() => openLightbox(message.imageUrl!)}
-                      >
-                        <img
-                          src={message.imageUrl}
-                          alt="Message attachment"
-                          className="rounded-lg max-w-full max-h-60 object-contain"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/30 rounded-lg">
-                          <ZoomIn className="w-8 h-8 text-white" />
+                      failedImageIds.has(message.id) ? (
+                        <a
+                          href={message.imageUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className={`flex items-center gap-2 rounded-lg px-3 py-2 transition ${
+                            isOwn
+                              ? "bg-white/15 hover:bg-white/25"
+                              : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+                          }`}
+                        >
+                          <FileText className="w-6 h-6 flex-shrink-0" />
+                          <span className="text-sm font-medium flex-1 min-w-0 truncate">
+                            {t("chat.attachment") || "Document"}
+                          </span>
+                          <Download className="w-4 h-4 flex-shrink-0" />
+                        </a>
+                      ) : (
+                        <div
+                          className="cursor-pointer group relative"
+                          onClick={() => openLightbox(message.imageUrl!)}
+                        >
+                          <img
+                            src={message.imageUrl}
+                            alt="Message attachment"
+                            className="rounded-lg max-w-full max-h-60 object-contain"
+                            onError={() =>
+                              setFailedImageIds((prev) => new Set(prev).add(message.id))
+                            }
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/30 rounded-lg">
+                            <ZoomIn className="w-8 h-8 text-white" />
+                          </div>
                         </div>
-                      </div>
+                      )
                     )}
 
                     {isEditing ? (
@@ -803,6 +885,23 @@ export default function ChatInterface({
           type="file"
           accept="image/*"
           onChange={handleImageUpload}
+          className="hidden"
+        />
+
+        <button
+          type="button"
+          onClick={() => documentInputRef.current?.click()}
+          disabled={uploadingImage}
+          className="text-gray-500 hover:text-zrp-red transition flex-shrink-0 disabled:opacity-50 p-1.5"
+          title={t("chat.uploadDocument") || "Attach document"}
+        >
+          <Paperclip className="w-5 h-5" />
+        </button>
+        <input
+          ref={documentInputRef}
+          type="file"
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain"
+          onChange={handleDocumentUpload}
           className="hidden"
         />
 
