@@ -9,6 +9,7 @@ interface CreateNotificationParams {
     | "follow"
     | "repost"
     | "mention"
+    | "message"
     | "follow_request"
     | "ticket_reply"
     | "ticket_resolved"
@@ -77,6 +78,7 @@ export async function createNotification({
       follow: "follows",
       repost: "reposts",
       mention: "mentions",
+      message: "messages",
       follow_request: "followRequests",
       ticket_reply: "supportTickets", // ✅ added
       ticket_resolved: "supportTickets", // ✅ added
@@ -102,6 +104,7 @@ export async function createNotification({
       follow: { action: "started following you", emoji: "👋" },
       repost: { action: "reposted your post", emoji: "🔄" },
       mention: { action: "mentioned you in a post", emoji: "📝" },
+      message: { action: "sent you a message", emoji: "✉️" },
       follow_request: { action: "sent you a follow request", emoji: "🔒" },
       ticket_reply: { action: "replied to your support ticket", emoji: "📩" },
       ticket_resolved: { action: "resolved your support ticket", emoji: "✅" },
@@ -122,6 +125,12 @@ export async function createNotification({
       });
       if (post) postContent = post.content;
       postUrl = postId ? `${process.env.NEXTAUTH_URL}/post/${postId}` : undefined;
+    }
+
+    // Messages don't have a postId - link straight to the conversation
+    // with the sender instead.
+    if (type === "message") {
+      postUrl = `${process.env.NEXTAUTH_URL}/messages/${actorUsername}`;
     }
 
     // ✅ Build ticket URL if ticketId is provided
@@ -183,6 +192,7 @@ export async function createNotification({
       follow: `${actorName} started following you`,
       repost: `${actorName} reposted your post`,
       mention: `${actorName} mentioned you in a post`,
+      message: `${actorName} sent you a message`,
       follow_request: `${actorName} sent you a follow request`,
       ticket_reply: `${actorName} replied to your support ticket`,
       ticket_resolved: `Your support ticket has been resolved`,
