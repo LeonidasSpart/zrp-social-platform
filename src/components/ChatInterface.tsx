@@ -6,7 +6,7 @@ import Link from "next/link";
 import { getSocket } from "@/lib/socket-client";
 import {
   Send, Phone, Video, Image, Smile, X, Download, ZoomIn, Trash2,
-  Loader2, Reply, Pencil, Check, Paperclip, FileText, Mic, Square, Play, Pause,
+  Loader2, Reply, Pencil, Check, Paperclip, FileText,
 } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
@@ -98,16 +98,6 @@ export default function ChatInterface({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
   const lastMessageCountRef = useRef(0);
-
-  // ─── Voice message recording ────────────────────────────────────────
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingSeconds, setRecordingSeconds] = useState(0);
-  const recordingSecondsRef = useRef(0); // survives past the UI reset, for the upload-complete callback
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const mediaStreamRef = useRef<MediaStream | null>(null);
-  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const recordingCancelledRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // ─── Reply state ────────────────────────────────────────────────────
@@ -152,23 +142,6 @@ export default function ChatInterface({
     },
   });
 
-  // ─── Uploadthing hook for voice messages ───────────────────────────
-  const { startUpload: startAudioUpload } = useUploadThing("chatAudio", {
-    onClientUploadComplete: (files) => {
-      const url = files[0].ufsUrl;
-      setUploadingImage(false);
-      // Duration gets embedded directly in the content marker since
-      // there's no separate schema field to store it in - the bubble
-      // renderer below parses it back out.
-      sendMessage(`🎤 Voice message (${formatRecordingTime(recordingSecondsRef.current)})`, url);
-      recordingSecondsRef.current = 0;
-    },
-    onUploadError: (error) => {
-      setUploadingImage(false);
-      alert(t("chat.errImageUploadFailed") + " " + error.message);
-    },
-  });
-
   const fetchMessages = async () => {
     try {
       const res = await fetch(`/api/messages/${receiverId}`);
@@ -180,15 +153,6 @@ export default function ChatInterface({
       setLoading(false);
     }
   };
-
-  // ─── Release the mic / stop the timer if the component unmounts mid-
-  // recording (e.g. navigating away from the chat) ───────────────────
-  useEffect(() => {
-    return () => {
-      if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
-      mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
-    };
-  }, []);
 
   useEffect(() => {
     if (userId) {
@@ -515,89 +479,6 @@ export default function ChatInterface({
     e.target.value = "";
   };
 
-  // ─── Voice message recording ────────────────────────────────────────
-  const formatRecordingTime = (totalSeconds: number) => {
-    const m = Math.floor(totalSeconds / 60);
-    const s = totalSeconds % 60;
-    return `${m}:${s.toString().padStart(2, "0")}`;
-  };
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaStreamRef.current = stream;
-
-      // Prefer a widely-supported codec; browsers vary in what they'll
-      // actually record (Safari differs from Chrome/Firefox).
-      const mimeCandidates = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
-      const mimeType = mimeCandidates.find((m) => MediaRecorder.isTypeSupported(m));
-
-      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
-      mediaRecorderRef.current = recorder;
-      audioChunksRef.current = [];
-      recordingCancelledRef.current = false;
-
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data);
-      };
-
-      recorder.onstop = async () => {
-        // Always release the microphone, whether sending or cancelling.
-        mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
-        mediaStreamRef.current = null;
-
-        if (recordingCancelledRef.current || audioChunksRef.current.length === 0) {
-          audioChunksRef.current = [];
-          return;
-        }
-
-        const blob = new Blob(audioChunksRef.current, { type: mimeType || "audio/webm" });
-        audioChunksRef.current = [];
-        const extension = mimeType?.includes("mp4") ? "m4a" : "webm";
-        const file = new File([blob], `voice-message.${extension}`, { type: blob.type });
-
-        setUploadingImage(true);
-        try {
-          await startAudioUpload([file]);
-        } catch (err) {
-          console.error("Voice message upload error:", err);
-          setUploadingImage(false);
-          alert(t("chat.errUploadFailedRetry"));
-        }
-      };
-
-      recorder.start();
-      setIsRecording(true);
-      setRecordingSeconds(0);
-      recordingSecondsRef.current = 0;
-      recordingIntervalRef.current = setInterval(() => {
-        setRecordingSeconds((prev) => {
-          const next = prev + 1;
-          recordingSecondsRef.current = next;
-          return next;
-        });
-      }, 1000);
-    } catch (err) {
-      console.error("Microphone access error:", err);
-      alert("Couldn't access your microphone. Please check your permissions.");
-    }
-  };
-
-  const stopAndSendRecording = () => {
-    if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
-    recordingCancelledRef.current = false;
-    mediaRecorderRef.current?.stop();
-    setIsRecording(false);
-  };
-
-  const cancelRecording = () => {
-    if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
-    recordingCancelledRef.current = true;
-    mediaRecorderRef.current?.stop();
-    setIsRecording(false);
-    setRecordingSeconds(0);
-  };
-
   // ─── Insert an emoji at the current cursor position (not just
   // appended to the end) and restore the cursor right after it - same
   // fix already applied to the post composer's emoji picker.
@@ -857,16 +738,7 @@ export default function ChatInterface({
                     )}
 
                     {message.imageUrl && (
-                      message.content?.startsWith("🎤") ? (
-                        <audio
-                          controls
-                          preload="metadata"
-                          src={message.imageUrl}
-                          onClick={(e) => e.stopPropagation()}
-                          className="max-w-full"
-                          style={{ height: "36px", minWidth: "220px" }}
-                        />
-                      ) : failedImageIds.has(message.id) ? (
+                      failedImageIds.has(message.id) ? (
                         <a
                           href={message.imageUrl}
                           target="_blank"
@@ -1014,117 +886,75 @@ export default function ChatInterface({
         onSubmit={handleSend}
         className="p-2 sm:p-4 border-t border-gray-200 dark:border-gray-700 flex gap-1 sm:gap-2 items-end flex-shrink-0"
       >
-        {isRecording ? (
-          <div className="flex-1 flex items-center gap-3 px-2">
-            <button
-              type="button"
-              onClick={cancelRecording}
-              className="text-gray-500 hover:text-red-500 transition flex-shrink-0 p-1.5"
-              title="Cancel"
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse flex-shrink-0" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-200 tabular-nums">
-              {formatRecordingTime(recordingSeconds)}
-            </span>
-            <span className="flex-1 text-sm text-gray-400 dark:text-gray-500">
-              Recording...
-            </span>
-            <button
-              type="button"
-              onClick={stopAndSendRecording}
-              className="bg-zrp-red text-white p-2 rounded-full hover:bg-zrp-darkRed transition flex-shrink-0"
-              title="Send"
-            >
-              <Send className="w-5 h-5" />
-            </button>
-          </div>
-        ) : (
-          <>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploadingImage}
-              className="text-gray-500 hover:text-zrp-red transition flex-shrink-0 disabled:opacity-50 p-1.5"
-              title={t("chat.uploadImage")}
-            >
-              {uploadingImage ? (
-                <div className="w-5 h-5 border-2 border-zrp-red border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Image className="w-5 h-5" />
-              )}
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-            />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploadingImage}
+          className="text-gray-500 hover:text-zrp-red transition flex-shrink-0 disabled:opacity-50 p-1.5"
+          title={t("chat.uploadImage")}
+        >
+          {uploadingImage ? (
+            <div className="w-5 h-5 border-2 border-zrp-red border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Image className="w-5 h-5" />
+          )}
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="hidden"
+        />
 
-            <button
-              type="button"
-              onClick={() => documentInputRef.current?.click()}
-              disabled={uploadingImage}
-              className="text-gray-500 hover:text-zrp-red transition flex-shrink-0 disabled:opacity-50 p-1.5"
-              title="Attach document"
-            >
-              <Paperclip className="w-5 h-5" />
-            </button>
-            <input
-              ref={documentInputRef}
-              type="file"
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain"
-              onChange={handleDocumentUpload}
-              className="hidden"
-            />
+        <button
+          type="button"
+          onClick={() => documentInputRef.current?.click()}
+          disabled={uploadingImage}
+          className="text-gray-500 hover:text-zrp-red transition flex-shrink-0 disabled:opacity-50 p-1.5"
+          title="Attach document"
+        >
+          <Paperclip className="w-5 h-5" />
+        </button>
+        <input
+          ref={documentInputRef}
+          type="file"
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain"
+          onChange={handleDocumentUpload}
+          className="hidden"
+        />
 
-            <button
-              type="button"
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              className="text-gray-500 hover:text-zrp-red transition flex-shrink-0 p-1.5"
-              title={t("chat.addEmoji")}
-            >
-              <Smile className="w-5 h-5" />
-            </button>
+        <button
+          type="button"
+          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+          className="text-gray-500 hover:text-zrp-red transition flex-shrink-0 p-1.5"
+          title={t("chat.addEmoji")}
+        >
+          <Smile className="w-5 h-5" />
+        </button>
 
-            <textarea
-              ref={textareaRef}
-              value={newMessage}
-              onChange={handleTyping}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              placeholder={t("chat.messagePlaceholder", { name: receiverName })}
-              rows={1}
-              className="flex-1 min-w-0 px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm resize-none overflow-hidden max-h-32"
-            />
+        <textarea
+          ref={textareaRef}
+          value={newMessage}
+          onChange={handleTyping}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
+          placeholder={t("chat.messagePlaceholder", { name: receiverName })}
+          rows={1}
+          className="flex-1 min-w-0 px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm resize-none overflow-hidden max-h-32"
+        />
 
-            {newMessage.trim() ? (
-              <button
-                type="submit"
-                disabled={sending}
-                className="bg-zrp-red text-white p-2 rounded-full hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition flex-shrink-0"
-              >
-                <Send className="w-5 h-5" />
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={startRecording}
-                disabled={uploadingImage}
-                className="bg-zrp-red text-white p-2 rounded-full hover:bg-zrp-darkRed disabled:opacity-50 transition flex-shrink-0"
-                title="Record a voice message"
-              >
-                <Mic className="w-5 h-5" />
-              </button>
-            )}
-          </>
-        )}
+        <button
+          type="submit"
+          disabled={!newMessage.trim() || sending}
+          className="bg-zrp-red text-white p-2 rounded-full hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition flex-shrink-0"
+        >
+          <Send className="w-5 h-5" />
+        </button>
       </form>
 
       {/* ─── Emoji picker ─── */}
