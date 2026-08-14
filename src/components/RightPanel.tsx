@@ -105,7 +105,7 @@ export default function RightPanel() {
         ) : trending.length === 0 ? (
           <p className="text-sm text-gray-400 px-4 pb-4">{t("rightPanel.noTrending")}</p>
         ) : (
-          <div className="pb-2">
+          <div className="pb-2 max-h-[280px] overflow-y-auto overscroll-contain">
             {trending.map((item) => (
               <Link
                 key={item.tag}
