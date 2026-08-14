@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import {
   ChevronDown,
   ChevronUp,
@@ -536,10 +537,23 @@ export default function FAQPage() {
       icon: CheckCircle,
       answer: (
         <div className="space-y-2">
-          <ul className="list-disc list-inside space-y-1 text-sm">
-            <li><span className="text-blue-500">🔵 Verified</span> – Authentic account of notable public interest</li>
-            <li><span className="text-amber-400">🟡 Organization</span> – Official account of an organisation or company</li>
-            <li><span className="text-gray-400">⚪ Government</span> – Official government account</li>
+          <ul className="space-y-2 text-sm">
+            <li className="flex items-center gap-2">
+              <VerifiedBadge badgeType="verified" />
+              <span><strong>Verified</strong> – Authentic account of notable public interest</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <VerifiedBadge badgeType="organization" />
+              <span><strong>Organization</strong> – Official account of an organisation or company</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <VerifiedBadge badgeType="government" />
+              <span><strong>Government</strong> – Official government account</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <VerifiedBadge badgeType="team" />
+              <span><strong>ZRP Team</strong> – Official ZRP staff account</span>
+            </li>
           </ul>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             🏅 Badges are assigned by the ZRP Social team and indicate authenticity.
