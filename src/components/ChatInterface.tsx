@@ -479,9 +479,28 @@ export default function ChatInterface({
     e.target.value = "";
   };
 
+  // ─── Insert an emoji at the current cursor position (not just
+  // appended to the end) and restore the cursor right after it - same
+  // fix already applied to the post composer's emoji picker.
   const handleEmojiClick = (emoji: any) => {
-    setNewMessage((prev) => prev + emoji.emoji);
+    const el = textareaRef.current;
+    const start = el?.selectionStart ?? newMessage.length;
+    const end = el?.selectionEnd ?? newMessage.length;
+    const before = newMessage.slice(0, start);
+    const after = newMessage.slice(end);
+    const updated = before + emoji.emoji + after;
+    setNewMessage(updated);
     setShowEmojiPicker(false);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        const newPos = start + emoji.emoji.length;
+        textareaRef.current.selectionStart = newPos;
+        textareaRef.current.selectionEnd = newPos;
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+        textareaRef.current.focus();
+      }
+    }, 0);
   };
 
   const handleTyping = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
