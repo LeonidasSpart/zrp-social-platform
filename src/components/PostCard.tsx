@@ -474,7 +474,9 @@ export default function PostCard({
         alert("Report submitted. Thank you for helping keep the community safe.");
         setShowReportModal(false);
       } else {
-        alert("Failed to submit report. Please try again.");
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || "Failed to submit report. Please try again.");
+        if (res.status === 409) setShowReportModal(false);
       }
     } catch (error) {
       console.error("Report error:", error);
