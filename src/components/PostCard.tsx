@@ -15,6 +15,7 @@ import VerifiedBadge from "./VerifiedBadge";
 import EmojiPicker from "emoji-picker-react";
 import QuotePostModal from "./QuotePostModal";
 import VideoFeedViewer from "./VideoFeedViewer";
+import LinkPreviewCard from "./LinkPreviewCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface PostCardProps {
@@ -24,6 +25,7 @@ interface PostCardProps {
     imageUrl?: string;
     imageUrls?: string[];
     mediaType?: string;
+    linkUrl?: string | null;
     createdAt: string;
     updatedAt?: string;
     views?: number;
@@ -115,6 +117,18 @@ function parseContent(content: string) {
     parts.push({ type: "text", value: content.slice(lastIndex) });
   }
   return parts;
+}
+
+// ─── Extract the first URL from post content, used as a fallback for
+// link previews on posts that don't have an explicit linkUrl set (which
+// is effectively every post today, old and new, since nothing writes to
+// it yet) - this makes previews work immediately for any post containing
+// a link, without needing a data backfill or composer changes.
+function extractFirstUrl(content: string): string | null {
+  const match = content.match(/(https?:\/\/[^\s]+)|(www\.[^\s]+)/);
+  if (!match) return null;
+  const raw = match[0].replace(/[.,!?;:'")\]}]+$/, "");
+  return raw.startsWith("http") ? raw : `https://${raw}`;
 }
 
 // ─── FORMAT COUNTS LIKE X ────────────────────────────────────────────
@@ -678,6 +692,15 @@ export default function PostCard({
                   return <span key={index}>{part.value}</span>;
                 })}
               </p>
+
+              {/* ─── Link preview card ────────────────────────────────── */}
+              {/* Only for text posts - a post with actual uploaded media
+                  (image/video) already has its own media block below, so
+                  this stays out of the way of that. */}
+              {!post.imageUrl && (() => {
+                const previewUrl = post.linkUrl || extractFirstUrl(post.content);
+                return previewUrl ? <LinkPreviewCard url={previewUrl} /> : null;
+              })()}
 
               {/* ─── Translate post ───────────────────────────────────── */}
               {post.content.trim().length > 0 && (
