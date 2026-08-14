@@ -62,17 +62,17 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditP
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-xl max-w-lg w-full p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Edit Post</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Edit Post</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition"
+            className="text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 transition"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4">
+          <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg text-sm mb-4">
             {error}
           </div>
         )}
@@ -81,17 +81,17 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditP
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-zrp-red focus:border-transparent resize-none min-h-[120px] text-gray-800"
+            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-3 focus:ring-2 focus:ring-zrp-red focus:border-transparent resize-none min-h-[120px] bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
             placeholder="What's happening?"
             maxLength={limits.postLength}
           />
           <div className="flex items-center justify-between mt-3">
-            <span className="text-xs text-gray-400">{content.length}/{limits.postLength}</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500">{content.length}/{limits.postLength}</span>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-1.5 border border-gray-300 rounded-full text-sm font-medium hover:bg-gray-50 transition"
+                className="px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
               >
                 Cancel
               </button>
