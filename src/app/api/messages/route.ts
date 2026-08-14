@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { sendPushNotification } from "@/lib/push-notifications";
+import { createNotification } from "@/lib/notifications";
 import { rateLimit } from "@/lib/rate-limit";
 
 // ─── GET conversations ──────────────────────────────────────────────
@@ -172,8 +173,23 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // ─── Send push notification (non‑blocking) ──────────────────────
+    // ─── Create in-app notification + send push (non‑blocking) ──────
+    // Previously this only attempted a browser push notification, which
+    // most people never grant permission for - so if push failed or
+    // wasn't set up, there was no trace of the message anywhere in the
+    // Notifications page at all. Now a durable in-app notification is
+    // always created too, matching every other notification type.
     if (receiverId !== session.user.id) {
+      try {
+        await createNotification({
+          userId: receiverId,
+          type: "message",
+          fromUserId: session.user.id,
+        });
+      } catch (notifErr) {
+        console.error("In-app message notification failed:", notifErr);
+      }
+
       try {
         const notificationMessage = imageUrl
           ? `${session.user.name || session.user.username} sent you an image.`
