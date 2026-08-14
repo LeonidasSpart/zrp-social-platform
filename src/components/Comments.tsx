@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { Send, Pencil, Trash2, X, Check, Reply, Heart, Repeat, Bookmark } from "lucide-react";
 import VerifiedBadge from "./VerifiedBadge";
 import { timeAgo } from "@/lib/utils";
+import { getPlanLimits } from "@/lib/limits";
 
 interface Comment {
   id: string;
@@ -60,6 +61,8 @@ interface CommentsProps {
 
 export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   const { data: session } = useSession();
+  const plan = (session?.user?.plan as any) || "free";
+  const limits = getPlanLimits(plan);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
@@ -426,7 +429,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 rows={1}
                 className="flex-1 min-w-0 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red resize-none overflow-hidden max-h-40"
                 autoFocus
-                maxLength={280}
+                maxLength={limits.postLength}
               />
               <button
                 onClick={() => saveEdit(comment.id)}
@@ -518,7 +521,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 placeholder={`Reply to ${comment.author.name || comment.author.username}...`}
                 rows={1}
                 className="flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent resize-none overflow-hidden max-h-40"
-                maxLength={280}
+                maxLength={limits.postLength}
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
@@ -609,7 +612,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             placeholder="Write a comment..."
             rows={1}
             className="flex-1 min-w-0 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none overflow-hidden max-h-40"
-            maxLength={280}
+            maxLength={limits.postLength}
           />
           <button
             type="submit"
