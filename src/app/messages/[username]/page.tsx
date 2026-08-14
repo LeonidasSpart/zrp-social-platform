@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useLayoutEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import ChatInterface from "@/components/ChatInterface";
@@ -50,6 +50,34 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   const [incomingSignal, setIncomingSignal] = useState<any>(null);
   const [callError, setCallError] = useState<string | null>(null);
   const socketRef = useRef<any>(null);
+
+  // ─── Fill the exact space available below whatever's already rendered
+  // above this page (sticky header, verification banner, etc.), instead
+  // of guessing with a fixed h-screen - that was the actual bug causing
+  // the message input to sit below the fold, requiring a page scroll to
+  // reach it (Header is sticky, not fixed, so it still consumes real
+  // document height; h-screen ignored that and always measured a full
+  // 100vh starting from below the header, overflowing the true viewport).
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [availableHeight, setAvailableHeight] = useState<number | null>(null);
+
+  useLayoutEffect(() => {
+    const updateHeight = () => {
+      if (containerRef.current) {
+        const top = containerRef.current.getBoundingClientRect().top;
+        setAvailableHeight(window.innerHeight - top);
+      }
+    };
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
+    // Re-measure shortly after mount too, in case a banner/header above
+    // this page loads its real height asynchronously (e.g. session data).
+    const timeoutId = setTimeout(updateHeight, 300);
+    return () => {
+      window.removeEventListener("resize", updateHeight);
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   const userId = session?.user?.id;
 
@@ -263,7 +291,11 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   }
 
   return (
-    <div className="w-full max-w-full mx-auto px-2 sm:px-4 py-2 sm:py-4 h-screen flex flex-col overflow-hidden">
+    <div
+      ref={containerRef}
+      className="w-full max-w-full mx-auto px-2 sm:px-4 py-2 sm:py-4 flex flex-col overflow-hidden"
+      style={{ height: availableHeight ? `${availableHeight}px` : "100vh" }}
+    >
       {callError && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] bg-red-600 text-white text-sm px-4 py-2 rounded-lg shadow-lg max-w-md text-center">
           {callError}
