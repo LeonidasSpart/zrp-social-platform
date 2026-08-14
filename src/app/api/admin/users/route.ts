@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
       ];
     }
 
-    const [users, total] = await Promise.all([
+    const [users, total, active, banned, admins, mods] = await Promise.all([
       prisma.user.findMany({
         where,
         skip: (page - 1) * limit,
@@ -48,9 +48,24 @@ export async function GET(req: NextRequest) {
         },
       }),
       prisma.user.count({ where }),
+      // Aggregate counts across the whole filtered result set, not just
+      // the current page - the stat cards were previously computed by
+      // filtering the current page's 20 users client-side, so "Total"
+      // could never show more than the page size regardless of how many
+      // users actually exist.
+      prisma.user.count({ where: { ...where, banned: false } }),
+      prisma.user.count({ where: { ...where, banned: true } }),
+      prisma.user.count({ where: { ...where, role: "ADMIN" } }),
+      prisma.user.count({ where: { ...where, role: "MODERATOR" } }),
     ]);
 
-    return NextResponse.json({ users, total, page, totalPages: Math.ceil(total / limit) });
+    return NextResponse.json({
+      users,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+      stats: { total, active, banned, admins, mods },
+    });
   } catch (error) {
     console.error("Error fetching users:", error);
     return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
