@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { X } from "lucide-react";
+import { getPlanLimits } from "@/lib/limits";
 
 interface EditPostModalProps {
   post: {
@@ -15,6 +17,10 @@ interface EditPostModalProps {
 }
 
 export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditPostModalProps) {
+  const { data: session } = useSession();
+  const plan = (session?.user?.plan as any) || "free";
+  const limits = getPlanLimits(plan);
+
   const [content, setContent] = useState(post.content);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,10 +83,10 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditP
             onChange={(e) => setContent(e.target.value)}
             className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-zrp-red focus:border-transparent resize-none min-h-[120px] text-gray-800"
             placeholder="What's happening?"
-            maxLength={280}
+            maxLength={limits.postLength}
           />
           <div className="flex items-center justify-between mt-3">
-            <span className="text-xs text-gray-400">{content.length}/280</span>
+            <span className="text-xs text-gray-400">{content.length}/{limits.postLength}</span>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -103,3 +109,4 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditP
     </div>
   );
 }
+
