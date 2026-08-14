@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
 import { sendPushNotification } from "@/lib/push-notifications";
 import { rateLimit } from "@/lib/rate-limit";
+import { checkPostLength } from "@/lib/limits";
 
 // ─── GET: Fetch a page of threaded comments with counts and status ──
 // Paginates by top-level comment (cursor + limit), then loads only the
@@ -151,6 +152,13 @@ export async function POST(
 
     if (!content?.trim()) {
       return NextResponse.json({ error: "Comment cannot be empty" }, { status: 400 });
+    }
+
+    // Validate against the commenter's actual plan limit - previously
+    // this had no server-side length check at all.
+    const lengthCheck = checkPostLength(content.length, (session.user as any).plan || "free");
+    if (!lengthCheck.allowed) {
+      return NextResponse.json({ error: lengthCheck.message }, { status: 400 });
     }
 
     // ─── Check if comments are enabled for this post ────────────────
