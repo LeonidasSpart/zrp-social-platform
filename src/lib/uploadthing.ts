@@ -64,6 +64,22 @@ export const ourFileRouter = {
       return { url: file.url };
     }),
 
+  // ─── Chat document upload (PDF, Word, Excel, PowerPoint, plain text) ──
+  chatFile: f({
+    pdf: { maxFileSize: "8MB", maxFileCount: 1 },
+    text: { maxFileSize: "8MB", maxFileCount: 1 },
+    blob: { maxFileSize: "8MB", maxFileCount: 1 },
+  })
+    .middleware(async () => {
+      const session = await getServerSession(authOptions);
+      if (!session?.user) throw new UploadThingError("Unauthorized");
+      return { userId: session.user.id };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log("Chat document uploaded:", file.url, file.name);
+      return { url: file.url, name: file.name };
+    }),
+
   // ─── Story media upload (image or video) ────────────────────────
   storyMedia: f({
     image: { maxFileSize: "4MB", maxFileCount: 1 },
