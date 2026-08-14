@@ -151,6 +151,11 @@ export default function PostCard({
   const [liked, setLiked] = useState(post.liked || false);
   const [likesCount, setLikesCount] = useState(post._count?.likes || 0);
   const [commentsCount, setCommentsCount] = useState(post._count?.comments || 0);
+  // Once a link preview card successfully loads for a URL in this post's
+  // text, that raw URL is hidden from the visible text - the card itself
+  // becomes the link, matching X's behavior of not showing the same link
+  // twice (once as plain text, once as a preview card).
+  const [linkPreviewFoundFor, setLinkPreviewFoundFor] = useState<string | null>(null);
   const [showComments, setShowComments] = useState(false);
   const [reposted, setReposted] = useState(false);
   const [repostsCount, setRepostsCount] = useState(post._count?.reposts || 0);
@@ -186,6 +191,7 @@ export default function PostCard({
 
   const isAuthor = session?.user?.id === post.author.id;
   const contentParts = parseContent(post.content);
+  const previewUrl = post.linkUrl || extractFirstUrl(post.content);
   const isRepost = post.isRepost === true;
   const originalAuthor = post.repostOriginalAuthor;
 
@@ -676,6 +682,12 @@ export default function PostCard({
                   }
                   if (part.type === "url") {
                     const href = part.value.startsWith("http") ? part.value : `https://${part.value}`;
+                    // Hide this URL from the visible text once we know a
+                    // preview card successfully loaded for it - the card
+                    // becomes the link instead of showing it twice.
+                    if (previewUrl && href === previewUrl && linkPreviewFoundFor === previewUrl) {
+                      return null;
+                    }
                     return (
                       <a
                         key={index}
@@ -697,10 +709,12 @@ export default function PostCard({
               {/* Only for text posts - a post with actual uploaded media
                   (image/video) already has its own media block below, so
                   this stays out of the way of that. */}
-              {!post.imageUrl && (() => {
-                const previewUrl = post.linkUrl || extractFirstUrl(post.content);
-                return previewUrl ? <LinkPreviewCard url={previewUrl} /> : null;
-              })()}
+              {!post.imageUrl && previewUrl && (
+                <LinkPreviewCard
+                  url={previewUrl}
+                  onLoaded={(found) => setLinkPreviewFoundFor(found ? previewUrl : null)}
+                />
+              )}
 
               {/* ─── Translate post ───────────────────────────────────── */}
               {post.content.trim().length > 0 && (
