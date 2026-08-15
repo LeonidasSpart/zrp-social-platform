@@ -231,6 +231,11 @@ export default function RootLayout({
         />
 
         <meta
+          name="color-scheme"
+          content="light dark"
+        />
+
+        <meta
           name="mobile-web-app-capable"
           content="yes"
         />
@@ -240,9 +245,19 @@ export default function RootLayout({
           content="yes"
         />
 
+        {/* Status bar style was hardcoded to "black-translucent", which
+            renders a translucent black overlay over the status bar area
+            on iOS regardless of theme. That's correct for dark mode
+            (invisible against a dark background), but over a white/light
+            background it visually reads as a washed-out gray - this is
+            mobile-only by nature since desktop/iPad browser chrome
+            doesn't have this native status-bar overlay at all. The
+            ThemeContext now updates this dynamically to match the
+            active theme instead; "default" is set here purely as the
+            correct initial value for light mode (the default theme). */}
         <meta
           name="apple-mobile-web-app-status-bar-style"
-          content="black-translucent"
+          content="default"
         />
 
         <meta
