@@ -3,8 +3,16 @@ import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { sendVerificationEmail } from "@/lib/email";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  // Account creation had no rate limit at all - every signup also
+  // creates a real database row and sends a real email, so this was
+  // open to both mass spam-account creation and the same email-bombing
+  // concern as the resend-verification endpoint.
+  const limit = await rateLimit(req, { limit: 5, window: 3600, type: "auth-register" });
+  if (!limit.success) return limit.response;
+
   try {
     const { name, username, email, password } = await req.json();
 
