@@ -114,6 +114,7 @@ interface UserProfile {
   publicLikes: boolean;
   publicFollowing: boolean;
   isPrivate: boolean; // ✅ added
+  solanaWallet: string | null; // ✅ added - for tipping
   creatorProfile: {
     tipsEnabled: boolean;
   } | null;
@@ -1145,6 +1146,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
           onClose={() => setShowTipModal(false)}
           recipientId={profile.id}
           recipientName={profile.name || profile.username}
+          recipientWallet={profile.solanaWallet}
           onTipSent={() => {
             fetchProfile();
           }}
