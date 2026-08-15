@@ -1,10 +1,12 @@
-export type Language = "en" | "fr" | "de" | "it";
+export type Language = "en" | "fr" | "de" | "it" | "sq" | "es";
 
 export const SUPPORTED_LANGUAGES: { code: Language; label: string }[] = [
   { code: "en", label: "English" },
   { code: "fr", label: "Français" },
   { code: "de", label: "Deutsch" },
   { code: "it", label: "Italiano" },
+  { code: "sq", label: "Shqip" },
+  { code: "es", label: "Español" },
 ];
 
 type TranslationKey =
@@ -2911,5 +2913,9 @@ export const translations: Record<Language, TranslationDict> = {
     "contact.helpCenterLabel": "Centro assistenza",
   },
 };
+
+// Fallback to English for any newly enabled language until translations are available.
+translations.sq = translations.en;
+translations.es = translations.en;
 
 export type { TranslationKey };
