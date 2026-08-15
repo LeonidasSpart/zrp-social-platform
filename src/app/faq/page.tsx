@@ -1,153 +1,90 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import {
   ChevronDown,
   ChevronUp,
   UserPlus,
   LogIn,
-  KeyRound,
+  Key,
   Image as ImageIcon,
   Video,
   MessageSquare,
-  Bell,
   Shield,
   Heart,
   FileText,
   HelpCircle,
   Users,
-  Settings,
   Phone,
   Camera,
   Upload,
   Clock,
-  Globe,
   Lock,
   CheckCircle,
   Ticket,
   Trash2,
   Crown,
-  Search,
-  Sparkles,
-  Zap,
-  Wallet,
-  BarChart3,
-  Flag,
-  Scale,
-  Building2,
-  Mail,
-  ArrowRight,
-  ExternalLink,
   CircleHelp,
-  BadgeCheck,
-  Megaphone,
-  User,
-  Send,
-  Eye,
-  HeartHandshake,
+  Wallet,
+  Globe,
+  CreditCard,
+  Zap,
+  Scale,
+  Server,
+  Database,
 } from "lucide-react";
 
 interface FaqItem {
   id: string;
   category: string;
   question: string;
-  answer: React.ReactNode;
+  answer: string | React.ReactNode;
   icon?: React.ElementType;
 }
 
-const categories = [
-  {
-    id: "getting-started",
-    label: "Getting Started",
-    icon: Sparkles,
-  },
-  {
-    id: "profile-media",
-    label: "Profile & Media",
-    icon: ImageIcon,
-  },
-  {
-    id: "posts",
-    label: "Posts & Social",
-    icon: FileText,
-  },
-  {
-    id: "messaging",
-    label: "Messaging & Calls",
-    icon: MessageSquare,
-  },
-  {
-    id: "privacy",
-    label: "Privacy & Safety",
-    icon: Shield,
-  },
-  {
-    id: "web3",
-    label: "Web3 & Digital",
-    icon: Wallet,
-  },
-  {
-    id: "impact",
-    label: "Charity & Impact",
-    icon: Heart,
-  },
-  {
-    id: "accounts",
-    label: "Accounts & Plans",
-    icon: Crown,
-  },
-  {
-    id: "support",
-    label: "Support",
-    icon: Ticket,
-  },
-];
-
 export default function FAQPage() {
-  const [openId, setOpenId] = useState<string | null>("what-is-zrp");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
 
   const toggleFaq = (id: string) => {
     setOpenId(openId === id ? null : id);
   };
 
   const faqs: FaqItem[] = [
-    /* ═══════════════════════════════════════════════════════════════════════
+    /* ================================================================
        GETTING STARTED
-    ═══════════════════════════════════════════════════════════════════════ */
+    ================================================================ */
 
     {
       id: "what-is-zrp",
       category: "Getting Started",
       question: "What is ZRP Social?",
-      icon: Sparkles,
+      icon: HelpCircle,
       answer: (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <p>
-            <strong>ZRP Social</strong> is a Swiss-focused social platform
-            built around communication, community, privacy, freedom of
-            expression, and modern digital technology.
+            ZRP Social is a Swiss-based social platform designed around
+            <strong> freedom of expression</strong>, <strong>privacy</strong>,
+            security, and community.
           </p>
 
           <p>
-            ZRP is designed to give people a place to publish posts, interact
-            with communities, communicate directly, share media, build
-            professional profiles, and participate in an evolving digital
-            ecosystem.
+            The platform provides tools for individuals, creators,
+            organisations, businesses, and communities to communicate,
+            publish content, build audiences, and connect with other users.
           </p>
 
-          <div className="rounded-xl border border-zrp-red/20 bg-zrp-red/5 p-4">
-            <div className="flex items-start gap-3">
-              <Heart className="w-5 h-5 text-zrp-red flex-shrink-0" />
-              <p className="text-sm">
-                ZRP has a stated commitment to allocate{" "}
-                <strong>35% of platform profits</strong> toward charitable
-                causes.
-              </p>
-            </div>
-          </div>
+          <p>
+            ZRP is designed with a strong focus on European values,
+            responsible technology, user control, and transparent platform
+            policies.
+          </p>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            🧡 ZRP is built to give people a place to connect, communicate,
+            and create.
+          </p>
         </div>
       ),
     },
@@ -155,52 +92,33 @@ export default function FAQPage() {
     {
       id: "how-to-register",
       category: "Getting Started",
-      question: "How do I create a ZRP account?",
+      question: "How do I register an account?",
       icon: UserPlus,
       answer: (
-        <div className="space-y-4">
-          <p>Creating an account is straightforward:</p>
-
-          <StepList
-            steps={[
-              <>
-                Go to the{" "}
-                <Link href="/signup" className="faq-link">
-                  Sign Up
-                </Link>{" "}
-                page.
-              </>,
-              "Enter the requested account information.",
-              "Choose your username and password.",
-              "Complete any email verification step requested by ZRP.",
-              "Complete your profile and onboarding.",
-            ]}
-          />
-
-          <InfoBox icon={CheckCircle}>
-            Registration is free unless ZRP introduces a specific paid feature
-            or service.
-          </InfoBox>
-        </div>
-      ),
-    },
-
-    {
-      id: "google-login",
-      category: "Getting Started",
-      question: "Can I sign in with Google?",
-      icon: LogIn,
-      answer: (
         <div className="space-y-3">
-          <p>
-            If <strong>Google Sign-In</strong> is enabled on your version of
-            ZRP, you can use the Google authentication option on the login
-            screen.
-          </p>
+          <p>Creating a ZRP Social account is simple:</p>
+
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>
+              Go to the{" "}
+              <Link
+                href="/signup"
+                className="text-zrp-red hover:underline"
+              >
+                Sign Up
+              </Link>{" "}
+              page.
+            </li>
+            <li>Enter your registration information.</li>
+            <li>Choose a username and password.</li>
+            <li>Create your account.</li>
+            <li>Verify your email address if verification is requested.</li>
+            <li>Complete your profile and onboarding.</li>
+          </ol>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            The available authentication methods shown on the live ZRP login
-            page are the authoritative list of supported sign-in options.
+            🔐 Never share your password or verification codes with another
+            person.
           </p>
         </div>
       ),
@@ -212,25 +130,29 @@ export default function FAQPage() {
       question: "How do I log in?",
       icon: LogIn,
       answer: (
-        <div className="space-y-4">
-          <StepList
-            steps={[
-              <>
-                Open the{" "}
-                <Link href="/login" className="faq-link">
-                  Login
-                </Link>{" "}
-                page.
-              </>,
-              "Enter your account credentials or use an available social login option.",
-              "Select Sign In.",
-            ]}
-          />
+        <div className="space-y-3">
+          <p>To access your account:</p>
 
-          <InfoBox icon={Lock}>
-            Never share your password with another person or enter your
-            credentials into an unofficial ZRP website.
-          </InfoBox>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>
+              Open the{" "}
+              <Link
+                href="/login"
+                className="text-zrp-red hover:underline"
+              >
+                Login
+              </Link>{" "}
+              page.
+            </li>
+            <li>Enter your registered email address.</li>
+            <li>Enter your password.</li>
+            <li>Select Sign In.</li>
+          </ol>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            If you cannot access your account, use the password recovery
+            option.
+          </p>
         </div>
       ),
     },
@@ -238,37 +160,39 @@ export default function FAQPage() {
     {
       id: "password-reset",
       category: "Getting Started",
-      question: "I forgot my password. What should I do?",
-      icon: KeyRound,
+      question: "How do I reset my password?",
+      icon: Key,
       answer: (
-        <div className="space-y-4">
-          <StepList
-            steps={[
-              <>
-                Go to{" "}
-                <Link href="/login" className="faq-link">
-                  Login
-                </Link>
-                .
-              </>,
-              "Select Forgot password.",
-              "Enter the email address associated with your account.",
-              "Check your email for the password-reset instructions.",
-              "Create a new password using the secure reset process.",
-            ]}
-          />
+        <div className="space-y-3">
+          <p>To reset your password:</p>
 
-          <InfoBox icon={Shield}>
-            If you did not request a password reset, do not use the link and
-            consider securing your account.
-          </InfoBox>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>
+              Go to the{" "}
+              <Link
+                href="/login"
+                className="text-zrp-red hover:underline"
+              >
+                Login
+              </Link>{" "}
+              page.
+            </li>
+            <li>Select <strong>Forgot password?</strong></li>
+            <li>Enter the email address associated with your account.</li>
+            <li>Check your email for the password reset instructions.</li>
+            <li>Create a new secure password.</li>
+          </ol>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            ⏳ Password reset links may expire for security reasons.
+          </p>
         </div>
       ),
     },
 
-    /* ═══════════════════════════════════════════════════════════════════════
+    /* ================================================================
        PROFILE & MEDIA
-    ═══════════════════════════════════════════════════════════════════════ */
+    ================================================================ */
 
     {
       id: "avatar-size",
@@ -276,33 +200,54 @@ export default function FAQPage() {
       question: "What are the avatar requirements?",
       icon: ImageIcon,
       answer: (
-        <MediaRequirements
-          items={[
-            ["Maximum file size", "2 MB"],
-            ["Formats", "JPEG, PNG, GIF, WebP"],
-            ["Recommended", "400 × 400 px"],
-            ["Shape", "Square"],
-          ]}
-          note="A square, high-quality image normally produces the best profile result."
-        />
+        <div className="space-y-3">
+          <p>
+            <strong>Recommended avatar specifications:</strong>
+          </p>
+
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>
+              <strong>Maximum file size:</strong> 2 MB
+            </li>
+            <li>
+              <strong>Formats:</strong> JPEG, PNG, GIF, WebP
+            </li>
+            <li>
+              <strong>Recommended resolution:</strong> 400×400 px
+            </li>
+          </ul>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            💡 A square, high-quality image normally produces the best
+            result.
+          </p>
+        </div>
       ),
     },
 
     {
       id: "banner-size",
       category: "Profile & Media",
-      question: "What are the profile banner requirements?",
+      question: "What are the banner image requirements?",
       icon: Camera,
       answer: (
-        <MediaRequirements
-          items={[
-            ["Maximum file size", "4 MB"],
-            ["Formats", "JPEG, PNG, GIF, WebP"],
-            ["Recommended", "1200 × 400 px"],
-            ["Aspect ratio", "3:1"],
-          ]}
-          note="Keep important text and logos away from the extreme edges because profile layouts can vary between devices."
-        />
+        <div className="space-y-3">
+          <p>
+            <strong>Recommended banner specifications:</strong>
+          </p>
+
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>
+              <strong>Maximum file size:</strong> 4 MB
+            </li>
+            <li>
+              <strong>Formats:</strong> JPEG, PNG, GIF, WebP
+            </li>
+            <li>
+              <strong>Recommended resolution:</strong> 1200×400 px
+            </li>
+          </ul>
+        </div>
       ),
     },
 
@@ -312,191 +257,212 @@ export default function FAQPage() {
       question: "What are the post image requirements?",
       icon: Upload,
       answer: (
-        <MediaRequirements
-          items={[
-            ["Maximum file size", "4 MB"],
-            ["Formats", "JPEG, PNG, GIF, WebP"],
-            ["Recommended", "1200 × 800 px"],
-            ["Aspect ratio", "3:2"],
-          ]}
-          note="Actual upload limits may depend on the current ZRP deployment and account plan."
-        />
+        <div className="space-y-3">
+          <p>
+            <strong>Recommended post image specifications:</strong>
+          </p>
+
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>
+              <strong>Maximum file size:</strong> 4 MB
+            </li>
+            <li>
+              <strong>Formats:</strong> JPEG, PNG, GIF, WebP
+            </li>
+            <li>
+              <strong>Recommended resolution:</strong> 1200×800 px
+            </li>
+          </ul>
+        </div>
       ),
     },
 
     {
       id: "post-video-size",
       category: "Profile & Media",
-      question: "What are the video requirements?",
+      question: "What are the post video requirements?",
       icon: Video,
       answer: (
-        <MediaRequirements
-          items={[
-            ["Maximum file size", "32 MB"],
-            ["Formats", "MP4, MOV, AVI, WebM"],
-            ["Recommended", "1280 × 720 px or higher"],
-            ["Recommended encoding", "H.264"],
-          ]}
-          note="Shorter videos generally provide a better experience for mobile users and faster uploads."
-        />
+        <div className="space-y-3">
+          <p>
+            <strong>Recommended video specifications:</strong>
+          </p>
+
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>
+              <strong>Maximum file size:</strong> 32 MB
+            </li>
+            <li>
+              <strong>Formats:</strong> MP4, MOV, AVI, WebM
+            </li>
+            <li>
+              <strong>Recommended resolution:</strong> 1280×720 px or higher
+            </li>
+            <li>
+              <strong>Recommended encoding:</strong> H.264
+            </li>
+          </ul>
+        </div>
       ),
     },
 
     {
       id: "chat-image-size",
       category: "Profile & Media",
-      question: "Can I send images in messages?",
+      question: "What are the chat image requirements?",
       icon: MessageSquare,
       answer: (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <p>
-            If media messaging is enabled for your account, you can send
-            supported image formats through direct conversations.
+            <strong>Chat image specifications:</strong>
           </p>
 
-          <MediaRequirements
-            items={[
-              ["Maximum file size", "4 MB"],
-              ["Formats", "JPEG, PNG, GIF, WebP"],
-              ["Recommended", "800 × 800 px"],
-            ]}
-          />
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>
+              <strong>Maximum file size:</strong> 4 MB
+            </li>
+            <li>
+              <strong>Formats:</strong> JPEG, PNG, GIF, WebP
+            </li>
+            <li>
+              <strong>Recommended resolution:</strong> 800×800 px
+            </li>
+          </ul>
         </div>
       ),
     },
 
-    /* ═══════════════════════════════════════════════════════════════════════
-       POSTS & SOCIAL
-    ═══════════════════════════════════════════════════════════════════════ */
+    /* ================================================================
+       POSTS & INTERACTIONS
+    ================================================================ */
 
     {
       id: "how-to-post",
-      category: "Posts & Social",
+      category: "Posts & Interactions",
       question: "How do I create a post?",
       icon: FileText,
       answer: (
-        <div className="space-y-4">
-          <p>To publish on ZRP:</p>
+        <div className="space-y-3">
+          <p>To publish a post:</p>
 
-          <StepList
-            steps={[
-              'Open the post composer.',
-              "Write your content.",
-              "Add hashtags or mentions if relevant.",
-              "Optionally add supported media, a poll, or other available features.",
-              "Publish immediately or schedule the post if scheduling is available.",
-            ]}
-          />
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Open your home feed.</li>
+            <li>Open the post composer.</li>
+            <li>Write your message.</li>
+            <li>Add media or a poll if available.</li>
+            <li>Add hashtags or mentions if appropriate.</li>
+            <li>Select <strong>Post</strong>.</li>
+          </ol>
 
-          <InfoBox icon={Zap}>
-            Character limits and available media options depend on your
-            account plan and the current ZRP platform configuration.
-          </InfoBox>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            📢 Content remains subject to the ZRP Terms of Service and
+            Community Guidelines.
+          </p>
         </div>
       ),
     },
 
     {
       id: "how-to-schedule-post",
-      category: "Posts & Social",
-      question: "Can I schedule posts?",
+      category: "Posts & Interactions",
+      question: "How do I schedule a post?",
       icon: Clock,
       answer: (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <p>
-            If scheduled publishing is available on your account, you can
-            prepare a post and choose a future publication time.
+            If scheduling is available for your account, you can publish
+            content automatically at a future date and time.
           </p>
 
-          <StepList
-            steps={[
-              "Create your post.",
-              "Open the scheduling option.",
-              "Choose the desired date and time.",
-              "Review the post.",
-              "Confirm the schedule.",
-            ]}
-          />
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Create your post.</li>
+            <li>Select the scheduling option.</li>
+            <li>Choose the future date and time.</li>
+            <li>Confirm the scheduled publication.</li>
+          </ol>
 
-          <InfoBox icon={Clock}>
-            Scheduled-post limits vary by plan.
-          </InfoBox>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            ⏰ Availability and limits may depend on your account plan.
+          </p>
         </div>
       ),
     },
 
     {
       id: "how-to-comment",
-      category: "Posts & Social",
+      category: "Posts & Interactions",
       question: "How do I comment or reply?",
       icon: MessageSquare,
       answer: (
-        <StepList
-          steps={[
-            "Open the post.",
-            "Select the comment/reply option.",
-            "Write your response.",
-            "Submit your comment.",
-          ]}
-        />
+        <div className="space-y-3">
+          <p>
+            Select the comment or reply option beneath a post, enter your
+            message, and submit it.
+          </p>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            💬 You remain responsible for comments and replies you publish.
+          </p>
+        </div>
       ),
     },
 
     {
       id: "hashtags-mentions",
-      category: "Posts & Social",
+      category: "Posts & Interactions",
       question: "How do hashtags and mentions work?",
       icon: Users,
       answer: (
-        <div className="space-y-5">
-          <div>
-            <h4 className="font-semibold mb-2">Hashtags</h4>
-            <p className="text-sm">
-              Hashtags such as <strong>#ZRP</strong> or{" "}
-              <strong>#Web3</strong> help categorise public conversations and
-              make related content easier to discover.
-            </p>
-          </div>
+        <div className="space-y-3">
+          <p>
+            <strong>Hashtags</strong> use the # symbol to organise content
+            around a topic.
+          </p>
 
-          <div>
-            <h4 className="font-semibold mb-2">Mentions</h4>
-            <p className="text-sm">
-              Mentions such as <strong>@username</strong> can reference another
-              account. Depending on account settings, the mentioned user may
-              receive a notification.
-            </p>
-          </div>
+          <p>
+            Example:{" "}
+            <span className="text-zrp-red font-medium">#ZRP</span>{" "}
+            or{" "}
+            <span className="text-zrp-red font-medium">#Web3</span>
+          </p>
+
+          <p>
+            <strong>Mentions</strong> use the @ symbol to reference another
+            account.
+          </p>
+
+          <p>
+            Example:{" "}
+            <span className="text-zrp-red font-medium">@username</span>
+          </p>
         </div>
       ),
     },
 
     {
       id: "how-to-pin-post",
-      category: "Posts & Social",
-      question: "Can I pin a post to my profile?",
+      category: "Posts & Interactions",
+      question: "How do I pin a post to my profile?",
       icon: CheckCircle,
       answer: (
-        <div className="space-y-4">
-          <StepList
-            steps={[
-              "Open your profile.",
-              "Find the post you want to highlight.",
-              "Open the post options.",
-              "Select the available Pin option.",
-            ]}
-          />
+        <div className="space-y-3">
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Open your profile.</li>
+            <li>Find the post you want to highlight.</li>
+            <li>Select the post options menu.</li>
+            <li>Select <strong>Pin</strong>.</li>
+          </ol>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            A pinned post is displayed prominently on your profile when the
-            feature is enabled.
+            📌 You can remove the pinned status later.
           </p>
         </div>
       ),
     },
 
-    /* ═══════════════════════════════════════════════════════════════════════
-       MESSAGING
-    ═══════════════════════════════════════════════════════════════════════ */
+    /* ================================================================
+       MESSAGING & CALLS
+    ================================================================ */
 
     {
       id: "how-to-message",
@@ -504,47 +470,43 @@ export default function FAQPage() {
       question: "How do I send a direct message?",
       icon: MessageSquare,
       answer: (
-        <StepList
-          steps={[
-            "Open the recipient's profile or your Messages area.",
-            "Open the conversation.",
-            "Write your message.",
-            "Press Send.",
-          ]}
-        />
+        <div className="space-y-3">
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Open the user's profile or an existing conversation.</li>
+            <li>Select <strong>Message</strong>.</li>
+            <li>Write your message.</li>
+            <li>Select Send.</li>
+          </ol>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            💬 Messaging availability may depend on account privacy settings
+            and platform restrictions.
+          </p>
+        </div>
       ),
     },
 
     {
       id: "how-to-call",
       category: "Messaging & Calls",
-      question: "Can I make voice or video calls?",
+      question: "How do I make a voice or video call?",
       icon: Phone,
       answer: (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <p>
-            If calling is enabled in the current ZRP application, calls can be
-            started from supported conversations.
+            Where voice or video calling is available:
           </p>
 
-          <div className="grid sm:grid-cols-2 gap-3">
-            <MiniFeature
-              icon={Phone}
-              title="Voice"
-              text="Start an audio conversation where calling is supported."
-            />
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Open a direct message conversation.</li>
+            <li>Select the voice or video call option.</li>
+            <li>Wait for the recipient to accept the call.</li>
+          </ol>
 
-            <MiniFeature
-              icon={Video}
-              title="Video"
-              text="Start a video conversation where video calling is supported."
-            />
-          </div>
-
-          <InfoBox icon={Globe}>
-            Call quality depends on your device, browser/app permissions, and
-            network connection.
-          </InfoBox>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            📞 Calls require a compatible device, browser, microphone, camera,
+            and stable network connection.
+          </p>
         </div>
       ),
     },
@@ -557,79 +519,57 @@ export default function FAQPage() {
       answer: (
         <div className="space-y-3">
           <p>
-            Read receipts indicate the delivery or viewing state of a message
-            when the feature is enabled.
+            Read receipts indicate whether a message has been delivered or
+            viewed, where the feature is enabled.
           </p>
 
-          <div className="grid sm:grid-cols-2 gap-3">
-            <StatusCard
-              symbol="✓"
-              title="Delivered"
-              text="The message has been delivered."
-            />
-
-            <StatusCard
-              symbol="✓✓"
-              title="Read"
-              text="The recipient has viewed the message."
-            />
-          </div>
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>
+              <strong>Delivered:</strong> The message reached the recipient's
+              messaging service.
+            </li>
+            <li>
+              <strong>Read:</strong> The recipient has opened or viewed the
+              conversation.
+            </li>
+          </ul>
         </div>
       ),
     },
 
-    /* ═══════════════════════════════════════════════════════════════════════
+    /* ================================================================
        PRIVACY & SAFETY
-    ═══════════════════════════════════════════════════════════════════════ */
+    ================================================================ */
 
     {
       id: "privacy-policy",
       category: "Privacy & Safety",
-      question: "How does ZRP protect my data?",
+      question: "How is my data protected?",
       icon: Lock,
       answer: (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <p>
-            ZRP's privacy practices are described in detail in the{" "}
-            <Link href="/privacy" className="faq-link">
+            ZRP Social takes privacy and security seriously.
+          </p>
+
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>Encrypted connections using HTTPS/TLS.</li>
+            <li>Security controls designed to protect accounts and data.</li>
+            <li>Access controls for internal systems.</li>
+            <li>Security monitoring and abuse prevention.</li>
+            <li>Account and data deletion mechanisms.</li>
+          </ul>
+
+          <p>
+            For complete information, read our{" "}
+            <Link
+              href="/privacy"
+              className="text-zrp-red hover:underline"
+            >
               Privacy Policy
             </Link>
             .
           </p>
-
-          <div className="grid sm:grid-cols-2 gap-3">
-            <PrivacyCard
-              icon={Lock}
-              title="Secure connections"
-              text="Traffic should be protected using modern HTTPS/TLS security."
-            />
-
-            <PrivacyCard
-              icon={Shield}
-              title="Account protection"
-              text="Security measures are used to help protect accounts and platform infrastructure."
-            />
-
-            <PrivacyCard
-              icon={Eye}
-              title="Transparency"
-              text="Users can review the Privacy Policy to understand how information is processed."
-            />
-
-            <PrivacyCard
-              icon={Trash2}
-              title="Data rights"
-              text="Applicable users can exercise privacy rights including access and deletion."
-            />
-          </div>
-
-          <Link
-            href="/privacy"
-            className="inline-flex items-center gap-2 faq-link font-semibold"
-          >
-            Read Privacy Policy
-            <ArrowRight className="w-4 h-4" />
-          </Link>
         </div>
       ),
     },
@@ -638,23 +578,20 @@ export default function FAQPage() {
       id: "how-to-report",
       category: "Privacy & Safety",
       question: "How do I report inappropriate content?",
-      icon: Flag,
+      icon: Shield,
       answer: (
-        <div className="space-y-4">
-          <StepList
-            steps={[
-              "Open the options menu on the relevant post, comment, or account.",
-              "Select Report.",
-              "Choose the reason that best describes the issue.",
-              "Provide additional information if appropriate.",
-              "Submit the report.",
-            ]}
-          />
+        <div className="space-y-3">
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Open the options menu on the content.</li>
+            <li>Select <strong>Report</strong>.</li>
+            <li>Select the appropriate reason.</li>
+            <li>Add additional information if necessary.</li>
+            <li>Submit the report.</li>
+          </ol>
 
-          <InfoBox icon={Shield}>
-            Reports are reviewed according to ZRP's rules, Community
-            Guidelines, applicable law, and the circumstances of the report.
-          </InfoBox>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            🛡️ Reports are reviewed according to applicable ZRP policies.
+          </p>
         </div>
       ),
     },
@@ -662,23 +599,20 @@ export default function FAQPage() {
     {
       id: "how-to-block",
       category: "Privacy & Safety",
-      question: "How do I block another user?",
+      question: "How do I block a user?",
       icon: Shield,
       answer: (
-        <div className="space-y-4">
-          <StepList
-            steps={[
-              "Open the user's profile.",
-              "Open the available profile options.",
-              "Select Block.",
-              "Confirm the action.",
-            ]}
-          />
+        <div className="space-y-3">
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Open the user's profile.</li>
+            <li>Select the options menu.</li>
+            <li>Select <strong>Block</strong>.</li>
+            <li>Confirm the action.</li>
+          </ol>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Blocking changes how the two accounts can interact. Exact
-            visibility and interaction behaviour is determined by the current
-            ZRP implementation.
+            🚫 Blocking can prevent the blocked account from interacting with
+            you according to the platform's blocking functionality.
           </p>
         </div>
       ),
@@ -690,95 +624,65 @@ export default function FAQPage() {
       question: "How do I delete my account?",
       icon: Trash2,
       answer: (
-        <div className="space-y-4">
-          <StepList
-            steps={[
-              <>
-                Open{" "}
-                <Link href="/settings" className="faq-link">
-                  Settings
-                </Link>
-                .
-              </>,
-              "Open the account-management section.",
-              "Select the available Delete Account option.",
-              "Review the warning and consequences.",
-              "Confirm the deletion request.",
-            ]}
-          />
-
-          <InfoBox icon={Shield} danger>
-            Account deletion may be irreversible. Information may be retained
-            where required by law or for legitimate security, fraud-prevention,
-            backup, or dispute-resolution purposes.
-          </InfoBox>
-
-          <Link href="/privacy" className="faq-link text-sm">
-            Review the Privacy Policy →
-          </Link>
-        </div>
-      ),
-    },
-
-    /* ═══════════════════════════════════════════════════════════════════════
-       WEB3 & DIGITAL
-    ═══════════════════════════════════════════════════════════════════════ */
-
-    {
-      id: "is-zrp-web3",
-      category: "Web3 & Digital",
-      question: "Is ZRP a Web3 platform?",
-      icon: Wallet,
-      answer: (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <p>
-            ZRP is designed with modern digital and Web3 technologies in mind,
-            while keeping the core social experience accessible to ordinary
-            users.
+            You can request permanent deletion of your ZRP Social account
+            through your account settings.
           </p>
 
-          <p>
-            You should not need to understand blockchain technology simply to
-            use ZRP as a social network.
-          </p>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>
+              Go to{" "}
+              <Link
+                href="/settings"
+                className="text-zrp-red hover:underline"
+              >
+                Settings
+              </Link>
+              .
+            </li>
+            <li>Open the Account section.</li>
+            <li>Select <strong>Delete Account</strong>.</li>
+            <li>Review the warning carefully.</li>
+            <li>Confirm the deletion request.</li>
+          </ol>
 
-          <div className="rounded-2xl bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack p-5 text-white">
-            <div className="flex items-start gap-4">
-              <Wallet className="w-6 h-6 text-zrp-red flex-shrink-0" />
-
-              <div>
-                <h4 className="font-orbitron font-bold">
-                  Web3-ready, user-first
-                </h4>
-
-                <p className="mt-2 text-sm leading-6 text-white/65">
-                  Digital ownership, payments, identity, and other
-                  decentralised technologies can be integrated where they add
-                  genuine value rather than complexity.
-                </p>
-              </div>
-            </div>
+          <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg text-sm">
+            ⚠️ Account deletion may be permanent and cannot normally be
+            reversed. Certain information may be retained where required by
+            applicable law.
           </div>
         </div>
       ),
     },
 
+    /* ================================================================
+       WEB3 & DIGITAL
+    ================================================================ */
+
     {
-      id: "need-wallet",
+      id: "what-is-web3",
       category: "Web3 & Digital",
-      question: "Do I need a crypto wallet to use ZRP?",
-      icon: Wallet,
+      question: "What does Web3 mean for ZRP?",
+      icon: Globe,
       answer: (
         <div className="space-y-3">
           <p>
-            <strong>No.</strong> A crypto wallet should not be required simply
-            to create a normal ZRP Social account or participate in ordinary
-            social interactions.
+            Web3 generally refers to a new generation of internet
+            infrastructure that can include decentralised networks,
+            blockchain technology, digital assets, cryptographic identities,
+            and user-controlled digital ownership.
+          </p>
+
+          <p>
+            ZRP may explore Web3 technologies where they provide meaningful
+            benefits to users, creators, organisations, or the broader
+            ecosystem.
           </p>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Blockchain or digital-payment features, if offered, may have
-            separate requirements.
+            ⚠️ Web3 features should only be considered available when they are
+            officially enabled and documented by ZRP.
           </p>
         </div>
       ),
@@ -788,97 +692,193 @@ export default function FAQPage() {
       id: "digital-payments",
       category: "Web3 & Digital",
       question: "Will ZRP support digital or blockchain payments?",
-      icon={CircleHelp}
+      icon: CircleHelp,
       answer: (
         <div className="space-y-3">
           <p>
             ZRP can support modern digital-payment infrastructure where it
-            provides a useful experience for users and creators.
+            provides a useful and secure experience for users and creators.
+          </p>
+
+          <p>
+            Digital payments may include conventional online payment methods
+            and, where officially supported, blockchain-based payment
+            infrastructure.
           </p>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Only payment methods and blockchain functionality actually enabled
-            in the live ZRP product should be considered available.
+            🔐 Payment methods, supported networks, assets, fees, and
+            availability will depend on the features officially enabled by
+            ZRP.
           </p>
         </div>
       ),
     },
 
     {
-      id: "creator-economy",
+      id: "zrp-wallet",
       category: "Web3 & Digital",
-      question: "Will creators be able to monetise on ZRP?",
-      icon: CircleHelp,
+      question: "Does ZRP have a Web3 wallet?",
+      icon: Wallet,
       answer: (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <p>
-            ZRP can provide creator-economy features designed to help creators
-            build audiences and participate in monetisation opportunities.
+            ZRP may integrate wallet functionality as part of its broader
+            digital ecosystem.
           </p>
 
-          <div className="grid sm:grid-cols-2 gap-3">
-            <MiniFeature
-              icon={BarChart3}
-              title="Analytics"
-              text="Understand audience engagement and content performance."
-            />
+          <p>
+            A Web3 wallet can allow users to interact with blockchain
+            applications and manage compatible digital assets.
+          </p>
 
-            <MiniFeature
-              icon={CircleHelp}
-              title="Monetisation"
-              text="Participate in monetisation features when available."
-            />
-          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            🔑 Never share a private key, seed phrase, recovery phrase, or
+            wallet password with anyone, including someone claiming to be
+            ZRP support.
+          </p>
         </div>
       ),
     },
 
-    /* ═══════════════════════════════════════════════════════════════════════
+    {
+      id: "blockchain-security",
+      category: "Web3 & Digital",
+      question: "What should I know about blockchain security?",
+      icon: Shield,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            Blockchain transactions can be irreversible. Users should verify
+            addresses, networks, assets, and transaction details before
+            approving a transaction.
+          </p>
+
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>Never share your private keys.</li>
+            <li>Never share your recovery phrase.</li>
+            <li>Verify wallet addresses before sending assets.</li>
+            <li>Be careful with links and third-party applications.</li>
+            <li>Do not trust unsolicited investment or giveaway messages.</li>
+          </ul>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            🛡️ ZRP support will never ask you for your private key or recovery
+            phrase.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "blockchain-transactions",
+      category: "Web3 & Digital",
+      question: "Can blockchain transactions be reversed?",
+      icon: Scale,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            Generally, confirmed blockchain transactions cannot simply be
+            reversed by the sender or recipient.
+          </p>
+
+          <p>
+            Users should therefore verify the destination address, network,
+            amount, and transaction details before confirming a blockchain
+            transaction.
+          </p>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            ⚠️ Blockchain transactions can involve risks, network fees,
+            technical failures, and third-party services.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "web3-not-investment",
+      category: "Web3 & Digital",
+      question: "Is ZRP an investment platform?",
+      icon: CreditCard,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            ZRP Social is primarily a social platform and digital ecosystem.
+          </p>
+
+          <p>
+            References to blockchain, Web3, digital assets, or future
+            technology integrations should not automatically be interpreted
+            as an offer, recommendation, or guarantee of financial returns.
+          </p>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            ⚠️ Always conduct your own research and consider professional
+            advice before making financial or digital-asset decisions.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "web3-future",
+      category: "Web3 & Digital",
+      question: "What Web3 features could ZRP introduce in the future?",
+      icon: Zap,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            Depending on product development and regulatory requirements, ZRP
+            may explore technologies such as:
+          </p>
+
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>Digital wallets.</li>
+            <li>Blockchain-based payments.</li>
+            <li>Digital identity infrastructure.</li>
+            <li>Creator ownership tools.</li>
+            <li>Tokenised community features.</li>
+            <li>Decentralised applications and integrations.</li>
+          </ul>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            🚀 Future concepts are not guarantees of future functionality.
+            Only officially released features should be considered active.
+          </p>
+        </div>
+      ),
+    },
+
+    /* ================================================================
        CHARITY & IMPACT
-    ═══════════════════════════════════════════════════════════════════════ */
+    ================================================================ */
 
     {
       id: "charity-model",
       category: "Charity & Impact",
-      question: "How does the 35% charity commitment work?",
-      icon: HeartHandshake,
+      question: "How does the 35% charity model work?",
+      icon: Heart,
       answer: (
-        <div className="space-y-5">
+        <div className="space-y-3">
           <p>
-            ZRP has stated a commitment to allocate{" "}
-            <strong>35% of platform profits</strong> toward charitable causes.
+            ZRP's stated social-impact commitment is to dedicate{" "}
+            <strong>35% of platform profits</strong> to charitable causes.
           </p>
 
-          <div className="grid sm:grid-cols-2 gap-3">
-            <ImpactCard
-              icon="🧸"
-              title="Orphans"
-              text="Supporting children and communities in need."
-            />
+          <p>These causes may include:</p>
 
-            <ImpactCard
-              icon="🏫"
-              title="Schools"
-              text="Supporting access to education."
-            />
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>🧸 Support for orphans and children in need.</li>
+            <li>🏫 Education and schools.</li>
+            <li>🏥 Hospitals and healthcare initiatives.</li>
+            <li>🌍 Climate and environmental relief.</li>
+          </ul>
 
-            <ImpactCard
-              icon="🏥"
-              title="Hospitals"
-              text="Supporting healthcare-related causes."
-            />
-
-            <ImpactCard
-              icon="🌍"
-              title="Climate"
-              text="Supporting climate and environmental relief."
-            />
-          </div>
-
-          <InfoBox icon={Heart}>
-            The 35% figure refers to platform profits, not a 35% deduction from
-            every individual user payment.
-          </InfoBox>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            🧡 The contribution is based on platform profits and is not an
+            additional fee charged directly to users.
+          </p>
         </div>
       ),
     },
@@ -886,1041 +886,815 @@ export default function FAQPage() {
     {
       id: "impact-badge",
       category: "Charity & Impact",
-      question: "What is the Impact badge?",
+      question: "What is the impact badge on my profile?",
       icon: Heart,
       answer: (
         <div className="space-y-3">
           <p>
-            An Impact badge or similar feature can communicate participation
-            in ZRP's social-impact ecosystem.
+            An impact badge may be used to represent participation in ZRP's
+            broader social-impact ecosystem.
           </p>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            The exact functionality and metrics displayed by an Impact feature
-            depend on the live ZRP implementation.
+          <p>
+            Any specific metrics displayed by the platform should be
+            interpreted according to the methodology published by ZRP.
           </p>
         </div>
       ),
     },
 
-    /* ═══════════════════════════════════════════════════════════════════════
-       ACCOUNTS & PLANS
-    ═══════════════════════════════════════════════════════════════════════ */
+    /* ================================================================
+       VERIFICATION & ADMINISTRATION
+    ================================================================ */
 
     {
-      id: "plans",
-      category: "Accounts & Plans",
-      question: "What account plans does ZRP offer?",
-      icon: Crown,
+      id: "admin-roles",
+      category: "Administration",
+      question: "What are the different user roles?",
+      icon: Users,
       answer: (
-        <div className="space-y-5">
+        <div className="space-y-3">
           <p>
-            ZRP can offer different account levels for individual users,
-            creators, businesses, and larger organisations.
+            ZRP may use different roles to operate and moderate the platform.
           </p>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <PlanMini
-              title="Free"
-              description="Core social experience"
-            />
+          <p>
+            <strong>User</strong> – Standard account with access to available
+            social features.
+          </p>
 
-            <PlanMini
-              title="Pro"
-              description="Creators & advanced users"
-              featured
-            />
+          <p>
+            <strong>Moderator</strong> – Authorised personnel responsible for
+            reviewing reports and enforcing applicable policies.
+          </p>
 
-            <PlanMini
-              title="Business"
-              description="Teams & companies"
-            />
+          <p>
+            <strong>Administrator</strong> – Authorised personnel with
+            additional platform-management permissions.
+          </p>
 
-            <PlanMini
-              title="Enterprise"
-              description="Large organisations"
-            />
-          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            🛡️ Administrative access is restricted according to internal
+            permissions.
+          </p>
+        </div>
+      ),
+    },
 
-          <Link href="/help#help-account-types" className="faq-link">
-            Compare plans in the Help Center →
-          </Link>
+    {
+      id: "verified-badge",
+      category: "Administration",
+      question: "What do the verified badges mean?",
+      icon: CheckCircle,
+      answer: (
+        <div className="space-y-3">
+          <ul className="space-y-3 text-sm">
+            <li className="flex items-center gap-2">
+              <VerifiedBadge badgeType="verified" />
+              <span>
+                <strong>Verified</strong> – Indicates an account that has
+                received ZRP verification.
+              </span>
+            </li>
+
+            <li className="flex items-center gap-2">
+              <VerifiedBadge badgeType="organization" />
+              <span>
+                <strong>Organization</strong> – Official organisation or
+                company account.
+              </span>
+            </li>
+
+            <li className="flex items-center gap-2">
+              <VerifiedBadge badgeType="government" />
+              <span>
+                <strong>Government</strong> – Official government account.
+              </span>
+            </li>
+
+            <li className="flex items-center gap-2">
+              <VerifiedBadge badgeType="team" />
+              <span>
+                <strong>ZRP Team</strong> – Official ZRP staff account.
+              </span>
+            </li>
+          </ul>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            🏅 Verification indicates authenticity or official status
+            according to ZRP's verification system.
+          </p>
         </div>
       ),
     },
 
     {
       id: "enterprise-plan",
-      category: "Accounts & Plans",
+      category: "Administration",
       question: "What is the Enterprise plan?",
-      icon: Building2,
+      icon: Crown,
       answer: (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <p>
-            Enterprise is intended for larger organisations requiring
-            professional social, publishing, team, support, or integration
-            capabilities.
+            Enterprise services are intended for larger organisations and
+            professional teams requiring additional capabilities or support.
           </p>
 
-          <div className="grid sm:grid-cols-2 gap-3">
-            <MiniFeature
-              icon={Users}
-              title="Teams"
-              text="Support organisational roles and collaboration."
-            />
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>Advanced account capabilities.</li>
+            <li>Organisation management tools.</li>
+            <li>Additional support options.</li>
+            <li>Potential API and integration capabilities.</li>
+            <li>Custom solutions where available.</li>
+          </ul>
 
-            <MiniFeature
-              icon={BarChart3}
-              title="Analytics"
-              text="Access more advanced organisational insights."
-            />
-
-            <MiniFeature
-              icon={Zap}
-              title="Integrations"
-              text="Enterprise-level integrations may be available."
-            />
-
-            <MiniFeature
-              icon={Ticket}
-              title="Support"
-              text="Higher-tier support options may be available."
-            />
-          </div>
-
-          <Link href="/contact" className="faq-button">
-            Contact ZRP
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            📧 Enterprise availability and pricing may vary.
+          </p>
         </div>
       ),
     },
 
-    /* ═══════════════════════════════════════════════════════════════════════
-       SUPPORT
-    ═══════════════════════════════════════════════════════════════════════ */
+    /* ================================================================
+       PLATFORM & INFRASTRUCTURE
+    ================================================================ */
+
+    {
+      id: "platform-security",
+      category: "Platform & Security",
+      question: "How does ZRP protect the platform from bots and abuse?",
+      icon: Shield,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            ZRP uses security and abuse-prevention mechanisms designed to
+            detect suspicious behaviour and protect the community.
+          </p>
+
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>Account security controls.</li>
+            <li>Abuse detection.</li>
+            <li>Rate limiting and automated protections.</li>
+            <li>Content reporting.</li>
+            <li>Human moderation where appropriate.</li>
+          </ul>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            🛡️ Security systems may evolve as new threats emerge.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "translations",
+      category: "Platform & Security",
+      question: "Can ZRP translate posts?",
+      icon: Globe,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            Where translation functionality is available, users can translate
+            supported posts into another language directly through the
+            platform.
+          </p>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            🌍 Translation availability may depend on language support and
+            platform functionality.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "google-login",
+      category: "Platform & Security",
+      question: "Can I sign in with Google?",
+      icon: LogIn,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            If Google authentication is enabled for your ZRP deployment,
+            you can use the Google sign-in option during authentication.
+          </p>
+
+          <p>
+            Google authentication is handled through Google's authentication
+            infrastructure and remains subject to Google's policies.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "data-storage",
+      category: "Platform & Security",
+      question: "Where is ZRP data stored?",
+      icon: Database,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            ZRP's infrastructure may use hosting and service providers located
+            in Switzerland, the European Union, or other jurisdictions where
+            appropriate safeguards are in place.
+          </p>
+
+          <p>
+            The exact providers and processing arrangements are governed by
+            the platform's current infrastructure and Privacy Policy.
+          </p>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            📜 For the authoritative information about personal-data
+            processing, see the{" "}
+            <Link
+              href="/privacy"
+              className="text-zrp-red hover:underline"
+            >
+              Privacy Policy
+            </Link>
+            .
+          </p>
+        </div>
+      ),
+    },
+
+    /* ================================================================
+       SUPPORT & TICKETS
+    ================================================================ */
 
     {
       id: "support-tickets",
-      category: "Support",
+      category: "Support & Tickets",
       question: "How do I submit a support ticket?",
       icon: Ticket,
       answer: (
-        <div className="space-y-4">
-          <StepList
-            steps={[
-              <>
-                Open the{" "}
-                <Link href="/support" className="faq-link">
-                  Support
-                </Link>{" "}
-                page.
-              </>,
-              "Choose the appropriate category.",
-              "Describe the issue clearly.",
-              "Submit the ticket.",
-              "Monitor the ticket for updates.",
-            ]}
-          />
+        <div className="space-y-3">
+          <p>
+            If you need assistance, you can submit a support request through
+            the ZRP support system.
+          </p>
 
-          <Link href="/support" className="faq-button">
-            Open Support
-            <Ticket className="w-4 h-4" />
-          </Link>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>
+              Go to the{" "}
+              <Link
+                href="/support"
+                className="text-zrp-red hover:underline"
+              >
+                Support
+              </Link>{" "}
+              page.
+            </li>
+            <li>Choose the appropriate category.</li>
+            <li>Describe your issue clearly.</li>
+            <li>Include relevant information or screenshots where useful.</li>
+            <li>Submit the ticket.</li>
+          </ol>
         </div>
       ),
     },
 
     {
       id: "track-support-tickets",
-      category: "Support",
+      category: "Support & Tickets",
       question: "How do I track my support tickets?",
       icon: MessageSquare,
       answer: (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <p>
-            If ticket tracking is enabled for your account, you can view
-            support conversations from your ticket area.
+            If ticket tracking is enabled for your account, you can review
+            previous requests through the support area.
           </p>
 
-          <Link href="/support/tickets" className="faq-button">
-            View My Tickets
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>
+              Open{" "}
+              <Link
+                href="/support/tickets"
+                className="text-zrp-red hover:underline"
+              >
+                My Tickets
+              </Link>
+              .
+            </li>
+            <li>Choose the ticket you want to review.</li>
+            <li>Read the conversation and current status.</li>
+            <li>Reply if additional information is requested.</li>
+          </ol>
         </div>
       ),
     },
 
     {
-      id: "contact-support",
-      category: "Support",
-      question: "How can I contact ZRP?",
-      icon: Mail,
+      id: "admin-ticket-management",
+      category: "Support & Tickets",
+      question: "How do administrators manage support tickets?",
+      icon: Shield,
       answer: (
-        <div className="space-y-4">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <ContactCard
-              icon={Ticket}
-              title="Support Ticket"
-              text="Best for account and platform issues."
-              href="/support"
-              label="Open Support"
-            />
+        <div className="space-y-3">
+          <p>
+            Authorised administrators can manage support requests through the
+            administrative support interface.
+          </p>
 
-            <ContactCard
-              icon={Mail}
-              title="Contact"
-              text="For general questions and business enquiries."
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>Review incoming tickets.</li>
+            <li>Assign or prioritise requests.</li>
+            <li>Respond to users.</li>
+            <li>Update ticket status.</li>
+            <li>Resolve or close requests.</li>
+          </ul>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            🔐 Administrative ticket functionality is restricted to authorised
+            staff.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "ticket-statuses",
+      category: "Support & Tickets",
+      question: "What do support ticket statuses mean?",
+      icon: CheckCircle,
+      answer: (
+        <div className="space-y-3">
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>
+              <strong>OPEN</strong> – The request has been submitted.
+            </li>
+            <li>
+              <strong>IN_PROGRESS</strong> – The request is being reviewed.
+            </li>
+            <li>
+              <strong>AWAITING_REPLY</strong> – Additional information is
+              required.
+            </li>
+            <li>
+              <strong>RESOLVED</strong> – The issue has been addressed.
+            </li>
+            <li>
+              <strong>CLOSED</strong> – The ticket has been closed.
+            </li>
+          </ul>
+        </div>
+      ),
+    },
+
+    /* ================================================================
+       FAQ / GENERAL
+    ================================================================ */
+
+    {
+      id: "can-switch-plans",
+      category: "Plans & Billing",
+      question: "Can I change my subscription plan?",
+      icon: CreditCard,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            If multiple subscription plans are available to your account, you
+            may be able to upgrade or downgrade through your account settings.
+          </p>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            💳 Billing terms, pricing, and changes are subject to the plan
+            selected and the applicable subscription terms.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "cancel-subscription",
+      category: "Plans & Billing",
+      question: "Can I cancel my subscription?",
+      icon: CreditCard,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            Where paid subscriptions are available, cancellation can normally
+            be requested through your account billing or subscription
+            settings.
+          </p>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            📄 Any applicable refund or billing terms are governed by the
+            relevant subscription terms.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "charity-payments",
+      category: "Plans & Billing",
+      question: "Is the 35% charity contribution deducted from my payment?",
+      icon: Heart,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            No. The stated 35% commitment is based on{" "}
+            <strong>platform profits</strong>, rather than being presented as
+            a separate charity fee charged to users.
+          </p>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            🧡 The exact calculation and charitable reporting should be
+            understood through ZRP's official transparency information.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "freedom-of-speech",
+      category: "Community & Moderation",
+      question: "Does ZRP support freedom of speech?",
+      icon: MessageSquare,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            Freedom of expression is a core principle of ZRP Social.
+          </p>
+
+          <p>
+            Users are generally free to express opinions, criticism,
+            political views, religious views, and other lawful viewpoints.
+          </p>
+
+          <p>
+            Freedom of expression does not create a right to use the platform
+            for illegal activity, threats, targeted harassment, child sexual
+            abuse material, fraud, malware, or other prohibited content.
+          </p>
+
+          <p>
+            For the complete rules, review our{" "}
+            <Link
+              href="/guidelines"
+              className="text-zrp-red hover:underline"
+            >
+              Community Guidelines
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/terms"
+              className="text-zrp-red hover:underline"
+            >
+              Terms of Service
+            </Link>
+            .
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "moderation-appeal",
+      category: "Community & Moderation",
+      question: "Can I appeal a moderation decision?",
+      icon: Scale,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            Where an appeal mechanism is available, users can challenge
+            certain moderation decisions.
+          </p>
+
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Review the notification explaining the action.</li>
+            <li>Open the available appeal option.</li>
+            <li>Explain why you believe the decision should be reviewed.</li>
+            <li>Provide relevant context or evidence.</li>
+            <li>Submit the appeal.</li>
+          </ol>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            ⚖️ Appeals are reviewed according to ZRP's moderation procedures.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "contact-zrp",
+      category: "General",
+      question: "How can I contact ZRP?",
+      icon: HelpCircle,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            For general assistance, use the ZRP support system.
+          </p>
+
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/support"
+              className="inline-flex items-center px-4 py-2 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed transition"
+            >
+              Open Support
+            </Link>
+
+            <Link
               href="/contact"
-              label="Contact ZRP"
-            />
+              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            >
+              Contact ZRP
+            </Link>
           </div>
         </div>
       ),
     },
   ];
 
-  const filteredFaqs = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-
-    if (!query) return faqs;
-
-    return faqs.filter((faq) => {
-      const content = `${faq.question} ${faq.category}`.toLowerCase();
-      return content.includes(query);
-    });
-  }, [searchQuery, faqs]);
-
-  const groupedFaqs = useMemo(() => {
-    return filteredFaqs.reduce(
-      (acc, faq) => {
-        if (!acc[faq.category]) {
-          acc[faq.category] = [];
-        }
-
-        acc[faq.category].push(faq);
-        return acc;
-      },
-      {} as Record<string, FaqItem[]>
-    );
-  }, [filteredFaqs]);
-
-  return (
-    <div className="min-h-screen bg-white dark:bg-zrp-deepBlack text-zrp-charcoal dark:text-white">
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          HERO
-      ═══════════════════════════════════════════════════════════════════ */}
-
-      <section className="relative overflow-hidden bg-gradient-to-br from-zrp-darkRed via-zrp-deepBlack to-black">
-
-        {/* Grid */}
-        <div
-          className="absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.4) 1px, transparent 1px)",
-            backgroundSize: "42px 42px",
-          }}
-        />
-
-        <div className="absolute -top-32 -right-32 w-[30rem] h-[30rem] bg-zrp-red/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-[28rem] h-[28rem] bg-zrp-red/10 rounded-full blur-3xl" />
-
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-white/50 hover:text-white text-sm transition mb-10"
-          >
-            ← Back to ZRP
-          </Link>
-
-          <div className="grid lg:grid-cols-[1.4fr_.6fr] gap-12 items-center">
-
-            <div>
-
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl px-4 py-2 text-[11px] font-mono tracking-wider text-white/70 mb-6">
-                <span className="w-2 h-2 rounded-full bg-zrp-red animate-pulse" />
-                ZRP KNOWLEDGE HUB
-              </div>
-
-              <h1 className="font-orbitron font-extrabold text-4xl sm:text-5xl lg:text-6xl leading-[1.05] text-white">
-                Frequently
-                <span className="block text-zrp-red mt-2">
-                  Asked Questions.
-                </span>
-              </h1>
-
-              <p className="mt-6 max-w-2xl text-base sm:text-lg text-white/60 leading-8">
-                Everything you need to know about ZRP Social — from account
-                creation and publishing to privacy, Web3, digital features,
-                community safety, and support.
-              </p>
-
-              {/* Search */}
-              <div className="relative mt-8 max-w-2xl">
-
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/35" />
-
-                <input
-                  type="search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search questions..."
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.08] backdrop-blur-xl py-4 pl-14 pr-5 text-white placeholder:text-white/35 outline-none focus:border-zrp-red/60 focus:ring-2 focus:ring-zrp-red/20 transition"
-                />
-
-              </div>
-
-              <div className="mt-5 flex flex-wrap gap-2">
-
-                {[
-                  "Account",
-                  "Privacy",
-                  "Posts",
-                  "Messaging",
-                  "Web3",
-                  "Support",
-                ].map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => setSearchQuery(tag)}
-                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/55 hover:bg-white/10 hover:text-white transition"
-                  >
-                    {tag}
-                  </button>
-                ))}
-
-              </div>
-
-            </div>
-
-            {/* Hero protocol card */}
-            <div className="hidden lg:block">
-
-              <div className="relative">
-
-                <div className="absolute inset-0 bg-zrp-red/20 blur-3xl rounded-full" />
-
-                <div className="relative rounded-3xl border border-white/10 bg-white/[0.05] backdrop-blur-xl p-6 shadow-2xl">
-
-                  <div className="flex items-center justify-between mb-6">
-
-                    <div className="flex items-center gap-3">
-
-                      <div className="w-11 h-11 rounded-xl bg-zrp-red flex items-center justify-center">
-                        <CircleHelp className="w-5 h-5 text-white" />
-                      </div>
-
-                      <div>
-                        <div className="font-orbitron font-bold text-white">
-                          ZRP FAQ
-                        </div>
-                        <div className="text-xs text-white/35">
-                          Knowledge protocol
-                        </div>
-                      </div>
-
-                    </div>
-
-                    <span className="text-[10px] font-mono text-zrp-red">
-                      LIVE
-                    </span>
-
-                  </div>
-
-                  <div className="space-y-3">
-
-                    <HeroStat
-                      icon={HelpCircle}
-                      label="Questions"
-                      value={`${faqs.length}+`}
-                    />
-
-                    <HeroStat
-                      icon={Shield}
-                      label="Privacy"
-                      value="Protected"
-                    />
-
-                    <HeroStat
-                      icon={Globe}
-                      label="Community"
-                      value="Global"
-                    />
-
-                    <HeroStat
-                      icon={Heart}
-                      label="Impact"
-                      value="35%"
-                    />
-
-                  </div>
-
-                  <div className="mt-6 border-t border-white/10 pt-5 text-[10px] font-mono tracking-wider text-white/25">
-                    SWISS · EUROPE · SOCIAL · DIGITAL
-                  </div>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          CATEGORY NAVIGATION
-      ═══════════════════════════════════════════════════════════════════ */}
-
-      <section className="sticky top-0 z-20 border-b border-zrp-silver/20 dark:border-zrp-charcoal bg-white/95 dark:bg-zrp-deepBlack/95 backdrop-blur-xl">
-
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
-
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-
-            {categories.map((category) => {
-              const Icon = category.icon;
-
-              return (
-                <a
-                  key={category.id}
-                  href={`#${category.id}`}
-                  className="flex-shrink-0 flex items-center gap-2 rounded-full border border-zrp-silver/30 dark:border-zrp-charcoal px-4 py-2 text-xs font-medium text-zrp-charcoal/60 dark:text-white/55 hover:border-zrp-red hover:text-zrp-red transition"
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  {category.label}
-                </a>
-              );
-            })}
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          MAIN
-      ═══════════════════════════════════════════════════════════════════ */}
-
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-
-        {/* Intro cards */}
-
-        <div className="grid md:grid-cols-3 gap-4 mb-12">
-
-          <QuickCard
-            icon={Sparkles}
-            title="Learn ZRP"
-            text="Understand how the platform works and discover its core features."
-          />
-
-          <QuickCard
-            icon={Shield}
-            title="Stay protected"
-            text="Learn about privacy, account security, reporting, and moderation."
-          />
-
-          <QuickCard
-            icon={Ticket}
-            title="Get support"
-            text="Can't find your answer? Open a support ticket and contact ZRP."
-          />
-
-        </div>
-
-        {searchQuery && (
-          <div className="mb-6 flex items-center justify-between">
-
-            <p className="text-sm text-zrp-charcoal/50 dark:text-white/40">
-              Showing{" "}
-              <strong className="text-zrp-charcoal dark:text-white">
-                {filteredFaqs.length}
-              </strong>{" "}
-              result{filteredFaqs.length === 1 ? "" : "s"} for "
-              {searchQuery}"
-            </p>
-
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              className="text-xs font-semibold text-zrp-red hover:underline"
-            >
-              Clear
-            </button>
-
-          </div>
-        )}
-
-        {/* FAQ groups */}
-
-        <div className="space-y-12">
-
-          {Object.entries(groupedFaqs).map(([category, items]) => {
-
-            const categoryInfo = categories.find(
-              (item) => item.label === category
-            );
-
-            const CategoryIcon = categoryInfo?.icon || HelpCircle;
-
-            const categoryId =
-              categoryInfo?.id ||
-              category.replace(/\s+/g, "-").toLowerCase();
-
-            return (
-              <section key={category} id={categoryId}>
-
-                {/* Category heading */}
-
-                <div className="flex items-center gap-4 mb-5">
-
-                  <div className="w-11 h-11 rounded-xl bg-zrp-red/10 flex items-center justify-center text-zrp-red">
-                    <CategoryIcon className="w-5 h-5" />
-                  </div>
-
-                  <div>
-
-                    <h2 className="font-orbitron font-bold text-xl text-zrp-charcoal dark:text-white">
-                      {category}
-                    </h2>
-
-                    <p className="text-xs text-zrp-charcoal/40 dark:text-white/35 mt-1">
-                      {items.length}{" "}
-                      {items.length === 1 ? "question" : "questions"}
-                    </p>
-
-                  </div>
-
-                </div>
-
-                <div className="space-y-3">
-
-                  {items.map((faq) => {
-
-                    const isOpen = openId === faq.id;
-                    const Icon = faq.icon || HelpCircle;
-
-                    return (
-                      <div
-                        key={faq.id}
-                        className={`overflow-hidden rounded-2xl border transition-all duration-300 ${
-                          isOpen
-                            ? "border-zrp-red/30 shadow-lg shadow-red-950/5"
-                            : "border-zrp-silver/30 dark:border-zrp-charcoal"
-                        } bg-white dark:bg-zrp-deepBlack`}
-                      >
-
-                        <button
-                          type="button"
-                          onClick={() => toggleFaq(faq.id)}
-                          className="w-full flex items-center gap-4 p-5 text-left hover:bg-zrp-silver/5 dark:hover:bg-white/[0.02] transition"
-                          aria-expanded={isOpen}
-                        >
-
-                          <div
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition ${
-                              isOpen
-                                ? "bg-zrp-red text-white"
-                                : "bg-zrp-red/10 text-zrp-red"
-                            }`}
-                          >
-                            <Icon className="w-4 h-4" />
-                          </div>
-
-                          <span className="flex-1 font-semibold text-sm sm:text-base text-zrp-charcoal dark:text-white">
-                            {faq.question}
-                          </span>
-
-                          {isOpen ? (
-                            <ChevronUp className="w-5 h-5 text-zrp-red flex-shrink-0" />
-                          ) : (
-                            <ChevronDown className="w-5 h-5 text-zrp-charcoal/30 dark:text-white/30 flex-shrink-0" />
-                          )}
-
-                        </button>
-
-                        {isOpen && (
-                          <div className="px-5 pb-6">
-
-                            <div className="border-t border-zrp-silver/20 dark:border-zrp-charcoal pt-5 text-sm leading-7 text-zrp-charcoal/70 dark:text-white/65">
-                              {faq.answer}
-                            </div>
-
-                          </div>
-                        )}
-
-                      </div>
-                    );
-                  })}
-
-                </div>
-
-              </section>
-            );
-          })}
-
-        </div>
-
-        {/* No results */}
-
-        {filteredFaqs.length === 0 && (
-          <div className="rounded-3xl border border-zrp-silver/30 dark:border-zrp-charcoal p-12 text-center">
-
-            <Search className="w-10 h-10 mx-auto text-zrp-red/50" />
-
-            <h3 className="mt-5 font-orbitron font-bold text-lg">
-              No answers found
-            </h3>
-
-            <p className="mt-2 text-sm text-zrp-charcoal/45 dark:text-white/40">
-              Try a different search term or contact the ZRP support team.
-            </p>
-
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              className="mt-5 text-sm font-semibold text-zrp-red hover:underline"
-            >
-              Clear search
-            </button>
-
-          </div>
-        )}
-
-        {/* ═════════════════════════════════════════════════════════════════
-            SUPPORT CTA
-        ═════════════════════════════════════════════════════════════════ */}
-
-        <section className="relative overflow-hidden mt-16 rounded-3xl bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack p-8 sm:p-12 text-white">
-
-          <div
-            className="absolute inset-0 opacity-[0.06]"
-            style={{
-              backgroundImage:
-                "linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)",
-              backgroundSize: "32px 32px",
-            }}
-          />
-
-          <div className="absolute -right-24 -bottom-24 w-80 h-80 bg-zrp-red/20 rounded-full blur-3xl" />
-
-          <div className="relative grid md:grid-cols-[1fr_auto] gap-8 items-center">
-
-            <div>
-
-              <div className="inline-flex items-center gap-2 text-[10px] font-mono tracking-wider text-white/40 mb-4">
-                <span className="w-2 h-2 rounded-full bg-zrp-red" />
-                ZRP SUPPORT
-              </div>
-
-              <h2 className="font-orbitron font-bold text-2xl sm:text-3xl">
-                Didn't find your answer?
-              </h2>
-
-              <p className="mt-3 max-w-xl text-sm sm:text-base text-white/55 leading-7">
-                Our support team can help with account issues, technical
-                problems, privacy requests, moderation questions, billing, and
-                more.
-              </p>
-
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-
-              <Link
-                href="/support"
-                className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-zrp-darkRed hover:bg-gray-100 transition"
-              >
-                <Ticket className="w-4 h-4" />
-                Open Ticket
-              </Link>
-
-              <Link
-                href="/contact"
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition"
-              >
-                <Mail className="w-4 h-4" />
-                Contact ZRP
-              </Link>
-
-            </div>
-
-          </div>
-
-        </section>
-
-        {/* Bottom navigation */}
-
-        <div className="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-3 text-xs text-zrp-charcoal/40 dark:text-white/35">
-
-          <Link href="/help" className="hover:text-zrp-red transition">
-            Help Center
-          </Link>
-
-          <Link href="/privacy" className="hover:text-zrp-red transition">
-            Privacy Policy
-          </Link>
-
-          <Link href="/terms" className="hover:text-zrp-red transition">
-            Terms of Service
-          </Link>
-
-          <Link
-            href="/guidelines"
-            className="hover:text-zrp-red transition"
-          >
-            Community Guidelines
-          </Link>
-
-          <Link href="/contact" className="hover:text-zrp-red transition">
-            Contact
-          </Link>
-
-        </div>
-
-      </main>
-    </div>
+  /* ================================================================
+     GROUP FAQS
+  ================================================================ */
+
+  const groupedFaqs = faqs.reduce(
+    (acc, faq) => {
+      if (!acc[faq.category]) {
+        acc[faq.category] = [];
+      }
+
+      acc[faq.category].push(faq);
+
+      return acc;
+    },
+    {} as Record<string, FaqItem[]>
   );
-}
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   REUSABLE COMPONENTS
-═══════════════════════════════════════════════════════════════════════════ */
-
-function StepList({
-  steps,
-}: {
-  steps: React.ReactNode[];
-}) {
   return (
-    <ol className="space-y-3">
-      {steps.map((step, index) => (
-        <li key={index} className="flex items-start gap-3">
-          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-zrp-red/10 text-zrp-red flex items-center justify-center text-[10px] font-mono font-bold">
-            {String(index + 1).padStart(2, "0")}
+    <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6">
+      {/* ================================================================
+          HEADER
+      ================================================================ */}
+
+      <div className="text-center mb-10">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-zrp-red/10 text-zrp-red mb-4">
+          <HelpCircle className="w-8 h-8" />
+        </div>
+
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <span className="text-xs font-semibold uppercase tracking-wider text-zrp-red">
+            ZRP Social
           </span>
 
-          <span className="pt-0.5 text-sm">
-            {step}
+          <span className="text-xs text-gray-400">
+            •
           </span>
-        </li>
-      ))}
-    </ol>
-  );
-}
 
-function InfoBox({
-  icon: Icon,
-  children,
-  danger = false,
-}: {
-  icon: React.ElementType;
-  children: React.ReactNode;
-  danger?: boolean;
-}) {
-  return (
-    <div
-      className={`rounded-xl border p-4 ${
-        danger
-          ? "border-red-500/20 bg-red-500/5"
-          : "border-zrp-red/20 bg-zrp-red/5"
-      }`}
-    >
-      <div className="flex items-start gap-3">
-        <Icon
-          className={`w-5 h-5 flex-shrink-0 ${
-            danger ? "text-red-500" : "text-zrp-red"
-          }`}
-        />
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+            Help & Knowledge Center
+          </span>
+        </div>
 
-        <p className="text-sm leading-6">
-          {children}
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
+          Frequently Asked Questions
+        </h1>
+
+        <p className="mt-3 text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+          Find answers about your ZRP account, content, privacy, security,
+          Web3, digital infrastructure, subscriptions, moderation, and
+          community features.
         </p>
       </div>
-    </div>
-  );
-}
 
-function MediaRequirements({
-  items,
-  note,
-}: {
-  items: string[][];
-  note?: string;
-}) {
-  return (
-    <div className="space-y-4">
+      {/* ================================================================
+          TRUST / QUICK INFO
+      ================================================================ */}
 
-      <div className="grid sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+        <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-zrp-deepBlack">
+          <Shield className="w-5 h-5 text-zrp-red mb-2" />
 
-        {items.map(([label, value]) => (
-          <div
-            key={label}
-            className="rounded-xl border border-zrp-silver/25 dark:border-zrp-charcoal bg-zrp-silver/5 dark:bg-zrp-charcoal/30 p-4"
+          <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+            Privacy focused
+          </h3>
+
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Built with privacy, security, and user control in mind.
+          </p>
+        </div>
+
+        <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-zrp-deepBlack">
+          <Globe className="w-5 h-5 text-zrp-red mb-2" />
+
+          <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+            Global community
+          </h3>
+
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Connect and communicate with users around the world.
+          </p>
+        </div>
+
+        <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-zrp-deepBlack">
+          <Wallet className="w-5 h-5 text-zrp-red mb-2" />
+
+          <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+            Digital future
+          </h3>
+
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Exploring modern digital and Web3 technologies responsibly.
+          </p>
+        </div>
+      </div>
+
+      {/* ================================================================
+          QUICK LINKS
+      ================================================================ */}
+
+      <div className="flex flex-wrap justify-center gap-2 mb-10">
+        {Object.keys(groupedFaqs).map((category) => (
+          <a
+            key={category}
+            href={`#category-${category
+              .replace(/\s+/g, "-")
+              .toLowerCase()}`}
+            className="px-3 py-1.5 text-xs font-medium rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-zrp-red hover:text-white transition"
           >
-            <div className="text-[10px] uppercase tracking-wider font-mono text-zrp-red/70">
-              {label}
-            </div>
-
-            <div className="mt-1 font-semibold text-sm">
-              {value}
-            </div>
-          </div>
+            {category}
+          </a>
         ))}
-
       </div>
 
-      {note && (
-        <p className="text-xs text-zrp-charcoal/45 dark:text-white/40">
-          💡 {note}
+      {/* ================================================================
+          FAQ LIST
+      ================================================================ */}
+
+      <div className="space-y-8">
+        {Object.entries(groupedFaqs).map(([category, items]) => (
+          <section key={category}>
+            <h2
+              id={`category-${category
+                .replace(/\s+/g, "-")
+                .toLowerCase()}`}
+              className="text-xl font-semibold text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-700"
+            >
+              {category}
+            </h2>
+
+            <div className="space-y-3">
+              {items.map((faq) => {
+                const isOpen = openId === faq.id;
+                const Icon = faq.icon || HelpCircle;
+
+                return (
+                  <div
+                    key={faq.id}
+                    className={`border rounded-xl overflow-hidden bg-white dark:bg-zrp-deepBlack transition ${
+                      isOpen
+                        ? "border-zrp-red/40 shadow-sm"
+                        : "border-gray-200 dark:border-gray-700"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleFaq(faq.id)}
+                      aria-expanded={isOpen}
+                      aria-controls={`faq-answer-${faq.id}`}
+                      className="w-full flex items-start gap-3 p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                    >
+                      <div className="flex-shrink-0 mt-0.5">
+                        <Icon className="w-5 h-5 text-zrp-red" />
+                      </div>
+
+                      <div className="flex-1">
+                        <span className="font-medium text-gray-900 dark:text-white">
+                          {faq.question}
+                        </span>
+                      </div>
+
+                      <div className="flex-shrink-0 mt-0.5">
+                        {isOpen ? (
+                          <ChevronUp className="w-5 h-5 text-gray-400" />
+                        ) : (
+                          <ChevronDown className="w-5 h-5 text-gray-400" />
+                        )}
+                      </div>
+                    </button>
+
+                    {isOpen && (
+                      <div
+                        id={`faq-answer-${faq.id}`}
+                        className="px-4 pb-5 pt-0 text-gray-700 dark:text-gray-300 text-sm border-t border-gray-100 dark:border-gray-800"
+                      >
+                        <div className="pt-4">
+                          {faq.answer}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        ))}
+      </div>
+
+      {/* ================================================================
+          LEGAL LINKS
+      ================================================================ */}
+
+      <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Link
+          href="/terms"
+          className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-zrp-deepBlack hover:border-zrp-red/40 transition"
+        >
+          <FileText className="w-5 h-5 text-zrp-red mb-2" />
+
+          <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+            Terms of Service
+          </h3>
+
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Read the rules governing use of ZRP Social.
+          </p>
+        </Link>
+
+        <Link
+          href="/privacy"
+          className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-zrp-deepBlack hover:border-zrp-red/40 transition"
+        >
+          <Lock className="w-5 h-5 text-zrp-red mb-2" />
+
+          <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+            Privacy Policy
+          </h3>
+
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Learn how ZRP handles personal data.
+          </p>
+        </Link>
+
+        <Link
+          href="/guidelines"
+          className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-zrp-deepBlack hover:border-zrp-red/40 transition"
+        >
+          <Shield className="w-5 h-5 text-zrp-red mb-2" />
+
+          <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+            Community Guidelines
+          </h3>
+
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Understand ZRP's content and community rules.
+          </p>
+        </Link>
+      </div>
+
+      {/* ================================================================
+          SUPPORT
+      ================================================================ */}
+
+      <div className="mt-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-xl text-center border border-gray-200 dark:border-gray-700">
+        <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-zrp-red/10 text-zrp-red mb-3">
+          <HelpCircle className="w-5 h-5" />
+        </div>
+
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Still have questions?
+        </h3>
+
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-md mx-auto">
+          Our support team can help with account issues, technical problems,
+          moderation questions, privacy requests, and other ZRP-related
+          matters.
         </p>
-      )}
 
-    </div>
-  );
-}
+        <div className="flex flex-wrap justify-center gap-3 mt-5">
+          <Link
+            href="/support"
+            className="px-5 py-2.5 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed transition"
+          >
+            Submit a Ticket
+          </Link>
 
-function MiniFeature({
-  icon: Icon,
-  title,
-  text,
-}: {
-  icon: React.ElementType;
-  title: string;
-  text: string;
-}) {
-  return (
-    <div className="rounded-xl border border-zrp-silver/25 dark:border-zrp-charcoal bg-zrp-silver/5 dark:bg-zrp-charcoal/30 p-4">
-
-      <Icon className="w-5 h-5 text-zrp-red" />
-
-      <h4 className="mt-3 font-semibold text-sm">
-        {title}
-      </h4>
-
-      <p className="mt-1 text-xs leading-5 text-zrp-charcoal/55 dark:text-white/45">
-        {text}
-      </p>
-
-    </div>
-  );
-}
-
-function PrivacyCard({
-  icon: Icon,
-  title,
-  text,
-}: {
-  icon: React.ElementType;
-  title: string;
-  text: string;
-}) {
-  return (
-    <div className="rounded-xl border border-zrp-silver/25 dark:border-zrp-charcoal p-4">
-
-      <Icon className="w-5 h-5 text-zrp-red" />
-
-      <h4 className="mt-3 font-semibold text-sm">
-        {title}
-      </h4>
-
-      <p className="mt-1 text-xs leading-5 text-zrp-charcoal/55 dark:text-white/45">
-        {text}
-      </p>
-
-    </div>
-  );
-}
-
-function ImpactCard({
-  icon,
-  title,
-  text,
-}: {
-  icon: string;
-  title: string;
-  text: string;
-}) {
-  return (
-    <div className="rounded-xl border border-zrp-silver/25 dark:border-zrp-charcoal bg-zrp-silver/5 dark:bg-zrp-charcoal/30 p-4">
-
-      <div className="text-2xl">
-        {icon}
+          <Link
+            href="/about"
+            className="px-5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+          >
+            About ZRP
+          </Link>
+        </div>
       </div>
 
-      <h4 className="mt-2 font-semibold text-sm">
-        {title}
-      </h4>
+      {/* ================================================================
+          FOOTER NOTE
+      ================================================================ */}
 
-      <p className="mt-1 text-xs leading-5 text-zrp-charcoal/55 dark:text-white/45">
-        {text}
-      </p>
-
-    </div>
-  );
-}
-
-function PlanMini({
-  title,
-  description,
-  featured = false,
-}: {
-  title: string;
-  description: string;
-  featured?: boolean;
-}) {
-  return (
-    <div
-      className={`rounded-xl border p-4 ${
-        featured
-          ? "border-zrp-red/40 bg-zrp-red/5"
-          : "border-zrp-silver/25 dark:border-zrp-charcoal"
-      }`}
-    >
-
-      <div className="flex items-center gap-2">
-
-        <div
-          className={`w-2 h-2 rounded-full ${
-            featured ? "bg-zrp-red" : "bg-zrp-charcoal/20 dark:bg-white/20"
-          }`}
-        />
-
-        <span className="font-orbitron font-bold text-sm">
-          {title}
-        </span>
-
+      <div className="mt-8 text-center">
+        <p className="text-xs text-gray-400 dark:text-gray-500">
+          ZRP Social • Swiss-built social platform • Privacy • Freedom of
+          expression • Responsible technology
+        </p>
       </div>
-
-      <p className="mt-2 text-xs text-zrp-charcoal/50 dark:text-white/45">
-        {description}
-      </p>
-
-    </div>
-  );
-}
-
-function ContactCard({
-  icon: Icon,
-  title,
-  text,
-  href,
-  label,
-}: {
-  icon: React.ElementType;
-  title: string;
-  text: string;
-  href: string;
-  label: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-zrp-silver/25 dark:border-zrp-charcoal p-5">
-
-      <Icon className="w-5 h-5 text-zrp-red" />
-
-      <h3 className="mt-3 font-orbitron font-bold text-sm">
-        {title}
-      </h3>
-
-      <p className="mt-2 text-xs leading-5 text-zrp-charcoal/50 dark:text-white/45">
-        {text}
-      </p>
-
-      <Link href={href} className="faq-link inline-flex mt-4">
-        {label}
-        <ArrowRight className="w-3.5 h-3.5" />
-      </Link>
-
-    </div>
-  );
-}
-
-function StatusCard({
-  symbol,
-  title,
-  text,
-}: {
-  symbol: string;
-  title: string;
-  text: string;
-}) {
-  return (
-    <div className="rounded-xl border border-zrp-silver/25 dark:border-zrp-charcoal p-4">
-
-      <div className="text-zrp-red font-bold text-lg">
-        {symbol}
-      </div>
-
-      <h4 className="mt-2 font-semibold text-sm">
-        {title}
-      </h4>
-
-      <p className="mt-1 text-xs text-zrp-charcoal/50 dark:text-white/45">
-        {text}
-      </p>
-
-    </div>
-  );
-}
-
-function QuickCard({
-  icon: Icon,
-  title,
-  text,
-}: {
-  icon: React.ElementType;
-  title: string;
-  text: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-zrp-silver/30 dark:border-zrp-charcoal bg-zrp-silver/5 dark:bg-zrp-charcoal/30 p-5">
-
-      <div className="w-10 h-10 rounded-xl bg-zrp-red/10 flex items-center justify-center text-zrp-red">
-        <Icon className="w-5 h-5" />
-      </div>
-
-      <h3 className="mt-4 font-orbitron font-bold text-sm">
-        {title}
-      </h3>
-
-      <p className="mt-2 text-sm leading-6 text-zrp-charcoal/55 dark:text-white/45">
-        {text}
-      </p>
-
-    </div>
-  );
-}
-
-function HeroStat({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
-
-      <div className="flex items-center gap-3">
-        <Icon className="w-4 h-4 text-zrp-red" />
-        <span className="text-sm text-white/50">
-          {label}
-        </span>
-      </div>
-
-      <span className="text-xs font-mono text-white/75">
-        {value}
-      </span>
-
     </div>
   );
 }
