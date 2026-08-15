@@ -2,16 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { username: string } }
 ) {
+  // This is a public, unauthenticated-accessible profile lookup - it had
+  // no rate limiting at all, leaving it open to username enumeration and
+  // bulk profile scraping at volume.
+  const limit = await rateLimit(req, { limit: 60, window: 60, type: "user-profile-get" });
+  if (!limit.success) return limit.response;
+
   try {
     const session = await getServerSession(authOptions);
     const slug = params.username;
-
-    console.log("🔍 Looking for slug:", slug);
 
     // ─── 1. Try Prisma with OR condition (case‑insensitive) ─────
     let user = await prisma.user.findFirst({
@@ -107,10 +112,6 @@ export async function GET(
 
       console.log("🔍 Raw SQL result count:", users.length);
       if (users.length === 0) {
-        const allUsers = await prisma.$queryRaw<Array<{ username: string }>>`
-          SELECT username FROM "User"
-        `;
-        console.log("🔍 All usernames in database:", allUsers.map(u => u.username));
         return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
 
