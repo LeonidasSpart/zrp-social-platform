@@ -109,7 +109,8 @@ export async function PUT(
   }
 
   try {
-    const { content, imageUrl } = await req.json();
+    const body = await req.json();
+    const { content } = body;
 
     if (!content || content.trim().length === 0) {
       return NextResponse.json({ error: "Content is required" }, { status: 400 });
@@ -137,12 +138,22 @@ export async function PUT(
       return NextResponse.json({ error: lengthCheck.message }, { status: 400 });
     }
 
+    // ─── Build the update payload ──────────────────────────────────
+    // Only touch imageUrl if the request actually included it. The
+    // main edit UI (EditPostModal) is text-only and never sends
+    // imageUrl at all - previously this defaulted the missing field
+    // to null unconditionally, silently deleting the post's image on
+    // every text-only edit. Checking "in body" lets a real image
+    // change (or an explicit removal, sending imageUrl: null) still
+    // work correctly, while a text-only edit leaves the image alone.
+    const updateData: { content: string; imageUrl?: string | null } = { content };
+    if ("imageUrl" in body) {
+      updateData.imageUrl = body.imageUrl || null;
+    }
+
     const updatedPost = await prisma.post.update({
       where: { id: params.id },
-      data: {
-        content,
-        imageUrl: imageUrl || null,
-      },
+      data: updateData,
       include: {
         author: {
           select: {
