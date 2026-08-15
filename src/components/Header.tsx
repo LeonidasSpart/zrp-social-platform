@@ -131,7 +131,7 @@ export default function Header() {
               alt="ZRP"
               width={90}
               height={90}
-              className="w-10 h-10 object-contain"
+              className="w-12 h-12 object-contain"
             />
           </Link>
 
