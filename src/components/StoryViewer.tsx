@@ -288,4 +288,11 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
             transform: translate(-50%, -50%) scale(1);
           }
           100% {
-            opacity:
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(1);
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
