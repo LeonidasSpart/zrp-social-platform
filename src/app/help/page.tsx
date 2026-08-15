@@ -192,7 +192,7 @@ export default function HelpPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             <PlanCard
               icon={User}
-              iconClass="text-white"
+              iconClass="text-zrp-charcoal dark:text-white"
               accent="border-white/10"
               title="Free"
               price="$0"
@@ -223,7 +223,7 @@ export default function HelpPage() {
 
             <PlanCard
               icon={Building2}
-              iconClass="text-white"
+              iconClass="text-zrp-charcoal dark:text-white"
               accent="border-zrp-red/20"
               title="Business"
               price="$49.99"
@@ -1408,23 +1408,31 @@ function PlanCard({
 
       <Icon className={`w-6 h-6 ${iconClass}`} />
 
-      <h3 className="mt-4 font-orbitron font-bold text-lg text-white">
+      {/* This whole card was hardcoded to white text, but its own
+          background is light-mode-light (bg-zrp-silver/10, or a
+          near-transparent red-to-transparent gradient over a white
+          page) - only correct once .dark switches it to
+          dark:bg-zrp-charcoal/50. In light mode that was white text
+          on a near-white card: invisible. Adding dark: variants so
+          the text defaults to a dark, readable color in light mode
+          and only turns white once the background actually is dark. */}
+      <h3 className="mt-4 font-orbitron font-bold text-lg text-zrp-charcoal dark:text-white">
         {title}
       </h3>
 
       <div className="mt-2">
 
-        <span className="font-orbitron font-bold text-2xl text-white">
+        <span className="font-orbitron font-bold text-2xl text-zrp-charcoal dark:text-white">
           {price}
         </span>
 
-        <span className="text-xs text-white/40">
+        <span className="text-xs text-zrp-charcoal/50 dark:text-white/40">
           {period}
         </span>
 
       </div>
 
-      <p className="mt-1 text-xs text-white/40">
+      <p className="mt-1 text-xs text-zrp-charcoal/50 dark:text-white/40">
         {description}
       </p>
 
@@ -1433,7 +1441,7 @@ function PlanCard({
         {features.map((feature) => (
           <li
             key={feature}
-            className="flex items-start gap-2 text-xs text-white/65"
+            className="flex items-start gap-2 text-xs text-zrp-charcoal/70 dark:text-white/65"
           >
             <CheckCircle className="w-3.5 h-3.5 text-zrp-red flex-shrink-0 mt-0.5" />
             {feature}
