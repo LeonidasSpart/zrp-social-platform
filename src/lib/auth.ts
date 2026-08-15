@@ -89,7 +89,6 @@ export const authOptions: NextAuthOptions = {
         const isEmail = identifier.includes("@");
 
         console.log("🔑 Login attempt for:", identifier, isEmail ? "(email)" : "(username)");
-        console.log("🔑 Input password length:", inputPassword.length);
 
         const user = await prisma.user.findUnique({
           where: isEmail
@@ -113,27 +112,28 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user || !user.password) {
-          console.log("🔑 User not found or password missing");
           throw new Error("Invalid credentials");
         }
-
-        console.log("🔑 Stored hash prefix:", user.password.substring(0, 10));
-        console.log("🔑 Stored hash length:", user.password.length);
 
         let isValid = false;
         try {
           isValid = await bcrypt.compare(inputPassword, user.password);
-          console.log("🔑 bcrypt.compare result:", isValid);
         } catch (err) {
-          console.error("🔑 bcrypt.compare error:", err);
+          console.error("Password comparison error:", err);
           isValid = false;
         }
 
+        // ⚠️ SECURITY: legacy accounts with a non-bcrypt (plaintext)
+        // stored password are still supported here for backward
+        // compatibility, upgrading them to a real bcrypt hash on
+        // successful login. This should be treated as a known, tracked
+        // risk, not a permanent design - see the security audit notes
+        // for a recommended remediation plan (identify affected
+        // accounts and force a password reset, then remove this
+        // fallback entirely once no legacy plaintext passwords remain).
         if (!isValid && !user.password.startsWith('$2')) {
-          console.log("🔑 Falling back to plain‑text compare");
           isValid = inputPassword === user.password;
           if (isValid) {
-            console.log("🔑 Plain‑text match – upgrading hash");
             const hashed = await bcrypt.hash(inputPassword, 10);
             await prisma.user.update({
               where: { id: user.id },
@@ -143,7 +143,6 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (!isValid) {
-          console.log("🔑 ❌ Invalid credentials – password mismatch");
           throw new Error("Invalid credentials");
         }
 
