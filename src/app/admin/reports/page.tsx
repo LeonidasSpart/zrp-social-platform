@@ -16,7 +16,7 @@ interface Report {
   createdAt: string;
   reporter: { username: string; name: string };
   post: { id: string; content: string; author: { username: string } } | null;
-  comment: { id: string; content: string; author: { username: string } } | null;
+  comment: { id: string; content: string; postId: string; author: { username: string } } | null;
 }
 
 export default function AdminReports() {
