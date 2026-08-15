@@ -38,8 +38,12 @@ export async function GET(req: NextRequest) {
         where: { viewerId: userId },
         select: { id: true },
       },
+      likes: {
+        where: { likerId: userId },
+        select: { id: true },
+      },
       _count: {
-        select: { views: true }, // ✅ total view count
+        select: { views: true, likes: true }, // ✅ total view + like count
       },
     },
     orderBy: { createdAt: "desc" },
@@ -62,6 +66,8 @@ export async function GET(req: NextRequest) {
       createdAt: story.createdAt,
       viewed: story.views.length > 0,
       viewCount: story._count.views, // ✅ total views
+      liked: story.likes.length > 0,
+      likeCount: story._count.likes,
     });
   });
 
