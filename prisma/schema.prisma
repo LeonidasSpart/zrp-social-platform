@@ -135,6 +135,7 @@ model User {
 
   stories     Story[]
   storyViews  StoryView[]
+  storyLikes  StoryLike[]
 
   commentLikes     CommentLike[]
   commentReposts   CommentRepost[]
@@ -570,6 +571,7 @@ model Story {
   createdAt   DateTime  @default(now())
   expiresAt   DateTime
   views       StoryView[]
+  likes       StoryLike[]
 
   @@index([userId])
   @@index([createdAt])
@@ -587,6 +589,19 @@ model StoryView {
   @@unique([storyId, viewerId])
   @@index([storyId])
   @@index([viewerId])
+}
+
+model StoryLike {
+  id          String    @id @default(cuid())
+  storyId     String
+  story       Story     @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  likerId     String
+  liker       User      @relation(fields: [likerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@unique([storyId, likerId])
+  @@index([storyId])
+  @@index([likerId])
 }
 
 model TeamMember {
