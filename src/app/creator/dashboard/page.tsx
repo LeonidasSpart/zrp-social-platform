@@ -7,8 +7,10 @@ import Link from "next/link";
 import {
   DollarSign, TrendingUp, Users, ShoppingBag, Wallet,
   Loader2, CheckCircle, XCircle, Clock, ArrowUpRight,
-  Copy, Check, Calendar, MessageCircle, Heart, Eye
+  Copy, Check, Calendar, MessageCircle, Heart, Eye, BarChart3
 } from "lucide-react";
+import ContentPerformanceTab from "@/components/ContentPerformanceTab";
+import AudienceGrowthTab from "@/components/AudienceGrowthTab";
 
 // ─── Inline components ──────────────────────────────────────────────
 const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -113,6 +115,11 @@ export default function CreatorDashboard() {
   const [recentPurchases, setRecentPurchases] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  // ─── Creator Studio tabs ───────────────────────────────────────────
+  const [activeTab, setActiveTab] = useState<"overview" | "content" | "audience">("overview");
+  const [studioData, setStudioData] = useState<any>(null);
+  const [studioLoading, setStudioLoading] = useState(true);
+
   // ─── Withdrawal states ────────────────────────────────────────────
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
@@ -130,8 +137,24 @@ export default function CreatorDashboard() {
   useEffect(() => {
     if (status === "authenticated") {
       fetchDashboard();
+      fetchStudioData();
     }
   }, [status]);
+
+  const fetchStudioData = async () => {
+    try {
+      setStudioLoading(true);
+      const res = await fetch("/api/creator/studio");
+      if (res.ok) {
+        const data = await res.json();
+        setStudioData(data);
+      }
+    } catch (err) {
+      console.error("Error loading creator studio data:", err);
+    } finally {
+      setStudioLoading(false);
+    }
+  };
 
   const fetchDashboard = async () => {
     try {
@@ -263,8 +286,8 @@ export default function CreatorDashboard() {
       {/* ─── Header ──────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Creator Dashboard</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Manage your earnings, tips, and premium content.</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Creator Studio</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Earnings, content performance, and audience growth.</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => router.push("/settings")}>
@@ -280,6 +303,30 @@ export default function CreatorDashboard() {
         </div>
       </div>
 
+      {/* ─── Tab navigation ──────────────────────────────────────────── */}
+      <div className="flex gap-1 border-b border-gray-200 dark:border-gray-700">
+        {[
+          { id: "overview" as const, label: "Overview", icon: Wallet },
+          { id: "content" as const, label: "Content", icon: BarChart3 },
+          { id: "audience" as const, label: "Audience", icon: Users },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+              activeTab === tab.id
+                ? "border-zrp-red text-zrp-red"
+                : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+            }`}
+          >
+            <tab.icon className="w-4 h-4" />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === "overview" && (
+        <>
       {/* ─── Stats Row ───────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Balance" value={profile.balance || 0} icon={Wallet} color="green" />
@@ -408,6 +455,40 @@ export default function CreatorDashboard() {
           </div>
         )}
       </div>
+        </>
+      )}
+
+      {activeTab === "content" && (
+        studioLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-6 h-6 animate-spin text-zrp-red" />
+          </div>
+        ) : studioData ? (
+          <ContentPerformanceTab
+            topPosts={studioData.content.topPosts}
+            engagementTrend={studioData.content.engagementTrend}
+            totals={studioData.content.totals}
+          />
+        ) : (
+          <div className="text-center py-16 text-gray-500 dark:text-gray-400">Failed to load content data.</div>
+        )
+      )}
+
+      {activeTab === "audience" && (
+        studioLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-6 h-6 animate-spin text-zrp-red" />
+          </div>
+        ) : studioData ? (
+          <AudienceGrowthTab
+            totalFollowers={studioData.audience.totalFollowers}
+            newFollowersInWindow={studioData.audience.newFollowersInWindow}
+            trend={studioData.audience.trend}
+          />
+        ) : (
+          <div className="text-center py-16 text-gray-500 dark:text-gray-400">Failed to load audience data.</div>
+        )
+      )}
 
       {/* ─── Withdrawal Modal ────────────────────────────────────────── */}
       {showWithdrawModal && (

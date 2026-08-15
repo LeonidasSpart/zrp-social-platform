@@ -3,6 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { prisma } from "@/lib/db";
 import { getPlanLimits, checkPostLength, checkImagesPerPost } from "@/lib/limits";
 import { canPostRecruitment, canPublishArticle } from "@/lib/permissions";
+import { rateLimit } from "@/lib/rate-limit";
 
 // ─── GET (Feed) ─────────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
@@ -112,6 +113,11 @@ export async function GET(req: NextRequest) {
 
 // ─── POST (Create) ──────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
+  // Rate limit: 20 posts per 10 minutes - generous for normal use,
+  // blocks spam-posting bots/scripts.
+  const limit = await rateLimit(req, { limit: 20, window: 600, type: "posts-create" });
+  if (!limit.success) return limit.response;
+
   try {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     if (!token) {
@@ -130,6 +136,7 @@ export async function POST(req: NextRequest) {
     const {
       content = "",
       imageUrl,
+      imageUrls,
       mediaType,
       linkUrl,
       quotePostId,
@@ -142,6 +149,13 @@ export async function POST(req: NextRequest) {
       applyUrl,
       articleBody,
     } = body;
+
+    // ─── Normalize media: support both the legacy single imageUrl and
+    // the new multi-image imageUrls array, without breaking either ────
+    const normalizedImageUrls: string[] = Array.isArray(imageUrls) && imageUrls.length > 0
+      ? imageUrls
+      : (imageUrl ? [imageUrl] : []);
+    const primaryImageUrl: string | null = normalizedImageUrls[0] || null;
 
     // ─── Type‑specific plan checks ──────────────────────────────
     if (type === "RECRUITMENT" && !canPostRecruitment(user)) {
@@ -166,8 +180,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: lengthCheck.message }, { status: 400 });
     }
 
-    if (imageUrl) {
-      const imageCheck = checkImagesPerPost(1, plan);
+    if (normalizedImageUrls.length > 0) {
+      const imageCheck = checkImagesPerPost(normalizedImageUrls.length, plan);
       if (!imageCheck.allowed) {
         return NextResponse.json({ error: imageCheck.message }, { status: 400 });
       }
@@ -205,8 +219,9 @@ export async function POST(req: NextRequest) {
 
     const postData: any = {
       content,
-      imageUrl,
-      mediaType: mediaType || (imageUrl ? (imageUrl.match(/\.(mp4|webm|ogg)$/) ? "video" : "image") : null),
+      imageUrl: primaryImageUrl,
+      imageUrls: normalizedImageUrls,
+      mediaType: mediaType || (primaryImageUrl ? (primaryImageUrl.match(/\.(mp4|webm|ogg)$/) ? "video" : "image") : null),
       linkUrl,
       authorId: user.id,
       quotePostId: quotePostId || null,

@@ -1,13 +1,35 @@
+"use client";
+
+import { useRef } from "react";
 import Link from "next/link";
 
 interface Props {
   user: { id: string; username: string; name: string; avatarUrl?: string | null };
   hasUnseen: boolean;
   onClick: () => void;
-  storyPreview?: string | null; // 👈 new prop
+  storyPreview?: string | null;
+  storyPreviewType?: string | null; // "image" | "video"
 }
 
-export default function StoryCircle({ user, hasUnseen, onClick, storyPreview }: Props) {
+export default function StoryCircle({ user, hasUnseen, onClick, storyPreview, storyPreviewType }: Props) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const nudged = useRef(false);
+
+  // Same fix already applied to post videos: preload="metadata" alone
+  // often leaves the <video> element solid black until playback starts,
+  // since it only fetches duration/dimensions, not a decoded frame.
+  // Nudging the playhead forward slightly forces the browser to decode
+  // and paint a real frame for the thumbnail.
+  const nudgeFrame = (el: HTMLVideoElement) => {
+    if (nudged.current) return;
+    nudged.current = true;
+    try {
+      el.currentTime = Math.min(0.1, (el.duration || 1) * 0.05);
+    } catch {
+      // no-op
+    }
+  };
+
   return (
     <button
       onClick={onClick}
@@ -15,7 +37,19 @@ export default function StoryCircle({ user, hasUnseen, onClick, storyPreview }: 
     >
       <div className={`w-16 h-16 rounded-full p-[2px] ${hasUnseen ? "bg-gradient-to-tr from-yellow-400 to-pink-500" : "bg-gray-300 dark:bg-gray-600"}`}>
         <div className="w-full h-full rounded-full bg-white dark:bg-gray-800 overflow-hidden">
-          {storyPreview ? (
+          {storyPreview && storyPreviewType === "video" ? (
+            <video
+              ref={videoRef}
+              src={storyPreview}
+              className="w-full h-full object-cover pointer-events-none"
+              muted
+              playsInline
+              webkit-playsinline="true"
+              preload="metadata"
+              onLoadedMetadata={(e) => nudgeFrame(e.currentTarget)}
+              onLoadedData={(e) => nudgeFrame(e.currentTarget)}
+            />
+          ) : storyPreview ? (
             <img
               src={storyPreview}
               alt={user.name || user.username}

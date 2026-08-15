@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import {
   ChevronDown,
   ChevronUp,
@@ -25,7 +26,9 @@ import {
   Globe,
   Lock,
   CheckCircle,
-  Ticket, // ➕ ADDED
+  Ticket,
+  Trash2,    // ➕ ADDED
+  Crown,     // ➕ ADDED
 } from "lucide-react";
 
 interface FaqItem {
@@ -451,6 +454,27 @@ export default function FAQPage() {
         </div>
       ),
     },
+    // ─── NEW: How to delete your account ─────────────────────────────
+    {
+      id: "delete-account",
+      category: "Privacy & Safety",
+      question: "How do I delete my account?",
+      icon: Trash2,
+      answer: (
+        <div className="space-y-2">
+          <p>To permanently delete your account:</p>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Go to <Link href="/settings" className="text-zrp-red hover:underline">Settings</Link>.</li>
+            <li>Navigate to the <strong>Account</strong> tab.</li>
+            <li>Scroll to the bottom and tap <strong>Delete Account</strong>.</li>
+            <li>Confirm your password and tap <strong>Permanently Delete</strong>.</li>
+          </ol>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            ⚠️ Deletion is permanent and cannot be undone. All your data will be removed within 30 days.
+          </p>
+        </div>
+      ),
+    },
 
     // ─── Charity & Impact ────────────────────────────────────────────
     {
@@ -513,10 +537,23 @@ export default function FAQPage() {
       icon: CheckCircle,
       answer: (
         <div className="space-y-2">
-          <ul className="list-disc list-inside space-y-1 text-sm">
-            <li><span className="text-blue-500">🔵 Verified</span> – Authentic account of notable public interest</li>
-            <li><span className="text-amber-400">🟡 Organization</span> – Official account of an organisation or company</li>
-            <li><span className="text-gray-400">⚪ Government</span> – Official government account</li>
+          <ul className="space-y-2 text-sm">
+            <li className="flex items-center gap-2">
+              <VerifiedBadge badgeType="verified" />
+              <span><strong>Verified</strong> – Authentic account of notable public interest</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <VerifiedBadge badgeType="organization" />
+              <span><strong>Organization</strong> – Official account of an organisation or company</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <VerifiedBadge badgeType="government" />
+              <span><strong>Government</strong> – Official government account</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <VerifiedBadge badgeType="team" />
+              <span><strong>ZRP Team</strong> – Official ZRP staff account</span>
+            </li>
           </ul>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             🏅 Badges are assigned by the ZRP Social team and indicate authenticity.
@@ -524,8 +561,29 @@ export default function FAQPage() {
         </div>
       ),
     },
+    // ─── NEW: Enterprise Plan ─────────────────────────────────────────
+    {
+      id: "enterprise-plan",
+      category: "Administration",
+      question: "What is the Enterprise plan?",
+      icon: Crown,
+      answer: (
+        <div className="space-y-2">
+          <p>The <strong>Enterprise</strong> plan is designed for large organisations and power users:</p>
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>Unlimited posts</li>
+            <li>Full API access</li>
+            <li>24/7 priority support</li>
+            <li>Custom solutions and dedicated account manager</li>
+          </ul>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            📧 Contact sales for custom pricing.
+          </p>
+        </div>
+      ),
+    },
 
-    // ─── NEW: Support & Tickets ──────────────────────────────────────
+    // ─── Support & Tickets ──────────────────────────────────────────
     {
       id: "support-tickets",
       category: "Support & Tickets",
@@ -721,9 +779,6 @@ export default function FAQPage() {
           </Link>
         </div>
       </div>
-
-      {/* ─── Footer Links ─── */}
-      {/* ❌ REMOVED – to avoid duplication with global footer */}
     </div>
   );
 }

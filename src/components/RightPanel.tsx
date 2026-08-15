@@ -45,7 +45,7 @@ export default function RightPanel() {
 
     fetch("/api/users/suggested")
       .then((res) => (res.ok ? res.json() : []))
-      .then((data) => setSuggestions(Array.isArray(data) ? data.slice(0, 5) : []))
+      .then((data) => setSuggestions(Array.isArray(data) ? data : []))
       .catch(() => {})
       .finally(() => setLoadingSuggestions(false));
   }, [session]);
@@ -75,7 +75,7 @@ export default function RightPanel() {
     }
   };
 
-  if (!session || pathname?.startsWith("/admin") || pathname?.startsWith("/onboarding")) return null;
+  if (!session || pathname?.startsWith("/admin") || pathname?.startsWith("/onboarding") || pathname?.startsWith("/shorts")) return null;
 
   return (
     <aside className="hidden xl:flex flex-col w-80 flex-shrink-0 h-screen sticky top-0 py-4 pl-4 overflow-y-auto overscroll-contain">
@@ -105,7 +105,7 @@ export default function RightPanel() {
         ) : trending.length === 0 ? (
           <p className="text-sm text-gray-400 px-4 pb-4">{t("rightPanel.noTrending")}</p>
         ) : (
-          <div className="pb-2">
+          <div className="pb-2 max-h-[280px] overflow-y-auto overscroll-contain">
             {trending.map((item) => (
               <Link
                 key={item.tag}
@@ -136,7 +136,7 @@ export default function RightPanel() {
         ) : suggestions.length === 0 ? (
           <p className="text-sm text-gray-400 px-4 pb-4">{t("rightPanel.noSuggestions")}</p>
         ) : (
-          <div className="pb-2">
+          <div className="pb-2 max-h-[340px] overflow-y-auto overscroll-contain">
             {suggestions.map((user) => {
               const alreadyFollowing = followingIds.has(user.id);
               return (

@@ -119,12 +119,20 @@ export default function HomePage() {
     setPosts([]);
   };
 
-  // ─── Reload when feedType changes ──────────────────────────────────
+  // ─── Reload when feedType changes (or the user actually changes) ──
+  // Depend on the user's id specifically, not the whole session object -
+  // NextAuth's SessionProvider silently refetches the session on window
+  // focus by default (e.g. switching back to this tab), which creates a
+  // brand new session object every time even though the user is the
+  // same. Depending on that whole object meant the feed would fully
+  // reload - and everyone's scroll position would reset to the top -
+  // just from switching tabs and coming back.
+  const userId = session?.user?.id;
   useEffect(() => {
-    if (session) {
+    if (userId) {
       loadPosts();
     }
-  }, [feedType, session, loadPosts]);
+  }, [feedType, userId, loadPosts]);
 
   // ─── Intersection Observer for infinite scroll ────────────────────
   useEffect(() => {
@@ -146,8 +154,15 @@ export default function HomePage() {
     setPosts((prev) => [newPost, ...prev]);
   };
 
-  const handleUpdate = useCallback(() => {
-    loadPosts();
+  const handleUpdate = useCallback((deletedPostId?: string) => {
+    if (deletedPostId) {
+      // Just remove the one deleted post locally - no need to refetch
+      // and reset the whole feed (and everyone's scroll position) for
+      // something that only affects a single post.
+      setPosts((prev) => prev.filter((p) => p.id !== deletedPostId));
+    } else {
+      loadPosts();
+    }
   }, [loadPosts]);
 
   // ─── Redirect if not authenticated ────────────────────────────────
@@ -176,6 +191,22 @@ export default function HomePage() {
         </div>
       );
     }
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-500">{t("action.loading")}</div>
+      </div>
+    );
+  }
+
+  // ─── Guest / session-expired guard ─────────────────────────────────
+  // Middleware already redirects a fresh, unauthenticated visit to /
+  // before this component ever mounts. This covers the narrower case
+  // of a session expiring (or the account being banned) while someone
+  // is already sitting on this page - status flips to "unauthenticated"
+  // after mount, and without this guard the full authenticated feed
+  // shell below would still render for a moment before the redirect
+  // effect above finishes navigating away.
+  if (status === "unauthenticated") {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-gray-500">{t("action.loading")}</div>
@@ -235,7 +266,7 @@ export default function HomePage() {
       </div>
 
       {/* ─── Feed ────────────────────────────────────────────────────── */}
-      <div className="mt-4 space-y-4">
+      <div className="mt-4">
         {loading ? (
           <div className="flex justify-center py-8">
             <div className="w-6 h-6 border-2 border-zrp-red border-t-transparent rounded-full animate-spin" />

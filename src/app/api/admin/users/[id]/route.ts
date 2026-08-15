@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { Role } from "@prisma/client";
 
-const VALID_BADGE_TYPES = ["verified", "organization", "government", null];
+const VALID_BADGE_TYPES = ["verified", "organization", "government", "team", null];
 const VALID_ROLES = ["USER", "MODERATOR", "ADMIN"];
 
 export async function PUT(

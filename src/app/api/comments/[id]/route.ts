@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { checkPostLength } from "@/lib/limits";
 
 // ─── PREVENT STATIC GENERATION ─────────────────────────────────────
 export const dynamic = 'force-dynamic';
@@ -28,7 +29,7 @@ export async function PUT(
     // Check if comment exists and belongs to the user
     const comment = await prisma.comment.findUnique({
       where: { id: params.id },
-      select: { authorId: true },
+      select: { authorId: true, author: { select: { plan: true } } },
     });
 
     if (!comment) {
@@ -40,6 +41,13 @@ export async function PUT(
         { error: "You can only edit your own comments" },
         { status: 403 }
       );
+    }
+
+    // Validate against the author's actual plan limit - previously this
+    // had no server-side length check at all.
+    const lengthCheck = checkPostLength(content.length, comment.author.plan);
+    if (!lengthCheck.allowed) {
+      return NextResponse.json({ error: lengthCheck.message }, { status: 400 });
     }
 
     const updated = await prisma.comment.update({

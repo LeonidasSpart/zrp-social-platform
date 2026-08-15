@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { checkPostLength } from "@/lib/limits";
 
 // GET a single post (with all data for the post page)
 export async function GET(
@@ -117,7 +118,7 @@ export async function PUT(
     // Check if post exists and belongs to user
     const existingPost = await prisma.post.findUnique({
       where: { id: params.id },
-      select: { authorId: true },
+      select: { authorId: true, author: { select: { plan: true } } },
     });
 
     if (!existingPost) {
@@ -126,6 +127,14 @@ export async function PUT(
 
     if (existingPost.authorId !== session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    // Validate against the author's actual plan limit, same as post
+    // creation - this previously had no server-side length check at all,
+    // meaning it silently trusted whatever the client sent.
+    const lengthCheck = checkPostLength(content.length, existingPost.author.plan);
+    if (!lengthCheck.allowed) {
+      return NextResponse.json({ error: lengthCheck.message }, { status: 400 });
     }
 
     const updatedPost = await prisma.post.update({

@@ -8,7 +8,7 @@ import { useSession, signOut } from "next-auth/react";
 import {
   Home, Compass, Search, MessageSquare, Bell, Bookmark, User,
   LayoutDashboard, Settings, Users, Key, LogOut, MoreHorizontal,
-  PenSquare, Sun, Moon, Globe,
+  PenSquare, Sun, Moon, Globe, Film,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -51,10 +51,11 @@ export default function Sidebar() {
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
-  if (!isAuthenticated || pathname?.startsWith("/onboarding")) return null;
+  if (!isAuthenticated || pathname?.startsWith("/onboarding") || pathname?.startsWith("/shorts")) return null;
 
   const navItems: NavItem[] = [
     { href: "/", icon: Home, label: t("nav.home") },
+    { href: "/shorts", icon: Film, label: "Shorts" },
     { href: "/explore", icon: Compass, label: t("nav.explore") },
     { href: "/search", icon: Search, label: t("nav.search") },
     { href: "/messages", icon: MessageSquare, label: t("nav.messages") },
@@ -78,7 +79,7 @@ export default function Sidebar() {
     <aside className="hidden lg:flex flex-col w-64 flex-shrink-0 h-screen sticky top-0 px-2 py-4 border-r border-gray-200 dark:border-gray-800 overflow-y-auto">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2 px-3 py-2 mb-2">
-        <Image src="/logo.png" alt="ZRP" width={40} height={40} className="w-9 h-9 object-contain" />
+        <Image src="/logo.png" alt="ZRP" width={44} height={44} className="w-11 h-11 object-contain" />
       </Link>
 
       {/* Nav items */}

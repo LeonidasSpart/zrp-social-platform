@@ -7,7 +7,7 @@ import Link from "next/link";
 import {
   Check, X, Globe, MapPin, User, Key, Calendar, Camera, Trash2, Loader2,
   BellOff, ChevronRight, Ban, Mail, DollarSign, TrendingUp, Wallet, Lock,
-  Ticket, // ➕ ADDED for support tickets icon
+  Ticket, Shield, Bell, UserCircle, CreditCard, LifeBuoy,
 } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import EmailPreferences from "@/components/EmailPreferences";
@@ -48,6 +48,27 @@ interface CreatorProfile {
   totalWithdrawn: number;
 }
 
+// ─── Settings categories, X-style ────────────────────────────────────
+type Category = "account" | "profile" | "security" | "privacy" | "notifications" | "monetization" | "support";
+
+const CATEGORIES: { id: Category; label: string; icon: React.ElementType }[] = [
+  { id: "account", label: "Account", icon: UserCircle },
+  { id: "profile", label: "Profile", icon: User },
+  { id: "security", label: "Security", icon: Key },
+  { id: "privacy", label: "Privacy & Safety", icon: Shield },
+  { id: "notifications", label: "Notifications", icon: Bell },
+  { id: "monetization", label: "Monetization", icon: CreditCard },
+  { id: "support", label: "Support", icon: LifeBuoy },
+];
+
+// Backward compatibility: old #anchor deep-links still land on the right category
+const HASH_TO_CATEGORY: Record<string, Category> = {
+  "account-info": "account",
+  "profile": "profile",
+  "password": "security",
+  "privacy": "privacy",
+};
+
 export default function SettingsPage() {
   const { data: session, status, update } = useSession();
   const router = useRouter();
@@ -55,6 +76,16 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
+
+  // ─── Category navigation ────────────────────────────────────────────
+  const [activeCategory, setActiveCategory] = useState<Category>("account");
+
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (hash && HASH_TO_CATEGORY[hash]) {
+      setActiveCategory(HASH_TO_CATEGORY[hash]);
+    }
+  }, []);
 
   // ─── Creator monetisation state ──────────────────────────────────
   const [creatorProfile, setCreatorProfile] = useState<CreatorProfile | null>(null);
@@ -483,7 +514,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-4 px-4">
+    <div className="max-w-5xl mx-auto py-4 px-4">
       <div className="mb-4">
         <Link href={`/profile/${session?.user?.username}`} className="text-zrp-red hover:underline text-sm">
           {t("settings.backToProfile")}
@@ -502,621 +533,696 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* ─── Account Info ──────────────────────────────────────────── */}
-      <div id="account-info" className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4 scroll-mt-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.accountInfo")}</h2>
-        <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-          <Calendar className="w-4 h-4" />
-          <span>{t("settings.joined", { date: formatDate(userData.createdAt) })}</span>
-        </div>
-        <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400 mt-1">
-          <Mail className="w-4 h-4" />
-          <span>{currentEmail}</span>
-        </div>
-      </div>
-
-      {/* ─── Change Email Section ───────────────────────────────────── */}
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.changeEmail")}</h2>
-        <form onSubmit={handleUpdateEmail} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("settings.currentEmail")}
-            </label>
-            <p className="text-gray-600 dark:text-gray-400">{currentEmail}</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("settings.newEmail")}
-            </label>
-            <input
-              type="email"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              placeholder={t("settings.newEmailPlaceholder")}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("settings.currentPasswordRequired")}
-            </label>
-            <input
-              type="password"
-              value={emailPassword}
-              onChange={(e) => setEmailPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              placeholder={t("settings.currentPasswordPlaceholder")}
-              required
-            />
-          </div>
-          {emailMessage && (
-            <p className={`text-sm ${emailMessage.type === "success" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-              {emailMessage.text}
-            </p>
-          )}
+      {/* ─── Mobile: horizontal scrollable category chips ─────────────── */}
+      <div className="lg:hidden flex gap-2 overflow-x-auto pb-3 mb-4 -mx-4 px-4 scrollbar-hide">
+        {CATEGORIES.map((cat) => (
           <button
-            type="submit"
-            disabled={updatingEmail}
-            className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+            key={cat.id}
+            onClick={() => setActiveCategory(cat.id)}
+            className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium border transition whitespace-nowrap ${
+              activeCategory === cat.id
+                ? "bg-zrp-red text-white border-zrp-red"
+                : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+            }`}
           >
-            {updatingEmail ? t("settings.sending") : t("settings.sendVerificationEmail")}
+            <cat.icon className="w-4 h-4" />
+            {cat.label}
           </button>
-        </form>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-          {t("settings.emailVerifyNote")}
-        </p>
+        ))}
       </div>
 
-      {/* ─── Your Plan Section ────────────────────────────────────── */}
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.yourPlan")}</h2>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{t("settings.currentPlan")}</p>
-            <p className="text-xl font-bold text-gray-900 dark:text-white capitalize">
-              {userPlan}
-            </p>
-          </div>
-          <Link
-            href="/pricing"
-            className="px-4 py-2 bg-zrp-red text-white rounded-lg font-medium hover:bg-zrp-darkRed transition"
-          >
-            {t("settings.upgradePlan")}
-          </Link>
-        </div>
-
-        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {planNoteMap[userPlan]}
-          </p>
-        </div>
-
-        <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-          <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-            <p className="font-medium text-gray-900 dark:text-white">{t("settings.posts")}</p>
-            <p className="text-gray-500 dark:text-gray-400">
-              {planLimits.postLength === 999999 ? "∞" : planLimits.postLength}
-            </p>
-          </div>
-          <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-            <p className="font-medium text-gray-900 dark:text-white">{t("settings.images")}</p>
-            <p className="text-gray-500 dark:text-gray-400">
-              {planLimits.imagesPerPost === 999999 ? "∞" : planLimits.imagesPerPost}
-            </p>
-          </div>
-          <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-            <p className="font-medium text-gray-900 dark:text-white">{t("settings.video")}</p>
-            <p className="text-gray-500 dark:text-gray-400">{planLimits.videoUploadMB}MB</p>
-          </div>
-          <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-            <p className="font-medium text-gray-900 dark:text-white">{t("settings.scheduled")}</p>
-            <p className="text-gray-500 dark:text-gray-400">
-              {planLimits.scheduledPostsPerMonth === 999999 ? "∞" : planLimits.scheduledPostsPerMonth}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* ─── Creator Monetisation Section ──────────────────────────── */}
-      {isCreatorEligible && (
-        <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t("settings.creatorMonetisation")}</h2>
-            <Link
-              href="/creator/dashboard"
-              className="inline-flex items-center gap-1.5 text-sm bg-zrp-red text-white px-4 py-2 rounded-lg font-medium hover:bg-zrp-darkRed transition"
+      <div className="lg:flex lg:gap-8 lg:items-start">
+        {/* ─── Desktop: persistent left category list ──────────────── */}
+        <nav className="hidden lg:flex lg:flex-col lg:w-56 lg:flex-shrink-0 gap-1 sticky top-4">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-left transition ${
+                activeCategory === cat.id
+                  ? "bg-zrp-red/10 text-zrp-red"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
             >
-              <TrendingUp className="w-4 h-4" />
-              {t("settings.dashboard")}
-            </Link>
-          </div>
+              <cat.icon className="w-4 h-4 flex-shrink-0" />
+              {cat.label}
+            </button>
+          ))}
+        </nav>
 
-          {loadingCreator ? (
-            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              {t("action.loading")}
-            </div>
-          ) : creatorProfile ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-              <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-                <p className="text-gray-500 dark:text-gray-400 text-xs">{t("settings.balance")}</p>
-                <p className="font-bold text-gray-900 dark:text-white">
-                  ${creatorProfile.balance.toFixed(2)}
-                </p>
+        <div className="flex-1 min-w-0">
+          {/* ═══════════════════════ ACCOUNT ═══════════════════════ */}
+          {activeCategory === "account" && (
+            <div className="space-y-4">
+              {/* ─── Account Info ──────────────────────────────────────── */}
+              <div id="account-info" className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 scroll-mt-4">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.accountInfo")}</h2>
+                <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                  <Calendar className="w-4 h-4" />
+                  <span>{t("settings.joined", { date: formatDate(userData.createdAt) })}</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <Mail className="w-4 h-4" />
+                  <span>{currentEmail}</span>
+                </div>
               </div>
-              <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-                <p className="text-gray-500 dark:text-gray-400 text-xs">{t("settings.totalTips")}</p>
-                <p className="font-bold text-gray-900 dark:text-white">
-                  ${creatorProfile.totalTips.toFixed(2)}
-                </p>
-              </div>
-              <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-                <p className="text-gray-500 dark:text-gray-400 text-xs">{t("settings.premiumRevenue")}</p>
-                <p className="font-bold text-gray-900 dark:text-white">
-                  ${creatorProfile.totalPremiumRevenue.toFixed(2)}
-                </p>
-              </div>
-              <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-                <p className="text-gray-500 dark:text-gray-400 text-xs">{t("settings.withdrawn")}</p>
-                <p className="font-bold text-gray-900 dark:text-white">
-                  ${creatorProfile.totalWithdrawn.toFixed(2)}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              <p>{t("settings.creatorCta")}</p>
-              <Link
-                href="/creator/dashboard"
-                className="inline-block mt-2 text-zrp-red hover:underline"
-              >
-                {t("settings.getStarted")}
-              </Link>
-            </div>
-          )}
 
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
-            {t("settings.platformFeeNote")}
-          </p>
-        </div>
-      )}
+              {/* ─── Change Email Section ───────────────────────────────────── */}
+              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.changeEmail")}</h2>
+                <form onSubmit={handleUpdateEmail} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t("settings.currentEmail")}
+                    </label>
+                    <p className="text-gray-600 dark:text-gray-400">{currentEmail}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t("settings.newEmail")}
+                    </label>
+                    <input
+                      type="email"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      placeholder={t("settings.newEmailPlaceholder")}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t("settings.currentPasswordRequired")}
+                    </label>
+                    <input
+                      type="password"
+                      value={emailPassword}
+                      onChange={(e) => setEmailPassword(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      placeholder={t("settings.currentPasswordPlaceholder")}
+                      required
+                    />
+                  </div>
+                  {emailMessage && (
+                    <p className={`text-sm ${emailMessage.type === "success" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                      {emailMessage.text}
+                    </p>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={updatingEmail}
+                    className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    {updatingEmail ? t("settings.sending") : t("settings.sendVerificationEmail")}
+                  </button>
+                </form>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                  {t("settings.emailVerifyNote")}
+                </p>
+              </div>
 
-      {/* ─── Profile Picture ────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.profilePicture")}</h2>
-        <div className="flex items-center gap-6">
-          <div className="relative">
-            <div className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-3xl font-bold overflow-hidden">
-              {avatarPreview ? (
-                <img
-                  src={avatarPreview}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
+              {/* ─── Username Section ────────────────────────────────────────── */}
+              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.usernameTitle")}</h2>
+
+                {usernameCooldown !== null && usernameCooldown > 0 && (
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-300 text-sm p-3 rounded-lg mb-4">
+                    {t("settings.usernameCooldownBanner", { n: usernameCooldown })}
+                  </div>
+                )}
+
+                <form onSubmit={handleUpdateUsername} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t("settings.currentUsername")}
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-600 dark:text-gray-400">@{userData.username}</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t("settings.newUsername")}
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        value={newUsername}
+                        onChange={(e) => setNewUsername(e.target.value.toLowerCase())}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        placeholder={t("settings.newUsernamePlaceholder")}
+                        minLength={3}
+                        maxLength={20}
+                        disabled={usernameCooldown !== null && usernameCooldown > 0}
+                      />
+                    </div>
+                    {usernameError && (
+                      <p className="text-red-500 dark:text-red-400 text-sm mt-1">{usernameError}</p>
+                    )}
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                      {t("settings.usernameHint")}
+                    </p>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={updatingUsername || (usernameCooldown !== null && usernameCooldown > 0)}
+                    className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    {updatingUsername ? t("settings.updating") : t("settings.changeUsername")}
+                  </button>
+                </form>
+              </div>
+
+              {/* ─── Custom Profile URL ────────────────────────────────────── */}
+              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <CustomUrlSettings
+                  currentUsername={userData.username}
+                  currentCustomUrl={userData.customUrl}
+                  onUpdate={() => {
+                    fetchUserData();
+                    update();
+                  }}
                 />
-              ) : (
-                userData?.name?.[0]?.toUpperCase() || "?"
-              )}
+              </div>
+
+              {/* ─── Delete Account Section ──────────────────────────────────── */}
+              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.dangerZone")}</h2>
+                <div className="border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900/10">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">{t("settings.deleteAccount")}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {t("settings.deleteAccountDesc")}
+                      </p>
+                    </div>
+                    <Link
+                      href="/settings/delete"
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition"
+                    >
+                      <Trash2 className="w-4 h-4 inline mr-1" />
+                      {t("settings.deleteAccount")}
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </div>
-            <label
-              htmlFor="avatar-upload"
-              className="absolute bottom-0 right-0 bg-zrp-red text-white rounded-full p-1.5 cursor-pointer hover:bg-zrp-darkRed transition"
-            >
-              <Camera className="w-4 h-4" />
-            </label>
-            <input
-              id="avatar-upload"
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarUpload}
-              className="hidden"
-              disabled={uploadingAvatar}
-            />
-          </div>
-          <div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {t("settings.uploadProfilePicNote")}
-            </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              {t("settings.supportedFormats")}
-            </p>
-            {uploadingAvatar && (
-              <p className="text-sm text-zrp-red dark:text-zrp-red mt-1">{t("settings.uploading")}</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ─── Profile Section ────────────────────────────────────────── */}
-      <div id="profile" className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4 scroll-mt-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.profile")}</h2>
-        <form onSubmit={handleUpdateProfile} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("settings.displayName")}
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              maxLength={50}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("settings.bio")}
-            </label>
-            <textarea
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              rows={3}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
-              placeholder={t("settings.bioPlaceholder")}
-              maxLength={160}
-            />
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{bio.length}/160</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <LocationAutocomplete
-                value={location}
-                onChange={(val) => setLocation(val)}
-                placeholder={t("settings.cityPlaceholder")}
-                label={t("settings.city")}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {t("settings.country")}
-              </label>
-              <input
-                type="text"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder={t("settings.countryPlaceholder")}
-                maxLength={50}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("settings.website")}
-            </label>
-            <div className="relative">
-              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="url"
-                value={website}
-                onChange={(e) => setWebsite(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder={t("settings.websitePlaceholder")}
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={updatingProfile}
-            className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            {updatingProfile ? t("settings.saving") : t("settings.updateProfile")}
-          </button>
-        </form>
-      </div>
-
-      {/* ─── Custom Profile URL ────────────────────────────────────── */}
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <CustomUrlSettings
-          currentUsername={userData.username}
-          currentCustomUrl={userData.customUrl}
-          onUpdate={() => {
-            fetchUserData();
-            update();
-          }}
-        />
-      </div>
-
-      {/* ─── Solana Wallet (for direct tips) ───────────────────────── */}
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.solanaWalletTitle")}</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-          {t("settings.solanaWalletDesc")}
-        </p>
-        <form onSubmit={handleUpdateSolanaWallet} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("settings.walletAddress")}
-            </label>
-            <div className="relative">
-              <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                value={solanaWallet}
-                onChange={(e) => setSolanaWallet(e.target.value)}
-                placeholder={t("settings.walletAddressPlaceholder")}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                disabled={updatingWallet}
-              />
-            </div>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              {t("settings.walletAddressNote")}
-            </p>
-          </div>
-          <button
-            type="submit"
-            disabled={updatingWallet}
-            className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            {updatingWallet ? t("settings.saving") : t("settings.saveWallet")}
-          </button>
-        </form>
-      </div>
-
-      {/* ─── Username Section ────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.usernameTitle")}</h2>
-
-        {usernameCooldown !== null && usernameCooldown > 0 && (
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-300 text-sm p-3 rounded-lg mb-4">
-            {t("settings.usernameCooldownBanner", { n: usernameCooldown })}
-          </div>
-        )}
-
-        <form onSubmit={handleUpdateUsername} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("settings.currentUsername")}
-            </label>
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600 dark:text-gray-400">@{userData.username}</span>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("settings.newUsername")}
-            </label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                value={newUsername}
-                onChange={(e) => setNewUsername(e.target.value.toLowerCase())}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder={t("settings.newUsernamePlaceholder")}
-                minLength={3}
-                maxLength={20}
-                disabled={usernameCooldown !== null && usernameCooldown > 0}
-              />
-            </div>
-            {usernameError && (
-              <p className="text-red-500 dark:text-red-400 text-sm mt-1">{usernameError}</p>
-            )}
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              {t("settings.usernameHint")}
-            </p>
-          </div>
-
-          <button
-            type="submit"
-            disabled={updatingUsername || (usernameCooldown !== null && usernameCooldown > 0)}
-            className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            {updatingUsername ? t("settings.updating") : t("settings.changeUsername")}
-          </button>
-        </form>
-      </div>
-
-      {/* ─── Password Section ────────────────────────────────────────── */}
-      <div id="password" className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4 scroll-mt-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.changePasswordTitle")}</h2>
-        <form onSubmit={handleUpdatePassword} className="space-y-4">
-          {passwordError && (
-            <p className="text-red-500 dark:text-red-400 text-sm">{passwordError}</p>
           )}
 
-          <PasswordInput
-            id="currentPassword"
-            name="currentPassword"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            label={t("settings.currentPassword")}
-            placeholder={t("settings.currentPasswordPlaceholder2")}
-            required
-            autoComplete="current-password"
-          />
+          {/* ═══════════════════════ PROFILE ═══════════════════════ */}
+          {activeCategory === "profile" && (
+            <div className="space-y-4">
+              {/* ─── Profile Picture ────────────────────────────────────────── */}
+              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.profilePicture")}</h2>
+                <div className="flex items-center gap-6">
+                  <div className="relative">
+                    <div className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-3xl font-bold overflow-hidden">
+                      {avatarPreview ? (
+                        <img
+                          src={avatarPreview}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        userData?.name?.[0]?.toUpperCase() || "?"
+                      )}
+                    </div>
+                    <label
+                      htmlFor="avatar-upload"
+                      className="absolute bottom-0 right-0 bg-zrp-red text-white rounded-full p-1.5 cursor-pointer hover:bg-zrp-darkRed transition"
+                    >
+                      <Camera className="w-4 h-4" />
+                    </label>
+                    <input
+                      id="avatar-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                      disabled={uploadingAvatar}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {t("settings.uploadProfilePicNote")}
+                    </p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">
+                      {t("settings.supportedFormats")}
+                    </p>
+                    {uploadingAvatar && (
+                      <p className="text-sm text-zrp-red dark:text-zrp-red mt-1">{t("settings.uploading")}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
 
-          <PasswordInput
-            id="newPassword"
-            name="newPassword"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            label={t("settings.newPassword")}
-            placeholder={t("settings.newPasswordPlaceholder")}
-            required
-            autoComplete="new-password"
-          />
+              {/* ─── Profile Section ────────────────────────────────────────── */}
+              <div id="profile" className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 scroll-mt-4">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.profile")}</h2>
+                <form onSubmit={handleUpdateProfile} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t("settings.displayName")}
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      maxLength={50}
+                    />
+                  </div>
 
-          <PasswordInput
-            id="confirmPassword"
-            name="confirmPassword"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            label={t("settings.confirmNewPassword")}
-            placeholder={t("settings.confirmNewPasswordPlaceholder")}
-            required
-            autoComplete="new-password"
-          />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t("settings.bio")}
+                    </label>
+                    <textarea
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      rows={3}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
+                      placeholder={t("settings.bioPlaceholder")}
+                      maxLength={160}
+                    />
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{bio.length}/160</p>
+                  </div>
 
-          <button
-            type="submit"
-            disabled={updatingPassword}
-            className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            {updatingPassword ? t("settings.updating") : t("settings.changePassword")}
-          </button>
-        </form>
-      </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <LocationAutocomplete
+                        value={location}
+                        onChange={(val) => setLocation(val)}
+                        placeholder={t("settings.cityPlaceholder")}
+                        label={t("settings.city")}
+                      />
+                    </div>
 
-      {/* ─── Privacy Settings ───────────────────────────────────────── */}
-      <div id="privacy" className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4 scroll-mt-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.privacySettings")}</h2>
-        <form onSubmit={handleUpdatePrivacy} className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-gray-900 dark:text-white">{t("settings.publicLikes")}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {t("settings.publicLikesDesc")}
-              </p>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {t("settings.country")}
+                      </label>
+                      <input
+                        type="text"
+                        value={country}
+                        onChange={(e) => setCountry(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        placeholder={t("settings.countryPlaceholder")}
+                        maxLength={50}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t("settings.website")}
+                    </label>
+                    <div className="relative">
+                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="url"
+                        value={website}
+                        onChange={(e) => setWebsite(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        placeholder={t("settings.websitePlaceholder")}
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={updatingProfile}
+                    className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    {updatingProfile ? t("settings.saving") : t("settings.updateProfile")}
+                  </button>
+                </form>
+              </div>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={publicLikes}
-                onChange={(e) => setPublicLikes(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-zrp-red rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-zrp-red"></div>
-            </label>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-gray-900 dark:text-white">{t("settings.publicFollowing")}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {t("settings.publicFollowingDesc")}
-              </p>
+          )}
+
+          {/* ═══════════════════════ SECURITY ═══════════════════════ */}
+          {activeCategory === "security" && (
+            <div className="space-y-4">
+              {/* ─── Password Section ────────────────────────────────────────── */}
+              <div id="password" className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 scroll-mt-4">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.changePasswordTitle")}</h2>
+                <form onSubmit={handleUpdatePassword} className="space-y-4">
+                  {passwordError && (
+                    <p className="text-red-500 dark:text-red-400 text-sm">{passwordError}</p>
+                  )}
+
+                  <PasswordInput
+                    id="currentPassword"
+                    name="currentPassword"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    label={t("settings.currentPassword")}
+                    placeholder={t("settings.currentPasswordPlaceholder2")}
+                    required
+                    autoComplete="current-password"
+                  />
+
+                  <PasswordInput
+                    id="newPassword"
+                    name="newPassword"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    label={t("settings.newPassword")}
+                    placeholder={t("settings.newPasswordPlaceholder")}
+                    required
+                    autoComplete="new-password"
+                  />
+
+                  <PasswordInput
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    label={t("settings.confirmNewPassword")}
+                    placeholder={t("settings.confirmNewPasswordPlaceholder")}
+                    required
+                    autoComplete="new-password"
+                  />
+
+                  <button
+                    type="submit"
+                    disabled={updatingPassword}
+                    className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    {updatingPassword ? t("settings.updating") : t("settings.changePassword")}
+                  </button>
+                </form>
+              </div>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={publicFollowing}
-                onChange={(e) => setPublicFollowing(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-zrp-red rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-zrp-red"></div>
-            </label>
-          </div>
+          )}
 
-          {/* ─── Private Account Toggle ───────────────────────────── */}
-          <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
-            <div>
-              <p className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                <Lock className="w-4 h-4" />
-                {t("settings.privateAccount")}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {t("settings.privateAccountDesc")}
-              </p>
+          {/* ═══════════════════════ PRIVACY & SAFETY ═══════════════════════ */}
+          {activeCategory === "privacy" && (
+            <div className="space-y-4">
+              {/* ─── Privacy Settings ───────────────────────────────────────── */}
+              <div id="privacy" className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 scroll-mt-4">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.privacySettings")}</h2>
+                <form onSubmit={handleUpdatePrivacy} className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">{t("settings.publicLikes")}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {t("settings.publicLikesDesc")}
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={publicLikes}
+                        onChange={(e) => setPublicLikes(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-zrp-red rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-zrp-red"></div>
+                    </label>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">{t("settings.publicFollowing")}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {t("settings.publicFollowingDesc")}
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={publicFollowing}
+                        onChange={(e) => setPublicFollowing(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-zrp-red rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-zrp-red"></div>
+                    </label>
+                  </div>
+
+                  {/* ─── Private Account Toggle ───────────────────────────── */}
+                  <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                        <Lock className="w-4 h-4" />
+                        {t("settings.privateAccount")}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {t("settings.privateAccountDesc")}
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isPrivate}
+                        onChange={(e) => setIsPrivate(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-zrp-red rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-zrp-red"></div>
+                    </label>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={updatingPrivacy}
+                    className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    {updatingPrivacy ? t("settings.saving") : t("settings.updatePrivacy")}
+                  </button>
+                </form>
+              </div>
+
+              {/* ─── Muted / Blocked users ──────────────────────────────────── */}
+              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.privacyTitle")}</h2>
+                <div className="space-y-2">
+                  <Link
+                    href="/settings/muted"
+                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <BellOff className="w-5 h-5 text-gray-500" />
+                      <span className="text-gray-900 dark:text-white">{t("settings.mutedUsers")}</span>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </Link>
+                  <Link
+                    href="/settings/blocked"
+                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Ban className="w-5 h-5 text-gray-500" />
+                      <span className="text-gray-900 dark:text-white">{t("settings.blockedUsers")}</span>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </Link>
+                </div>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 pl-2">
+                  {t("settings.privacyManageNote")}
+                </p>
+              </div>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isPrivate}
-                onChange={(e) => setIsPrivate(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-zrp-red rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-zrp-red"></div>
-            </label>
-          </div>
+          )}
 
-          <button
-            type="submit"
-            disabled={updatingPrivacy}
-            className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            {updatingPrivacy ? t("settings.saving") : t("settings.updatePrivacy")}
-          </button>
-        </form>
-      </div>
-
-      {/* ─── Email Preferences Section ────────────────────────────── */}
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.emailNotifications")}</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          {t("settings.emailNotificationsDesc")}
-        </p>
-        <EmailPreferences />
-      </div>
-
-      {/* ─── ➕ ADDED: Support Tickets Section ─────────────────────── */}
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.supportTickets") || "Support Tickets"}</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          {t("settings.supportTicketsDesc") || "View and manage your support tickets."}
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/support/tickets"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-zrp-red text-white rounded-lg font-medium hover:bg-zrp-darkRed transition"
-          >
-            <Ticket className="w-4 h-4" />
-            {t("settings.viewTickets") || "My Tickets"}
-          </Link>
-          <Link
-            href="/support"
-            className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-          >
-            {t("settings.newTicket") || "New Ticket"}
-          </Link>
-        </div>
-      </div>
-
-      {/* ─── Privacy Section (existing) ──────────────────────────────── */}
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.privacyTitle")}</h2>
-        <div className="space-y-2">
-          <Link
-            href="/settings/muted"
-            className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-          >
-            <div className="flex items-center gap-3">
-              <BellOff className="w-5 h-5 text-gray-500" />
-              <span className="text-gray-900 dark:text-white">{t("settings.mutedUsers")}</span>
+          {/* ═══════════════════════ NOTIFICATIONS ═══════════════════════ */}
+          {activeCategory === "notifications" && (
+            <div className="space-y-4">
+              {/* ─── Email Preferences Section ────────────────────────────── */}
+              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.emailNotifications")}</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  {t("settings.emailNotificationsDesc")}
+                </p>
+                <EmailPreferences />
+              </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </Link>
-          <Link
-            href="/settings/blocked"
-            className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-          >
-            <div className="flex items-center gap-3">
-              <Ban className="w-5 h-5 text-gray-500" />
-              <span className="text-gray-900 dark:text-white">{t("settings.blockedUsers")}</span>
-            </div>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </Link>
-        </div>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 pl-2">
-          {t("settings.privacyManageNote")}
-        </p>
-      </div>
+          )}
 
-      {/* ─── Delete Account Section ──────────────────────────────────── */}
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.dangerZone")}</h2>
-        <div className="border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900/10">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-gray-900 dark:text-white">{t("settings.deleteAccount")}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {t("settings.deleteAccountDesc")}
-              </p>
+          {/* ═══════════════════════ MONETIZATION ═══════════════════════ */}
+          {activeCategory === "monetization" && (
+            <div className="space-y-4">
+              {/* ─── Your Plan Section ────────────────────────────────────── */}
+              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.yourPlan")}</h2>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{t("settings.currentPlan")}</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white capitalize">
+                      {userPlan}
+                    </p>
+                  </div>
+                  <Link
+                    href="/pricing"
+                    className="px-4 py-2 bg-zrp-red text-white rounded-lg font-medium hover:bg-zrp-darkRed transition"
+                  >
+                    {t("settings.upgradePlan")}
+                  </Link>
+                </div>
+
+                <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {planNoteMap[userPlan]}
+                  </p>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                  <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                    <p className="font-medium text-gray-900 dark:text-white">{t("settings.posts")}</p>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      {planLimits.postLength === 999999 ? "∞" : planLimits.postLength}
+                    </p>
+                  </div>
+                  <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                    <p className="font-medium text-gray-900 dark:text-white">{t("settings.images")}</p>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      {planLimits.imagesPerPost === 999999 ? "∞" : planLimits.imagesPerPost}
+                    </p>
+                  </div>
+                  <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                    <p className="font-medium text-gray-900 dark:text-white">{t("settings.video")}</p>
+                    <p className="text-gray-500 dark:text-gray-400">{planLimits.videoUploadMB}MB</p>
+                  </div>
+                  <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                    <p className="font-medium text-gray-900 dark:text-white">{t("settings.scheduled")}</p>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      {planLimits.scheduledPostsPerMonth === 999999 ? "∞" : planLimits.scheduledPostsPerMonth}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* ─── Creator Monetisation Section ──────────────────────────── */}
+              {isCreatorEligible && (
+                <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t("settings.creatorMonetisation")}</h2>
+                    <Link
+                      href="/creator/dashboard"
+                      className="inline-flex items-center gap-1.5 text-sm bg-zrp-red text-white px-4 py-2 rounded-lg font-medium hover:bg-zrp-darkRed transition"
+                    >
+                      <TrendingUp className="w-4 h-4" />
+                      {t("settings.dashboard")}
+                    </Link>
+                  </div>
+
+                  {loadingCreator ? (
+                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      {t("action.loading")}
+                    </div>
+                  ) : creatorProfile ? (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                      <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                        <p className="text-gray-500 dark:text-gray-400 text-xs">{t("settings.balance")}</p>
+                        <p className="font-bold text-gray-900 dark:text-white">
+                          ${creatorProfile.balance.toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                        <p className="text-gray-500 dark:text-gray-400 text-xs">{t("settings.totalTips")}</p>
+                        <p className="font-bold text-gray-900 dark:text-white">
+                          ${creatorProfile.totalTips.toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                        <p className="text-gray-500 dark:text-gray-400 text-xs">{t("settings.premiumRevenue")}</p>
+                        <p className="font-bold text-gray-900 dark:text-white">
+                          ${creatorProfile.totalPremiumRevenue.toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                        <p className="text-gray-500 dark:text-gray-400 text-xs">{t("settings.withdrawn")}</p>
+                        <p className="font-bold text-gray-900 dark:text-white">
+                          ${creatorProfile.totalWithdrawn.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      <p>{t("settings.creatorCta")}</p>
+                      <Link
+                        href="/creator/dashboard"
+                        className="inline-block mt-2 text-zrp-red hover:underline"
+                      >
+                        {t("settings.getStarted")}
+                      </Link>
+                    </div>
+                  )}
+
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
+                    {t("settings.platformFeeNote")}
+                  </p>
+                </div>
+              )}
+
+              {/* ─── Solana Wallet (for direct tips) ───────────────────────── */}
+              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.solanaWalletTitle")}</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                  {t("settings.solanaWalletDesc")}
+                </p>
+                <form onSubmit={handleUpdateSolanaWallet} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t("settings.walletAddress")}
+                    </label>
+                    <div className="relative">
+                      <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        value={solanaWallet}
+                        onChange={(e) => setSolanaWallet(e.target.value)}
+                        placeholder={t("settings.walletAddressPlaceholder")}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        disabled={updatingWallet}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                      {t("settings.walletAddressNote")}
+                    </p>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={updatingWallet}
+                    className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    {updatingWallet ? t("settings.saving") : t("settings.saveWallet")}
+                  </button>
+                </form>
+              </div>
             </div>
-            <Link
-              href="/settings/delete"
-              className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition"
-            >
-              <Trash2 className="w-4 h-4 inline mr-1" />
-              {t("settings.deleteAccount")}
-            </Link>
-          </div>
+          )}
+
+          {/* ═══════════════════════ SUPPORT ═══════════════════════ */}
+          {activeCategory === "support" && (
+            <div className="space-y-4">
+              {/* ─── Support Tickets Section ─────────────────────── */}
+              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.supportTickets") || "Support Tickets"}</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  {t("settings.supportTicketsDesc") || "View and manage your support tickets."}
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/support/tickets"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-zrp-red text-white rounded-lg font-medium hover:bg-zrp-darkRed transition"
+                  >
+                    <Ticket className="w-4 h-4" />
+                    {t("settings.viewTickets") || "My Tickets"}
+                  </Link>
+                  <Link
+                    href="/support"
+                    className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                  >
+                    {t("settings.newTicket") || "New Ticket"}
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

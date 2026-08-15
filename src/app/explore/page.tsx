@@ -52,7 +52,9 @@ export default function ExplorePage() {
       const res = await fetch("/api/posts/explore");
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
-      setPosts(data);
+      // /api/posts/explore now returns { posts, nextCursor } for pagination
+      // instead of a bare array - fall back to the old shape just in case.
+      setPosts(data.posts || data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("explore.errFailedLoad"));
     } finally {

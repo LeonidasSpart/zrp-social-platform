@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Image, FileImage, BarChart3, Plus, Trash2, Clock, Briefcase, FileText } from "lucide-react";
+import { Image, FileImage, BarChart3, Plus, Trash2, Clock, Briefcase, FileText, Smile } from "lucide-react";
 import GifPicker from "./GifPicker";
+import EmojiPicker from "emoji-picker-react";
 import { uploadFiles } from "@/lib/uploadthing-client";
 import { getPlanLimits } from "@/lib/limits";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -19,7 +20,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const { data: session } = useSession();
   const { t } = useLanguage();
   const [content, setContent] = useState("");
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [mediaType, setMediaType] = useState<"image" | "video" | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -34,6 +35,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const [scheduledAt, setScheduledAt] = useState("");
   const [commentsEnabled, setCommentsEnabled] = useState(true);
   const [showGifPicker, setShowGifPicker] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [pollQuestion, setPollQuestion] = useState("");
   const [pollOptions, setPollOptions] = useState(["", ""]);
   const [pollExpiry, setPollExpiry] = useState("");
@@ -47,6 +49,51 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const composerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // ─── Draft protection ────────────────────────────────────────────
+  // Composer text should never be lost to an accidental navigation,
+  // refresh, or tab close. Auto-saves to localStorage as the person
+  // types, restores it the next time the composer mounts, and clears
+  // it once a post is actually published. One shared draft slot across
+  // both places the composer is mounted (home feed + profile page),
+  // matching how a single "in progress" draft is the expected behavior.
+  const DRAFT_KEY = "zrp:composer:draft";
+  const hasRestoredDraft = useRef(false);
+
+  useEffect(() => {
+    if (hasRestoredDraft.current) return;
+    hasRestoredDraft.current = true;
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (saved) {
+        const draft = JSON.parse(saved);
+        if (draft.content) setContent(draft.content);
+        if (draft.imageUrls?.length) setImageUrls(draft.imageUrls);
+        if (draft.mediaType) setMediaType(draft.mediaType);
+        if (draft.postType) setPostType(draft.postType);
+      }
+    } catch {
+      // Corrupt/unavailable localStorage - just start with an empty composer
+    }
+  }, []);
+
+  useEffect(() => {
+    // Nothing worth saving yet - avoid writing an empty draft over a
+    // potentially-still-loading restored one on the very first render.
+    if (!hasRestoredDraft.current) return;
+    try {
+      if (!content.trim() && imageUrls.length === 0) {
+        localStorage.removeItem(DRAFT_KEY);
+      } else {
+        localStorage.setItem(
+          DRAFT_KEY,
+          JSON.stringify({ content, imageUrls, mediaType, postType })
+        );
+      }
+    } catch {
+      // Storage full/unavailable - draft protection is best-effort, not critical
+    }
+  }, [content, imageUrls, mediaType, postType]);
+
   const extractHashtags = (text: string): string[] => {
     const matches = text.match(/#[\w\u0590-\u05fe]+/g) || [];
     return matches.map(tag => tag.slice(1).toLowerCase());
@@ -57,46 +104,57 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     return matches.map(tag => tag.slice(1).toLowerCase());
   };
 
-  // ─── Updated handleFileUpload – no skipPolling ──────────────────
+  // ─── Multi-image upload (up to 4, matching X, or the plan's lower limit) ──
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) {
       setError("No file selected");
       return;
     }
 
-    console.log("📁 File selected:", file.name, file.type, file.size);
+    const maxImages = Math.min(limits.imagesPerPost || 1, 4);
 
-    if (imageUrl) {
-      setError(t("composer.errAlreadyUploaded", { n: limits.imagesPerPost }));
+    // ─── Video: strictly single-file, cannot mix with images ─────────
+    const hasVideo = files.some((f) => f.type.startsWith("video/"));
+    if (hasVideo) {
+      if (files.length > 1 || imageUrls.length > 0) {
+        setError(t("composer.errOnlyMedia"));
+        return;
+      }
+    } else if (imageUrls.length + files.length > maxImages) {
+      setError(t("composer.errAlreadyUploaded", { n: maxImages }));
       return;
     }
 
-    const isVideo = file.type.startsWith("video/");
-    const maxSize = isVideo ? limits.videoUploadMB * 1024 * 1024 : 4 * 1024 * 1024;
-
-    if (file.size > maxSize) {
-      setError(t("composer.errFileTooLarge", { size: isVideo ? limits.videoUploadMB : 4 }));
-      return;
-    }
-
-    if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
-      setError(t("composer.errOnlyMedia"));
-      return;
+    for (const file of files) {
+      const isVideo = file.type.startsWith("video/");
+      const maxSize = isVideo ? limits.videoUploadMB * 1024 * 1024 : 4 * 1024 * 1024;
+      if (file.size > maxSize) {
+        setError(t("composer.errFileTooLarge", { size: isVideo ? limits.videoUploadMB : 4 }));
+        return;
+      }
+      if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+        setError(t("composer.errOnlyMedia"));
+        return;
+      }
     }
 
     setUploading(true);
     setError(null);
 
     try {
-      // ✅ Correct call: endpoint + options object with `files`
-      const result = await uploadFiles("postMedia", { files: [file] });
+      const result = await uploadFiles("postMedia", { files });
       console.log("✅ Upload result:", result);
 
       if (result && result.length > 0) {
-        const uploadedFile = result[0];
-        setImageUrl(uploadedFile.ufsUrl);
-        setMediaType(uploadedFile.type?.startsWith("video") ? "video" : "image");
+        const isVideoUpload = result[0].type?.startsWith("video");
+        if (isVideoUpload) {
+          setImageUrls([result[0].ufsUrl]);
+          setMediaType("video");
+        } else {
+          setImageUrls((prev) => [...prev, ...result.map((f) => f.ufsUrl)]);
+          setMediaType("image");
+        }
       } else {
         throw new Error("No file returned from upload");
       }
@@ -112,11 +170,11 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   };
 
   const handleGifSelect = (gifUrl: string) => {
-    if (imageUrl) {
+    if (imageUrls.length > 0) {
       setError(t("composer.errGifLimit", { n: limits.imagesPerPost }));
       return;
     }
-    setImageUrl(gifUrl);
+    setImageUrls([gifUrl]);
     setMediaType("image");
     setShowGifPicker(false);
   };
@@ -148,6 +206,8 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     const newContent = e.target.value;
     setContent(newContent);
     setCursorPosition(e.target.selectionStart || 0);
+    e.target.style.height = "auto";
+    e.target.style.height = `${e.target.scrollHeight}px`;
   };
 
   const handleMentionSelect = (mention: string) => {
@@ -167,6 +227,29 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
         }
       }, 0);
     }
+  };
+
+  // ─── Insert an emoji at the current cursor position (not just appended
+  // to the end) and restore the cursor right after the inserted emoji ──
+  const handleEmojiSelect = (emojiData: { emoji: string }) => {
+    const start = textareaRef.current?.selectionStart ?? cursorPosition;
+    const end = textareaRef.current?.selectionEnd ?? cursorPosition;
+    const before = content.slice(0, start);
+    const after = content.slice(end);
+    const newContent = before + emojiData.emoji + after;
+    setContent(newContent);
+    setShowEmojiPicker(false);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        const newPos = start + emojiData.emoji.length;
+        textareaRef.current.selectionStart = newPos;
+        textareaRef.current.selectionEnd = newPos;
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+        textareaRef.current.focus();
+        setCursorPosition(newPos);
+      }
+    }, 0);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -213,7 +296,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
       const payload: any = {
         content: content.trim() || (postType === "ARTICLE" ? "" : pollQuestion.trim()),
-        imageUrl: imageUrl || undefined,
+        imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
         mediaType: mediaType || undefined,
         hashtags,
         mentions,
@@ -281,8 +364,13 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   };
 
   const resetForm = () => {
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      // no-op
+    }
     setContent("");
-    setImageUrl(null);
+    setImageUrls([]);
     setMediaType(null);
     setPollQuestion("");
     setPollOptions(["", ""]);
@@ -313,7 +401,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const isSubmitDisabled = (() => {
     if (loading) return true;
     if (isOverLimit) return true;
-    if (!!imageUrl && !limits.imagesPerPost) return true;
+    if (imageUrls.length > 0 && !limits.imagesPerPost) return true;
 
     if (!content.trim() && !pollQuestion.trim() && postType !== "ARTICLE") return true;
     if (showPollBuilder && !isPollValid) return true;
@@ -399,7 +487,11 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                 />
                 <textarea
                   value={articleBody}
-                  onChange={(e) => setArticleBody(e.target.value)}
+                  onChange={(e) => {
+                    setArticleBody(e.target.value);
+                    e.target.style.height = "auto";
+                    e.target.style.height = `${e.target.scrollHeight}px`;
+                  }}
                   placeholder={t("composer.placeholderArticleBody")}
                   className="w-full resize-none border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 min-h-[200px] bg-gray-50 dark:bg-gray-800/50 font-mono text-sm"
                 />
@@ -532,33 +624,70 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               </div>
             )}
 
-            {imageUrl && (
-              <div className="relative mt-2 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+            {imageUrls.length > 0 && (
+              <div
+                className={`relative mt-2 rounded-xl overflow-hidden grid gap-0.5 ${
+                  mediaType === "video" || imageUrls.length === 1
+                    ? "grid-cols-1"
+                    : imageUrls.length === 2
+                    ? "grid-cols-2"
+                    : imageUrls.length === 3
+                    ? "grid-cols-2 grid-rows-2"
+                    : "grid-cols-2 grid-rows-2"
+                }`}
+              >
                 {mediaType === "video" ? (
-                  <video src={imageUrl} controls className="max-h-60 w-auto rounded-lg" />
+                  <video src={imageUrls[0]} controls className="max-h-80 w-full rounded-xl" />
                 ) : (
-                  <img src={imageUrl} alt="Upload preview" className="max-h-60 w-auto rounded-lg" />
+                  imageUrls.map((url, idx) => (
+                    <div
+                      key={url}
+                      className={`relative bg-gray-100 dark:bg-gray-800 ${
+                        imageUrls.length === 3 && idx === 0 ? "row-span-2" : ""
+                      }`}
+                    >
+                      <img
+                        src={url}
+                        alt={`Upload preview ${idx + 1}`}
+                        className={`w-full object-cover ${
+                          imageUrls.length === 1 ? "max-h-80" : "h-40 sm:h-48"
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setImageUrls((prev) => prev.filter((u) => u !== url))}
+                        className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 text-lg leading-none w-6 h-6 flex items-center justify-center"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))
                 )}
-                <button
-                  type="button"
-                  onClick={() => { setImageUrl(null); setMediaType(null); }}
-                  className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 text-xl leading-none w-7 h-7 flex items-center justify-center"
-                >
-                  ×
-                </button>
+                {mediaType === "video" && (
+                  <button
+                    type="button"
+                    onClick={() => { setImageUrls([]); setMediaType(null); }}
+                    className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 text-xl leading-none w-7 h-7 flex items-center justify-center"
+                  >
+                    ×
+                  </button>
+                )}
               </div>
             )}
 
             <div className="flex items-center justify-between mt-2 border-t border-gray-100 dark:border-gray-700 pt-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <label className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition">
+                <label className={`text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition ${
+                  uploading || (imageUrls.length >= Math.min(limits.imagesPerPost || 1, 4)) ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                }`}>
                   <input
                     ref={fileInputRef}
                     type="file"
                     accept="image/*,video/*"
+                    multiple
                     onChange={handleFileUpload}
                     className="hidden"
-                    disabled={uploading || (!!imageUrl && !limits.imagesPerPost)}
+                    disabled={uploading || imageUrls.length >= Math.min(limits.imagesPerPost || 1, 4)}
                   />
                   <Image className="w-5 h-5" />
                   {uploading && <span className="text-xs ml-1 text-gray-400 dark:text-gray-500">{t("composer.uploading")}</span>}
@@ -571,6 +700,25 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   title={t("composer.addGif")}
                 >
                   <FileImage className="w-5 h-5" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Capture where the cursor actually is right before
+                    // opening the picker, since focus will move away from
+                    // the textarea onto the picker itself.
+                    if (textareaRef.current) {
+                      setCursorPosition(textareaRef.current.selectionStart || 0);
+                    }
+                    setShowEmojiPicker((v) => !v);
+                  }}
+                  className={`text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition ${
+                    showEmojiPicker ? "text-zrp-red dark:text-zrp-red" : ""
+                  }`}
+                  title="Add emoji"
+                >
+                  <Smile className="w-5 h-5" />
                 </button>
 
                 {postType === "POST" && (
@@ -612,6 +760,30 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
 
       {showGifPicker && (
         <GifPicker onSelect={handleGifSelect} onClose={() => setShowGifPicker(false)} />
+      )}
+
+      {showEmojiPicker && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center bg-black/40"
+          onClick={() => setShowEmojiPicker(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:w-auto p-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-end mb-1">
+              <button
+                type="button"
+                onClick={() => setShowEmojiPicker(false)}
+                className="p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="sr-only">Close</span>
+                ✕
+              </button>
+            </div>
+            <EmojiPicker onEmojiClick={handleEmojiSelect} width="100%" height={380} />
+          </div>
+        </div>
       )}
     </div>
   );

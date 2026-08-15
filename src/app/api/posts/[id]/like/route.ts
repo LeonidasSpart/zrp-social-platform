@@ -4,11 +4,17 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
 import { sendPushNotification } from "@/lib/push-notifications"; // ← Added
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // Rate limit: 120 like-toggles per minute - generous for fast double-tap
+  // scrolling/liking, still blocks scripted like-bombing.
+  const limit = await rateLimit(req, { limit: 120, window: 60, type: "post-like" });
+  if (!limit.success) return limit.response;
+
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

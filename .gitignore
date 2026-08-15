@@ -1,2 +1,11 @@
 node_modules
 .next
+
+# Environment files - never commit real secrets. .env in this repo is
+# a placeholder template; this rule protects against anyone (including
+# future contributors) accidentally committing real values over it.
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

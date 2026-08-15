@@ -18,6 +18,7 @@ import {
   LayoutDashboard,
   Bookmark,
   LogOut,
+  Film,
   Globe,
   Settings,
   Users,
@@ -87,6 +88,7 @@ export default function Header() {
   // Authenticated nav links (excludes User icon – we'll use dropdown)
   const authNavLinks: NavItem[] = [
     { href: "/", icon: Home, label: t("nav.home") },
+    { href: "/shorts", icon: Film, label: "Shorts" },
     { href: "/explore", icon: Compass, label: t("nav.explore") },
     { href: "/search", icon: Search, label: t("nav.search") },
     { href: "/messages", icon: MessageSquare, label: t("nav.messages") },
@@ -129,7 +131,7 @@ export default function Header() {
               alt="ZRP"
               width={90}
               height={90}
-              className="w-10 h-10 object-contain"
+              className="w-12 h-12 object-contain"
             />
           </Link>
 

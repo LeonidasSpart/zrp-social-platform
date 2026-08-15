@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Send, Pencil, Trash2, X, Check, Reply } from "lucide-react";
+import { Send, Pencil, Trash2, X, Check, Reply, Heart, Repeat, Bookmark, Flag } from "lucide-react";
 import VerifiedBadge from "./VerifiedBadge";
 import { timeAgo } from "@/lib/utils";
+import { getPlanLimits } from "@/lib/limits";
+import ReportModal from "./ReportModal";
 
 interface Comment {
   id: string;
@@ -20,15 +22,48 @@ interface Comment {
   };
   replies: Comment[];
   parentId?: string | null;
+  liked?: boolean;
+  reposted?: boolean;
+  bookmarked?: boolean;
+  _count?: {
+    likes: number;
+    reposts: number;
+    bookmarks: number;
+  };
 }
+
+// A single flattened row: X never nests reply DOM inside reply DOM (which is
+// what compounds indentation the deeper a thread goes). Instead every reply,
+// no matter how deep in the tree, becomes a sibling row with one flat indent
+// level and a "Replying to @x" label carrying the lost context.
+interface FlatRow {
+  comment: Comment;
+  depth: number;
+  parentAuthorUsername?: string;
+}
+
+function flattenThread(
+  comment: Comment,
+  depth = 0,
+  parentAuthorUsername?: string
+): FlatRow[] {
+  const row: FlatRow = { comment, depth, parentAuthorUsername };
+  const childRows = (comment.replies || []).flatMap((reply) =>
+    flattenThread(reply, depth + 1, comment.author.username)
+  );
+  return [row, ...childRows];
+}
+
 
 interface CommentsProps {
   postId: string;
-  onCommentAdded: () => void;
+  onCommentAdded: (delta?: number) => void;
 }
 
 export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   const { data: session } = useSession();
+  const plan = (session?.user?.plan as any) || "free";
+  const limits = getPlanLimits(plan);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,13 +78,20 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
 
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportingCommentId, setReportingCommentId] = useState<string | null>(null);
+
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   const fetchComments = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/posts/${postId}/comments`);
+      const res = await fetch(`/api/posts/${postId}/comments?limit=10`);
       if (res.ok) {
         const data = await res.json();
-        setComments(data);
+        setComments(data.comments || []);
+        setNextCursor(data.nextCursor || null);
       }
     } catch (error) {
       console.error("Error fetching comments:", error);
@@ -58,13 +100,30 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
     }
   };
 
+  const loadMoreComments = async () => {
+    if (!nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/posts/${postId}/comments?limit=10&cursor=${nextCursor}`);
+      if (res.ok) {
+        const data = await res.json();
+        setComments((prev) => [...prev, ...(data.comments || [])]);
+        setNextCursor(data.nextCursor || null);
+      }
+    } catch (error) {
+      console.error("Error loading more comments:", error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
   useEffect(() => {
     fetchComments();
   }, [postId]);
 
   // ─── Add top‑level comment ──────────────────────────────────────
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // ✅ Prevents page refresh
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault(); // ✅ Prevents page refresh
     if (!newComment.trim() || !session) return;
 
     setSubmitting(true);
@@ -76,9 +135,12 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       });
 
       if (res.ok) {
+        const created = await res.json();
         setNewComment("");
-        await fetchComments();
-        onCommentAdded(); // Only updates state, never reloads
+        // Prepend directly instead of refetching - a full refetch would
+        // reset pagination and drop any "load more" pages already loaded.
+        setComments((prev) => [{ ...created, replies: created.replies || [] }, ...prev]);
+        onCommentAdded(1); // Local count update only, never reloads the feed
       } else {
         console.error("Failed to post comment");
       }
@@ -104,10 +166,14 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       });
 
       if (res.ok) {
+        const created = await res.json();
         setReplyContent("");
         setReplyingTo(null);
-        await fetchComments();
-        onCommentAdded();
+        updateCommentInTree(parentId, (c) => ({
+          ...c,
+          replies: [...(c.replies || []), { ...created, replies: [] }],
+        }));
+        onCommentAdded(1);
       }
     } catch (error) {
       console.error("Error replying:", error);
@@ -137,13 +203,11 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       });
 
       if (res.ok) {
+        const updated = await res.json();
         setEditingId(null);
         setEditContent("");
-        await fetchComments();
-        onCommentAdded();
-      } else {
-        const err = await res.json();
-        alert(err.error || "Failed to update comment");
+        updateCommentInTree(commentId, (c) => ({ ...c, content: updated.content }));
+        onCommentAdded(0);
       }
     } catch (error) {
       console.error("Error editing comment:", error);
@@ -159,6 +223,16 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
     setShowDeleteModal(true);
   };
 
+  // Remove a comment (and its subtree, since deletion cascades in the DB)
+  // from anywhere in the local tree without a full refetch.
+  const removeCommentFromTree = (commentId: string) => {
+    const walk = (list: Comment[]): Comment[] =>
+      list
+        .filter((c) => c.id !== commentId)
+        .map((c) => (c.replies?.length ? { ...c, replies: walk(c.replies) } : c));
+    setComments((prev) => walk(prev));
+  };
+
   const handleDelete = async () => {
     if (!commentToDelete) return;
 
@@ -169,12 +243,9 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
 
       if (res.ok) {
         setShowDeleteModal(false);
+        removeCommentFromTree(commentToDelete);
         setCommentToDelete(null);
-        await fetchComments();
-        onCommentAdded();
-      } else {
-        const err = await res.json();
-        alert(err.error || "Failed to delete comment");
+        onCommentAdded(-1);
       }
     } catch (error) {
       console.error("Error deleting comment:", error);
@@ -182,31 +253,149 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
     }
   };
 
+  // ─── Report a comment ──────────────────────────────────────────────
+  const openReportModal = (commentId: string) => {
+    setReportingCommentId(commentId);
+    setShowReportModal(true);
+  };
+
+  const handleReportComment = async (reason: string, details?: string) => {
+    if (!reportingCommentId) return;
+    try {
+      const res = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ commentId: reportingCommentId, reason, details }),
+      });
+      if (res.ok) {
+        alert("Report submitted. Thank you for helping keep the community safe.");
+        setShowReportModal(false);
+        setReportingCommentId(null);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || "Failed to submit report. Please try again.");
+        // A 409 means it's already reported and pending - close the
+        // modal rather than inviting a retry that would just repeat it.
+        if (res.status === 409) {
+          setShowReportModal(false);
+          setReportingCommentId(null);
+        }
+      }
+    } catch (error) {
+      console.error("Error reporting comment:", error);
+      alert("Failed to submit report. Please try again.");
+    }
+  };
+
   const getAvatarSrc = (author: Comment["author"]) => {
     return author.avatarUrl || "/default-avatar.png";
+  };
+
+  // ─── Update a comment anywhere in the tree (top-level or nested) ──
+  const updateCommentInTree = (
+    commentId: string,
+    updater: (comment: Comment) => Comment
+  ) => {
+    const walk = (list: Comment[]): Comment[] =>
+      list.map((c) => {
+        if (c.id === commentId) return updater(c);
+        if (c.replies?.length) return { ...c, replies: walk(c.replies) };
+        return c;
+      });
+    setComments((prev) => walk(prev));
+  };
+
+  // ─── Like / repost / bookmark a comment (optimistic, reverts on failure) ──
+  const handleLikeComment = async (comment: Comment) => {
+    if (!session) return;
+    const wasLiked = !!comment.liked;
+    updateCommentInTree(comment.id, (c) => ({
+      ...c,
+      liked: !wasLiked,
+      _count: {
+        likes: (c._count?.likes || 0) + (wasLiked ? -1 : 1),
+        reposts: c._count?.reposts || 0,
+        bookmarks: c._count?.bookmarks || 0,
+      },
+    }));
+    try {
+      const res = await fetch(`/api/comments/${comment.id}/like`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed");
+    } catch {
+      updateCommentInTree(comment.id, (c) => ({
+        ...c,
+        liked: wasLiked,
+        _count: {
+          likes: (c._count?.likes || 0) + (wasLiked ? 1 : -1),
+          reposts: c._count?.reposts || 0,
+          bookmarks: c._count?.bookmarks || 0,
+        },
+      }));
+    }
+  };
+
+  const handleRepostComment = async (comment: Comment) => {
+    if (!session) return;
+    const wasReposted = !!comment.reposted;
+    updateCommentInTree(comment.id, (c) => ({
+      ...c,
+      reposted: !wasReposted,
+      _count: {
+        likes: c._count?.likes || 0,
+        reposts: (c._count?.reposts || 0) + (wasReposted ? -1 : 1),
+        bookmarks: c._count?.bookmarks || 0,
+      },
+    }));
+    try {
+      const res = await fetch(`/api/comments/${comment.id}/repost`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed");
+    } catch {
+      updateCommentInTree(comment.id, (c) => ({
+        ...c,
+        reposted: wasReposted,
+        _count: {
+          likes: c._count?.likes || 0,
+          reposts: (c._count?.reposts || 0) + (wasReposted ? 1 : -1),
+          bookmarks: c._count?.bookmarks || 0,
+        },
+      }));
+    }
+  };
+
+  const handleBookmarkComment = async (comment: Comment) => {
+    if (!session) return;
+    const wasBookmarked = !!comment.bookmarked;
+    updateCommentInTree(comment.id, (c) => ({ ...c, bookmarked: !wasBookmarked }));
+    try {
+      const res = await fetch(`/api/comments/${comment.id}/bookmark`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed");
+    } catch {
+      updateCommentInTree(comment.id, (c) => ({ ...c, bookmarked: wasBookmarked }));
+    }
   };
 
   const getDisplayName = (author: Comment["author"]) => {
     return author.name || author.username;
   };
 
-  // ─── Render a single comment (recursive) ──────────────────────────
-  const renderComment = (comment: Comment, depth = 0) => {
+  // ─── Render a single flat row (no recursive DOM nesting) ──────────
+  const renderCommentRow = ({ comment, depth, parentAuthorUsername }: FlatRow) => {
     const isAuthor = session?.user?.id === comment.author.id;
     const isEditing = editingId === comment.id;
     const isReplying = replyingTo === comment.id;
+    const isNested = depth > 0;
 
     return (
       <div
         key={comment.id}
-        className={`flex gap-3 group ${depth > 0 ? "ml-8 pl-4 border-l-2 border-gray-200 dark:border-gray-700" : ""}`}
+        className={`flex gap-3 group ${isNested ? "ml-11" : ""}`}
       >
         {/* Avatar */}
         <Link
           href={`/profile/${comment.author.username}`}
           className="flex-shrink-0"
         >
-          <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-sm font-semibold overflow-hidden hover:ring-2 hover:ring-zrp-red transition">
+          <div className={`${isNested ? "w-7 h-7" : "w-8 h-8"} rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-sm font-semibold overflow-hidden hover:ring-2 hover:ring-zrp-red transition`}>
             <img
               src={getAvatarSrc(comment.author)}
               alt={getDisplayName(comment.author)}
@@ -216,6 +405,12 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         </Link>
 
         <div className="flex-1 min-w-0">
+          {depth > 1 && parentAuthorUsername && (
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">
+              Replying to{" "}
+              <span className="text-zrp-red">@{parentAuthorUsername}</span>
+            </p>
+          )}
           <div className="flex items-center gap-1.5 flex-wrap">
             <Link
               href={`/profile/${comment.author.username}`}
@@ -252,17 +447,37 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 </button>
               </div>
             )}
+            {!isAuthor && session && !isEditing && (
+              <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => openReportModal(comment.id)}
+                  className="text-gray-400 hover:text-red-500 p-1"
+                  title="Report comment"
+                >
+                  <Flag className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
           </div>
-
           {isEditing ? (
-            <div className="mt-1 flex items-center gap-2">
-              <input
-                type="text"
+            <div className="mt-1 flex items-end gap-2">
+              <textarea
                 value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                className="flex-1 min-w-0 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
+                onChange={(e) => {
+                  setEditContent(e.target.value);
+                  e.target.style.height = "auto";
+                  e.target.style.height = `${e.target.scrollHeight}px`;
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    saveEdit(comment.id);
+                  }
+                }}
+                rows={1}
+                className="flex-1 min-w-0 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red resize-none overflow-hidden max-h-40"
                 autoFocus
-                maxLength={280}
+                maxLength={limits.postLength}
               />
               <button
                 onClick={() => saveEdit(comment.id)}
@@ -287,30 +502,77 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
           )}
 
           {!isEditing && (
-            <button
-              onClick={() => {
-                setReplyingTo(replyingTo === comment.id ? null : comment.id);
-                setReplyContent("");
-              }}
-              className="text-xs text-gray-400 hover:text-zrp-red transition mt-0.5 flex items-center gap-1 whitespace-nowrap"
-            >
-              <Reply className="w-3 h-3" />
-              Reply
-            </button>
+            <div className="flex items-center gap-4 mt-1">
+              <button
+                onClick={() => {
+                  setReplyingTo(replyingTo === comment.id ? null : comment.id);
+                  setReplyContent("");
+                }}
+                className="text-xs text-gray-400 hover:text-zrp-red transition flex items-center gap-1 whitespace-nowrap"
+              >
+                <Reply className="w-3.5 h-3.5" />
+                {comment.replies?.length ? comment.replies.length : ""}
+              </button>
+
+              <button
+                onClick={() => handleRepostComment(comment)}
+                disabled={!session}
+                className={`text-xs transition flex items-center gap-1 whitespace-nowrap ${
+                  comment.reposted
+                    ? "text-green-500"
+                    : "text-gray-400 hover:text-green-500"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                title="Repost"
+              >
+                <Repeat className="w-3.5 h-3.5" />
+                {comment._count?.reposts ? comment._count.reposts : ""}
+              </button>
+
+              <button
+                onClick={() => handleLikeComment(comment)}
+                disabled={!session}
+                className={`text-xs transition flex items-center gap-1 whitespace-nowrap ${
+                  comment.liked
+                    ? "text-red-500"
+                    : "text-gray-400 hover:text-red-500"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                title="Like"
+              >
+                <Heart className={`w-3.5 h-3.5 ${comment.liked ? "fill-red-500" : ""}`} />
+                {comment._count?.likes ? comment._count.likes : ""}
+              </button>
+
+              <button
+                onClick={() => handleBookmarkComment(comment)}
+                disabled={!session}
+                className={`text-xs transition flex items-center gap-1 whitespace-nowrap ${
+                  comment.bookmarked
+                    ? "text-zrp-red"
+                    : "text-gray-400 hover:text-zrp-red"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                title="Bookmark"
+              >
+                <Bookmark className={`w-3.5 h-3.5 ${comment.bookmarked ? "fill-zrp-red" : ""}`} />
+              </button>
+            </div>
           )}
 
           {isReplying && (
-            <div className="mt-2 flex items-center gap-2">
-              <input
-                type="text"
+            <div className="mt-2 flex items-end gap-2">
+              <textarea
                 value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
+                onChange={(e) => {
+                  setReplyContent(e.target.value);
+                  e.target.style.height = "auto";
+                  e.target.style.height = `${e.target.scrollHeight}px`;
+                }}
                 placeholder={`Reply to ${comment.author.name || comment.author.username}...`}
-                className="flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
-                maxLength={280}
+                rows={1}
+                className="flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent resize-none overflow-hidden max-h-40"
+                maxLength={limits.postLength}
                 autoFocus
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+                  if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     handleReply(comment.id);
                   }
@@ -332,12 +594,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
               >
                 Cancel
               </button>
-            </div>
-          )}
-
-          {comment.replies && comment.replies.length > 0 && (
-            <div className="mt-2 space-y-2">
-              {comment.replies.map((reply) => renderComment(reply, depth + 1))}
             </div>
           )}
         </div>
@@ -366,20 +622,45 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       {comments.length === 0 ? (
         <p className="text-sm text-gray-400 dark:text-gray-500">No comments yet.</p>
       ) : (
-        <div className="space-y-3">
-          {comments.map((comment) => renderComment(comment, 0))}
+        <div className="divide-y divide-gray-100 dark:divide-gray-800">
+          {comments.map((comment) => (
+            <div key={comment.id} className="py-3 first:pt-0 last:pb-0 space-y-3">
+              {flattenThread(comment).map((row) => renderCommentRow(row))}
+            </div>
+          ))}
+          {nextCursor && (
+            <div className="pt-3 first:pt-0">
+              <button
+                onClick={loadMoreComments}
+                disabled={loadingMore}
+                className="text-sm text-zrp-red hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loadingMore ? "Loading..." : "Show more comments"}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
-      {session && (
-        <form onSubmit={handleSubmit} className="mt-3 flex gap-2">
-          <input
-            type="text"
+      {session && !replyingTo && (
+        <form onSubmit={handleSubmit} className="mt-3 flex gap-2 items-end">
+          <textarea
             value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
+            onChange={(e) => {
+              setNewComment(e.target.value);
+              e.target.style.height = "auto";
+              e.target.style.height = `${e.target.scrollHeight}px`;
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit();
+              }
+            }}
             placeholder="Write a comment..."
-            className="flex-1 min-w-0 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-            maxLength={280}
+            rows={1}
+            className="flex-1 min-w-0 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none overflow-hidden max-h-40"
+            maxLength={limits.postLength}
           />
           <button
             type="submit"
@@ -421,6 +702,15 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
           </div>
         </div>
       )}
+
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => {
+          setShowReportModal(false);
+          setReportingCommentId(null);
+        }}
+        onSubmit={handleReportComment}
+      />
     </div>
   );
 }

@@ -9,6 +9,7 @@ const BADGE_STYLES: Record<string, { color: string; label: string }> = {
   verified: { color: "#3B82F6", label: "Verified account" }, // blue
   organization: { color: "#FFD700", label: "Verified organization" }, // gold ✅
   government: { color: "#9CA3AF", label: "Government official" }, // gray
+  team: { color: "#EF4444", label: "ZRP Team" }, // red — ZRP staff only
 };
 
 export default function VerifiedBadge({ badgeType, className = "" }: VerifiedBadgeProps) {

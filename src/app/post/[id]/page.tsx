@@ -98,11 +98,25 @@ export default function PostPage({ params }: { params: { id: string } }) {
 
   const fetchComments = async () => {
     try {
-      const res = await fetch(`/api/posts/${params.id}/comments`);
-      if (res.ok) {
+      // This page shows the full conversation (and supports deep-linking to
+      // any comment via #comment-id + scroll-into-view), so it pages through
+      // every batch internally rather than only loading the first page -
+      // unlike the inline Comments widget used in feed cards, which stays
+      // paginated with a "Show more" button.
+      let all: Comment[] = [];
+      let cursor: string | null = null;
+      while (true) {
+        const url: string = cursor
+          ? `/api/posts/${params.id}/comments?limit=50&cursor=${cursor}`
+          : `/api/posts/${params.id}/comments?limit=50`;
+        const res = await fetch(url);
+        if (!res.ok) break;
         const data = await res.json();
-        setComments(data);
+        all = [...all, ...(data.comments || [])];
+        cursor = data.nextCursor || null;
+        if (!cursor) break;
       }
+      setComments(all);
     } catch (error) {
       console.error("Error fetching comments:", error);
     }

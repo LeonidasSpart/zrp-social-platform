@@ -65,6 +65,23 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/onboarding", req.url));
   }
 
+  // ─── GUEST HOMEPAGE PROTECTION ────────────────────────────────────
+  // A first-time visitor with no session hitting "/" was previously
+  // let through by middleware entirely, leaving the client-side page
+  // to render the full authenticated feed shell (stories bar, post
+  // composer, feed tabs - each firing their own authenticated fetches)
+  // and only redirect to /login afterward via a useEffect. That meant
+  // a visible flash of the logged-in homepage plus a burst of API
+  // calls that were always going to 401, for every guest, every time.
+  // Redirecting here, before any of that ever renders or fetches,
+  // fixes it at the root rather than papering over it client-side.
+  // Exact match only ("/") - this intentionally does not touch other
+  // routes (profile pages, search, etc.) that may be fine for guests
+  // and weren't part of what was reported.
+  if (path === "/" && !token) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+
   // ─── FEATURE‑BASED ROUTE PROTECTION ──────────────────────────────
   // These routes require specific plan features
 

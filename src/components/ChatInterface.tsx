@@ -2,13 +2,39 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 import { getSocket } from "@/lib/socket-client";
-import { Send, Phone, Video, Image, Smile, X, Download, ZoomIn, Trash2, Loader2 } from "lucide-react";
+import {
+  Send, Phone, Video, Image, Smile, X, Download, ZoomIn, Trash2,
+  Loader2, Reply, Pencil, Check, Paperclip, FileText, Mic, Square, Play, Pause,
+} from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import ChatContactDrawer from "@/components/ChatContactDrawer";
+
+const QUICK_REACTIONS = ["❤️", "👍", "👎", "😂", "😮", "😢"];
+
+interface ReactionUser {
+  id: string;
+  username: string;
+  name: string;
+  avatarUrl?: string;
+}
+
+interface Reaction {
+  id: string;
+  emoji: string;
+  user: ReactionUser;
+}
+
+interface MessageAuthor {
+  id: string;
+  username: string;
+  name: string;
+  avatarUrl?: string;
+  badgeType?: string | null;
+}
 
 interface Message {
   id: string;
@@ -18,6 +44,14 @@ interface Message {
   createdAt: string;
   read: boolean;
   imageUrl?: string | null;
+  edited?: boolean;
+  replyTo?: {
+    id: string;
+    content: string;
+    imageUrl?: string | null;
+    sender: MessageAuthor;
+  } | null;
+  reactions?: Reaction[];
 }
 
 interface ChatInterfaceProps {
@@ -49,14 +83,44 @@ export default function ChatInterface({
   const [receiverTyping, setReceiverTyping] = useState(false);
   const [socketConnected, setSocketConnected] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showContactInfo, setShowContactInfo] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  // Message attachments are all stored as a single imageUrl with no
+  // stored file type/name (no schema field for it) - so instead of
+  // guessing from the URL, we just try rendering it as an image and
+  // fall back to a generic document card if it fails to actually load
+  // as one (e.g. it's a PDF, not an image).
+  const [failedImageIds, setFailedImageIds] = useState<Set<string>>(new Set());
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<any>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
   const lastMessageCountRef = useRef(0);
+
+  // ─── Voice message recording ────────────────────────────────────────
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const recordingSecondsRef = useRef(0); // survives past the UI reset, for the upload-complete callback
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const recordingCancelledRef = useRef(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // ─── Reply state ────────────────────────────────────────────────────
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+
+  // ─── Edit state ─────────────────────────────────────────────────────
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  // ─── Reaction picker state ──────────────────────────────────────────
+  const [reactionPickerFor, setReactionPickerFor] = useState<string | null>(null);
 
   const userId = session?.user?.id;
 
@@ -66,6 +130,39 @@ export default function ChatInterface({
       const url = files[0].ufsUrl;
       setUploadingImage(false);
       sendMessage("", url);
+    },
+    onUploadError: (error) => {
+      setUploadingImage(false);
+      alert(t("chat.errImageUploadFailed") + " " + error.message);
+    },
+  });
+
+  // ─── Uploadthing hook for chat documents (PDF, Word, Excel, etc.) ──
+  const { startUpload: startFileUpload } = useUploadThing("chatFile", {
+    onClientUploadComplete: (files) => {
+      const url = files[0].ufsUrl;
+      setUploadingImage(false);
+      // Prefix the message content with the original filename so it's
+      // still recoverable even though the URL itself carries no name -
+      // the bubble renderer below reads this back out for display.
+      sendMessage(`📎 ${files[0].name}`, url);
+    },
+    onUploadError: (error) => {
+      setUploadingImage(false);
+      alert(t("chat.errImageUploadFailed") + " " + error.message);
+    },
+  });
+
+  // ─── Uploadthing hook for voice messages ───────────────────────────
+  const { startUpload: startAudioUpload } = useUploadThing("chatAudio", {
+    onClientUploadComplete: (files) => {
+      const url = files[0].ufsUrl;
+      setUploadingImage(false);
+      // Duration gets embedded directly in the content marker since
+      // there's no separate schema field to store it in - the bubble
+      // renderer below parses it back out.
+      sendMessage(`🎤 Voice message (${formatRecordingTime(recordingSecondsRef.current)})`, url);
+      recordingSecondsRef.current = 0;
     },
     onUploadError: (error) => {
       setUploadingImage(false);
@@ -84,6 +181,15 @@ export default function ChatInterface({
       setLoading(false);
     }
   };
+
+  // ─── Release the mic / stop the timer if the component unmounts mid-
+  // recording (e.g. navigating away from the chat) ───────────────────
+  useEffect(() => {
+    return () => {
+      if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
+      mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
 
   useEffect(() => {
     if (userId) {
@@ -118,6 +224,8 @@ export default function ChatInterface({
           socketRef.current.off("message-read");
           socketRef.current.off("message-sent");
           socketRef.current.off("message-deleted");
+          socketRef.current.off("message-edited");
+          socketRef.current.off("reaction-updated");
         }
       };
     }
@@ -155,12 +263,22 @@ export default function ChatInterface({
     socket.on("message-deleted", ({ messageId }: { messageId: string }) => {
       setMessages((prev) => prev.filter((m) => m.id !== messageId));
     });
+
+    socket.on("message-edited", ({ message }: { message: Message }) => {
+      setMessages((prev) => prev.map((m) => (m.id === message.id ? message : m)));
+    });
+
+    socket.on("reaction-updated", ({ messageId, reactions }: { messageId: string; reactions: Reaction[] }) => {
+      setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, reactions } : m)));
+    });
   };
 
   const sendMessage = async (content: string, imageUrl: string | null) => {
     if (!content.trim() && !imageUrl) return;
 
     setSending(true);
+
+    const replyToSnapshot = replyingTo;
 
     const tempId = `temp-${Date.now()}`;
     const optimisticMessage: Message = {
@@ -171,9 +289,24 @@ export default function ChatInterface({
       createdAt: new Date().toISOString(),
       read: false,
       imageUrl,
+      replyTo: replyToSnapshot
+        ? {
+            id: replyToSnapshot.id,
+            content: replyToSnapshot.content,
+            imageUrl: replyToSnapshot.imageUrl,
+            sender: {
+              id: replyToSnapshot.senderId,
+              username: replyToSnapshot.senderId === userId ? session?.user?.username || "" : receiverUsername,
+              name: replyToSnapshot.senderId === userId ? session?.user?.name || "" : receiverName,
+            },
+          }
+        : null,
+      reactions: [],
     };
     setMessages((prev) => [...prev, optimisticMessage]);
     setNewMessage("");
+    setReplyingTo(null);
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
 
     try {
       const res = await fetch("/api/messages", {
@@ -183,6 +316,7 @@ export default function ChatInterface({
           receiverId,
           content: content || "",
           imageUrl,
+          replyToId: replyToSnapshot?.id || null,
         }),
       });
 
@@ -212,8 +346,8 @@ export default function ChatInterface({
     }
   };
 
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSend = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!newMessage.trim() || !userId) return;
     await sendMessage(newMessage.trim(), null);
   };
@@ -249,6 +383,78 @@ export default function ChatInterface({
     }
   };
 
+  // ─── Edit Message ────────────────────────────────────────────────────
+  const startEdit = (message: Message) => {
+    setEditingId(message.id);
+    setEditContent(message.content);
+    setReplyingTo(null);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditContent("");
+  };
+
+  const saveEdit = async (messageId: string) => {
+    if (!editContent.trim()) return;
+    setSavingEdit(true);
+    try {
+      const res = await fetch(`/api/messages/edit/${messageId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: editContent.trim() }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setMessages((prev) => prev.map((m) => (m.id === messageId ? updated : m)));
+        socketRef.current?.emit("edit-message", {
+          message: updated,
+          senderId: updated.senderId,
+          receiverId: updated.receiverId,
+        });
+        setEditingId(null);
+        setEditContent("");
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to edit message");
+      }
+    } catch (error) {
+      console.error("Edit message error:", error);
+      alert("Failed to edit message");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  // ─── Reactions ──────────────────────────────────────────────────────
+  const handleReact = async (messageId: string, emoji: string) => {
+    setReactionPickerFor(null);
+    try {
+      const res = await fetch(`/api/messages/reaction/${messageId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emoji }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMessages((prev) =>
+          prev.map((m) => (m.id === messageId ? { ...m, reactions: data.reactions } : m))
+        );
+        const message = messages.find((m) => m.id === messageId);
+        if (message) {
+          socketRef.current?.emit("message-reaction", {
+            messageId,
+            reactions: data.reactions,
+            senderId: message.senderId,
+            receiverId: message.receiverId,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Reaction error:", error);
+    }
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -274,13 +480,153 @@ export default function ChatInterface({
     e.target.value = "";
   };
 
-  const handleEmojiClick = (emoji: any) => {
-    setNewMessage((prev) => prev + emoji.emoji);
-    setShowEmojiPicker(false);
+  // ─── Document attachments (PDF, Word, Excel, PowerPoint, plain text) ──
+  const DOCUMENT_TYPES = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-powerpoint",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "text/plain",
+  ];
+
+  const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 8 * 1024 * 1024) {
+      alert(t("chat.errFileTooLarge"));
+      return;
+    }
+    if (!DOCUMENT_TYPES.includes(file.type)) {
+      alert(t("chat.errInvalidFileType"));
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      await startFileUpload([file]);
+    } catch (err) {
+      console.error("Upload error:", err);
+      setUploadingImage(false);
+      alert(t("chat.errUploadFailedRetry"));
+    }
+    e.target.value = "";
   };
 
-  const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ─── Voice message recording ────────────────────────────────────────
+  const formatRecordingTime = (totalSeconds: number) => {
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+
+      // Prefer a widely-supported codec; browsers vary in what they'll
+      // actually record (Safari differs from Chrome/Firefox).
+      const mimeCandidates = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
+      const mimeType = mimeCandidates.find((m) => MediaRecorder.isTypeSupported(m));
+
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      mediaRecorderRef.current = recorder;
+      audioChunksRef.current = [];
+      recordingCancelledRef.current = false;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        // Always release the microphone, whether sending or cancelling.
+        mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+
+        if (recordingCancelledRef.current || audioChunksRef.current.length === 0) {
+          audioChunksRef.current = [];
+          return;
+        }
+
+        const blob = new Blob(audioChunksRef.current, { type: mimeType || "audio/webm" });
+        audioChunksRef.current = [];
+        const extension = mimeType?.includes("mp4") ? "m4a" : "webm";
+        const file = new File([blob], `voice-message.${extension}`, { type: blob.type });
+
+        setUploadingImage(true);
+        try {
+          await startAudioUpload([file]);
+        } catch (err) {
+          console.error("Voice message upload error:", err);
+          setUploadingImage(false);
+          alert(t("chat.errUploadFailedRetry"));
+        }
+      };
+
+      recorder.start();
+      setIsRecording(true);
+      setRecordingSeconds(0);
+      recordingSecondsRef.current = 0;
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingSeconds((prev) => {
+          const next = prev + 1;
+          recordingSecondsRef.current = next;
+          return next;
+        });
+      }, 1000);
+    } catch (err) {
+      console.error("Microphone access error:", err);
+      alert(t("chat.errMicAccess"));
+    }
+  };
+
+  const stopAndSendRecording = () => {
+    if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
+    recordingCancelledRef.current = false;
+    mediaRecorderRef.current?.stop();
+    setIsRecording(false);
+  };
+
+  const cancelRecording = () => {
+    if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
+    recordingCancelledRef.current = true;
+    mediaRecorderRef.current?.stop();
+    setIsRecording(false);
+    setRecordingSeconds(0);
+  };
+
+  // ─── Insert an emoji at the current cursor position (not just
+  // appended to the end) and restore the cursor right after it - same
+  // fix already applied to the post composer's emoji picker.
+  const handleEmojiClick = (emoji: any) => {
+    const el = textareaRef.current;
+    const start = el?.selectionStart ?? newMessage.length;
+    const end = el?.selectionEnd ?? newMessage.length;
+    const before = newMessage.slice(0, start);
+    const after = newMessage.slice(end);
+    const updated = before + emoji.emoji + after;
+    setNewMessage(updated);
+    setShowEmojiPicker(false);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        const newPos = start + emoji.emoji.length;
+        textareaRef.current.selectionStart = newPos;
+        textareaRef.current.selectionEnd = newPos;
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+        textareaRef.current.focus();
+      }
+    }, 0);
+  };
+
+  const handleTyping = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNewMessage(e.target.value);
+    e.target.style.height = "auto";
+    e.target.style.height = `${e.target.scrollHeight}px`;
 
     if (!isTyping) {
       setIsTyping(true);
@@ -314,6 +660,15 @@ export default function ChatInterface({
     }
   };
 
+  const scrollToMessage = (messageId: string) => {
+    const el = document.getElementById(`msg-${messageId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("ring-2", "ring-zrp-red");
+      setTimeout(() => el.classList.remove("ring-2", "ring-zrp-red"), 1200);
+    }
+  };
+
   useEffect(() => {
     if (messages.length > lastMessageCountRef.current) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -323,6 +678,17 @@ export default function ChatInterface({
 
   const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
+  // ─── Group reactions by emoji, with counts ──────────────────────────
+  const groupReactions = (reactions?: Reaction[]) => {
+    if (!reactions || reactions.length === 0) return [];
+    const map = new Map<string, ReactionUser[]>();
+    reactions.forEach((r) => {
+      if (!map.has(r.emoji)) map.set(r.emoji, []);
+      map.get(r.emoji)!.push(r.user);
+    });
+    return Array.from(map.entries()).map(([emoji, users]) => ({ emoji, users }));
+  };
+
   if (loading) {
     return <div className="text-center py-8 text-gray-500">{t("chat.loadingMessages")}</div>;
   }
@@ -331,9 +697,10 @@ export default function ChatInterface({
     <div className="flex flex-col h-full w-full max-w-full bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
       {/* ─── HEADER – CLICKABLE PROFILE LINK ───────────────────────── */}
       <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-        <Link
-          href={`/profile/${receiverUsername}`}
-          className="flex items-center gap-2 sm:gap-3 min-w-0 hover:opacity-80 transition"
+        <button
+          type="button"
+          onClick={() => setShowContactInfo(true)}
+          className="flex items-center gap-2 sm:gap-3 min-w-0 hover:opacity-80 transition text-left"
         >
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-zrp-red/10 flex items-center justify-center text-zrp-red font-semibold flex-shrink-0">
             {receiverAvatar ? (
@@ -363,7 +730,7 @@ export default function ChatInterface({
               {socketConnected ? t("chat.live") : t("chat.offline")}
             </span>
           </div>
-        </Link>
+        </button>
         <div className="flex gap-1 flex-shrink-0">
           <button
             onClick={onVoiceCall}
@@ -380,6 +747,19 @@ export default function ChatInterface({
         </div>
       </div>
 
+      {showContactInfo && (
+        <ChatContactDrawer
+          receiverUsername={receiverUsername}
+          receiverName={receiverName}
+          receiverAvatar={receiverAvatar}
+          receiverBadgeType={receiverBadgeType}
+          messages={messages}
+          onClose={() => setShowContactInfo(false)}
+          onVoiceCall={onVoiceCall}
+          onVideoCall={onVideoCall}
+        />
+      )}
+
       {/* ─── MESSAGES ────────────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2 min-h-0">
         {messages.length === 0 ? (
@@ -392,58 +772,252 @@ export default function ChatInterface({
             const isOwn = message.senderId === userId;
             const displayContent =
               message.content && message.content !== "📷 Image" ? message.content : "";
+            const isEditing = editingId === message.id;
+            const reactionGroups = groupReactions(message.reactions);
 
             return (
-              <div key={message.id} className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`relative group max-w-[80%] sm:max-w-[75%] rounded-2xl px-3 sm:px-4 py-2 break-words ${
-                    isOwn
-                      ? "bg-zrp-red text-white rounded-br-none"
-                      : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-none"
-                  }`}
-                >
-                  {/* ─── DELETE BUTTON (only for sender) ────────────── */}
-                  {isOwn && (
-                    <button
-                      onClick={() => handleDeleteMessage(message.id)}
-                      disabled={deletingMessageId === message.id}
-                      className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition bg-gray-200 dark:bg-gray-700 rounded-full p-1 hover:bg-red-500 hover:text-white disabled:opacity-50"
-                      title={t("chat.deleteMessage")}
-                    >
-                      {deletingMessageId === message.id ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <Trash2 className="w-3 h-3" />
-                      )}
-                    </button>
-                  )}
-                  {message.imageUrl && (
-                    <div
-                      className="cursor-pointer group relative"
-                      onClick={() => openLightbox(message.imageUrl!)}
-                    >
-                      <img
-                        src={message.imageUrl}
-                        alt="Message attachment"
-                        className="rounded-lg max-w-full max-h-60 object-contain"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/30 rounded-lg">
-                        <ZoomIn className="w-8 h-8 text-white" />
-                      </div>
-                    </div>
-                  )}
-                  {displayContent && <p className="text-sm">{displayContent}</p>}
-                  <p
-                    className={`text-[10px] mt-1 ${
-                      isOwn ? "text-red-100" : "text-gray-400"
+              <div
+                id={`msg-${message.id}`}
+                key={message.id}
+                className={`flex ${isOwn ? "justify-end" : "justify-start"} transition rounded-2xl`}
+              >
+                <div className="max-w-[80%] sm:max-w-[75%]">
+                  <div
+                    className={`relative group rounded-2xl px-3 sm:px-4 py-2 break-words ${
+                      isOwn
+                        ? "bg-zrp-red text-white rounded-br-none"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-none"
                     }`}
                   >
-                    {new Date(message.createdAt).toLocaleTimeString(localeMap[language] || "en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                    {isOwn && message.read && <span className="ml-1">✓✓</span>}
-                  </p>
+                    {/* ─── Hover action bar ─────────────────────────── */}
+                    <div
+                      className={`absolute -top-3 ${isOwn ? "left-0 -translate-x-1" : "right-0 translate-x-1"} opacity-0 group-hover:opacity-100 transition flex items-center gap-0.5 bg-white dark:bg-gray-800 rounded-full shadow border border-gray-200 dark:border-gray-600 px-1 py-0.5 z-10`}
+                    >
+                      <button
+                        onClick={() => setReactionPickerFor(reactionPickerFor === message.id ? null : message.id)}
+                        className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+                        title="React"
+                      >
+                        <Smile className="w-3.5 h-3.5 text-gray-500 dark:text-gray-300" />
+                      </button>
+                      <button
+                        onClick={() => setReplyingTo(message)}
+                        className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                        title="Reply"
+                      >
+                        <Reply className="w-3.5 h-3.5 text-gray-500 dark:text-gray-300" />
+                      </button>
+                      {isOwn && !message.imageUrl && (
+                        <button
+                          onClick={() => startEdit(message)}
+                          className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                          title="Edit"
+                        >
+                          <Pencil className="w-3.5 h-3.5 text-gray-500 dark:text-gray-300" />
+                        </button>
+                      )}
+                      {isOwn && (
+                        <button
+                          onClick={() => handleDeleteMessage(message.id)}
+                          disabled={deletingMessageId === message.id}
+                          className="p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 disabled:opacity-50"
+                          title={t("chat.deleteMessage")}
+                        >
+                          {deletingMessageId === message.id ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-500" />
+                          ) : (
+                            <Trash2 className="w-3.5 h-3.5 text-gray-500 dark:text-gray-300 hover:text-red-600" />
+                          )}
+                        </button>
+                      )}
+                    </div>
+
+                    {/* ─── Quick reaction picker ─────────────────────── */}
+                    {reactionPickerFor === message.id && (
+                      <>
+                        <div className="fixed inset-0 z-10" onClick={() => setReactionPickerFor(null)} />
+                        <div
+                          className={`absolute -top-11 ${isOwn ? "right-0" : "left-0"} z-20 flex items-center gap-1 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-600 px-2 py-1.5`}
+                        >
+                          {QUICK_REACTIONS.map((emoji) => (
+                            <button
+                              key={emoji}
+                              onClick={() => handleReact(message.id, emoji)}
+                              className="text-lg hover:scale-125 transition-transform"
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+
+                    {/* ─── Quoted reply preview ──────────────────────── */}
+                    {message.replyTo && (
+                      <button
+                        onClick={() => scrollToMessage(message.replyTo!.id)}
+                        className={`block w-full text-left mb-1.5 px-2 py-1 rounded-lg border-l-2 text-xs ${
+                          isOwn
+                            ? "bg-white/10 border-white/40 text-white/80"
+                            : "bg-black/5 dark:bg-white/5 border-gray-400 dark:border-gray-500 text-gray-600 dark:text-gray-300"
+                        }`}
+                      >
+                        <p className="font-semibold truncate">
+                          {message.replyTo.sender.id === userId ? "You" : message.replyTo.sender.name}
+                        </p>
+                        <p className="truncate opacity-90">
+                          {message.replyTo.content || (message.replyTo.imageUrl ? "📷 Image" : "")}
+                        </p>
+                      </button>
+                    )}
+
+                    {message.imageUrl && (
+                      message.content?.startsWith("🎤") ? (
+                        <audio
+                          controls
+                          preload="metadata"
+                          src={message.imageUrl}
+                          onClick={(e) => e.stopPropagation()}
+                          className="max-w-full"
+                          style={{ height: "36px", minWidth: "220px" }}
+                          onLoadedMetadata={(e) => {
+                            const el = e.currentTarget;
+                            // Browsers' MediaRecorder API produces audio
+                            // blobs with broken/missing duration metadata
+                            // in the container header (shows as Infinity
+                            // or NaN) - a well-documented MediaRecorder
+                            // limitation across Chrome, Firefox and
+                            // Safari, not something specific to this
+                            // file. It also frequently prevents the
+                            // player from actually starting playback,
+                            // not just displaying "00:00 / 00:00".
+                            // Seeking to a huge timestamp forces the
+                            // browser to walk the whole file and compute
+                            // the real duration, then we reset to the
+                            // start so it's ready to play normally.
+                            if (!isFinite(el.duration)) {
+                              const fixDuration = () => {
+                                el.currentTime = 0;
+                                el.removeEventListener("timeupdate", fixDuration);
+                              };
+                              el.addEventListener("timeupdate", fixDuration);
+                              el.currentTime = 1e101;
+                            }
+                          }}
+                        />
+                      ) : failedImageIds.has(message.id) ? (
+                        <a
+                          href={message.imageUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className={`flex items-center gap-2 rounded-lg px-3 py-2 transition ${
+                            isOwn
+                              ? "bg-white/15 hover:bg-white/25"
+                              : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+                          }`}
+                        >
+                          <FileText className="w-6 h-6 flex-shrink-0" />
+                          <span className="text-sm font-medium flex-1 min-w-0 truncate">
+                            {t("chat.attachment")}
+                          </span>
+                          <Download className="w-4 h-4 flex-shrink-0" />
+                        </a>
+                      ) : (
+                        <div
+                          className="cursor-pointer group relative"
+                          onClick={() => openLightbox(message.imageUrl!)}
+                        >
+                          <img
+                            src={message.imageUrl}
+                            alt="Message attachment"
+                            className="rounded-lg max-w-full max-h-60 object-contain"
+                            onError={() =>
+                              setFailedImageIds((prev) => new Set(prev).add(message.id))
+                            }
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/30 rounded-lg">
+                            <ZoomIn className="w-8 h-8 text-white" />
+                          </div>
+                        </div>
+                      )
+                    )}
+
+                    {isEditing ? (
+                      <div className="flex items-end gap-2 min-w-[180px]">
+                        <textarea
+                          value={editContent}
+                          onChange={(e) => {
+                            setEditContent(e.target.value);
+                            e.target.style.height = "auto";
+                            e.target.style.height = `${e.target.scrollHeight}px`;
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                              e.preventDefault();
+                              saveEdit(message.id);
+                            }
+                            if (e.key === "Escape") cancelEdit();
+                          }}
+                          rows={1}
+                          autoFocus
+                          className="flex-1 min-w-0 bg-white/20 text-inherit placeholder-white/60 rounded-lg px-2 py-1 text-sm resize-none overflow-hidden max-h-32 focus:outline-none"
+                        />
+                        <button
+                          onClick={() => saveEdit(message.id)}
+                          disabled={savingEdit || !editContent.trim()}
+                          className="flex-shrink-0 p-1 rounded-full hover:bg-white/20 disabled:opacity-50"
+                        >
+                          {savingEdit ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                        </button>
+                        <button
+                          onClick={cancelEdit}
+                          className="flex-shrink-0 p-1 rounded-full hover:bg-white/20"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      displayContent && <p className="text-sm whitespace-pre-wrap">{displayContent}</p>
+                    )}
+
+                    <p
+                      className={`text-[10px] mt-1 flex items-center gap-1 ${
+                        isOwn ? "text-red-100" : "text-gray-400"
+                      }`}
+                    >
+                      {new Date(message.createdAt).toLocaleTimeString(localeMap[language] || "en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                      {message.edited && <span>· edited</span>}
+                      {isOwn && message.read && <span className="ml-1">✓✓</span>}
+                    </p>
+                  </div>
+
+                  {/* ─── Reaction pills below the bubble ─────────────── */}
+                  {reactionGroups.length > 0 && (
+                    <div className={`flex flex-wrap gap-1 mt-1 ${isOwn ? "justify-end" : "justify-start"}`}>
+                      {reactionGroups.map((group) => {
+                        const reacted = group.users.some((u) => u.id === userId);
+                        return (
+                          <button
+                            key={group.emoji}
+                            onClick={() => handleReact(message.id, group.emoji)}
+                            title={group.users.map((u) => u.name || u.username).join(", ")}
+                            className={`flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full border transition ${
+                              reacted
+                                ? "bg-zrp-red/10 border-zrp-red text-zrp-red"
+                                : "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300"
+                            }`}
+                          >
+                            <span>{group.emoji}</span>
+                            {group.users.length > 1 && <span>{group.users.length}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -452,56 +1026,144 @@ export default function ChatInterface({
         <div ref={messagesEndRef} />
       </div>
 
+      {/* ─── Reply preview above input ──────────────────────────────── */}
+      {replyingTo && (
+        <div className="px-3 sm:px-4 pt-2 flex items-center justify-between gap-2 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+          <div className="flex items-center gap-2 min-w-0 text-xs text-gray-500 dark:text-gray-400">
+            <Reply className="w-3.5 h-3.5 flex-shrink-0" />
+            <span className="truncate">
+              Replying to{" "}
+              <span className="font-medium text-gray-700 dark:text-gray-300">
+                {replyingTo.senderId === userId ? "yourself" : receiverName}
+              </span>
+              : {replyingTo.content || (replyingTo.imageUrl ? "📷 Image" : "")}
+            </span>
+          </div>
+          <button
+            onClick={() => setReplyingTo(null)}
+            className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* ─── INPUT ────────────────────────────────────────────────────── */}
       <form
         onSubmit={handleSend}
-        className="p-2 sm:p-4 border-t border-gray-200 dark:border-gray-700 flex gap-1 sm:gap-2 items-center flex-shrink-0"
+        className="p-2 sm:p-4 border-t border-gray-200 dark:border-gray-700 flex gap-1 sm:gap-2 items-end flex-shrink-0"
       >
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploadingImage}
-          className="text-gray-500 hover:text-zrp-red transition flex-shrink-0 disabled:opacity-50 p-1.5"
-          title={t("chat.uploadImage")}
-        >
-          {uploadingImage ? (
-            <div className="w-5 h-5 border-2 border-zrp-red border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <Image className="w-5 h-5" />
-          )}
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="hidden"
-        />
+        {isRecording ? (
+          <div className="flex-1 flex items-center gap-3 px-2">
+            <button
+              type="button"
+              onClick={cancelRecording}
+              className="text-gray-500 hover:text-red-500 transition flex-shrink-0 p-1.5"
+              title={t("chat.cancelRecording")}
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse flex-shrink-0" />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-200 tabular-nums">
+              {formatRecordingTime(recordingSeconds)}
+            </span>
+            <span className="flex-1 text-sm text-gray-400 dark:text-gray-500">
+              {t("chat.recording")}
+            </span>
+            <button
+              type="button"
+              onClick={stopAndSendRecording}
+              className="bg-zrp-red text-white p-2 rounded-full hover:bg-zrp-darkRed transition flex-shrink-0"
+              title={t("chat.sendVoiceMessage")}
+            >
+              <Send className="w-5 h-5" />
+            </button>
+          </div>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingImage}
+              className="text-gray-500 hover:text-zrp-red transition flex-shrink-0 disabled:opacity-50 p-1.5"
+              title={t("chat.uploadImage")}
+            >
+              {uploadingImage ? (
+                <div className="w-5 h-5 border-2 border-zrp-red border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Image className="w-5 h-5" />
+              )}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
 
-        <button
-          type="button"
-          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          className="text-gray-500 hover:text-zrp-red transition flex-shrink-0 p-1.5"
-          title={t("chat.addEmoji")}
-        >
-          <Smile className="w-5 h-5" />
-        </button>
+            <button
+              type="button"
+              onClick={() => documentInputRef.current?.click()}
+              disabled={uploadingImage}
+              className="text-gray-500 hover:text-zrp-red transition flex-shrink-0 disabled:opacity-50 p-1.5"
+              title={t("chat.uploadDocument")}
+            >
+              <Paperclip className="w-5 h-5" />
+            </button>
+            <input
+              ref={documentInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain"
+              onChange={handleDocumentUpload}
+              className="hidden"
+            />
 
-        <input
-          type="text"
-          value={newMessage}
-          onChange={handleTyping}
-          placeholder={t("chat.messagePlaceholder", { name: receiverName })}
-          className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm min-w-0"
-        />
+            <button
+              type="button"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className="text-gray-500 hover:text-zrp-red transition flex-shrink-0 p-1.5"
+              title={t("chat.addEmoji")}
+            >
+              <Smile className="w-5 h-5" />
+            </button>
 
-        <button
-          type="submit"
-          disabled={!newMessage.trim() || sending}
-          className="bg-zrp-red text-white p-2 rounded-full hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition flex-shrink-0"
-        >
-          <Send className="w-5 h-5" />
-        </button>
+            <textarea
+              ref={textareaRef}
+              value={newMessage}
+              onChange={handleTyping}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              placeholder={t("chat.messagePlaceholder", { name: receiverName })}
+              rows={1}
+              className="flex-1 min-w-0 px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm resize-none overflow-hidden max-h-32"
+            />
+
+            {newMessage.trim() ? (
+              <button
+                type="submit"
+                disabled={sending}
+                className="bg-zrp-red text-white p-2 rounded-full hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition flex-shrink-0"
+              >
+                <Send className="w-5 h-5" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={startRecording}
+                disabled={uploadingImage}
+                className="bg-zrp-red text-white p-2 rounded-full hover:bg-zrp-darkRed disabled:opacity-50 transition flex-shrink-0"
+                title={t("chat.recordVoiceMessage")}
+              >
+                <Mic className="w-5 h-5" />
+              </button>
+            )}
+          </>
+        )}
       </form>
 
       {/* ─── Emoji picker ─── */}

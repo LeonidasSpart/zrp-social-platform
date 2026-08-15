@@ -24,21 +24,38 @@ function formatProfileCount(n: number) {
   return n.toString();
 }
 
-// ─── Parse bio for @mentions and #hashtags ──────────────────────────
+// ─── Parse bio for @mentions, #hashtags, and URLs ───────────────────
 function parseBio(bio: string) {
-  const parts: { type: "text" | "mention" | "hashtag"; value: string }[] = [];
+  const parts: { type: "text" | "mention" | "hashtag" | "url"; value: string }[] = [];
   let lastIndex = 0;
-  const regex = /(@\w+)|(#\w+)/g;
+  const regex = /(@\w+)|(#\w+)|(https?:\/\/[^\s]+)|(www\.[^\s]+)/g;
+  const trailingPunctuation = /[.,!?;:'")\]}]+$/;
   let match;
   while ((match = regex.exec(bio)) !== null) {
     if (match.index > lastIndex) {
       parts.push({ type: "text", value: bio.slice(lastIndex, match.index) });
     }
-    parts.push({
-      type: match[0].startsWith("@") ? "mention" : "hashtag",
-      value: match[0],
-    });
-    lastIndex = match.index + match[0].length;
+
+    const raw = match[0];
+    const type: "mention" | "hashtag" | "url" = raw.startsWith("@")
+      ? "mention"
+      : raw.startsWith("#")
+      ? "hashtag"
+      : "url";
+
+    if (type === "url") {
+      const trailingMatch = raw.match(trailingPunctuation);
+      const trimmed = trailingMatch ? raw.slice(0, raw.length - trailingMatch[0].length) : raw;
+      if (trailingMatch && trimmed.length > 0) {
+        parts.push({ type: "url", value: trimmed });
+        parts.push({ type: "text", value: trailingMatch[0] });
+        lastIndex = match.index + raw.length;
+        continue;
+      }
+    }
+
+    parts.push({ type, value: raw });
+    lastIndex = match.index + raw.length;
   }
   if (lastIndex < bio.length) {
     parts.push({ type: "text", value: bio.slice(lastIndex) });
@@ -83,6 +100,7 @@ function getMilestones(profile: UserProfile): Milestone[] {
 interface UserProfile {
   id: string;
   username: string;
+  customUrl: string | null;
   name: string | null;
   bio: string | null;
   avatarUrl: string | null;
@@ -378,7 +396,8 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
   // ─── Share Profile ──────────────────────────────────────────────────
   const handleShareProfile = async () => {
-    const url = `${window.location.origin}/profile/${profile?.username}`;
+    const shortSlug = profile?.customUrl || profile?.username;
+    const url = `${window.location.origin}/${shortSlug}`;
     if (navigator.share) {
       try {
         await navigator.share({
@@ -889,6 +908,20 @@ export default function ProfilePage({ params }: { params: { username: string } }
                     </Link>
                   );
                 }
+                if (part.type === "url") {
+                  const href = part.value.startsWith("http") ? part.value : `https://${part.value}`;
+                  return (
+                    <a
+                      key={index}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-zrp-red hover:underline break-all"
+                    >
+                      {part.value}
+                    </a>
+                  );
+                }
                 return <span key={index}>{part.value}</span>;
               })}
             </p>
@@ -1034,12 +1067,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
             <p>{emptyStateMap[activeTab as Exclude<TabType, "analytics">]}</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {/* ─── Posts Tab ──────────────────────────────────────────── */}
+          <div>
             {activeTab === "posts" && (
               <>
                 {pinnedPost && (
-                  <div className="relative border border-blue-200 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-900/10 rounded-xl p-3">
+                  <div className="relative border border-blue-200 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-900/10 rounded-xl p-3 mb-3">
                     <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-medium mb-2">
                       <Pin className="w-3.5 h-3.5" />
                       {t("profile.pinned")}

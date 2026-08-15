@@ -28,7 +28,10 @@ import {
   Video,
   Image,
   Lock,
-  Ticket, // ➕ ADDED
+  Ticket,
+  Flag,      // ➕ ADDED for Reporting
+  Trash2,    // ➕ ADDED for Account Deletion
+  Scale,     // ➕ ADDED for Moderation & Appeals
 } from "lucide-react";
 
 interface HelpSection {
@@ -271,7 +274,6 @@ export default function HelpPage() {
         </div>
       ),
     },
-    // ─── NEW: Support Tickets ──────────────────────────────────────
     {
       id: "support-tickets",
       title: "Support Tickets",
@@ -304,6 +306,131 @@ export default function HelpPage() {
           <div className="mt-3 p-3 bg-zrp-red/5 border border-zrp-red/20 rounded-lg text-sm">
             🧡 All support tickets are handled with care and confidentiality.
           </div>
+        </div>
+      ),
+    },
+    // ─── NEW: Reporting & Blocking ──────────────────────────────────────
+    {
+      id: "reporting-blocking",
+      title: "Reporting Content & Blocking Users",
+      icon: Flag,
+      content: (
+        <div className="space-y-4">
+          <p className="text-gray-600 dark:text-gray-300">
+            ZRP Social is committed to providing a safe and respectful environment for everyone.
+            If you encounter content that violates our guidelines, or if you wish to block another user, here's how.
+          </p>
+          <h4 className="font-semibold text-gray-900 dark:text-white">How to report a post or comment</h4>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Tap the <strong>“…”</strong> (more) menu on the post or comment.</li>
+            <li>Select <strong>“Report”</strong>.</li>
+            <li>Choose the reason for your report (e.g., harassment, spam, illegal content).</li>
+            <li>Optionally add additional details, then submit.</li>
+            <li>Our moderation team will review the report and take appropriate action.</li>
+          </ol>
+          <h4 className="font-semibold text-gray-900 dark:text-white">How to block a user</h4>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Go to the user's profile.</li>
+            <li>Tap the <strong>“…”</strong> (more) menu.</li>
+            <li>Select <strong>“Block”</strong>.</li>
+            <li>Confirm – the user will no longer be able to interact with you.</li>
+          </ol>
+          <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg text-sm">
+            🔒 Blocked users cannot see your content, send you messages, or mention you. You can unblock them anytime from your Settings.
+          </div>
+        </div>
+      ),
+    },
+    // ─── NEW: Account Deletion ──────────────────────────────────────────
+    {
+      id: "account-deletion",
+      title: "How to Delete Your Account",
+      icon: Trash2,
+      content: (
+        <div className="space-y-4">
+          <p className="text-gray-600 dark:text-gray-300">
+            If you decide to leave ZRP Social, you can permanently delete your account.
+            This action is irreversible and will remove all your data in accordance with our Privacy Policy.
+          </p>
+          <h4 className="font-semibold text-gray-900 dark:text-white">Steps to delete your account</h4>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>Go to <Link href="/settings" className="text-zrp-red hover:underline">Settings</Link>.</li>
+            <li>Navigate to the <strong>“Account”</strong> tab.</li>
+            <li>Scroll to the bottom and tap <strong>“Delete Account”</strong>.</li>
+            <li>Read the confirmation message carefully.</li>
+            <li>Confirm your password and tap <strong>“Permanently Delete”</strong>.</li>
+          </ol>
+          <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg text-sm">
+            ⚠️ <strong>Important:</strong> Deletion is permanent. Your profile, posts, comments, and interactions will be removed within <strong>30 days</strong> (as stated in our Terms). You cannot recover your account after this process.
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            If you're having trouble, please <Link href="/support" className="text-zrp-red hover:underline">contact support</Link>.
+          </p>
+        </div>
+      ),
+    },
+    // ─── NEW: Moderation & Appeals ──────────────────────────────────────
+    {
+      id: "moderation-appeals",
+      title: "Content Moderation & Appeals",
+      icon: Scale,
+      content: (
+        <div className="space-y-4">
+          <p className="text-gray-600 dark:text-gray-300">
+            ZRP Social uses a combination of automated tools and human review to enforce our Community Guidelines.
+            If your content is removed or your account is restricted, you have the right to appeal.
+          </p>
+          <h4 className="font-semibold text-gray-900 dark:text-white">Why content may be removed</h4>
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>Violation of our Terms of Service (e.g., hate speech, harassment, illegal activity).</li>
+            <li>Spam, impersonation, or misleading content.</li>
+            <li>Copyright infringement or unauthorised use of intellectual property.</li>
+          </ul>
+          <h4 className="font-semibold text-gray-900 dark:text-white">How to appeal a moderation decision</h4>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>You will receive a notification explaining why action was taken.</li>
+            <li>Follow the link in the notification to <strong>Submit an Appeal</strong>.</li>
+            <li>Alternatively, go to <Link href="/support" className="text-zrp-red hover:underline">Support</Link> and select <strong>“Appeal Moderation”</strong> as the category.</li>
+            <li>Provide details and any evidence you wish to share.</li>
+            <li>Our team will review your appeal and respond within <strong>5 business days</strong>.</li>
+          </ol>
+          <div className="mt-3 p-3 bg-zrp-red/5 border border-zrp-red/20 rounded-lg text-sm">
+            🧡 We treat all appeals fairly and with respect. We aim to resolve disputes amicably.
+          </div>
+        </div>
+      ),
+    },
+    // ─── NEW: Data Privacy (plain‑language summary) ────────────────────
+    {
+      id: "data-privacy",
+      title: "Privacy & Your Data",
+      icon: Shield,
+      content: (
+        <div className="space-y-4">
+          <p className="text-gray-600 dark:text-gray-300">
+            Your privacy matters to us. ZRP Social collects and processes your data only as described in our <Link href="https://zrp.one/privacy" target="_blank" className="text-zrp-red hover:underline">Privacy Policy</Link>. Here's a quick overview:
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <strong className="block text-gray-900 dark:text-white">What we collect</strong>
+              <span className="text-gray-600 dark:text-gray-300">Account info, posts/comments, device data, cookies, and interaction analytics.</span>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <strong className="block text-gray-900 dark:text-white">How we use it</strong>
+              <span className="text-gray-600 dark:text-gray-300">To operate, improve, and secure the platform, and to comply with legal obligations.</span>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <strong className="block text-gray-900 dark:text-white">Data sharing</strong>
+              <span className="text-gray-600 dark:text-gray-300">Only with trusted processors (hosting, email). We never sell your data.</span>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <strong className="block text-gray-900 dark:text-white">Your rights</strong>
+              <span className="text-gray-600 dark:text-gray-300">Access, correct, delete, or export your data anytime. See our Privacy Policy for details.</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            For full details, read our <Link href="https://zrp.one/privacy" target="_blank" className="text-zrp-red hover:underline">Privacy Policy</Link> and <Link href="https://zrp.one/terms" target="_blank" className="text-zrp-red hover:underline">Terms of Service</Link>.
+          </p>
         </div>
       ),
     },
@@ -418,7 +545,7 @@ export default function HelpPage() {
         </p>
         <div className="flex flex-wrap justify-center gap-3 mt-4">
           <Link
-            href="/support" // ✅ changed from /contact to /support
+            href="/support"
             className="px-4 py-2 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed transition"
           >
             Open Ticket
@@ -431,9 +558,6 @@ export default function HelpPage() {
           </Link>
         </div>
       </div>
-
-      {/* ─── Footer Links ─── */}
-      {/* ❌ REMOVED – to avoid duplication with global footer */}
     </div>
   );
 }

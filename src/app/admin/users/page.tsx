@@ -34,6 +34,11 @@ export default function AdminUsers() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  // Real aggregate counts across the whole (search-filtered) dataset,
+  // from the server - not derived from just the current page of users,
+  // which is why "Total" used to always cap out at the page size (20)
+  // instead of matching the real user count shown on the Dashboard.
+  const [stats, setStats] = useState({ total: 0, active: 0, banned: 0, admins: 0, mods: 0 });
 
   const ROLE_OPTIONS = [
     { value: "USER", label: t("adminUsers.roleUser"), icon: User, color: "bg-gray-100 text-gray-700" },
@@ -46,6 +51,7 @@ export default function AdminUsers() {
     { value: "verified", label: t("adminUsers.badgeVerified"), icon: BadgeCheck, color: "bg-blue-100 text-blue-700" },
     { value: "organization", label: t("adminUsers.badgeOrganization"), icon: Building2, color: "bg-yellow-100 text-yellow-700" },
     { value: "government", label: t("adminUsers.badgeGovernment"), icon: Landmark, color: "bg-gray-200 text-gray-700" },
+    { value: "team", label: t("adminUsers.badgeTeam") || "ZRP Team", icon: Award, color: "bg-red-100 text-red-700" },
   ];
 
   const STATUS_OPTIONS = [
@@ -64,10 +70,18 @@ export default function AdminUsers() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/users?search=${encodeURIComponent(search)}&page=${page}`);
+      const params = new URLSearchParams({
+        search,
+        page: String(page),
+        role: roleFilter,
+        badge: badgeFilter,
+        status: statusFilter,
+      });
+      const res = await fetch(`/api/admin/users?${params.toString()}`);
       const data = await res.json();
       setUsers(data.users);
       setTotalPages(data.totalPages);
+      if (data.stats) setStats(data.stats);
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -77,27 +91,21 @@ export default function AdminUsers() {
 
   useEffect(() => {
     fetchUsers();
-  }, [page, search]);
+  }, [page, search, roleFilter, badgeFilter, statusFilter]);
 
-  // ─── Client‑side filtering ──────────────────────────────────────────
-  const filteredUsers = users.filter((user) => {
-    if (roleFilter !== "ALL" && user.role !== roleFilter) return false;
-    if (badgeFilter !== "ALL") {
-      const badge = user.badgeType || "";
-      if (badgeFilter === "NONE" && badge !== "") return false;
-      if (badgeFilter !== "NONE" && badge !== badgeFilter) return false;
-    }
-    if (statusFilter === "ACTIVE" && user.banned) return false;
-    if (statusFilter === "BANNED" && !user.banned) return false;
-    return true;
-  });
+  // Filters are now applied server-side (role/badge/status query params
+  // above), so `users` already reflects them - no client-side re-filter
+  // needed anymore. Filtering on the current page's 20 rows used to mean
+  // e.g. selecting "Admins" could show nothing if the one admin happened
+  // to be on a different page than the one currently loaded.
+  const filteredUsers = users;
 
-  // ─── Stats from filtered data ──────────────────────────────────────
-  const total = filteredUsers.length;
-  const active = filteredUsers.filter(u => !u.banned).length;
-  const banned = filteredUsers.filter(u => u.banned).length;
-  const admins = filteredUsers.filter(u => u.role === "ADMIN").length;
-  const mods = filteredUsers.filter(u => u.role === "MODERATOR").length;
+  // ─── Stats: real totals from the server (not just this page) ──────
+  const total = stats.total;
+  const active = stats.active;
+  const banned = stats.banned;
+  const admins = stats.admins;
+  const mods = stats.mods;
 
   const handleDelete = async (userId: string) => {
     if (!confirm(t("adminUsers.deleteConfirm"))) return;
@@ -116,9 +124,15 @@ export default function AdminUsers() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role: newRole }),
       });
-      if (res.ok) fetchUsers();
+      if (res.ok) {
+        fetchUsers();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || "Failed to update role");
+      }
     } catch (error) {
       console.error("Role update error:", error);
+      alert("Failed to update role");
     }
   };
 
@@ -129,9 +143,15 @@ export default function AdminUsers() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ badgeType: badgeType || null }),
       });
-      if (res.ok) fetchUsers();
+      if (res.ok) {
+        fetchUsers();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || "Failed to update badge");
+      }
     } catch (error) {
       console.error("Badge update error:", error);
+      alert("Failed to update badge");
     }
   };
 
@@ -190,7 +210,7 @@ export default function AdminUsers() {
             type="text"
             placeholder={t("adminUsers.searchPlaceholder")}
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             className="pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-zrp-red focus:border-transparent"
           />
         </div>
@@ -239,7 +259,7 @@ export default function AdminUsers() {
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <select
           value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value)}
+          onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
           className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-zrp-red focus:border-transparent"
         >
           <option value="ALL">{t("adminUsers.allRoles")}</option>
@@ -250,7 +270,7 @@ export default function AdminUsers() {
 
         <select
           value={badgeFilter}
-          onChange={(e) => setBadgeFilter(e.target.value)}
+          onChange={(e) => { setBadgeFilter(e.target.value); setPage(1); }}
           className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-zrp-red focus:border-transparent"
         >
           <option value="ALL">{t("adminUsers.allBadges")}</option>
@@ -258,11 +278,12 @@ export default function AdminUsers() {
           <option value="verified">{t("adminUsers.badgeVerified")}</option>
           <option value="organization">{t("adminUsers.badgeOrganization")}</option>
           <option value="government">{t("adminUsers.badgeGovernment")}</option>
+          <option value="team">{t("adminUsers.badgeTeam") || "ZRP Team"}</option>
         </select>
 
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
           className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-zrp-red focus:border-transparent"
         >
           {STATUS_OPTIONS.map((opt) => (
@@ -280,17 +301,17 @@ export default function AdminUsers() {
       {/* ─── Table ──────────────────────────────────────────────────── */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[900px] text-sm">
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colUser")}</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium hidden sm:table-cell">{t("adminUsers.colEmail")}</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colPosts")}</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colRole")}</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colBadge")}</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colPlan")}</th>
-                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colStatus")}</th>
-                <th className="px-4 py-3 text-right text-gray-500 dark:text-gray-300 font-medium">{t("adminUsers.colActions")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium whitespace-nowrap">{t("adminUsers.colUser")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium hidden sm:table-cell whitespace-nowrap">{t("adminUsers.colEmail")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium whitespace-nowrap">{t("adminUsers.colPosts")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium whitespace-nowrap">{t("adminUsers.colRole")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium whitespace-nowrap">{t("adminUsers.colBadge")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium whitespace-nowrap">{t("adminUsers.colPlan")}</th>
+                <th className="px-4 py-3 text-left text-gray-500 dark:text-gray-300 font-medium whitespace-nowrap">{t("adminUsers.colStatus")}</th>
+                <th className="px-4 py-3 text-right text-gray-500 dark:text-gray-300 font-medium whitespace-nowrap">{t("adminUsers.colActions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -327,9 +348,9 @@ export default function AdminUsers() {
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
                         {user._count.posts}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${roleStyle}`}>
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${roleStyle}`}>
                             {user.role === "ADMIN" && <ShieldAlert className="w-3 h-3" />}
                             {user.role === "MODERATOR" && <Shield className="w-3 h-3" />}
                             {user.role === "USER" && <User className="w-3 h-3" />}
@@ -348,10 +369,10 @@ export default function AdminUsers() {
                           </select>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           {user.badgeType ? (
-                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${badgeStyle}`}>
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${badgeStyle}`}>
                               {BadgeIcon && <BadgeIcon className="w-3 h-3" />}
                               {badgeInfo?.label}
                             </span>
@@ -372,7 +393,7 @@ export default function AdminUsers() {
                         </div>
                       </td>
                       {/* ─── Plan column ───────────────────────────── */}
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <select
                           value={user.plan || "free"}
                           onChange={(e) => updatePlan(user.id, e.target.value)}
@@ -385,18 +406,18 @@ export default function AdminUsers() {
                           ))}
                         </select>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         {user.banned ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400">
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400 whitespace-nowrap">
                             <Circle className="w-2 h-2 fill-red-600" /> {t("adminUsers.statusBanned")}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400">
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400 whitespace-nowrap">
                             <CircleDot className="w-2 h-2 fill-green-600" /> {t("adminUsers.statusActive")}
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-right space-x-2">
+                      <td className="px-4 py-3 text-right space-x-2 whitespace-nowrap">
                         <button
                           onClick={() => toggleBan(user.id, user.banned)}
                           className={`text-xs font-medium transition ${

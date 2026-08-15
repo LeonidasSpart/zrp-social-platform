@@ -16,7 +16,7 @@ interface Report {
   createdAt: string;
   reporter: { username: string; name: string };
   post: { id: string; content: string; author: { username: string } } | null;
-  comment: { id: string; content: string; author: { username: string } } | null;
+  comment: { id: string; content: string; postId: string; author: { username: string } } | null;
 }
 
 export default function AdminReports() {
@@ -214,7 +214,16 @@ export default function AdminReports() {
           reports.map((report) => {
             const content = report.post || report.comment;
             const author = content?.author;
-            const viewPostLink = report.post ? `/post/${report.post.id}` : null;
+            // Comments deep-link to their parent post + scroll into view
+            // via #comment-<id> (already supported by the post detail
+            // page) - previously this was never actually constructed for
+            // comment reports, so moderators had a text preview but no
+            // way to click through and see the comment in context.
+            const viewContentLink = report.post
+              ? `/post/${report.post.id}`
+              : report.comment
+                ? `/post/${report.comment.postId}#comment-${report.comment.id}`
+                : null;
             const viewAuthorLink = author ? `/profile/${author.username}` : null;
             const contentLabel = report.post ? t("adminReports.viewPost") : t("adminReports.viewComment");
 
@@ -247,9 +256,9 @@ export default function AdminReports() {
                           {content.content}
                         </p>
                         <div className="flex flex-wrap items-center gap-3 mt-2">
-                          {viewPostLink && (
+                          {viewContentLink && (
                             <Link
-                              href={viewPostLink}
+                              href={viewContentLink}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition"

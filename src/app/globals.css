@@ -43,19 +43,34 @@
   }
 }
 
-/* Dark mode scrollbar */
-.dark ::-webkit-scrollbar {
-  width: 8px;
+/* Custom scrollbar - thin and red in both light and dark mode.
+   Previously this only applied under .dark, so light mode fell back to
+   the browser/OS default scrollbar, which on Windows can render quite
+   thick and gray - exactly what was reported. */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 .dark ::-webkit-scrollbar-track {
   background: #0D0D0D;
 }
-.dark ::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background: #FF2D2D;
   border-radius: 4px;
 }
-.dark ::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb:hover {
   background: #B10000;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #FF2D2D #f1f1f1;
+}
+.dark * {
+  scrollbar-color: #FF2D2D #0D0D0D;
 }
 
 /* Mobile responsiveness */

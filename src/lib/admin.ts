@@ -1,9 +1,19 @@
-import { getServerSession } from "next-auth";
+import { getServerSession, type Session } from "next-auth";
 import { authOptions } from "./auth";
 import { NextResponse } from "next/server";
 import { prisma } from "./db";
 
-export async function requireAdmin() {
+// Explicit discriminated union return type. Without this, TypeScript
+// widens the `authorized: true/false` literals to plain `boolean` on
+// inferred return types, which breaks control-flow narrowing at call
+// sites - `if (!adminCheck.authorized) return adminCheck.response;`
+// would no longer guarantee `adminCheck.session` is defined afterward,
+// even though it always is at runtime.
+type AdminCheckResult =
+  | { authorized: true; session: Session }
+  | { authorized: false; response: NextResponse };
+
+export async function requireAdmin(): Promise<AdminCheckResult> {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return { authorized: false, response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
@@ -29,7 +39,7 @@ export async function requireAdmin() {
   return { authorized: false, response: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
 }
 
-export async function requireStaff() {
+export async function requireStaff(): Promise<AdminCheckResult> {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return { authorized: false, response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };

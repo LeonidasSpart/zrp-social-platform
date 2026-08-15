@@ -128,6 +128,7 @@ model User {
   sentNotifications Notification[] @relation("Notification_fromUser")
   sentMessages Message[] @relation("Message_sender")
   receivedMessages Message[] @relation("Message_receiver")
+  messageReactions MessageReaction[]
   pollVotes   PollVote[]
   bookmarks   Bookmark[]
   pushSubscriptions PushSubscription[]
@@ -174,6 +175,7 @@ model Post {
   id          String    @id @default(cuid())
   content     String    @db.Text
   imageUrl    String?
+  imageUrls   String[]  @default([])
   mediaType   String?
   linkUrl     String?
   authorId    String
@@ -360,12 +362,33 @@ model Message {
   receiverId  String
   receiver    User      @relation("Message_receiver", fields: [receiverId], references: [id], onDelete: Cascade)
   read        Boolean   @default(false)
+  edited      Boolean   @default(false)
   createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt  // ✅ Fixed: added @default(now())
+  replyToId   String?
+  replyTo     Message?  @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies     Message[] @relation("MessageReplies")
+
+  reactions   MessageReaction[]
 
   @@index([senderId])
   @@index([receiverId])
   @@index([createdAt])
   @@index([senderId, receiverId])
+  @@index([replyToId])
+}
+
+model MessageReaction {
+  id        String   @id @default(cuid())
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emoji     String
+  createdAt DateTime @default(now())
+
+  @@unique([messageId, userId])
+  @@index([messageId])
 }
 
 model Poll {
