@@ -20,6 +20,31 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // Applies to every route. These are widely-recommended baseline
+        // security headers that were previously entirely absent:
+        // - X-Frame-Options: prevents the site being embedded in an
+        //   iframe elsewhere (clickjacking protection)
+        // - X-Content-Type-Options: stops the browser from guessing a
+        //   different MIME type than what's declared (helps prevent
+        //   some XSS vectors via disguised file uploads)
+        // - Referrer-Policy: avoids leaking full URLs (which can
+        //   contain sensitive path info) to third-party sites when
+        //   users click outbound links
+        // - Strict-Transport-Security: forces HTTPS for future visits
+        // Deliberately NOT adding Content-Security-Policy or
+        // Permissions-Policy here - getting either wrong could silently
+        // break WebRTC calling, UploadThing, or Socket.io, and that
+        // needs a careful domain-by-domain audit rather than a blind
+        // addition.
+        source: "/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
+        ],
+      },
+      {
         source: "/_next/static/:path*",
         headers: [
           {
