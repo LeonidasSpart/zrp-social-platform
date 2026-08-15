@@ -31,6 +31,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (mounted) {
       document.documentElement.classList.toggle("dark", theme === "dark");
       localStorage.setItem("theme", theme);
+
+      // Keep the iOS status bar style in sync with the active theme.
+      // "black-translucent" overlays a translucent black tint over the
+      // status bar area, which looks correct against a dark background
+      // but reads as a washed-out gray over light content - this was
+      // previously hardcoded to black-translucent regardless of theme,
+      // which is exactly what caused light mode to look gray specifically
+      // on mobile (desktop/iPad browser chrome has no equivalent overlay).
+      const statusBarMeta = document.querySelector(
+        'meta[name="apple-mobile-web-app-status-bar-style"]'
+      );
+      if (statusBarMeta) {
+        statusBarMeta.setAttribute(
+          "content",
+          theme === "dark" ? "black-translucent" : "default"
+        );
+      }
     }
   }, [theme, mounted]);
 
