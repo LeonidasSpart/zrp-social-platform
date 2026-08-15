@@ -2,8 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import crypto from "crypto";
 import { sendVerificationEmail } from "@/lib/email";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  // This endpoint is unauthenticated by necessity (a user who can't log
+  // in yet still needs to be able to request a new verification email),
+  // which is exactly why it needs a strict limit - without one, it's an
+  // open email-bombing vector against any address, since it accepts
+  // whatever email is put in the request body and always sends real mail.
+  const limit = await rateLimit(req, { limit: 3, window: 600, type: "resend-verification" });
+  if (!limit.success) return limit.response;
+
   try {
     const { email } = await req.json();
 
