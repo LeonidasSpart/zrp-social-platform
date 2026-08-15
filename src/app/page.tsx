@@ -198,6 +198,22 @@ export default function HomePage() {
     );
   }
 
+  // ─── Guest / session-expired guard ─────────────────────────────────
+  // Middleware already redirects a fresh, unauthenticated visit to /
+  // before this component ever mounts. This covers the narrower case
+  // of a session expiring (or the account being banned) while someone
+  // is already sitting on this page - status flips to "unauthenticated"
+  // after mount, and without this guard the full authenticated feed
+  // shell below would still render for a moment before the redirect
+  // effect above finishes navigating away.
+  if (status === "unauthenticated") {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-500">{t("action.loading")}</div>
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="max-w-2xl mx-auto py-4 px-4">
