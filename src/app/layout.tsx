@@ -17,7 +17,6 @@ import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Suspense } from "react";
-import { SolanaProvider } from "@/contexts/SolanaContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -322,35 +321,33 @@ export default function RootLayout({
                     </div>
                   }
                 >
-                  <SolanaProvider>
-                    <AuthProvider>
-                      <UnreadCountProvider>
-                        <Header />
+                  <AuthProvider>
+                    <UnreadCountProvider>
+                      <Header />
 
-                        <EmailVerificationBanner />
+                      <EmailVerificationBanner />
 
-                        <div className="flex justify-center w-full max-w-[1400px] mx-auto">
-                          <Sidebar />
+                      <div className="flex justify-center w-full max-w-[1400px] mx-auto">
+                        <Sidebar />
 
-                          <main className="flex-1 min-w-0">
-                            <PageTransition>
-                              {children}
-                            </PageTransition>
-                          </main>
+                        <main className="flex-1 min-w-0">
+                          <PageTransition>
+                            {children}
+                          </PageTransition>
+                        </main>
 
-                          <RightPanel />
-                        </div>
+                        <RightPanel />
+                      </div>
 
-                        <CookieConsent />
+                      <CookieConsent />
 
-                        <Footer />
+                      <Footer />
 
-                        <PushNotificationManager />
+                      <PushNotificationManager />
 
-                        <ServiceWorkerRegistration />
-                      </UnreadCountProvider>
-                    </AuthProvider>
-                  </SolanaProvider>
+                      <ServiceWorkerRegistration />
+                    </UnreadCountProvider>
+                  </AuthProvider>
                 </Suspense>
               </LanguageProvider>
             </ThemeProvider>
