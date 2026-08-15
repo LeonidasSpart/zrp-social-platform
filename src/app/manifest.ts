@@ -11,17 +11,36 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: '#ffffff',
     theme_color: '#FF2D2D',
     icons: [
+      // Full-bleed icons for regular contexts (app switchers, browser UI,
+      // etc.) - shown exactly as designed, no OS-applied mask.
       {
         src: '/icon-192.png',
         sizes: '192x192',
         type: 'image/png',
-        purpose: 'maskable', // ✅ fixed
+        purpose: 'any',
       },
       {
         src: '/icon-512.png',
         sizes: '512x512',
         type: 'image/png',
-        purpose: 'maskable', // ✅ fixed
+        purpose: 'any',
+      },
+      // Separate, padded icons for maskable contexts (Android adaptive
+      // icons, etc.) - the artwork sits inside the safe zone so circular/
+      // squircle/rounded-square masks don't crop off the outer ring.
+      // The originals were previously marked maskable directly, but had
+      // no safe-zone padding baked in, so Android was cropping them.
+      {
+        src: '/icon-192-maskable.png',
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'maskable',
+      },
+      {
+        src: '/icon-512-maskable.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'maskable',
       },
     ],
   };
