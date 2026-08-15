@@ -1,9 +1,11 @@
-const CACHE_NAME = 'zrp-v4'; // ✅ Incremented to force update
+const CACHE_NAME = 'zrp-v5'; // Bumped: added properly padded maskable icons
 const STATIC_ASSETS = [
   '/favicon.ico',
   '/logo.png',
   '/icon-192.png',
   '/icon-512.png',
+  '/icon-192-maskable.png',
+  '/icon-512-maskable.png',
   '/offline.html',
 ];
 
