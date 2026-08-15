@@ -104,6 +104,27 @@ export async function GET(req: NextRequest) {
       nextCursor = nextItem!.id;
     }
 
+    // ─── Add liked status for the viewer ──────────────────────────
+    // This was missing entirely on this route (the main "For You" /
+    // "Following" home feed) - every post came back with no `liked`
+    // field, so the frontend always rendered them as unliked here,
+    // regardless of what was actually in the database. Other feeds
+    // (explore, profile, hashtag, single post) already computed this
+    // correctly; this brings the home feed in line with that pattern.
+    if (userId && posts.length > 0) {
+      const likes = await prisma.like.findMany({
+        where: {
+          userId: userId as string,
+          postId: { in: posts.map(p => p.id) },
+        },
+        select: { postId: true },
+      });
+      const likedIds = new Set(likes.map(l => l.postId));
+      posts.forEach((p: any) => {
+        p.liked = likedIds.has(p.id);
+      });
+    }
+
     return NextResponse.json({ posts, nextCursor });
   } catch (error) {
     console.error("Feed error:", error);
