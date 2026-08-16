@@ -18,8 +18,8 @@ export const ourFileRouter = {
       return { userId: session.user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Post media uploaded:", file.url);
-      return { url: file.url };
+      console.log("Post media uploaded:", file.ufsUrl);
+      return { url: file.ufsUrl };
     }),
 
   // ─── Avatar upload ──────────────────────────────────────────────
@@ -32,8 +32,8 @@ export const ourFileRouter = {
       return { userId: session.user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Avatar uploaded:", file.url);
-      return { url: file.url };
+      console.log("Avatar uploaded:", file.ufsUrl);
+      return { url: file.ufsUrl };
     }),
 
   // ─── Banner upload ──────────────────────────────────────────────
@@ -46,8 +46,8 @@ export const ourFileRouter = {
       return { userId: session.user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Banner uploaded:", file.url);
-      return { url: file.url };
+      console.log("Banner uploaded:", file.ufsUrl);
+      return { url: file.ufsUrl };
     }),
 
   // ─── Chat image upload ──────────────────────────────────────────
@@ -60,8 +60,8 @@ export const ourFileRouter = {
       return { userId: session.user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Chat image uploaded:", file.url);
-      return { url: file.url };
+      console.log("Chat image uploaded:", file.ufsUrl);
+      return { url: file.ufsUrl };
     }),
 
   // ─── Chat document upload (PDF, Word, Excel, PowerPoint, plain text) ──
@@ -76,8 +76,8 @@ export const ourFileRouter = {
       return { userId: session.user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Chat document uploaded:", file.url, file.name);
-      return { url: file.url, name: file.name };
+      console.log("Chat document uploaded:", file.ufsUrl, file.name);
+      return { url: file.ufsUrl, name: file.name };
     }),
 
   // ─── Chat voice message upload ───────────────────────────────────
@@ -90,8 +90,8 @@ export const ourFileRouter = {
       return { userId: session.user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Chat voice message uploaded:", file.url);
-      return { url: file.url };
+      console.log("Chat voice message uploaded:", file.ufsUrl);
+      return { url: file.ufsUrl };
     }),
 
   // ─── Story media upload (image or video) ────────────────────────
@@ -105,9 +105,9 @@ export const ourFileRouter = {
       return { userId: session.user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Story media uploaded:", file.url);
+      console.log("Story media uploaded:", file.ufsUrl);
       // file.type is "image" or "video" – you can use that to store mediaType
-      return { url: file.url, type: file.type };
+      return { url: file.ufsUrl, type: file.type };
     }),
 } satisfies FileRouter;
 
