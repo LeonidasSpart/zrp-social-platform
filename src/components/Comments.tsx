@@ -3,11 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Send, Pencil, Trash2, X, Check, Reply, Heart, Repeat, Bookmark, Flag } from "lucide-react";
+import { Send, Pencil, Trash2, X, Check, Reply, Heart, Repeat, Bookmark } from "lucide-react";
 import VerifiedBadge from "./VerifiedBadge";
 import { timeAgo } from "@/lib/utils";
-import { getPlanLimits } from "@/lib/limits";
-import ReportModal from "./ReportModal";
 
 interface Comment {
   id: string;
@@ -62,8 +60,6 @@ interface CommentsProps {
 
 export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   const { data: session } = useSession();
-  const plan = (session?.user?.plan as any) || "free";
-  const limits = getPlanLimits(plan);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
@@ -77,9 +73,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
-
-  const [showReportModal, setShowReportModal] = useState(false);
-  const [reportingCommentId, setReportingCommentId] = useState<string | null>(null);
 
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -253,40 +246,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
     }
   };
 
-  // ─── Report a comment ──────────────────────────────────────────────
-  const openReportModal = (commentId: string) => {
-    setReportingCommentId(commentId);
-    setShowReportModal(true);
-  };
-
-  const handleReportComment = async (reason: string, details?: string) => {
-    if (!reportingCommentId) return;
-    try {
-      const res = await fetch("/api/reports", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ commentId: reportingCommentId, reason, details }),
-      });
-      if (res.ok) {
-        alert("Report submitted. Thank you for helping keep the community safe.");
-        setShowReportModal(false);
-        setReportingCommentId(null);
-      } else {
-        const err = await res.json().catch(() => ({}));
-        alert(err.error || "Failed to submit report. Please try again.");
-        // A 409 means it's already reported and pending - close the
-        // modal rather than inviting a retry that would just repeat it.
-        if (res.status === 409) {
-          setShowReportModal(false);
-          setReportingCommentId(null);
-        }
-      }
-    } catch (error) {
-      console.error("Error reporting comment:", error);
-      alert("Failed to submit report. Please try again.");
-    }
-  };
-
   const getAvatarSrc = (author: Comment["author"]) => {
     return author.avatarUrl || "/default-avatar.png";
   };
@@ -447,18 +406,8 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 </button>
               </div>
             )}
-            {!isAuthor && session && !isEditing && (
-              <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={() => openReportModal(comment.id)}
-                  className="text-gray-400 hover:text-red-500 p-1"
-                  title="Report comment"
-                >
-                  <Flag className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
           </div>
+
           {isEditing ? (
             <div className="mt-1 flex items-end gap-2">
               <textarea
@@ -477,7 +426,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 rows={1}
                 className="flex-1 min-w-0 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red resize-none overflow-hidden max-h-40"
                 autoFocus
-                maxLength={limits.postLength}
+                maxLength={280}
               />
               <button
                 onClick={() => saveEdit(comment.id)}
@@ -569,7 +518,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 placeholder={`Reply to ${comment.author.name || comment.author.username}...`}
                 rows={1}
                 className="flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent resize-none overflow-hidden max-h-40"
-                maxLength={limits.postLength}
+                maxLength={280}
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
@@ -660,7 +609,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             placeholder="Write a comment..."
             rows={1}
             className="flex-1 min-w-0 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none overflow-hidden max-h-40"
-            maxLength={limits.postLength}
+            maxLength={280}
           />
           <button
             type="submit"
@@ -702,15 +651,6 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
           </div>
         </div>
       )}
-
-      <ReportModal
-        isOpen={showReportModal}
-        onClose={() => {
-          setShowReportModal(false);
-          setReportingCommentId(null);
-        }}
-        onSubmit={handleReportComment}
-      />
     </div>
   );
 }
