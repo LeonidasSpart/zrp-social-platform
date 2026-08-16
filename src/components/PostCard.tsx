@@ -914,7 +914,7 @@ export default function PostCard({
                 <span className={`p-2 rounded-full transition ${commentsEnabled ? "group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:text-blue-500" : ""}`}>
                   <MessageCircle className="w-[18px] h-[18px]" />
                 </span>
-                <span className="group-hover:text-blue-500 transition">{formatCount(commentsCount)}</span>
+                <span className="group-hover:text-blue-500 transition whitespace-nowrap">{formatCount(commentsCount)}</span>
               </button>
 
               {/* ─── Repost dropdown ───────────────────────────────────── */}
@@ -926,7 +926,7 @@ export default function PostCard({
                   <span className="p-2 rounded-full transition group-hover:bg-green-50 dark:group-hover:bg-green-900/20 group-hover:text-green-500">
                     <Repeat className={`w-[18px] h-[18px] ${reposted ? "fill-green-500" : ""}`} />
                   </span>
-                  <span className="group-hover:text-green-500 transition -ml-1">
+                  <span className="group-hover:text-green-500 transition -ml-1 whitespace-nowrap">
                     {formatCount(repostsCount + (post._count?.quotedBy || 0))}
                   </span>
                   <ChevronDown className="w-3 h-3 ml-0.5 group-hover:text-green-500 transition" />
@@ -986,14 +986,14 @@ export default function PostCard({
                 <span className="p-2 rounded-full transition group-hover:bg-red-50 dark:group-hover:bg-red-900/20 group-hover:text-red-500">
                   <Heart className={`w-[18px] h-[18px] ${liked ? "fill-red-500" : ""}`} />
                 </span>
-                <span className="group-hover:text-red-500 transition -ml-1">{formatCount(likesCount)}</span>
+                <span className="group-hover:text-red-500 transition -ml-1 whitespace-nowrap">{formatCount(likesCount)}</span>
               </button>
 
-              <span className="flex items-center gap-1 text-sm text-gray-400 dark:text-gray-500" title={`${viewsCount.toLocaleString()} views`}>
+              <span className="flex items-center gap-1 text-sm text-gray-400 dark:text-gray-500 whitespace-nowrap" title={`${viewsCount.toLocaleString()} views`}>
                 <span className="p-2">
                   <BarChart3 className="w-[18px] h-[18px]" />
                 </span>
-                <span className="-ml-1">{formatCount(viewsCount)}</span>
+                <span className="-ml-1 whitespace-nowrap">{formatCount(viewsCount)}</span>
               </span>
 
               <div className="flex items-center">
