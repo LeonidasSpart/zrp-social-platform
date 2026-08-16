@@ -50,6 +50,12 @@ export default function Header() {
 
   const isAuthenticated = !!session;
   const features = session?.user?.features;
+  // Moderators (role: "MODERATOR") previously never saw this link at
+  // all, even though the backend now correctly grants them access to
+  // reports/posts/user-ban/stats via requireStaff(). Header/Sidebar
+  // were the actual reason moderators reported "not seeing" the
+  // dashboard - the link to it simply never appeared for them.
+  const isStaff = isAuthenticated && (session?.user?.isAdmin || session?.user?.role === "ADMIN" || session?.user?.role === "MODERATOR");
 
   useEffect(() => {
     // Threshold matches Tailwind's lg breakpoint (1024px), not md (768px) -
@@ -148,7 +154,7 @@ export default function Header() {
               instead, so this block must not extend to lg: or they'd be
               duplicated there. */}
           <nav className="hidden md:flex lg:hidden items-center gap-4">
-            {isAuthenticated && session?.user?.isAdmin && (
+            {isStaff && (
               <Link
                 href="/admin"
                 className="text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition"
@@ -310,7 +316,7 @@ export default function Header() {
                 )}
               </Link>
             ))}
-            {isAuthenticated && session?.user?.isAdmin && (
+            {isStaff && (
               <Link
                 href="/admin"
                 onClick={() => setMobileMenuOpen(false)}
