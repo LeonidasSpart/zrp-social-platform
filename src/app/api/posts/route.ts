@@ -19,44 +19,46 @@ export async function GET(req: NextRequest) {
     // ─── Build where clause ──────────────────────────────────────
     const where: any = { status: "published" };
 
-    // Exclude blocked users
+    // Blocked/blockedBy/muted/following were previously fetched with
+    // sequential awaits - each is independent (all keyed only on
+    // userId, none depends on another's result), so they were paying
+    // 3-4 avoidable sequential database round-trips on every single
+    // feed load, the highest-traffic route in the app. Running them
+    // concurrently cuts that to the time of the single slowest one.
+    const needsFollowing = tab === "following" && !!userId;
+    const [blockedIds, blockedBy, muted, following] = await Promise.all([
+      userId
+        ? prisma.blocked.findMany({ where: { blockerId: userId }, select: { blockedId: true } })
+        : Promise.resolve([]),
+      userId
+        ? prisma.blocked.findMany({ where: { blockedId: userId }, select: { blockerId: true } })
+        : Promise.resolve([]),
+      userId
+        ? prisma.mute.findMany({ where: { muterId: userId }, select: { mutedId: true } })
+        : Promise.resolve([]),
+      needsFollowing
+        ? prisma.follow.findMany({ where: { followerId: userId }, select: { followingId: true } })
+        : Promise.resolve([]),
+    ]);
+
     if (userId) {
-      const blockedIds = await prisma.blocked.findMany({
-        where: { blockerId: userId },
-        select: { blockedId: true },
-      });
-      const blockedBy = await prisma.blocked.findMany({
-        where: { blockedId: userId },
-        select: { blockerId: true },
-      });
       const excludedUserIds = [
-        ...blockedIds.map(b => b.blockedId),
-        ...blockedBy.map(b => b.blockerId),
+        ...blockedIds.map((b) => b.blockedId),
+        ...blockedBy.map((b) => b.blockerId),
       ];
       if (excludedUserIds.length > 0) {
         where.authorId = { notIn: excludedUserIds };
       }
-    }
 
-    // Muted users
-    if (userId) {
-      const muted = await prisma.mute.findMany({
-        where: { muterId: userId },
-        select: { mutedId: true },
-      });
-      const mutedIds = muted.map(m => m.mutedId);
+      const mutedIds = muted.map((m) => m.mutedId);
       if (mutedIds.length > 0) {
         where.authorId = { ...(where.authorId || {}), notIn: mutedIds };
       }
     }
 
     // For "following" tab
-    if (tab === "following" && userId) {
-      const following = await prisma.follow.findMany({
-        where: { followerId: userId },
-        select: { followingId: true },
-      });
-      const followingIds = following.map(f => f.followingId);
+    if (needsFollowing) {
+      const followingIds = following.map((f) => f.followingId);
       if (followingIds.length === 0) {
         return NextResponse.json({ posts: [], nextCursor: null });
       }
