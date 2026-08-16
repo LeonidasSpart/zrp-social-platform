@@ -4,7 +4,12 @@ import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Image, FileImage, BarChart3, Plus, Trash2, Clock, Briefcase, FileText, Smile } from "lucide-react";
 import GifPicker from "./GifPicker";
-import EmojiPicker from "emoji-picker-react";
+import dynamic from "next/dynamic";
+// PostComposer sits directly on the home page - this was shipping the
+// full emoji-picker-react library in the initial bundle for the app's
+// most-visited page, for a picker most visits never open. Lazy-loading
+// it removes that from the home page's initial JS entirely.
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 import { uploadFiles } from "@/lib/uploadthing-client";
 import { getPlanLimits } from "@/lib/limits";
 import { useLanguage } from "@/contexts/LanguageContext";
