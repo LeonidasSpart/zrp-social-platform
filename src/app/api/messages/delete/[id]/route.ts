@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { deleteUploadThingFiles } from "@/lib/uploadthing";
 
 export async function DELETE(
   req: NextRequest,
@@ -17,7 +18,7 @@ export async function DELETE(
   try {
     const message = await prisma.message.findUnique({
       where: { id: messageId },
-      select: { senderId: true, receiverId: true },
+      select: { senderId: true, receiverId: true, imageUrl: true },
     });
 
     if (!message) {
@@ -31,6 +32,11 @@ export async function DELETE(
     await prisma.message.delete({
       where: { id: messageId },
     });
+
+    // imageUrl doubles as the attachment field for images, documents, and
+    // voice messages alike (Message has no separate fields per type), so
+    // this one call covers all three attachment kinds a DM can carry.
+    await deleteUploadThingFiles([message.imageUrl]);
 
     return NextResponse.json({ success: true });
   } catch (error) {
