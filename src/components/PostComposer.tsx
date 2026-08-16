@@ -424,12 +424,12 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
           </div>
           <div className="flex-1 space-y-2 relative">
             {showTypeSelector && (
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">{t("composer.postAs")}</span>
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap">{t("composer.postAs")}</span>
                 <button
                   type="button"
                   onClick={() => setPostType("POST")}
-                  className={`text-xs px-3 py-1 rounded-full border transition ${
+                  className={`text-xs px-3 py-1 rounded-full border transition whitespace-nowrap flex-shrink-0 ${
                     postType === "POST"
                       ? "bg-zrp-red text-white border-zrp-red"
                       : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -441,7 +441,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   <button
                     type="button"
                     onClick={() => setPostType("RECRUITMENT")}
-                    className={`text-xs px-3 py-1 rounded-full border transition flex items-center gap-1 ${
+                    className={`text-xs px-3 py-1 rounded-full border transition flex items-center gap-1 whitespace-nowrap flex-shrink-0 ${
                       postType === "RECRUITMENT"
                         ? "bg-zrp-red text-white border-zrp-red"
                         : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -454,7 +454,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                   <button
                     type="button"
                     onClick={() => setPostType("ARTICLE")}
-                    className={`text-xs px-3 py-1 rounded-full border transition flex items-center gap-1 ${
+                    className={`text-xs px-3 py-1 rounded-full border transition flex items-center gap-1 whitespace-nowrap flex-shrink-0 ${
                       postType === "ARTICLE"
                         ? "bg-zrp-red text-white border-zrp-red"
                         : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -749,7 +749,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               <button
                 type="submit"
                 disabled={isSubmitDisabled}
-                className="bg-zrp-red text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+                className="bg-zrp-red text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap flex-shrink-0"
               >
                 {loading ? t("composer.posting") : schedulePost ? t("composer.scheduleButton") : t("composer.postButton")}
               </button>
