@@ -15,6 +15,7 @@ import { UnreadCountProvider } from "@/contexts/UnreadCountContext";
 import PageTransition from "@/components/PageTransition";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import BottomNav from "@/components/BottomNav";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Suspense } from "react";
 
@@ -325,7 +326,13 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${orbitron.variable} font-inter min-h-screen flex flex-col bg-white dark:bg-zrp-deepBlack`}
       >
-        <div className="app-shell-clip w-full flex flex-col min-h-screen">
+        {/* Reserves space for BottomNav's true rendered height (its h-14
+            content plus its own safe-area inset on notched phones) at the
+            very bottom of the whole page, so Footer/CookieConsent - which
+            render after main, outside its own flex row - never end up
+            hidden behind the fixed nav when scrolled to the bottom.
+            lg:pb-0 removes this on desktop, where BottomNav is hidden. */}
+        <div className="app-shell-clip w-full flex flex-col min-h-screen pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0">
           <ErrorBoundary>
             <ThemeProvider>
               <LanguageProvider>
@@ -361,6 +368,8 @@ export default function RootLayout({
                       <PushNotificationManager />
 
                       <ServiceWorkerRegistration />
+
+                      <BottomNav />
                     </UnreadCountProvider>
                   </AuthProvider>
                 </Suspense>
