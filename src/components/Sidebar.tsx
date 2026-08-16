@@ -107,7 +107,10 @@ export default function Sidebar() {
           );
         })}
 
-        {session?.user?.isAdmin && (
+        {/* Moderators (role: "MODERATOR") were previously invisible to
+            this check too - same fix as Header.tsx, so the desktop nav
+            now shows this link to staff, not just full admins. */}
+        {(session?.user?.isAdmin || session?.user?.role === "ADMIN" || session?.user?.role === "MODERATOR") && (
           <Link
             href="/admin"
             className={`flex items-center gap-4 px-3 py-2.5 rounded-full text-lg transition ${
