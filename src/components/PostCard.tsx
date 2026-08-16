@@ -583,7 +583,10 @@ export default function PostCard({
       <div className="bg-white dark:bg-zrp-deepBlack px-4 py-3 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50/70 dark:hover:bg-white/[0.03] transition">
         <div className="flex items-start gap-3">
           <Link href={`/profile/${post.author.username}`}>
-            <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 font-semibold flex-shrink-0 overflow-hidden">
+            {/* Bumped from w-10 (40px) to w-12 (48px) - matches X's actual
+                main-timeline avatar size, giving posts the same visual
+                weight/proportion X's cards have. */}
+            <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 font-semibold flex-shrink-0 overflow-hidden">
               {post.author.avatarUrl ? (
                 <img
                   src={post.author.avatarUrl}
@@ -891,7 +894,12 @@ export default function PostCard({
             </div>
 
             {/* ─── ACTION BAR ──────────────────────────────────────────── */}
-            <div className="flex items-center justify-between max-w-md mt-3">
+            {/* Removed max-w-md - it capped this row at 448px regardless
+                of how wide the actual post content above it was, so on
+                anything wider than that the icons bunched up on the left
+                instead of spreading evenly across the full post width the
+                way X's action bar does. */}
+            <div className="flex items-center justify-between mt-3">
               {/* ─── Comment button (disabled if comments off) ─────────── */}
               <button
                 onClick={() => setShowComments(!showComments)}
