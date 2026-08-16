@@ -22,6 +22,7 @@ interface ShortPost {
   };
   _count: { likes: number; comments: number; reposts: number; quotedBy: number };
   liked?: boolean;
+  reposted?: boolean;
 }
 
 function formatCount(n: number) {
@@ -49,6 +50,26 @@ export default function ShortsPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
   const hasFetchedInitial = useRef(false);
+
+  // ─── Double-tap-to-like on the video itself (users expect this - the
+  // heart button worked, but there was no tap gesture on the video at
+  // all, unlike Stories which already has this). lastTapRef distinguishes
+  // a double-tap from the existing single-tap play/pause toggle.
+  const lastTapRef = useRef<number>(0);
+  const [burstId, setBurstId] = useState<string | null>(null);
+  const [burstKey, setBurstKey] = useState(0);
+
+  // ─── Touch-swipe navigation, as a deterministic supplement to the CSS
+  // scroll-snap below. Native snap-mandatory can be directionally
+  // inconsistent on some mobile browsers - a quick upward flick
+  // sometimes doesn't carry enough scroll distance to pass the snap
+  // point and gets pulled back to where it started, while downward
+  // swipes (often slightly longer/faster in practice) succeed more
+  // reliably. Explicitly measuring the swipe and calling scrollToIndex
+  // (the same helper already used for desktop arrow keys) makes both
+  // directions equally deterministic instead of depending on browser
+  // snap physics.
+  const touchStartY = useRef<number | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -172,6 +193,37 @@ export default function ShortsPage() {
     }
   };
 
+  // ─── Repost - the button previously rendered as a plain <div> with no
+  // onClick at all, so it showed a count but did nothing when tapped.
+  // Matches PostCard's handleRepost exactly (same endpoint, same
+  // optimistic pattern), just adapted to this component's array-of-videos
+  // state shape instead of single-post state. ───────────────────────────
+  const handleRepost = async (postId: string) => {
+    if (!session) return;
+    try {
+      const res = await fetch(`/api/posts/${postId}/repost`, { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setVideos((prev) =>
+          prev.map((v) =>
+            v.id === postId
+              ? {
+                  ...v,
+                  reposted: data.reposted,
+                  _count: {
+                    ...v._count,
+                    reposts: data.reposted ? v._count.reposts + 1 : v._count.reposts - 1,
+                  },
+                }
+              : v
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error reposting Short:", error);
+    }
+  };
+
   const handleShare = async (post: ShortPost) => {
     const url = `${window.location.origin}/post/${post.id}`;
     if (navigator.share) {
@@ -250,6 +302,21 @@ export default function ShortsPage() {
           ref={containerRef}
           className="h-full w-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
           style={{ scrollbarWidth: "none" }}
+          onTouchStart={(e) => {
+            touchStartY.current = e.touches[0].clientY;
+          }}
+          onTouchEnd={(e) => {
+            if (touchStartY.current === null) return;
+            const deltaY = touchStartY.current - e.changedTouches[0].clientY;
+            touchStartY.current = null;
+            // Threshold avoids hijacking small taps/scrolls that native
+            // snap-scroll already handles fine on its own - this only
+            // steps in for deliberate swipes, which is exactly the
+            // gesture that was landing inconsistently before.
+            if (Math.abs(deltaY) > 50) {
+              scrollToIndex(activeIndex + (deltaY > 0 ? 1 : -1));
+            }
+          }}
         >
           {videos.map((post, index) => (
             <div
@@ -267,11 +334,36 @@ export default function ShortsPage() {
                 playsInline
                 webkit-playsinline="true"
                 onClick={(e) => {
+                  const now = Date.now();
+                  const isDoubleTap = now - lastTapRef.current < 300;
+                  lastTapRef.current = now;
+
+                  if (isDoubleTap) {
+                    // Double-tap always likes, never unlikes - matches
+                    // the same TikTok/Instagram convention already used
+                    // for Stories, so repeated double-taps don't toggle
+                    // the like back off.
+                    if (!post.liked) handleLike(post.id);
+                    setBurstId(post.id);
+                    setBurstKey((k) => k + 1);
+                    window.setTimeout(() => setBurstId((id) => (id === post.id ? null : id)), 700);
+                    return;
+                  }
+
                   const el = e.currentTarget;
                   if (el.paused) el.play();
                   else el.pause();
                 }}
               />
+
+              {burstId === post.id && (
+                <div
+                  key={burstKey}
+                  className="shorts-heart-burst absolute inset-0 flex items-center justify-center pointer-events-none"
+                >
+                  <Heart className="w-24 h-24 text-white fill-red-500 drop-shadow-lg" />
+                </div>
+              )}
 
               <div className="absolute inset-x-0 bottom-0 p-4 pb-8 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
                 <div className="flex items-end justify-between gap-4">
@@ -318,10 +410,13 @@ export default function ShortsPage() {
                       <MessageCircle className="w-7 h-7" />
                       <span className="text-xs">{formatCount(post._count.comments)}</span>
                     </Link>
-                    <div className="flex flex-col items-center gap-1">
-                      <Repeat className="w-7 h-7" />
+                    <button
+                      onClick={() => handleRepost(post.id)}
+                      className="flex flex-col items-center gap-1"
+                    >
+                      <Repeat className={`w-7 h-7 ${post.reposted ? "text-green-500" : ""}`} />
                       <span className="text-xs">{formatCount(post._count.reposts)}</span>
-                    </div>
+                    </button>
                     <button
                       onClick={() => handleShare(post)}
                       className="flex flex-col items-center gap-1"
@@ -345,6 +440,30 @@ export default function ShortsPage() {
       {showUpload && (
         <ShortUploadModal onClose={() => setShowUpload(false)} onUploaded={handleUploaded} />
       )}
+
+      <style jsx>{`
+        .shorts-heart-burst {
+          animation: heartBurst 0.7s ease-out forwards;
+          z-index: 5;
+        }
+        @keyframes heartBurst {
+          0% {
+            opacity: 0;
+            transform: scale(0.4);
+          }
+          25% {
+            opacity: 1;
+            transform: scale(1.15);
+          }
+          40% {
+            transform: scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(1);
+          }
+        }
+      `}</style>
     </div>
   );
 }
