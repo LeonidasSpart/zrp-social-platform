@@ -52,8 +52,12 @@ export default function Header() {
   const features = session?.user?.features;
 
   useEffect(() => {
+    // Threshold matches Tailwind's lg breakpoint (1024px), not md (768px) -
+    // the mobile menu is now usable up through tablet widths too, so it
+    // shouldn't auto-close until the screen is wide enough for Sidebar to
+    // take over instead.
     const handleResize = () => {
-      if (window.innerWidth >= 768) {
+      if (window.innerWidth >= 1024) {
         setMobileMenuOpen(false);
         setUserMenuOpen(false);
         setLangMenuOpen(false);
@@ -135,23 +139,15 @@ export default function Header() {
             />
           </Link>
 
+          {/* Tablet-range inline nav icons removed - BottomNav now covers
+              phones and tablets both (lg:hidden) with the same 5 icons,
+              matching X's pattern of a persistent bottom bar rather than
+              small header icons on tablet specifically. The rest of this
+              block (admin, user dropdown, language, theme) stays tablet-
+              only exactly as before - desktop gets these from Sidebar
+              instead, so this block must not extend to lg: or they'd be
+              duplicated there. */}
           <nav className="hidden md:flex lg:hidden items-center gap-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="relative text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition"
-                title={link.label}
-              >
-                {link.icon && <link.icon className="w-5 h-5" />}
-                {link.badge !== undefined && link.badge > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                    {link.badge > 9 ? "9+" : link.badge}
-                  </span>
-                )}
-              </Link>
-            ))}
-
             {isAuthenticated && session?.user?.isAdmin && (
               <Link
                 href="/admin"
@@ -280,9 +276,14 @@ export default function Header() {
             {/* We'll remove the standalone logout button to avoid duplication */}
           </nav>
 
+          {/* Extended from md:hidden to lg:hidden so tablets get this
+              hamburger too - after removing the tablet-only icon row
+              above, this menu (which already lists every nav item,
+              including Explore and Bookmarks) is now tablet's only way
+              to reach those, matching how it already worked on phones. */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition"
+            className="lg:hidden text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red transition"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -291,7 +292,7 @@ export default function Header() {
 
       {/* ─── Mobile Menu ─── */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-[57px] bottom-0 bg-white dark:bg-zrp-deepBlack z-40 px-4 py-6 border-t border-gray-200 dark:border-gray-800 overflow-y-auto">
+        <div className="lg:hidden fixed inset-x-0 top-[57px] bottom-0 bg-white dark:bg-zrp-deepBlack z-40 px-4 py-6 border-t border-gray-200 dark:border-gray-800 overflow-y-auto">
           <nav className="flex flex-col gap-2">
             {navLinks.map((link) => (
               <Link
