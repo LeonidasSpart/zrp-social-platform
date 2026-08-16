@@ -251,6 +251,11 @@ model Comment {
   @@index([postId])
   @@index([createdAt])
   @@index([parentId])
+  // authorId was queried directly in several places (profile activity,
+  // moderator tools, account-deletion cleanup collecting a user's
+  // comment images) with no index backing it - every one of those
+  // queries was doing a full table scan.
+  @@index([authorId])
 }
 
 model Follow {
@@ -682,6 +687,9 @@ model Tip {
   @@index([senderId])
   @@index([status])
   @@index([createdAt])
+  // Creator dashboard queries tips directly by creatorProfileId - was
+  // unindexed, so every dashboard load did a full table scan.
+  @@index([creatorProfileId])
 }
 
 model PremiumPost {
@@ -705,6 +713,9 @@ model PremiumPost {
 
   @@index([postId])
   @@index([price])
+  // Same as Tip - the creator dashboard queries premium posts directly
+  // by creatorProfileId.
+  @@index([creatorProfileId])
 }
 
 model PremiumPurchase {
@@ -751,6 +762,9 @@ model WithdrawalRequest {
 
   @@index([userId])
   @@index([status])
+  // Same as Tip/PremiumPost - the creator dashboard queries withdrawal
+  // requests directly by creatorProfileId.
+  @@index([creatorProfileId])
 }
 
 // ─── SUPPORT TICKET SYSTEM ─────────────────────────────────
