@@ -47,7 +47,16 @@ function buildGrid(counts: Record<string, number>): DayCell[][] {
 }
 
 function getColorClass(count: number) {
-  if (count === 0) return "bg-gray-100 dark:bg-gray-800";
+  // Empty cells were bg-gray-100 (#f3f4f6) against a white page - nearly
+  // invisible, especially on a phone screen. For any account younger than
+  // a year, most of the 53-week grid is legitimately empty (before the
+  // account existed), so with that little contrast only the last handful
+  // of populated columns were visible at all - making the whole grid look
+  // lopsided/broken rather than like a complete, evenly-shaped calendar.
+  // gray-200 + a subtle border keeps every cell visible so the full
+  // structure always reads correctly, regardless of how sparse the
+  // actual activity is.
+  if (count === 0) return "bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600";
   if (count <= 1) return "bg-zrp-red/25";
   if (count <= 3) return "bg-zrp-red/50";
   if (count <= 6) return "bg-zrp-red/75";
@@ -149,7 +158,7 @@ export default function ActivityHeatmap({ username }: ActivityHeatmapProps) {
 
       <div className="flex items-center gap-1.5 mt-2 justify-end">
         <span className="text-[10px] text-gray-400 dark:text-gray-500">Less</span>
-        <div className="w-[10px] h-[10px] rounded-sm bg-gray-100 dark:bg-gray-800" />
+        <div className="w-[10px] h-[10px] rounded-sm bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600" />
         <div className="w-[10px] h-[10px] rounded-sm bg-zrp-red/25" />
         <div className="w-[10px] h-[10px] rounded-sm bg-zrp-red/50" />
         <div className="w-[10px] h-[10px] rounded-sm bg-zrp-red/75" />
