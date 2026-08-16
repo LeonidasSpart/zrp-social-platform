@@ -112,3 +112,50 @@ export const ourFileRouter = {
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
+
+// ─── Cleanup: delete the underlying UploadThing file when the post /
+// message / comment / story that referenced it gets deleted ──────────
+//
+// Every route above only ever stored the file's public URL, never its
+// UploadThing file key - deleting a post's database row never removed
+// the actual file from UploadThing, so every image/video anyone ever
+// deleted was still sitting in storage indefinitely (and still costing
+// storage, still reachable by URL). UploadThing's URLs always end in
+// `/f/{fileKey}` (both the legacy utfs.io domain and the current
+// {appId}.ufs.sh domain), so the key can be recovered from the stored
+// URL alone - no schema change or backfill needed to start cleaning
+// these up going forward.
+export function extractUploadThingKey(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const path = new URL(url).pathname; // e.g. "/f/abc123"
+    const segments = path.split("/").filter(Boolean);
+    return segments[segments.length - 1] || null;
+  } catch {
+    return null;
+  }
+}
+
+// Best-effort deletion - deliberately never throws. This is meant to be
+// called right alongside a prisma delete of the record that owned the
+// file; if UploadThing's API is briefly down or a URL doesn't parse,
+// that should never block or fail the actual content deletion the user
+// asked for. Worst case, a file is orphaned and this can be retried
+// later - better than a delete button that sometimes doesn't work.
+export async function deleteUploadThingFiles(
+  urls: (string | null | undefined)[]
+): Promise<void> {
+  const keys = urls
+    .map((u) => extractUploadThingKey(u))
+    .filter((k): k is string => !!k);
+
+  if (keys.length === 0) return;
+
+  try {
+    const { UTApi } = await import("uploadthing/server");
+    const utapi = new UTApi();
+    await utapi.deleteFiles(keys);
+  } catch (error) {
+    console.error("UploadThing cleanup failed (non-blocking):", error);
+  }
+}
