@@ -7,7 +7,10 @@ import {
   Send, Phone, Video, Image, Smile, X, Download, ZoomIn, Trash2,
   Loader2, Reply, Pencil, Check, Paperclip, FileText, Mic, Square, Play, Pause,
 } from "lucide-react";
-import EmojiPicker from "emoji-picker-react";
+import dynamic from "next/dynamic";
+// Lazy-loaded for the same reason as PostCard - large library, only
+// needed once someone actually opens the picker in a chat.
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUnreadCount } from "@/contexts/UnreadCountContext";
