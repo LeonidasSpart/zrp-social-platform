@@ -22,27 +22,41 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
 
+  // Moderators (role: "MODERATOR") were previously bounced from every
+  // admin page here, even though the backend's requireStaff() helper
+  // (now used by reports/posts/users-list/ban/stats) was already
+  // designed to let them in. This was the actual root gate blocking
+  // them - Header/Sidebar also hid the link to get here, but even a
+  // moderator who typed /admin directly would land right back on "/".
+  const isStaff = session?.user?.isAdmin || session?.user?.role === "ADMIN" || session?.user?.role === "MODERATOR";
+
   useEffect(() => {
     if (status === "loading") return;
-    if (!session || !session.user?.isAdmin) {
+    if (!session || !isStaff) {
       router.push("/");
     }
-  }, [session, status, router]);
+  }, [session, status, isStaff, router]);
 
   if (status === "loading") {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
-  if (!session || !session.user?.isAdmin) {
+  if (!session || !isStaff) {
     return null;
   }
+
+  const isFullAdmin = session?.user?.isAdmin || session?.user?.role === "ADMIN";
 
   const navItems = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/posts", label: "Posts", icon: FileText },
     { href: "/admin/reports", label: "Reports", icon: Flag },
-    { href: "/admin/upgrade-requests", label: "Upgrade Requests", icon: DollarSign },
+    // Upgrade Requests handles plan/billing changes and stays on the
+    // stricter requireAdmin() check on the backend (see its route),
+    // so it's hidden here for moderators - showing it would just lead
+    // to a 403 when they clicked in, since they're not full admins.
+    ...(isFullAdmin ? [{ href: "/admin/upgrade-requests", label: "Upgrade Requests", icon: DollarSign }] : []),
   ];
 
   return (
