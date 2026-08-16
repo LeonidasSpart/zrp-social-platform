@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/admin";
+// requireStaff (ADMIN or MODERATOR) - this is core content-moderation work.
+// Sensitive/financial admin routes (roles, plan changes, payments, analytics)
+// stay on requireAdmin.
+import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
-  const adminCheck = await requireAdmin();
+  const adminCheck = await requireStaff();
   if (!adminCheck.authorized) return adminCheck.response;
 
   const search = req.nextUrl.searchParams.get("search") || "";
