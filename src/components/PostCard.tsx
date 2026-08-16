@@ -178,7 +178,6 @@ export default function PostCard({
   // ─── Repost dropdown ──────────────────────────────────────────────
   const [repostDropdownOpen, setRepostDropdownOpen] = useState(false);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
-
   const [lastClickTime, setLastClickTime] = useState(0);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [reactions, setReactions] = useState<Record<string, number>>({});
