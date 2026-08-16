@@ -10,6 +10,7 @@ import {
 import EmojiPicker from "emoji-picker-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUnreadCount } from "@/contexts/UnreadCountContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ChatContactDrawer from "@/components/ChatContactDrawer";
 
@@ -74,6 +75,7 @@ export default function ChatInterface({
   onVideoCall,
 }: ChatInterfaceProps) {
   const { data: session } = useSession();
+  const { refreshUnreadMessageCount } = useUnreadCount();
   const { t, language } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -175,6 +177,10 @@ export default function ChatInterface({
       const res = await fetch(`/api/messages/${receiverId}`);
       const data = await res.json();
       setMessages(data);
+      // The GET above marks this conversation's messages as read
+      // server-side - refreshing here clears the Messages nav badge
+      // immediately instead of waiting up to 30s for the next poll.
+      refreshUnreadMessageCount();
     } catch (error) {
       console.error("Error fetching messages:", error);
     } finally {
