@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { Role } from "@prisma/client";
+import { deleteUploadThingFiles } from "@/lib/uploadthing";
 
 const VALID_BADGE_TYPES = ["verified", "organization", "government", "team", null];
 const VALID_ROLES = ["USER", "MODERATOR", "ADMIN"];
@@ -64,9 +65,45 @@ export async function DELETE(
   if (!adminCheck.authorized) return adminCheck.response;
 
   try {
+    // Same full-account UploadThing cleanup as self-service account
+    // deletion (see src/app/api/user/delete/confirm/route.ts) - this is
+    // a separate code path admins/moderators use, with the identical gap.
+    const [user, posts, comments, messages, stories] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: params.id },
+        select: { avatarUrl: true, coverUrl: true },
+      }),
+      prisma.post.findMany({
+        where: { authorId: params.id },
+        select: { imageUrl: true, imageUrls: true },
+      }),
+      prisma.comment.findMany({
+        where: { authorId: params.id, imageUrl: { not: null } },
+        select: { imageUrl: true },
+      }),
+      prisma.message.findMany({
+        where: { senderId: params.id, imageUrl: { not: null } },
+        select: { imageUrl: true },
+      }),
+      prisma.story.findMany({
+        where: { userId: params.id, mediaUrl: { not: null } },
+        select: { mediaUrl: true },
+      }),
+    ]);
+
     await prisma.user.delete({
       where: { id: params.id },
     });
+
+    await deleteUploadThingFiles([
+      user?.avatarUrl,
+      user?.coverUrl,
+      ...posts.flatMap((p) => [p.imageUrl, ...p.imageUrls]),
+      ...comments.map((c) => c.imageUrl),
+      ...messages.map((m) => m.imageUrl),
+      ...stories.map((s) => s.mediaUrl),
+    ]);
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete user error:", error);
