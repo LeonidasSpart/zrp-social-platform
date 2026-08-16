@@ -163,24 +163,26 @@ export async function GET(
     let isBlocked = false;
 
     if (session?.user?.id && session.user.id !== user.id) {
-      const follow = await prisma.follow.findUnique({
-        where: {
-          followerId_followingId: {
-            followerId: session.user.id,
-            followingId: user.id,
+      // Independent lookups (no shared dependency), previously sequential.
+      const [follow, block] = await Promise.all([
+        prisma.follow.findUnique({
+          where: {
+            followerId_followingId: {
+              followerId: session.user.id,
+              followingId: user.id,
+            },
           },
-        },
-      });
+        }),
+        prisma.blocked.findUnique({
+          where: {
+            blockerId_blockedId: {
+              blockerId: session.user.id,
+              blockedId: user.id,
+            },
+          },
+        }),
+      ]);
       isFollowing = !!follow;
-
-      const block = await prisma.blocked.findUnique({
-        where: {
-          blockerId_blockedId: {
-            blockerId: session.user.id,
-            blockedId: user.id,
-          },
-        },
-      });
       isBlocked = !!block;
     }
 
