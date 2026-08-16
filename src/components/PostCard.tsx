@@ -12,7 +12,13 @@ import Comments from "./Comments";
 import EditPostModal from "./EditPostModal";
 import ReportModal from "./ReportModal";
 import VerifiedBadge from "./VerifiedBadge";
-import EmojiPicker from "emoji-picker-react";
+import dynamic from "next/dynamic";
+// emoji-picker-react is a genuinely large library, and PostCard renders
+// once per post in the feed - statically importing it meant every single
+// feed load shipped that library's code even though the picker is only
+// opened occasionally. Lazy-loading it means the code is only fetched
+// the moment someone actually opens a picker, not on every page load.
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 import QuotePostModal from "./QuotePostModal";
 import VideoFeedViewer from "./VideoFeedViewer";
 import LinkPreviewCard from "./LinkPreviewCard";
