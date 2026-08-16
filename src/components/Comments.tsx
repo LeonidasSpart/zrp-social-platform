@@ -3,9 +3,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Send, Pencil, Trash2, X, Check, Reply, Heart, Repeat, Bookmark } from "lucide-react";
+import { Send, Pencil, Trash2, X, Check, Reply, Heart, Repeat, Bookmark, Flag, Globe, Loader2 } from "lucide-react";
 import VerifiedBadge from "./VerifiedBadge";
 import { timeAgo } from "@/lib/utils";
+import { getPlanLimits } from "@/lib/limits";
+import ReportModal from "./ReportModal";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Comment {
   id: string;
@@ -60,6 +63,8 @@ interface CommentsProps {
 
 export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   const { data: session } = useSession();
+  const plan = (session?.user?.plan as any) || "free";
+  const limits = getPlanLimits(plan);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
@@ -74,8 +79,47 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
 
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportingCommentId, setReportingCommentId] = useState<string | null>(null);
+
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+
+  // ─── Translation (per-comment, since many render at once here unlike
+  // PostCard's single post - keyed by comment id) ────────────────────
+  const { language: uiLanguage } = useLanguage();
+  const [translatedMap, setTranslatedMap] = useState<Record<string, string>>({});
+  const [showTranslationMap, setShowTranslationMap] = useState<Record<string, boolean>>({});
+  const [translatingId, setTranslatingId] = useState<string | null>(null);
+  const [translateErrorMap, setTranslateErrorMap] = useState<Record<string, boolean>>({});
+
+  const handleTranslateComment = async (comment: Comment) => {
+    if (translatedMap[comment.id]) {
+      setShowTranslationMap((prev) => ({ ...prev, [comment.id]: !prev[comment.id] }));
+      return;
+    }
+    setTranslatingId(comment.id);
+    setTranslateErrorMap((prev) => ({ ...prev, [comment.id]: false }));
+    try {
+      const res = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: comment.content, targetLang: uiLanguage }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTranslatedMap((prev) => ({ ...prev, [comment.id]: data.translatedText }));
+        setShowTranslationMap((prev) => ({ ...prev, [comment.id]: true }));
+      } else {
+        setTranslateErrorMap((prev) => ({ ...prev, [comment.id]: true }));
+      }
+    } catch (error) {
+      console.error("Translate error:", error);
+      setTranslateErrorMap((prev) => ({ ...prev, [comment.id]: true }));
+    } finally {
+      setTranslatingId(null);
+    }
+  };
 
   const fetchComments = async () => {
     setLoading(true);
@@ -246,6 +290,40 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
     }
   };
 
+  // ─── Report a comment ──────────────────────────────────────────────
+  const openReportModal = (commentId: string) => {
+    setReportingCommentId(commentId);
+    setShowReportModal(true);
+  };
+
+  const handleReportComment = async (reason: string, details?: string) => {
+    if (!reportingCommentId) return;
+    try {
+      const res = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ commentId: reportingCommentId, reason, details }),
+      });
+      if (res.ok) {
+        alert("Report submitted. Thank you for helping keep the community safe.");
+        setShowReportModal(false);
+        setReportingCommentId(null);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || "Failed to submit report. Please try again.");
+        // A 409 means it's already reported and pending - close the
+        // modal rather than inviting a retry that would just repeat it.
+        if (res.status === 409) {
+          setShowReportModal(false);
+          setReportingCommentId(null);
+        }
+      }
+    } catch (error) {
+      console.error("Error reporting comment:", error);
+      alert("Failed to submit report. Please try again.");
+    }
+  };
+
   const getAvatarSrc = (author: Comment["author"]) => {
     return author.avatarUrl || "/default-avatar.png";
   };
@@ -406,8 +484,18 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 </button>
               </div>
             )}
+            {!isAuthor && session && !isEditing && (
+              <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => openReportModal(comment.id)}
+                  className="text-gray-400 hover:text-red-500 p-1"
+                  title="Report comment"
+                >
+                  <Flag className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
           </div>
-
           {isEditing ? (
             <div className="mt-1 flex items-end gap-2">
               <textarea
@@ -426,7 +514,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 rows={1}
                 className="flex-1 min-w-0 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red resize-none overflow-hidden max-h-40"
                 autoFocus
-                maxLength={280}
+                maxLength={limits.postLength}
               />
               <button
                 onClick={() => saveEdit(comment.id)}
@@ -448,6 +536,34 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             <p className="text-sm text-gray-800 dark:text-gray-200 mt-0.5">
               {comment.content}
             </p>
+          )}
+
+          {/* ─── Translate comment ─────────────────────────────────── */}
+          {!isEditing && comment.content.trim().length > 0 && (
+            <div className="mt-1">
+              <button
+                onClick={() => handleTranslateComment(comment)}
+                disabled={translatingId === comment.id}
+                className="inline-flex items-center gap-1 text-xs text-zrp-red hover:underline disabled:opacity-60"
+              >
+                {translatingId === comment.id ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Globe className="w-3 h-3" />
+                )}
+                {showTranslationMap[comment.id] ? "Show original" : "Show translation"}
+              </button>
+              {translateErrorMap[comment.id] && (
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                  Translation unavailable right now.
+                </p>
+              )}
+              {showTranslationMap[comment.id] && translatedMap[comment.id] && (
+                <p className="text-sm text-gray-800 dark:text-gray-200 mt-1 whitespace-pre-wrap break-words border-l-2 border-gray-200 dark:border-gray-700 pl-2">
+                  {translatedMap[comment.id]}
+                </p>
+              )}
+            </div>
           )}
 
           {!isEditing && (
@@ -518,7 +634,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 placeholder={`Reply to ${comment.author.name || comment.author.username}...`}
                 rows={1}
                 className="flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent resize-none overflow-hidden max-h-40"
-                maxLength={280}
+                maxLength={limits.postLength}
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
@@ -609,7 +725,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             placeholder="Write a comment..."
             rows={1}
             className="flex-1 min-w-0 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none overflow-hidden max-h-40"
-            maxLength={280}
+            maxLength={limits.postLength}
           />
           <button
             type="submit"
@@ -651,6 +767,15 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
           </div>
         </div>
       )}
+
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => {
+          setShowReportModal(false);
+          setReportingCommentId(null);
+        }}
+        onSubmit={handleReportComment}
+      />
     </div>
   );
 }
