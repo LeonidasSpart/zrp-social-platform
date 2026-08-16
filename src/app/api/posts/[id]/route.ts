@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { checkPostLength } from "@/lib/limits";
+import { deleteUploadThingFiles } from "@/lib/uploadthing";
 
 // GET a single post (with all data for the post page)
 export async function GET(
@@ -218,7 +219,7 @@ export async function DELETE(
     // Check if post exists and belongs to user
     const existingPost = await prisma.post.findUnique({
       where: { id: params.id },
-      select: { authorId: true },
+      select: { authorId: true, imageUrl: true, imageUrls: true },
     });
 
     if (!existingPost) {
@@ -229,6 +230,14 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
+    // The comments on this post are about to be cascade-deleted below too -
+    // any images they had would be orphaned the same way the post's own
+    // image would be, so their URLs need collecting before that happens.
+    const commentsWithImages = await prisma.comment.findMany({
+      where: { postId: params.id, imageUrl: { not: null } },
+      select: { imageUrl: true },
+    });
+
     // Delete all related records first (cascade should handle this, but we do it explicitly)
     await prisma.$transaction([
       prisma.like.deleteMany({ where: { postId: params.id } }),
@@ -237,6 +246,15 @@ export async function DELETE(
       // ✅ For quote reposts: when a post is deleted, its quotePostId will be set to null automatically
       // because we used onDelete: SetNull in the schema. No extra action needed.
       prisma.post.delete({ where: { id: params.id } }),
+    ]);
+
+    // Best-effort UploadThing cleanup - runs after the DB delete succeeds,
+    // and never blocks or fails the request if it has trouble (see
+    // deleteUploadThingFiles for why).
+    await deleteUploadThingFiles([
+      existingPost.imageUrl,
+      ...existingPost.imageUrls,
+      ...commentsWithImages.map((c) => c.imageUrl),
     ]);
 
     return NextResponse.json({ success: true });
