@@ -133,3 +133,25 @@ img, video, iframe, svg {
 .app-shell-clip {
   overflow-x: clip;
 }
+
+/* scrollbar-hide was already used in 4 places (Shorts, VideoFeedViewer,
+   Settings tabs, Help page nav) intending to hide the scrollbar, but the
+   class itself was never actually defined anywhere - it did nothing.
+   Also needed on Sidebar/RightPanel: both are independently-scrollable
+   sticky columns (h-screen, overflow-y-auto), so the global red
+   scrollbar styling above applies to them too. Since their nav content
+   is close to viewport height, the scroll thumb ends up nearly
+   full-height, rendering as a solid red vertical bar rather than a
+   normal small scrollbar thumb - this only affects desktop/laptop
+   widths, since Sidebar/RightPanel are hidden entirely below their
+   breakpoints, which is why it looked fine on tablet/mobile but not on
+   a laptop screen. Scrolling itself still works everywhere this is
+   used - this only hides the visual scrollbar, matching how X's own
+   sidebar doesn't show one either. */
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* older Edge/IE */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and other WebKit browsers */
+}
