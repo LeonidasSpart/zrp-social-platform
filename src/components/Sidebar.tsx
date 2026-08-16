@@ -76,7 +76,7 @@ export default function Sidebar() {
   const currentLangLabel = SUPPORTED_LANGUAGES.find((l) => l.code === language)?.code.toUpperCase() || "EN";
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 flex-shrink-0 h-screen sticky top-0 px-2 py-4 border-r border-gray-200 dark:border-gray-800 overflow-y-auto">
+    <aside className="hidden lg:flex flex-col w-64 flex-shrink-0 h-screen sticky top-0 px-2 py-4 border-r border-gray-200 dark:border-gray-800 overflow-y-auto scrollbar-hide">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2 px-3 py-2 mb-2">
         <Image src="/logo.png" alt="ZRP" width={44} height={44} className="w-11 h-11 object-contain" />
