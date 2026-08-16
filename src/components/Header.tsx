@@ -43,7 +43,7 @@ export default function Header() {
   const { data: session } = useSession();
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
-  const { unreadCount } = useUnreadCount();
+  const { unreadCount, unreadMessageCount } = useUnreadCount();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -101,7 +101,7 @@ export default function Header() {
     { href: "/shorts", icon: Film, label: "Shorts" },
     { href: "/explore", icon: Compass, label: t("nav.explore") },
     { href: "/search", icon: Search, label: t("nav.search") },
-    { href: "/messages", icon: MessageSquare, label: t("nav.messages") },
+    { href: "/messages", icon: MessageSquare, label: t("nav.messages"), badge: unreadMessageCount },
     { href: "/notifications", icon: Bell, label: t("nav.notifications"), badge: unreadCount },
     { href: "/bookmarks", icon: Bookmark, label: t("nav.bookmarks") },
   ];
