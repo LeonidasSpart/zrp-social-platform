@@ -50,11 +50,18 @@ export default function FollowersPage({ params }: { params: { username: string }
     }
   };
 
-  const handleFollow = async (targetUserId: string, currentState: boolean) => {
+  // Was always calling /api/users/{params.username}/follow - params.username
+  // is the profile owner whose follower list this is, not the person in the
+  // row that was actually clicked. The optimistic UI update below still
+  // used the correct targetUserId, so the button visibly toggled - but the
+  // real API call was hitting (and toggling the viewer's own follow status
+  // with) the wrong person entirely. A page refresh would reveal nothing
+  // had actually changed for the user someone meant to follow/unfollow.
+  const handleFollow = async (targetUserId: string, targetUsername: string, currentState: boolean) => {
     if (!session) return;
     setFollowLoading(targetUserId);
     try {
-      const res = await fetch(`/api/users/${params.username}/follow`, {
+      const res = await fetch(`/api/users/${targetUsername}/follow`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: currentState ? "unfollow" : "follow" }),
@@ -138,7 +145,7 @@ export default function FollowersPage({ params }: { params: { username: string }
 
               {session?.user?.id !== user.id && (
                 <button
-                  onClick={() => handleFollow(user.id, user.isFollowing)}
+                  onClick={() => handleFollow(user.id, user.username, user.isFollowing)}
                   disabled={followLoading === user.id}
                   className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium transition ${
                     user.isFollowing
