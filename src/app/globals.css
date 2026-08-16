@@ -108,6 +108,25 @@ img, video, iframe, svg {
   }
 }
 
+/* On phones and tablets (below the lg breakpoint, 1024px), both
+   Sidebar and RightPanel are hidden, so the main content column has
+   the full viewport width available to it. Every feed/list-style page
+   (home, profile, search, notifications, post detail, etc.) still
+   wraps its content in max-w-2xl mx-auto though, which caps it at
+   672px and centers it - leaving large empty gutters on either side
+   on any tablet screen wider than that instead of using the space
+   that's actually available. This only loosens the cap in that range;
+   at lg: and above, where Sidebar/RightPanel return and a narrower
+   centered column makes sense next to them, max-w-2xl is untouched.
+   Each page's own px-4 (or similar) still applies on top of this, so
+   content keeps a normal edge margin rather than touching the screen
+   edges - this only removes the width cap, not the padding. */
+@media (max-width: 1023px) {
+  .max-w-2xl {
+    max-width: 100% !important;
+  }
+}
+
 /* Clips horizontal overflow on the app shell without turning it into
    a scroll container (unlike overflow-x: hidden, which forces
    overflow-y: auto per spec and breaks position: sticky). */
