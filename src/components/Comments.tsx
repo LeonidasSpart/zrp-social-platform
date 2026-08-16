@@ -55,6 +55,49 @@ function flattenThread(
   return [row, ...childRows];
 }
 
+// Comment content was previously rendered as raw plain text - any URL,
+// #hashtag, or @mention typed into a comment just sat there as dead,
+// unclickable text, unlike posts (which already parse and link all
+// three via the same pattern below). This brings comments in line.
+function parseCommentContent(content: string) {
+  const parts: { type: "text" | "hashtag" | "mention" | "url"; value: string }[] = [];
+  let lastIndex = 0;
+  const regex = /(@\w+)|(#\w+)|(https?:\/\/[^\s]+)|(www\.[^\s]+)/g;
+  const trailingPunctuation = /[.,!?;:'")\]}]+$/;
+  let match;
+
+  while ((match = regex.exec(content)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({ type: "text", value: content.slice(lastIndex, match.index) });
+    }
+
+    const raw = match[0];
+    const type: "hashtag" | "mention" | "url" = raw.startsWith("@")
+      ? "mention"
+      : raw.startsWith("#")
+      ? "hashtag"
+      : "url";
+
+    if (type === "url") {
+      const trailingMatch = raw.match(trailingPunctuation);
+      const trimmed = trailingMatch ? raw.slice(0, raw.length - trailingMatch[0].length) : raw;
+      if (trailingMatch && trimmed.length > 0) {
+        parts.push({ type: "url", value: trimmed });
+        parts.push({ type: "text", value: trailingMatch[0] });
+        lastIndex = match.index + raw.length;
+        continue;
+      }
+    }
+
+    parts.push({ type, value: raw });
+    lastIndex = match.index + raw.length;
+  }
+  if (lastIndex < content.length) {
+    parts.push({ type: "text", value: content.slice(lastIndex) });
+  }
+  return parts;
+}
+
 
 interface CommentsProps {
   postId: string;
@@ -533,8 +576,40 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
               </button>
             </div>
           ) : (
-            <p className="text-sm text-gray-800 dark:text-gray-200 mt-0.5">
-              {comment.content}
+            <p className="text-sm text-gray-800 dark:text-gray-200 mt-0.5 whitespace-pre-wrap break-words">
+              {parseCommentContent(comment.content).map((part, index) => {
+                if (part.type === "hashtag") {
+                  const tag = part.value.slice(1);
+                  return (
+                    <Link key={index} href={`/hashtag/${tag}`} className="text-zrp-red hover:underline">
+                      {part.value}
+                    </Link>
+                  );
+                }
+                if (part.type === "mention") {
+                  const username = part.value.slice(1);
+                  return (
+                    <Link key={index} href={`/profile/${username}`} className="text-zrp-red hover:underline">
+                      {part.value}
+                    </Link>
+                  );
+                }
+                if (part.type === "url") {
+                  const href = part.value.startsWith("http") ? part.value : `https://${part.value}`;
+                  return (
+                    <a
+                      key={index}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-zrp-red hover:underline break-all"
+                    >
+                      {part.value}
+                    </a>
+                  );
+                }
+                return <span key={index}>{part.value}</span>;
+              })}
             </p>
           )}
 
