@@ -78,7 +78,7 @@ export default function RightPanel() {
   if (!session || pathname?.startsWith("/admin") || pathname?.startsWith("/onboarding") || pathname?.startsWith("/shorts")) return null;
 
   return (
-    <aside className="hidden xl:flex flex-col w-80 flex-shrink-0 h-screen sticky top-0 py-4 pl-4 overflow-y-auto overscroll-contain">
+    <aside className="hidden xl:flex flex-col w-80 flex-shrink-0 h-screen sticky top-0 py-4 pl-4 overflow-y-auto overscroll-contain scrollbar-hide">
       {/* ─── Search ─────────────────────────────────────────────── */}
       <form onSubmit={handleSearch} className="mb-4">
         <div className="relative">
@@ -105,7 +105,7 @@ export default function RightPanel() {
         ) : trending.length === 0 ? (
           <p className="text-sm text-gray-400 px-4 pb-4">{t("rightPanel.noTrending")}</p>
         ) : (
-          <div className="pb-2 max-h-[280px] overflow-y-auto overscroll-contain">
+          <div className="pb-2 max-h-[280px] overflow-y-auto overscroll-contain scrollbar-hide">
             {trending.map((item) => (
               <Link
                 key={item.tag}
@@ -136,7 +136,7 @@ export default function RightPanel() {
         ) : suggestions.length === 0 ? (
           <p className="text-sm text-gray-400 px-4 pb-4">{t("rightPanel.noSuggestions")}</p>
         ) : (
-          <div className="pb-2 max-h-[340px] overflow-y-auto overscroll-contain">
+          <div className="pb-2 max-h-[340px] overflow-y-auto overscroll-contain scrollbar-hide">
             {suggestions.map((user) => {
               const alreadyFollowing = followingIds.has(user.id);
               return (
