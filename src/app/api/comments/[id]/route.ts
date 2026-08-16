@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { checkPostLength } from "@/lib/limits";
+import { deleteUploadThingFiles } from "@/lib/uploadthing";
 
 // ─── PREVENT STATIC GENERATION ─────────────────────────────────────
 export const dynamic = 'force-dynamic';
@@ -66,6 +67,24 @@ export async function PUT(
 }
 
 // ─── DELETE COMMENT ────────────────────────────────────────────────
+// Recursively collects imageUrl from a comment and every reply beneath
+// it - replies cascade-delete along with their parent (onDelete: Cascade
+// on the self-relation), at unlimited depth, so their images would be
+// orphaned the exact same way the top comment's own image would be.
+async function collectCommentImageUrls(commentId: string): Promise<string[]> {
+  const replies = await prisma.comment.findMany({
+    where: { parentId: commentId },
+    select: { id: true, imageUrl: true },
+  });
+  const nested = await Promise.all(
+    replies.map((r) => collectCommentImageUrls(r.id))
+  );
+  return [
+    ...replies.map((r) => r.imageUrl).filter((u): u is string => !!u),
+    ...nested.flat(),
+  ];
+}
+
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -79,7 +98,7 @@ export async function DELETE(
     // Check if comment exists and belongs to the user
     const comment = await prisma.comment.findUnique({
       where: { id: params.id },
-      select: { authorId: true },
+      select: { authorId: true, imageUrl: true },
     });
 
     if (!comment) {
@@ -93,9 +112,13 @@ export async function DELETE(
       );
     }
 
+    const replyImageUrls = await collectCommentImageUrls(params.id);
+
     await prisma.comment.delete({
       where: { id: params.id },
     });
+
+    await deleteUploadThingFiles([comment.imageUrl, ...replyImageUrls]);
 
     return NextResponse.json({ success: true });
   } catch (error) {
