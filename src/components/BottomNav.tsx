@@ -22,7 +22,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export default function BottomNav() {
   const { data: session } = useSession();
   const pathname = usePathname();
-  const { unreadCount } = useUnreadCount();
+  const { unreadCount, unreadMessageCount } = useUnreadCount();
   const { t } = useLanguage();
 
   if (!session) return null;
@@ -32,7 +32,7 @@ export default function BottomNav() {
     { href: "/search", icon: Search, label: t("nav.search") },
     { href: "/shorts", icon: Film, label: "Shorts" },
     { href: "/notifications", icon: Bell, label: t("nav.notifications"), badge: unreadCount },
-    { href: "/messages", icon: MessageSquare, label: t("nav.messages") },
+    { href: "/messages", icon: MessageSquare, label: t("nav.messages"), badge: unreadMessageCount },
   ];
 
   const isActive = (href: string) =>
