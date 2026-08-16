@@ -50,11 +50,14 @@ export default function FollowingPage({ params }: { params: { username: string }
     }
   };
 
-  const handleFollow = async (targetUserId: string, currentState: boolean) => {
+  // Same bug as followers/page.tsx - was always calling
+  // /api/users/{params.username}/follow (the profile owner) instead of the
+  // actual person in the clicked row.
+  const handleFollow = async (targetUserId: string, targetUsername: string, currentState: boolean) => {
     if (!session) return;
     setFollowLoading(targetUserId);
     try {
-      const res = await fetch(`/api/users/${params.username}/follow`, {
+      const res = await fetch(`/api/users/${targetUsername}/follow`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: currentState ? "unfollow" : "follow" }),
@@ -138,7 +141,7 @@ export default function FollowingPage({ params }: { params: { username: string }
 
               {session?.user?.id !== user.id && (
                 <button
-                  onClick={() => handleFollow(user.id, user.isFollowing)}
+                  onClick={() => handleFollow(user.id, user.username, user.isFollowing)}
                   disabled={followLoading === user.id}
                   className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium transition ${
                     user.isFollowing
