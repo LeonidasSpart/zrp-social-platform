@@ -29,6 +29,7 @@ export default function Sidebar() {
   const { t, language, setLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
 
@@ -51,6 +52,27 @@ export default function Sidebar() {
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
+  // Same pattern as the notifications fetch above, just for the Messages
+  // nav item's own badge - this file already fetches its own unread
+  // counts independently rather than through the shared context, so
+  // matching that existing convention here rather than introducing a
+  // second, inconsistent data-fetching approach in the same component.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const fetchUnreadMessages = async () => {
+      try {
+        const res = await fetch("/api/messages/unread");
+        if (res.ok) {
+          const data = await res.json();
+          setUnreadMessageCount(data.count);
+        }
+      } catch {}
+    };
+    fetchUnreadMessages();
+    const interval = setInterval(fetchUnreadMessages, 30000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
+
   if (!isAuthenticated || pathname?.startsWith("/onboarding") || pathname?.startsWith("/shorts")) return null;
 
   const navItems: NavItem[] = [
@@ -58,7 +80,7 @@ export default function Sidebar() {
     { href: "/shorts", icon: Film, label: "Shorts" },
     { href: "/explore", icon: Compass, label: t("nav.explore") },
     { href: "/search", icon: Search, label: t("nav.search") },
-    { href: "/messages", icon: MessageSquare, label: t("nav.messages") },
+    { href: "/messages", icon: MessageSquare, label: t("nav.messages"), badge: unreadMessageCount },
     { href: "/notifications", icon: Bell, label: t("nav.notifications"), badge: unreadCount },
     { href: "/bookmarks", icon: Bookmark, label: t("nav.bookmarks") },
     { href: `/profile/${session?.user?.username}`, icon: User, label: t("nav.profile") },
