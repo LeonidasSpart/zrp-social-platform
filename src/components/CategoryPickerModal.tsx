@@ -20,13 +20,20 @@ export default function CategoryPickerModal({
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<string | null>(currentCategory);
 
-  if (!isOpen) return null;
-
+  // All hooks must run on every render, in the same order, before any
+  // early return - this useMemo previously sat after the "if (!isOpen)
+  // return null" below, so it only ran once the modal was actually
+  // open. The moment isOpen flipped from false to true, React saw one
+  // more hook fire than it had on the previous render (2 useState calls
+  // vs. 2 useState + this useMemo) and threw, which is exactly what the
+  // error boundary was catching the instant the picker was opened.
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return PROFESSIONAL_CATEGORIES;
     return PROFESSIONAL_CATEGORIES.filter((c) => c.toLowerCase().includes(q));
   }, [query]);
+
+  if (!isOpen) return null;
 
   const handleSave = () => {
     if (selected) onSave(selected);
