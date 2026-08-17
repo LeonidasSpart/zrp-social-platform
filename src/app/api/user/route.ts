@@ -10,17 +10,27 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    const { name, bio, location, country, website } = await req.json();
+    const body = await req.json();
+    const { name, bio, location, country, website, category, showCategory } = body;
+
+    // Only touch a field if the request actually included it. The main
+    // profile-edit form sends name/bio/location/country/website together,
+    // while the dedicated category picker and its toggle each send only
+    // their own single field - without this check, saving just a category
+    // change would wipe bio/name/location/website to null, the same bug
+    // class already fixed on post editing earlier this session.
+    const data: any = {};
+    if ("name" in body) data.name = name || null;
+    if ("bio" in body) data.bio = bio || null;
+    if ("location" in body) data.location = location || null;
+    if ("country" in body) data.country = country || null;
+    if ("website" in body) data.website = website || null;
+    if ("category" in body) data.category = category || null;
+    if ("showCategory" in body) data.showCategory = !!showCategory;
 
     const user = await prisma.user.update({
       where: { id: session.user.id },
-      data: {
-        name: name || null,
-        bio: bio || null,
-        location: location || null,
-        country: country || null,
-        website: website || null,
-      },
+      data,
     });
 
     return NextResponse.json({
@@ -31,6 +41,8 @@ export async function PUT(req: NextRequest) {
       location: user.location,
       country: user.country,
       website: user.website,
+      category: user.category,
+      showCategory: user.showCategory,
     });
   } catch (error) {
     console.error("Error updating user:", error);
