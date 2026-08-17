@@ -2,9 +2,10 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, Fragment } from "react";
 import PostComposer from "@/components/PostComposer";
 import PostCard from "@/components/PostCard";
+import AdCard from "@/components/AdCard";
 import StoriesBar from "@/components/StoriesBar";
 import { Sparkles, Users } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -40,6 +41,11 @@ export default function HomePage() {
   const { t } = useLanguage();
   const [feedType, setFeedType] = useState<FeedType>("for-you");
   const [posts, setPosts] = useState<Post[]>([]);
+  // One ad fetched per feed load, interleaved into the render below -
+  // deliberately not refetched on every scroll/load-more, matching how
+  // a single feed session typically shows the same sponsored post
+  // repeated at intervals rather than a different one each time.
+  const [ad, setAd] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -94,6 +100,14 @@ export default function HomePage() {
       setLoading(false);
     }
   }, [fetchPosts]);
+
+  // ─── Fetch one ad to interleave into this feed session ─────────────
+  useEffect(() => {
+    fetch("/api/ads/serve")
+      .then((res) => (res.ok ? res.json() : { ad: null }))
+      .then((data) => setAd(data.ad || null))
+      .catch(() => setAd(null));
+  }, []);
 
   // ─── Load more posts ──────────────────────────────────────────────
   const loadMore = useCallback(async () => {
@@ -285,8 +299,18 @@ export default function HomePage() {
           </div>
         ) : (
           <>
-            {posts.map((post) => (
-              <PostCard key={post.id} post={post} onUpdate={handleUpdate} />
+            {posts.map((post, index) => (
+              <Fragment key={post.id}>
+                <PostCard post={post} onUpdate={handleUpdate} />
+                {/* One ad after the 5th post, matching a common, non-
+                    intrusive feed-ad frequency - only if an ad actually
+                    loaded and there are enough real posts to interleave
+                    it into (a 3-post feed doesn't get an ad awkwardly
+                    tacked onto the end). */}
+                {ad && index === 4 && posts.length > 5 && (
+                  <AdCard key={`ad-${ad.campaignId}`} ad={ad} />
+                )}
+              </Fragment>
             ))}
 
             {/* ─── Loading more indicator ────────────────────────────── */}
