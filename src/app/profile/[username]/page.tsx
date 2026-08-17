@@ -108,6 +108,8 @@ interface UserProfile {
   location: string | null;
   website: string | null;
   badgeType: string | null;
+  category: string | null;
+  showCategory: boolean;
   createdAt: string;
   isAdmin: boolean;
   plan: string | null;
@@ -880,6 +882,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
             )}
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">@{profile.username}</p>
+
+          {/* ─── Professional profile category ───────────────────────── */}
+          {profile.category && profile.showCategory && (
+            <p className="text-sm text-zrp-red font-medium mt-0.5">{profile.category}</p>
+          )}
 
           {/* ─── Bio with parsed mentions and hashtags ───────────────── */}
           {profile.bio && (
