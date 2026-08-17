@@ -15,6 +15,7 @@ import PasswordInput from "@/components/PasswordInput";
 import LocationAutocomplete from "@/components/LocationAutocomplete";
 import { getPlanLimits } from "@/lib/limits";
 import CustomUrlSettings from "@/components/CustomUrlSettings";
+import CategoryPickerModal from "@/components/CategoryPickerModal";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface UserData {
@@ -107,6 +108,9 @@ export default function SettingsPage() {
   const [location, setLocation] = useState("");
   const [country, setCountry] = useState("");
   const [website, setWebsite] = useState("");
+  const [category, setCategory] = useState<string | null>(null);
+  const [showCategory, setShowCategory] = useState(true);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -186,6 +190,8 @@ export default function SettingsPage() {
         setLocation(data.location || "");
         setCountry(data.country || "");
         setWebsite(data.website || "");
+        setCategory(data.category || null);
+        setShowCategory(data.showCategory !== undefined ? data.showCategory : true);
         setNewUsername(data.username || "");
         setAvatarPreview(data.avatarUrl || null);
         setPublicLikes(data.publicLikes !== undefined ? data.publicLikes : true);
@@ -259,7 +265,47 @@ export default function SettingsPage() {
     }
   };
 
-  // ─── Update Profile ─────────────────────────────────────────────
+  // ─── Professional profile: category & visibility ────────────────
+  // Saved immediately on change via their own request, matching X's
+  // own UX (the category picker and its toggle save right away, not
+  // bundled with the main bio/name form submit). Sending only the one
+  // changed field relies on the backend only touching fields it
+  // actually receives, so this never disturbs bio/name/location/etc.
+  const handleSaveCategory = async (newCategory: string) => {
+    try {
+      const res = await fetch("/api/user", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ category: newCategory }),
+      });
+      if (res.ok) {
+        setCategory(newCategory);
+        setShowCategoryPicker(false);
+        await update();
+      } else {
+        setMessage({ type: "error", text: t("settings.errProfileUpdateFailed") });
+      }
+    } catch {
+      setMessage({ type: "error", text: t("settings.errSomethingWrong") });
+    }
+  };
+
+  const handleToggleShowCategory = async () => {
+    const next = !showCategory;
+    setShowCategory(next); // optimistic
+    try {
+      const res = await fetch("/api/user", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ showCategory: next }),
+      });
+      if (!res.ok) setShowCategory(!next); // revert on failure
+    } catch {
+      setShowCategory(!next);
+    }
+  };
+
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setUpdatingProfile(true);
@@ -853,6 +899,48 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                      Professional profile
+                    </h3>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
+                      Add a category to describe your account, like X's professional profiles.
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowCategoryPicker(true)}
+                      className="w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                    >
+                      <span className="text-sm text-gray-700 dark:text-gray-300">Category</span>
+                      <span className="text-sm text-gray-400 dark:text-gray-500 flex items-center gap-1">
+                        {category || "None"}
+                        <ChevronRight className="w-4 h-4" />
+                      </span>
+                    </button>
+
+                    {category && (
+                      <div className="flex items-center justify-between px-4 py-2.5 mt-2">
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                          Show category on profile
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleToggleShowCategory}
+                          className={`relative w-11 h-6 rounded-full transition ${
+                            showCategory ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"
+                          }`}
+                        >
+                          <span
+                            className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                              showCategory ? "translate-x-5" : ""
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
                   <button
                     type="submit"
                     disabled={updatingProfile}
@@ -1225,6 +1313,13 @@ export default function SettingsPage() {
           )}
         </div>
       </div>
+
+      <CategoryPickerModal
+        isOpen={showCategoryPicker}
+        currentCategory={category}
+        onClose={() => setShowCategoryPicker(false)}
+        onSave={handleSaveCategory}
+      />
     </div>
   );
 }
