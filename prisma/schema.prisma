@@ -91,6 +91,12 @@ model User {
   isPrivate   Boolean   @default(false)
   isAdmin     Boolean   @default(false)
   badgeType   String?
+  // Professional profile - a single category chosen from a fixed list
+  // (see src/lib/professionalCategories.ts), matching X's "professional
+  // profile" feature. showCategory lets someone select a category
+  // without displaying it publicly, same as X's own toggle for this.
+  category    String?
+  showCategory Boolean  @default(true)
   location    String?
   country     String?
   website     String?
