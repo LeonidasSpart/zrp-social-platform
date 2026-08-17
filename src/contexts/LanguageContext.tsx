@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { Language, translations, SUPPORTED_LANGUAGES, type TranslationKey } from "@/lib/translations";
+import { Language, translations, SUPPORTED_LANGUAGES, RTL_LANGUAGES, type TranslationKey } from "@/lib/translations";
 
 interface LanguageContextType {
   language: Language;
@@ -65,6 +65,18 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setLanguageState(lang);
     setCookie(COOKIE_NAME, lang);
   };
+
+  // Keeps <html lang> and dir in sync with the active language, the same
+  // way ThemeContext already toggles the "dark" class there. layout.tsx
+  // can't know the language at server-render time (it's stored in a
+  // client-side cookie, not the URL), so it renders a static lang="en"
+  // and this corrects it immediately after mount/change - Arabic is the
+  // only RTL language here, everything else stays ltr.
+  useEffect(() => {
+    if (!mounted) return;
+    document.documentElement.lang = language;
+    document.documentElement.dir = RTL_LANGUAGES.includes(language) ? "rtl" : "ltr";
+  }, [language, mounted]);
 
   const t = (key: TranslationKey, params?: Record<string, string | number>) => {
     const raw = translations[language]?.[key] ?? translations.en[key] ?? key;
