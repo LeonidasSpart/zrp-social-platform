@@ -64,7 +64,12 @@ export async function GET(req: NextRequest) {
     // and no longer bakes per-user liked status into the cached payload -
     // that's now computed fresh per request so a like/unlike is reflected
     // immediately instead of only after the 5-minute cache expires) ────
-    const cacheKey = `explore:${userId || 'anon'}:v5`;
+    // Bumped v5 -> v6: the cached shape now includes imageUrls/mediaType
+    // (previously missing - see the select block below), so any cache
+    // entry still keyed under v5 needs to be treated as a completely
+    // different, stale entry rather than naturally expiring over the
+    // next 5 minutes.
+    const cacheKey = `explore:${userId || 'anon'}:v6`;
     let ranked: any[] | null = await getCached(cacheKey);
 
     if (!ranked) {
@@ -81,6 +86,17 @@ export async function GET(req: NextRequest) {
           id: true,
           content: true,
           imageUrl: true,
+          // imageUrls (plural, the multi-image array) was missing here
+          // entirely - this is the route the default "For You" tab
+          // actually calls (page.tsx uses /api/posts/explore for
+          // "for-you" and only /api/posts for "following"), so every
+          // post returned here always had imageUrls undefined,
+          // regardless of how many images it actually had. PostCard's
+          // grid-vs-single-image check depends entirely on this field
+          // being present, so it silently fell back to rendering just
+          // the first image via the legacy singular imageUrl every time.
+          imageUrls: true,
+          mediaType: true,
           createdAt: true,
           views: true,
           author: {
@@ -97,6 +113,8 @@ export async function GET(req: NextRequest) {
               id: true,
               content: true,
               imageUrl: true,
+              imageUrls: true,
+              mediaType: true,
               createdAt: true,
               author: {
                 select: {
