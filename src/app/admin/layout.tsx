@@ -9,6 +9,7 @@ import {
   Users,
   FileText,
   Flag,
+  Megaphone,
   Settings,
   DollarSign,
 } from "lucide-react";
@@ -52,6 +53,9 @@ export default function AdminLayout({
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/posts", label: "Posts", icon: FileText },
     { href: "/admin/reports", label: "Reports", icon: Flag },
+    // Ad review is requireStaff() on the backend (same as Reports/Posts),
+    // so it's visible here to moderators too, not gated to full admins.
+    { href: "/admin/ads", label: "Ad Review", icon: Megaphone },
     // Upgrade Requests handles plan/billing changes and stays on the
     // stricter requireAdmin() check on the backend (see its route),
     // so it's hidden here for moderators - showing it would just lead
