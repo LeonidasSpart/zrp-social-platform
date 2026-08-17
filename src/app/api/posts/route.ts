@@ -71,7 +71,36 @@ export async function GET(req: NextRequest) {
       take: take + 1,
       skip: cursor ? 1 : 0,
       cursor: cursor ? { id: cursor } : undefined,
-      include: {
+      // Switched from a bare `include` to an explicit `select` - a post
+      // with 4 images displayed correctly on the profile page but only
+      // ever showed 1 image on this route specifically (the home feed).
+      // Both pages render through the exact same PostCard component, so
+      // this made the query itself the most likely place for a genuine
+      // difference, and an explicit select removes any ambiguity about
+      // which scalar fields actually come back - imageUrls is now
+      // guaranteed to be present rather than relying on include's
+      // default scalar behavior.
+      select: {
+        id: true,
+        content: true,
+        imageUrl: true,
+        imageUrls: true,
+        mediaType: true,
+        linkUrl: true,
+        createdAt: true,
+        updatedAt: true,
+        views: true,
+        commentsEnabled: true,
+        type: true,
+        company: true,
+        location: true,
+        applyUrl: true,
+        body: true,
+        quotePostId: true,
+        hashtags: true,
+        mentions: true,
+        isPoll: true,
+        authorId: true,
         author: {
           select: {
             id: true,
