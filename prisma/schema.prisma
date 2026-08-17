@@ -67,6 +67,20 @@ enum TicketStatus {
   CLOSED
 }
 
+enum AdCampaignStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACTIVE
+  PAUSED
+  COMPLETED
+  REJECTED
+}
+
+enum AdBidType {
+  CPC // cost per click
+  CPM // cost per 1000 impressions
+}
+
 model User {
   id          String    @id @default(cuid())
   email       String    @unique
@@ -176,6 +190,11 @@ model User {
   // ─── AI Chat ──────────────────────────────────────────────────────
   aiConversations     AIConversation[]
   aiDailyUsage        AIDailyUsage[]
+
+  // ─── Advertising ────────────────────────────────────────────────
+  adCampaigns    AdCampaign[]   @relation("AdAdvertiser")
+  adImpressions  AdImpression[] @relation("AdImpressionUser")
+  adClicks       AdClick[]      @relation("AdClickUser")
 }
 
 model Post {
@@ -223,6 +242,7 @@ model Post {
   bookmarks   Bookmark[]
 
   premiumPost PremiumPost?
+  adCampaign  AdCampaign?
 
   @@index([createdAt])
   @@index([authorId])
@@ -771,6 +791,88 @@ model WithdrawalRequest {
   // Same as Tip/PremiumPost - the creator dashboard queries withdrawal
   // requests directly by creatorProfileId.
   @@index([creatorProfileId])
+}
+
+// ─── ADVERTISING PLATFORM ────────────────────────────────────────────
+// Full self-serve ad platform: any authenticated user can create a
+// campaign around one of their own posts, set a budget and a bid
+// (per-click or per-1000-impressions), and it goes through moderator
+// review before it can actually start serving - matching the same
+// requireStaff() review pattern already used for content moderation
+// elsewhere in this app, since ads are exactly the kind of content
+// that benefits from a human check before it reaches every feed.
+
+model AdCampaign {
+  id           String            @id @default(cuid())
+  advertiserId String
+  advertiser   User              @relation("AdAdvertiser", fields: [advertiserId], references: [id], onDelete: Cascade)
+
+  // The actual ad creative is a real Post - same content model everyone
+  // already knows, just specially marked and boosted into feeds, rather
+  // than inventing a parallel "ad content" shape.
+  postId String @unique
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  name   String // internal campaign name, shown only to the advertiser/admins, never publicly
+  status AdCampaignStatus @default(DRAFT)
+
+  bidType     AdBidType
+  bidAmount   Float // $ per click (CPC) or $ per 1000 impressions (CPM)
+  budgetTotal Float
+  budgetSpent Float @default(0)
+
+  // Optional external destination - if unset, a click just opens the post
+  // itself, same as clicking any other post.
+  targetUrl String?
+
+  startDate DateTime?
+  endDate   DateTime?
+
+  rejectionReason String?   @db.Text
+  reviewedBy      String?
+  reviewedAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  impressions AdImpression[]
+  clicks      AdClick[]
+
+  @@index([advertiserId])
+  @@index([status])
+  // The serving endpoint filters active campaigns within their date
+  // window on every feed load - this is the route that needs to be fast.
+  @@index([status, startDate, endDate])
+}
+
+model AdImpression {
+  id         String     @id @default(cuid())
+  campaignId String
+  campaign   AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  // Nullable - an impression can come from a logged-out viewer, unlike
+  // most other event models in this schema which require a real user.
+  userId String?
+  user   User?   @relation("AdImpressionUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([campaignId])
+  @@index([campaignId, createdAt])
+  @@index([userId])
+}
+
+model AdClick {
+  id         String     @id @default(cuid())
+  campaignId String
+  campaign   AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  userId     String?
+  user       User?      @relation("AdClickUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([campaignId])
+  @@index([campaignId, createdAt])
+  @@index([userId])
 }
 
 // ─── SUPPORT TICKET SYSTEM ─────────────────────────────────
