@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zrp-v5'; // Bumped: added properly padded maskable icons
+const CACHE_NAME = 'zrp-v6'; // Bumped: page navigations (not just "/") now use network-first, fixing stale like/repost status on post/comment/short pages served from a previously cached version
 const STATIC_ASSETS = [
   '/favicon.ico',
   '/logo.png',
@@ -54,8 +54,21 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. For the home page – try network first, fallback to cache
-  if (url.pathname === '/') {
+  // 2. For the home page AND any other page navigation (post detail,
+  // shorts, profile, etc.) - try network first, fallback to cache.
+  // Previously only "/" got this treatment; every other page fell
+  // through to rule 3 below (cache-first), which is fine for genuinely
+  // static assets (JS/CSS/images) but wrong for page navigations that
+  // embed personalized, frequently-changing data server-side (like
+  // whether *this* viewer has liked a specific post/comment/short).
+  // event.request.mode === "navigate" reliably distinguishes an actual
+  // page load/route change from an asset request, so this only affects
+  // navigations, not static files. This is also why "clear cache and
+  // history" alone didn't fix stale like status - Service Worker Cache
+  // Storage is a separate mechanism from what that browser action
+  // typically clears, so a previously cached page could keep being
+  // served with its old like state baked in until this fix.
+  if (url.pathname === '/' || event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
@@ -63,14 +76,14 @@ self.addEventListener('fetch', (event) => {
           if (response && response.status === 200) {
             const cloned = response.clone();
             caches.open(CACHE_NAME).then((cache) => {
-              cache.put('/', cloned);
+              cache.put(event.request, cloned);
             });
           }
           return response;
         })
         .catch(() => {
           // If network fails, serve from cache
-          return caches.match('/')
+          return caches.match(event.request)
             .then((cached) => cached || caches.match('/offline.html'));
         })
     );
