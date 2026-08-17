@@ -64,6 +64,18 @@ export async function createNotification({
 
   // ─── 2. Check email preferences and send email ────────────────────
   try {
+    // Likes, comments, reposts, DMs, mentions, and new-follower events
+    // never send email, full stop - regardless of stored user
+    // preference. These are all engagement events the person already
+    // sees the moment they open the app via the in-app notification
+    // created above, and every single one was consuming Resend's
+    // limited quota for no real benefit. Verification and password-reset
+    // emails are handled by a completely separate function
+    // (sendVerificationEmail in email.ts, not this one) and are
+    // untouched by this change.
+    const NEVER_EMAIL_TYPES = new Set(["like", "comment", "repost", "message", "mention", "follow"]);
+    if (NEVER_EMAIL_TYPES.has(type)) return;
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { email: true, name: true, emailPreferences: true },
