@@ -9,7 +9,14 @@ const f = createUploadthing();
 export const ourFileRouter = {
   // ─── Post image/video upload ──────────────────────────────────────
   postMedia: f({
-    image: { maxFileSize: "4MB", maxFileCount: 1 },
+    // maxFileCount was 1 for images, but the composer's own UI lets
+    // someone select up to 4 at once (Math.min(planLimit, 4), a
+    // deliberate ceiling matching the 4-image grid layout, applying
+    // even to Business/Enterprise plans with higher nominal limits) -
+    // any attempt to upload more than 1 image was rejected by
+    // UploadThing's own validation before it ever reached this app's
+    // code, with exactly the "FileCountMismatch" error reported.
+    image: { maxFileSize: "4MB", maxFileCount: 4 },
     video: { maxFileSize: "32MB", maxFileCount: 1 },
   })
     .middleware(async () => {
