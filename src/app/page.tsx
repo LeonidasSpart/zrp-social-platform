@@ -13,6 +13,8 @@ interface Post {
   id: string;
   content: string;
   imageUrl?: string;
+  imageUrls?: string[];
+  mediaType?: string;
   createdAt: string;
   author: {
     id: string;
