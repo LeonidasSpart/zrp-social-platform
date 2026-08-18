@@ -14,6 +14,7 @@ import {
   Video,
   MessageSquare,
   Shield,
+  ShieldCheck,
   Heart,
   FileText,
   HelpCircle,
@@ -32,6 +33,9 @@ import {
   CreditCard,
   Database,
   Zap,
+  BadgeCheck,
+  Eye,
+  Sparkles,
 } from "lucide-react";
 
 interface FaqItem {
@@ -197,9 +201,7 @@ export default function FAQPage() {
       icon: Image,
       answer: (
         <div className="space-y-3">
-          <p>
-            For the best profile image quality, we recommend:
-          </p>
+          <p>For the best profile image quality, we recommend:</p>
 
           <ul className="list-disc list-inside space-y-2 text-sm">
             <li>
@@ -399,9 +401,7 @@ export default function FAQPage() {
       icon: MessageSquare,
       answer: (
         <div className="space-y-3">
-          <p>
-            Open a post and select the comment or reply option.
-          </p>
+          <p>Open a post and select the comment or reply option.</p>
 
           <ol className="list-decimal list-inside space-y-2 text-sm">
             <li>Open the post.</li>
@@ -431,13 +431,8 @@ export default function FAQPage() {
 
           <p className="text-sm">
             Example:{" "}
-            <span className="text-zrp-red font-medium">
-              #ZRP
-            </span>{" "}
-            or{" "}
-            <span className="text-zrp-red font-medium">
-              #Web3
-            </span>
+            <span className="text-zrp-red font-medium">#ZRP</span> or{" "}
+            <span className="text-zrp-red font-medium">#Web3</span>
           </p>
 
           <p>
@@ -447,9 +442,7 @@ export default function FAQPage() {
 
           <p className="text-sm">
             Example:{" "}
-            <span className="text-zrp-red font-medium">
-              @username
-            </span>
+            <span className="text-zrp-red font-medium">@username</span>
           </p>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -563,9 +556,7 @@ export default function FAQPage() {
       icon: Lock,
       answer: (
         <div className="space-y-3">
-          <p>
-            ZRP Social takes privacy and security seriously.
-          </p>
+          <p>ZRP Social takes privacy and security seriously.</p>
 
           <ul className="list-disc list-inside space-y-2 text-sm">
             <li>Encrypted connections using HTTPS/TLS.</li>
@@ -679,6 +670,387 @@ export default function FAQPage() {
             </Link>{" "}
             for more information.
           </p>
+        </div>
+      ),
+    },
+
+    // ============================================================
+    // ZRP TRUST PASSPORT
+    // ============================================================
+    {
+      id: "what-is-trust-passport",
+      category: "ZRP Trust Passport",
+      question: "What is the ZRP Trust Passport?",
+      icon: ShieldCheck,
+      answer: (
+        <div className="space-y-4">
+          <p>
+            The <strong>ZRP Trust Passport</strong> is a transparency feature
+            designed to help the ZRP community understand positive trust signals
+            associated with an account.
+          </p>
+
+          <p>
+            It provides a <strong>Trust Score from 0 to 100</strong> together
+            with selected account and community signals that can help users
+            better understand the public history and activity of an account.
+          </p>
+
+          <div className="p-4 rounded-xl bg-zrp-red/5 border border-zrp-red/20">
+            <div className="flex items-start gap-3">
+              <ShieldCheck className="w-5 h-5 text-zrp-red flex-shrink-0 mt-0.5" />
+
+              <div>
+                <strong className="text-zrp-red">
+                  Transparency, not a guarantee
+                </strong>
+
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                  The Trust Passport is designed to provide useful account
+                  signals. It does not guarantee a person's identity,
+                  intentions, character, or future behaviour.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+
+    {
+      id: "trust-score-calculation",
+      category: "ZRP Trust Passport",
+      question: "How is the ZRP Trust Score calculated?",
+      icon: Sparkles,
+      answer: (
+        <div className="space-y-4">
+          <p>
+            The Trust Score is generated from positive account and community
+            signals available to the ZRP platform.
+          </p>
+
+          <p>
+            Depending on the current implementation, signals can include:
+          </p>
+
+          <ul className="list-disc list-inside space-y-2 text-sm">
+            <li>Email verification.</li>
+            <li>Profile completeness.</li>
+            <li>Account age and history.</li>
+            <li>Posts and community participation.</li>
+            <li>Comments and interactions.</li>
+            <li>Likes and repost activity.</li>
+            <li>Community connections.</li>
+            <li>ZRP verification status.</li>
+          </ul>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            The exact weighting of individual signals is controlled by ZRP's
+            Trust Passport system and may evolve over time.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "trust-levels",
+      category: "ZRP Trust Passport",
+      question: "What do the different Trust Score levels mean?",
+      icon: BadgeCheck,
+      answer: (
+        <div className="space-y-4">
+          <p>
+            The Trust Passport currently groups scores into broad trust levels
+            to make the score easier to understand.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+              <strong className="text-zrp-red">0–34</strong>
+              <p className="mt-1 text-sm font-medium">
+                Building Trust
+              </p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                The account is developing its public trust signals.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+              <strong className="text-zrp-red">35–54</strong>
+              <p className="mt-1 text-sm font-medium">
+                Moderate Trust
+              </p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                The account has established some positive signals.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+              <strong className="text-zrp-red">55–74</strong>
+              <p className="mt-1 text-sm font-medium">
+                Good Trust
+              </p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                The account demonstrates a broader set of positive signals.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+              <strong className="text-zrp-red">75–89</strong>
+              <p className="mt-1 text-sm font-medium">
+                High Trust
+              </p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                The account has a strong collection of available trust signals.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl border border-zrp-red/30 bg-zrp-red/5 sm:col-span-2">
+              <strong className="text-zrp-red">90–100</strong>
+              <p className="mt-1 text-sm font-medium">
+                Excellent Trust
+              </p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                The account has a very strong set of available positive trust
+                signals.
+              </p>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+
+    {
+      id: "trust-score-change",
+      category: "ZRP Trust Passport",
+      question: "Can my Trust Score change?",
+      icon: Zap,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            Yes. The Trust Passport is dynamic and can change as the account's
+            available trust signals change.
+          </p>
+
+          <p>
+            For example, completing your profile, verifying your email,
+            developing account history, participating positively in the
+            community, or receiving an applicable verification status may
+            affect available trust signals.
+          </p>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Trust Scores are not intended to be permanent rankings and may
+            change as ZRP's systems evolve.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "trust-score-not-popularity",
+      category: "ZRP Trust Passport",
+      question: "Is the Trust Score a popularity score?",
+      icon: Heart,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            <strong>No.</strong> The Trust Score is not intended to rank users
+            according to popularity.
+          </p>
+
+          <p>
+            A large following, many likes, or high engagement should not by
+            itself be interpreted as proof that someone is trustworthy.
+          </p>
+
+          <p>
+            The Trust Passport is designed around a broader set of account and
+            community signals rather than simply measuring popularity.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "trust-score-not-identity",
+      category: "ZRP Trust Passport",
+      question: "Does a high Trust Score prove someone's identity?",
+      icon: Lock,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            No. A Trust Score is <strong>not government identity
+            verification</strong> and should not be treated as proof that a
+            person is who they claim to be.
+          </p>
+
+          <p>
+            Verification badges and the Trust Passport are separate concepts.
+            The Trust Passport provides account trust signals, while a
+            verification badge represents the applicable verification status
+            granted by ZRP.
+          </p>
+
+          <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 text-sm">
+            <strong>Important:</strong> Always exercise normal caution when
+            communicating with people online, regardless of their Trust Score.
+          </div>
+        </div>
+      ),
+    },
+
+    {
+      id: "trust-passport-private-data",
+      category: "ZRP Trust Passport",
+      question: "Does the Trust Passport expose private information?",
+      icon: Shield,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            The public Trust Passport is designed to display useful trust
+            signals without exposing sensitive private information.
+          </p>
+
+          <p>It should not publicly expose information such as:</p>
+
+          <ul className="list-disc list-inside space-y-2 text-sm">
+            <li>Private email addresses.</li>
+            <li>Passwords.</li>
+            <li>Private messages.</li>
+            <li>IP addresses.</li>
+            <li>Private moderation reports.</li>
+            <li>Internal security information.</li>
+            <li>Private account credentials.</li>
+          </ul>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            The handling of personal information is governed by the ZRP Privacy
+            Policy.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "trust-passport-location",
+      category: "ZRP Trust Passport",
+      question: "Where can I see a user's Trust Passport?",
+      icon: Eye,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            Open a supported ZRP user profile and select{" "}
+            <strong>ZRP Trust Passport</strong>.
+          </p>
+
+          <p>
+            The Trust Passport can display the account's available Trust Score
+            and relevant public trust signals.
+          </p>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            The exact placement of the Trust Passport may vary as the ZRP
+            profile experience develops.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "trust-passport-verification",
+      category: "ZRP Trust Passport",
+      question: "Does ZRP verification affect the Trust Passport?",
+      icon: BadgeCheck,
+      answer: (
+        <div className="space-y-4">
+          <p>
+            An active ZRP verification status may contribute a positive
+            verification signal to the Trust Passport.
+          </p>
+
+          <p>
+            However, <strong>verification and the Trust Passport are not the
+            same thing</strong>.
+          </p>
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+              <VerifiedBadge badgeType="verified" />
+
+              <h3 className="mt-3 font-semibold">
+                Verification
+              </h3>
+
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Represents the applicable verification status of an account.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl border border-zrp-red/20 bg-zrp-red/5">
+              <ShieldCheck className="w-5 h-5 text-zrp-red" />
+
+              <h3 className="mt-3 font-semibold">
+                Trust Passport
+              </h3>
+
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Combines multiple account and community signals into a
+                transparency-oriented Trust Score.
+              </p>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+
+    {
+      id: "trust-passport-not-moderation",
+      category: "ZRP Trust Passport",
+      question: "Is the Trust Score a moderation or punishment score?",
+      icon: ShieldCheck,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            No. The Trust Passport is not intended to function as a public
+            punishment or moderation score.
+          </p>
+
+          <p>
+            Moderation decisions are handled separately through ZRP's
+            moderation and safety systems.
+          </p>
+
+          <p>
+            A Trust Score should therefore not be interpreted as a public
+            record of someone's moderation history.
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "trust-passport-guarantee",
+      category: "ZRP Trust Passport",
+      question: "Does an Excellent Trust Score guarantee that someone is safe?",
+      icon: Shield,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            No. Even an Excellent Trust Score does not guarantee that a person
+            is safe, honest, legitimate, or trustworthy in every situation.
+          </p>
+
+          <p>
+            The Trust Passport is an additional transparency tool. Users should
+            always apply their own judgment and appropriate caution.
+          </p>
+
+          <div className="p-3 rounded-lg bg-zrp-red/5 border border-zrp-red/20 text-sm">
+            <strong className="text-zrp-red">
+              Think of it as a signal, not a guarantee.
+            </strong>
+          </div>
         </div>
       ),
     },
@@ -1021,6 +1393,15 @@ export default function FAQPage() {
             </li>
           </ul>
 
+          <div className="p-3 rounded-lg bg-zrp-red/5 border border-zrp-red/20 text-sm">
+            <strong className="text-zrp-red">
+              Verification ≠ Trust Passport:
+            </strong>{" "}
+            A verification badge is one possible trust signal. The ZRP Trust
+            Passport combines multiple account and community signals into a
+            separate transparency system.
+          </div>
+
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Verification does not necessarily represent endorsement of an
             account's opinions or content.
@@ -1339,8 +1720,8 @@ export default function FAQPage() {
 
         <p className="mt-3 text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
           Find answers about ZRP Social, account management, publishing,
-          privacy, security, Web3 infrastructure, support, and our social
-          impact mission.
+          privacy, security, the ZRP Trust Passport, Web3 infrastructure,
+          support, and our social impact mission.
         </p>
 
         <div className="flex flex-wrap justify-center gap-2 mt-5">
@@ -1522,8 +1903,8 @@ export default function FAQPage() {
 
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-lg mx-auto">
           Our support team can help with account issues, technical problems,
-          moderation questions, privacy requests, and other ZRP Social
-          enquiries.
+          moderation questions, privacy requests, Trust Passport questions,
+          and other ZRP Social enquiries.
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 mt-5">
@@ -1549,8 +1930,8 @@ export default function FAQPage() {
       <div className="mt-8 text-center">
         <p className="text-xs text-gray-400 dark:text-gray-500">
           Information on this page is provided for general guidance. Features,
-          limits, pricing, availability, and technical implementations may
-          change as ZRP Social evolves.
+          limits, pricing, availability, scoring methods, and technical
+          implementations may change as ZRP Social evolves.
         </p>
       </div>
     </div>
