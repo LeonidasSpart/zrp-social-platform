@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db";
 
 interface RouteContext {
   params: {
@@ -74,6 +74,7 @@ export async function GET(
      */
 
     const now = Date.now();
+
     const accountAgeDays = Math.floor(
       (now - new Date(user.createdAt).getTime()) /
         (1000 * 60 * 60 * 24)
@@ -131,7 +132,7 @@ export async function GET(
      *
      * Maximum = 100
      *
-     * We deliberately keep popularity relatively small.
+     * Popularity is deliberately kept relatively small.
      */
 
     let score = 0;
@@ -139,7 +140,7 @@ export async function GET(
     // Security / account verification
     if (profileSignals.emailVerified) score += 20;
 
-    // Profile authenticity/completeness
+    // Profile authenticity / completeness
     if (profileSignals.avatarAdded) score += 10;
     if (profileSignals.coverAdded) score += 5;
     if (profileSignals.nameAdded) score += 5;
