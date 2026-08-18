@@ -19,6 +19,7 @@ import {
   CreditCard,
   Star,
   Shield,
+  ShieldCheck,
   Globe,
   Mail,
   MessageSquare,
@@ -167,6 +168,7 @@ export default function HelpPage() {
   const [openSection, setOpenSection] = useState<string | null>(
     "account-types"
   );
+
   const [searchQuery, setSearchQuery] = useState("");
 
   const toggleSection = (id: string) => {
@@ -349,15 +351,19 @@ export default function HelpPage() {
                   <th className="px-4 py-4 text-left font-orbitron">
                     Feature
                   </th>
+
                   <th className="px-4 py-4 text-center font-orbitron">
                     Free
                   </th>
+
                   <th className="px-4 py-4 text-center font-orbitron text-zrp-red">
                     Pro
                   </th>
+
                   <th className="px-4 py-4 text-center font-orbitron">
                     Business
                   </th>
+
                   <th className="px-4 py-4 text-center font-orbitron">
                     Enterprise
                   </th>
@@ -868,13 +874,277 @@ export default function HelpPage() {
     },
 
     {
-      id: "faq",
+      id: "trust-passport",
       number: "12",
+      title: "ZRP Trust Passport",
+      subtitle: "Understand account trust signals and transparency",
+      icon: ShieldCheck,
+      content: (
+        <div className="space-y-6">
+          {/* Introduction */}
+          <div className="rounded-2xl border border-zrp-red/20 bg-gradient-to-br from-zrp-red/10 via-transparent to-transparent p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-zrp-red/10 flex items-center justify-center">
+                <ShieldCheck className="w-6 h-6 text-zrp-red" />
+              </div>
+
+              <div>
+                <h3 className="font-orbitron font-bold text-lg text-zrp-charcoal dark:text-white">
+                  What is the ZRP Trust Passport?
+                </h3>
+
+                <p className="mt-2 text-sm leading-6 text-zrp-charcoal/70 dark:text-white/65">
+                  The ZRP Trust Passport is a transparency feature designed to
+                  help the ZRP community understand positive trust signals
+                  associated with an account.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Explanation */}
+          <p className="help-text">
+            Each account can receive a Trust Score from{" "}
+            <strong>0 to 100</strong>. The score is calculated from positive
+            account and community signals already available on ZRP. It is
+            designed to provide transparency without exposing private or
+            sensitive account information.
+          </p>
+
+          {/* Trust signals */}
+          <div>
+            <h3 className="font-orbitron font-bold text-base text-zrp-charcoal dark:text-white mb-4">
+              What can contribute to the Trust Passport?
+            </h3>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <InfoCard
+                icon={ShieldCheck}
+                title="Email verification"
+                text="A verified email address can contribute to an account's positive trust signals."
+              />
+
+              <InfoCard
+                icon={User}
+                title="Profile completeness"
+                text="Profile information such as a photo, name, bio, location, and website can contribute to the score."
+              />
+
+              <InfoCard
+                icon={Calendar}
+                title="Account history"
+                text="Established account history can contribute additional trust signals over time."
+              />
+
+              <InfoCard
+                icon={Users}
+                title="Community activity"
+                text="Positive participation such as posts, comments, likes, reposts, and community connections can contribute to the score."
+              />
+
+              <InfoCard
+                icon={BadgeCheck}
+                title="ZRP verification"
+                text="An account with an active ZRP verification badge can receive an additional verification signal."
+              />
+
+              <InfoCard
+                icon={Eye}
+                title="Transparency"
+                text="The Trust Passport shows public-facing signals without exposing private security or personal information."
+              />
+            </div>
+          </div>
+
+          {/* Trust levels */}
+          <div>
+            <h3 className="font-orbitron font-bold text-base text-zrp-charcoal dark:text-white mb-4">
+              Trust levels
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              {[
+                {
+                  score: "0–34",
+                  label: "Building Trust",
+                },
+                {
+                  score: "35–54",
+                  label: "Moderate Trust",
+                },
+                {
+                  score: "55–74",
+                  label: "Good Trust",
+                },
+                {
+                  score: "75–89",
+                  label: "High Trust",
+                },
+                {
+                  score: "90–100",
+                  label: "Excellent Trust",
+                },
+              ].map((level) => (
+                <div
+                  key={level.score}
+                  className="rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal bg-zrp-silver/5 dark:bg-zrp-charcoal/30 p-4"
+                >
+                  <div className="text-lg font-orbitron font-bold text-zrp-red">
+                    {level.score}
+                  </div>
+
+                  <div className="mt-1 text-xs font-semibold text-zrp-charcoal dark:text-white">
+                    {level.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* What it does not mean */}
+          <div className="rounded-2xl bg-zrp-charcoal dark:bg-black border border-white/10 p-6 text-white">
+            <div className="flex items-start gap-4">
+              <Lock className="w-6 h-6 text-zrp-red flex-shrink-0" />
+
+              <div>
+                <h3 className="font-orbitron font-bold">
+                  What the Trust Passport does not mean
+                </h3>
+
+                <ul className="mt-3 space-y-2 text-sm leading-6 text-white/65">
+                  <li>
+                    • It is not government or identity verification.
+                  </li>
+
+                  <li>
+                    • It is not a popularity ranking.
+                  </li>
+
+                  <li>
+                    • It is not a financial or credit score.
+                  </li>
+
+                  <li>
+                    • It is not a moderation punishment score.
+                  </li>
+
+                  <li>
+                    • It does not guarantee that a person is trustworthy.
+                  </li>
+
+                  <li>
+                    • It does not guarantee someone's intentions or future
+                    behavior.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Privacy */}
+          <div className="rounded-xl border border-zrp-red/20 bg-zrp-red/5 p-5">
+            <div className="flex items-start gap-3">
+              <Shield className="w-5 h-5 text-zrp-red flex-shrink-0 mt-0.5" />
+
+              <div>
+                <h3 className="font-semibold text-sm text-zrp-charcoal dark:text-white">
+                  Privacy by design
+                </h3>
+
+                <p className="mt-1 text-sm leading-6 text-zrp-charcoal/70 dark:text-white/65">
+                  The Trust Passport does not publicly expose sensitive
+                  information such as email addresses, IP addresses, private
+                  messages, private moderation reports, or internal security
+                  information.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Dynamic score */}
+          <div className="rounded-2xl border border-zrp-silver/30 dark:border-zrp-charcoal p-5">
+            <div className="flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-zrp-red flex-shrink-0 mt-0.5" />
+
+              <div>
+                <h3 className="font-orbitron font-bold text-sm text-zrp-charcoal dark:text-white">
+                  Your score can change
+                </h3>
+
+                <p className="mt-1 text-sm leading-6 text-zrp-charcoal/65 dark:text-white/60">
+                  Trust Passport information is generated from current account
+                  information and activity. As your account develops, the
+                  available trust signals and score may change automatically.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* How to find it */}
+          <div className="rounded-2xl border border-zrp-red/20 bg-zrp-red/5 p-5">
+            <div className="flex items-start gap-3">
+              <Eye className="w-5 h-5 text-zrp-red flex-shrink-0 mt-0.5" />
+
+              <div>
+                <h3 className="font-orbitron font-bold text-sm text-zrp-charcoal dark:text-white">
+                  Where can I find it?
+                </h3>
+
+                <p className="mt-1 text-sm leading-6 text-zrp-charcoal/70 dark:text-white/65">
+                  Open a user's ZRP profile and select{" "}
+                  <strong>ZRP Trust Passport</strong> to view the account's
+                  available trust signals and Trust Score.
+                </p>
+
+                <p className="mt-2 text-xs text-zrp-charcoal/50 dark:text-white/45">
+                  The Trust Passport is available directly from supported ZRP
+                  profile pages.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+
+    {
+      id: "faq",
+      number: "13",
       title: "Frequently Asked Questions",
       subtitle: "Quick answers to common questions",
       icon: HelpCircle,
       content: (
         <div className="space-y-4">
+          <FaqItem
+            question="What is the ZRP Trust Passport?"
+            answer="The ZRP Trust Passport is a transparency feature that displays positive account and community trust signals. It provides a Trust Score from 0 to 100 based on information and activity available on ZRP."
+          />
+
+          <FaqItem
+            question="How is the Trust Score calculated?"
+            answer="The score can consider signals such as email verification, profile completeness, account history, community activity, community connections, and ZRP verification."
+          />
+
+          <FaqItem
+            question="Does a high Trust Score mean that someone is trustworthy?"
+            answer="No. The Trust Passport does not guarantee someone's identity, intentions, character, or future behavior. It is a transparency tool based on available ZRP account signals."
+          />
+
+          <FaqItem
+            question="Can my Trust Score change?"
+            answer="Yes. The Trust Passport is based on current account information and activity. As your account develops or information changes, your available trust signals and score may change."
+          />
+
+          <FaqItem
+            question="Does the Trust Passport expose private information?"
+            answer="No. The public Trust Passport is designed not to expose sensitive information such as email addresses, IP addresses, private messages, private moderation reports, or internal security information."
+          />
+
+          <FaqItem
+            question="Where can I see a user's Trust Passport?"
+            answer="Open a user's ZRP profile and select ZRP Trust Passport to view the available trust signals and Trust Score."
+          />
+
           <FaqItem
             question="Can I switch plans?"
             answer="Plan changes depend on the subscription options currently available in your account. Check Settings for the current options."
@@ -934,13 +1204,13 @@ export default function HelpPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter text-zrp-charcoal dark:text-white">
-
       {/* ═══════════════════════════════════════════════════════════════════
           HERO
       ═══════════════════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-zrp-darkRed via-zrp-deepBlack to-black py-16 sm:py-24 px-4">
 
+      <section className="relative overflow-hidden bg-gradient-to-br from-zrp-darkRed via-zrp-deepBlack to-black py-16 sm:py-24 px-4">
         {/* Web3-style background grid */}
+
         <div
           className="absolute inset-0 opacity-[0.08]"
           style={{
@@ -951,10 +1221,10 @@ export default function HelpPage() {
         />
 
         <div className="absolute -top-32 -right-32 w-96 h-96 bg-zrp-red/20 rounded-full blur-3xl" />
+
         <div className="absolute -bottom-40 -left-32 w-[28rem] h-[28rem] bg-zrp-red/10 rounded-full blur-3xl" />
 
         <div className="relative max-w-6xl mx-auto">
-
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-white/65 hover:text-white text-sm transition mb-10"
@@ -963,11 +1233,10 @@ export default function HelpPage() {
           </Link>
 
           <div className="grid lg:grid-cols-[1.4fr_0.6fr] gap-12 items-center">
-
             <div>
-
               <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 backdrop-blur-sm px-4 py-2 text-xs font-semibold text-white/85 mb-6">
                 <span className="w-2 h-2 rounded-full bg-zrp-red animate-pulse" />
+
                 ZRP SOCIAL · HELP CENTER
               </div>
 
@@ -985,28 +1254,29 @@ export default function HelpPage() {
               </p>
 
               {/* Search */}
-              <div className="mt-8 max-w-2xl relative">
 
+              <div className="mt-8 max-w-2xl relative">
                 <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
 
                 <input
                   type="search"
                   value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
+                  onChange={(event) =>
+                    setSearchQuery(event.target.value)
+                  }
                   placeholder="Search help topics..."
                   className="w-full rounded-2xl border border-white/10 bg-white/10 backdrop-blur-xl pl-14 pr-5 py-4 text-white placeholder:text-white/40 outline-none focus:border-zrp-red/70 focus:ring-2 focus:ring-zrp-red/20 transition"
                 />
-
               </div>
 
               <div className="mt-5 flex flex-wrap gap-2">
-
                 {[
                   "Plans",
                   "Privacy",
                   "Support",
                   "Moderation",
                   "Creators",
+                  "Trust Passport",
                 ].map((tag) => (
                   <button
                     key={tag}
@@ -1016,24 +1286,18 @@ export default function HelpPage() {
                     {tag}
                   </button>
                 ))}
-
               </div>
-
             </div>
 
             {/* Hero visual */}
+
             <div className="hidden lg:block">
-
               <div className="relative">
-
                 <div className="absolute inset-0 bg-zrp-red/20 blur-3xl rounded-full" />
 
                 <div className="relative rounded-3xl border border-white/10 bg-white/[0.06] backdrop-blur-xl p-7 shadow-2xl">
-
                   <div className="flex items-center justify-between mb-8">
-
                     <div className="flex items-center gap-3">
-
                       <div className="w-11 h-11 rounded-xl bg-zrp-red flex items-center justify-center shadow-lg shadow-red-900/30">
                         <Sparkles className="w-5 h-5 text-white" />
                       </div>
@@ -1042,21 +1306,19 @@ export default function HelpPage() {
                         <div className="text-white font-orbitron font-bold">
                           ZRP
                         </div>
+
                         <div className="text-white/40 text-xs">
                           Social ecosystem
                         </div>
                       </div>
-
                     </div>
 
                     <div className="text-xs text-zrp-red font-mono">
                       ONLINE
                     </div>
-
                   </div>
 
                   <div className="space-y-3">
-
                     <GlassStat
                       icon={Shield}
                       label="Privacy"
@@ -1081,37 +1343,35 @@ export default function HelpPage() {
                       value="35%"
                     />
 
+                    <GlassStat
+                      icon={ShieldCheck}
+                      label="Trust"
+                      value="Transparent"
+                    />
                   </div>
 
                   <div className="mt-6 pt-5 border-t border-white/10 text-xs text-white/35 font-mono">
                     SWISS · EUROPE · PRIVACY · FREEDOM
                   </div>
-
                 </div>
-
               </div>
-
             </div>
-
           </div>
-
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
           QUICK NAV
       ═══════════════════════════════════════════════════════════════════ */}
+
       <section className="border-b border-zrp-silver/20 dark:border-zrp-charcoal bg-white dark:bg-zrp-deepBlack">
-
         <div className="max-w-6xl mx-auto px-4 py-5">
-
           <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
-
             <span className="flex-shrink-0 text-xs font-orbitron uppercase tracking-wider text-zrp-charcoal/40 dark:text-white/40">
               Explore
             </span>
 
-            {sections.slice(0, 7).map((section) => (
+            {sections.slice(0, 12).map((section) => (
               <a
                 key={section.id}
                 href={`#help-${section.id}`}
@@ -1120,31 +1380,28 @@ export default function HelpPage() {
                 {section.title}
               </a>
             ))}
-
           </div>
-
         </div>
-
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
           MAIN
       ═══════════════════════════════════════════════════════════════════ */}
+
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-
         {/* Ecosystem cards */}
-        <div className="grid md:grid-cols-3 gap-4 mb-12">
 
+        <div className="grid md:grid-cols-3 gap-4 mb-12">
           <QuickCard
             icon={BookOpen}
             title="Learn"
-            description="Understand ZRP features, plans, privacy, and account controls."
+            description="Understand ZRP features, plans, privacy, account controls, and Trust Passport."
           />
 
           <QuickCard
             icon={Shield}
             title="Stay protected"
-            description="Learn about security, reporting, moderation, and privacy."
+            description="Learn about security, Trust Passport, reporting, moderation, and privacy."
           />
 
           <QuickCard
@@ -1152,7 +1409,6 @@ export default function HelpPage() {
             title="Get support"
             description="Open a support ticket when you need help from the ZRP team."
           />
-
         </div>
 
         {searchQuery && (
@@ -1167,10 +1423,9 @@ export default function HelpPage() {
         )}
 
         {/* Sections */}
+
         <div className="space-y-4">
-
           {filteredSections.map((section) => {
-
             const isOpen = openSection === section.id;
             const Icon = section.icon;
 
@@ -1184,14 +1439,12 @@ export default function HelpPage() {
                     : "border-zrp-silver/30 dark:border-zrp-charcoal"
                 } bg-white dark:bg-zrp-deepBlack`}
               >
-
                 <button
                   type="button"
                   onClick={() => toggleSection(section.id)}
                   className="w-full flex items-center gap-4 p-5 sm:p-6 text-left hover:bg-zrp-silver/5 dark:hover:bg-white/[0.02] transition"
                   aria-expanded={isOpen}
                 >
-
                   <div
                     className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center transition ${
                       isOpen
@@ -1203,9 +1456,7 @@ export default function HelpPage() {
                   </div>
 
                   <div className="min-w-0 flex-1">
-
                     <div className="flex items-center gap-3">
-
                       <span className="font-mono text-[10px] text-zrp-red/60">
                         {section.number}
                       </span>
@@ -1213,44 +1464,35 @@ export default function HelpPage() {
                       <h2 className="font-orbitron font-bold text-base sm:text-lg text-zrp-charcoal dark:text-white">
                         {section.title}
                       </h2>
-
                     </div>
 
                     <p className="mt-1 text-xs sm:text-sm text-zrp-charcoal/50 dark:text-white/45">
                       {section.subtitle}
                     </p>
-
                   </div>
 
                   <div className="flex-shrink-0">
-
                     {isOpen ? (
                       <ChevronUp className="w-5 h-5 text-zrp-red" />
                     ) : (
                       <ChevronDown className="w-5 h-5 text-zrp-charcoal/30 dark:text-white/30 group-hover:text-zrp-red transition" />
                     )}
-
                   </div>
-
                 </button>
 
                 {isOpen && (
                   <div className="px-5 sm:px-6 pb-6">
-
                     <div className="border-t border-zrp-silver/20 dark:border-zrp-charcoal pt-6">
                       {section.content}
                     </div>
-
                   </div>
                 )}
-
               </div>
             );
           })}
 
           {filteredSections.length === 0 && (
             <div className="rounded-2xl border border-zrp-silver/30 dark:border-zrp-charcoal p-12 text-center">
-
               <Search className="w-10 h-10 mx-auto text-zrp-red/50" />
 
               <h3 className="mt-4 font-orbitron font-bold text-lg">
@@ -1267,17 +1509,15 @@ export default function HelpPage() {
               >
                 Clear search
               </button>
-
             </div>
           )}
-
         </div>
 
         {/* ═════════════════════════════════════════════════════════════════
             SUPPORT CTA
         ═════════════════════════════════════════════════════════════════ */}
-        <section className="relative overflow-hidden mt-14 rounded-3xl bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack p-8 sm:p-12 text-white">
 
+        <section className="relative overflow-hidden mt-14 rounded-3xl bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack p-8 sm:p-12 text-white">
           <div className="absolute inset-0 opacity-[0.06]">
             <div
               className="absolute inset-0"
@@ -1292,9 +1532,7 @@ export default function HelpPage() {
           <div className="absolute -right-24 -bottom-24 w-80 h-80 bg-zrp-red/20 rounded-full blur-3xl" />
 
           <div className="relative grid md:grid-cols-[1fr_auto] gap-8 items-center">
-
             <div>
-
               <div className="inline-flex items-center gap-2 text-xs text-white/50 font-mono mb-4">
                 <span className="w-2 h-2 rounded-full bg-zrp-red" />
                 ZRP SUPPORT
@@ -1306,14 +1544,12 @@ export default function HelpPage() {
 
               <p className="mt-3 max-w-xl text-white/60 leading-7">
                 Our support team can help with account issues, payments,
-                moderation questions, privacy requests, and other platform
-                problems.
+                moderation questions, privacy requests, Trust Passport
+                questions, and other platform problems.
               </p>
-
             </div>
 
             <div className="flex flex-wrap gap-3">
-
               <Link
                 href="/support"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-zrp-darkRed hover:bg-gray-100 transition"
@@ -1329,38 +1565,48 @@ export default function HelpPage() {
                 <Mail className="w-4 h-4" />
                 Email Support
               </a>
-
             </div>
-
           </div>
-
         </section>
 
         {/* Footer links */}
-        <div className="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-3 text-xs text-zrp-charcoal/45 dark:text-white/40">
 
-          <Link href="/privacy" className="hover:text-zrp-red transition">
+        <div className="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-3 text-xs text-zrp-charcoal/45 dark:text-white/40">
+          <Link
+            href="/privacy"
+            className="hover:text-zrp-red transition"
+          >
             Privacy Policy
           </Link>
 
-          <Link href="/terms" className="hover:text-zrp-red transition">
+          <Link
+            href="/terms"
+            className="hover:text-zrp-red transition"
+          >
             Terms of Service
           </Link>
 
-          <Link href="/guidelines" className="hover:text-zrp-red transition">
+          <Link
+            href="/guidelines"
+            className="hover:text-zrp-red transition"
+          >
             Community Guidelines
           </Link>
 
-          <Link href="/contact" className="hover:text-zrp-red transition">
+          <Link
+            href="/contact"
+            className="hover:text-zrp-red transition"
+          >
             Contact
           </Link>
 
-          <Link href="/" className="hover:text-zrp-red transition">
+          <Link
+            href="/"
+            className="hover:text-zrp-red transition"
+          >
             ZRP Social
           </Link>
-
         </div>
-
       </main>
     </div>
   );
@@ -1399,7 +1645,6 @@ function PlanCard({
           : "bg-zrp-silver/10 dark:bg-zrp-charcoal/50"
       } p-5`}
     >
-
       {featured && (
         <div className="absolute -top-3 right-4 rounded-full bg-zrp-red px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider">
           Popular
@@ -1408,20 +1653,11 @@ function PlanCard({
 
       <Icon className={`w-6 h-6 ${iconClass}`} />
 
-      {/* This whole card was hardcoded to white text, but its own
-          background is light-mode-light (bg-zrp-silver/10, or a
-          near-transparent red-to-transparent gradient over a white
-          page) - only correct once .dark switches it to
-          dark:bg-zrp-charcoal/50. In light mode that was white text
-          on a near-white card: invisible. Adding dark: variants so
-          the text defaults to a dark, readable color in light mode
-          and only turns white once the background actually is dark. */}
       <h3 className="mt-4 font-orbitron font-bold text-lg text-zrp-charcoal dark:text-white">
         {title}
       </h3>
 
       <div className="mt-2">
-
         <span className="font-orbitron font-bold text-2xl text-zrp-charcoal dark:text-white">
           {price}
         </span>
@@ -1429,7 +1665,6 @@ function PlanCard({
         <span className="text-xs text-zrp-charcoal/50 dark:text-white/40">
           {period}
         </span>
-
       </div>
 
       <p className="mt-1 text-xs text-zrp-charcoal/50 dark:text-white/40">
@@ -1437,19 +1672,17 @@ function PlanCard({
       </p>
 
       <ul className="mt-5 space-y-2">
-
         {features.map((feature) => (
           <li
             key={feature}
             className="flex items-start gap-2 text-xs text-zrp-charcoal/70 dark:text-white/65"
           >
             <CheckCircle className="w-3.5 h-3.5 text-zrp-red flex-shrink-0 mt-0.5" />
+
             {feature}
           </li>
         ))}
-
       </ul>
-
     </div>
   );
 }
@@ -1465,7 +1698,6 @@ function FeatureCard({
 }) {
   return (
     <div className="group rounded-2xl border border-zrp-silver/30 dark:border-zrp-charcoal bg-zrp-silver/5 dark:bg-zrp-charcoal/30 p-5 hover:border-zrp-red/30 transition">
-
       <div className="w-10 h-10 rounded-xl bg-zrp-red/10 flex items-center justify-center text-zrp-red group-hover:bg-zrp-red group-hover:text-white transition">
         <Icon className="w-5 h-5" />
       </div>
@@ -1477,7 +1709,6 @@ function FeatureCard({
       <p className="mt-2 text-sm leading-6 text-zrp-charcoal/65 dark:text-white/60">
         {description}
       </p>
-
     </div>
   );
 }
@@ -1493,7 +1724,6 @@ function StepCard({
 }) {
   return (
     <div className="rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal bg-zrp-silver/5 dark:bg-zrp-charcoal/30 p-4">
-
       <div className="font-mono text-xs text-zrp-red">
         {number}
       </div>
@@ -1505,7 +1735,6 @@ function StepCard({
       <p className="mt-1 text-xs leading-5 text-zrp-charcoal/55 dark:text-white/50">
         {text}
       </p>
-
     </div>
   );
 }
@@ -1549,9 +1778,7 @@ function ActionGuide({
 }) {
   return (
     <div className="rounded-2xl border border-zrp-silver/30 dark:border-zrp-charcoal p-5">
-
       <div className="flex items-center gap-3">
-
         <div className="w-10 h-10 rounded-xl bg-zrp-red/10 flex items-center justify-center text-zrp-red">
           <Icon className="w-5 h-5" />
         </div>
@@ -1559,11 +1786,9 @@ function ActionGuide({
         <h3 className="font-orbitron font-bold">
           {title}
         </h3>
-
       </div>
 
       <ol className="mt-5 space-y-3">
-
         {steps.map((step, index) => (
           <li
             key={step}
@@ -1576,9 +1801,7 @@ function ActionGuide({
             <span>{step}</span>
           </li>
         ))}
-
       </ol>
-
     </div>
   );
 }
@@ -1586,13 +1809,11 @@ function ActionGuide({
 function ChecklistItem({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-3 rounded-xl border border-zrp-silver/25 dark:border-zrp-charcoal bg-zrp-silver/5 dark:bg-zrp-charcoal/30 px-4 py-3">
-
       <CheckCircle className="w-4 h-4 text-zrp-red flex-shrink-0" />
 
       <span className="text-sm text-zrp-charcoal/70 dark:text-white/65">
         {text}
       </span>
-
     </div>
   );
 }
@@ -1608,7 +1829,6 @@ function InfoCard({
 }) {
   return (
     <div className="rounded-xl border border-zrp-silver/25 dark:border-zrp-charcoal bg-zrp-silver/5 dark:bg-zrp-charcoal/30 p-5">
-
       <Icon className="w-5 h-5 text-zrp-red" />
 
       <h3 className="mt-3 font-orbitron font-bold text-sm">
@@ -1618,7 +1838,6 @@ function InfoCard({
       <p className="mt-2 text-sm leading-6 text-zrp-charcoal/60 dark:text-white/55">
         {text}
       </p>
-
     </div>
   );
 }
@@ -1632,7 +1851,6 @@ function FaqItem({
 }) {
   return (
     <div className="rounded-xl border border-zrp-silver/25 dark:border-zrp-charcoal bg-zrp-silver/5 dark:bg-zrp-charcoal/30 p-5">
-
       <h3 className="font-semibold text-sm text-zrp-charcoal dark:text-white">
         {question}
       </h3>
@@ -1640,7 +1858,6 @@ function FaqItem({
       <p className="mt-2 text-sm leading-6 text-zrp-charcoal/60 dark:text-white/55">
         {answer}
       </p>
-
     </div>
   );
 }
@@ -1656,9 +1873,7 @@ function QuickCard({
 }) {
   return (
     <div className="rounded-2xl border border-zrp-silver/30 dark:border-zrp-charcoal bg-zrp-silver/5 dark:bg-zrp-charcoal/30 p-5">
-
       <div className="flex items-center gap-3">
-
         <div className="w-10 h-10 rounded-xl bg-zrp-red/10 flex items-center justify-center text-zrp-red">
           <Icon className="w-5 h-5" />
         </div>
@@ -1666,13 +1881,11 @@ function QuickCard({
         <h3 className="font-orbitron font-bold text-sm">
           {title}
         </h3>
-
       </div>
 
       <p className="mt-3 text-sm leading-6 text-zrp-charcoal/60 dark:text-white/55">
         {description}
       </p>
-
     </div>
   );
 }
@@ -1688,21 +1901,17 @@ function GlassStat({
 }) {
   return (
     <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
-
       <div className="flex items-center gap-3">
-
         <Icon className="w-4 h-4 text-zrp-red" />
 
         <span className="text-sm text-white/55">
           {label}
         </span>
-
       </div>
 
       <span className="text-xs font-mono text-white/80">
         {value}
       </span>
-
     </div>
   );
 }
