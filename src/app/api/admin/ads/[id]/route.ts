@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const check = await requireStaff();
 
@@ -19,31 +19,25 @@ export async function PUT(
   });
 
   try {
+    const { id } = await params;
+
     const { action, rejectionReason } = await req.json();
 
     if (action !== "approve" && action !== "reject") {
       return NextResponse.json(
-        {
-          error: "action must be 'approve' or 'reject'",
-        },
+        { error: 'action must be "approve" or "reject"' },
         { status: 400 }
       );
     }
 
     const campaign = await prisma.adCampaign.findUnique({
-      where: {
-        id: params.id,
-      },
-      select: {
-        status: true,
-      },
+      where: { id },
+      select: { status: true },
     });
 
     if (!campaign) {
       return NextResponse.json(
-        {
-          error: "Campaign not found",
-        },
+        { error: "Campaign not found" },
         { status: 404 }
       );
     }
@@ -59,28 +53,22 @@ export async function PUT(
     }
 
     const updated = await prisma.adCampaign.update({
-      where: {
-        id: params.id,
-      },
+      where: { id },
       data: {
         status: action === "approve" ? "ACTIVE" : "REJECTED",
         rejectionReason:
-          action === "reject" ? rejectionReason || null : null,
+          action === "reject" ? (rejectionReason || null) : null,
         reviewedBy: token?.id as string | undefined,
         reviewedAt: new Date(),
       },
     });
 
-    return NextResponse.json({
-      campaign: updated,
-    });
+    return NextResponse.json({ campaign: updated });
   } catch (error) {
     console.error("Error reviewing ad campaign:", error);
 
     return NextResponse.json(
-      {
-        error: "Failed to review campaign",
-      },
+      { error: "Failed to review campaign" },
       { status: 500 }
     );
   }
