@@ -1,14 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-// requireStaff (ADMIN or MODERATOR) - this is core content-moderation work.
-// Sensitive/financial admin routes (roles, plan changes, payments, analytics)
-// stay on requireAdmin.
-import { requireStaff } from "@/lib/admin";
-import { prisma } from "@/lib/db";
-
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
+
   const adminCheck = await requireStaff();
   if (!adminCheck.authorized) return adminCheck.response;
 
@@ -31,13 +26,16 @@ export async function PUT(
     }
 
     const report = await prisma.report.update({
-      where: { id: params.id },
+      where: { id },
       data,
     });
 
     return NextResponse.json(report);
   } catch (error) {
     console.error("Error updating report:", error);
-    return NextResponse.json({ error: "Failed to update report" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update report" },
+      { status: 500 }
+    );
   }
 }
