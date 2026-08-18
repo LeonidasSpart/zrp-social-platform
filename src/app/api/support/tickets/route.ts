@@ -8,8 +8,12 @@ import { notifyTicketCreated } from '@/lib/notifications';
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
+
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
 
     const tickets = await prisma.supportTicket.findMany({
@@ -19,15 +23,28 @@ export async function GET(req: NextRequest) {
         replies: {
           orderBy: { createdAt: 'desc' },
           take: 1,
-          include: { user: { select: { username: true, avatarUrl: true, role: true } } },
+          include: {
+            user: {
+              select: {
+                username: true,
+                avatarUrl: true,
+                role: true,
+              },
+            },
+          },
         },
-        _count: { select: { replies: true } },
+        _count: {
+          select: {
+            replies: true,
+          },
+        },
       },
     });
 
     return NextResponse.json(tickets);
   } catch (error) {
     console.error('Error fetching user tickets:', error);
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -39,8 +56,12 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
+
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
 
     const body = await req.json();
@@ -56,10 +77,19 @@ export async function POST(req: NextRequest) {
 
     // Validate category
     const validCategories = [
-      'GENERAL', 'ACCOUNT', 'PRIVACY', 'CONTENT',
-      'MODERATION', 'PAYMENT', 'MONETISATION',
-      'BUG', 'FEATURE_REQUEST', 'SECURITY', 'OTHER'
+      'GENERAL',
+      'ACCOUNT',
+      'PRIVACY',
+      'CONTENT',
+      'MODERATION',
+      'PAYMENT',
+      'MONETISATION',
+      'BUG',
+      'FEATURE_REQUEST',
+      'SECURITY',
+      'OTHER',
     ];
+
     if (category && !validCategories.includes(category)) {
       return NextResponse.json(
         { error: 'Invalid category' },
@@ -72,9 +102,13 @@ export async function POST(req: NextRequest) {
       where: { id: session.user.id },
       select: { plan: true },
     });
-    const priority = user?.plan === 'enterprise' ? 'URGENT'
-      : user?.plan === 'business' ? 'HIGH'
-      : 'NORMAL';
+
+    const priority =
+      user?.plan === 'enterprise'
+        ? 'URGENT'
+        : user?.plan === 'business'
+          ? 'HIGH'
+          : 'NORMAL';
 
     // ─── Create the ticket ──────────────────────────────────────────
     const ticket = await prisma.supportTicket.create({
@@ -84,16 +118,33 @@ export async function POST(req: NextRequest) {
         category: category || 'GENERAL',
         priority,
         message: message.trim(),
-        userAgent: req.headers.get('user-agent') || undefined,
-        ipAddress: req.headers.get('x-forwarded-for') || req.ip || undefined,
-        referrer: req.headers.get('referer') || undefined,
+
+        userAgent:
+          req.headers.get('user-agent') || undefined,
+
+        // Next.js 15 / NextRequest does not expose req.ip.
+        // Prefer proxy-provided client IP headers.
+        ipAddress:
+          req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+          req.headers.get('x-real-ip') ||
+          undefined,
+
+        referrer:
+          req.headers.get('referer') || undefined,
       },
+
       include: {
-        user: { select: { username: true, email: true, avatarUrl: true } },
+        user: {
+          select: {
+            username: true,
+            email: true,
+            avatarUrl: true,
+          },
+        },
       },
     });
 
-    // ─── 🆕 Notify all admins about the new ticket ──────────────────
+    // ─── Notify all admins about the new ticket ──────────────────
     const admins = await prisma.user.findMany({
       where: { role: 'ADMIN' },
       select: { id: true },
@@ -103,14 +154,17 @@ export async function POST(req: NextRequest) {
       await notifyTicketCreated({
         ticketId: ticket.id,
         ticketSubject: ticket.subject,
-        adminIds: admins.map(a => a.id),
+        adminIds: admins.map((a) => a.id),
         fromUserId: session.user.id,
       });
     }
 
-    return NextResponse.json(ticket, { status: 201 });
+    return NextResponse.json(ticket, {
+      status: 201,
+    });
   } catch (error) {
     console.error('Error creating ticket:', error);
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
