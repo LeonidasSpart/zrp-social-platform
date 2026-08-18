@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Megaphone } from "lucide-react";
+import VerifiedBadge from "./VerifiedBadge";
 
 interface AdCardProps {
   ad: {
@@ -19,6 +20,7 @@ interface AdCardProps {
         username: string;
         name: string;
         avatarUrl?: string | null;
+        badgeType?: string | null;
       };
     };
   };
@@ -84,19 +86,31 @@ export default function AdCard({ ad }: AdCardProps) {
         <Megaphone className="w-3.5 h-3.5" />
         <span>Sponsored</span>
       </div>
-      <a href="#" onClick={handleClick} className="block cursor-pointer">
-        <div className="flex items-start gap-3">
-          <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 font-semibold flex-shrink-0 overflow-hidden">
+      <div className="flex items-start gap-3">
+        {/* ─── Avatar + name: a normal profile visit, not part of the
+            tracked/billed ad click - clicking to see who's advertising
+            isn't the same event as clicking through on the ad itself,
+            same distinction PostCard already makes between its author
+            link and the post body. ────────────────────────────────── */}
+        <Link href={`/profile/${ad.post.author.username}`} className="flex-shrink-0">
+          <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 font-semibold overflow-hidden">
             {ad.post.author.avatarUrl ? (
               <img src={ad.post.author.avatarUrl} alt={ad.post.author.name} className="w-full h-full object-cover" />
             ) : (
               (ad.post.author.name || ad.post.author.username)[0]?.toUpperCase()
             )}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-gray-900 dark:text-white">
-              {ad.post.author.name || ad.post.author.username}
-            </p>
+        </Link>
+        <div className="flex-1 min-w-0">
+          <Link
+            href={`/profile/${ad.post.author.username}`}
+            className="font-semibold text-gray-900 dark:text-white hover:underline inline-flex items-center gap-1"
+          >
+            {ad.post.author.name || ad.post.author.username}
+            <VerifiedBadge badgeType={ad.post.author.badgeType} />
+          </Link>
+          {/* ─── Content/image: the actual tracked, billed ad click ──── */}
+          <a href="#" onClick={handleClick} className="block cursor-pointer">
             <p className="text-gray-800 dark:text-gray-200 mt-1 whitespace-pre-wrap break-words">
               {ad.post.content}
             </p>
@@ -105,9 +119,9 @@ export default function AdCard({ ad }: AdCardProps) {
                 <img src={image} alt="" className="w-full" />
               </div>
             )}
-          </div>
+          </a>
         </div>
-      </a>
+      </div>
     </div>
   );
 }
