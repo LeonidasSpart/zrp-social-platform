@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   const check = await requireStaff();
 
@@ -23,21 +23,27 @@ export async function PUT(
 
     if (action !== "approve" && action !== "reject") {
       return NextResponse.json(
-        { error: "action must be 'approve' or 'reject'" },
+        {
+          error: "action must be 'approve' or 'reject'",
+        },
         { status: 400 }
       );
     }
 
-    const { id } = await params;
-
     const campaign = await prisma.adCampaign.findUnique({
-      where: { id },
-      select: { status: true },
+      where: {
+        id: params.id,
+      },
+      select: {
+        status: true,
+      },
     });
 
     if (!campaign) {
       return NextResponse.json(
-        { error: "Campaign not found" },
+        {
+          error: "Campaign not found",
+        },
         { status: 404 }
       );
     }
@@ -53,7 +59,9 @@ export async function PUT(
     }
 
     const updated = await prisma.adCampaign.update({
-      where: { id },
+      where: {
+        id: params.id,
+      },
       data: {
         status: action === "approve" ? "ACTIVE" : "REJECTED",
         rejectionReason:
@@ -70,7 +78,9 @@ export async function PUT(
     console.error("Error reviewing ad campaign:", error);
 
     return NextResponse.json(
-      { error: "Failed to review campaign" },
+      {
+        error: "Failed to review campaign",
+      },
       { status: 500 }
     );
   }
