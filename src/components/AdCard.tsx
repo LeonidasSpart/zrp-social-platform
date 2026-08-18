@@ -65,11 +65,10 @@ export default function AdCard({ ad }: AdCardProps) {
       });
       const data = await res.json();
       const url = data.redirectUrl || `/post/${ad.post.id}`;
-      if (url.startsWith("http")) {
-        window.open(url, "_blank", "noopener,noreferrer");
-      } else {
-        window.location.href = url;
-      }
+      // Always navigate in the same tab, whether it's an internal post
+      // link or an external advertiser URL - no more window.open in a
+      // new tab.
+      window.location.href = url;
     } catch {
       window.location.href = `/post/${ad.post.id}`;
     }
