@@ -1,16 +1,8 @@
 import webpush from "web-push";
 import { prisma } from "./db";
 
-// ─── Initialize Web Push lazily ──────────────────────────────────
-// IMPORTANT:
-// Do NOT initialize VAPID at module/build time.
-//
-// Next.js can evaluate imported server modules during `next build`.
-// Railway may not provide VAPID environment variables during build.
-//
-// We therefore initialize Web Push only when a notification is
-// actually being sent at runtime.
-
+// Initialize Web Push lazily.
+// Do not initialize VAPID at module/build time.
 function getWebPush() {
   const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
   const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
@@ -30,8 +22,6 @@ function getWebPush() {
   return webpush;
 }
 
-// ─── Send Push Notification ──────────────────────────────────────
-
 export async function sendPushNotification(
   userId: string,
   title: string,
@@ -39,14 +29,11 @@ export async function sendPushNotification(
   url: string = "/"
 ) {
   try {
-    // Initialize Web Push ONLY when the function is actually called.
     const push = getWebPush();
 
     const subscriptions =
       await prisma.pushSubscription.findMany({
-        where: {
-          userId,
-        },
+        where: { userId },
       });
 
     if (subscriptions.length === 0) {
@@ -60,18 +47,15 @@ export async function sendPushNotification(
     });
 
     for (const sub of subscriptions) {
-      const pushSubscription = {
-        endpoint: sub.endpoint,
-        keys: sub.keys as any,
-      };
-
       try {
         await push.sendNotification(
-          pushSubscription,
+          {
+            endpoint: sub.endpoint,
+            keys: sub.keys as any,
+          },
           payload
         );
       } catch (err: any) {
-        // Subscription expired or is no longer valid.
         if (err?.statusCode === 410) {
           try {
             await prisma.pushSubscription.delete({
@@ -94,11 +78,6 @@ export async function sendPushNotification(
       }
     }
   } catch (error) {
-    // Push notification failure must NEVER prevent the
-    // main action (message, like, follow, etc.) from succeeding.
-    console.error(
-      "Push notification error:",
-      error
-    );
+    console.error("Push notification error:", error);
   }
 }
