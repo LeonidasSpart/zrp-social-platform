@@ -3,12 +3,13 @@ import { prisma } from "./db";
 
 // ─── Initialize Web Push lazily ──────────────────────────────────
 // IMPORTANT:
-// Do not call webpush.setVapidDetails() at module/build time.
-// Next.js may evaluate this module during `next build`, when
-// VAPID environment variables may not be available yet.
+// Do NOT initialize VAPID at module/build time.
 //
-// VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY are required only when
-// an actual push notification is sent.
+// Next.js can evaluate imported server modules during `next build`.
+// Railway may not provide VAPID environment variables during build.
+//
+// We therefore initialize Web Push only when a notification is
+// actually being sent at runtime.
 
 function getWebPush() {
   const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
@@ -38,8 +39,7 @@ export async function sendPushNotification(
   url: string = "/"
 ) {
   try {
-    // Initialize Web Push ONLY when actually sending.
-    // This prevents Next.js build-time failures.
+    // Initialize Web Push ONLY when the function is actually called.
     const push = getWebPush();
 
     const subscriptions =
@@ -66,36 +66,35 @@ export async function sendPushNotification(
       };
 
       try {
-        await push
-          .sendNotification(
-            pushSubscription,
-            payload
-          )
-          .catch(async (err) => {
-            // If the subscription has expired or is no
-            // longer valid, remove it from the database.
-            if (err.statusCode === 410) {
-              await prisma.pushSubscription.delete({
-                where: {
-                  endpoint: sub.endpoint,
-                },
-              });
-            } else {
-              console.error(
-                "Push notification delivery error:",
-                err
-              );
-            }
-          });
-      } catch (err) {
-        console.error(
-          "Push notification send error:",
-          err
+        await push.sendNotification(
+          pushSubscription,
+          payload
         );
+      } catch (err: any) {
+        // Subscription expired or is no longer valid.
+        if (err?.statusCode === 410) {
+          try {
+            await prisma.pushSubscription.delete({
+              where: {
+                endpoint: sub.endpoint,
+              },
+            });
+          } catch (deleteError) {
+            console.error(
+              "Failed to delete expired push subscription:",
+              deleteError
+            );
+          }
+        } else {
+          console.error(
+            "Push notification delivery error:",
+            err
+          );
+        }
       }
     }
   } catch (error) {
-    // Push notification failure must never prevent the
+    // Push notification failure must NEVER prevent the
     // main action (message, like, follow, etc.) from succeeding.
     console.error(
       "Push notification error:",
