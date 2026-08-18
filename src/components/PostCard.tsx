@@ -187,6 +187,12 @@ export default function PostCard({
 
   // ─── Expand article body ──────────────────────────────────────────
   const [articleExpanded, setArticleExpanded] = useState(false);
+  // Same idea as articleExpanded above, but for the main content field
+  // every post type has (not just ARTICLE's separate body field) -
+  // matches X's own behavior of truncating long posts in the feed with
+  // a "Show more" expand, even though the full text was already
+  // published in full underneath.
+  const [contentExpanded, setContentExpanded] = useState(false);
 
   // ─── Translation ────────────────────────────────────────────────
   const [translatedText, setTranslatedText] = useState<string | null>(null);
@@ -196,6 +202,14 @@ export default function PostCard({
 
   const isAuthor = session?.user?.id === post.author.id;
   const contentParts = parseContent(post.content);
+  // 280 chars matches classic tweet length - a familiar, recognizable
+  // threshold - and is deliberately more relevant here than on X itself,
+  // since ZRP's paid plans already allow posts far longer than that.
+  const CONTENT_TRUNCATE_LENGTH = 280;
+  const isLongContent = post.content.length > CONTENT_TRUNCATE_LENGTH;
+  const displayContentParts = isLongContent && !contentExpanded
+    ? parseContent(post.content.slice(0, CONTENT_TRUNCATE_LENGTH))
+    : contentParts;
   const previewUrl = post.linkUrl || extractFirstUrl(post.content);
   const isRepost = post.isRepost === true;
   const originalAuthor = post.repostOriginalAuthor;
@@ -673,7 +687,7 @@ export default function PostCard({
 
             <div onClick={handlePostClick} onTouchEnd={handleTouchEnd} className="cursor-pointer select-none">
               <p className="text-gray-800 dark:text-gray-200 mt-1 whitespace-pre-wrap break-words">
-                {contentParts.map((part, index) => {
+                {displayContentParts.map((part, index) => {
                   if (part.type === "hashtag") {
                     const tag = part.value.slice(1);
                     return (
@@ -713,7 +727,21 @@ export default function PostCard({
                   }
                   return <span key={index}>{part.value}</span>;
                 })}
+                {isLongContent && !contentExpanded && "..."}
               </p>
+
+              {/* ─── Show more / Show less ─────────────────────────────── */}
+              {isLongContent && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setContentExpanded(!contentExpanded);
+                  }}
+                  className="text-sm text-zrp-red hover:underline mt-0.5"
+                >
+                  {contentExpanded ? "Show less" : "Show more"}
+                </button>
+              )}
 
               {/* ─── Link preview card ────────────────────────────────── */}
               {/* Only for text posts - a post with actual uploaded media
