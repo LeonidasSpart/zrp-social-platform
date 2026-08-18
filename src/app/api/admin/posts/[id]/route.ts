@@ -8,8 +8,9 @@ import { deleteUploadThingFiles } from "@/lib/uploadthing";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const adminCheck = await requireStaff();
   if (!adminCheck.authorized) return adminCheck.response;
 
@@ -18,16 +19,16 @@ export async function DELETE(
     // moderator removing a post (or its comments, cascade-deleted with
     // it) never cleaned up the underlying files either.
     const post = await prisma.post.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       select: { imageUrl: true, imageUrls: true },
     });
     const commentsWithImages = await prisma.comment.findMany({
-      where: { postId: params.id, imageUrl: { not: null } },
+      where: { postId: id, imageUrl: { not: null } },
       select: { imageUrl: true },
     });
 
     await prisma.post.delete({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     await deleteUploadThingFiles([

@@ -7,8 +7,9 @@ import { prisma } from "@/lib/db";
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const adminCheck = await requireStaff();
   if (!adminCheck.authorized) return adminCheck.response;
 
@@ -31,7 +32,7 @@ export async function PUT(
     }
 
     const report = await prisma.report.update({
-      where: { id: params.id },
+      where: { id },
       data,
     });
 

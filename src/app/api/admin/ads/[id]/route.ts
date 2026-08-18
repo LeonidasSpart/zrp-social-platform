@@ -5,8 +5,9 @@ import { prisma } from "@/lib/db";
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
   const check = await requireStaff();
   if (!check.authorized) return check.response;
 
@@ -19,7 +20,7 @@ export async function PUT(
     }
 
     const campaign = await prisma.adCampaign.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: { status: true },
     });
     if (!campaign) {
@@ -33,7 +34,7 @@ export async function PUT(
     }
 
     const updated = await prisma.adCampaign.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status: action === "approve" ? "ACTIVE" : "REJECTED",
         rejectionReason: action === "reject" ? (rejectionReason || null) : null,
