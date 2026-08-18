@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   ChevronDown,
   ChevronUp,
@@ -44,6 +44,7 @@ import {
   ExternalLink,
   BookOpen,
   AlertTriangle,
+  Calendar,
 } from "lucide-react";
 
 interface HelpSection {
@@ -386,10 +387,7 @@ export default function HelpPage() {
 
                     <PlanValue value={feature.free} />
 
-                    <PlanValue
-                      value={feature.pro}
-                      highlighted
-                    />
+                    <PlanValue value={feature.pro} highlighted />
 
                     <PlanValue value={feature.business} />
 
@@ -881,7 +879,6 @@ export default function HelpPage() {
       icon: ShieldCheck,
       content: (
         <div className="space-y-6">
-          {/* Introduction */}
           <div className="rounded-2xl border border-zrp-red/20 bg-gradient-to-br from-zrp-red/10 via-transparent to-transparent p-6">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-zrp-red/10 flex items-center justify-center">
@@ -902,7 +899,6 @@ export default function HelpPage() {
             </div>
           </div>
 
-          {/* Explanation */}
           <p className="help-text">
             Each account can receive a Trust Score from{" "}
             <strong>0 to 100</strong>. The score is calculated from positive
@@ -911,7 +907,6 @@ export default function HelpPage() {
             sensitive account information.
           </p>
 
-          {/* Trust signals */}
           <div>
             <h3 className="font-orbitron font-bold text-base text-zrp-charcoal dark:text-white mb-4">
               What can contribute to the Trust Passport?
@@ -956,7 +951,6 @@ export default function HelpPage() {
             </div>
           </div>
 
-          {/* Trust levels */}
           <div>
             <h3 className="font-orbitron font-bold text-base text-zrp-charcoal dark:text-white mb-4">
               Trust levels
@@ -1001,7 +995,6 @@ export default function HelpPage() {
             </div>
           </div>
 
-          {/* What it does not mean */}
           <div className="rounded-2xl bg-zrp-charcoal dark:bg-black border border-white/10 p-6 text-white">
             <div className="flex items-start gap-4">
               <Lock className="w-6 h-6 text-zrp-red flex-shrink-0" />
@@ -1012,26 +1005,11 @@ export default function HelpPage() {
                 </h3>
 
                 <ul className="mt-3 space-y-2 text-sm leading-6 text-white/65">
-                  <li>
-                    • It is not government or identity verification.
-                  </li>
-
-                  <li>
-                    • It is not a popularity ranking.
-                  </li>
-
-                  <li>
-                    • It is not a financial or credit score.
-                  </li>
-
-                  <li>
-                    • It is not a moderation punishment score.
-                  </li>
-
-                  <li>
-                    • It does not guarantee that a person is trustworthy.
-                  </li>
-
+                  <li>• It is not government or identity verification.</li>
+                  <li>• It is not a popularity ranking.</li>
+                  <li>• It is not a financial or credit score.</li>
+                  <li>• It is not a moderation punishment score.</li>
+                  <li>• It does not guarantee that a person is trustworthy.</li>
                   <li>
                     • It does not guarantee someone's intentions or future
                     behavior.
@@ -1041,7 +1019,6 @@ export default function HelpPage() {
             </div>
           </div>
 
-          {/* Privacy */}
           <div className="rounded-xl border border-zrp-red/20 bg-zrp-red/5 p-5">
             <div className="flex items-start gap-3">
               <Shield className="w-5 h-5 text-zrp-red flex-shrink-0 mt-0.5" />
@@ -1061,7 +1038,6 @@ export default function HelpPage() {
             </div>
           </div>
 
-          {/* Dynamic score */}
           <div className="rounded-2xl border border-zrp-silver/30 dark:border-zrp-charcoal p-5">
             <div className="flex items-start gap-3">
               <Sparkles className="w-5 h-5 text-zrp-red flex-shrink-0 mt-0.5" />
@@ -1080,7 +1056,6 @@ export default function HelpPage() {
             </div>
           </div>
 
-          {/* How to find it */}
           <div className="rounded-2xl border border-zrp-red/20 bg-zrp-red/5 p-5">
             <div className="flex items-start gap-3">
               <Eye className="w-5 h-5 text-zrp-red flex-shrink-0 mt-0.5" />
@@ -1184,33 +1159,27 @@ export default function HelpPage() {
     },
   ];
 
-  const filteredSections = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
+  const query = searchQuery.trim().toLowerCase();
 
-    if (!query) return sections;
+  const filteredSections = query
+    ? sections.filter((section) => {
+        const searchable = [
+          section.title,
+          section.subtitle,
+          section.id,
+        ]
+          .join(" ")
+          .toLowerCase();
 
-    return sections.filter((section) => {
-      const searchable = [
-        section.title,
-        section.subtitle,
-        section.id,
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      return searchable.includes(query);
-    });
-  }, [searchQuery]);
+        return searchable.includes(query);
+      })
+    : sections;
 
   return (
     <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter text-zrp-charcoal dark:text-white">
-      {/* ═══════════════════════════════════════════════════════════════════
-          HERO
-      ═══════════════════════════════════════════════════════════════════ */}
+      {/* HERO */}
 
       <section className="relative overflow-hidden bg-gradient-to-br from-zrp-darkRed via-zrp-deepBlack to-black py-16 sm:py-24 px-4">
-        {/* Web3-style background grid */}
-
         <div
           className="absolute inset-0 opacity-[0.08]"
           style={{
@@ -1236,7 +1205,6 @@ export default function HelpPage() {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 backdrop-blur-sm px-4 py-2 text-xs font-semibold text-white/85 mb-6">
                 <span className="w-2 h-2 rounded-full bg-zrp-red animate-pulse" />
-
                 ZRP SOCIAL · HELP CENTER
               </div>
 
@@ -1253,17 +1221,13 @@ export default function HelpPage() {
                 platform.
               </p>
 
-              {/* Search */}
-
               <div className="mt-8 max-w-2xl relative">
                 <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
 
                 <input
                   type="search"
                   value={searchQuery}
-                  onChange={(event) =>
-                    setSearchQuery(event.target.value)
-                  }
+                  onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder="Search help topics..."
                   className="w-full rounded-2xl border border-white/10 bg-white/10 backdrop-blur-xl pl-14 pr-5 py-4 text-white placeholder:text-white/40 outline-none focus:border-zrp-red/70 focus:ring-2 focus:ring-zrp-red/20 transition"
                 />
@@ -1288,8 +1252,6 @@ export default function HelpPage() {
                 ))}
               </div>
             </div>
-
-            {/* Hero visual */}
 
             <div className="hidden lg:block">
               <div className="relative">
@@ -1360,9 +1322,7 @@ export default function HelpPage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          QUICK NAV
-      ═══════════════════════════════════════════════════════════════════ */}
+      {/* QUICK NAV */}
 
       <section className="border-b border-zrp-silver/20 dark:border-zrp-charcoal bg-white dark:bg-zrp-deepBlack">
         <div className="max-w-6xl mx-auto px-4 py-5">
@@ -1384,13 +1344,9 @@ export default function HelpPage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          MAIN
-      ═══════════════════════════════════════════════════════════════════ */}
+      {/* MAIN */}
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-        {/* Ecosystem cards */}
-
         <div className="grid md:grid-cols-3 gap-4 mb-12">
           <QuickCard
             icon={BookOpen}
@@ -1421,8 +1377,6 @@ export default function HelpPage() {
             {searchQuery}"
           </div>
         )}
-
-        {/* Sections */}
 
         <div className="space-y-4">
           {filteredSections.map((section) => {
@@ -1513,9 +1467,7 @@ export default function HelpPage() {
           )}
         </div>
 
-        {/* ═════════════════════════════════════════════════════════════════
-            SUPPORT CTA
-        ═════════════════════════════════════════════════════════════════ */}
+        {/* SUPPORT CTA */}
 
         <section className="relative overflow-hidden mt-14 rounded-3xl bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack p-8 sm:p-12 text-white">
           <div className="absolute inset-0 opacity-[0.06]">
@@ -1569,8 +1521,6 @@ export default function HelpPage() {
           </div>
         </section>
 
-        {/* Footer links */}
-
         <div className="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-3 text-xs text-zrp-charcoal/45 dark:text-white/40">
           <Link
             href="/privacy"
@@ -1612,9 +1562,7 @@ export default function HelpPage() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   COMPONENTS
-═══════════════════════════════════════════════════════════════════════════ */
+/* COMPONENTS */
 
 function PlanCard({
   icon: Icon,
@@ -1678,7 +1626,6 @@ function PlanCard({
             className="flex items-start gap-2 text-xs text-zrp-charcoal/70 dark:text-white/65"
           >
             <CheckCircle className="w-3.5 h-3.5 text-zrp-red flex-shrink-0 mt-0.5" />
-
             {feature}
           </li>
         ))}
@@ -1724,13 +1671,9 @@ function StepCard({
 }) {
   return (
     <div className="rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal bg-zrp-silver/5 dark:bg-zrp-charcoal/30 p-4">
-      <div className="font-mono text-xs text-zrp-red">
-        {number}
-      </div>
+      <div className="font-mono text-xs text-zrp-red">{number}</div>
 
-      <h3 className="mt-3 font-orbitron font-bold text-sm">
-        {title}
-      </h3>
+      <h3 className="mt-3 font-orbitron font-bold text-sm">{title}</h3>
 
       <p className="mt-1 text-xs leading-5 text-zrp-charcoal/55 dark:text-white/50">
         {text}
@@ -1783,9 +1726,7 @@ function ActionGuide({
           <Icon className="w-5 h-5" />
         </div>
 
-        <h3 className="font-orbitron font-bold">
-          {title}
-        </h3>
+        <h3 className="font-orbitron font-bold">{title}</h3>
       </div>
 
       <ol className="mt-5 space-y-3">
@@ -1831,9 +1772,7 @@ function InfoCard({
     <div className="rounded-xl border border-zrp-silver/25 dark:border-zrp-charcoal bg-zrp-silver/5 dark:bg-zrp-charcoal/30 p-5">
       <Icon className="w-5 h-5 text-zrp-red" />
 
-      <h3 className="mt-3 font-orbitron font-bold text-sm">
-        {title}
-      </h3>
+      <h3 className="mt-3 font-orbitron font-bold text-sm">{title}</h3>
 
       <p className="mt-2 text-sm leading-6 text-zrp-charcoal/60 dark:text-white/55">
         {text}
@@ -1878,9 +1817,7 @@ function QuickCard({
           <Icon className="w-5 h-5" />
         </div>
 
-        <h3 className="font-orbitron font-bold text-sm">
-          {title}
-        </h3>
+        <h3 className="font-orbitron font-bold text-sm">{title}</h3>
       </div>
 
       <p className="mt-3 text-sm leading-6 text-zrp-charcoal/60 dark:text-white/55">
@@ -1904,14 +1841,10 @@ function GlassStat({
       <div className="flex items-center gap-3">
         <Icon className="w-4 h-4 text-zrp-red" />
 
-        <span className="text-sm text-white/55">
-          {label}
-        </span>
+        <span className="text-sm text-white/55">{label}</span>
       </div>
 
-      <span className="text-xs font-mono text-white/80">
-        {value}
-      </span>
+      <span className="text-xs font-mono text-white/80">{value}</span>
     </div>
   );
 }
