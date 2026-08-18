@@ -71,6 +71,11 @@ export async function GET(
      * - a moderation punishment score
      *
      * It represents positive trust signals available on ZRP.
+     *
+     * IMPORTANT:
+     * The scoring formula below remains unchanged.
+     * The new "breakdown" response simply exposes how the score
+     * was calculated so the frontend can display it transparently.
      */
 
     /*
@@ -78,13 +83,13 @@ export async function GET(
      * ACCOUNT AGE
      * ---------------------------------------------------------------
      *
-     * Days are calculated from the exact elapsed time.
+     * Days are calculated from exact elapsed time.
      *
      * Months are calculated using calendar months rather than
      * dividing the number of days by 30.44.
      *
-     * This means the displayed account age automatically updates
-     * based on the user's original createdAt timestamp.
+     * This automatically updates whenever the Trust Passport
+     * endpoint is requested.
      */
 
     const createdAt = new Date(user.createdAt);
@@ -107,6 +112,7 @@ export async function GET(
      * creation day, the current month is not complete yet.
      *
      * Example:
+     *
      * Created: July 25
      * Current: August 18
      * Result: 0 months
@@ -115,6 +121,7 @@ export async function GET(
      * Current: August 25
      * Result: 1 month
      */
+
     if (nowDate.getDate() < createdAt.getDate()) {
       accountAgeMonths--;
     }
@@ -166,45 +173,269 @@ export async function GET(
 
     /*
      * ---------------------------------------------------------------
-     * SCORE
+     * SCORE POINTS
      * ---------------------------------------------------------------
      *
-     * Maximum = 100
+     * Maximum possible score:
      *
-     * Popularity is deliberately kept relatively small.
+     * SECURITY   = 20
+     * PROFILE    = 30
+     * HISTORY    = 25
+     * COMMUNITY  = 17
+     * ZRP        = 8
+     *
+     * TOTAL      = 100
+     *
+     * This is the SAME scoring formula already used by ZRP.
      */
 
-    let score = 0;
+    const scorePoints = {
+      emailVerified: profileSignals.emailVerified ? 20 : 0,
 
-    // Security / account verification
-    if (profileSignals.emailVerified) score += 20;
+      avatarAdded: profileSignals.avatarAdded ? 10 : 0,
+      coverAdded: profileSignals.coverAdded ? 5 : 0,
+      nameAdded: profileSignals.nameAdded ? 5 : 0,
+      bioAdded: profileSignals.bioAdded ? 5 : 0,
+      locationAdded: profileSignals.locationAdded ? 3 : 0,
+      websiteAdded: profileSignals.websiteAdded ? 2 : 0,
 
-    // Profile authenticity / completeness
-    if (profileSignals.avatarAdded) score += 10;
-    if (profileSignals.coverAdded) score += 5;
-    if (profileSignals.nameAdded) score += 5;
-    if (profileSignals.bioAdded) score += 5;
-    if (profileSignals.locationAdded) score += 3;
-    if (profileSignals.websiteAdded) score += 2;
+      established30Days: ageSignals.established30Days ? 5 : 0,
+      established90Days: ageSignals.established90Days ? 5 : 0,
+      established180Days: ageSignals.established180Days ? 5 : 0,
+      established365Days: ageSignals.established365Days ? 10 : 0,
 
-    // Account age
-    if (ageSignals.established30Days) score += 5;
-    if (ageSignals.established90Days) score += 5;
-    if (ageSignals.established180Days) score += 5;
-    if (ageSignals.established365Days) score += 10;
+      hasPosts: activitySignals.hasPosts ? 5 : 0,
+      hasComments: activitySignals.hasComments ? 5 : 0,
+      hasLikes: activitySignals.hasLikes ? 2 : 0,
+      hasReposts: activitySignals.hasReposts ? 2 : 0,
+      hasFollowers: activitySignals.hasFollowers ? 3 : 0,
 
-    // Healthy community activity
-    if (activitySignals.hasPosts) score += 5;
-    if (activitySignals.hasComments) score += 5;
-    if (activitySignals.hasLikes) score += 2;
-    if (activitySignals.hasReposts) score += 2;
-    if (activitySignals.hasFollowers) score += 3;
+      zrpVerification: user.badgeType ? 8 : 0,
+    };
 
-    // ZRP verification
-    if (user.badgeType) score += 8;
+    /*
+     * ---------------------------------------------------------------
+     * SCORE
+     * ---------------------------------------------------------------
+     */
+
+    let score =
+      scorePoints.emailVerified +
+      scorePoints.avatarAdded +
+      scorePoints.coverAdded +
+      scorePoints.nameAdded +
+      scorePoints.bioAdded +
+      scorePoints.locationAdded +
+      scorePoints.websiteAdded +
+      scorePoints.established30Days +
+      scorePoints.established90Days +
+      scorePoints.established180Days +
+      scorePoints.established365Days +
+      scorePoints.hasPosts +
+      scorePoints.hasComments +
+      scorePoints.hasLikes +
+      scorePoints.hasReposts +
+      scorePoints.hasFollowers +
+      scorePoints.zrpVerification;
 
     // Hard cap
     score = Math.min(score, 100);
+
+    /*
+     * ---------------------------------------------------------------
+     * TRANSPARENT SCORE BREAKDOWN
+     * ---------------------------------------------------------------
+     *
+     * This is public information derived from the same scoring
+     * formula. No private security or moderation information is
+     * exposed here.
+     */
+
+    const breakdown = [
+      {
+        key: "security",
+        title: "Security",
+        description: "Account security and verification signals.",
+        points: scorePoints.emailVerified,
+        maxPoints: 20,
+        signals: [
+          {
+            key: "emailVerified",
+            title: "Email verified",
+            points: scorePoints.emailVerified,
+            maxPoints: 20,
+            verified: profileSignals.emailVerified,
+          },
+        ],
+      },
+
+      {
+        key: "profile",
+        title: "Profile",
+        description: "Positive profile completeness signals.",
+        points:
+          scorePoints.avatarAdded +
+          scorePoints.coverAdded +
+          scorePoints.nameAdded +
+          scorePoints.bioAdded +
+          scorePoints.locationAdded +
+          scorePoints.websiteAdded,
+        maxPoints: 30,
+        signals: [
+          {
+            key: "avatarAdded",
+            title: "Profile photo added",
+            points: scorePoints.avatarAdded,
+            maxPoints: 10,
+            verified: profileSignals.avatarAdded,
+          },
+          {
+            key: "coverAdded",
+            title: "Profile banner added",
+            points: scorePoints.coverAdded,
+            maxPoints: 5,
+            verified: profileSignals.coverAdded,
+          },
+          {
+            key: "nameAdded",
+            title: "Display name added",
+            points: scorePoints.nameAdded,
+            maxPoints: 5,
+            verified: profileSignals.nameAdded,
+          },
+          {
+            key: "bioAdded",
+            title: "Profile bio added",
+            points: scorePoints.bioAdded,
+            maxPoints: 5,
+            verified: profileSignals.bioAdded,
+          },
+          {
+            key: "locationAdded",
+            title: "Location added",
+            points: scorePoints.locationAdded,
+            maxPoints: 3,
+            verified: profileSignals.locationAdded,
+          },
+          {
+            key: "websiteAdded",
+            title: "Website added",
+            points: scorePoints.websiteAdded,
+            maxPoints: 2,
+            verified: profileSignals.websiteAdded,
+          },
+        ],
+      },
+
+      {
+        key: "history",
+        title: "Account history",
+        description: "Positive signals based on account age.",
+        points:
+          scorePoints.established30Days +
+          scorePoints.established90Days +
+          scorePoints.established180Days +
+          scorePoints.established365Days,
+        maxPoints: 25,
+        signals: [
+          {
+            key: "established30Days",
+            title: "30-day account history",
+            points: scorePoints.established30Days,
+            maxPoints: 5,
+            verified: ageSignals.established30Days,
+          },
+          {
+            key: "established90Days",
+            title: "90-day account history",
+            points: scorePoints.established90Days,
+            maxPoints: 5,
+            verified: ageSignals.established90Days,
+          },
+          {
+            key: "established180Days",
+            title: "180-day account history",
+            points: scorePoints.established180Days,
+            maxPoints: 5,
+            verified: ageSignals.established180Days,
+          },
+          {
+            key: "established365Days",
+            title: "1-year account history",
+            points: scorePoints.established365Days,
+            maxPoints: 10,
+            verified: ageSignals.established365Days,
+          },
+        ],
+      },
+
+      {
+        key: "community",
+        title: "Community",
+        description: "Positive participation and community signals.",
+        points:
+          scorePoints.hasPosts +
+          scorePoints.hasComments +
+          scorePoints.hasLikes +
+          scorePoints.hasReposts +
+          scorePoints.hasFollowers,
+        maxPoints: 17,
+        signals: [
+          {
+            key: "hasPosts",
+            title: "Published posts",
+            points: scorePoints.hasPosts,
+            maxPoints: 5,
+            verified: activitySignals.hasPosts,
+          },
+          {
+            key: "hasComments",
+            title: "Community comments",
+            points: scorePoints.hasComments,
+            maxPoints: 5,
+            verified: activitySignals.hasComments,
+          },
+          {
+            key: "hasLikes",
+            title: "Community likes",
+            points: scorePoints.hasLikes,
+            maxPoints: 2,
+            verified: activitySignals.hasLikes,
+          },
+          {
+            key: "hasReposts",
+            title: "Community reposts",
+            points: scorePoints.hasReposts,
+            maxPoints: 2,
+            verified: activitySignals.hasReposts,
+          },
+          {
+            key: "hasFollowers",
+            title: "Community connections",
+            points: scorePoints.hasFollowers,
+            maxPoints: 3,
+            verified: activitySignals.hasFollowers,
+          },
+        ],
+      },
+
+      {
+        key: "zrp",
+        title: "ZRP",
+        description: "ZRP platform verification signals.",
+        points: scorePoints.zrpVerification,
+        maxPoints: 8,
+        signals: [
+          {
+            key: "zrpVerification",
+            title: "ZRP verification",
+            points: scorePoints.zrpVerification,
+            maxPoints: 8,
+            verified: Boolean(user.badgeType),
+          },
+        ],
+      },
+    ];
 
     /*
      * ---------------------------------------------------------------
@@ -245,35 +476,70 @@ export async function GET(
         description: "The account has completed email verification.",
         verified: profileSignals.emailVerified,
         category: "SECURITY",
+        points: scorePoints.emailVerified,
+        maxPoints: 20,
       },
+
       {
         key: "avatar",
         title: "Profile photo added",
         description: "A profile photo has been added to the account.",
         verified: profileSignals.avatarAdded,
         category: "PROFILE",
+        points: scorePoints.avatarAdded,
+        maxPoints: 10,
       },
+
       {
         key: "cover",
         title: "Profile banner added",
         description: "A profile banner has been added.",
         verified: profileSignals.coverAdded,
         category: "PROFILE",
+        points: scorePoints.coverAdded,
+        maxPoints: 5,
       },
+
       {
         key: "name",
         title: "Display name added",
         description: "The account has a configured display name.",
         verified: profileSignals.nameAdded,
         category: "PROFILE",
+        points: scorePoints.nameAdded,
+        maxPoints: 5,
       },
+
       {
         key: "bio",
         title: "Profile bio added",
         description: "The account has provided profile information.",
         verified: profileSignals.bioAdded,
         category: "PROFILE",
+        points: scorePoints.bioAdded,
+        maxPoints: 5,
       },
+
+      {
+        key: "location",
+        title: "Location added",
+        description: "A location has been added to the public profile.",
+        verified: profileSignals.locationAdded,
+        category: "PROFILE",
+        points: scorePoints.locationAdded,
+        maxPoints: 3,
+      },
+
+      {
+        key: "website",
+        title: "Website added",
+        description: "A website has been added to the profile.",
+        verified: profileSignals.websiteAdded,
+        category: "PROFILE",
+        points: scorePoints.websiteAdded,
+        maxPoints: 2,
+      },
+
       {
         key: "account-age",
         title:
@@ -288,7 +554,14 @@ export async function GET(
               }.`,
         verified: accountAgeDays >= 30,
         category: "HISTORY",
+        points:
+          scorePoints.established30Days +
+          scorePoints.established90Days +
+          scorePoints.established180Days +
+          scorePoints.established365Days,
+        maxPoints: 25,
       },
+
       {
         key: "community",
         title: "Community activity",
@@ -300,7 +573,14 @@ export async function GET(
           activitySignals.hasLikes ||
           activitySignals.hasReposts,
         category: "COMMUNITY",
+        points:
+          scorePoints.hasPosts +
+          scorePoints.hasComments +
+          scorePoints.hasLikes +
+          scorePoints.hasReposts,
+        maxPoints: 14,
       },
+
       {
         key: "followers",
         title: "Community connections",
@@ -308,7 +588,10 @@ export async function GET(
           "The account has established connections with other ZRP users.",
         verified: activitySignals.hasFollowers,
         category: "COMMUNITY",
+        points: scorePoints.hasFollowers,
+        maxPoints: 3,
       },
+
       {
         key: "verified",
         title: "ZRP verification",
@@ -316,6 +599,8 @@ export async function GET(
           "This account currently has a ZRP verification badge.",
         verified: Boolean(user.badgeType),
         category: "ZRP",
+        points: scorePoints.zrpVerification,
+        maxPoints: 8,
       },
     ];
 
@@ -340,6 +625,15 @@ export async function GET(
         level,
         levelLabel,
         generatedAt: new Date().toISOString(),
+
+        /*
+         * Explicit scoring information for the frontend.
+         *
+         * The frontend should never calculate the Trust Score itself.
+         * It should display the backend result and this breakdown.
+         */
+        maxScore: 100,
+        breakdown,
       },
 
       user: {
