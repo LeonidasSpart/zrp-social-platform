@@ -1,9 +1,17 @@
+import { NextRequest, NextResponse } from "next/server";
+import { requireStaff } from "@/lib/admin";
+import { getToken } from "next-auth/jwt";
+import { prisma } from "@/lib/db";
+
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const check = await requireStaff();
-  if (!check.authorized) return check.response;
+
+  if (!check.authorized) {
+    return check.response;
+  }
 
   const token = await getToken({
     req,
@@ -11,8 +19,6 @@ export async function PUT(
   });
 
   try {
-    const { id } = await params;
-
     const { action, rejectionReason } = await req.json();
 
     if (action !== "approve" && action !== "reject") {
@@ -21,6 +27,8 @@ export async function PUT(
         { status: 400 }
       );
     }
+
+    const { id } = await params;
 
     const campaign = await prisma.adCampaign.findUnique({
       where: { id },
@@ -47,16 +55,10 @@ export async function PUT(
     const updated = await prisma.adCampaign.update({
       where: { id },
       data: {
-        status:
-          action === "approve"
-            ? "ACTIVE"
-            : "REJECTED",
+        status: action === "approve" ? "ACTIVE" : "REJECTED",
         rejectionReason:
-          action === "reject"
-            ? rejectionReason || null
-            : null,
-        reviewedBy:
-          token?.id as string | undefined,
+          action === "reject" ? rejectionReason || null : null,
+        reviewedBy: token?.id as string | undefined,
         reviewedAt: new Date(),
       },
     });
@@ -65,16 +67,10 @@ export async function PUT(
       campaign: updated,
     });
   } catch (error) {
-    console.error(
-      "Error reviewing ad campaign:",
-      error
-    );
+    console.error("Error reviewing ad campaign:", error);
 
     return NextResponse.json(
-      {
-        error:
-          "Failed to review campaign",
-      },
+      { error: "Failed to review campaign" },
       { status: 500 }
     );
   }
