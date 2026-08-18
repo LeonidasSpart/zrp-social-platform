@@ -73,14 +73,53 @@ export async function GET(
      * It represents positive trust signals available on ZRP.
      */
 
-    const now = Date.now();
+    /*
+     * ---------------------------------------------------------------
+     * ACCOUNT AGE
+     * ---------------------------------------------------------------
+     *
+     * Days are calculated from the exact elapsed time.
+     *
+     * Months are calculated using calendar months rather than
+     * dividing the number of days by 30.44.
+     *
+     * This means the displayed account age automatically updates
+     * based on the user's original createdAt timestamp.
+     */
 
-    const accountAgeDays = Math.floor(
-      (now - new Date(user.createdAt).getTime()) /
-        (1000 * 60 * 60 * 24)
+    const createdAt = new Date(user.createdAt);
+    const nowDate = new Date();
+
+    const accountAgeDays = Math.max(
+      0,
+      Math.floor(
+        (nowDate.getTime() - createdAt.getTime()) /
+          (1000 * 60 * 60 * 24)
+      )
     );
 
-    const accountAgeMonths = Math.floor(accountAgeDays / 30.44);
+    let accountAgeMonths =
+      (nowDate.getFullYear() - createdAt.getFullYear()) * 12 +
+      (nowDate.getMonth() - createdAt.getMonth());
+
+    /*
+     * If today's calendar day has not reached the account's
+     * creation day, the current month is not complete yet.
+     *
+     * Example:
+     * Created: July 25
+     * Current: August 18
+     * Result: 0 months
+     *
+     * Created: July 25
+     * Current: August 25
+     * Result: 1 month
+     */
+    if (nowDate.getDate() < createdAt.getDate()) {
+      accountAgeMonths--;
+    }
+
+    accountAgeMonths = Math.max(0, accountAgeMonths);
 
     /*
      * ---------------------------------------------------------------
@@ -114,7 +153,7 @@ export async function GET(
 
     /*
      * ---------------------------------------------------------------
-     * ACCOUNT AGE
+     * ACCOUNT AGE SIGNALS
      * ---------------------------------------------------------------
      */
 
@@ -244,10 +283,9 @@ export async function GET(
         description:
           accountAgeMonths >= 12
             ? "This account has been active on ZRP for at least one year."
-            : `This account has been on ZRP for ${Math.max(
-                accountAgeMonths,
-                0
-              )} month${accountAgeMonths === 1 ? "" : "s"}.`,
+            : `This account has been on ZRP for ${accountAgeMonths} month${
+                accountAgeMonths === 1 ? "" : "s"
+              }.`,
         verified: accountAgeDays >= 30,
         category: "HISTORY",
       },
@@ -282,6 +320,10 @@ export async function GET(
     ];
 
     /*
+     * ---------------------------------------------------------------
+     * PRIVACY
+     * ---------------------------------------------------------------
+     *
      * We intentionally DO NOT expose:
      *
      * - email address
