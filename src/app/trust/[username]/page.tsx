@@ -13,6 +13,8 @@ import {
   Lock,
   Loader2,
   Info,
+  Activity,
+  Award,
 } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
@@ -53,29 +55,103 @@ interface TrustData {
   };
 }
 
+/*
+ * ---------------------------------------------------------------
+ * TRUST LEVEL DESCRIPTION
+ * ---------------------------------------------------------------
+ */
+
 function getLevelDescription(
   level: TrustData["passport"]["level"]
 ) {
   switch (level) {
     case "EXCELLENT":
       return "This account has a strong collection of positive ZRP trust signals.";
+
     case "HIGH":
       return "This account has a strong history of positive ZRP trust signals.";
+
     case "GOOD":
       return "This account has established several positive trust signals.";
+
     case "MODERATE":
       return "This account is building a history on ZRP.";
+
+    case "LOW":
     default:
       return "This account is still building its ZRP trust history.";
   }
 }
 
+/*
+ * ---------------------------------------------------------------
+ * SCORE COLOR
+ * ---------------------------------------------------------------
+ */
+
 function getScoreTextClass(score: number) {
   if (score >= 90) return "text-zrp-red";
   if (score >= 75) return "text-zrp-red";
   if (score >= 55) return "text-zrp-red";
+
   return "text-gray-600 dark:text-gray-300";
 }
+
+/*
+ * ---------------------------------------------------------------
+ * LEVEL BADGE
+ * ---------------------------------------------------------------
+ */
+
+function getLevelBadgeClass(
+  level: TrustData["passport"]["level"]
+) {
+  switch (level) {
+    case "EXCELLENT":
+      return "bg-zrp-red/10 text-zrp-red border-zrp-red/20";
+
+    case "HIGH":
+      return "bg-zrp-red/10 text-zrp-red border-zrp-red/20";
+
+    case "GOOD":
+      return "bg-zrp-red/10 text-zrp-red border-zrp-red/20";
+
+    case "MODERATE":
+      return "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700";
+
+    case "LOW":
+    default:
+      return "bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700";
+  }
+}
+
+/*
+ * ---------------------------------------------------------------
+ * FORMAT LARGE NUMBERS
+ * ---------------------------------------------------------------
+ */
+
+function formatCount(value: number) {
+  if (value >= 1_000_000) {
+    return `${(value / 1_000_000)
+      .toFixed(1)
+      .replace(/\.0$/, "")}M`;
+  }
+
+  if (value >= 1_000) {
+    return `${(value / 1_000)
+      .toFixed(1)
+      .replace(/\.0$/, "")}K`;
+  }
+
+  return value.toString();
+}
+
+/*
+ * ---------------------------------------------------------------
+ * TRUST PASSPORT PAGE
+ * ---------------------------------------------------------------
+ */
 
 export default function TrustPassportPage({
   params,
@@ -86,31 +162,64 @@ export default function TrustPassportPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  /*
+   * -------------------------------------------------------------
+   * LOAD TRUST PASSPORT
+   * -------------------------------------------------------------
+   */
+
   useEffect(() => {
+    let cancelled = false;
+
     const loadTrustPassport = async () => {
       try {
         setLoading(true);
+        setError("");
 
         const res = await fetch(
-          `/api/users/${encodeURIComponent(params.username)}/trust`
+          `/api/users/${encodeURIComponent(
+            params.username
+          )}/trust`,
+          {
+            method: "GET",
+            cache: "no-store",
+          }
         );
 
         if (!res.ok) {
           throw new Error("Trust Passport unavailable");
         }
 
-        const result = await res.json();
-        setData(result);
+        const result: TrustData = await res.json();
+
+        if (!cancelled) {
+          setData(result);
+        }
       } catch (err) {
-        console.error(err);
-        setError("Unable to load this Trust Passport.");
+        console.error("Trust Passport loading error:", err);
+
+        if (!cancelled) {
+          setError("Unable to load this Trust Passport.");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     loadTrustPassport();
+
+    return () => {
+      cancelled = true;
+    };
   }, [params.username]);
+
+  /*
+   * -------------------------------------------------------------
+   * LOADING STATE
+   * -------------------------------------------------------------
+   */
 
   if (loading) {
     return (
@@ -119,6 +228,12 @@ export default function TrustPassportPage({
       </div>
     );
   }
+
+  /*
+   * -------------------------------------------------------------
+   * ERROR STATE
+   * -------------------------------------------------------------
+   */
 
   if (error || !data) {
     return (
@@ -129,12 +244,14 @@ export default function TrustPassportPage({
           Trust Passport unavailable
         </h1>
 
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-sm">
           {error || "This account could not be found."}
         </p>
 
         <Link
-          href={`/profile/${params.username}`}
+          href={`/profile/${encodeURIComponent(
+            params.username
+          )}`}
           className="mt-6 px-5 py-2 rounded-full bg-zrp-red text-white text-sm font-medium hover:bg-zrp-darkRed transition"
         >
           Back to profile
@@ -143,7 +260,16 @@ export default function TrustPassportPage({
     );
   }
 
-  const score = data.passport.score;
+  const score = Math.max(
+    0,
+    Math.min(100, data.passport.score)
+  );
+
+  /*
+   * -------------------------------------------------------------
+   * GROUP TRUST SIGNALS
+   * -------------------------------------------------------------
+   */
 
   const categories = [
     "SECURITY",
@@ -160,6 +286,12 @@ export default function TrustPassportPage({
     ),
   }));
 
+  /*
+   * -------------------------------------------------------------
+   * ACCOUNT DATE
+   * -------------------------------------------------------------
+   */
+
   const formattedDate = new Date(
     data.user.createdAt
   ).toLocaleDateString("en-US", {
@@ -167,21 +299,55 @@ export default function TrustPassportPage({
     year: "numeric",
   });
 
+  /*
+   * -------------------------------------------------------------
+   * ACCOUNT AGE TEXT
+   * -------------------------------------------------------------
+   *
+   * The API calculates these values automatically from createdAt.
+   */
+
+  const accountAgeText =
+    data.user.accountAgeMonths >= 12
+      ? `${Math.floor(
+          data.user.accountAgeMonths / 12
+        )} year${
+          Math.floor(
+            data.user.accountAgeMonths / 12
+          ) === 1
+            ? ""
+            : "s"
+        }`
+      : `${data.user.accountAgeMonths} month${
+          data.user.accountAgeMonths === 1
+            ? ""
+            : "s"
+        }`;
+
+  /*
+   * -------------------------------------------------------------
+   * RENDER
+   * -------------------------------------------------------------
+   */
+
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-zrp-deepBlack">
       <div className="max-w-2xl mx-auto min-h-screen bg-white dark:bg-zrp-deepBlack">
-        {/* Header */}
+        {/* =========================================================
+            HEADER
+        ========================================================= */}
+
         <div className="sticky top-0 z-20 border-b border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-zrp-deepBlack/95 backdrop-blur">
           <div className="px-4 py-3 flex items-center gap-3">
             <Link
               href={`/profile/${data.user.username}`}
               className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-              aria-label="Back"
+              aria-label="Back to profile"
             >
               <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-gray-200" />
             </Link>
 
-            <div>
+            <div className="min-w-0">
               <h1 className="font-bold text-gray-900 dark:text-white">
                 ZRP Trust Passport
               </h1>
@@ -193,7 +359,10 @@ export default function TrustPassportPage({
           </div>
         </div>
 
-        {/* User */}
+        {/* =========================================================
+            USER
+        ========================================================= */}
+
         <section className="px-5 pt-8 pb-6 text-center">
           <div className="flex justify-center">
             <div className="relative">
@@ -201,38 +370,63 @@ export default function TrustPassportPage({
                 {data.user.avatarUrl ? (
                   <img
                     src={data.user.avatarUrl}
-                    alt={data.user.name || data.user.username}
+                    alt={
+                      data.user.name ||
+                      data.user.username
+                    }
                     className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-gray-500">
-                    {(data.user.name || data.user.username)[0].toUpperCase()}
+                    {(
+                      data.user.name ||
+                      data.user.username
+                    )[0].toUpperCase()}
                   </div>
                 )}
               </div>
 
-              <div className="absolute -right-1 -bottom-1 w-9 h-9 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center">
+              <div className="absolute -right-1 -bottom-1 w-9 h-9 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                 <ShieldCheck className="w-7 h-7 text-zrp-red" />
               </div>
             </div>
           </div>
 
-          <div className="mt-4 flex justify-center items-center gap-1">
+          <div className="mt-4 flex justify-center items-center gap-1 flex-wrap">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              {data.user.name || data.user.username}
+              {data.user.name ||
+                data.user.username}
             </h2>
 
             {data.user.badgeType && (
-              <VerifiedBadge badgeType={data.user.badgeType} />
+              <VerifiedBadge
+                badgeType={data.user.badgeType}
+              />
             )}
           </div>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
             @{data.user.username}
           </p>
+
+          {/* Trust level badge */}
+
+          <div className="mt-3 flex justify-center">
+            <span
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-semibold ${getLevelBadgeClass(
+                data.passport.level
+              )}`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              {data.passport.levelLabel}
+            </span>
+          </div>
         </section>
 
-        {/* Score */}
+        {/* =========================================================
+            SCORE
+        ========================================================= */}
+
         <section className="px-5">
           <div className="rounded-2xl border border-zrp-red/20 bg-zrp-red/5 dark:bg-zrp-red/10 p-6 text-center">
             <div className="flex justify-center">
@@ -258,59 +452,145 @@ export default function TrustPassportPage({
             </h3>
 
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-              {getLevelDescription(data.passport.level)}
+              {getLevelDescription(
+                data.passport.level
+              )}
+            </p>
+
+            <div className="mt-4 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-zrp-red transition-all duration-500"
+                style={{
+                  width: `${score}%`,
+                }}
+              />
+            </div>
+
+            <p className="mt-2 text-[11px] text-gray-400 dark:text-gray-500">
+              Score is automatically calculated from
+              available ZRP trust signals.
             </p>
           </div>
         </section>
 
-        {/* Account overview */}
+        {/* =========================================================
+            ACCOUNT OVERVIEW
+        ========================================================= */}
+
         <section className="px-5 mt-5">
           <div className="grid grid-cols-3 gap-3">
+            {/* Posts */}
+
             <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-4 text-center">
               <FileText className="w-5 h-5 mx-auto text-zrp-red" />
+
               <div className="mt-2 font-bold text-gray-900 dark:text-white">
-                {data.counts.posts}
+                {formatCount(
+                  data.counts.posts
+                )}
               </div>
+
               <div className="text-xs text-gray-500 dark:text-gray-400">
                 Posts
               </div>
             </div>
 
+            {/* Followers */}
+
             <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-4 text-center">
               <Users className="w-5 h-5 mx-auto text-zrp-red" />
+
               <div className="mt-2 font-bold text-gray-900 dark:text-white">
-                {data.counts.followers}
+                {formatCount(
+                  data.counts.followers
+                )}
               </div>
+
               <div className="text-xs text-gray-500 dark:text-gray-400">
                 Followers
               </div>
             </div>
 
+            {/* Account age */}
+
             <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-4 text-center">
               <Calendar className="w-5 h-5 mx-auto text-zrp-red" />
+
               <div className="mt-2 font-bold text-gray-900 dark:text-white">
-                {data.user.accountAgeMonths}
+                {accountAgeText}
               </div>
+
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                Months
+                On ZRP
               </div>
             </div>
           </div>
         </section>
 
-        {/* Trust signals */}
+        {/* =========================================================
+            ACCOUNT AGE DETAIL
+        ========================================================= */}
+
+        <section className="px-5 mt-5">
+          <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+            <div className="flex items-start gap-3">
+              <Calendar className="w-5 h-5 text-zrp-red flex-shrink-0 mt-0.5" />
+
+              <div className="min-w-0">
+                <h4 className="font-semibold text-sm text-gray-900 dark:text-white">
+                  Account history
+                </h4>
+
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Joined ZRP in {formattedDate}.
+                </p>
+
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Account age:{" "}
+                  <span className="font-medium text-gray-700 dark:text-gray-300">
+                    {accountAgeText}
+                  </span>
+                  {" · "}
+                  {data.user.accountAgeDays} days.
+                </p>
+
+                <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-2">
+                  Account age is automatically
+                  calculated from the original account
+                  creation date.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================
+            TRUST SIGNALS
+        ========================================================= */}
+
         <section className="px-5 mt-8 pb-10">
           <div className="flex items-center gap-2 mb-4">
             <ShieldCheck className="w-5 h-5 text-zrp-red" />
 
-            <h3 className="font-bold text-gray-900 dark:text-white">
-              Trust signals
-            </h3>
+            <div>
+              <h3 className="font-bold text-gray-900 dark:text-white">
+                Trust signals
+              </h3>
+
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Public signals used to calculate this
+                passport.
+              </p>
+            </div>
           </div>
 
           <div className="space-y-6">
             {groupedSignals.map((group) => {
-              if (group.signals.length === 0) return null;
+              if (
+                group.signals.length === 0
+              ) {
+                return null;
+              }
 
               return (
                 <div key={group.category}>
@@ -319,38 +599,44 @@ export default function TrustPassportPage({
                   </h4>
 
                   <div className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-                    {group.signals.map((signal, index) => (
-                      <div
-                        key={signal.key}
-                        className={`p-4 flex items-start gap-3 ${
-                          index !== group.signals.length - 1
-                            ? "border-b border-gray-200 dark:border-gray-800"
-                            : ""
-                        }`}
-                      >
-                        {signal.verified ? (
-                          <CheckCircle2 className="w-5 h-5 text-zrp-red flex-shrink-0 mt-0.5" />
-                        ) : (
-                          <Circle className="w-5 h-5 text-gray-300 dark:text-gray-600 flex-shrink-0 mt-0.5" />
-                        )}
+                    {group.signals.map(
+                      (signal, index) => (
+                        <div
+                          key={signal.key}
+                          className={`p-4 flex items-start gap-3 ${
+                            index !==
+                            group.signals.length -
+                              1
+                              ? "border-b border-gray-200 dark:border-gray-800"
+                              : ""
+                          }`}
+                        >
+                          {signal.verified ? (
+                            <CheckCircle2 className="w-5 h-5 text-zrp-red flex-shrink-0 mt-0.5" />
+                          ) : (
+                            <Circle className="w-5 h-5 text-gray-300 dark:text-gray-600 flex-shrink-0 mt-0.5" />
+                          )}
 
-                        <div className="min-w-0">
-                          <div
-                            className={`font-medium text-sm ${
-                              signal.verified
-                                ? "text-gray-900 dark:text-white"
-                                : "text-gray-500 dark:text-gray-400"
-                            }`}
-                          >
-                            {signal.title}
+                          <div className="min-w-0">
+                            <div
+                              className={`font-medium text-sm ${
+                                signal.verified
+                                  ? "text-gray-900 dark:text-white"
+                                  : "text-gray-500 dark:text-gray-400"
+                              }`}
+                            >
+                              {signal.title}
+                            </div>
+
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              {
+                                signal.description
+                              }
+                            </p>
                           </div>
-
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            {signal.description}
-                          </p>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
                 </div>
               );
@@ -358,25 +644,44 @@ export default function TrustPassportPage({
           </div>
         </section>
 
-        {/* Account information */}
+        {/* =========================================================
+            COMMUNITY INFORMATION
+        ========================================================= */}
+
         <section className="px-5 pb-10">
           <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
             <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-gray-500 flex-shrink-0" />
+              <Activity className="w-5 h-5 text-zrp-red flex-shrink-0 mt-0.5" />
 
               <div>
-                <h4 className="font-medium text-sm text-gray-900 dark:text-white">
-                  Account history
+                <h4 className="font-semibold text-sm text-gray-900 dark:text-white">
+                  Community participation
                 </h4>
 
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Joined ZRP in {formattedDate}.
+                  {formatCount(
+                    data.counts.posts
+                  )}{" "}
+                  posts and{" "}
+                  {formatCount(
+                    data.counts.followers
+                  )}{" "}
+                  followers are currently associated
+                  with this public account.
                 </p>
               </div>
             </div>
+          </div>
+        </section>
 
-            {data.user.isPrivate && (
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800 flex items-start gap-3">
+        {/* =========================================================
+            PRIVATE ACCOUNT
+        ========================================================= */}
+
+        {data.user.isPrivate && (
+          <section className="px-5 pb-10">
+            <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+              <div className="flex items-start gap-3">
                 <Lock className="w-5 h-5 text-gray-500 flex-shrink-0" />
 
                 <div>
@@ -385,30 +690,69 @@ export default function TrustPassportPage({
                   </h4>
 
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Some profile activity is intentionally private.
+                    Some profile activity is
+                    intentionally private. The Trust
+                    Passport does not expose private
+                    account information.
                   </p>
                 </div>
               </div>
-            )}
+            </div>
+          </section>
+        )}
+
+        {/* =========================================================
+            VERIFICATION INFORMATION
+        ========================================================= */}
+
+        <section className="px-5 pb-10">
+          <div className="rounded-xl border border-zrp-red/20 bg-zrp-red/5 dark:bg-zrp-red/10 p-4">
+            <div className="flex items-start gap-3">
+              <Award className="w-5 h-5 text-zrp-red flex-shrink-0 mt-0.5" />
+
+              <div>
+                <h4 className="font-semibold text-sm text-gray-900 dark:text-white">
+                  What the Trust Passport means
+                </h4>
+
+                <p className="text-xs leading-5 text-gray-600 dark:text-gray-400 mt-1">
+                  The Trust Passport provides a
+                  transparent view of positive account
+                  signals available on ZRP. It is not an
+                  identity verification system and does
+                  not guarantee a person's identity,
+                  intentions, or future behavior.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* Transparency notice */}
+        {/* =========================================================
+            TRANSPARENCY NOTICE
+        ========================================================= */}
+
         <section className="px-5 pb-12">
           <div className="rounded-xl bg-gray-100 dark:bg-gray-900 p-4 flex items-start gap-3">
             <Info className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
 
             <p className="text-xs leading-5 text-gray-500 dark:text-gray-400">
-              The ZRP Trust Passport is based on account and community
-              signals available on ZRP. It is designed to provide
-              transparency and does not guarantee a person's identity,
-              intentions, or future behavior. Trust scores can change as
-              account information and activity change.
+              The ZRP Trust Passport is based on
+              account and community signals available on
+              ZRP. Scores are automatically recalculated
+              when the underlying account information or
+              activity changes. The passport does not
+              expose email addresses, IP addresses,
+              private messages, moderation reports, or
+              other private account information.
             </p>
           </div>
         </section>
 
-        {/* Back */}
+        {/* =========================================================
+            BACK TO PROFILE
+        ========================================================= */}
+
         <div className="px-5 pb-12">
           <Link
             href={`/profile/${data.user.username}`}
