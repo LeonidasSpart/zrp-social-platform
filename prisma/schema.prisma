@@ -77,9 +77,37 @@ enum AdCampaignStatus {
 }
 
 enum AdBidType {
-  CPC // cost per click
-  CPM // cost per 1000 impressions
+  CPC
+  CPM
 }
+
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * ZRP TRUST
+ * ─────────────────────────────────────────────────────────────────────
+ *
+ * Trust is behavioral, NOT identity verification.
+ *
+ * ZRP does not require a phone number to establish trust.
+ *
+ * NEW        = newly created / insufficient behavioral history
+ * BASIC      = normal account with some healthy activity
+ * TRUSTED    = established account with healthy behavior
+ * RESTRICTED = account currently subject to trust/safety restrictions
+ */
+
+enum TrustLevel {
+  NEW
+  BASIC
+  TRUSTED
+  RESTRICTED
+}
+
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * USER
+ * ─────────────────────────────────────────────────────────────────────
+ */
 
 model User {
   id          String    @id @default(cuid())
@@ -90,156 +118,356 @@ model User {
   resetToken       String?   @unique
   resetTokenExpiry DateTime?
 
-  emailVerified        DateTime?
-  verificationToken    String?     @unique
+  emailVerified           DateTime?
+  verificationToken       String?   @unique
   verificationTokenExpiry DateTime?
-  pendingEmail         String?     @unique
+  pendingEmail            String?   @unique
 
   deletionRequestedAt  DateTime?
   deletionScheduledFor DateTime?
 
-  name        String?
-  bio         String?   @db.Text
-  avatarUrl   String?   @db.Text
-  coverUrl    String?   @db.Text
-  isPrivate   Boolean   @default(false)
-  isAdmin     Boolean   @default(false)
-  badgeType   String?
-  // Professional profile - a single category chosen from a fixed list
-  // (see src/lib/professionalCategories.ts), matching X's "professional
-  // profile" feature. showCategory lets someone select a category
-  // without displaying it publicly, same as X's own toggle for this.
-  category    String?
-  showCategory Boolean  @default(true)
-  location    String?
-  country     String?
-  website     String?
+  name      String?
+  bio       String?   @db.Text
+  avatarUrl String?   @db.Text
+  coverUrl  String?   @db.Text
+
+  isPrivate Boolean @default(false)
+
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * ZRP SAFE MODE
+   *
+   * Safe Mode is a content-safety preference.
+   *
+   * It does NOT require a phone number or additional identity data.
+   *
+   * New users have Safe Mode enabled by default.
+   */
+  safeMode Boolean @default(true)
+
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * ZRP TRUST LEVEL
+   *
+   * Behavioral trust, NOT identity verification.
+   */
+  trustLevel TrustLevel @default(NEW)
+
+  badgeType String?
+
+  /*
+   * Professional profile
+   */
+  category     String?
+  showCategory Boolean @default(true)
+
+  location String?
+  country  String?
+  website  String?
+
   usernameChangedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
 
-  role        Role      @default(USER)
-  plan        String    @default("free")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  role   Role   @default(USER)
+  plan   String @default("free")
+  banned Boolean @default(false)
+
   onboardingCompleted Boolean @default(false)
-  banned      Boolean   @default(false)
 
-  publicLikes     Boolean   @default(true)
-  publicFollowing Boolean   @default(true)
+  publicLikes     Boolean @default(true)
+  publicFollowing Boolean @default(true)
 
-  customUrl       String?   @unique
+  customUrl String? @unique
 
-  solanaWallet    String?
+  solanaWallet String?
 
   emailPreferences Json?
 
-  pinnedPostId  String?   @unique
-  pinnedPost    Post?     @relation("PinnedPost", fields: [pinnedPostId], references: [id], onDelete: SetNull)
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * PINNED POST
+   */
+  pinnedPostId String? @unique
 
-  posts       Post[]
-  comments    Comment[]
-  following   Follow[]  @relation("Following")
-  followers   Follow[]  @relation("Followers")
-  likes       Like[]
-  reposts     Repost[]
-  reactions   Reaction[]
-  muter       Mute[]    @relation("Muter")
-  mutedBy     Mute[]    @relation("Muted")
-  notifications Notification[] @relation("Notification_user")
+  pinnedPost Post? @relation(
+    "PinnedPost",
+    fields: [pinnedPostId],
+    references: [id],
+    onDelete: SetNull
+  )
+
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * SOCIAL
+   */
+  posts    Post[]
+  comments Comment[]
+
+  following Follow[] @relation("Following")
+  followers Follow[] @relation("Followers")
+
+  likes     Like[]
+  reposts   Repost[]
+  reactions Reaction[]
+
+  muter   Mute[] @relation("Muter")
+  mutedBy Mute[] @relation("Muted")
+
+  blockedUsers Blocked[] @relation("Blocker")
+  blockedBy    Blocked[] @relation("Blocked")
+
+  followRequestsSent     FollowRequest[] @relation("FollowRequester")
+  followRequestsReceived FollowRequest[] @relation("FollowTarget")
+
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * NOTIFICATIONS
+   */
+  notifications     Notification[] @relation("Notification_user")
   sentNotifications Notification[] @relation("Notification_fromUser")
-  sentMessages Message[] @relation("Message_sender")
+
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * MESSAGES
+   */
+  sentMessages     Message[] @relation("Message_sender")
   receivedMessages Message[] @relation("Message_receiver")
+
   messageReactions MessageReaction[]
-  pollVotes   PollVote[]
-  bookmarks   Bookmark[]
+
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * POLLS / BOOKMARKS / PUSH
+   */
+  pollVotes        PollVote[]
+  bookmarks       Bookmark[]
   pushSubscriptions PushSubscription[]
 
-  stories     Story[]
-  storyViews  StoryView[]
-  storyLikes  StoryLike[]
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * STORIES
+   */
+  stories    Story[]
+  storyViews StoryView[]
+  storyLikes StoryLike[]
 
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * COMMENT INTERACTIONS
+   */
   commentLikes     CommentLike[]
   commentReposts   CommentRepost[]
   commentBookmarks CommentBookmark[]
 
-  upgradeRequests UpgradeRequest[]
-  paymentRequests PaymentRequest[]
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * REPORTS
+   */
+  reports Report[] @relation("Reporter")
 
-  blockedUsers Blocked[] @relation("Blocker")
-  blockedBy    Blocked[] @relation("Blocked")
-  reports      Report[]  @relation("Reporter")
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * PAYMENTS / PLANS
+   */
+  upgradeRequests  UpgradeRequest[]
+  paymentRequests  PaymentRequest[]
 
-  teamAccount  TeamMember[] @relation("TeamAccount")
-  teamMembers  TeamMember[] @relation("TeamMemberUser")
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * TEAMS
+   */
+  teamAccount TeamMember[] @relation("TeamAccount")
+  teamMembers TeamMember[] @relation("TeamMemberUser")
 
-  apiKeys      ApiKey[]
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * API
+   */
+  apiKeys ApiKey[]
 
-  creatorProfile   CreatorProfile?
-  sentTips         Tip[]           @relation("TipSender")
-  receivedTips     Tip[]           @relation("TipRecipient")
-  premiumPurchases PremiumPurchase[]
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * CREATOR ECONOMY
+   */
+  creatorProfile CreatorProfile?
+
+  sentTips     Tip[] @relation("TipSender")
+  receivedTips Tip[] @relation("TipRecipient")
+
+  premiumPurchases  PremiumPurchase[]
   withdrawalRequests WithdrawalRequest[]
 
-  followRequestsSent   FollowRequest[] @relation("FollowRequester")
-  followRequestsReceived FollowRequest[] @relation("FollowTarget")
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * SUPPORT
+   */
+  supportTickets SupportTicket[]
 
-  // ─── Support Tickets ────────────────────────────────────────────
-  supportTickets      SupportTicket[]   // tickets created by user
-  assignedTickets     SupportTicket[]   @relation("AssignedTickets") // tickets assigned to admin
-  ticketReplies       TicketReply[]     // replies sent by user/admin
+  assignedTickets SupportTicket[] @relation("AssignedTickets")
 
-  // ─── AI Chat ──────────────────────────────────────────────────────
-  aiConversations     AIConversation[]
-  aiDailyUsage        AIDailyUsage[]
+  ticketReplies TicketReply[]
 
-  // ─── Advertising ────────────────────────────────────────────────
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * AI
+   */
+  aiConversations AIConversation[]
+  aiDailyUsage   AIDailyUsage[]
+
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * ADVERTISING
+   */
   adCampaigns    AdCampaign[]   @relation("AdAdvertiser")
   adImpressions  AdImpression[] @relation("AdImpressionUser")
   adClicks       AdClick[]      @relation("AdClickUser")
+
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * ZRP TRUST PROFILE
+   */
+  trustProfile UserTrust?
+
+  /*
+   * ──────────────────────────────────────────────────────────────────
+   * INDEXES
+   */
+  @@index([trustLevel])
+  @@index([safeMode])
+  @@index([createdAt])
+  @@index([banned])
+  @@index([plan])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * ZRP TRUST PROFILE
+ * ─────────────────────────────────────────────────────────────────────
+ *
+ * Stores behavioral signals used to calculate trust.
+ *
+ * IMPORTANT:
+ * No phone number.
+ * No government ID.
+ * No additional identity verification.
+ */
+
+model UserTrust {
+  id String @id @default(cuid())
+
+  userId String @unique
+
+  user User @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  /*
+   * Behavioral counters
+   */
+  postsCount     Int @default(0)
+  commentsCount  Int @default(0)
+  followersCount Int @default(0)
+
+  /*
+   * Safety signals
+   */
+  reportsReceived Int @default(0)
+
+  spamScore  Int @default(0)
+  abuseScore Int @default(0)
+
+  /*
+   * Activity
+   */
+  lastActivityAt  DateTime?
+  lastTrustUpdate DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([spamScore])
+  @@index([abuseScore])
+  @@index([lastActivityAt])
+}
+
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * POSTS
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model Post {
-  id          String    @id @default(cuid())
-  content     String    @db.Text
-  imageUrl    String?
-  imageUrls   String[]  @default([])
-  mediaType   String?
-  linkUrl     String?
-  authorId    String
-  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id      String @id @default(cuid())
+  content String @db.Text
+
+  imageUrl  String?
+  imageUrls String[] @default([])
+  mediaType String?
+  linkUrl   String?
+
+  authorId String
+  author   User   @relation(
+    fields: [authorId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   quotePostId String?
-  quotePost   Post?   @relation("QuotePost", fields: [quotePostId], references: [id], onDelete: SetNull)
-  quotedBy    Post[]  @relation("QuotePost")
 
-  views       Int       @default(0)
+  quotePost Post? @relation(
+    "QuotePost",
+    fields: [quotePostId],
+    references: [id],
+    onDelete: SetNull
+  )
+
+  quotedBy Post[] @relation("QuotePost")
+
+  views Int @default(0)
+
   scheduledAt DateTime?
-  status      String    @default("published")
+  status      String   @default("published")
 
-  hashtags    String[]
-  mentions    String[]
-  pollId      String?   @unique
-  poll        Poll?     @relation(fields: [pollId], references: [id])
-  isPoll      Boolean   @default(false)
+  hashtags String[]
+  mentions String[]
+
+  pollId String? @unique
+
+  poll Poll? @relation(
+    fields: [pollId],
+    references: [id]
+  )
+
+  isPoll Boolean @default(false)
 
   commentsEnabled Boolean @default(true)
 
-  type        PostType  @default(POST)
-  company     String?
-  location    String?
-  applyUrl    String?
-  body        String?   @db.Text
+  type PostType @default(POST)
 
-  pinnedBy    User?     @relation("PinnedPost")
+  company  String?
+  location String?
+  applyUrl String?
+  body     String? @db.Text
 
-  comments    Comment[]
-  likes       Like[]
-  reposts     Repost[]
-  reactions   Reaction[]
+  pinnedBy User? @relation("PinnedPost")
+
+  comments Comment[]
+
+  likes     Like[]
+  reposts   Repost[]
+  reactions Reaction[]
+
   notifications Notification[] @relation("Notification_post")
-  reports     Report[]
-  bookmarks   Bookmark[]
+
+  reports   Report[]
+  bookmarks Bookmark[]
 
   premiumPost PremiumPost?
   adCampaign  AdCampaign?
@@ -252,45 +480,84 @@ model Post {
   @@index([type])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * COMMENTS
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model Comment {
-  id          String    @id @default(cuid())
-  content     String    @db.Text
-  imageUrl    String?
-  postId      String
-  post        Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  authorId    String
-  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  id      String @id @default(cuid())
+  content String @db.Text
 
-  parentId    String?
-  parent      Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies     Comment[] @relation("CommentReplies")
+  imageUrl String?
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  postId String
+  post   Post   @relation(
+    fields: [postId],
+    references: [id],
+    onDelete: Cascade
+  )
 
-  reports     Report[]
+  authorId String
+  author   User   @relation(
+    fields: [authorId],
+    references: [id],
+    onDelete: Cascade
+  )
 
-  likes       CommentLike[]
-  reposts     CommentRepost[]
-  bookmarks   CommentBookmark[]
+  parentId String?
+
+  parent Comment? @relation(
+    "CommentReplies",
+    fields: [parentId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  replies Comment[] @relation("CommentReplies")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reports Report[]
+
+  likes     CommentLike[]
+  reposts   CommentRepost[]
+  bookmarks CommentBookmark[]
 
   @@index([postId])
   @@index([createdAt])
   @@index([parentId])
-  // authorId was queried directly in several places (profile activity,
-  // moderator tools, account-deletion cleanup collecting a user's
-  // comment images) with no index backing it - every one of those
-  // queries was doing a full table scan.
   @@index([authorId])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * FOLLOWING
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model Follow {
-  id          String    @id @default(cuid())
-  followerId  String
-  follower    User      @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
+
+  followerId String
+  follower   User   @relation(
+    "Following",
+    fields: [followerId],
+    references: [id],
+    onDelete: Cascade
+  )
+
   followingId String
-  following   User      @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
+  following   User   @relation(
+    "Followers",
+    fields: [followingId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  createdAt DateTime @default(now())
 
   @@unique([followerId, followingId])
   @@index([followerId])
@@ -298,14 +565,28 @@ model Follow {
 }
 
 model FollowRequest {
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
+
   requesterId String
-  requester   User     @relation("FollowRequester", fields: [requesterId], references: [id], onDelete: Cascade)
-  targetId    String
-  target      User     @relation("FollowTarget", fields: [targetId], references: [id], onDelete: Cascade)
-  status      String   @default("pending")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  requester   User   @relation(
+    "FollowRequester",
+    fields: [requesterId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  targetId String
+  target   User   @relation(
+    "FollowTarget",
+    fields: [targetId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  status String @default("pending")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([requesterId, targetId])
   @@index([requesterId])
@@ -313,40 +594,92 @@ model FollowRequest {
   @@index([status])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * LIKES
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model Like {
-  id          String    @id @default(cuid())
-  postId      String
-  post        Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
+  id String @id @default(cuid())
+
+  postId String
+  post   Post   @relation(
+    fields: [postId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  userId String
+  user   User   @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  createdAt DateTime @default(now())
 
   @@unique([postId, userId])
   @@index([postId])
   @@index([userId])
 }
+
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * REPOSTS
+ * ─────────────────────────────────────────────────────────────────────
+ */
 
 model Repost {
-  id            String    @id @default(cuid())
-  postId        String
-  post          Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quoteContent  String?   @db.Text
-  createdAt     DateTime  @default(now())
+  id String @id @default(cuid())
+
+  postId String
+  post   Post   @relation(
+    fields: [postId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  userId String
+  user   User   @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  quoteContent String? @db.Text
+
+  createdAt DateTime @default(now())
 
   @@unique([postId, userId])
   @@index([postId])
   @@index([userId])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * REACTIONS
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model Reaction {
-  id        String   @id @default(cuid())
-  emoji     String
-  postId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id    String @id @default(cuid())
+  emoji String
+
+  postId String
+  post   Post   @relation(
+    fields: [postId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  userId String
+  user   User   @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
   createdAt DateTime @default(now())
 
   @@unique([postId, userId, emoji])
@@ -354,12 +687,31 @@ model Reaction {
   @@index([userId])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * MUTES
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model Mute {
-  id        String   @id @default(cuid())
-  muterId   String
-  muter     User     @relation("Muter", fields: [muterId], references: [id], onDelete: Cascade)
-  mutedId   String
-  muted     User     @relation("Muted", fields: [mutedId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
+
+  muterId String
+  muter   User   @relation(
+    "Muter",
+    fields: [muterId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  mutedId String
+  muted   User   @relation(
+    "Muted",
+    fields: [mutedId],
+    references: [id],
+    onDelete: Cascade
+  )
+
   createdAt DateTime @default(now())
 
   @@unique([muterId, mutedId])
@@ -367,17 +719,76 @@ model Mute {
   @@index([mutedId])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * BLOCKS
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
+model Blocked {
+  id String @id @default(cuid())
+
+  blockerId String
+  blocker   User   @relation(
+    "Blocker",
+    fields: [blockerId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  blockedId String
+  blocked   User   @relation(
+    "Blocked",
+    fields: [blockedId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+}
+
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * NOTIFICATIONS
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model Notification {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation("Notification_user", fields: [userId], references: [id], onDelete: Cascade)
-  type        String
-  fromUserId  String
-  fromUser    User      @relation("Notification_fromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
-  postId      String?
-  post        Post?     @relation("Notification_post", fields: [postId], references: [id], onDelete: Cascade)
-  read        Boolean   @default(false)
-  createdAt   DateTime  @default(now())
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(
+    "Notification_user",
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  type String
+
+  fromUserId String
+  fromUser   User   @relation(
+    "Notification_fromUser",
+    fields: [fromUserId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  postId String?
+
+  post Post? @relation(
+    "Notification_post",
+    fields: [postId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
 
   @@index([userId])
   @@index([userId, read])
@@ -385,23 +796,52 @@ model Notification {
   @@index([fromUserId])
 }
 
-model Message {
-  id          String    @id @default(cuid())
-  content     String    @db.Text
-  imageUrl    String?
-  senderId    String
-  sender      User      @relation("Message_sender", fields: [senderId], references: [id], onDelete: Cascade)
-  receiverId  String
-  receiver    User      @relation("Message_receiver", fields: [receiverId], references: [id], onDelete: Cascade)
-  read        Boolean   @default(false)
-  edited      Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now()) @updatedAt  // ✅ Fixed: added @default(now())
-  replyToId   String?
-  replyTo     Message?  @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
-  replies     Message[] @relation("MessageReplies")
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * MESSAGES
+ * ─────────────────────────────────────────────────────────────────────
+ */
 
-  reactions   MessageReaction[]
+model Message {
+  id String @id @default(cuid())
+
+  content  String @db.Text
+  imageUrl String?
+
+  senderId String
+  sender   User   @relation(
+    "Message_sender",
+    fields: [senderId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  receiverId String
+  receiver   User   @relation(
+    "Message_receiver",
+    fields: [receiverId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  read   Boolean @default(false)
+  edited Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  replyToId String?
+
+  replyTo Message? @relation(
+    "MessageReplies",
+    fields: [replyToId],
+    references: [id],
+    onDelete: SetNull
+  )
+
+  replies Message[] @relation("MessageReplies")
+
+  reactions MessageReaction[]
 
   @@index([senderId])
   @@index([receiverId])
@@ -410,85 +850,148 @@ model Message {
   @@index([replyToId])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * MESSAGE REACTIONS
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model MessageReaction {
-  id        String   @id @default(cuid())
+  id String @id @default(cuid())
+
   messageId String
-  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  emoji     String
+  message   Message @relation(
+    fields: [messageId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  userId String
+  user   User @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  emoji String
+
   createdAt DateTime @default(now())
 
   @@unique([messageId, userId])
   @@index([messageId])
 }
 
-model Poll {
-  id          String    @id @default(cuid())
-  question    String    @db.Text
-  options     String[]
-  votes       Json?
-  post        Post?
-  expiresAt   DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * POLLS
+ * ─────────────────────────────────────────────────────────────────────
+ */
 
-  votes_user  PollVote[]
+model Poll {
+  id String @id @default(cuid())
+
+  question String   @db.Text
+  options  String[]
+
+  votes Json?
+
+  post Post?
+
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  votes_user PollVote[]
 }
 
 model PollVote {
-  id          String    @id @default(cuid())
-  pollId      String
-  poll        Poll      @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
+
+  pollId String
+  poll   Poll   @relation(
+    fields: [pollId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  userId String
+  user   User   @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
   optionIndex Int
-  createdAt   DateTime  @default(now())
+
+  createdAt DateTime @default(now())
 
   @@unique([pollId, userId])
   @@index([pollId])
   @@index([userId])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * GIFS
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model Gif {
-  id          String    @id @default(cuid())
-  url         String
-  title       String?
-  width       Int?
-  height      Int?
-  createdAt   DateTime  @default(now())
+  id String @id @default(cuid())
+
+  url    String
+  title  String?
+  width  Int?
+  height Int?
+
+  createdAt DateTime @default(now())
 }
 
-model Blocked {
-  id          String    @id @default(cuid())
-  blockerId   String
-  blocker     User      @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
-  blockedId   String
-  blocked     User      @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
-
-  @@unique([blockerId, blockedId])
-  @@index([blockerId])
-  @@index([blockedId])
-}
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * REPORTS
+ * ─────────────────────────────────────────────────────────────────────
+ */
 
 model Report {
-  id          String    @id @default(cuid())
-  reporterId  String
-  reporter    User      @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
-  postId      String?
-  post        Post?     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  commentId   String?
-  comment     Comment?  @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  reason      String
-  details     String?   @db.Text
-  status      String    @default("pending")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id String @id @default(cuid())
 
-  actionType   String?
-  actionNote   String?   @db.Text
-  actionedAt   DateTime?
+  reporterId String
+  reporter   User   @relation(
+    "Reporter",
+    fields: [reporterId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  postId String?
+
+  post Post? @relation(
+    fields: [postId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  commentId String?
+
+  comment Comment? @relation(
+    fields: [commentId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  reason  String
+  details String? @db.Text
+
+  status String @default("pending")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  actionType String?
+  actionNote String? @db.Text
+  actionedAt DateTime?
 
   @@index([postId])
   @@index([commentId])
@@ -496,12 +999,29 @@ model Report {
   @@index([reporterId])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * BOOKMARKS
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model Bookmark {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  postId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  postId String
+  post   Post   @relation(
+    fields: [postId],
+    references: [id],
+    onDelete: Cascade
+  )
+
   createdAt DateTime @default(now())
 
   @@unique([userId, postId])
@@ -509,82 +1029,178 @@ model Bookmark {
   @@index([postId])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * PUSH NOTIFICATIONS
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model PushSubscription {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  endpoint  String   @unique
-  keys      Json
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  endpoint String @unique
+  keys     Json
+
   createdAt DateTime @default(now())
 
   @@index([userId])
 }
+
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * UPGRADE REQUESTS
+ * ─────────────────────────────────────────────────────────────────────
+ */
 
 model UpgradeRequest {
-  id             String    @id @default(cuid())
-  userId         String
-  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  requestedPlan  String
-  paymentMethod  String?
-  message        String?   @db.Text
-  status         String    @default("pending")
-  approvedBy     String?
-  approvedAt     DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  requestedPlan String
+
+  paymentMethod String?
+  message       String? @db.Text
+
+  status String @default("pending")
+
+  approvedBy String?
+  approvedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([status])
 }
+
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * PAYMENT REQUESTS
+ * ─────────────────────────────────────────────────────────────────────
+ */
 
 model PaymentRequest {
-  id            String   @id @default(cuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan          String
-  amount        Float
-  currency      String   @default("USDC")
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  plan   String
+  amount Float
+
+  currency String @default("USDC")
+
   transactionId String?
-  status        String   @default("pending")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+
+  status String @default("pending")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([status])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * COMMENT LIKES
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model CommentLike {
-  id        String   @id @default(cuid())
+  id String @id @default(cuid())
+
   commentId String
-  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment   Comment @relation(
+    fields: [commentId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  userId String
+  user   User   @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
   createdAt DateTime @default(now())
 
   @@unique([commentId, userId])
   @@index([commentId])
   @@index([userId])
 }
+
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * COMMENT REPOSTS
+ * ─────────────────────────────────────────────────────────────────────
+ */
 
 model CommentRepost {
-  id        String   @id @default(cuid())
+  id String @id @default(cuid())
+
   commentId String
-  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment   Comment @relation(
+    fields: [commentId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  userId String
+  user   User   @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
   createdAt DateTime @default(now())
 
   @@unique([commentId, userId])
   @@index([commentId])
   @@index([userId])
 }
+
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * COMMENT BOOKMARKS
+ * ─────────────────────────────────────────────────────────────────────
+ */
 
 model CommentBookmark {
-  id        String   @id @default(cuid())
+  id String @id @default(cuid())
+
   commentId String
-  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment   Comment @relation(
+    fields: [commentId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  userId String
+  user   User   @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
   createdAt DateTime @default(now())
 
   @@unique([commentId, userId])
@@ -592,17 +1208,31 @@ model CommentBookmark {
   @@index([userId])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * STORIES
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model Story {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  content     String?   @db.Text
-  mediaUrl    String?
-  mediaType   String?
-  createdAt   DateTime  @default(now())
-  expiresAt   DateTime
-  views       StoryView[]
-  likes       StoryLike[]
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  content  String? @db.Text
+  mediaUrl String?
+  mediaType String?
+
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  views StoryView[]
+  likes StoryLike[]
 
   @@index([userId])
   @@index([createdAt])
@@ -610,12 +1240,23 @@ model Story {
 }
 
 model StoryView {
-  id          String    @id @default(cuid())
-  storyId     String
-  story       Story     @relation(fields: [storyId], references: [id], onDelete: Cascade)
-  viewerId    String
-  viewer      User      @relation(fields: [viewerId], references: [id], onDelete: Cascade)
-  viewedAt    DateTime  @default(now())
+  id String @id @default(cuid())
+
+  storyId String
+  story   Story  @relation(
+    fields: [storyId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  viewerId String
+  viewer   User   @relation(
+    fields: [viewerId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  viewedAt DateTime @default(now())
 
   @@unique([storyId, viewerId])
   @@index([storyId])
@@ -623,145 +1264,269 @@ model StoryView {
 }
 
 model StoryLike {
-  id          String    @id @default(cuid())
-  storyId     String
-  story       Story     @relation(fields: [storyId], references: [id], onDelete: Cascade)
-  likerId     String
-  liker       User      @relation(fields: [likerId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
+  id String @id @default(cuid())
+
+  storyId String
+  story   Story  @relation(
+    fields: [storyId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  likerId String
+  liker   User   @relation(
+    fields: [likerId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  createdAt DateTime @default(now())
 
   @@unique([storyId, likerId])
   @@index([storyId])
   @@index([likerId])
 }
 
-model TeamMember {
-  id         String    @id @default(cuid())
-  accountId  String
-  userId     String
-  role       TeamRole  @default(VIEWER)
-  createdAt  DateTime  @default(now())
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * TEAMS
+ * ─────────────────────────────────────────────────────────────────────
+ */
 
-  account    User      @relation("TeamAccount", fields: [accountId], references: [id], onDelete: Cascade)
-  user       User      @relation("TeamMemberUser", fields: [userId], references: [id], onDelete: Cascade)
+model TeamMember {
+  id String @id @default(cuid())
+
+  accountId String
+  userId    String
+
+  role TeamRole @default(VIEWER)
+
+  createdAt DateTime @default(now())
+
+  account User @relation(
+    "TeamAccount",
+    fields: [accountId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  user User @relation(
+    "TeamMemberUser",
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
 
   @@unique([accountId, userId])
   @@index([accountId])
   @@index([userId])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * API KEYS
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model ApiKey {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  keyHash     String    @unique
-  name        String
-  lastUsed    DateTime?
-  expiresAt   DateTime?
-  createdAt   DateTime  @default(now())
-  revoked     Boolean   @default(false)
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  keyHash String @unique
+  name    String
+
+  lastUsed DateTime?
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  revoked Boolean @default(false)
 
   @@index([userId])
 }
 
-model CreatorProfile {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * CREATOR PROFILE
+ * ─────────────────────────────────────────────────────────────────────
+ */
 
-  tipsEnabled     Boolean  @default(true)
-  tipsMessage     String?  @db.Text
+model CreatorProfile {
+  id String @id @default(cuid())
+
+  userId String @unique
+  user   User   @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  tipsEnabled Boolean @default(true)
+
+  tipsMessage String? @db.Text
+
   premiumPostsEnabled Boolean @default(true)
 
-  totalTips       Float    @default(0)
+  totalTips           Float @default(0)
   totalPremiumRevenue Float @default(0)
-  totalEarnings   Float    @default(0)
-  totalWithdrawn  Float    @default(0)
-  balance         Float    @default(0)
+  totalEarnings       Float @default(0)
+  totalWithdrawn      Float @default(0)
+  balance             Float @default(0)
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  tips            Tip[]
-  premiumPosts    PremiumPost[]
+  tips              Tip[]
+  premiumPosts      PremiumPost[]
   withdrawalRequests WithdrawalRequest[]
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * TIPS
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model Tip {
-  id              String   @id @default(cuid())
-  senderId        String
-  sender          User     @relation("TipSender", fields: [senderId], references: [id], onDelete: Cascade)
-  recipientId     String
-  recipient       User     @relation("TipRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
+
+  senderId String
+  sender   User   @relation(
+    "TipSender",
+    fields: [senderId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  recipientId String
+  recipient   User   @relation(
+    "TipRecipient",
+    fields: [recipientId],
+    references: [id],
+    onDelete: Cascade
+  )
+
   creatorProfileId String
-  creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
 
-  amount          Float
-  currency        String   @default("USDC")
-  message         String?  @db.Text
-  transactionId   String?  @unique
-  status          TransactionStatus @default(PENDING)
+  creatorProfile CreatorProfile @relation(
+    fields: [creatorProfileId],
+    references: [id],
+    onDelete: Cascade
+  )
 
-  platformFee     Float    @default(0)
-  charityAmount   Float    @default(0)
-  creatorAmount   Float    @default(0)
+  amount Float
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  currency String @default("USDC")
+
+  message String? @db.Text
+
+  transactionId String? @unique
+
+  status TransactionStatus @default(PENDING)
+
+  platformFee  Float @default(0)
+  charityAmount Float @default(0)
+  creatorAmount Float @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([recipientId])
   @@index([senderId])
   @@index([status])
   @@index([createdAt])
-  // Creator dashboard queries tips directly by creatorProfileId - was
-  // unindexed, so every dashboard load did a full table scan.
   @@index([creatorProfileId])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * PREMIUM POSTS
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model PremiumPost {
-  id              String   @id @default(cuid())
-  postId          String   @unique
-  post            Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
+
+  postId String @unique
+
+  post Post @relation(
+    fields: [postId],
+    references: [id],
+    onDelete: Cascade
+  )
+
   creatorProfileId String
-  creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
 
-  price           Float    @default(1.0)
-  currency        String   @default("USDC")
-  previewContent  String?  @db.Text
+  creatorProfile CreatorProfile @relation(
+    fields: [creatorProfileId],
+    references: [id],
+    onDelete: Cascade
+  )
 
-  totalPurchases  Int      @default(0)
-  totalRevenue    Float    @default(0)
+  price Float @default(1.0)
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  currency String @default("USDC")
 
-  purchases       PremiumPurchase[]
+  previewContent String? @db.Text
+
+  totalPurchases Int @default(0)
+  totalRevenue   Float @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  purchases PremiumPurchase[]
 
   @@index([postId])
   @@index([price])
-  // Same as Tip - the creator dashboard queries premium posts directly
-  // by creatorProfileId.
   @@index([creatorProfileId])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * PREMIUM PURCHASES
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model PremiumPurchase {
-  id              String   @id @default(cuid())
-  premiumPostId   String
-  premiumPost     PremiumPost @relation(fields: [premiumPostId], references: [id], onDelete: Cascade)
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
 
-  amount          Float
-  currency        String   @default("USDC")
-  transactionId   String?  @unique
-  status          TransactionStatus @default(PENDING)
+  premiumPostId String
 
-  platformFee     Float    @default(0)
-  charityAmount   Float    @default(0)
-  creatorAmount   Float    @default(0)
+  premiumPost PremiumPost @relation(
+    fields: [premiumPostId],
+    references: [id],
+    onDelete: Cascade
+  )
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  userId String
+
+  user User @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  amount Float
+
+  currency String @default("USDC")
+
+  transactionId String? @unique
+
+  status TransactionStatus @default(PENDING)
+
+  platformFee   Float @default(0)
+  charityAmount Float @default(0)
+  creatorAmount Float @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([premiumPostId, userId])
   @@index([userId])
@@ -769,68 +1534,97 @@ model PremiumPurchase {
   @@index([status])
 }
 
-model WithdrawalRequest {
-  id              String   @id @default(cuid())
-  creatorProfileId String
-  creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * WITHDRAWALS
+ * ─────────────────────────────────────────────────────────────────────
+ */
 
-  amount          Float
-  currency        String   @default("USDC")
-  walletAddress   String
-  status          WithdrawalStatus @default(PENDING)
+model WithdrawalRequest {
+  id String @id @default(cuid())
+
+  creatorProfileId String
+
+  creatorProfile CreatorProfile @relation(
+    fields: [creatorProfileId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  userId String
+
+  user User @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  amount Float
+
+  currency String @default("USDC")
+
+  walletAddress String
+
+  status WithdrawalStatus @default(PENDING)
+
   transactionHash String?
 
-  processedAt     DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  processedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([status])
-  // Same as Tip/PremiumPost - the creator dashboard queries withdrawal
-  // requests directly by creatorProfileId.
   @@index([creatorProfileId])
 }
 
-// ─── ADVERTISING PLATFORM ────────────────────────────────────────────
-// Full self-serve ad platform: any authenticated user can create a
-// campaign around one of their own posts, set a budget and a bid
-// (per-click or per-1000-impressions), and it goes through moderator
-// review before it can actually start serving - matching the same
-// requireStaff() review pattern already used for content moderation
-// elsewhere in this app, since ads are exactly the kind of content
-// that benefits from a human check before it reaches every feed.
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * ADVERTISING
+ * ─────────────────────────────────────────────────────────────────────
+ */
 
 model AdCampaign {
-  id           String            @id @default(cuid())
+  id String @id @default(cuid())
+
   advertiserId String
-  advertiser   User              @relation("AdAdvertiser", fields: [advertiserId], references: [id], onDelete: Cascade)
 
-  // The actual ad creative is a real Post - same content model everyone
-  // already knows, just specially marked and boosted into feeds, rather
-  // than inventing a parallel "ad content" shape.
+  advertiser User @relation(
+    "AdAdvertiser",
+    fields: [advertiserId],
+    references: [id],
+    onDelete: Cascade
+  )
+
   postId String @unique
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-  name   String // internal campaign name, shown only to the advertiser/admins, never publicly
+  post Post @relation(
+    fields: [postId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  name String
+
   status AdCampaignStatus @default(DRAFT)
 
-  bidType     AdBidType
-  bidAmount   Float // $ per click (CPC) or $ per 1000 impressions (CPM)
+  bidType AdBidType
+
+  bidAmount Float
+
   budgetTotal Float
   budgetSpent Float @default(0)
 
-  // Optional external destination - if unset, a click just opens the post
-  // itself, same as clicking any other post.
   targetUrl String?
 
   startDate DateTime?
   endDate   DateTime?
 
-  rejectionReason String?   @db.Text
-  reviewedBy      String?
-  reviewedAt      DateTime?
+  rejectionReason String? @db.Text
+
+  reviewedBy String?
+  reviewedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -840,19 +1634,34 @@ model AdCampaign {
 
   @@index([advertiserId])
   @@index([status])
-  // The serving endpoint filters active campaigns within their date
-  // window on every feed load - this is the route that needs to be fast.
   @@index([status, startDate, endDate])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * AD IMPRESSIONS
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model AdImpression {
-  id         String     @id @default(cuid())
+  id String @id @default(cuid())
+
   campaignId String
-  campaign   AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  // Nullable - an impression can come from a logged-out viewer, unlike
-  // most other event models in this schema which require a real user.
+
+  campaign AdCampaign @relation(
+    fields: [campaignId],
+    references: [id],
+    onDelete: Cascade
+  )
+
   userId String?
-  user   User?   @relation("AdImpressionUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  user User? @relation(
+    "AdImpressionUser",
+    fields: [userId],
+    references: [id],
+    onDelete: SetNull
+  )
 
   createdAt DateTime @default(now())
 
@@ -860,13 +1669,32 @@ model AdImpression {
   @@index([campaignId, createdAt])
   @@index([userId])
 }
+
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * AD CLICKS
+ * ─────────────────────────────────────────────────────────────────────
+ */
 
 model AdClick {
-  id         String     @id @default(cuid())
+  id String @id @default(cuid())
+
   campaignId String
-  campaign   AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  userId     String?
-  user       User?      @relation("AdClickUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  campaign AdCampaign @relation(
+    fields: [campaignId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  userId String?
+
+  user User? @relation(
+    "AdClickUser",
+    fields: [userId],
+    references: [id],
+    onDelete: SetNull
+  )
 
   createdAt DateTime @default(now())
 
@@ -875,37 +1703,58 @@ model AdClick {
   @@index([userId])
 }
 
-// ─── SUPPORT TICKET SYSTEM ─────────────────────────────────
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * SUPPORT TICKETS
+ * ─────────────────────────────────────────────────────────────────────
+ */
 
 model SupportTicket {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
 
-  subject     String
-  category    TicketCategory @default(GENERAL)
-  priority    TicketPriority @default(NORMAL)
-  status      TicketStatus  @default(OPEN)
-  message     String    @db.Text
+  userId String
+
+  user User @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  subject String
+
+  category TicketCategory @default(GENERAL)
+  priority TicketPriority @default(NORMAL)
+  status   TicketStatus   @default(OPEN)
+
+  message String @db.Text
 
   attachments String[]
 
-  assignedTo  String?
-  assignedAdmin User?   @relation("AssignedTickets", fields: [assignedTo], references: [id], onDelete: SetNull)
+  assignedTo String?
 
-  resolvedAt  DateTime?
-  resolution  String?   @db.Text
+  assignedAdmin User? @relation(
+    "AssignedTickets",
+    fields: [assignedTo],
+    references: [id],
+    onDelete: SetNull
+  )
 
-  userAgent   String?
-  ipAddress   String?
-  referrer    String?
+  resolvedAt DateTime?
+  resolution String? @db.Text
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  /*
+   * These fields already existed in your system.
+   * Keep them if your support/security system uses them.
+   */
+  userAgent String?
+  ipAddress String?
+  referrer  String?
 
-  replies     TicketReply[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  feedback    TicketFeedback?
+  replies  TicketReply[]
+  feedback TicketFeedback?
 
   @@index([userId])
   @@index([status])
@@ -916,20 +1765,39 @@ model SupportTicket {
   @@index([status, priority])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * TICKET REPLIES
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model TicketReply {
-  id          String   @id @default(cuid())
-  ticketId    String
-  ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
 
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ticketId String
 
-  message     String   @db.Text
-  isInternal  Boolean  @default(false)
+  ticket SupportTicket @relation(
+    fields: [ticketId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  userId String
+
+  user User @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  message String @db.Text
+
+  isInternal Boolean @default(false)
+
   attachments String[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([ticketId])
   @@index([userId])
@@ -937,58 +1805,94 @@ model TicketReply {
   @@index([isInternal])
 }
 
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * TICKET FEEDBACK
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
 model TicketFeedback {
-  id          String   @id @default(cuid())
-  ticketId    String   @unique
-  ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
 
-  rating      Int?     // 1-5 stars
-  comment     String?  @db.Text
-  resolved    Boolean? // Was the issue fully resolved?
+  ticketId String @unique
 
-  createdAt   DateTime @default(now())
+  ticket SupportTicket @relation(
+    fields: [ticketId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  rating   Int?
+  comment  String? @db.Text
+  resolved Boolean?
+
+  createdAt DateTime @default(now())
 }
 
-// ─── AI CHAT ─────────────────────────────────────────────────────────
+/*
+ * ─────────────────────────────────────────────────────────────────────
+ * AI
+ * ─────────────────────────────────────────────────────────────────────
+ */
 
 model AIConversation {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
 
-  title       String   @default("New Conversation")
-  messages    AIMessage[]
+  userId String
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  user User @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  title String @default("New Conversation")
+
+  messages AIMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([createdAt])
 }
 
 model AIMessage {
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
+
   conversationId String
-  conversation AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  role        String   // "user" | "assistant" | "system"
-  content     String   @db.Text
-  model       String   // "deepseek-v4-flash"
+  conversation AIConversation @relation(
+    fields: [conversationId],
+    references: [id],
+    onDelete: Cascade
+  )
 
-  createdAt   DateTime @default(now())
+  role    String
+  content String @db.Text
+  model   String
+
+  createdAt DateTime @default(now())
 
   @@index([conversationId])
   @@index([createdAt])
 }
 
 model AIDailyUsage {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
 
-  date        DateTime @default(now())
-  messages    Int      @default(0)
-  tokensUsed  Int      @default(0)
+  userId String
+
+  user User @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  date DateTime @default(now())
+
+  messages   Int @default(0)
+  tokensUsed Int @default(0)
 
   @@unique([userId, date])
   @@index([userId])
