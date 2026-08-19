@@ -85,16 +85,21 @@ export default function PostComposer({
    * for older sessions where a newer feature flag does not exist.
    */
 
-  const rawLimits = limits as Record<
-    string,
-    unknown
-  >;
+  // TypeScript requires the intermediate unknown cast because
+  // PlanLimits does not have a string index signature.
+  const rawLimits =
+    limits as unknown as Record<
+      string,
+      unknown
+    >;
 
   const getNumericLimit = (
     key: string,
     fallback: number
   ) => {
-    const value = Number(rawLimits[key]);
+    const value = Number(
+      rawLimits[key]
+    );
 
     return Number.isFinite(value)
       ? value
@@ -119,9 +124,7 @@ export default function PostComposer({
           return value;
         }
 
-        if (
-          typeof value === "string"
-        ) {
+        if (typeof value === "string") {
           return value === "true";
         }
 
@@ -137,7 +140,8 @@ export default function PostComposer({
   const featureAllowed = (
     keys: string[]
   ) => {
-    const explicit = getOptionalFeature(keys);
+    const explicit =
+      getOptionalFeature(keys);
 
     /*
      * If the current account/session does not expose the feature
@@ -513,7 +517,6 @@ export default function PostComposer({
 
     setError(null);
 
-    // Account has no image allowance.
     if (maxImages <= 0) {
       setError(
         t(
