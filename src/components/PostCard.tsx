@@ -6,7 +6,6 @@ import {
   Heart,
   MessageCircle,
   Repeat,
-  Repeat2,
   Share2,
   Pencil,
   Trash2,
@@ -26,9 +25,7 @@ import {
   Play,
   Volume2,
   VolumeX,
-  MoreHorizontal,
-  UserPlus,
-  ExternalLink,
+  MapPin,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Comments from "./Comments";
@@ -103,9 +100,9 @@ interface PostCardProps {
   showInlineComments?: boolean;
 }
 
-/* ─────────────────────────────────────────────────────────────
-   PARSE CONTENT
-───────────────────────────────────────────────────────────── */
+// ─────────────────────────────────────────────────────────────
+// CONTENT PARSER
+// ─────────────────────────────────────────────────────────────
 
 function parseContent(content: string) {
   const parts: {
@@ -143,10 +140,7 @@ function parseContent(content: string) {
       const trailingMatch = raw.match(trailingPunctuation);
 
       const trimmed = trailingMatch
-        ? raw.slice(
-            0,
-            raw.length - trailingMatch[0].length
-          )
+        ? raw.slice(0, raw.length - trailingMatch[0].length)
         : raw;
 
       if (trailingMatch && trimmed.length > 0) {
@@ -184,9 +178,9 @@ function parseContent(content: string) {
   return parts;
 }
 
-/* ─────────────────────────────────────────────────────────────
-   EXTRACT URL
-───────────────────────────────────────────────────────────── */
+// ─────────────────────────────────────────────────────────────
+// EXTRACT FIRST URL
+// ─────────────────────────────────────────────────────────────
 
 function extractFirstUrl(content: string): string | null {
   const match = content.match(
@@ -205,9 +199,9 @@ function extractFirstUrl(content: string): string | null {
     : `https://${raw}`;
 }
 
-/* ─────────────────────────────────────────────────────────────
-   FORMAT COUNTS
-───────────────────────────────────────────────────────────── */
+// ─────────────────────────────────────────────────────────────
+// FORMAT COUNTS
+// ─────────────────────────────────────────────────────────────
 
 function formatCount(n: number) {
   if (n >= 1_000_000) {
@@ -229,9 +223,9 @@ function formatCount(n: number) {
   return n.toString();
 }
 
-/* ─────────────────────────────────────────────────────────────
-   COMPONENT
-───────────────────────────────────────────────────────────── */
+// ─────────────────────────────────────────────────────────────
+// COMPONENT
+// ─────────────────────────────────────────────────────────────
 
 export default function PostCard({
   post,
@@ -244,13 +238,7 @@ export default function PostCard({
   const { data: session } = useSession();
   const { language: uiLanguage } = useLanguage();
 
-  /* ─────────────────────────────────────────────────────────
-     BASIC STATE
-  ───────────────────────────────────────────────────────── */
-
-  const [liked, setLiked] = useState(
-    post.liked || false
-  );
+  const [liked, setLiked] = useState(post.liked || false);
 
   const [likesCount, setLikesCount] = useState(
     post._count?.likes || 0
@@ -259,6 +247,11 @@ export default function PostCard({
   const [commentsCount, setCommentsCount] = useState(
     post._count?.comments || 0
   );
+
+  const [linkPreviewFoundFor, setLinkPreviewFoundFor] =
+    useState<string | null>(null);
+
+  const [showComments, setShowComments] = useState(false);
 
   const [reposted, setReposted] = useState(false);
 
@@ -270,24 +263,6 @@ export default function PostCard({
     post.views || 0
   );
 
-  const [bookmarked, setBookmarked] = useState(false);
-
-  const [bookmarkLoading, setBookmarkLoading] =
-    useState(false);
-
-  /* ─────────────────────────────────────────────────────────
-     MENUS / MODALS
-  ───────────────────────────────────────────────────────── */
-
-  const [moreMenuOpen, setMoreMenuOpen] =
-    useState(false);
-
-  const [repostDropdownOpen, setRepostDropdownOpen] =
-    useState(false);
-
-  const [showComments, setShowComments] =
-    useState(false);
-
   const [showEditModal, setShowEditModal] =
     useState(false);
 
@@ -297,53 +272,28 @@ export default function PostCard({
   const [showReportModal, setShowReportModal] =
     useState(false);
 
+  const [deleting, setDeleting] = useState(false);
+
+  const [pinLoading, setPinLoading] = useState(false);
+
+  const [bookmarked, setBookmarked] = useState(false);
+
+  const [bookmarkLoading, setBookmarkLoading] =
+    useState(false);
+
+  const hasCountedView = useRef(false);
+
+  const [repostDropdownOpen, setRepostDropdownOpen] =
+    useState(false);
+
   const [showQuoteModal, setShowQuoteModal] =
     useState(false);
 
-  const [showEmojiPicker, setShowEmojiPicker] =
-    useState(false);
-
-  const [deleting, setDeleting] =
-    useState(false);
-
-  /* ─────────────────────────────────────────────────────────
-     PIN
-  ───────────────────────────────────────────────────────── */
-
-  const [pinLoading, setPinLoading] =
-    useState(false);
-
-  /* ─────────────────────────────────────────────────────────
-     MEDIA
-  ───────────────────────────────────────────────────────── */
+  const [lastClickTime, setLastClickTime] =
+    useState(0);
 
   const [lightboxImage, setLightboxImage] =
     useState<string | null>(null);
-
-  const [showVideoFeed, setShowVideoFeed] =
-    useState(false);
-
-  const [videoLoadFailed, setVideoLoadFailed] =
-    useState(false);
-
-  const videoRef =
-    useRef<HTMLVideoElement>(null);
-
-  const videoContainerRef =
-    useRef<HTMLDivElement>(null);
-
-  const posterNudged =
-    useRef(false);
-
-  const [videoInView, setVideoInView] =
-    useState(false);
-
-  const [videoMuted, setVideoMuted] =
-    useState(true);
-
-  /* ─────────────────────────────────────────────────────────
-     REACTIONS
-  ───────────────────────────────────────────────────────── */
 
   const [reactions, setReactions] =
     useState<Record<string, number>>({});
@@ -354,26 +304,14 @@ export default function PostCard({
   const [reactionsLoading, setReactionsLoading] =
     useState(true);
 
-  /* ─────────────────────────────────────────────────────────
-     CONTENT
-  ───────────────────────────────────────────────────────── */
+  const [showEmojiPicker, setShowEmojiPicker] =
+    useState(false);
 
   const [articleExpanded, setArticleExpanded] =
     useState(false);
 
   const [contentExpanded, setContentExpanded] =
     useState(false);
-
-  /* ─────────────────────────────────────────────────────────
-     LINK PREVIEW
-  ───────────────────────────────────────────────────────── */
-
-  const [linkPreviewFoundFor, setLinkPreviewFoundFor] =
-    useState<string | null>(null);
-
-  /* ─────────────────────────────────────────────────────────
-     TRANSLATION
-  ───────────────────────────────────────────────────────── */
 
   const [translatedText, setTranslatedText] =
     useState<string | null>(null);
@@ -387,47 +325,15 @@ export default function PostCard({
   const [translateError, setTranslateError] =
     useState(false);
 
-  /* ─────────────────────────────────────────────────────────
-     DOUBLE CLICK
-  ───────────────────────────────────────────────────────── */
-
-  const [lastClickTime, setLastClickTime] =
-    useState(0);
-
-  /* ─────────────────────────────────────────────────────────
-     REFS
-  ───────────────────────────────────────────────────────── */
-
-  const moreMenuRef =
-    useRef<HTMLDivElement>(null);
-
-  const repostMenuRef =
-    useRef<HTMLDivElement>(null);
-
-  const hasCountedView =
-    useRef(false);
-
-  /* ─────────────────────────────────────────────────────────
-     DERIVED VALUES
-  ───────────────────────────────────────────────────────── */
-
   const isAuthor =
     session?.user?.id === post.author.id;
 
-  const commentsEnabled =
-    post.commentsEnabled !== false;
-
-  const postType =
-    post.type || "POST";
-
-  const contentParts =
-    parseContent(post.content);
+  const contentParts = parseContent(post.content);
 
   const CONTENT_TRUNCATE_LENGTH = 280;
 
   const isLongContent =
-    post.content.length >
-    CONTENT_TRUNCATE_LENGTH;
+    post.content.length > CONTENT_TRUNCATE_LENGTH;
 
   const displayContentParts =
     isLongContent && !contentExpanded
@@ -443,15 +349,20 @@ export default function PostCard({
     post.linkUrl ||
     extractFirstUrl(post.content);
 
-  const isRepost =
-    post.isRepost === true;
+  const isRepost = post.isRepost === true;
 
   const originalAuthor =
     post.repostOriginalAuthor;
 
-  /* ─────────────────────────────────────────────────────────
-     VIDEO DETECTION
-  ───────────────────────────────────────────────────────── */
+  const commentsEnabled =
+    post.commentsEnabled !== false;
+
+  const postType =
+    post.type || "POST";
+
+  // ─────────────────────────────────────────────────────────────
+  // VIDEO DETECTION
+  // ─────────────────────────────────────────────────────────────
 
   const isVideo = () => {
     if (post.mediaType === "video")
@@ -487,8 +398,9 @@ export default function PostCard({
     ];
 
     if (
-      videoExtensions.some((ext) =>
-        path.endsWith("." + ext)
+      videoExtensions.some(
+        (ext) =>
+          path.endsWith("." + ext)
       )
     ) {
       return true;
@@ -506,8 +418,9 @@ export default function PostCard({
     ];
 
     if (
-      imageExtensions.some((ext) =>
-        path.endsWith("." + ext)
+      imageExtensions.some(
+        (ext) =>
+          path.endsWith("." + ext)
       )
     ) {
       return false;
@@ -525,48 +438,47 @@ export default function PostCard({
 
   const video = isVideo();
 
-  /* ─────────────────────────────────────────────────────────
-     OUTSIDE CLICK
-  ───────────────────────────────────────────────────────── */
+  const [videoLoadFailed, setVideoLoadFailed] =
+    useState(false);
 
-  useEffect(() => {
-    const handleClickOutside = (
-      event: MouseEvent
-    ) => {
-      const target =
-        event.target as Node;
+  const videoRef =
+    useRef<HTMLVideoElement>(null);
 
-      if (
-        moreMenuRef.current &&
-        !moreMenuRef.current.contains(target)
-      ) {
-        setMoreMenuOpen(false);
-      }
+  const [showVideoFeed, setShowVideoFeed] =
+    useState(false);
 
-      if (
-        repostMenuRef.current &&
-        !repostMenuRef.current.contains(target)
-      ) {
-        setRepostDropdownOpen(false);
-      }
-    };
+  const posterNudged = useRef(false);
 
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside
-    );
+  const nudgeVideoFrame = (
+    el: HTMLVideoElement
+  ) => {
+    if (posterNudged.current)
+      return;
 
-    return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
+    posterNudged.current = true;
+
+    try {
+      el.currentTime = Math.min(
+        0.1,
+        (el.duration || 1) * 0.05
       );
-    };
-  }, []);
+    } catch {
+      // no-op
+    }
+  };
 
-  /* ─────────────────────────────────────────────────────────
-     VIDEO VIEW
-  ───────────────────────────────────────────────────────── */
+  const videoContainerRef =
+    useRef<HTMLDivElement>(null);
+
+  const [videoInView, setVideoInView] =
+    useState(false);
+
+  const [videoMuted, setVideoMuted] =
+    useState(true);
+
+  // ─────────────────────────────────────────────────────────────
+  // VIDEO AUTOPLAY
+  // ─────────────────────────────────────────────────────────────
 
   useEffect(() => {
     if (
@@ -576,7 +488,7 @@ export default function PostCard({
       return;
     }
 
-    const element =
+    const el =
       videoContainerRef.current;
 
     const observer =
@@ -591,61 +503,39 @@ export default function PostCard({
         }
       );
 
-    observer.observe(element);
+    observer.observe(el);
 
     return () =>
       observer.disconnect();
   }, [video]);
 
   useEffect(() => {
-    const element =
+    const el =
       videoRef.current;
 
-    if (!element)
+    if (!el)
       return;
 
     if (videoInView) {
-      element.muted =
-        videoMuted;
+      el.muted = videoMuted;
 
       const playPromise =
-        element.play();
+        el.play();
 
       if (playPromise) {
         playPromise.catch(() => {});
       }
     } else {
-      element.pause();
+      el.pause();
     }
   }, [
     videoInView,
     videoMuted,
   ]);
 
-  const nudgeVideoFrame = (
-    element: HTMLVideoElement
-  ) => {
-    if (posterNudged.current)
-      return;
-
-    posterNudged.current =
-      true;
-
-    try {
-      element.currentTime =
-        Math.min(
-          0.1,
-          (element.duration || 1) *
-            0.05
-        );
-    } catch {
-      // Ignore unsupported browser behavior.
-    }
-  };
-
-  /* ─────────────────────────────────────────────────────────
-     REPOST STATUS
-  ───────────────────────────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────
+  // REPOST STATUS
+  // ─────────────────────────────────────────────────────────────
 
   useEffect(() => {
     const checkRepost =
@@ -681,9 +571,9 @@ export default function PostCard({
     session,
   ]);
 
-  /* ─────────────────────────────────────────────────────────
-     REACTIONS
-  ───────────────────────────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────
+  // REACTIONS
+  // ─────────────────────────────────────────────────────────────
 
   const fetchReactions =
     async () => {
@@ -704,25 +594,23 @@ export default function PostCard({
                   string,
                   number
                 >,
-                reaction: any
+                r: any
               ) => {
-                acc[reaction.emoji] =
-                  (acc[reaction.emoji] ||
-                    0) + 1;
+                acc[r.emoji] =
+                  (acc[r.emoji] || 0) +
+                  1;
 
                 return acc;
               },
               {}
             );
 
-          setReactions(
-            counts
-          );
+          setReactions(counts);
 
           const ownReaction =
             data.find(
-              (reaction: any) =>
-                reaction.user.id ===
+              (r: any) =>
+                r.user.id ===
                 session?.user?.id
             )?.emoji || null;
 
@@ -736,16 +624,13 @@ export default function PostCard({
           error
         );
       } finally {
-        setReactionsLoading(
-          false
-        );
+        setReactionsLoading(false);
       }
     };
 
   useEffect(() => {
-    if (session) {
+    if (session)
       fetchReactions();
-    }
   }, [
     post.id,
     session,
@@ -774,9 +659,7 @@ export default function PostCard({
 
         if (res.ok) {
           await fetchReactions();
-          setShowEmojiPicker(
-            false
-          );
+          setShowEmojiPicker(false);
         }
       } catch (error) {
         console.error(
@@ -786,9 +669,9 @@ export default function PostCard({
       }
     };
 
-  /* ─────────────────────────────────────────────────────────
-     BOOKMARK
-  ───────────────────────────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────
+  // BOOKMARK
+  // ─────────────────────────────────────────────────────────────
 
   useEffect(() => {
     const checkBookmark =
@@ -815,24 +698,22 @@ export default function PostCard({
         }
       };
 
-    if (session) {
+    if (session)
       checkBookmark();
-    }
   }, [
     post.id,
     session,
   ]);
 
-  /* ─────────────────────────────────────────────────────────
-     VIEW COUNT
-  ───────────────────────────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────
+  // VIEW COUNT
+  // ─────────────────────────────────────────────────────────────
 
   useEffect(() => {
     if (hasCountedView.current)
       return;
 
-    hasCountedView.current =
-      true;
+    hasCountedView.current = true;
 
     const storageKey =
       "zrp_viewed_posts";
@@ -849,11 +730,8 @@ export default function PostCard({
       viewed = [];
     }
 
-    if (
-      viewed.includes(post.id)
-    ) {
+    if (viewed.includes(post.id))
       return;
-    }
 
     fetch(
       `/api/posts/${post.id}/view`,
@@ -875,7 +753,7 @@ export default function PostCard({
           );
         } else {
           setViewsCount(
-            (value) => value + 1
+            (v) => v + 1
           );
         }
       })
@@ -893,25 +771,24 @@ export default function PostCard({
     } catch {}
   }, [post.id]);
 
-  /* ─────────────────────────────────────────────────────────
-     COMMENTS
-  ───────────────────────────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────
+  // COMMENTS
+  // ─────────────────────────────────────────────────────────────
 
   const handleCommentCountChange =
     (delta?: number) => {
       setCommentsCount(
-        (previous) =>
+        (prev) =>
           Math.max(
             0,
-            previous +
-              (delta || 0)
+            prev + (delta || 0)
           )
       );
     };
 
-  /* ─────────────────────────────────────────────────────────
-     LIKE
-  ───────────────────────────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────
+  // LIKE
+  // ─────────────────────────────────────────────────────────────
 
   const handleLike =
     async () => {
@@ -925,20 +802,12 @@ export default function PostCard({
           );
 
         if (res.ok) {
-          const nextLiked =
-            !liked;
-
-          setLiked(
-            nextLiked
-          );
+          setLiked(!liked);
 
           setLikesCount(
-            nextLiked
-              ? likesCount + 1
-              : Math.max(
-                  0,
-                  likesCount - 1
-                )
+            liked
+              ? likesCount - 1
+              : likesCount + 1
           );
         }
       } catch (error) {
@@ -949,9 +818,9 @@ export default function PostCard({
       }
     };
 
-  /* ─────────────────────────────────────────────────────────
-     REPOST
-  ───────────────────────────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────
+  // REPOST
+  // ─────────────────────────────────────────────────────────────
 
   const handleRepost =
     async () => {
@@ -975,32 +844,27 @@ export default function PostCard({
           setRepostsCount(
             data.reposted
               ? repostsCount + 1
-              : Math.max(
-                  0,
-                  repostsCount - 1
-                )
+              : repostsCount - 1
           );
         }
       } catch (error) {
         console.error(
-          "Error reposting:",
+          "Error reposting post:",
           error
         );
       }
     };
 
-  /* ─────────────────────────────────────────────────────────
-     SHARE
-  ───────────────────────────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────
+  // SHARE
+  // ─────────────────────────────────────────────────────────────
 
   const handleShare =
     async () => {
       const url =
         window.location.href;
 
-      if (
-        navigator.share
-      ) {
+      if (navigator.share) {
         try {
           await navigator.share({
             title: `Post by ${
@@ -1024,9 +888,9 @@ export default function PostCard({
       }
     };
 
-  /* ─────────────────────────────────────────────────────────
-     DELETE
-  ───────────────────────────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────
+  // DELETE
+  // ─────────────────────────────────────────────────────────────
 
   const handleDelete =
     async () => {
@@ -1066,9 +930,9 @@ export default function PostCard({
       }
     };
 
-  /* ─────────────────────────────────────────────────────────
-     REPORT
-  ───────────────────────────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────
+  // REPORT
+  // ─────────────────────────────────────────────────────────────
 
   const handleReport =
     async (
@@ -1114,9 +978,7 @@ export default function PostCard({
               "Failed to submit report. Please try again."
           );
 
-          if (
-            res.status === 409
-          ) {
+          if (res.status === 409) {
             setShowReportModal(
               false
             );
@@ -1134,15 +996,13 @@ export default function PostCard({
       }
     };
 
-  /* ─────────────────────────────────────────────────────────
-     BOOKMARK
-  ───────────────────────────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────
+  // BOOKMARK
+  // ─────────────────────────────────────────────────────────────
 
   const handleBookmark =
     async () => {
-      setBookmarkLoading(
-        true
-      );
+      setBookmarkLoading(true);
 
       try {
         const res =
@@ -1167,15 +1027,13 @@ export default function PostCard({
           error
         );
       } finally {
-        setBookmarkLoading(
-          false
-        );
+        setBookmarkLoading(false);
       }
     };
 
-  /* ─────────────────────────────────────────────────────────
-     PIN
-  ───────────────────────────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────
+  // PIN
+  // ─────────────────────────────────────────────────────────────
 
   const handlePinToggle =
     async () => {
@@ -1211,9 +1069,9 @@ export default function PostCard({
       }
     };
 
-  /* ─────────────────────────────────────────────────────────
-     TRANSLATION
-  ───────────────────────────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────
+  // TRANSLATE
+  // ─────────────────────────────────────────────────────────────
 
   const handleTranslate =
     async () => {
@@ -1258,9 +1116,7 @@ export default function PostCard({
             true
           );
         } else {
-          setTranslateError(
-            true
-          );
+          setTranslateError(true);
         }
       } catch (error) {
         console.error(
@@ -1268,37 +1124,26 @@ export default function PostCard({
           error
         );
 
-        setTranslateError(
-          true
-        );
+        setTranslateError(true);
       } finally {
-        setTranslating(
-          false
-        );
+        setTranslating(false);
       }
     };
 
-  /* ─────────────────────────────────────────────────────────
-     DOUBLE CLICK LIKE
-  ───────────────────────────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────
+  // DOUBLE CLICK LIKE
+  // ─────────────────────────────────────────────────────────────
 
   const handlePostClick =
-    (
-      event: React.MouseEvent
-    ) => {
-      const now =
-        Date.now();
+    (e: React.MouseEvent) => {
+      const now = Date.now();
 
       const timeSince =
         now - lastClickTime;
 
-      setLastClickTime(
-        now
-      );
+      setLastClickTime(now);
 
-      if (
-        timeSince < 300
-      ) {
+      if (timeSince < 300) {
         handleLike();
       }
     };
@@ -1307,25 +1152,21 @@ export default function PostCard({
 
   const handleTouchEnd =
     () => {
-      const now =
-        Date.now();
+      const now = Date.now();
 
       const timeSince =
         now - lastTouchTime;
 
-      lastTouchTime =
-        now;
+      lastTouchTime = now;
 
-      if (
-        timeSince < 300
-      ) {
+      if (timeSince < 300) {
         handleLike();
       }
     };
 
-  /* ─────────────────────────────────────────────────────────
-     TIME AGO
-  ───────────────────────────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────
+  // TIME AGO
+  // ─────────────────────────────────────────────────────────────
 
   const timeAgo =
     (date: string) => {
@@ -1357,31 +1198,8 @@ export default function PostCard({
           hours / 24
         );
 
-      if (days < 7)
-        return `${days}d`;
-
-      const weeks =
-        Math.floor(
-          days / 7
-        );
-
-      if (weeks < 5)
-        return `${weeks}w`;
-
-      return new Date(
-        date
-      ).toLocaleDateString(
-        undefined,
-        {
-          month: "short",
-          day: "numeric",
-        }
-      );
+      return `${days}d`;
     };
-
-  /* ─────────────────────────────────────────────────────────
-     INITIAL
-  ───────────────────────────────────────────────────────── */
 
   const getInitial =
     () => {
@@ -1395,60 +1213,20 @@ export default function PostCard({
         .toUpperCase();
     };
 
-  /* ─────────────────────────────────────────────────────────
-     RENDER
-  ───────────────────────────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────
+  // RENDER
+  // ─────────────────────────────────────────────────────────────
 
   return (
     <>
-      <article
-        className="
-          group
-          bg-white
-          dark:bg-zrp-deepBlack
-          px-3
-          sm:px-4
-          py-4
-          border-b
-          border-gray-200
-          dark:border-gray-800
-          hover:bg-gray-50/50
-          dark:hover:bg-white/[0.025]
-          transition-colors
-        "
-      >
+      <div className="bg-white dark:bg-zrp-deepBlack px-4 py-3 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50/70 dark:hover:bg-white/[0.03] transition">
         <div className="flex items-start gap-3">
 
-          {/* ─────────────────────────────────────────────
-              AVATAR
-          ───────────────────────────────────────────── */}
-
+          {/* AVATAR */}
           <Link
             href={`/profile/${post.author.username}`}
-            onClick={(e) =>
-              e.stopPropagation()
-            }
-            className="flex-shrink-0"
           >
-            <div
-              className="
-                relative
-                w-11
-                h-11
-                sm:w-12
-                sm:h-12
-                rounded-full
-                overflow-hidden
-                bg-gradient-to-br
-                from-zrp-red/30
-                to-gray-800
-                ring-1
-                ring-gray-200
-                dark:ring-gray-700
-                transition
-                group-hover:ring-zrp-red/30
-              "
-            >
+            <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 font-semibold flex-shrink-0 overflow-hidden">
               {post.author.avatarUrl ? (
                 <img
                   src={
@@ -1458,459 +1236,165 @@ export default function PostCard({
                     post.author.name ||
                     post.author.username
                   }
-                  className="
-                    w-full
-                    h-full
-                    object-cover
-                  "
+                  className="w-full h-full object-cover"
                 />
               ) : (
-                <div
-                  className="
-                    w-full
-                    h-full
-                    flex
-                    items-center
-                    justify-center
-                    text-zrp-red
-                    font-bold
-                    text-lg
-                  "
-                >
-                  {getInitial()}
-                </div>
+                getInitial()
               )}
             </div>
           </Link>
 
           <div className="flex-1 min-w-0">
 
-            {/* ─────────────────────────────────────────
-                HEADER
-            ───────────────────────────────────────── */}
+            {/* HEADER */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 flex-wrap">
 
-            <div className="flex items-start justify-between gap-2">
-
-              <div className="min-w-0">
-
-                <div className="flex items-center gap-1.5 flex-wrap">
-
-                  <Link
-                    href={`/profile/${post.author.username}`}
-                    onClick={(e) =>
-                      e.stopPropagation()
-                    }
-                    className="
-                      font-bold
-                      text-[15px]
-                      text-gray-950
-                      dark:text-white
-                      hover:underline
-                      truncate
-                      max-w-[180px]
-                      sm:max-w-none
-                    "
-                  >
+                <Link
+                  href={`/profile/${post.author.username}`}
+                >
+                  <span className="font-semibold hover:underline text-gray-900 dark:text-white inline-flex items-center gap-1">
                     {post.author.name ||
                       post.author.username}
-                  </Link>
 
-                  <VerifiedBadge
-                    badgeType={
+                    <VerifiedBadge
+                      badgeType={
+                        post.author.badgeType
+                      }
+                    />
+                  </span>
+                </Link>
+
+                <Link
+                  href={`/profile/${post.author.username}`}
+                >
+                  <span className="text-gray-500 dark:text-gray-400 text-sm hover:underline">
+                    @
+                    {
                       post.author
-                        .badgeType
+                        .username
                     }
-                  />
+                  </span>
+                </Link>
 
-                  {!isAuthor && (
+                <span className="text-gray-400 dark:text-gray-500 text-sm">
+                  ·
+                </span>
+
+                <span className="text-gray-400 dark:text-gray-500 text-sm">
+                  {timeAgo(
+                    post.createdAt
+                  )}
+                </span>
+
+                {/* RECRUITMENT BADGE */}
+                {postType ===
+                  "RECRUITMENT" && (
+                  <span className="inline-flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">
+                    <Briefcase className="w-3 h-3" />
+                    Recruitment
+                  </span>
+                )}
+
+                {/* ARTICLE BADGE */}
+                {postType ===
+                  "ARTICLE" && (
+                  <span className="inline-flex items-center gap-1 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full">
+                    <FileText className="w-3 h-3" />
+                    Article
+                  </span>
+                )}
+              </div>
+
+              {/* AUTHOR CONTROLS */}
+              {isAuthor ? (
+                <div className="flex items-center gap-1">
+
+                  {showPinOption && (
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                      className="
-                        hidden
-                        sm:inline-flex
-                        items-center
-                        gap-1
-                        ml-1
-                        px-2.5
-                        py-1
-                        rounded-full
-                        border
-                        border-gray-300
-                        dark:border-gray-700
-                        text-xs
-                        font-semibold
-                        text-gray-700
-                        dark:text-gray-200
-                        hover:border-zrp-red
-                        hover:text-zrp-red
-                        transition
-                      "
+                      onClick={
+                        handlePinToggle
+                      }
+                      disabled={
+                        pinLoading
+                      }
+                      className={`transition p-1 ${
+                        isPinned
+                          ? "text-blue-500 hover:text-blue-600"
+                          : "text-gray-400 hover:text-blue-500"
+                      }`}
+                      title={
+                        isPinned
+                          ? "Unpin from profile"
+                          : "Pin to profile"
+                      }
                     >
-                      <UserPlus className="w-3.5 h-3.5" />
-                      Follow
+                      {isPinned ? (
+                        <PinOff className="w-4 h-4" />
+                      ) : (
+                        <Pin className="w-4 h-4" />
+                      )}
                     </button>
                   )}
-                </div>
 
-                <div
-                  className="
-                    flex
-                    items-center
-                    gap-1
-                    text-[13px]
-                    text-gray-500
-                    dark:text-gray-400
-                  "
-                >
-                  <Link
-                    href={`/profile/${post.author.username}`}
-                    onClick={(e) =>
-                      e.stopPropagation()
+                  <button
+                    onClick={() =>
+                      setShowEditModal(
+                        true
+                      )
                     }
-                    className="hover:underline"
+                    className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition p-1"
                   >
-                    @{post.author.username}
-                  </Link>
+                    <Pencil className="w-4 h-4" />
+                  </button>
 
-                  <span>·</span>
-
-                  <span>
-                    {timeAgo(
-                      post.createdAt
-                    )}
-                  </span>
-
-                  {post.updatedAt &&
-                    post.updatedAt !==
-                      post.createdAt && (
-                      <>
-                        <span>·</span>
-                        <span>
-                          edited
-                        </span>
-                      </>
-                    )}
+                  <button
+                    onClick={() =>
+                      setShowDeleteConfirm(
+                        true
+                      )
+                    }
+                    className="text-gray-400 hover:text-red-500 transition p-1"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
-
-                {/* Post type */}
-                {postType !==
-                  "POST" && (
-                  <div className="mt-1.5">
-
-                    {postType ===
-                      "RECRUITMENT" && (
-                      <span
-                        className="
-                          inline-flex
-                          items-center
-                          gap-1.5
-                          px-2.5
-                          py-1
-                          rounded-full
-                          bg-blue-500/10
-                          text-blue-500
-                          text-xs
-                          font-semibold
-                        "
-                      >
-                        <Briefcase className="w-3.5 h-3.5" />
-                        Recruitment
-                      </span>
-                    )}
-
-                    {postType ===
-                      "ARTICLE" && (
-                      <span
-                        className="
-                          inline-flex
-                          items-center
-                          gap-1.5
-                          px-2.5
-                          py-1
-                          rounded-full
-                          bg-purple-500/10
-                          text-purple-500
-                          text-xs
-                          font-semibold
-                        "
-                      >
-                        <FileText className="w-3.5 h-3.5" />
-                        Article
-                      </span>
-                    )}
-
-                  </div>
-                )}
-              </div>
-
-              {/* ───────────────────────────────────────
-                  MORE MENU
-              ─────────────────────────────────────── */}
-
-              <div
-                ref={moreMenuRef}
-                className="relative flex-shrink-0"
-              >
+              ) : (
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-
-                    setMoreMenuOpen(
-                      (value) =>
-                        !value
-                    );
-
-                    setRepostDropdownOpen(
-                      false
-                    );
-                  }}
-                  className="
-                    p-2
-                    rounded-full
-                    text-gray-400
-                    hover:text-gray-800
-                    dark:hover:text-white
-                    hover:bg-gray-100
-                    dark:hover:bg-white/10
-                    transition
-                  "
-                  aria-label="More options"
-                  aria-expanded={
-                    moreMenuOpen
+                  onClick={() =>
+                    setShowReportModal(
+                      true
+                    )
                   }
+                  className="text-gray-400 hover:text-red-500 transition p-1"
                 >
-                  <MoreHorizontal className="w-5 h-5" />
+                  <Flag className="w-4 h-4" />
                 </button>
-
-                {moreMenuOpen && (
-                  <div
-                    className="
-                      absolute
-                      right-0
-                      top-10
-                      z-40
-                      w-52
-                      overflow-hidden
-                      rounded-2xl
-                      border
-                      border-gray-200
-                      dark:border-gray-700
-                      bg-white
-                      dark:bg-zrp-deepBlack
-                      shadow-2xl
-                    "
-                    onClick={(e) =>
-                      e.stopPropagation()
-                    }
-                  >
-
-                    {isAuthor ? (
-                      <>
-                        {showPinOption && (
-                          <button
-                            onClick={() => {
-                              setMoreMenuOpen(
-                                false
-                              );
-                              handlePinToggle();
-                            }}
-                            disabled={
-                              pinLoading
-                            }
-                            className="
-                              w-full
-                              flex
-                              items-center
-                              gap-3
-                              px-4
-                              py-3
-                              text-left
-                              text-sm
-                              text-gray-700
-                              dark:text-gray-200
-                              hover:bg-gray-100
-                              dark:hover:bg-white/5
-                              transition
-                            "
-                          >
-                            {isPinned ? (
-                              <PinOff className="w-4 h-4" />
-                            ) : (
-                              <Pin className="w-4 h-4" />
-                            )}
-
-                            {isPinned
-                              ? "Unpin from profile"
-                              : "Pin to profile"}
-                          </button>
-                        )}
-
-                        <button
-                          onClick={() => {
-                            setMoreMenuOpen(
-                              false
-                            );
-
-                            setShowEditModal(
-                              true
-                            );
-                          }}
-                          className="
-                            w-full
-                            flex
-                            items-center
-                            gap-3
-                            px-4
-                            py-3
-                            text-left
-                            text-sm
-                            text-gray-700
-                            dark:text-gray-200
-                            hover:bg-gray-100
-                            dark:hover:bg-white/5
-                            transition
-                          "
-                        >
-                          <Pencil className="w-4 h-4" />
-                          Edit post
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            setMoreMenuOpen(
-                              false
-                            );
-
-                            setShowDeleteConfirm(
-                              true
-                            );
-                          }}
-                          className="
-                            w-full
-                            flex
-                            items-center
-                            gap-3
-                            px-4
-                            py-3
-                            text-left
-                            text-sm
-                            text-red-500
-                            hover:bg-red-50
-                            dark:hover:bg-red-500/10
-                            transition
-                          "
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          Delete post
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => {
-                            setMoreMenuOpen(
-                              false
-                            );
-
-                            setShowReportModal(
-                              true
-                            );
-                          }}
-                          className="
-                            w-full
-                            flex
-                            items-center
-                            gap-3
-                            px-4
-                            py-3
-                            text-left
-                            text-sm
-                            text-gray-700
-                            dark:text-gray-200
-                            hover:bg-gray-100
-                            dark:hover:bg-white/5
-                            transition
-                          "
-                        >
-                          <Flag className="w-4 h-4" />
-                          Report post
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            setMoreMenuOpen(
-                              false
-                            )
-                          }
-                          className="
-                            w-full
-                            flex
-                            items-center
-                            gap-3
-                            px-4
-                            py-3
-                            text-left
-                            text-sm
-                            text-gray-700
-                            dark:text-gray-200
-                            hover:bg-gray-100
-                            dark:hover:bg-white/5
-                            transition
-                          "
-                        >
-                          Not interested
-                        </button>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
+              )}
             </div>
 
-            {/* ─────────────────────────────────────────
-                REPOST INDICATOR
-            ───────────────────────────────────────── */}
-
+            {/* REPOST INFO */}
             {isRepost &&
               originalAuthor && (
-                <div
-                  className="
-                    flex
-                    items-center
-                    gap-1.5
-                    mt-1
-                    text-xs
-                    text-gray-500
-                    dark:text-gray-400
-                  "
-                >
-                  <Repeat2 className="w-3.5 h-3.5 text-green-500" />
+                <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <Repeat className="w-3 h-3" />
 
                   <span>
                     Reposted from{" "}
                     <Link
                       href={`/profile/${originalAuthor.username}`}
-                      className="
-                        text-zrp-red
-                        hover:underline
-                        font-medium
-                      "
-                      onClick={(e) =>
-                        e.stopPropagation()
-                      }
+                      className="hover:underline text-zrp-red"
                     >
-                      @{originalAuthor.username}
+                      @
+                      {
+                        originalAuthor.username
+                      }
                     </Link>
                   </span>
                 </div>
               )}
 
-            {/* ─────────────────────────────────────────
-                POST CONTENT
-            ───────────────────────────────────────── */}
-
+            {/* POST BODY */}
             <div
               onClick={
                 handlePostClick
@@ -1918,23 +1402,9 @@ export default function PostCard({
               onTouchEnd={
                 handleTouchEnd
               }
-              className="
-                cursor-pointer
-                select-none
-              "
+              className="cursor-pointer select-none"
             >
-              <p
-                className="
-                  text-[15px]
-                  sm:text-[16px]
-                  leading-6
-                  text-gray-800
-                  dark:text-gray-200
-                  mt-2
-                  whitespace-pre-wrap
-                  break-words
-                "
-              >
+              <p className="text-gray-800 dark:text-gray-200 mt-1 whitespace-pre-wrap break-words">
                 {displayContentParts.map(
                   (
                     part,
@@ -1955,13 +1425,7 @@ export default function PostCard({
                             index
                           }
                           href={`/hashtag/${tag}`}
-                          className="
-                            text-zrp-red
-                            hover:underline
-                          "
-                          onClick={(e) =>
-                            e.stopPropagation()
-                          }
+                          className="text-zrp-red hover:underline"
                         >
                           {
                             part.value
@@ -1985,13 +1449,7 @@ export default function PostCard({
                             index
                           }
                           href={`/profile/${username}`}
-                          className="
-                            text-zrp-red
-                            hover:underline
-                          "
-                          onClick={(e) =>
-                            e.stopPropagation()
-                          }
+                          className="text-zrp-red hover:underline"
                         >
                           {
                             part.value
@@ -2031,14 +1489,12 @@ export default function PostCard({
                           }
                           target="_blank"
                           rel="noopener noreferrer"
-                          onClick={(e) =>
+                          onClick={(
+                            e
+                          ) =>
                             e.stopPropagation()
                           }
-                          className="
-                            text-zrp-red
-                            hover:underline
-                            break-all
-                          "
+                          className="text-zrp-red hover:underline break-all"
                         >
                           {
                             part.value
@@ -2066,7 +1522,7 @@ export default function PostCard({
                   "..."}
               </p>
 
-              {/* Show more */}
+              {/* SHOW MORE */}
               {isLongContent && (
                 <button
                   onClick={(e) => {
@@ -2076,13 +1532,7 @@ export default function PostCard({
                       !contentExpanded
                     );
                   }}
-                  className="
-                    text-sm
-                    text-zrp-red
-                    hover:underline
-                    mt-0.5
-                    font-medium
-                  "
+                  className="text-sm text-zrp-red hover:underline mt-0.5"
                 >
                   {contentExpanded
                     ? "Show less"
@@ -2090,41 +1540,31 @@ export default function PostCard({
                 </button>
               )}
 
-              {/* ─────────────────────────────────────
-                  LINK PREVIEW
-              ───────────────────────────────────── */}
-
+              {/* LINK PREVIEW */}
               {!post.imageUrl &&
                 previewUrl && (
-                  <div
-                    className="mt-3"
-                    onClick={(e) =>
-                      e.stopPropagation()
+                  <LinkPreviewCard
+                    url={
+                      previewUrl
                     }
-                  >
-                    <LinkPreviewCard
-                      url={previewUrl}
-                      onLoaded={(
+                    onLoaded={(
+                      found
+                    ) =>
+                      setLinkPreviewFoundFor(
                         found
-                      ) =>
-                        setLinkPreviewFoundFor(
-                          found
-                            ? previewUrl
-                            : null
-                        )
-                      }
-                    />
-                  </div>
+                          ? previewUrl
+                          : null
+                      )
+                    }
+                  />
                 )}
 
-              {/* ─────────────────────────────────────
-                  TRANSLATION
-              ───────────────────────────────────── */}
-
-              {post.content.trim()
+              {/* TRANSLATION */}
+              {post.content
+                .trim()
                 .length > 0 && (
                 <div
-                  className="mt-2"
+                  className="mt-1"
                   onClick={(e) =>
                     e.stopPropagation()
                   }
@@ -2136,16 +1576,7 @@ export default function PostCard({
                     disabled={
                       translating
                     }
-                    className="
-                      inline-flex
-                      items-center
-                      gap-1.5
-                      text-xs
-                      sm:text-sm
-                      text-zrp-red
-                      hover:underline
-                      disabled:opacity-60
-                    "
+                    className="inline-flex items-center gap-1 text-sm text-zrp-red hover:underline disabled:opacity-60"
                   >
                     {translating ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -2159,7 +1590,7 @@ export default function PostCard({
                   </button>
 
                   {translateError && (
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                       Translation unavailable
                       right now.
                     </p>
@@ -2167,63 +1598,46 @@ export default function PostCard({
 
                   {showTranslation &&
                     translatedText && (
-                      <div
-                        className="
-                          mt-2
-                          pl-3
-                          border-l-2
-                          border-zrp-red/40
-                        "
-                      >
-                        <p
-                          className="
-                            text-[15px]
-                            leading-6
-                            text-gray-700
-                            dark:text-gray-300
-                            whitespace-pre-wrap
-                          "
-                        >
-                          {
-                            translatedText
-                          }
-                        </p>
-                      </div>
+                      <p className="text-gray-800 dark:text-gray-200 mt-1.5 whitespace-pre-wrap break-words border-l-2 border-gray-200 dark:border-gray-700 pl-2">
+                        {
+                          translatedText
+                        }
+                      </p>
                     )}
                 </div>
               )}
 
-              {/* ─────────────────────────────────────
-                  RECRUITMENT
-              ───────────────────────────────────── */}
+              {/* ─────────────────────────────────────────────────────
+                  RECRUITMENT CARD
+              ───────────────────────────────────────────────────── */}
 
               {postType ===
                 "RECRUITMENT" &&
                 (post.company ||
                   post.location ||
                   post.applyUrl) && (
-                  <div
-                    className="
-                      mt-3
-                      rounded-2xl
-                      border
-                      border-gray-200
-                      dark:border-gray-700
-                      bg-gray-50
-                      dark:bg-gray-800/50
-                      overflow-hidden
-                    "
-                  >
-                    <div className="p-4">
+                  <div className="mt-3 rounded-2xl overflow-hidden border border-blue-100 dark:border-blue-900/40 bg-gradient-to-br from-blue-50/80 to-white dark:from-blue-950/30 dark:to-zrp-deepBlack">
+
+                    <div className="px-4 py-3 border-b border-blue-100 dark:border-blue-900/40 flex items-center gap-2">
+                      <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                        <Briefcase className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+
+                      <div>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                          Job opportunity
+                        </p>
+
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Recruitment
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="px-4 py-3 space-y-2">
 
                       {post.company && (
-                        <p
-                          className="
-                            font-bold
-                            text-gray-900
-                            dark:text-white
-                          "
-                        >
+                        <p className="font-semibold text-gray-900 dark:text-white">
                           {
                             post.company
                           }
@@ -2231,21 +1645,14 @@ export default function PostCard({
                       )}
 
                       {post.location && (
-                        <div
-                          className="
-                            flex
-                            items-center
-                            gap-1.5
-                            mt-1
-                            text-sm
-                            text-gray-500
-                            dark:text-gray-400
-                          "
-                        >
-                          <MapPin className="w-4 h-4" />
-                          {
-                            post.location
-                          }
+                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                          <MapPin className="w-4 h-4 flex-shrink-0" />
+
+                          <span>
+                            {
+                              post.location
+                            }
+                          </span>
                         </div>
                       )}
 
@@ -2259,68 +1666,40 @@ export default function PostCard({
                           onClick={(e) =>
                             e.stopPropagation()
                           }
-                          className="
-                            inline-flex
-                            items-center
-                            gap-1.5
-                            mt-3
-                            px-4
-                            py-2
-                            rounded-full
-                            bg-zrp-red
-                            text-white
-                            text-sm
-                            font-semibold
-                            hover:opacity-90
-                            transition
-                          "
+                          className="inline-flex items-center gap-2 mt-2 bg-zrp-red hover:bg-red-700 text-white px-4 py-2 rounded-full text-sm font-semibold transition"
                         >
                           Apply Now
-                          <ExternalLink className="w-4 h-4" />
+                          <ExternalLink className="w-3.5 h-3.5" />
                         </a>
                       )}
                     </div>
                   </div>
                 )}
 
-              {/* ─────────────────────────────────────
-                  ARTICLE
-              ───────────────────────────────────── */}
-
+              {/* ARTICLE */}
               {postType ===
                 "ARTICLE" &&
                 post.body && (
-                  <div
-                    className="
-                      mt-3
-                      rounded-2xl
-                      border
-                      border-gray-200
-                      dark:border-gray-700
-                      overflow-hidden
-                    "
-                  >
-                    <div className="p-4">
+                  <div className="mt-3 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
 
-                      <div
-                        className="
-                          prose
-                          prose-sm
-                          dark:prose-invert
-                          max-w-none
-                          prose-headings:text-gray-900
-                          dark:prose-headings:text-white
-                          prose-p:text-gray-800
-                          dark:prose-p:text-gray-200
-                          prose-a:text-zrp-red
-                        "
-                      >
+                    <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-purple-500" />
+
+                      <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                        Article
+                      </span>
+                    </div>
+
+                    <div className="px-4 py-3">
+                      <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-800 dark:prose-p:text-gray-200 prose-strong:text-gray-900 dark:prose-strong:text-white prose-li:text-gray-800 dark:prose-li:text-gray-200 prose-a:text-zrp-red hover:prose-a:underline">
+
                         {articleExpanded ? (
                           <div
                             dangerouslySetInnerHTML={{
                               __html:
                                 post.body,
                             }}
+                            className="text-gray-800 dark:text-gray-200"
                           />
                         ) : (
                           <div
@@ -2328,20 +1707,22 @@ export default function PostCard({
                               __html:
                                 post.body.slice(
                                   0,
-                                  400
+                                  300
                                 ) +
                                 (post.body
                                   .length >
-                                400
+                                300
                                   ? "..."
                                   : ""),
                             }}
+                            className="text-gray-800 dark:text-gray-200"
                           />
                         )}
                       </div>
 
-                      {post.body.length >
-                        400 && (
+                      {post.body
+                        .length >
+                        300 && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -2350,13 +1731,7 @@ export default function PostCard({
                               !articleExpanded
                             );
                           }}
-                          className="
-                            mt-2
-                            text-sm
-                            text-zrp-red
-                            hover:underline
-                            font-medium
-                          "
+                          className="text-sm text-zrp-red hover:underline mt-2 font-medium"
                         >
                           {articleExpanded
                             ? "Show less"
@@ -2367,36 +1742,25 @@ export default function PostCard({
                   </div>
                 )}
 
-              {/* ─────────────────────────────────────
-                  MULTI IMAGE
-              ───────────────────────────────────── */}
-
+              {/* MEDIA */}
               {!video &&
               post.imageUrls &&
               post.imageUrls.length >
                 1 ? (
                 <div
-                  className={`
-                    mt-3
-                    rounded-2xl
-                    overflow-hidden
-                    border
-                    border-gray-200
-                    dark:border-gray-800
-                    grid
-                    gap-0.5
-                    bg-black
-                    ${
-                      post.imageUrls
-                        .length ===
-                      2
-                        ? "grid-cols-2"
-                        : "grid-cols-2 grid-rows-2"
-                    }
-                  `}
+                  className={`mt-3 rounded-2xl overflow-hidden grid gap-0.5 ${
+                    post.imageUrls
+                      .length ===
+                    2
+                      ? "grid-cols-2"
+                      : "grid-cols-2 grid-rows-2"
+                  }`}
                 >
                   {post.imageUrls
-                    .slice(0, 4)
+                    .slice(
+                      0,
+                      4
+                    )
                     .map(
                       (
                         url,
@@ -2406,24 +1770,16 @@ export default function PostCard({
                           key={
                             url
                           }
-                          className={`
-                            relative
-                            cursor-pointer
-                            group/media
-                            bg-gray-100
-                            dark:bg-gray-800
-                            overflow-hidden
-                            ${
-                              post
-                                .imageUrls!
-                                .length ===
-                                3 &&
-                              idx ===
-                                0
-                                ? "row-span-2"
-                                : ""
-                            }
-                          `}
+                          className={`relative cursor-pointer group bg-gray-100 dark:bg-gray-800 ${
+                            post
+                              .imageUrls!
+                              .length ===
+                              3 &&
+                            idx ===
+                              0
+                              ? "row-span-2"
+                              : ""
+                          }`}
                           onClick={(
                             e
                           ) => {
@@ -2442,72 +1798,29 @@ export default function PostCard({
                               idx +
                               1
                             }`}
-                            className={`
-                              w-full
-                              h-full
-                              object-cover
-                              transition-transform
-                              duration-300
-                              group-hover/media:scale-[1.02]
-                              ${
-                                post
-                                  .imageUrls!
-                                  .length ===
-                                  3 &&
-                                idx ===
-                                  0
-                                  ? ""
-                                  : "aspect-square"
-                              }
-                            `}
+                            className={`w-full h-full object-cover ${
+                              post
+                                .imageUrls!
+                                .length ===
+                                3 &&
+                              idx ===
+                                0
+                                ? ""
+                                : "aspect-square"
+                            }`}
                           />
 
-                          <div
-                            className="
-                              absolute
-                              inset-0
-                              flex
-                              items-center
-                              justify-center
-                              bg-black/0
-                              group-hover/media:bg-black/20
-                              transition
-                            "
-                          >
-                            <ZoomIn
-                              className="
-                                w-7
-                                h-7
-                                text-white
-                                opacity-0
-                                group-hover/media:opacity-100
-                                transition
-                              "
-                            />
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20">
+                            <ZoomIn className="w-6 h-6 text-white" />
                           </div>
                         </div>
                       )
                     )}
                 </div>
               ) : (
-                /* ─────────────────────────────────────
-                   SINGLE IMAGE / VIDEO
-                ───────────────────────────────────── */
-
                 post.imageUrl && (
                   <div
-                    className="
-                      mt-3
-                      rounded-2xl
-                      overflow-hidden
-                      border
-                      border-gray-200
-                      dark:border-gray-800
-                      cursor-pointer
-                      group/media
-                      relative
-                      bg-black
-                    "
+                    className="mt-3 rounded-2xl overflow-hidden cursor-pointer group relative"
                     onClick={(e) => {
                       e.stopPropagation();
 
@@ -2531,12 +1844,7 @@ export default function PostCard({
                         ref={
                           videoContainerRef
                         }
-                        className="
-                          relative
-                          aspect-video
-                          w-full
-                          bg-black
-                        "
+                        className="relative aspect-video w-full bg-black"
                       >
                         <video
                           ref={
@@ -2545,16 +1853,13 @@ export default function PostCard({
                           src={
                             post.imageUrl
                           }
-                          className="
-                            w-full
-                            h-full
-                            object-contain
-                          "
+                          className="w-full h-full object-contain pointer-events-none"
                           muted={
                             videoMuted
                           }
                           loop
                           playsInline
+                          webkit-playsinline="true"
                           preload="metadata"
                           onContextMenu={(
                             e
@@ -2583,57 +1888,26 @@ export default function PostCard({
                         />
 
                         {!videoInView && (
-                          <div
-                            className="
-                              absolute
-                              inset-0
-                              flex
-                              items-center
-                              justify-center
-                              bg-black/20
-                            "
-                          >
-                            <div
-                              className="
-                                bg-black/60
-                                backdrop-blur-sm
-                                rounded-full
-                                p-4
-                              "
-                            >
-                              <Play
-                                className="
-                                  w-8
-                                  h-8
-                                  text-white
-                                  fill-white
-                                "
-                              />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition">
+                            <div className="bg-black/50 rounded-full p-3">
+                              <Play className="w-8 h-8 text-white fill-white" />
                             </div>
                           </div>
                         )}
 
                         {videoInView && (
                           <button
-                            onClick={(e) => {
+                            onClick={(
+                              e
+                            ) => {
                               e.stopPropagation();
 
                               setVideoMuted(
-                                (value) =>
-                                  !value
+                                (m) =>
+                                  !m
                               );
                             }}
-                            className="
-                              absolute
-                              bottom-3
-                              right-3
-                              bg-black/60
-                              backdrop-blur-sm
-                              hover:bg-black/80
-                              rounded-full
-                              p-2.5
-                              transition
-                            "
+                            className="absolute bottom-2 right-2 bg-black/50 hover:bg-black/70 rounded-full p-2 transition"
                             title={
                               videoMuted
                                 ? "Unmute"
@@ -2654,38 +1928,12 @@ export default function PostCard({
                           src={
                             post.imageUrl
                           }
-                          alt="Post media"
-                          className="
-                            w-full
-                            max-h-[700px]
-                            object-cover
-                            transition-transform
-                            duration-300
-                            group-hover/media:scale-[1.015]
-                          "
+                          alt="Post image"
+                          className="w-full"
                         />
 
-                        <div
-                          className="
-                            absolute
-                            top-3
-                            right-3
-                            opacity-0
-                            group-hover/media:opacity-100
-                            transition
-                          "
-                        >
-                          <div
-                            className="
-                              p-2
-                              rounded-full
-                              bg-black/60
-                              backdrop-blur-sm
-                              text-white
-                            "
-                          >
-                            <ZoomIn className="w-5 h-5" />
-                          </div>
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20">
+                          <ZoomIn className="w-8 h-8 text-white" />
                         </div>
                       </>
                     )}
@@ -2694,109 +1942,75 @@ export default function PostCard({
               )}
             </div>
 
-            {/* ─────────────────────────────────────────
+            {/* ─────────────────────────────────────────────────────
                 ACTION BAR
-            ───────────────────────────────────────── */}
+            ───────────────────────────────────────────────────── */}
 
-            <div
-              className="
-                flex
-                items-center
-                justify-between
-                mt-3
-                max-w-[600px]
-              "
-            >
+            <div className="flex items-center justify-between mt-3">
 
-              {/* Comments */}
+              {/* COMMENTS */}
               <button
                 onClick={() =>
                   setShowComments(
                     !showComments
                   )
                 }
+                className={`group flex items-center gap-1 text-sm ${
+                  commentsEnabled
+                    ? "text-gray-500 dark:text-gray-400"
+                    : "text-gray-300 dark:text-gray-500 cursor-not-allowed opacity-50"
+                } transition`}
                 disabled={
                   !commentsEnabled
                 }
-                className={`
-                  group
-                  flex
-                  items-center
-                  gap-1
-                  transition
-                  ${
-                    commentsEnabled
-                      ? "text-gray-500 dark:text-gray-400 hover:text-blue-500"
-                      : "text-gray-300 dark:text-gray-600 cursor-not-allowed"
-                  }
-                `}
+                title={
+                  !commentsEnabled
+                    ? "Comments are disabled for this post"
+                    : ""
+                }
               >
                 <span
-                  className="
-                    p-2
-                    rounded-full
-                    group-hover:bg-blue-500/10
-                    transition
-                  "
+                  className={`p-2 rounded-full transition ${
+                    commentsEnabled
+                      ? "group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:text-blue-500"
+                      : ""
+                  }`}
                 >
-                  <MessageCircle className="w-[19px] h-[19px]" />
+                  <MessageCircle className="w-[18px] h-[18px]" />
                 </span>
 
-                <span className="text-xs sm:text-sm">
+                <span className="group-hover:text-blue-500 transition whitespace-nowrap">
                   {formatCount(
                     commentsCount
                   )}
                 </span>
               </button>
 
-              {/* Repost */}
-              <div
-                ref={
-                  repostMenuRef
-                }
-                className="relative"
-              >
+              {/* REPOST */}
+              <div className="relative">
                 <button
-                  onClick={() => {
+                  onClick={() =>
                     setRepostDropdownOpen(
-                      (value) =>
-                        !value
-                    );
-
-                    setMoreMenuOpen(
-                      false
-                    );
-                  }}
-                  className={`
-                    group
-                    flex
-                    items-center
-                    gap-1
-                    transition
-                    ${
-                      reposted
-                        ? "text-green-500"
-                        : "text-gray-500 dark:text-gray-400 hover:text-green-500"
-                    }
-                  `}
+                      !repostDropdownOpen
+                    )
+                  }
+                  className={`group flex items-center text-sm ${
+                    reposted
+                      ? "text-green-500"
+                      : "text-gray-500 dark:text-gray-400"
+                  } transition`}
                 >
-                  <span
-                    className="
-                      p-2
-                      rounded-full
-                      group-hover:bg-green-500/10
-                      transition
-                    "
-                  >
-                    <Repeat2
-                      className="
-                        w-[19px]
-                        h-[19px]
-                      "
+                  <span className="p-2 rounded-full transition group-hover:bg-green-50 dark:group-hover:bg-green-900/20 group-hover:text-green-500">
+                    <Repeat
+                      className={`w-[18px] h-[18px] ${
+                        reposted
+                          ? "fill-green-500"
+                          : ""
+                      }`}
                     />
                   </span>
 
-                  <span className="text-xs sm:text-sm">
+                  <span className="group-hover:text-green-500 transition -ml-1 whitespace-nowrap">
                     {formatCount(
                       repostsCount +
                         (post._count
@@ -2804,48 +2018,40 @@ export default function PostCard({
                           0)
                     )}
                   </span>
+
+                  <ChevronDown className="w-3 h-3 ml-0.5 group-hover:text-green-500 transition" />
                 </button>
 
                 {repostDropdownOpen && (
-                  <div
-                    className="
-                      absolute
-                      left-0
-                      bottom-10
-                      z-40
-                      w-40
-                      overflow-hidden
-                      rounded-xl
-                      border
-                      border-gray-200
-                      dark:border-gray-700
-                      bg-white
-                      dark:bg-gray-800
-                      shadow-xl
-                    "
-                  >
-                    <button
-                      onClick={() => {
-                        handleRepost();
+                  <div className="absolute left-0 mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-20 overflow-hidden">
 
-                        setRepostDropdownOpen(
-                          false
-                        );
-                      }}
-                      className="
-                        w-full
-                        px-4
-                        py-2.5
-                        text-left
-                        text-sm
-                        hover:bg-gray-100
-                        dark:hover:bg-gray-700
-                      "
-                    >
-                      {reposted
-                        ? "Undo Repost"
-                        : "Repost"}
-                    </button>
+                    {reposted ? (
+                      <button
+                        onClick={() => {
+                          handleRepost();
+
+                          setRepostDropdownOpen(
+                            false
+                          );
+                        }}
+                        className="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      >
+                        Undo Repost
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          handleRepost();
+
+                          setRepostDropdownOpen(
+                            false
+                          );
+                        }}
+                        className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      >
+                        Repost
+                      </button>
+                    )}
 
                     <button
                       onClick={() => {
@@ -2857,33 +2063,14 @@ export default function PostCard({
                           false
                         );
                       }}
-                      className="
-                        w-full
-                        px-4
-                        py-2.5
-                        text-left
-                        text-sm
-                        hover:bg-gray-100
-                        dark:hover:bg-gray-700
-                      "
+                      className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                     >
                       Quote
                     </button>
 
                     <Link
                       href={`/post/${post.id}/reposts`}
-                      className="
-                        block
-                        px-4
-                        py-2.5
-                        text-xs
-                        text-gray-400
-                        hover:bg-gray-100
-                        dark:hover:bg-gray-700
-                        border-t
-                        border-gray-100
-                        dark:border-gray-700
-                      "
+                      className="block w-full text-left px-4 py-2 text-xs text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition border-t border-gray-100 dark:border-gray-700"
                     >
                       {formatCount(
                         repostsCount
@@ -2893,15 +2080,7 @@ export default function PostCard({
 
                     <Link
                       href={`/post/${post.id}/quotes`}
-                      className="
-                        block
-                        px-4
-                        py-2.5
-                        text-xs
-                        text-gray-400
-                        hover:bg-gray-100
-                        dark:hover:bg-gray-700
-                      "
+                      className="block w-full text-left px-4 py-2 text-xs text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                     >
                       {formatCount(
                         post._count
@@ -2914,354 +2093,210 @@ export default function PostCard({
                 )}
               </div>
 
-              {/* Like */}
+              {/* LIKE */}
               <button
                 onClick={
                   handleLike
                 }
-                className={`
-                  group
-                  flex
-                  items-center
-                  gap-1
-                  transition
-                  ${
-                    liked
-                      ? "text-red-500"
-                      : "text-gray-500 dark:text-gray-400 hover:text-red-500"
-                  }
-                `}
+                className={`group flex items-center gap-1 text-sm ${
+                  liked
+                    ? "text-red-500"
+                    : "text-gray-500 dark:text-gray-400"
+                } transition`}
               >
-                <span
-                  className="
-                    p-2
-                    rounded-full
-                    group-hover:bg-red-500/10
-                    transition
-                  "
-                >
+                <span className="p-2 rounded-full transition group-hover:bg-red-50 dark:group-hover:bg-red-900/20 group-hover:text-red-500">
                   <Heart
-                    className={`
-                      w-[19px]
-                      h-[19px]
-                      transition-transform
-                      ${
-                        liked
-                          ? "fill-current scale-110"
-                          : ""
-                      }
-                    `}
+                    className={`w-[18px] h-[18px] ${
+                      liked
+                        ? "fill-red-500"
+                        : ""
+                    }`}
                   />
                 </span>
 
-                <span className="text-xs sm:text-sm">
+                <span className="group-hover:text-red-500 transition -ml-1 whitespace-nowrap">
                   {formatCount(
                     likesCount
                   )}
                 </span>
               </button>
 
-              {/* Views */}
-              <div
-                className="
-                  flex
-                  items-center
-                  gap-1
-                  text-gray-400
-                  dark:text-gray-500
-                "
+              {/* VIEWS */}
+              <span
+                className="flex items-center gap-1 text-sm text-gray-400 dark:text-gray-500 whitespace-nowrap"
                 title={`${viewsCount.toLocaleString()} views`}
               >
                 <span className="p-2">
                   <BarChart3 className="w-[18px] h-[18px]" />
                 </span>
 
-                <span className="text-xs sm:text-sm">
+                <span className="-ml-1 whitespace-nowrap">
                   {formatCount(
                     viewsCount
                   )}
                 </span>
+              </span>
+
+              {/* BOOKMARK + SHARE */}
+              <div className="flex items-center">
+
+                <button
+                  onClick={
+                    handleBookmark
+                  }
+                  disabled={
+                    bookmarkLoading
+                  }
+                  className={`group p-2 rounded-full transition hover:bg-blue-50 dark:hover:bg-blue-900/20 ${
+                    bookmarked
+                      ? "text-blue-500"
+                      : "text-gray-400 dark:text-gray-500 hover:text-blue-500"
+                  }`}
+                  title={
+                    bookmarked
+                      ? "Remove bookmark"
+                      : "Bookmark"
+                  }
+                >
+                  <Bookmark
+                    className={`w-[18px] h-[18px] ${
+                      bookmarked
+                        ? "fill-current"
+                        : ""
+                    }`}
+                  />
+                </button>
+
+                <button
+                  onClick={
+                    handleShare
+                  }
+                  className="p-2 rounded-full transition text-gray-400 dark:text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-500"
+                >
+                  <Share2 className="w-[18px] h-[18px]" />
+                </button>
               </div>
 
-              {/* Bookmark */}
-              <button
-                onClick={
-                  handleBookmark
-                }
-                disabled={
-                  bookmarkLoading
-                }
-                className={`
-                  p-2
-                  rounded-full
-                  transition
-                  ${
-                    bookmarked
-                      ? "text-blue-500 bg-blue-500/10"
-                      : "text-gray-400 dark:text-gray-500 hover:text-blue-500 hover:bg-blue-500/10"
-                  }
-                `}
-                aria-label="Bookmark"
-              >
-                <Bookmark
-                  className="w-[19px] h-[19px]"
-                  fill={
-                    bookmarked
-                      ? "currentColor"
-                      : "none"
-                  }
-                />
-              </button>
-
-              {/* Share */}
-              <button
-                onClick={
-                  handleShare
-                }
-                className="
-                  p-2
-                  rounded-full
-                  text-gray-400
-                  dark:text-gray-500
-                  hover:text-blue-500
-                  hover:bg-blue-500/10
-                  transition
-                "
-                aria-label="Share"
-              >
-                <Share2 className="w-[19px] h-[19px]" />
-              </button>
-            </div>
-
-            {/* ─────────────────────────────────────────
-                REACTIONS
-            ───────────────────────────────────────── */}
-
-            {!reactionsLoading &&
-              Object.keys(
-                reactions
-              ).length > 0 && (
-                <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
-
-                  {Object.entries(
-                    reactions
-                  )
-                    .sort(
-                      (a, b) =>
-                        b[1] - a[1]
-                    )
-                    .slice(0, 5)
-                    .map(
-                      ([
-                        emoji,
-                        count,
-                      ]) => (
-                        <button
-                          key={
-                            emoji
-                          }
-                          onClick={() =>
-                            handleReaction(
-                              emoji
-                            )
-                          }
-                          className={`
-                            inline-flex
-                            items-center
-                            gap-1
-                            px-2.5
-                            py-1
-                            rounded-full
-                            border
-                            text-xs
-                            transition
-                            ${
-                              userReaction ===
-                              emoji
-                                ? "bg-zrp-red/10 border-zrp-red/40 text-zrp-red"
-                                : "bg-gray-50 dark:bg-gray-800/70 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-zrp-red/40"
-                            }
-                          `}
-                        >
-                          <span className="text-sm">
-                            {
-                              emoji
-                            }
-                          </span>
-
-                          <span>
-                            {formatCount(
-                              count
-                            )}
-                          </span>
-                        </button>
-                      )
-                    )}
-
-                  <button
-                    onClick={() =>
-                      setShowEmojiPicker(
-                        true
-                      )
-                    }
-                    className="
-                      w-7
-                      h-7
-                      rounded-full
-                      border
-                      border-gray-200
-                      dark:border-gray-700
-                      flex
-                      items-center
-                      justify-center
-                      text-gray-400
-                      hover:text-zrp-red
-                      hover:border-zrp-red
-                      transition
-                    "
-                    aria-label="Add reaction"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-
-            {/* ─────────────────────────────────────────
-                COMMENTS OFF
-            ───────────────────────────────────────── */}
-
-            {!commentsEnabled && (
-              <div className="mt-2">
-                <span
-                  className="
-                    inline-flex
-                    items-center
-                    gap-1
-                    text-xs
-                    text-gray-400
-                    dark:text-gray-500
-                    bg-gray-100
-                    dark:bg-gray-800
-                    px-2.5
-                    py-1
-                    rounded-full
-                  "
-                >
-                  <MessageCircle className="w-3 h-3" />
+              {!commentsEnabled && (
+                <span className="text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
                   Comments off
                 </span>
+              )}
+            </div>
+
+            {/* ─────────────────────────────────────────────────────
+                REACTIONS
+            ───────────────────────────────────────────────────── */}
+
+            {!reactionsLoading && (
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+
+                {Object.entries(
+                  reactions
+                )
+                  .sort(
+                    (a, b) =>
+                      b[1] - a[1]
+                  )
+                  .map(
+                    ([
+                      emoji,
+                      count,
+                    ]) => (
+                      <button
+                        key={
+                          emoji
+                        }
+                        onClick={() =>
+                          handleReaction(
+                            emoji
+                          )
+                        }
+                        className={`text-sm px-2 py-1 rounded-full border transition ${
+                          userReaction ===
+                          emoji
+                            ? "bg-zrp-red/10 border-zrp-red text-zrp-red"
+                            : "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
+                        }`}
+                      >
+                        {emoji}
+
+                        <span className="ml-1 text-xs">
+                          {
+                            count
+                          }
+                        </span>
+                      </button>
+                    )
+                  )}
+
+                <button
+                  onClick={() =>
+                    setShowEmojiPicker(
+                      true
+                    )
+                  }
+                  className="text-sm px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
               </div>
             )}
 
-            {/* ─────────────────────────────────────────
-                INLINE COMMENTS
-            ───────────────────────────────────────── */}
-
+            {/* INLINE COMMENTS */}
             {commentsEnabled &&
               showInlineComments &&
               showComments && (
-                <div className="mt-3">
-                  <Comments
-                    postId={post.id}
-                    onCommentAdded={
-                      handleCommentCountChange
-                    }
-                  />
-                </div>
+                <Comments
+                  postId={
+                    post.id
+                  }
+                  onCommentAdded={
+                    handleCommentCountChange
+                  }
+                />
               )}
           </div>
         </div>
-      </article>
+      </div>
 
-      {/* ─────────────────────────────────────────────────────
-          EDIT
-      ───────────────────────────────────────────────────── */}
-
+      {/* EDIT MODAL */}
       <EditPostModal
         post={post}
-        isOpen={showEditModal}
+        isOpen={
+          showEditModal
+        }
         onClose={() =>
-          setShowEditModal(false)
+          setShowEditModal(
+            false
+          )
         }
         onUpdate={onUpdate}
       />
 
-      {/* ─────────────────────────────────────────────────────
-          DELETE CONFIRMATION
-      ───────────────────────────────────────────────────── */}
-
+      {/* DELETE CONFIRMATION */}
       {showDeleteConfirm && (
-        <div
-          className="
-            fixed
-            inset-0
-            bg-black/60
-            backdrop-blur-sm
-            flex
-            items-center
-            justify-center
-            z-[999]
-            px-4
-          "
-        >
-          <div
-            className="
-              bg-white
-              dark:bg-zrp-deepBlack
-              rounded-2xl
-              shadow-2xl
-              max-w-sm
-              w-full
-              p-6
-              border
-              border-gray-200
-              dark:border-gray-800
-            "
-          >
-            <h2
-              className="
-                text-xl
-                font-bold
-                text-gray-900
-                dark:text-white
-                mb-2
-              "
-            >
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+
+          <div className="bg-white dark:bg-zrp-deepBlack rounded-2xl shadow-xl max-w-sm w-full p-6">
+
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
               Delete Post?
             </h2>
 
-            <p
-              className="
-                text-gray-600
-                dark:text-gray-400
-                text-sm
-                mb-6
-              "
-            >
-              This action cannot be
-              undone.
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
+              This action cannot be undone.
             </p>
 
             <div className="flex gap-3 justify-end">
+
               <button
                 onClick={() =>
                   setShowDeleteConfirm(
                     false
                   )
                 }
-                className="
-                  px-4
-                  py-2
-                  border
-                  border-gray-300
-                  dark:border-gray-600
-                  rounded-full
-                  text-sm
-                  font-medium
-                  hover:bg-gray-50
-                  dark:hover:bg-gray-800
-                  transition
-                "
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
               >
                 Cancel
               </button>
@@ -3270,34 +2305,22 @@ export default function PostCard({
                 onClick={
                   handleDelete
                 }
-                disabled={deleting}
-                className="
-                  bg-red-600
-                  text-white
-                  px-4
-                  py-2
-                  rounded-full
-                  text-sm
-                  font-medium
-                  hover:bg-red-700
-                  disabled:opacity-50
-                  disabled:cursor-not-allowed
-                  transition
-                "
+                disabled={
+                  deleting
+                }
+                className="bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {deleting
                   ? "Deleting..."
                   : "Delete"}
               </button>
+
             </div>
           </div>
         </div>
       )}
 
-      {/* ─────────────────────────────────────────────────────
-          REPORT MODAL
-      ───────────────────────────────────────────────────── */}
-
+      {/* REPORT */}
       <ReportModal
         isOpen={
           showReportModal
@@ -3312,22 +2335,10 @@ export default function PostCard({
         }
       />
 
-      {/* ─────────────────────────────────────────────────────
-          IMAGE LIGHTBOX
-      ───────────────────────────────────────────────────── */}
-
+      {/* IMAGE LIGHTBOX */}
       {lightboxImage && (
         <div
-          className="
-            fixed
-            inset-0
-            bg-black/95
-            flex
-            items-center
-            justify-center
-            z-[999]
-            p-4
-          "
+          className="fixed inset-0 bg-black/90 flex items-center justify-center z-[999] p-4"
           onClick={() =>
             setLightboxImage(
               null
@@ -3335,14 +2346,7 @@ export default function PostCard({
           }
         >
           <div
-            className="
-              relative
-              max-w-5xl
-              w-full
-              flex
-              items-center
-              justify-center
-            "
+            className="relative max-w-3xl w-full"
             onClick={(e) =>
               e.stopPropagation()
             }
@@ -3352,12 +2356,7 @@ export default function PostCard({
                 lightboxImage
               }
               alt="Full size"
-              className="
-                max-w-full
-                max-h-[90vh]
-                object-contain
-                rounded-xl
-              "
+              className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
             />
 
             <button
@@ -3366,19 +2365,7 @@ export default function PostCard({
                   null
                 )
               }
-              className="
-                absolute
-                top-3
-                right-3
-                text-white
-                bg-black/60
-                backdrop-blur-sm
-                rounded-full
-                p-2.5
-                hover:bg-black/80
-                transition
-              "
-              aria-label="Close image"
+              className="absolute top-2 right-2 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition"
             >
               <X className="w-6 h-6" />
             </button>
@@ -3386,23 +2373,10 @@ export default function PostCard({
         </div>
       )}
 
-      {/* ─────────────────────────────────────────────────────
-          EMOJI PICKER
-      ───────────────────────────────────────────────────── */}
-
+      {/* EMOJI PICKER */}
       {showEmojiPicker && (
         <div
-          className="
-            fixed
-            inset-0
-            z-[999]
-            flex
-            items-end
-            sm:items-center
-            sm:justify-center
-            bg-black/50
-            backdrop-blur-sm
-          "
+          className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center bg-black/40"
           onClick={() =>
             setShowEmojiPicker(
               false
@@ -3410,42 +2384,12 @@ export default function PostCard({
           }
         >
           <div
-            className="
-              w-full
-              sm:w-auto
-              max-h-[75vh]
-              overflow-hidden
-              rounded-t-2xl
-              sm:rounded-2xl
-              bg-white
-              dark:bg-zrp-deepBlack
-              shadow-2xl
-            "
+            className="w-full sm:w-auto max-h-[70vh] sm:max-h-[80vh] overflow-hidden rounded-t-2xl sm:rounded-xl bg-white dark:bg-zrp-deepBlack shadow-2xl"
             onClick={(e) =>
               e.stopPropagation()
             }
           >
-            <div
-              className="
-                flex
-                items-center
-                justify-between
-                px-4
-                py-3
-                border-b
-                border-gray-200
-                dark:border-gray-700
-              "
-            >
-              <span
-                className="
-                  font-semibold
-                  text-gray-900
-                  dark:text-white
-                "
-              >
-                Add reaction
-              </span>
+            <div className="flex justify-end p-2 border-b border-gray-200 dark:border-gray-700">
 
               <button
                 type="button"
@@ -3454,16 +2398,11 @@ export default function PostCard({
                     false
                   )
                 }
-                className="
-                  p-1.5
-                  rounded-full
-                  text-gray-500
-                  hover:bg-gray-100
-                  dark:hover:bg-gray-700
-                "
+                className="p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <X className="w-5 h-5" />
               </button>
+
             </div>
 
             <EmojiPicker
@@ -3481,10 +2420,7 @@ export default function PostCard({
         </div>
       )}
 
-      {/* ─────────────────────────────────────────────────────
-          QUOTE POST
-      ───────────────────────────────────────────────────── */}
-
+      {/* QUOTE POST */}
       {showQuoteModal && (
         <QuotePostModal
           post={post}
@@ -3499,13 +2435,12 @@ export default function PostCard({
         />
       )}
 
-      {/* ─────────────────────────────────────────────────────
-          FULLSCREEN VIDEO FEED
-      ───────────────────────────────────────────────────── */}
-
+      {/* VIDEO VIEWER */}
       {showVideoFeed && (
         <VideoFeedViewer
-          startPostId={post.id}
+          startPostId={
+            post.id
+          }
           onClose={() =>
             setShowVideoFeed(
               false
