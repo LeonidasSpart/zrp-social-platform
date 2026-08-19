@@ -295,15 +295,10 @@ export default function PostCard({
   const [lastClickTime, setLastClickTime] =
     useState(0);
 
-  /*
-   * IMAGE LIGHTBOX
-   *
-   * Instead of storing the image URL, we store the
-   * index of the currently opened image.
-   *
-   * This allows the viewer to move through every
-   * image in imageUrls without closing the lightbox.
-   */
+  // ─────────────────────────────────────────────────────────────
+  // IMAGE LIGHTBOX
+  // ─────────────────────────────────────────────────────────────
+
   const [lightboxImageIndex, setLightboxImageIndex] =
     useState<number | null>(null);
 
@@ -377,10 +372,10 @@ export default function PostCard({
   // ─────────────────────────────────────────────────────────────
 
   /*
-   * Build one consistent image list for the lightbox.
+   * Build one consistent gallery list.
    *
-   * imageUrls is preferred because it contains all gallery images.
-   * For old/single-image posts, imageUrl is used as a fallback.
+   * imageUrls is preferred because it contains all images.
+   * imageUrl is used as a fallback for older single-image posts.
    */
   const galleryImages =
     post.imageUrls &&
@@ -443,9 +438,10 @@ export default function PostCard({
     });
   };
 
-  /*
-   * Prevent the page behind the gallery from scrolling.
-   */
+  // ─────────────────────────────────────────────────────────────
+  // PREVENT BACKGROUND SCROLL
+  // ─────────────────────────────────────────────────────────────
+
   useEffect(() => {
     if (!lightboxOpen) {
       return;
@@ -462,9 +458,10 @@ export default function PostCard({
     };
   }, [lightboxOpen]);
 
-  /*
-   * Keyboard navigation.
-   */
+  // ─────────────────────────────────────────────────────────────
+  // KEYBOARD LIGHTBOX NAVIGATION
+  // ─────────────────────────────────────────────────────────────
+
   useEffect(() => {
     if (!lightboxOpen) {
       return;
@@ -507,12 +504,10 @@ export default function PostCard({
     galleryImages.length,
   ]);
 
-  /*
-   * Touch swipe handling.
-   *
-   * A swipe left = next image.
-   * A swipe right = previous image.
-   */
+  // ─────────────────────────────────────────────────────────────
+  // LIGHTBOX TOUCH SWIPE
+  // ─────────────────────────────────────────────────────────────
+
   const lightboxTouchStartX =
     useRef<number | null>(null);
 
@@ -561,8 +556,6 @@ export default function PostCard({
 
     /*
      * Ignore mostly vertical gestures.
-     * This keeps normal scrolling-like gestures
-     * from accidentally changing the photo.
      */
     if (
       Math.abs(deltaX) < 50 ||
@@ -579,79 +572,138 @@ export default function PostCard({
   };
 
   // ─────────────────────────────────────────────────────────────
-  // VIDEO DETECTION
+  // MEDIA DETECTION
   // ─────────────────────────────────────────────────────────────
 
+  /*
+   * IMPORTANT:
+   *
+   * GIF files are ALWAYS treated as images.
+   *
+   * This protects old posts where the database may incorrectly
+   * contain:
+   *
+   *   mediaType: "video"
+   *
+   * while the actual file is:
+   *
+   *   something.gif
+   *
+   * GIFs therefore:
+   *
+   * - do NOT use <video>
+   * - do NOT open VideoFeedViewer
+   * - do NOT behave as Shorts
+   * - use the normal image/lightbox viewer
+   */
+
+  const mediaUrl =
+    post.imageUrl?.toLowerCase() || "";
+
+  const mediaPath =
+    mediaUrl
+      .split("?")[0]
+      .split("#")[0];
+
+  const isGif =
+    mediaPath.endsWith(".gif") ||
+    post.mediaType === "gif";
+
+  const isImageGallery =
+    !!post.imageUrls &&
+    post.imageUrls.length > 1;
+
+  const imageExtensions = [
+    "jpg",
+    "jpeg",
+    "png",
+    "gif",
+    "webp",
+    "svg",
+    "avif",
+    "bmp",
+  ];
+
+  const videoExtensions = [
+    "mp4",
+    "webm",
+    "mov",
+    "avi",
+    "mkv",
+    "m4v",
+    "3gp",
+  ];
+
+  const hasImageExtension =
+    imageExtensions.some(
+      (ext) =>
+        mediaPath.endsWith("." + ext)
+    );
+
+  const hasVideoExtension =
+    videoExtensions.some(
+      (ext) =>
+        mediaPath.endsWith("." + ext)
+    );
+
   const isVideo = () => {
-    if (post.mediaType === "video")
-      return true;
-
-    if (post.mediaType === "image")
-      return false;
-
-    if (!post.imageUrl)
-      return false;
-
-    if (
-      post.imageUrls &&
-      post.imageUrls.length > 1
-    ) {
+    /*
+     * GIF always wins.
+     */
+    if (isGif) {
       return false;
     }
 
-    const url =
-      post.imageUrl.toLowerCase();
+    /*
+     * Multiple images are always a gallery.
+     */
+    if (isImageGallery) {
+      return false;
+    }
 
-    const path =
-      url.split("?")[0];
+    /*
+     * Explicit image.
+     */
+    if (post.mediaType === "image") {
+      return false;
+    }
 
-    const videoExtensions = [
-      "mp4",
-      "webm",
-      "mov",
-      "avi",
-      "mkv",
-      "m4v",
-      "3gp",
-    ];
+    /*
+     * Actual image file extension.
+     */
+    if (hasImageExtension) {
+      return false;
+    }
 
-    if (
-      videoExtensions.some(
-        (ext) =>
-          path.endsWith("." + ext)
-      )
-    ) {
+    /*
+     * Actual video file extension.
+     */
+    if (hasVideoExtension) {
       return true;
     }
 
-    const imageExtensions = [
-      "jpg",
-      "jpeg",
-      "png",
-      "gif",
-      "webp",
-      "svg",
-      "avif",
-      "bmp",
-    ];
-
-    if (
-      imageExtensions.some(
-        (ext) =>
-          path.endsWith("." + ext)
-      )
-    ) {
-      return false;
+    /*
+     * Explicit video type.
+     */
+    if (post.mediaType === "video") {
+      return true;
     }
 
+    /*
+     * Some storage URLs may not expose a standard extension.
+     * Only obvious video paths are treated as video.
+     */
     if (
-      url.includes("/video/") ||
-      url.includes("video")
+      mediaUrl.includes("/video/") ||
+      mediaUrl.includes("/videos/")
     ) {
       return true;
     }
 
-    return true;
+    /*
+     * Unknown media is NOT assumed to be video.
+     */
+    return false;
   };
 
   const video = isVideo();
@@ -1450,9 +1502,7 @@ export default function PostCard({
             <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 font-semibold flex-shrink-0 overflow-hidden">
               {post.author.avatarUrl ? (
                 <img
-                  src={
-                    post.author.avatarUrl
-                  }
+                  src={post.author.avatarUrl}
                   alt={
                     post.author.name ||
                     post.author.username
@@ -1491,10 +1541,7 @@ export default function PostCard({
                 >
                   <span className="text-gray-500 dark:text-gray-400 text-sm hover:underline">
                     @
-                    {
-                      post.author
-                        .username
-                    }
+                    {post.author.username}
                   </span>
                 </Link>
 
@@ -1740,6 +1787,7 @@ export default function PostCard({
                   "..."}
               </p>
 
+              {/* SHOW MORE */}
               {isLongContent && (
                 <button
                   onClick={(e) => {
@@ -1757,6 +1805,7 @@ export default function PostCard({
                 </button>
               )}
 
+              {/* LINK PREVIEW */}
               {!post.imageUrl &&
                 previewUrl && (
                   <LinkPreviewCard
@@ -1775,6 +1824,7 @@ export default function PostCard({
                   />
                 )}
 
+              {/* TRANSLATION */}
               {post.content
                 .trim()
                 .length > 0 && (
@@ -2022,11 +2072,14 @@ export default function PostCard({
                             }`}
                           />
 
-                          {post.imageUrls.length > 4 &&
+                          {post.imageUrls.length >
+                            4 &&
                             idx === 3 && (
                               <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                                 <span className="text-white text-lg font-bold">
-                                  +{post.imageUrls.length - 4}
+                                  +
+                                  {post.imageUrls.length -
+                                    4}
                                 </span>
                               </div>
                             )}
@@ -2045,6 +2098,12 @@ export default function PostCard({
                     onClick={(e) => {
                       e.stopPropagation();
 
+                      /*
+                       * Only REAL videos open the video viewer.
+                       *
+                       * GIFs are protected by the media detector,
+                       * so they always go to the image lightbox.
+                       */
                       if (
                         video &&
                         !videoLoadFailed
@@ -2651,7 +2710,7 @@ export default function PostCard({
               </button>
             )}
 
-            {/* MOBILE SWIPE HINT / COUNTER */}
+            {/* MOBILE SWIPE HINT */}
             {galleryImages.length > 1 && (
               <div
                 className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 sm:hidden"
