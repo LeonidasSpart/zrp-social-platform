@@ -26,7 +26,7 @@ export default function PageTransition({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         transition={{ duration: 0.25, ease: "easeInOut" }}
-        className="flex-1 w-full max-w-full"
+        className="flex-1 w-full max-w-full min-h-0 h-full overflow-hidden"
       >
         {children}
       </motion.main>
