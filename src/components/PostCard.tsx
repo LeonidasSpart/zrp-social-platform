@@ -18,6 +18,8 @@ import {
   ZoomIn,
   Plus,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Briefcase,
   FileText,
   Globe,
@@ -293,8 +295,17 @@ export default function PostCard({
   const [lastClickTime, setLastClickTime] =
     useState(0);
 
-  const [lightboxImage, setLightboxImage] =
-    useState<string | null>(null);
+  /*
+   * IMAGE LIGHTBOX
+   *
+   * Instead of storing the image URL, we store the
+   * index of the currently opened image.
+   *
+   * This allows the viewer to move through every
+   * image in imageUrls without closing the lightbox.
+   */
+  const [lightboxImageIndex, setLightboxImageIndex] =
+    useState<number | null>(null);
 
   const [reactions, setReactions] =
     useState<Record<string, number>>({});
@@ -360,6 +371,212 @@ export default function PostCard({
 
   const postType =
     post.type || "POST";
+
+  // ─────────────────────────────────────────────────────────────
+  // IMAGE GALLERY
+  // ─────────────────────────────────────────────────────────────
+
+  /*
+   * Build one consistent image list for the lightbox.
+   *
+   * imageUrls is preferred because it contains all gallery images.
+   * For old/single-image posts, imageUrl is used as a fallback.
+   */
+  const galleryImages =
+    post.imageUrls &&
+    post.imageUrls.length > 0
+      ? post.imageUrls
+      : post.imageUrl
+      ? [post.imageUrl]
+      : [];
+
+  const lightboxOpen =
+    lightboxImageIndex !== null &&
+    galleryImages.length > 0 &&
+    !!galleryImages[lightboxImageIndex];
+
+  const closeLightbox = () => {
+    setLightboxImageIndex(null);
+  };
+
+  const openLightbox = (index: number) => {
+    if (
+      index < 0 ||
+      index >= galleryImages.length
+    ) {
+      return;
+    }
+
+    setLightboxImageIndex(index);
+  };
+
+  const showPreviousLightboxImage = () => {
+    if (lightboxImageIndex === null) {
+      return;
+    }
+
+    setLightboxImageIndex((current) => {
+      if (current === null) {
+        return null;
+      }
+
+      return current > 0
+        ? current - 1
+        : galleryImages.length - 1;
+    });
+  };
+
+  const showNextLightboxImage = () => {
+    if (lightboxImageIndex === null) {
+      return;
+    }
+
+    setLightboxImageIndex((current) => {
+      if (current === null) {
+        return null;
+      }
+
+      return current <
+        galleryImages.length - 1
+        ? current + 1
+        : 0;
+    });
+  };
+
+  /*
+   * Prevent the page behind the gallery from scrolling.
+   */
+  useEffect(() => {
+    if (!lightboxOpen) {
+      return;
+    }
+
+    const previousOverflow =
+      document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow =
+        previousOverflow;
+    };
+  }, [lightboxOpen]);
+
+  /*
+   * Keyboard navigation.
+   */
+  useEffect(() => {
+    if (!lightboxOpen) {
+      return;
+    }
+
+    const handleKeyDown = (
+      event: KeyboardEvent
+    ) => {
+      if (event.key === "Escape") {
+        closeLightbox();
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        showPreviousLightboxImage();
+        return;
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        showNextLightboxImage();
+      }
+    };
+
+    window.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+    return () => {
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+    };
+  }, [
+    lightboxOpen,
+    lightboxImageIndex,
+    galleryImages.length,
+  ]);
+
+  /*
+   * Touch swipe handling.
+   *
+   * A swipe left = next image.
+   * A swipe right = previous image.
+   */
+  const lightboxTouchStartX =
+    useRef<number | null>(null);
+
+  const lightboxTouchStartY =
+    useRef<number | null>(null);
+
+  const handleLightboxTouchStart = (
+    event: React.TouchEvent
+  ) => {
+    const touch =
+      event.touches[0];
+
+    lightboxTouchStartX.current =
+      touch.clientX;
+
+    lightboxTouchStartY.current =
+      touch.clientY;
+  };
+
+  const handleLightboxTouchEnd = (
+    event: React.TouchEvent
+  ) => {
+    if (
+      lightboxTouchStartX.current === null ||
+      lightboxTouchStartY.current === null
+    ) {
+      return;
+    }
+
+    const touch =
+      event.changedTouches[0];
+
+    const deltaX =
+      touch.clientX -
+      lightboxTouchStartX.current;
+
+    const deltaY =
+      touch.clientY -
+      lightboxTouchStartY.current;
+
+    lightboxTouchStartX.current =
+      null;
+
+    lightboxTouchStartY.current =
+      null;
+
+    /*
+     * Ignore mostly vertical gestures.
+     * This keeps normal scrolling-like gestures
+     * from accidentally changing the photo.
+     */
+    if (
+      Math.abs(deltaX) < 50 ||
+      Math.abs(deltaX) <= Math.abs(deltaY)
+    ) {
+      return;
+    }
+
+    if (deltaX < 0) {
+      showNextLightboxImage();
+    } else {
+      showPreviousLightboxImage();
+    }
+  };
 
   // ─────────────────────────────────────────────────────────────
   // VIDEO DETECTION
@@ -1149,16 +1366,19 @@ export default function PostCard({
       }
     };
 
-  let lastTouchTime = 0;
+  const lastTouchTimeRef =
+    useRef(0);
 
   const handleTouchEnd =
     () => {
       const now = Date.now();
 
       const timeSince =
-        now - lastTouchTime;
+        now -
+        lastTouchTimeRef.current;
 
-      lastTouchTime = now;
+      lastTouchTimeRef.current =
+        now;
 
       if (timeSince < 300) {
         handleLike();
@@ -1288,7 +1508,6 @@ export default function PostCard({
                   )}
                 </span>
 
-                {/* RECRUITMENT BADGE */}
                 {postType ===
                   "RECRUITMENT" && (
                   <span className="inline-flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">
@@ -1297,7 +1516,6 @@ export default function PostCard({
                   </span>
                 )}
 
-                {/* ARTICLE BADGE */}
                 {postType ===
                   "ARTICLE" && (
                   <span className="inline-flex items-center gap-1 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full">
@@ -1307,7 +1525,6 @@ export default function PostCard({
                 )}
               </div>
 
-              {/* AUTHOR CONTROLS */}
               {isAuthor ? (
                 <div className="flex items-center gap-1">
 
@@ -1523,7 +1740,6 @@ export default function PostCard({
                   "..."}
               </p>
 
-              {/* SHOW MORE */}
               {isLongContent && (
                 <button
                   onClick={(e) => {
@@ -1541,7 +1757,6 @@ export default function PostCard({
                 </button>
               )}
 
-              {/* LINK PREVIEW */}
               {!post.imageUrl &&
                 previewUrl && (
                   <LinkPreviewCard
@@ -1560,7 +1775,6 @@ export default function PostCard({
                   />
                 )}
 
-              {/* TRANSLATION */}
               {post.content
                 .trim()
                 .length > 0 && (
@@ -1783,8 +1997,8 @@ export default function PostCard({
                           ) => {
                             e.stopPropagation();
 
-                            setLightboxImage(
-                              url
+                            openLightbox(
+                              idx
                             );
                           }}
                         >
@@ -1808,6 +2022,15 @@ export default function PostCard({
                             }`}
                           />
 
+                          {post.imageUrls.length > 4 &&
+                            idx === 3 && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                                <span className="text-white text-lg font-bold">
+                                  +{post.imageUrls.length - 4}
+                                </span>
+                              </div>
+                            )}
+
                           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20">
                             <ZoomIn className="w-6 h-6 text-white" />
                           </div>
@@ -1830,8 +2053,8 @@ export default function PostCard({
                           true
                         );
                       } else {
-                        setLightboxImage(
-                          post.imageUrl!
+                        openLightbox(
+                          0
                         );
                       }
                     }}
@@ -2327,43 +2550,122 @@ export default function PostCard({
         }
       />
 
-      {/* IMAGE LIGHTBOX */}
-      {lightboxImage && (
-        <div
-          className="fixed inset-0 bg-black/90 flex items-center justify-center z-[999] p-4"
-          onClick={() =>
-            setLightboxImage(
-              null
-            )
-          }
-        >
+      {/* =========================================================
+          SWIPEABLE IMAGE LIGHTBOX
+          ========================================================= */}
+      {lightboxOpen &&
+        lightboxImageIndex !== null && (
           <div
-            className="relative max-w-3xl w-full"
-            onClick={(e) =>
-              e.stopPropagation()
+            className="fixed inset-0 z-[999] bg-black/95 flex items-center justify-center"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Image gallery"
+            onClick={closeLightbox}
+            onTouchStart={
+              handleLightboxTouchStart
+            }
+            onTouchEnd={
+              handleLightboxTouchEnd
             }
           >
-            <img
-              src={
-                lightboxImage
+            {/* TOP BAR */}
+            <div
+              className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 sm:px-6 py-4 bg-gradient-to-b from-black/70 to-transparent"
+              onClick={(e) =>
+                e.stopPropagation()
               }
-              alt="Full size"
-              className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
-            />
-
-            <button
-              onClick={() =>
-                setLightboxImage(
-                  null
-                )
-              }
-              className="absolute top-2 right-2 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition"
             >
-              <X className="w-6 h-6" />
-            </button>
+              {/* IMAGE COUNTER */}
+              <div className="text-white text-sm font-semibold bg-black/40 backdrop-blur-sm rounded-full px-3 py-1.5">
+                {lightboxImageIndex + 1} /{" "}
+                {galleryImages.length}
+              </div>
+
+              {/* CLOSE */}
+              <button
+                type="button"
+                onClick={closeLightbox}
+                aria-label="Close image"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-black/50 hover:bg-white/20 text-white transition"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* PREVIOUS */}
+            {galleryImages.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  showPreviousLightboxImage();
+                }}
+                aria-label="Previous image"
+                className="hidden sm:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-20 items-center justify-center w-11 h-11 lg:w-12 lg:h-12 rounded-full bg-black/50 hover:bg-white/20 text-white transition"
+              >
+                <ChevronLeft className="w-7 h-7" />
+              </button>
+            )}
+
+            {/* IMAGE */}
+            <div
+              className="relative w-full h-full flex items-center justify-center px-3 sm:px-16 lg:px-24 py-16 sm:py-20"
+              onClick={(e) =>
+                e.stopPropagation()
+              }
+            >
+              <img
+                key={
+                  galleryImages[
+                    lightboxImageIndex
+                  ]
+                }
+                src={
+                  galleryImages[
+                    lightboxImageIndex
+                  ]
+                }
+                alt={`Post image ${
+                  lightboxImageIndex +
+                  1
+                } of ${
+                  galleryImages.length
+                }`}
+                draggable={false}
+                className="max-w-full max-h-full w-auto h-auto object-contain select-none rounded-sm"
+              />
+            </div>
+
+            {/* NEXT */}
+            {galleryImages.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  showNextLightboxImage();
+                }}
+                aria-label="Next image"
+                className="hidden sm:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-20 items-center justify-center w-11 h-11 lg:w-12 lg:h-12 rounded-full bg-black/50 hover:bg-white/20 text-white transition"
+              >
+                <ChevronRight className="w-7 h-7" />
+              </button>
+            )}
+
+            {/* MOBILE SWIPE HINT / COUNTER */}
+            {galleryImages.length > 1 && (
+              <div
+                className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 sm:hidden"
+                onClick={(e) =>
+                  e.stopPropagation()
+                }
+              >
+                <div className="bg-black/50 backdrop-blur-sm text-white text-xs font-medium rounded-full px-4 py-2">
+                  Swipe to browse
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
 
       {/* EMOJI PICKER */}
       {showEmojiPicker && (
