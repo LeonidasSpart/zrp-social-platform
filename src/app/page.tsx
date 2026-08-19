@@ -530,37 +530,35 @@ export default function HomePage() {
   return (
     <main className="w-full">
 
-      <div className="max-w-2xl mx-auto px-3 sm:px-4 pt-0 pb-3 sm:pb-5">
+      <div className="relative max-w-2xl mx-auto px-3 sm:px-4 pt-0 pb-3 sm:pb-5">
 
         {/* ==========================================================
             REFRESH BUTTON
-        ========================================================== */}
+            ========================================================== */}
 
-        <div className="flex justify-end mb-1">
-          <button
-            type="button"
-            onClick={() =>
-              loadPosts(true)
-            }
-            disabled={refreshing}
-            aria-label="Refresh feed"
-            className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-zrp-red hover:border-zrp-red/40 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50"
-          >
-            <RefreshCw
-              className={`w-5 h-5 ${
-                refreshing
-                  ? "animate-spin"
-                  : ""
-              }`}
-            />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() =>
+            loadPosts(true)
+          }
+          disabled={refreshing}
+          aria-label="Refresh feed"
+          className="absolute right-3 sm:right-4 top-2 z-10 flex items-center justify-center w-9 h-9 rounded-full bg-gray-50/90 dark:bg-gray-800/90 text-gray-500 dark:text-gray-400 hover:text-zrp-red hover:bg-zrp-red/10 transition disabled:opacity-50"
+        >
+          <RefreshCw
+            className={`w-4 h-4 ${
+              refreshing
+                ? "animate-spin"
+                : ""
+            }`}
+          />
+        </button>
 
         {/* ==========================================================
             STORIES
         ========================================================== */}
 
-        <section className="mb-2 -mt-1">
+        <section className="-mt-2 mb-1 pr-8">
           <StoriesBar />
         </section>
 
@@ -797,7 +795,6 @@ export default function HomePage() {
                         <div className="w-3/4 h-3 rounded bg-gray-200 dark:bg-gray-800" />
 
                       </div>
-
                     </div>
                   </div>
                 )
