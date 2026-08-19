@@ -246,16 +246,6 @@ export default function RootLayout({
           content="yes"
         />
 
-        {/* Status bar style was hardcoded to "black-translucent", which
-            renders a translucent black overlay over the status bar area
-            on iOS regardless of theme. That's correct for dark mode
-            (invisible against a dark background), but over a white/light
-            background it visually reads as a washed-out gray - this is
-            mobile-only by nature since desktop/iPad browser chrome
-            doesn't have this native status-bar overlay at all. The
-            ThemeContext now updates this dynamically to match the
-            active theme instead; "default" is set here purely as the
-            correct initial value for light mode (the default theme). */}
         <meta
           name="apple-mobile-web-app-status-bar-style"
           content="default"
@@ -326,12 +316,6 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${orbitron.variable} font-inter min-h-screen flex flex-col bg-white dark:bg-zrp-deepBlack`}
       >
-        {/* Reserves space for BottomNav's true rendered height (its h-14
-            content plus its own safe-area inset on notched phones) at the
-            very bottom of the whole page, so Footer/CookieConsent - which
-            render after main, outside its own flex row - never end up
-            hidden behind the fixed nav when scrolled to the bottom.
-            lg:pb-0 removes this on desktop, where BottomNav is hidden. */}
         <div className="app-shell-clip w-full flex flex-col min-h-screen pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0">
           <ErrorBoundary>
             <ThemeProvider>
@@ -349,10 +333,14 @@ export default function RootLayout({
 
                       <EmailVerificationBanner />
 
-                      <div className="flex justify-center w-full max-w-[1400px] mx-auto">
+                      {/* Main application area.
+                          min-h-0 allows the chat page to shrink correctly
+                          inside the flex layout instead of forcing the
+                          composer below the visible viewport. */}
+                      <div className="flex justify-center w-full max-w-[1400px] mx-auto min-h-0 flex-1">
                         <Sidebar />
 
-                        <main className="flex-1 min-w-0">
+                        <main className="flex-1 min-w-0 min-h-0">
                           <PageTransition>
                             {children}
                           </PageTransition>
