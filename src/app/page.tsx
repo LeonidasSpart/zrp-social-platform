@@ -534,7 +534,7 @@ export default function HomePage() {
 
         {/* ==========================================================
             REFRESH BUTTON
-            ========================================================== */}
+        ========================================================== */}
 
         <button
           type="button"
@@ -543,7 +543,7 @@ export default function HomePage() {
           }
           disabled={refreshing}
           aria-label="Refresh feed"
-          className="absolute right-3 sm:right-4 top-2 z-10 flex items-center justify-center w-9 h-9 rounded-full bg-gray-50/90 dark:bg-gray-800/90 text-gray-500 dark:text-gray-400 hover:text-zrp-red hover:bg-zrp-red/10 transition disabled:opacity-50"
+          className="absolute right-3 sm:right-4 top-10 z-10 flex items-center justify-center w-9 h-9 rounded-full bg-gray-50/90 dark:bg-gray-800/90 text-gray-500 dark:text-gray-400 hover:text-zrp-red hover:bg-zrp-red/10 transition disabled:opacity-50"
         >
           <RefreshCw
             className={`w-4 h-4 ${
