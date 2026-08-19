@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function SupportPage() {
   const { data: session, status } = useSession();
@@ -16,6 +17,7 @@ export default function SupportPage() {
   });
 
   if (status === 'loading') return <div className="p-8 text-center">Loading...</div>;
+
   if (!session) {
     router.push('/login');
     return null;
@@ -32,8 +34,13 @@ export default function SupportPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to create ticket');
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to create ticket');
+      }
+
       router.push('/support/tickets');
     } catch (err: any) {
       setError(err.message);
@@ -48,6 +55,7 @@ export default function SupportPage() {
         <h1 className="text-3xl font-orbitron text-zrp-charcoal dark:text-white mb-6">
           Contact Support
         </h1>
+
         <p className="text-zrp-charcoal/70 dark:text-white/70 mb-6">
           Have an issue or question? Submit a ticket and we'll get back to you.
         </p>
@@ -63,11 +71,14 @@ export default function SupportPage() {
             <label className="block text-sm font-medium text-zrp-charcoal dark:text-white/80 mb-1">
               Subject <span className="text-zrp-red">*</span>
             </label>
+
             <input
               type="text"
               required
               value={form.subject}
-              onChange={(e) => setForm({ ...form, subject: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, subject: e.target.value })
+              }
               className="w-full px-4 py-2 border border-zrp-silver/30 dark:border-zrp-charcoal rounded-lg bg-white dark:bg-zrp-charcoal/50 text-zrp-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
               placeholder="Brief summary of your issue"
             />
@@ -77,9 +88,12 @@ export default function SupportPage() {
             <label className="block text-sm font-medium text-zrp-charcoal dark:text-white/80 mb-1">
               Category
             </label>
+
             <select
               value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, category: e.target.value })
+              }
               className="w-full px-4 py-2 border border-zrp-silver/30 dark:border-zrp-charcoal rounded-lg bg-white dark:bg-zrp-charcoal/50 text-zrp-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
             >
               <option value="GENERAL">General</option>
@@ -100,11 +114,14 @@ export default function SupportPage() {
             <label className="block text-sm font-medium text-zrp-charcoal dark:text-white/80 mb-1">
               Message <span className="text-zrp-red">*</span>
             </label>
+
             <textarea
               required
               rows={6}
               value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, message: e.target.value })
+              }
               className="w-full px-4 py-2 border border-zrp-silver/30 dark:border-zrp-charcoal rounded-lg bg-white dark:bg-zrp-charcoal/50 text-zrp-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red resize-none"
               placeholder="Describe your issue in detail..."
             />
@@ -120,8 +137,15 @@ export default function SupportPage() {
         </form>
 
         <p className="mt-4 text-sm text-zrp-charcoal/50 dark:text-white/50 text-center">
-          Your ticket will be reviewed within 24-48 hours. You can track its status
-          in the <a href="/support/tickets" className="text-zrp-red hover:underline">My Tickets</a> page.
+          Your ticket will be reviewed within 24-48 hours. You can track its
+          status in the{' '}
+          <Link
+            href="/support/tickets"
+            className="text-zrp-red hover:underline"
+          >
+            My Tickets
+          </Link>{' '}
+          page.
         </p>
       </div>
     </div>
