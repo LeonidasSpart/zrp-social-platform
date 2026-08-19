@@ -60,9 +60,7 @@ export default function Header() {
 
   /*
    * Keep the language handler compatible with whatever Language type
-   * LanguageContext expects. This prevents the Railway TypeScript error:
-   *
-   * Argument of type 'string' is not assignable to parameter of type 'Language'
+   * LanguageContext expects.
    */
   const handleLanguageChange = (code: string) => {
     setLanguage(code as Parameters<typeof setLanguage>[0]);
@@ -70,8 +68,9 @@ export default function Header() {
   };
 
   const currentLangLabel =
-    SUPPORTED_LANGUAGES.find((l) => l.code === language)?.code.toUpperCase() ||
-    "EN";
+    SUPPORTED_LANGUAGES.find(
+      (l) => l.code === language
+    )?.code.toUpperCase() || "EN";
 
   /*
    * Close responsive menus when switching to desktop.
@@ -87,7 +86,8 @@ export default function Header() {
 
     window.addEventListener("resize", handleResize);
 
-    return () => window.removeEventListener("resize", handleResize);
+    return () =>
+      window.removeEventListener("resize", handleResize);
   }, []);
 
   /*
@@ -178,7 +178,9 @@ export default function Header() {
     },
   ];
 
-  const navLinks = isAuthenticated ? authNavLinks : publicNavLinks;
+  const navLinks = isAuthenticated
+    ? authNavLinks
+    : publicNavLinks;
 
   /*
    * Logout.
@@ -204,11 +206,6 @@ export default function Header() {
 
   /*
    * Close dropdowns when clicking outside.
-   *
-   * IMPORTANT:
-   * The mobile language section below also has the "lang-menu" class.
-   * Without it, the document listener immediately closes the language
-   * selector after the user taps it.
    */
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -223,10 +220,16 @@ export default function Header() {
       }
     };
 
-    document.addEventListener("click", handleClickOutside);
+    document.addEventListener(
+      "click",
+      handleClickOutside
+    );
 
     return () => {
-      document.removeEventListener("click", handleClickOutside);
+      document.removeEventListener(
+        "click",
+        handleClickOutside
+      );
     };
   }, []);
 
@@ -239,6 +242,7 @@ export default function Header() {
             {/* =====================================================
                 LOGO
             ===================================================== */}
+
             <Link
               href="/"
               className="flex-shrink-0 flex items-center"
@@ -251,36 +255,45 @@ export default function Header() {
                 width={90}
                 height={90}
                 priority
-                className="w-11 h-11 sm:w-12 sm:h-12 object-contain"
+                className="w-14 h-14 sm:w-14 sm:h-14 object-contain"
               />
             </Link>
 
             {/* =====================================================
                 DESKTOP HEADER
             ===================================================== */}
+
             <div className="hidden lg:flex items-center gap-2">
 
               {/* Admin */}
+
               {isStaff && (
                 <Link
                   href="/admin"
                   className="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-zrp-red transition"
                 >
                   <LayoutDashboard className="w-5 h-5" />
-                  <span>{t("nav.admin")}</span>
+
+                  <span>
+                    {t("nav.admin")}
+                  </span>
                 </Link>
               )}
 
               {/* =================================================
                   DESKTOP LANGUAGE
               ================================================= */}
+
               <div className="relative lang-menu">
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
 
-                    setLangMenuOpen((value) => !value);
+                    setLangMenuOpen(
+                      (value) => !value
+                    );
+
                     setUserMenuOpen(false);
                   }}
                   className="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
@@ -289,40 +302,53 @@ export default function Header() {
                 >
                   <Globe className="w-5 h-5" />
 
-                  <span>{currentLangLabel}</span>
+                  <span>
+                    {currentLangLabel}
+                  </span>
 
                   <ChevronDown
                     className={`w-4 h-4 transition-transform ${
-                      langMenuOpen ? "rotate-180" : ""
+                      langMenuOpen
+                        ? "rotate-180"
+                        : ""
                     }`}
                   />
                 </button>
 
                 {langMenuOpen && (
                   <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
-                    {SUPPORTED_LANGUAGES.map((lang) => (
-                      <button
-                        key={lang.code}
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleLanguageChange(lang.code);
-                        }}
-                        className={`w-full flex items-center justify-between px-4 py-3 text-sm transition ${
-                          language === lang.code
-                            ? "bg-zrp-red/10 text-zrp-red font-semibold"
-                            : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        }`}
-                      >
-                        <span>{lang.label}</span>
+                    {SUPPORTED_LANGUAGES.map(
+                      (lang) => (
+                        <button
+                          key={lang.code}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
 
-                        {language === lang.code && (
-                          <span className="text-xs font-bold">
-                            ✓
+                            handleLanguageChange(
+                              lang.code
+                            );
+                          }}
+                          className={`w-full flex items-center justify-between px-4 py-3 text-sm transition ${
+                            language ===
+                            lang.code
+                              ? "bg-zrp-red/10 text-zrp-red font-semibold"
+                              : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          }`}
+                        >
+                          <span>
+                            {lang.label}
                           </span>
-                        )}
-                      </button>
-                    ))}
+
+                          {language ===
+                            lang.code && (
+                            <span className="text-xs font-bold">
+                              ✓
+                            </span>
+                          )}
+                        </button>
+                      )
+                    )}
                   </div>
                 )}
               </div>
@@ -330,6 +356,7 @@ export default function Header() {
               {/* =================================================
                   THEME
               ================================================= */}
+
               <button
                 type="button"
                 onClick={toggleTheme}
@@ -350,6 +377,7 @@ export default function Header() {
               {/* =================================================
                   DESKTOP USER MENU
               ================================================= */}
+
               {isAuthenticated && (
                 <div className="relative user-menu">
                   <button
@@ -357,7 +385,10 @@ export default function Header() {
                     onClick={(e) => {
                       e.stopPropagation();
 
-                      setUserMenuOpen((value) => !value);
+                      setUserMenuOpen(
+                        (value) => !value
+                      );
+
                       setLangMenuOpen(false);
                     }}
                     className="flex items-center gap-2 rounded-full px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
@@ -365,20 +396,27 @@ export default function Header() {
                     aria-expanded={userMenuOpen}
                   >
                     <div className="w-8 h-8 rounded-full overflow-hidden bg-zrp-red/10 flex items-center justify-center text-zrp-red font-semibold">
-                      {session?.user?.avatarUrl ? (
+                      {session?.user
+                        ?.avatarUrl ? (
                         <img
-                          src={session.user.avatarUrl}
+                          src={
+                            session.user
+                              .avatarUrl
+                          }
                           alt=""
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        session?.user?.name?.[0]?.toUpperCase() || "?"
+                        session?.user?.name?.[0]?.toUpperCase() ||
+                        "?"
                       )}
                     </div>
 
                     <ChevronDown
                       className={`w-4 h-4 text-gray-500 transition-transform ${
-                        userMenuOpen ? "rotate-180" : ""
+                        userMenuOpen
+                          ? "rotate-180"
+                          : ""
                       }`}
                     />
                   </button>
@@ -387,87 +425,126 @@ export default function Header() {
                     <div className="absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800">
 
                       {/* User information */}
+
                       <div className="px-4 py-4 border-b border-gray-200 dark:border-gray-700">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full overflow-hidden bg-zrp-red/10 flex items-center justify-center text-zrp-red font-bold">
-                            {session?.user?.avatarUrl ? (
+                            {session?.user
+                              ?.avatarUrl ? (
                               <img
-                                src={session.user.avatarUrl}
+                                src={
+                                  session.user
+                                    .avatarUrl
+                                }
                                 alt=""
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              session?.user?.name?.[0]?.toUpperCase() || "?"
+                              session?.user?.name?.[0]?.toUpperCase() ||
+                              "?"
                             )}
                           </div>
 
                           <div className="min-w-0">
                             <p className="font-semibold text-gray-900 dark:text-white truncate">
                               {session?.user?.name ||
-                                session?.user?.username}
+                                session?.user
+                                  ?.username}
                             </p>
 
                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                              @{session?.user?.username}
+                              @
+                              {
+                                session?.user
+                                  ?.username
+                              }
                             </p>
                           </div>
                         </div>
                       </div>
 
                       {/* Profile */}
+
                       <Link
                         href={`/profile/${session.user.username}`}
-                        onClick={() => setUserMenuOpen(false)}
+                        onClick={() =>
+                          setUserMenuOpen(false)
+                        }
                         className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                       >
                         <User className="w-5 h-5" />
-                        <span>{t("nav.profile")}</span>
+
+                        <span>
+                          {t("nav.profile")}
+                        </span>
                       </Link>
 
                       {/* Settings */}
+
                       <Link
                         href="/settings"
-                        onClick={() => setUserMenuOpen(false)}
+                        onClick={() =>
+                          setUserMenuOpen(false)
+                        }
                         className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                       >
                         <Settings className="w-5 h-5" />
-                        <span>Settings</span>
+
+                        <span>
+                          Settings
+                        </span>
                       </Link>
 
                       {/* Team Management */}
+
                       {features?.teamManagement && (
                         <Link
                           href="/settings/team"
-                          onClick={() => setUserMenuOpen(false)}
+                          onClick={() =>
+                            setUserMenuOpen(false)
+                          }
                           className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                         >
                           <Users className="w-5 h-5" />
-                          <span>Team Management</span>
+
+                          <span>
+                            Team Management
+                          </span>
                         </Link>
                       )}
 
                       {/* API Keys */}
+
                       {features?.apiAccess && (
                         <Link
                           href="/settings/api-keys"
-                          onClick={() => setUserMenuOpen(false)}
+                          onClick={() =>
+                            setUserMenuOpen(false)
+                          }
                           className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                         >
                           <Key className="w-5 h-5" />
-                          <span>API Keys</span>
+
+                          <span>
+                            API Keys
+                          </span>
                         </Link>
                       )}
 
                       <div className="border-t border-gray-200 dark:border-gray-700" />
 
                       {/* Logout */}
+
                       <button
                         type="button"
                         onClick={handleLogout}
                         className="flex items-center gap-3 w-full px-4 py-3 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
                       >
                         <LogOut className="w-5 h-5" />
-                        <span>{t("nav.signOut")}</span>
+
+                        <span>
+                          {t("nav.signOut")}
+                        </span>
                       </button>
                     </div>
                   )}
@@ -478,9 +555,11 @@ export default function Header() {
             {/* =====================================================
                 TABLET + MOBILE HEADER CONTROLS
             ===================================================== */}
+
             <div className="lg:hidden flex items-center gap-1">
 
               {/* Messages */}
+
               {isAuthenticated && (
                 <Link
                   href="/messages"
@@ -500,33 +579,44 @@ export default function Header() {
               )}
 
               {/* Notifications */}
+
               {isAuthenticated && (
                 <Link
                   href="/notifications"
                   className="relative flex items-center justify-center w-10 h-10 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                  aria-label={t("nav.notifications")}
+                  aria-label={t(
+                    "nav.notifications"
+                  )}
                 >
                   <Bell className="w-5 h-5" />
 
                   {unreadCount > 0 && (
                     <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 bg-zrp-red text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                      {unreadCount > 9 ? "9+" : unreadCount}
+                      {unreadCount > 9
+                        ? "9+"
+                        : unreadCount}
                     </span>
                   )}
                 </Link>
               )}
 
               {/* Menu */}
+
               <button
                 type="button"
                 onClick={() => {
-                  setMobileMenuOpen((value) => !value);
+                  setMobileMenuOpen(
+                    (value) => !value
+                  );
+
                   setUserMenuOpen(false);
                   setLangMenuOpen(false);
                 }}
                 className="flex items-center justify-center w-10 h-10 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-zrp-red transition"
                 aria-label="Open menu"
-                aria-expanded={mobileMenuOpen}
+                aria-expanded={
+                  mobileMenuOpen
+                }
               >
                 {mobileMenuOpen ? (
                   <X className="w-6 h-6" />
@@ -542,9 +632,11 @@ export default function Header() {
       {/* ===========================================================
           ADVANCED TABLET / MOBILE MENU
       =========================================================== */}
+
       {mobileMenuOpen && (
         <>
           {/* Backdrop */}
+
           <button
             type="button"
             aria-label="Close menu"
@@ -553,11 +645,13 @@ export default function Header() {
           />
 
           {/* Menu Panel */}
+
           <div className="lg:hidden fixed top-[64px] right-0 bottom-0 z-50 w-full sm:w-[420px] bg-white dark:bg-zrp-deepBlack border-l border-gray-200 dark:border-gray-800 shadow-2xl overflow-y-auto">
 
             {/* =====================================================
                 USER HEADER
             ===================================================== */}
+
             {isAuthenticated && (
               <div className="px-5 py-5 border-b border-gray-200 dark:border-gray-800">
                 <Link
@@ -568,18 +662,22 @@ export default function Header() {
                   <div className="w-12 h-12 rounded-full overflow-hidden bg-zrp-red/10 flex items-center justify-center text-zrp-red font-bold">
                     {session.user.avatarUrl ? (
                       <img
-                        src={session.user.avatarUrl}
+                        src={
+                          session.user.avatarUrl
+                        }
                         alt=""
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      session.user.name?.[0]?.toUpperCase() || "?"
+                      session.user.name?.[0]?.toUpperCase() ||
+                      "?"
                     )}
                   </div>
 
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-gray-900 dark:text-white truncate">
-                      {session.user.name || session.user.username}
+                      {session.user.name ||
+                        session.user.username}
                     </p>
 
                     <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
@@ -597,6 +695,7 @@ export default function Header() {
               {/* =================================================
                   PRIMARY NAVIGATION
               ================================================= */}
+
               <div className="space-y-1">
                 {navLinks.map((link) => (
                   <Link
@@ -613,11 +712,14 @@ export default function Header() {
                       {link.label}
                     </span>
 
-                    {link.badge !== undefined && link.badge > 0 && (
-                      <span className="min-w-[22px] h-5 px-1.5 bg-zrp-red text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                        {link.badge > 9 ? "9+" : link.badge}
-                      </span>
-                    )}
+                    {link.badge !== undefined &&
+                      link.badge > 0 && (
+                        <span className="min-w-[22px] h-5 px-1.5 bg-zrp-red text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                          {link.badge > 9
+                            ? "9+"
+                            : link.badge}
+                        </span>
+                      )}
 
                     <ChevronRight className="w-4 h-4 text-gray-400" />
                   </Link>
@@ -627,6 +729,7 @@ export default function Header() {
               {/* =================================================
                   ADMINISTRATION
               ================================================= */}
+
               {isStaff && (
                 <div className="mt-5 pt-5 border-t border-gray-200 dark:border-gray-800">
                   <p className="px-4 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
@@ -652,6 +755,7 @@ export default function Header() {
               {/* =================================================
                   ACCOUNT
               ================================================= */}
+
               {isAuthenticated && (
                 <div className="mt-5 pt-5 border-t border-gray-200 dark:border-gray-800">
                   <p className="px-4 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
@@ -723,30 +827,35 @@ export default function Header() {
               {/* =================================================
                   PREFERENCES
               ================================================= */}
+
               <div className="mt-5 pt-5 border-t border-gray-200 dark:border-gray-800">
                 <p className="px-4 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
                   Preferences
                 </p>
 
-                {/* =================================================
-                    LANGUAGE
-                    FIX: lang-menu class prevents outside-click
-                    handler from instantly closing this menu.
-                ================================================= */}
+                {/* LANGUAGE */}
+
                 <div className="lang-menu rounded-xl overflow-hidden">
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setLangMenuOpen((value) => !value);
+
+                      setLangMenuOpen(
+                        (value) => !value
+                      );
                     }}
                     className={`w-full flex items-center gap-4 px-4 py-3.5 text-gray-700 dark:text-gray-200 transition ${
                       langMenuOpen
                         ? "bg-gray-100 dark:bg-gray-800"
                         : "hover:bg-gray-100 dark:hover:bg-gray-800"
                     }`}
-                    aria-expanded={langMenuOpen}
-                    aria-label={t("nav.language")}
+                    aria-expanded={
+                      langMenuOpen
+                    }
+                    aria-label={t(
+                      "nav.language"
+                    )}
                   >
                     <Globe className="w-5 h-5 text-gray-500" />
 
@@ -760,47 +869,67 @@ export default function Header() {
 
                     <ChevronDown
                       className={`w-4 h-4 text-gray-400 transition-transform ${
-                        langMenuOpen ? "rotate-180" : ""
+                        langMenuOpen
+                          ? "rotate-180"
+                          : ""
                       }`}
                     />
                   </button>
 
-                  {/* Language options */}
                   {langMenuOpen && (
                     <div className="mx-2 mb-2 rounded-xl bg-gray-50 dark:bg-gray-800/70 overflow-hidden border border-gray-200 dark:border-gray-700">
-                      {SUPPORTED_LANGUAGES.map((lang) => {
-                        const selected = language === lang.code;
+                      {SUPPORTED_LANGUAGES.map(
+                        (lang) => {
+                          const selected =
+                            language ===
+                            lang.code;
 
-                        return (
-                          <button
-                            key={lang.code}
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleLanguageChange(lang.code);
-                            }}
-                            className={`w-full flex items-center justify-between px-4 py-3 text-sm transition ${
-                              selected
-                                ? "text-white bg-zrp-red font-semibold"
-                                : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                            }`}
-                          >
-                            <span>{lang.label}</span>
+                          return (
+                            <button
+                              key={
+                                lang.code
+                              }
+                              type="button"
+                              onClick={(
+                                e
+                              ) => {
+                                e.stopPropagation();
 
-                            <span className="flex items-center gap-2 text-xs font-medium">
-                              {selected && <span>✓</span>}
-                              {lang.code.toUpperCase()}
-                            </span>
-                          </button>
-                        );
-                      })}
+                                handleLanguageChange(
+                                  lang.code
+                                );
+                              }}
+                              className={`w-full flex items-center justify-between px-4 py-3 text-sm transition ${
+                                selected
+                                  ? "text-white bg-zrp-red font-semibold"
+                                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              }`}
+                            >
+                              <span>
+                                {
+                                  lang.label
+                                }
+                              </span>
+
+                              <span className="flex items-center gap-2 text-xs font-medium">
+                                {selected && (
+                                  <span>
+                                    ✓
+                                  </span>
+                                )}
+
+                                {lang.code.toUpperCase()}
+                              </span>
+                            </button>
+                          );
+                        }
+                      )}
                     </div>
                   )}
                 </div>
 
-                {/* =================================================
-                    THEME
-                ================================================= */}
+                {/* THEME */}
+
                 <button
                   type="button"
                   onClick={toggleTheme}
@@ -823,6 +952,7 @@ export default function Header() {
               {/* =================================================
                   LOGOUT
               ================================================= */}
+
               {isAuthenticated && (
                 <div className="mt-5 pt-5 border-t border-gray-200 dark:border-gray-800 pb-8">
                   <button
