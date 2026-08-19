@@ -3,9 +3,32 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
-  Heart, MessageCircle, Repeat, Share2, Pencil, Trash2, Flag,
-  Bookmark, BarChart3, Pin, PinOff, X, ZoomIn, Plus, ChevronDown,
-  Briefcase, FileText, Globe, Loader2, Play, Volume2, VolumeX
+  Heart,
+  MessageCircle,
+  Repeat,
+  Repeat2,
+  Share2,
+  Pencil,
+  Trash2,
+  Flag,
+  Bookmark,
+  BarChart3,
+  Pin,
+  PinOff,
+  X,
+  ZoomIn,
+  Plus,
+  ChevronDown,
+  Briefcase,
+  FileText,
+  Globe,
+  Loader2,
+  Play,
+  Volume2,
+  VolumeX,
+  MoreHorizontal,
+  UserPlus,
+  ExternalLink,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Comments from "./Comments";
@@ -13,12 +36,11 @@ import EditPostModal from "./EditPostModal";
 import ReportModal from "./ReportModal";
 import VerifiedBadge from "./VerifiedBadge";
 import dynamic from "next/dynamic";
-// emoji-picker-react is a genuinely large library, and PostCard renders
-// once per post in the feed - statically importing it meant every single
-// feed load shipped that library's code even though the picker is only
-// opened occasionally. Lazy-loading it means the code is only fetched
-// the moment someone actually opens a picker, not on every page load.
-const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
+
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
+  ssr: false,
+});
+
 import QuotePostModal from "./QuotePostModal";
 import VideoFeedViewer from "./VideoFeedViewer";
 import LinkPreviewCard from "./LinkPreviewCard";
@@ -35,6 +57,7 @@ interface PostCardProps {
     createdAt: string;
     updatedAt?: string;
     views?: number;
+
     author: {
       id: string;
       username: string;
@@ -42,52 +65,61 @@ interface PostCardProps {
       avatarUrl?: string;
       badgeType?: string | null;
     };
+
     _count?: {
       likes: number;
       comments: number;
       reposts: number;
       quotedBy: number;
     };
+
     liked?: boolean;
+
     isRepost?: boolean;
+
     repostOriginalAuthor?: {
       id: string;
       username: string;
       name: string;
     } | null;
+
     repostId?: string | null;
+
     commentsEnabled?: boolean;
-    // ─── NEW FIELDS ──────────────────────────────────────────────
+
     type?: "POST" | "RECRUITMENT" | "ARTICLE";
+
     company?: string;
     location?: string;
     applyUrl?: string;
     body?: string;
   };
-  // Optionally receives the id of a post that was just deleted, so the
-  // parent can remove just that one post locally instead of refetching
-  // and resetting the whole feed (which used to reset everyone's scroll
-  // position back to the top every time anything happened anywhere).
+
   onUpdate: (deletedPostId?: string) => void;
+
   showPinOption?: boolean;
   isPinned?: boolean;
   onPinToggle?: () => void;
   showInlineComments?: boolean;
 }
 
-// ─── PARSE HASHTAGS AND MENTIONS ──────────────────────────────────
+/* ─────────────────────────────────────────────────────────────
+   PARSE CONTENT
+───────────────────────────────────────────────────────────── */
+
 function parseContent(content: string) {
-  const parts: { type: "text" | "hashtag" | "mention" | "url"; value: string }[] = [];
+  const parts: {
+    type: "text" | "hashtag" | "mention" | "url";
+    value: string;
+  }[] = [];
+
   let lastIndex = 0;
-  // Detects @mentions, #hashtags, full URLs (http/https), and bare
-  // www.-prefixed URLs (the most common case people actually paste/type -
-  // e.g. sharing a YouTube link or "www.example.com" - none of which were
-  // being detected before, so links just rendered as plain, dead text).
-  const regex = /(@\w+)|(#\w+)|(https?:\/\/[^\s]+)|(www\.[^\s]+)/g;
-  // Trailing sentence punctuation commonly swept up into a URL match by
-  // mistake (e.g. "check this out: https://example.com." shouldn't turn
-  // the period into part of the link).
+
+  const regex =
+    /(@\w+)|(#\w+)|(https?:\/\/[^\s]+)|(www\.[^\s]+)/g;
+
   const trailingPunctuation = /[.,!?;:'")\]}]+$/;
+
   let match;
 
   while ((match = regex.exec(content)) !== null) {
@@ -99,50 +131,107 @@ function parseContent(content: string) {
     }
 
     const raw = match[0];
-    const type: "hashtag" | "mention" | "url" = raw.startsWith("@")
-      ? "mention"
-      : raw.startsWith("#")
-      ? "hashtag"
-      : "url";
+
+    const type: "hashtag" | "mention" | "url" =
+      raw.startsWith("@")
+        ? "mention"
+        : raw.startsWith("#")
+        ? "hashtag"
+        : "url";
 
     if (type === "url") {
       const trailingMatch = raw.match(trailingPunctuation);
-      const trimmed = trailingMatch ? raw.slice(0, raw.length - trailingMatch[0].length) : raw;
+
+      const trimmed = trailingMatch
+        ? raw.slice(
+            0,
+            raw.length - trailingMatch[0].length
+          )
+        : raw;
+
       if (trailingMatch && trimmed.length > 0) {
-        parts.push({ type: "url", value: trimmed });
-        parts.push({ type: "text", value: trailingMatch[0] });
+        parts.push({
+          type: "url",
+          value: trimmed,
+        });
+
+        parts.push({
+          type: "text",
+          value: trailingMatch[0],
+        });
+
         lastIndex = match.index + raw.length;
+
         continue;
       }
     }
 
-    parts.push({ type, value: raw });
+    parts.push({
+      type,
+      value: raw,
+    });
+
     lastIndex = match.index + raw.length;
   }
+
   if (lastIndex < content.length) {
-    parts.push({ type: "text", value: content.slice(lastIndex) });
+    parts.push({
+      type: "text",
+      value: content.slice(lastIndex),
+    });
   }
+
   return parts;
 }
 
-// ─── Extract the first URL from post content, used as a fallback for
-// link previews on posts that don't have an explicit linkUrl set (which
-// is effectively every post today, old and new, since nothing writes to
-// it yet) - this makes previews work immediately for any post containing
-// a link, without needing a data backfill or composer changes.
+/* ─────────────────────────────────────────────────────────────
+   EXTRACT URL
+───────────────────────────────────────────────────────────── */
+
 function extractFirstUrl(content: string): string | null {
-  const match = content.match(/(https?:\/\/[^\s]+)|(www\.[^\s]+)/);
+  const match = content.match(
+    /(https?:\/\/[^\s]+)|(www\.[^\s]+)/
+  );
+
   if (!match) return null;
-  const raw = match[0].replace(/[.,!?;:'")\]}]+$/, "");
-  return raw.startsWith("http") ? raw : `https://${raw}`;
+
+  const raw = match[0].replace(
+    /[.,!?;:'")\]}]+$/,
+    ""
+  );
+
+  return raw.startsWith("http")
+    ? raw
+    : `https://${raw}`;
 }
 
-// ─── FORMAT COUNTS LIKE X ────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────
+   FORMAT COUNTS
+───────────────────────────────────────────────────────────── */
+
 function formatCount(n: number) {
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
-  if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+  if (n >= 1_000_000) {
+    return (
+      (n / 1_000_000)
+        .toFixed(1)
+        .replace(/\.0$/, "") + "M"
+    );
+  }
+
+  if (n >= 1_000) {
+    return (
+      (n / 1_000)
+        .toFixed(1)
+        .replace(/\.0$/, "") + "K"
+    );
+  }
+
   return n.toString();
 }
+
+/* ─────────────────────────────────────────────────────────────
+   COMPONENT
+───────────────────────────────────────────────────────────── */
 
 export default function PostCard({
   post,
@@ -154,756 +243,2402 @@ export default function PostCard({
 }: PostCardProps) {
   const { data: session } = useSession();
   const { language: uiLanguage } = useLanguage();
-  const [liked, setLiked] = useState(post.liked || false);
-  const [likesCount, setLikesCount] = useState(post._count?.likes || 0);
-  const [commentsCount, setCommentsCount] = useState(post._count?.comments || 0);
-  // Once a link preview card successfully loads for a URL in this post's
-  // text, that raw URL is hidden from the visible text - the card itself
-  // becomes the link, matching X's behavior of not showing the same link
-  // twice (once as plain text, once as a preview card).
-  const [linkPreviewFoundFor, setLinkPreviewFoundFor] = useState<string | null>(null);
-  const [showComments, setShowComments] = useState(false);
+
+  /* ─────────────────────────────────────────────────────────
+     BASIC STATE
+  ───────────────────────────────────────────────────────── */
+
+  const [liked, setLiked] = useState(
+    post.liked || false
+  );
+
+  const [likesCount, setLikesCount] = useState(
+    post._count?.likes || 0
+  );
+
+  const [commentsCount, setCommentsCount] = useState(
+    post._count?.comments || 0
+  );
+
   const [reposted, setReposted] = useState(false);
-  const [repostsCount, setRepostsCount] = useState(post._count?.reposts || 0);
-  const [viewsCount, setViewsCount] = useState(post.views || 0);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showReportModal, setShowReportModal] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [pinLoading, setPinLoading] = useState(false);
+
+  const [repostsCount, setRepostsCount] = useState(
+    post._count?.reposts || 0
+  );
+
+  const [viewsCount, setViewsCount] = useState(
+    post.views || 0
+  );
+
   const [bookmarked, setBookmarked] = useState(false);
-  const [bookmarkLoading, setBookmarkLoading] = useState(false);
-  const hasCountedView = useRef(false);
 
-  // ─── Repost dropdown ──────────────────────────────────────────────
-  const [repostDropdownOpen, setRepostDropdownOpen] = useState(false);
-  const [showQuoteModal, setShowQuoteModal] = useState(false);
-  const [lastClickTime, setLastClickTime] = useState(0);
-  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
-  const [reactions, setReactions] = useState<Record<string, number>>({});
-  const [userReaction, setUserReaction] = useState<string | null>(null);
-  const [reactionsLoading, setReactionsLoading] = useState(true);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] =
+    useState(false);
 
-  // ─── Expand article body ──────────────────────────────────────────
-  const [articleExpanded, setArticleExpanded] = useState(false);
-  // Same idea as articleExpanded above, but for the main content field
-  // every post type has (not just ARTICLE's separate body field) -
-  // matches X's own behavior of truncating long posts in the feed with
-  // a "Show more" expand, even though the full text was already
-  // published in full underneath.
-  const [contentExpanded, setContentExpanded] = useState(false);
+  /* ─────────────────────────────────────────────────────────
+     MENUS / MODALS
+  ───────────────────────────────────────────────────────── */
 
-  // ─── Translation ────────────────────────────────────────────────
-  const [translatedText, setTranslatedText] = useState<string | null>(null);
-  const [showTranslation, setShowTranslation] = useState(false);
-  const [translating, setTranslating] = useState(false);
-  const [translateError, setTranslateError] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] =
+    useState(false);
 
-  const isAuthor = session?.user?.id === post.author.id;
-  const contentParts = parseContent(post.content);
-  // 280 chars matches classic tweet length - a familiar, recognizable
-  // threshold - and is deliberately more relevant here than on X itself,
-  // since ZRP's paid plans already allow posts far longer than that.
+  const [repostDropdownOpen, setRepostDropdownOpen] =
+    useState(false);
+
+  const [showComments, setShowComments] =
+    useState(false);
+
+  const [showEditModal, setShowEditModal] =
+    useState(false);
+
+  const [showDeleteConfirm, setShowDeleteConfirm] =
+    useState(false);
+
+  const [showReportModal, setShowReportModal] =
+    useState(false);
+
+  const [showQuoteModal, setShowQuoteModal] =
+    useState(false);
+
+  const [showEmojiPicker, setShowEmojiPicker] =
+    useState(false);
+
+  const [deleting, setDeleting] =
+    useState(false);
+
+  /* ─────────────────────────────────────────────────────────
+     PIN
+  ───────────────────────────────────────────────────────── */
+
+  const [pinLoading, setPinLoading] =
+    useState(false);
+
+  /* ─────────────────────────────────────────────────────────
+     MEDIA
+  ───────────────────────────────────────────────────────── */
+
+  const [lightboxImage, setLightboxImage] =
+    useState<string | null>(null);
+
+  const [showVideoFeed, setShowVideoFeed] =
+    useState(false);
+
+  const [videoLoadFailed, setVideoLoadFailed] =
+    useState(false);
+
+  const videoRef =
+    useRef<HTMLVideoElement>(null);
+
+  const videoContainerRef =
+    useRef<HTMLDivElement>(null);
+
+  const posterNudged =
+    useRef(false);
+
+  const [videoInView, setVideoInView] =
+    useState(false);
+
+  const [videoMuted, setVideoMuted] =
+    useState(true);
+
+  /* ─────────────────────────────────────────────────────────
+     REACTIONS
+  ───────────────────────────────────────────────────────── */
+
+  const [reactions, setReactions] =
+    useState<Record<string, number>>({});
+
+  const [userReaction, setUserReaction] =
+    useState<string | null>(null);
+
+  const [reactionsLoading, setReactionsLoading] =
+    useState(true);
+
+  /* ─────────────────────────────────────────────────────────
+     CONTENT
+  ───────────────────────────────────────────────────────── */
+
+  const [articleExpanded, setArticleExpanded] =
+    useState(false);
+
+  const [contentExpanded, setContentExpanded] =
+    useState(false);
+
+  /* ─────────────────────────────────────────────────────────
+     LINK PREVIEW
+  ───────────────────────────────────────────────────────── */
+
+  const [linkPreviewFoundFor, setLinkPreviewFoundFor] =
+    useState<string | null>(null);
+
+  /* ─────────────────────────────────────────────────────────
+     TRANSLATION
+  ───────────────────────────────────────────────────────── */
+
+  const [translatedText, setTranslatedText] =
+    useState<string | null>(null);
+
+  const [showTranslation, setShowTranslation] =
+    useState(false);
+
+  const [translating, setTranslating] =
+    useState(false);
+
+  const [translateError, setTranslateError] =
+    useState(false);
+
+  /* ─────────────────────────────────────────────────────────
+     DOUBLE CLICK
+  ───────────────────────────────────────────────────────── */
+
+  const [lastClickTime, setLastClickTime] =
+    useState(0);
+
+  /* ─────────────────────────────────────────────────────────
+     REFS
+  ───────────────────────────────────────────────────────── */
+
+  const moreMenuRef =
+    useRef<HTMLDivElement>(null);
+
+  const repostMenuRef =
+    useRef<HTMLDivElement>(null);
+
+  const hasCountedView =
+    useRef(false);
+
+  /* ─────────────────────────────────────────────────────────
+     DERIVED VALUES
+  ───────────────────────────────────────────────────────── */
+
+  const isAuthor =
+    session?.user?.id === post.author.id;
+
+  const commentsEnabled =
+    post.commentsEnabled !== false;
+
+  const postType =
+    post.type || "POST";
+
+  const contentParts =
+    parseContent(post.content);
+
   const CONTENT_TRUNCATE_LENGTH = 280;
-  const isLongContent = post.content.length > CONTENT_TRUNCATE_LENGTH;
-  const displayContentParts = isLongContent && !contentExpanded
-    ? parseContent(post.content.slice(0, CONTENT_TRUNCATE_LENGTH))
-    : contentParts;
-  const previewUrl = post.linkUrl || extractFirstUrl(post.content);
-  const isRepost = post.isRepost === true;
-  const originalAuthor = post.repostOriginalAuthor;
 
-  // ─── Comments enabled? ────────────────────────────────────────────
-  const commentsEnabled = post.commentsEnabled !== false;
+  const isLongContent =
+    post.content.length >
+    CONTENT_TRUNCATE_LENGTH;
 
-  // ─── Post type ────────────────────────────────────────────────────
-  const postType = post.type || "POST";
+  const displayContentParts =
+    isLongContent && !contentExpanded
+      ? parseContent(
+          post.content.slice(
+            0,
+            CONTENT_TRUNCATE_LENGTH
+          )
+        )
+      : contentParts;
 
-  // ─── Video detection ──────────────────────────────────────────────
+  const previewUrl =
+    post.linkUrl ||
+    extractFirstUrl(post.content);
+
+  const isRepost =
+    post.isRepost === true;
+
+  const originalAuthor =
+    post.repostOriginalAuthor;
+
+  /* ─────────────────────────────────────────────────────────
+     VIDEO DETECTION
+  ───────────────────────────────────────────────────────── */
+
   const isVideo = () => {
-    if (post.mediaType === 'video') return true;
-    if (post.mediaType === 'image') return false;
-    if (!post.imageUrl) return false;
-    // Multi-image posts are never single videos in this data model - guard
-    // this before the "default to video" fallback below can misfire on them.
-    if (post.imageUrls && post.imageUrls.length > 1) return false;
-    const url = post.imageUrl.toLowerCase();
-    const path = url.split('?')[0];
-    const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'm4v', '3gp'];
-    if (videoExtensions.some(ext => path.endsWith('.' + ext))) return true;
-    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'avif', 'bmp'];
-    if (imageExtensions.some(ext => path.endsWith('.' + ext))) return false;
-    if (url.includes('/video/') || url.includes('video')) return true;
-    // Inconclusive: mediaType wasn't stored (older posts) and the URL has
-    // no extension at all, which is normal for UploadThing CDN links
-    // (e.g. https://xxx.ufs.sh/f/<key>). Defaulting to "image" here was the
-    // actual bug - it silently skipped the <video> element entirely, so
-    // there was never any playback or sound to begin with. Default to
-    // trying video instead; the onError handler below already swaps back
-    // to a plain <img> if the resource genuinely isn't a decodable video.
+    if (post.mediaType === "video")
+      return true;
+
+    if (post.mediaType === "image")
+      return false;
+
+    if (!post.imageUrl)
+      return false;
+
+    if (
+      post.imageUrls &&
+      post.imageUrls.length > 1
+    ) {
+      return false;
+    }
+
+    const url =
+      post.imageUrl.toLowerCase();
+
+    const path =
+      url.split("?")[0];
+
+    const videoExtensions = [
+      "mp4",
+      "webm",
+      "mov",
+      "avi",
+      "mkv",
+      "m4v",
+      "3gp",
+    ];
+
+    if (
+      videoExtensions.some((ext) =>
+        path.endsWith("." + ext)
+      )
+    ) {
+      return true;
+    }
+
+    const imageExtensions = [
+      "jpg",
+      "jpeg",
+      "png",
+      "gif",
+      "webp",
+      "svg",
+      "avif",
+      "bmp",
+    ];
+
+    if (
+      imageExtensions.some((ext) =>
+        path.endsWith("." + ext)
+      )
+    ) {
+      return false;
+    }
+
+    if (
+      url.includes("/video/") ||
+      url.includes("video")
+    ) {
+      return true;
+    }
+
     return true;
   };
 
   const video = isVideo();
-  const [videoLoadFailed, setVideoLoadFailed] = useState(false);
 
-  // ─── Video playing state ──────────────────────────────────────────
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [showVideoFeed, setShowVideoFeed] = useState(false);
-
-  // ─── Fixes black video thumbnail before playback ───────────────────
-  // preload="metadata" only fetches duration/dimensions on many mobile
-  // browsers/WebViews - it does NOT guarantee a decoded, painted frame,
-  // so the <video> element can render solid black until the user presses
-  // play. Nudging currentTime forward slightly forces the browser to
-  // decode and paint a real frame, same end result as X/TikTok's poster
-  // thumbnails, without needing a canvas capture or CORS headers.
-  const posterNudged = useRef(false);
-  const nudgeVideoFrame = (el: HTMLVideoElement) => {
-    if (posterNudged.current) return;
-    posterNudged.current = true;
-    try {
-      el.currentTime = Math.min(0.1, (el.duration || 1) * 0.05);
-    } catch {
-      // no-op - some browsers throw if duration isn't ready yet
-    }
-  };
-
-  // ─── Feed autoplay (X/TikTok style) ─────────────────────────────────
-  // Videos in the scrolling feed autoplay muted once they're mostly in
-  // view, and pause again once scrolled away - browsers require muted
-  // for unattended autoplay, so we offer a tap-to-unmute control that
-  // doesn't fight with the video's own click-to-open-fullscreen area.
-  const videoContainerRef = useRef<HTMLDivElement>(null);
-  const [videoInView, setVideoInView] = useState(false);
-  const [videoMuted, setVideoMuted] = useState(true);
+  /* ─────────────────────────────────────────────────────────
+     OUTSIDE CLICK
+  ───────────────────────────────────────────────────────── */
 
   useEffect(() => {
-    if (!video || !videoContainerRef.current) return;
-    const el = videoContainerRef.current;
-    const observer = new IntersectionObserver(
-      ([entry]) => setVideoInView(entry.isIntersecting),
-      { threshold: 0.6 }
+    const handleClickOutside = (
+      event: MouseEvent
+    ) => {
+      const target =
+        event.target as Node;
+
+      if (
+        moreMenuRef.current &&
+        !moreMenuRef.current.contains(target)
+      ) {
+        setMoreMenuOpen(false);
+      }
+
+      if (
+        repostMenuRef.current &&
+        !repostMenuRef.current.contains(target)
+      ) {
+        setRepostDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
     );
-    observer.observe(el);
-    return () => observer.disconnect();
+
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+    };
+  }, []);
+
+  /* ─────────────────────────────────────────────────────────
+     VIDEO VIEW
+  ───────────────────────────────────────────────────────── */
+
+  useEffect(() => {
+    if (
+      !video ||
+      !videoContainerRef.current
+    ) {
+      return;
+    }
+
+    const element =
+      videoContainerRef.current;
+
+    const observer =
+      new IntersectionObserver(
+        ([entry]) => {
+          setVideoInView(
+            entry.isIntersecting
+          );
+        },
+        {
+          threshold: 0.6,
+        }
+      );
+
+    observer.observe(element);
+
+    return () =>
+      observer.disconnect();
   }, [video]);
 
   useEffect(() => {
-    const el = videoRef.current;
-    if (!el) return;
+    const element =
+      videoRef.current;
+
+    if (!element)
+      return;
+
     if (videoInView) {
-      el.muted = videoMuted;
-      const playPromise = el.play();
-      if (playPromise) playPromise.catch(() => {});
+      element.muted =
+        videoMuted;
+
+      const playPromise =
+        element.play();
+
+      if (playPromise) {
+        playPromise.catch(() => {});
+      }
     } else {
-      el.pause();
+      element.pause();
     }
-  }, [videoInView, videoMuted]);
+  }, [
+    videoInView,
+    videoMuted,
+  ]);
 
-  // ─── FETCH REPOST STATUS ──────────────────────────────────────────
+  const nudgeVideoFrame = (
+    element: HTMLVideoElement
+  ) => {
+    if (posterNudged.current)
+      return;
+
+    posterNudged.current =
+      true;
+
+    try {
+      element.currentTime =
+        Math.min(
+          0.1,
+          (element.duration || 1) *
+            0.05
+        );
+    } catch {
+      // Ignore unsupported browser behavior.
+    }
+  };
+
+  /* ─────────────────────────────────────────────────────────
+     REPOST STATUS
+  ───────────────────────────────────────────────────────── */
+
   useEffect(() => {
-    const checkRepost = async () => {
-      if (!session) return;
-      try {
-        const res = await fetch(`/api/posts/${post.id}/repost`);
-        if (res.ok) {
-          const data = await res.json();
-          setReposted(data.reposted);
+    const checkRepost =
+      async () => {
+        if (!session)
+          return;
+
+        try {
+          const res =
+            await fetch(
+              `/api/posts/${post.id}/repost`
+            );
+
+          if (res.ok) {
+            const data =
+              await res.json();
+
+            setReposted(
+              data.reposted
+            );
+          }
+        } catch (error) {
+          console.error(
+            "Error checking repost:",
+            error
+          );
         }
-      } catch (error) {
-        console.error("Error checking repost:", error);
-      }
-    };
+      };
+
     checkRepost();
-  }, [post.id, session]);
+  }, [
+    post.id,
+    session,
+  ]);
 
-  // ─── FETCH REACTIONS ──────────────────────────────────────────────
-  const fetchReactions = async () => {
-    try {
-      const res = await fetch(`/api/posts/${post.id}/reaction`);
-      if (res.ok) {
-        const data = await res.json();
-        const counts = data.reduce((acc: any, r: any) => {
-          acc[r.emoji] = (acc[r.emoji] || 0) + 1;
-          return acc;
-        }, {});
-        setReactions(counts);
-        const ownReaction = data.find((r: any) => r.user.id === session?.user?.id)?.emoji || null;
-        setUserReaction(ownReaction);
-      }
-    } catch (error) {
-      console.error("Error fetching reactions:", error);
-    } finally {
-      setReactionsLoading(false);
-    }
-  };
+  /* ─────────────────────────────────────────────────────────
+     REACTIONS
+  ───────────────────────────────────────────────────────── */
 
-  useEffect(() => {
-    if (session) fetchReactions();
-  }, [post.id, session]);
-
-  const handleReaction = async (emoji: string) => {
-    if (!session) return;
-    try {
-      const res = await fetch(`/api/posts/${post.id}/reaction`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ emoji }),
-      });
-      if (res.ok) {
-        await fetchReactions();
-        setShowEmojiPicker(false);
-      }
-    } catch (error) {
-      console.error("Error toggling reaction:", error);
-    }
-  };
-
-  // ─── BOOKMARK ──────────────────────────────────────────────────────
-  useEffect(() => {
-    const checkBookmark = async () => {
+  const fetchReactions =
+    async () => {
       try {
-        const res = await fetch(`/api/posts/${post.id}/bookmark`);
+        const res =
+          await fetch(
+            `/api/posts/${post.id}/reaction`
+          );
+
         if (res.ok) {
-          const data = await res.json();
-          setBookmarked(data.bookmarked);
+          const data =
+            await res.json();
+
+          const counts =
+            data.reduce(
+              (
+                acc: Record<
+                  string,
+                  number
+                >,
+                reaction: any
+              ) => {
+                acc[reaction.emoji] =
+                  (acc[reaction.emoji] ||
+                    0) + 1;
+
+                return acc;
+              },
+              {}
+            );
+
+          setReactions(
+            counts
+          );
+
+          const ownReaction =
+            data.find(
+              (reaction: any) =>
+                reaction.user.id ===
+                session?.user?.id
+            )?.emoji || null;
+
+          setUserReaction(
+            ownReaction
+          );
         }
       } catch (error) {
-        console.error("Error checking bookmark:", error);
+        console.error(
+          "Error fetching reactions:",
+          error
+        );
+      } finally {
+        setReactionsLoading(
+          false
+        );
       }
     };
+
+  useEffect(() => {
+    if (session) {
+      fetchReactions();
+    }
+  }, [
+    post.id,
+    session,
+  ]);
+
+  const handleReaction =
+    async (emoji: string) => {
+      if (!session)
+        return;
+
+      try {
+        const res =
+          await fetch(
+            `/api/posts/${post.id}/reaction`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+              body: JSON.stringify({
+                emoji,
+              }),
+            }
+          );
+
+        if (res.ok) {
+          await fetchReactions();
+          setShowEmojiPicker(
+            false
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Error toggling reaction:",
+          error
+        );
+      }
+    };
+
+  /* ─────────────────────────────────────────────────────────
+     BOOKMARK
+  ───────────────────────────────────────────────────────── */
+
+  useEffect(() => {
+    const checkBookmark =
+      async () => {
+        try {
+          const res =
+            await fetch(
+              `/api/posts/${post.id}/bookmark`
+            );
+
+          if (res.ok) {
+            const data =
+              await res.json();
+
+            setBookmarked(
+              data.bookmarked
+            );
+          }
+        } catch (error) {
+          console.error(
+            "Error checking bookmark:",
+            error
+          );
+        }
+      };
+
     if (session) {
       checkBookmark();
     }
-  }, [post.id, session]);
+  }, [
+    post.id,
+    session,
+  ]);
 
-  // ─── VIEW COUNT ──────────────────────────────────────────────────
+  /* ─────────────────────────────────────────────────────────
+     VIEW COUNT
+  ───────────────────────────────────────────────────────── */
+
   useEffect(() => {
-    if (hasCountedView.current) return;
-    hasCountedView.current = true;
+    if (hasCountedView.current)
+      return;
 
-    const storageKey = "zrp_viewed_posts";
+    hasCountedView.current =
+      true;
+
+    const storageKey =
+      "zrp_viewed_posts";
+
     let viewed: string[] = [];
+
     try {
-      viewed = JSON.parse(sessionStorage.getItem(storageKey) || "[]");
+      viewed = JSON.parse(
+        sessionStorage.getItem(
+          storageKey
+        ) || "[]"
+      );
     } catch {
       viewed = [];
     }
 
-    if (viewed.includes(post.id)) return;
+    if (
+      viewed.includes(post.id)
+    ) {
+      return;
+    }
 
-    fetch(`/api/posts/${post.id}/view`, { method: "POST" })
-      .then((res) => (res.ok ? res.json() : null))
+    fetch(
+      `/api/posts/${post.id}/view`,
+      {
+        method: "POST",
+      }
+    )
+      .then((res) =>
+        res.ok
+          ? res.json()
+          : null
+      )
       .then((data) => {
-        if (data?.views != null) {
-          setViewsCount(data.views);
+        if (
+          data?.views != null
+        ) {
+          setViewsCount(
+            data.views
+          );
         } else {
-          setViewsCount((v) => v + 1);
+          setViewsCount(
+            (value) => value + 1
+          );
         }
       })
       .catch(() => {});
 
     viewed.push(post.id);
+
     try {
-      sessionStorage.setItem(storageKey, JSON.stringify(viewed.slice(-500)));
+      sessionStorage.setItem(
+        storageKey,
+        JSON.stringify(
+          viewed.slice(-500)
+        )
+      );
     } catch {}
   }, [post.id]);
 
-  // ─── HANDLERS ──────────────────────────────────────────────────────
+  /* ─────────────────────────────────────────────────────────
+     COMMENTS
+  ───────────────────────────────────────────────────────── */
 
-  // ─── Local comment count only - never triggers a parent feed reload.
-  // This used to be wired straight to the parent's onUpdate (full feed
-  // refetch), which meant commenting on any post reset everyone's scroll
-  // position back to the top of the whole feed.
-  const handleCommentCountChange = (delta?: number) => {
-    setCommentsCount((prev) => Math.max(0, prev + (delta || 0)));
-  };
+  const handleCommentCountChange =
+    (delta?: number) => {
+      setCommentsCount(
+        (previous) =>
+          Math.max(
+            0,
+            previous +
+              (delta || 0)
+          )
+      );
+    };
 
-  const handleLike = async () => {
-    try {
-      const res = await fetch(`/api/posts/${post.id}/like`, { method: "POST" });
-      if (res.ok) {
-        setLiked(!liked);
-        setLikesCount(liked ? likesCount - 1 : likesCount + 1);
-      }
-    } catch (error) {
-      console.error("Error liking post:", error);
-    }
-  };
+  /* ─────────────────────────────────────────────────────────
+     LIKE
+  ───────────────────────────────────────────────────────── */
 
-  const handleRepost = async () => {
-    try {
-      const res = await fetch(`/api/posts/${post.id}/repost`, { method: "POST" });
-      if (res.ok) {
-        const data = await res.json();
-        setReposted(data.reposted);
-        setRepostsCount(data.reposted ? repostsCount + 1 : repostsCount - 1);
-      }
-    } catch (error) {
-      console.error("Error reposting:", error);
-    }
-  };
-
-  const handleShare = async () => {
-    const url = window.location.href;
-    if (navigator.share) {
+  const handleLike =
+    async () => {
       try {
-        await navigator.share({
-          title: `Post by ${post.author.name || post.author.username}`,
-          text: post.content,
-          url,
-        });
-      } catch {}
-    } else {
+        const res =
+          await fetch(
+            `/api/posts/${post.id}/like`,
+            {
+              method: "POST",
+            }
+          );
+
+        if (res.ok) {
+          const nextLiked =
+            !liked;
+
+          setLiked(
+            nextLiked
+          );
+
+          setLikesCount(
+            nextLiked
+              ? likesCount + 1
+              : Math.max(
+                  0,
+                  likesCount - 1
+                )
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Error liking post:",
+          error
+        );
+      }
+    };
+
+  /* ─────────────────────────────────────────────────────────
+     REPOST
+  ───────────────────────────────────────────────────────── */
+
+  const handleRepost =
+    async () => {
       try {
-        await navigator.clipboard.writeText(url);
-        alert("Link copied to clipboard!");
-      } catch {}
-    }
-  };
+        const res =
+          await fetch(
+            `/api/posts/${post.id}/repost`,
+            {
+              method: "POST",
+            }
+          );
 
-  const handleDelete = async () => {
-    setDeleting(true);
-    try {
-      const res = await fetch(`/api/posts/${post.id}`, { method: "DELETE" });
-      if (res.ok) {
-        onUpdate(post.id);
-        setShowDeleteConfirm(false);
+        if (res.ok) {
+          const data =
+            await res.json();
+
+          setReposted(
+            data.reposted
+          );
+
+          setRepostsCount(
+            data.reposted
+              ? repostsCount + 1
+              : Math.max(
+                  0,
+                  repostsCount - 1
+                )
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Error reposting:",
+          error
+        );
+      }
+    };
+
+  /* ─────────────────────────────────────────────────────────
+     SHARE
+  ───────────────────────────────────────────────────────── */
+
+  const handleShare =
+    async () => {
+      const url =
+        window.location.href;
+
+      if (
+        navigator.share
+      ) {
+        try {
+          await navigator.share({
+            title: `Post by ${
+              post.author.name ||
+              post.author.username
+            }`,
+            text: post.content,
+            url,
+          });
+        } catch {}
       } else {
-        alert("Failed to delete post");
-      }
-    } catch (error) {
-      console.error("Error deleting post:", error);
-      alert("Failed to delete post");
-    } finally {
-      setDeleting(false);
-    }
-  };
+        try {
+          await navigator.clipboard.writeText(
+            url
+          );
 
-  const handleReport = async (reason: string, details?: string) => {
-    try {
-      const res = await fetch("/api/reports", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ postId: post.id, reason, details }),
-      });
-      if (res.ok) {
-        alert("Report submitted. Thank you for helping keep the community safe.");
-        setShowReportModal(false);
-      } else {
-        const err = await res.json().catch(() => ({}));
-        alert(err.error || "Failed to submit report. Please try again.");
-        if (res.status === 409) setShowReportModal(false);
+          alert(
+            "Link copied to clipboard!"
+          );
+        } catch {}
       }
-    } catch (error) {
-      console.error("Report error:", error);
-      alert("Failed to submit report. Please try again.");
-    }
-  };
+    };
 
-  const handleBookmark = async () => {
-    setBookmarkLoading(true);
-    try {
-      const res = await fetch(`/api/posts/${post.id}/bookmark`, { method: "POST" });
-      if (res.ok) {
-        const data = await res.json();
-        setBookmarked(data.bookmarked);
+  /* ─────────────────────────────────────────────────────────
+     DELETE
+  ───────────────────────────────────────────────────────── */
+
+  const handleDelete =
+    async () => {
+      setDeleting(true);
+
+      try {
+        const res =
+          await fetch(
+            `/api/posts/${post.id}`,
+            {
+              method: "DELETE",
+            }
+          );
+
+        if (res.ok) {
+          onUpdate(post.id);
+
+          setShowDeleteConfirm(
+            false
+          );
+        } else {
+          alert(
+            "Failed to delete post"
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Error deleting post:",
+          error
+        );
+
+        alert(
+          "Failed to delete post"
+        );
+      } finally {
+        setDeleting(false);
       }
-    } catch (error) {
-      console.error("Error toggling bookmark:", error);
-    } finally {
-      setBookmarkLoading(false);
-    }
-  };
+    };
 
-  const handlePinToggle = async () => {
-    setPinLoading(true);
-    try {
-      const res = await fetch(`/api/posts/${post.id}/pin`, { method: "POST" });
-      if (res.ok) {
-        onPinToggle?.();
-      } else {
-        alert("Failed to update pin status");
+  /* ─────────────────────────────────────────────────────────
+     REPORT
+  ───────────────────────────────────────────────────────── */
+
+  const handleReport =
+    async (
+      reason: string,
+      details?: string
+    ) => {
+      try {
+        const res =
+          await fetch(
+            "/api/reports",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+              body: JSON.stringify({
+                postId: post.id,
+                reason,
+                details,
+              }),
+            }
+          );
+
+        if (res.ok) {
+          alert(
+            "Report submitted. Thank you for helping keep the community safe."
+          );
+
+          setShowReportModal(
+            false
+          );
+        } else {
+          const err =
+            await res
+              .json()
+              .catch(
+                () => ({})
+              );
+
+          alert(
+            err.error ||
+              "Failed to submit report. Please try again."
+          );
+
+          if (
+            res.status === 409
+          ) {
+            setShowReportModal(
+              false
+            );
+          }
+        }
+      } catch (error) {
+        console.error(
+          "Report error:",
+          error
+        );
+
+        alert(
+          "Failed to submit report. Please try again."
+        );
       }
-    } catch (error) {
-      console.error("Pin toggle error:", error);
-      alert("Failed to update pin status");
-    } finally {
-      setPinLoading(false);
-    }
-  };
+    };
 
-  // ─── TRANSLATE POST ────────────────────────────────────────────────
-  const handleTranslate = async () => {
-    if (translatedText) {
-      setShowTranslation(!showTranslation);
-      return;
-    }
-    setTranslating(true);
-    setTranslateError(false);
-    try {
-      const res = await fetch("/api/translate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: post.content, targetLang: uiLanguage }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setTranslatedText(data.translatedText);
-        setShowTranslation(true);
-      } else {
-        setTranslateError(true);
+  /* ─────────────────────────────────────────────────────────
+     BOOKMARK
+  ───────────────────────────────────────────────────────── */
+
+  const handleBookmark =
+    async () => {
+      setBookmarkLoading(
+        true
+      );
+
+      try {
+        const res =
+          await fetch(
+            `/api/posts/${post.id}/bookmark`,
+            {
+              method: "POST",
+            }
+          );
+
+        if (res.ok) {
+          const data =
+            await res.json();
+
+          setBookmarked(
+            data.bookmarked
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Error toggling bookmark:",
+          error
+        );
+      } finally {
+        setBookmarkLoading(
+          false
+        );
       }
-    } catch (error) {
-      console.error("Translate error:", error);
-      setTranslateError(true);
-    } finally {
-      setTranslating(false);
-    }
-  };
+    };
 
-  // ─── DOUBLE‑CLICK TO LIKE ──────────────────────────────────────────
-  const handlePostClick = (e: React.MouseEvent) => {
-    const now = Date.now();
-    const timeSince = now - lastClickTime;
-    setLastClickTime(now);
-    if (timeSince < 300) handleLike();
-  };
+  /* ─────────────────────────────────────────────────────────
+     PIN
+  ───────────────────────────────────────────────────────── */
+
+  const handlePinToggle =
+    async () => {
+      setPinLoading(true);
+
+      try {
+        const res =
+          await fetch(
+            `/api/posts/${post.id}/pin`,
+            {
+              method: "POST",
+            }
+          );
+
+        if (res.ok) {
+          onPinToggle?.();
+        } else {
+          alert(
+            "Failed to update pin status"
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Pin toggle error:",
+          error
+        );
+
+        alert(
+          "Failed to update pin status"
+        );
+      } finally {
+        setPinLoading(false);
+      }
+    };
+
+  /* ─────────────────────────────────────────────────────────
+     TRANSLATION
+  ───────────────────────────────────────────────────────── */
+
+  const handleTranslate =
+    async () => {
+      if (translatedText) {
+        setShowTranslation(
+          !showTranslation
+        );
+
+        return;
+      }
+
+      setTranslating(true);
+      setTranslateError(false);
+
+      try {
+        const res =
+          await fetch(
+            "/api/translate",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+              body: JSON.stringify({
+                text: post.content,
+                targetLang:
+                  uiLanguage,
+              }),
+            }
+          );
+
+        if (res.ok) {
+          const data =
+            await res.json();
+
+          setTranslatedText(
+            data.translatedText
+          );
+
+          setShowTranslation(
+            true
+          );
+        } else {
+          setTranslateError(
+            true
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Translate error:",
+          error
+        );
+
+        setTranslateError(
+          true
+        );
+      } finally {
+        setTranslating(
+          false
+        );
+      }
+    };
+
+  /* ─────────────────────────────────────────────────────────
+     DOUBLE CLICK LIKE
+  ───────────────────────────────────────────────────────── */
+
+  const handlePostClick =
+    (
+      event: React.MouseEvent
+    ) => {
+      const now =
+        Date.now();
+
+      const timeSince =
+        now - lastClickTime;
+
+      setLastClickTime(
+        now
+      );
+
+      if (
+        timeSince < 300
+      ) {
+        handleLike();
+      }
+    };
 
   let lastTouchTime = 0;
-  const handleTouchEnd = () => {
-    const now = Date.now();
-    const timeSince = now - lastTouchTime;
-    lastTouchTime = now;
-    if (timeSince < 300) handleLike();
-  };
 
-  // ─── TIME AGO ──────────────────────────────────────────────────────
-  const timeAgo = (date: string) => {
-    const diff = Date.now() - new Date(date).getTime();
-    const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return "Just now";
-    if (minutes < 60) return `${minutes}m`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h`;
-    const days = Math.floor(hours / 24);
-    return `${days}d`;
-  };
+  const handleTouchEnd =
+    () => {
+      const now =
+        Date.now();
 
-  const getInitial = () => {
-    const name = post.author.name || post.author.username || "?";
-    return name.charAt(0).toUpperCase();
-  };
+      const timeSince =
+        now - lastTouchTime;
+
+      lastTouchTime =
+        now;
+
+      if (
+        timeSince < 300
+      ) {
+        handleLike();
+      }
+    };
+
+  /* ─────────────────────────────────────────────────────────
+     TIME AGO
+  ───────────────────────────────────────────────────────── */
+
+  const timeAgo =
+    (date: string) => {
+      const diff =
+        Date.now() -
+        new Date(date).getTime();
+
+      const minutes =
+        Math.floor(
+          diff / 60000
+        );
+
+      if (minutes < 1)
+        return "Just now";
+
+      if (minutes < 60)
+        return `${minutes}m`;
+
+      const hours =
+        Math.floor(
+          minutes / 60
+        );
+
+      if (hours < 24)
+        return `${hours}h`;
+
+      const days =
+        Math.floor(
+          hours / 24
+        );
+
+      if (days < 7)
+        return `${days}d`;
+
+      const weeks =
+        Math.floor(
+          days / 7
+        );
+
+      if (weeks < 5)
+        return `${weeks}w`;
+
+      return new Date(
+        date
+      ).toLocaleDateString(
+        undefined,
+        {
+          month: "short",
+          day: "numeric",
+        }
+      );
+    };
+
+  /* ─────────────────────────────────────────────────────────
+     INITIAL
+  ───────────────────────────────────────────────────────── */
+
+  const getInitial =
+    () => {
+      const name =
+        post.author.name ||
+        post.author.username ||
+        "?";
+
+      return name
+        .charAt(0)
+        .toUpperCase();
+    };
+
+  /* ─────────────────────────────────────────────────────────
+     RENDER
+  ───────────────────────────────────────────────────────── */
 
   return (
     <>
-      <div className="bg-white dark:bg-zrp-deepBlack px-4 py-3 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50/70 dark:hover:bg-white/[0.03] transition">
+      <article
+        className="
+          group
+          bg-white
+          dark:bg-zrp-deepBlack
+          px-3
+          sm:px-4
+          py-4
+          border-b
+          border-gray-200
+          dark:border-gray-800
+          hover:bg-gray-50/50
+          dark:hover:bg-white/[0.025]
+          transition-colors
+        "
+      >
         <div className="flex items-start gap-3">
-          <Link href={`/profile/${post.author.username}`}>
-            {/* Bumped from w-10 (40px) to w-12 (48px) - matches X's actual
-                main-timeline avatar size, giving posts the same visual
-                weight/proportion X's cards have. */}
-            <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 font-semibold flex-shrink-0 overflow-hidden">
+
+          {/* ─────────────────────────────────────────────
+              AVATAR
+          ───────────────────────────────────────────── */}
+
+          <Link
+            href={`/profile/${post.author.username}`}
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+            className="flex-shrink-0"
+          >
+            <div
+              className="
+                relative
+                w-11
+                h-11
+                sm:w-12
+                sm:h-12
+                rounded-full
+                overflow-hidden
+                bg-gradient-to-br
+                from-zrp-red/30
+                to-gray-800
+                ring-1
+                ring-gray-200
+                dark:ring-gray-700
+                transition
+                group-hover:ring-zrp-red/30
+              "
+            >
               {post.author.avatarUrl ? (
                 <img
-                  src={post.author.avatarUrl}
-                  alt={post.author.name || post.author.username}
-                  className="w-full h-full object-cover"
+                  src={
+                    post.author.avatarUrl
+                  }
+                  alt={
+                    post.author.name ||
+                    post.author.username
+                  }
+                  className="
+                    w-full
+                    h-full
+                    object-cover
+                  "
                 />
               ) : (
-                getInitial()
+                <div
+                  className="
+                    w-full
+                    h-full
+                    flex
+                    items-center
+                    justify-center
+                    text-zrp-red
+                    font-bold
+                    text-lg
+                  "
+                >
+                  {getInitial()}
+                </div>
               )}
             </div>
           </Link>
+
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Link href={`/profile/${post.author.username}`}>
-                  <span className="font-semibold hover:underline text-gray-900 dark:text-white inline-flex items-center gap-1">
-                    {post.author.name || post.author.username}
-                    <VerifiedBadge badgeType={post.author.badgeType} />
-                  </span>
-                </Link>
-                <Link href={`/profile/${post.author.username}`}>
-                  <span className="text-gray-500 dark:text-gray-400 text-sm hover:underline">
-                    @{post.author.username}
-                  </span>
-                </Link>
-                <span className="text-gray-400 dark:text-gray-500 text-sm">·</span>
-                <span className="text-gray-400 dark:text-gray-500 text-sm">{timeAgo(post.createdAt)}</span>
 
-                {/* ─── Post type badge ─────────────────────────────────── */}
-                {postType === "RECRUITMENT" && (
-                  <span className="inline-flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">
-                    <Briefcase className="w-3 h-3" /> Recruitment
-                  </span>
-                )}
-                {postType === "ARTICLE" && (
-                  <span className="inline-flex items-center gap-1 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full">
-                    <FileText className="w-3 h-3" /> Article
-                  </span>
-                )}
-              </div>
+            {/* ─────────────────────────────────────────
+                HEADER
+            ───────────────────────────────────────── */}
 
-              {isAuthor ? (
-                <div className="flex items-center gap-1">
-                  {showPinOption && (
+            <div className="flex items-start justify-between gap-2">
+
+              <div className="min-w-0">
+
+                <div className="flex items-center gap-1.5 flex-wrap">
+
+                  <Link
+                    href={`/profile/${post.author.username}`}
+                    onClick={(e) =>
+                      e.stopPropagation()
+                    }
+                    className="
+                      font-bold
+                      text-[15px]
+                      text-gray-950
+                      dark:text-white
+                      hover:underline
+                      truncate
+                      max-w-[180px]
+                      sm:max-w-none
+                    "
+                  >
+                    {post.author.name ||
+                      post.author.username}
+                  </Link>
+
+                  <VerifiedBadge
+                    badgeType={
+                      post.author
+                        .badgeType
+                    }
+                  />
+
+                  {!isAuthor && (
                     <button
-                      onClick={handlePinToggle}
-                      disabled={pinLoading}
-                      className={`transition p-1 ${isPinned ? "text-blue-500 hover:text-blue-600" : "text-gray-400 hover:text-blue-500"}`}
-                      title={isPinned ? "Unpin from profile" : "Pin to profile"}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      className="
+                        hidden
+                        sm:inline-flex
+                        items-center
+                        gap-1
+                        ml-1
+                        px-2.5
+                        py-1
+                        rounded-full
+                        border
+                        border-gray-300
+                        dark:border-gray-700
+                        text-xs
+                        font-semibold
+                        text-gray-700
+                        dark:text-gray-200
+                        hover:border-zrp-red
+                        hover:text-zrp-red
+                        transition
+                      "
                     >
-                      {isPinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
+                      <UserPlus className="w-3.5 h-3.5" />
+                      Follow
                     </button>
                   )}
-                  <button onClick={() => setShowEditModal(true)} className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition p-1">
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => setShowDeleteConfirm(true)} className="text-gray-400 hover:text-red-500 transition p-1">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
                 </div>
-              ) : (
-                <button onClick={() => setShowReportModal(true)} className="text-gray-400 hover:text-red-500 transition p-1">
-                  <Flag className="w-4 h-4" />
+
+                <div
+                  className="
+                    flex
+                    items-center
+                    gap-1
+                    text-[13px]
+                    text-gray-500
+                    dark:text-gray-400
+                  "
+                >
+                  <Link
+                    href={`/profile/${post.author.username}`}
+                    onClick={(e) =>
+                      e.stopPropagation()
+                    }
+                    className="hover:underline"
+                  >
+                    @{post.author.username}
+                  </Link>
+
+                  <span>·</span>
+
+                  <span>
+                    {timeAgo(
+                      post.createdAt
+                    )}
+                  </span>
+
+                  {post.updatedAt &&
+                    post.updatedAt !==
+                      post.createdAt && (
+                      <>
+                        <span>·</span>
+                        <span>
+                          edited
+                        </span>
+                      </>
+                    )}
+                </div>
+
+                {/* Post type */}
+                {postType !==
+                  "POST" && (
+                  <div className="mt-1.5">
+
+                    {postType ===
+                      "RECRUITMENT" && (
+                      <span
+                        className="
+                          inline-flex
+                          items-center
+                          gap-1.5
+                          px-2.5
+                          py-1
+                          rounded-full
+                          bg-blue-500/10
+                          text-blue-500
+                          text-xs
+                          font-semibold
+                        "
+                      >
+                        <Briefcase className="w-3.5 h-3.5" />
+                        Recruitment
+                      </span>
+                    )}
+
+                    {postType ===
+                      "ARTICLE" && (
+                      <span
+                        className="
+                          inline-flex
+                          items-center
+                          gap-1.5
+                          px-2.5
+                          py-1
+                          rounded-full
+                          bg-purple-500/10
+                          text-purple-500
+                          text-xs
+                          font-semibold
+                        "
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        Article
+                      </span>
+                    )}
+
+                  </div>
+                )}
+              </div>
+
+              {/* ───────────────────────────────────────
+                  MORE MENU
+              ─────────────────────────────────────── */}
+
+              <div
+                ref={moreMenuRef}
+                className="relative flex-shrink-0"
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+
+                    setMoreMenuOpen(
+                      (value) =>
+                        !value
+                    );
+
+                    setRepostDropdownOpen(
+                      false
+                    );
+                  }}
+                  className="
+                    p-2
+                    rounded-full
+                    text-gray-400
+                    hover:text-gray-800
+                    dark:hover:text-white
+                    hover:bg-gray-100
+                    dark:hover:bg-white/10
+                    transition
+                  "
+                  aria-label="More options"
+                  aria-expanded={
+                    moreMenuOpen
+                  }
+                >
+                  <MoreHorizontal className="w-5 h-5" />
                 </button>
-              )}
+
+                {moreMenuOpen && (
+                  <div
+                    className="
+                      absolute
+                      right-0
+                      top-10
+                      z-40
+                      w-52
+                      overflow-hidden
+                      rounded-2xl
+                      border
+                      border-gray-200
+                      dark:border-gray-700
+                      bg-white
+                      dark:bg-zrp-deepBlack
+                      shadow-2xl
+                    "
+                    onClick={(e) =>
+                      e.stopPropagation()
+                    }
+                  >
+
+                    {isAuthor ? (
+                      <>
+                        {showPinOption && (
+                          <button
+                            onClick={() => {
+                              setMoreMenuOpen(
+                                false
+                              );
+                              handlePinToggle();
+                            }}
+                            disabled={
+                              pinLoading
+                            }
+                            className="
+                              w-full
+                              flex
+                              items-center
+                              gap-3
+                              px-4
+                              py-3
+                              text-left
+                              text-sm
+                              text-gray-700
+                              dark:text-gray-200
+                              hover:bg-gray-100
+                              dark:hover:bg-white/5
+                              transition
+                            "
+                          >
+                            {isPinned ? (
+                              <PinOff className="w-4 h-4" />
+                            ) : (
+                              <Pin className="w-4 h-4" />
+                            )}
+
+                            {isPinned
+                              ? "Unpin from profile"
+                              : "Pin to profile"}
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => {
+                            setMoreMenuOpen(
+                              false
+                            );
+
+                            setShowEditModal(
+                              true
+                            );
+                          }}
+                          className="
+                            w-full
+                            flex
+                            items-center
+                            gap-3
+                            px-4
+                            py-3
+                            text-left
+                            text-sm
+                            text-gray-700
+                            dark:text-gray-200
+                            hover:bg-gray-100
+                            dark:hover:bg-white/5
+                            transition
+                          "
+                        >
+                          <Pencil className="w-4 h-4" />
+                          Edit post
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setMoreMenuOpen(
+                              false
+                            );
+
+                            setShowDeleteConfirm(
+                              true
+                            );
+                          }}
+                          className="
+                            w-full
+                            flex
+                            items-center
+                            gap-3
+                            px-4
+                            py-3
+                            text-left
+                            text-sm
+                            text-red-500
+                            hover:bg-red-50
+                            dark:hover:bg-red-500/10
+                            transition
+                          "
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Delete post
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => {
+                            setMoreMenuOpen(
+                              false
+                            );
+
+                            setShowReportModal(
+                              true
+                            );
+                          }}
+                          className="
+                            w-full
+                            flex
+                            items-center
+                            gap-3
+                            px-4
+                            py-3
+                            text-left
+                            text-sm
+                            text-gray-700
+                            dark:text-gray-200
+                            hover:bg-gray-100
+                            dark:hover:bg-white/5
+                            transition
+                          "
+                        >
+                          <Flag className="w-4 h-4" />
+                          Report post
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            setMoreMenuOpen(
+                              false
+                            )
+                          }
+                          className="
+                            w-full
+                            flex
+                            items-center
+                            gap-3
+                            px-4
+                            py-3
+                            text-left
+                            text-sm
+                            text-gray-700
+                            dark:text-gray-200
+                            hover:bg-gray-100
+                            dark:hover:bg-white/5
+                            transition
+                          "
+                        >
+                          Not interested
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {isRepost && originalAuthor && (
-              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
-                <Repeat className="w-3 h-3" />
-                <span>
-                  Reposted from{" "}
-                  <Link href={`/profile/${originalAuthor.username}`} className="hover:underline text-zrp-red">
-                    @{originalAuthor.username}
-                  </Link>
-                </span>
-              </div>
-            )}
+            {/* ─────────────────────────────────────────
+                REPOST INDICATOR
+            ───────────────────────────────────────── */}
 
-            <div onClick={handlePostClick} onTouchEnd={handleTouchEnd} className="cursor-pointer select-none">
-              <p className="text-gray-800 dark:text-gray-200 mt-1 whitespace-pre-wrap break-words">
-                {displayContentParts.map((part, index) => {
-                  if (part.type === "hashtag") {
-                    const tag = part.value.slice(1);
-                    return (
-                      <Link key={index} href={`/hashtag/${tag}`} className="text-zrp-red hover:underline">
-                        {part.value}
-                      </Link>
-                    );
-                  }
-                  if (part.type === "mention") {
-                    const username = part.value.slice(1);
-                    return (
-                      <Link key={index} href={`/profile/${username}`} className="text-zrp-red hover:underline">
-                        {part.value}
-                      </Link>
-                    );
-                  }
-                  if (part.type === "url") {
-                    const href = part.value.startsWith("http") ? part.value : `https://${part.value}`;
-                    // Hide this URL from the visible text once we know a
-                    // preview card successfully loaded for it - the card
-                    // becomes the link instead of showing it twice.
-                    if (previewUrl && href === previewUrl && linkPreviewFoundFor === previewUrl) {
-                      return null;
+            {isRepost &&
+              originalAuthor && (
+                <div
+                  className="
+                    flex
+                    items-center
+                    gap-1.5
+                    mt-1
+                    text-xs
+                    text-gray-500
+                    dark:text-gray-400
+                  "
+                >
+                  <Repeat2 className="w-3.5 h-3.5 text-green-500" />
+
+                  <span>
+                    Reposted from{" "}
+                    <Link
+                      href={`/profile/${originalAuthor.username}`}
+                      className="
+                        text-zrp-red
+                        hover:underline
+                        font-medium
+                      "
+                      onClick={(e) =>
+                        e.stopPropagation()
+                      }
+                    >
+                      @{originalAuthor.username}
+                    </Link>
+                  </span>
+                </div>
+              )}
+
+            {/* ─────────────────────────────────────────
+                POST CONTENT
+            ───────────────────────────────────────── */}
+
+            <div
+              onClick={
+                handlePostClick
+              }
+              onTouchEnd={
+                handleTouchEnd
+              }
+              className="
+                cursor-pointer
+                select-none
+              "
+            >
+              <p
+                className="
+                  text-[15px]
+                  sm:text-[16px]
+                  leading-6
+                  text-gray-800
+                  dark:text-gray-200
+                  mt-2
+                  whitespace-pre-wrap
+                  break-words
+                "
+              >
+                {displayContentParts.map(
+                  (
+                    part,
+                    index
+                  ) => {
+                    if (
+                      part.type ===
+                      "hashtag"
+                    ) {
+                      const tag =
+                        part.value.slice(
+                          1
+                        );
+
+                      return (
+                        <Link
+                          key={
+                            index
+                          }
+                          href={`/hashtag/${tag}`}
+                          className="
+                            text-zrp-red
+                            hover:underline
+                          "
+                          onClick={(e) =>
+                            e.stopPropagation()
+                          }
+                        >
+                          {
+                            part.value
+                          }
+                        </Link>
+                      );
                     }
+
+                    if (
+                      part.type ===
+                      "mention"
+                    ) {
+                      const username =
+                        part.value.slice(
+                          1
+                        );
+
+                      return (
+                        <Link
+                          key={
+                            index
+                          }
+                          href={`/profile/${username}`}
+                          className="
+                            text-zrp-red
+                            hover:underline
+                          "
+                          onClick={(e) =>
+                            e.stopPropagation()
+                          }
+                        >
+                          {
+                            part.value
+                          }
+                        </Link>
+                      );
+                    }
+
+                    if (
+                      part.type ===
+                      "url"
+                    ) {
+                      const href =
+                        part.value.startsWith(
+                          "http"
+                        )
+                          ? part.value
+                          : `https://${part.value}`;
+
+                      if (
+                        previewUrl &&
+                        href ===
+                          previewUrl &&
+                        linkPreviewFoundFor ===
+                          previewUrl
+                      ) {
+                        return null;
+                      }
+
+                      return (
+                        <a
+                          key={
+                            index
+                          }
+                          href={
+                            href
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) =>
+                            e.stopPropagation()
+                          }
+                          className="
+                            text-zrp-red
+                            hover:underline
+                            break-all
+                          "
+                        >
+                          {
+                            part.value
+                          }
+                        </a>
+                      );
+                    }
+
                     return (
-                      <a
-                        key={index}
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-zrp-red hover:underline break-all"
+                      <span
+                        key={
+                          index
+                        }
                       >
-                        {part.value}
-                      </a>
+                        {
+                          part.value
+                        }
+                      </span>
                     );
                   }
-                  return <span key={index}>{part.value}</span>;
-                })}
-                {isLongContent && !contentExpanded && "..."}
+                )}
+
+                {isLongContent &&
+                  !contentExpanded &&
+                  "..."}
               </p>
 
-              {/* ─── Show more / Show less ─────────────────────────────── */}
+              {/* Show more */}
               {isLongContent && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setContentExpanded(!contentExpanded);
+
+                    setContentExpanded(
+                      !contentExpanded
+                    );
                   }}
-                  className="text-sm text-zrp-red hover:underline mt-0.5"
+                  className="
+                    text-sm
+                    text-zrp-red
+                    hover:underline
+                    mt-0.5
+                    font-medium
+                  "
                 >
-                  {contentExpanded ? "Show less" : "Show more"}
+                  {contentExpanded
+                    ? "Show less"
+                    : "Show more"}
                 </button>
               )}
 
-              {/* ─── Link preview card ────────────────────────────────── */}
-              {/* Only for text posts - a post with actual uploaded media
-                  (image/video) already has its own media block below, so
-                  this stays out of the way of that. */}
-              {!post.imageUrl && previewUrl && (
-                <LinkPreviewCard
-                  url={previewUrl}
-                  onLoaded={(found) => setLinkPreviewFoundFor(found ? previewUrl : null)}
-                />
-              )}
+              {/* ─────────────────────────────────────
+                  LINK PREVIEW
+              ───────────────────────────────────── */}
 
-              {/* ─── Translate post ───────────────────────────────────── */}
-              {post.content.trim().length > 0 && (
-                <div className="mt-1" onClick={(e) => e.stopPropagation()}>
+              {!post.imageUrl &&
+                previewUrl && (
+                  <div
+                    className="mt-3"
+                    onClick={(e) =>
+                      e.stopPropagation()
+                    }
+                  >
+                    <LinkPreviewCard
+                      url={previewUrl}
+                      onLoaded={(
+                        found
+                      ) =>
+                        setLinkPreviewFoundFor(
+                          found
+                            ? previewUrl
+                            : null
+                        )
+                      }
+                    />
+                  </div>
+                )}
+
+              {/* ─────────────────────────────────────
+                  TRANSLATION
+              ───────────────────────────────────── */}
+
+              {post.content.trim()
+                .length > 0 && (
+                <div
+                  className="mt-2"
+                  onClick={(e) =>
+                    e.stopPropagation()
+                  }
+                >
                   <button
-                    onClick={handleTranslate}
-                    disabled={translating}
-                    className="inline-flex items-center gap-1 text-sm text-zrp-red hover:underline disabled:opacity-60"
+                    onClick={
+                      handleTranslate
+                    }
+                    disabled={
+                      translating
+                    }
+                    className="
+                      inline-flex
+                      items-center
+                      gap-1.5
+                      text-xs
+                      sm:text-sm
+                      text-zrp-red
+                      hover:underline
+                      disabled:opacity-60
+                    "
                   >
                     {translating ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     ) : (
                       <Globe className="w-3.5 h-3.5" />
                     )}
-                    {showTranslation ? "Show original" : "Show translation"}
+
+                    {showTranslation
+                      ? "Show original"
+                      : "Show translation"}
                   </button>
+
                   {translateError && (
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                      Translation unavailable right now.
+                    <p className="text-xs text-gray-400 mt-1">
+                      Translation unavailable
+                      right now.
                     </p>
                   )}
-                  {showTranslation && translatedText && (
-                    <p className="text-gray-800 dark:text-gray-200 mt-1.5 whitespace-pre-wrap break-words border-l-2 border-gray-200 dark:border-gray-700 pl-2">
-                      {translatedText}
-                    </p>
-                  )}
-                </div>
-              )}
 
-              {/* ─── Recruitment extra info ───────────────────────────── */}
-              {postType === "RECRUITMENT" && (post.company || post.location || post.applyUrl) && (
-                <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 space-y-1 text-sm">
-                  {post.company && <p className="font-medium text-gray-900 dark:text-white">{post.company}</p>}
-                  {post.location && <p className="text-gray-600 dark:text-gray-400">{post.location}</p>}
-                  {post.applyUrl && (
-                    <a
-                      href={post.applyUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block mt-1 text-zrp-red hover:underline text-sm font-medium"
-                    >
-                      Apply Now →
-                    </a>
-                  )}
-                </div>
-              )}
-
-              {/* ─── Article body ─────────────────────────────────────── */}
-              {postType === "ARTICLE" && post.body && (
-                <div className="mt-2">
-                  <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-800 dark:prose-p:text-gray-200 prose-strong:text-gray-900 dark:prose-strong:text-white prose-li:text-gray-800 dark:prose-li:text-gray-200 prose-a:text-zrp-red hover:prose-a:underline">
-                    {articleExpanded ? (
+                  {showTranslation &&
+                    translatedText && (
                       <div
-                        dangerouslySetInnerHTML={{ __html: post.body }}
-                        className="text-gray-800 dark:text-gray-200"
-                      />
-                    ) : (
-                      <div
-                        dangerouslySetInnerHTML={{ __html: post.body.slice(0, 300) + (post.body.length > 300 ? "..." : "") }}
-                        className="text-gray-800 dark:text-gray-200"
-                      />
-                    )}
-                  </div>
-                  {post.body.length > 300 && (
-                    <button
-                      onClick={() => setArticleExpanded(!articleExpanded)}
-                      className="text-sm text-zrp-red hover:underline mt-1"
-                    >
-                      {articleExpanded ? "Show less" : "Read more"}
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* ─── Media rendering (image grid, single image, or video) ─ */}
-              {!video && post.imageUrls && post.imageUrls.length > 1 ? (
-                <div
-                  className={`mt-2 rounded-2xl overflow-hidden grid gap-0.5 ${
-                    post.imageUrls.length === 2
-                      ? "grid-cols-2"
-                      : "grid-cols-2 grid-rows-2"
-                  }`}
-                >
-                  {post.imageUrls.slice(0, 4).map((url, idx) => (
-                    <div
-                      key={url}
-                      className={`relative cursor-pointer group bg-gray-100 dark:bg-gray-800 ${
-                        post.imageUrls!.length === 3 && idx === 0 ? "row-span-2" : ""
-                      }`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setLightboxImage(url);
-                      }}
-                    >
-                      <img
-                        src={url}
-                        alt={`Post image ${idx + 1}`}
-                        className={`w-full h-full object-cover ${
-                          post.imageUrls!.length === 3 && idx === 0 ? "" : "aspect-square"
-                        }`}
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20">
-                        <ZoomIn className="w-6 h-6 text-white" />
+                        className="
+                          mt-2
+                          pl-3
+                          border-l-2
+                          border-zrp-red/40
+                        "
+                      >
+                        <p
+                          className="
+                            text-[15px]
+                            leading-6
+                            text-gray-700
+                            dark:text-gray-300
+                            whitespace-pre-wrap
+                          "
+                        >
+                          {
+                            translatedText
+                          }
+                        </p>
                       </div>
+                    )}
+                </div>
+              )}
+
+              {/* ─────────────────────────────────────
+                  RECRUITMENT
+              ───────────────────────────────────── */}
+
+              {postType ===
+                "RECRUITMENT" &&
+                (post.company ||
+                  post.location ||
+                  post.applyUrl) && (
+                  <div
+                    className="
+                      mt-3
+                      rounded-2xl
+                      border
+                      border-gray-200
+                      dark:border-gray-700
+                      bg-gray-50
+                      dark:bg-gray-800/50
+                      overflow-hidden
+                    "
+                  >
+                    <div className="p-4">
+
+                      {post.company && (
+                        <p
+                          className="
+                            font-bold
+                            text-gray-900
+                            dark:text-white
+                          "
+                        >
+                          {
+                            post.company
+                          }
+                        </p>
+                      )}
+
+                      {post.location && (
+                        <div
+                          className="
+                            flex
+                            items-center
+                            gap-1.5
+                            mt-1
+                            text-sm
+                            text-gray-500
+                            dark:text-gray-400
+                          "
+                        >
+                          <MapPin className="w-4 h-4" />
+                          {
+                            post.location
+                          }
+                        </div>
+                      )}
+
+                      {post.applyUrl && (
+                        <a
+                          href={
+                            post.applyUrl
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) =>
+                            e.stopPropagation()
+                          }
+                          className="
+                            inline-flex
+                            items-center
+                            gap-1.5
+                            mt-3
+                            px-4
+                            py-2
+                            rounded-full
+                            bg-zrp-red
+                            text-white
+                            text-sm
+                            font-semibold
+                            hover:opacity-90
+                            transition
+                          "
+                        >
+                          Apply Now
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      )}
                     </div>
-                  ))}
+                  </div>
+                )}
+
+              {/* ─────────────────────────────────────
+                  ARTICLE
+              ───────────────────────────────────── */}
+
+              {postType ===
+                "ARTICLE" &&
+                post.body && (
+                  <div
+                    className="
+                      mt-3
+                      rounded-2xl
+                      border
+                      border-gray-200
+                      dark:border-gray-700
+                      overflow-hidden
+                    "
+                  >
+                    <div className="p-4">
+
+                      <div
+                        className="
+                          prose
+                          prose-sm
+                          dark:prose-invert
+                          max-w-none
+                          prose-headings:text-gray-900
+                          dark:prose-headings:text-white
+                          prose-p:text-gray-800
+                          dark:prose-p:text-gray-200
+                          prose-a:text-zrp-red
+                        "
+                      >
+                        {articleExpanded ? (
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html:
+                                post.body,
+                            }}
+                          />
+                        ) : (
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html:
+                                post.body.slice(
+                                  0,
+                                  400
+                                ) +
+                                (post.body
+                                  .length >
+                                400
+                                  ? "..."
+                                  : ""),
+                            }}
+                          />
+                        )}
+                      </div>
+
+                      {post.body.length >
+                        400 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+
+                            setArticleExpanded(
+                              !articleExpanded
+                            );
+                          }}
+                          className="
+                            mt-2
+                            text-sm
+                            text-zrp-red
+                            hover:underline
+                            font-medium
+                          "
+                        >
+                          {articleExpanded
+                            ? "Show less"
+                            : "Read more"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* ─────────────────────────────────────
+                  MULTI IMAGE
+              ───────────────────────────────────── */}
+
+              {!video &&
+              post.imageUrls &&
+              post.imageUrls.length >
+                1 ? (
+                <div
+                  className={`
+                    mt-3
+                    rounded-2xl
+                    overflow-hidden
+                    border
+                    border-gray-200
+                    dark:border-gray-800
+                    grid
+                    gap-0.5
+                    bg-black
+                    ${
+                      post.imageUrls
+                        .length ===
+                      2
+                        ? "grid-cols-2"
+                        : "grid-cols-2 grid-rows-2"
+                    }
+                  `}
+                >
+                  {post.imageUrls
+                    .slice(0, 4)
+                    .map(
+                      (
+                        url,
+                        idx
+                      ) => (
+                        <div
+                          key={
+                            url
+                          }
+                          className={`
+                            relative
+                            cursor-pointer
+                            group/media
+                            bg-gray-100
+                            dark:bg-gray-800
+                            overflow-hidden
+                            ${
+                              post
+                                .imageUrls!
+                                .length ===
+                                3 &&
+                              idx ===
+                                0
+                                ? "row-span-2"
+                                : ""
+                            }
+                          `}
+                          onClick={(
+                            e
+                          ) => {
+                            e.stopPropagation();
+
+                            setLightboxImage(
+                              url
+                            );
+                          }}
+                        >
+                          <img
+                            src={
+                              url
+                            }
+                            alt={`Post image ${
+                              idx +
+                              1
+                            }`}
+                            className={`
+                              w-full
+                              h-full
+                              object-cover
+                              transition-transform
+                              duration-300
+                              group-hover/media:scale-[1.02]
+                              ${
+                                post
+                                  .imageUrls!
+                                  .length ===
+                                  3 &&
+                                idx ===
+                                  0
+                                  ? ""
+                                  : "aspect-square"
+                              }
+                            `}
+                          />
+
+                          <div
+                            className="
+                              absolute
+                              inset-0
+                              flex
+                              items-center
+                              justify-center
+                              bg-black/0
+                              group-hover/media:bg-black/20
+                              transition
+                            "
+                          >
+                            <ZoomIn
+                              className="
+                                w-7
+                                h-7
+                                text-white
+                                opacity-0
+                                group-hover/media:opacity-100
+                                transition
+                              "
+                            />
+                          </div>
+                        </div>
+                      )
+                    )}
                 </div>
               ) : (
+                /* ─────────────────────────────────────
+                   SINGLE IMAGE / VIDEO
+                ───────────────────────────────────── */
+
                 post.imageUrl && (
                   <div
-                    className="mt-2 rounded-2xl overflow-hidden cursor-pointer group relative"
+                    className="
+                      mt-3
+                      rounded-2xl
+                      overflow-hidden
+                      border
+                      border-gray-200
+                      dark:border-gray-800
+                      cursor-pointer
+                      group/media
+                      relative
+                      bg-black
+                    "
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (video && !videoLoadFailed) {
-                        setShowVideoFeed(true);
+
+                      if (
+                        video &&
+                        !videoLoadFailed
+                      ) {
+                        setShowVideoFeed(
+                          true
+                        );
                       } else {
-                        setLightboxImage(post.imageUrl!);
+                        setLightboxImage(
+                          post.imageUrl!
+                        );
                       }
                     }}
                   >
-                    {video && !videoLoadFailed ? (
-                      <div ref={videoContainerRef} className="relative aspect-video w-full bg-black">
+                    {video &&
+                    !videoLoadFailed ? (
+                      <div
+                        ref={
+                          videoContainerRef
+                        }
+                        className="
+                          relative
+                          aspect-video
+                          w-full
+                          bg-black
+                        "
+                      >
                         <video
-                          ref={videoRef}
-                          src={post.imageUrl}
-                          className="w-full h-full object-contain pointer-events-none"
-                          muted={videoMuted}
+                          ref={
+                            videoRef
+                          }
+                          src={
+                            post.imageUrl
+                          }
+                          className="
+                            w-full
+                            h-full
+                            object-contain
+                          "
+                          muted={
+                            videoMuted
+                          }
                           loop
                           playsInline
-                          webkit-playsinline="true"
                           preload="metadata"
-                          onContextMenu={(e) => e.preventDefault()}
-                          onLoadedMetadata={(e) => nudgeVideoFrame(e.currentTarget)}
-                          onLoadedData={(e) => nudgeVideoFrame(e.currentTarget)}
-                          onError={() => setVideoLoadFailed(true)}
+                          onContextMenu={(
+                            e
+                          ) =>
+                            e.preventDefault()
+                          }
+                          onLoadedMetadata={(
+                            e
+                          ) =>
+                            nudgeVideoFrame(
+                              e.currentTarget
+                            )
+                          }
+                          onLoadedData={(
+                            e
+                          ) =>
+                            nudgeVideoFrame(
+                              e.currentTarget
+                            )
+                          }
+                          onError={() =>
+                            setVideoLoadFailed(
+                              true
+                            )
+                          }
                         />
+
                         {!videoInView && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition">
-                            <div className="bg-black/50 rounded-full p-3">
-                              <Play className="w-8 h-8 text-white fill-white" />
+                          <div
+                            className="
+                              absolute
+                              inset-0
+                              flex
+                              items-center
+                              justify-center
+                              bg-black/20
+                            "
+                          >
+                            <div
+                              className="
+                                bg-black/60
+                                backdrop-blur-sm
+                                rounded-full
+                                p-4
+                              "
+                            >
+                              <Play
+                                className="
+                                  w-8
+                                  h-8
+                                  text-white
+                                  fill-white
+                                "
+                              />
                             </div>
                           </div>
                         )}
+
                         {videoInView && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setVideoMuted((m) => !m);
+
+                              setVideoMuted(
+                                (value) =>
+                                  !value
+                              );
                             }}
-                            className="absolute bottom-2 right-2 bg-black/50 hover:bg-black/70 rounded-full p-2 transition"
-                            title={videoMuted ? "Unmute" : "Mute"}
+                            className="
+                              absolute
+                              bottom-3
+                              right-3
+                              bg-black/60
+                              backdrop-blur-sm
+                              hover:bg-black/80
+                              rounded-full
+                              p-2.5
+                              transition
+                            "
+                            title={
+                              videoMuted
+                                ? "Unmute"
+                                : "Mute"
+                            }
                           >
                             {videoMuted ? (
                               <VolumeX className="w-4 h-4 text-white" />
@@ -915,9 +2650,42 @@ export default function PostCard({
                       </div>
                     ) : (
                       <>
-                        <img src={post.imageUrl} alt="Post image" className="w-full" />
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20">
-                          <ZoomIn className="w-8 h-8 text-white" />
+                        <img
+                          src={
+                            post.imageUrl
+                          }
+                          alt="Post media"
+                          className="
+                            w-full
+                            max-h-[700px]
+                            object-cover
+                            transition-transform
+                            duration-300
+                            group-hover/media:scale-[1.015]
+                          "
+                        />
+
+                        <div
+                          className="
+                            absolute
+                            top-3
+                            right-3
+                            opacity-0
+                            group-hover/media:opacity-100
+                            transition
+                          "
+                        >
+                          <div
+                            className="
+                              p-2
+                              rounded-full
+                              bg-black/60
+                              backdrop-blur-sm
+                              text-white
+                            "
+                          >
+                            <ZoomIn className="w-5 h-5" />
+                          </div>
                         </div>
                       </>
                     )}
@@ -926,202 +2694,691 @@ export default function PostCard({
               )}
             </div>
 
-            {/* ─── ACTION BAR ──────────────────────────────────────────── */}
-            {/* Removed max-w-md - it capped this row at 448px regardless
-                of how wide the actual post content above it was, so on
-                anything wider than that the icons bunched up on the left
-                instead of spreading evenly across the full post width the
-                way X's action bar does. */}
-            <div className="flex items-center justify-between mt-3">
-              {/* ─── Comment button (disabled if comments off) ─────────── */}
+            {/* ─────────────────────────────────────────
+                ACTION BAR
+            ───────────────────────────────────────── */}
+
+            <div
+              className="
+                flex
+                items-center
+                justify-between
+                mt-3
+                max-w-[600px]
+              "
+            >
+
+              {/* Comments */}
               <button
-                onClick={() => setShowComments(!showComments)}
-                className={`group flex items-center gap-1 text-sm ${
-                  commentsEnabled
-                    ? "text-gray-500 dark:text-gray-400"
-                    : "text-gray-300 dark:text-gray-500 cursor-not-allowed opacity-50"
-                } transition`}
-                disabled={!commentsEnabled}
-                title={!commentsEnabled ? "Comments are disabled for this post" : ""}
+                onClick={() =>
+                  setShowComments(
+                    !showComments
+                  )
+                }
+                disabled={
+                  !commentsEnabled
+                }
+                className={`
+                  group
+                  flex
+                  items-center
+                  gap-1
+                  transition
+                  ${
+                    commentsEnabled
+                      ? "text-gray-500 dark:text-gray-400 hover:text-blue-500"
+                      : "text-gray-300 dark:text-gray-600 cursor-not-allowed"
+                  }
+                `}
               >
-                <span className={`p-2 rounded-full transition ${commentsEnabled ? "group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:text-blue-500" : ""}`}>
-                  <MessageCircle className="w-[18px] h-[18px]" />
+                <span
+                  className="
+                    p-2
+                    rounded-full
+                    group-hover:bg-blue-500/10
+                    transition
+                  "
+                >
+                  <MessageCircle className="w-[19px] h-[19px]" />
                 </span>
-                <span className="group-hover:text-blue-500 transition whitespace-nowrap">{formatCount(commentsCount)}</span>
+
+                <span className="text-xs sm:text-sm">
+                  {formatCount(
+                    commentsCount
+                  )}
+                </span>
               </button>
 
-              {/* ─── Repost dropdown ───────────────────────────────────── */}
-              <div className="relative">
+              {/* Repost */}
+              <div
+                ref={
+                  repostMenuRef
+                }
+                className="relative"
+              >
                 <button
-                  onClick={() => setRepostDropdownOpen(!repostDropdownOpen)}
-                  className={`group flex items-center text-sm ${reposted ? "text-green-500" : "text-gray-500 dark:text-gray-400"} transition`}
+                  onClick={() => {
+                    setRepostDropdownOpen(
+                      (value) =>
+                        !value
+                    );
+
+                    setMoreMenuOpen(
+                      false
+                    );
+                  }}
+                  className={`
+                    group
+                    flex
+                    items-center
+                    gap-1
+                    transition
+                    ${
+                      reposted
+                        ? "text-green-500"
+                        : "text-gray-500 dark:text-gray-400 hover:text-green-500"
+                    }
+                  `}
                 >
-                  <span className="p-2 rounded-full transition group-hover:bg-green-50 dark:group-hover:bg-green-900/20 group-hover:text-green-500">
-                    <Repeat className={`w-[18px] h-[18px] ${reposted ? "fill-green-500" : ""}`} />
+                  <span
+                    className="
+                      p-2
+                      rounded-full
+                      group-hover:bg-green-500/10
+                      transition
+                    "
+                  >
+                    <Repeat2
+                      className="
+                        w-[19px]
+                        h-[19px]
+                      "
+                    />
                   </span>
-                  <span className="group-hover:text-green-500 transition -ml-1 whitespace-nowrap">
-                    {formatCount(repostsCount + (post._count?.quotedBy || 0))}
-                  </span>
-                  <ChevronDown className="w-3 h-3 ml-0.5 group-hover:text-green-500 transition" />
-                </button>
-                {repostDropdownOpen && (
-                  <div className="absolute left-0 mt-1 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
-                    {reposted ? (
-                      <button
-                        onClick={() => {
-                          handleRepost();
-                          setRepostDropdownOpen(false);
-                        }}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                      >
-                        Undo Repost
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          handleRepost();
-                          setRepostDropdownOpen(false);
-                        }}
-                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                      >
-                        Repost
-                      </button>
+
+                  <span className="text-xs sm:text-sm">
+                    {formatCount(
+                      repostsCount +
+                        (post._count
+                          ?.quotedBy ||
+                          0)
                     )}
+                  </span>
+                </button>
+
+                {repostDropdownOpen && (
+                  <div
+                    className="
+                      absolute
+                      left-0
+                      bottom-10
+                      z-40
+                      w-40
+                      overflow-hidden
+                      rounded-xl
+                      border
+                      border-gray-200
+                      dark:border-gray-700
+                      bg-white
+                      dark:bg-gray-800
+                      shadow-xl
+                    "
+                  >
                     <button
                       onClick={() => {
-                        setShowQuoteModal(true);
-                        setRepostDropdownOpen(false);
+                        handleRepost();
+
+                        setRepostDropdownOpen(
+                          false
+                        );
                       }}
-                      className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      className="
+                        w-full
+                        px-4
+                        py-2.5
+                        text-left
+                        text-sm
+                        hover:bg-gray-100
+                        dark:hover:bg-gray-700
+                      "
+                    >
+                      {reposted
+                        ? "Undo Repost"
+                        : "Repost"}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setShowQuoteModal(
+                          true
+                        );
+
+                        setRepostDropdownOpen(
+                          false
+                        );
+                      }}
+                      className="
+                        w-full
+                        px-4
+                        py-2.5
+                        text-left
+                        text-sm
+                        hover:bg-gray-100
+                        dark:hover:bg-gray-700
+                      "
                     >
                       Quote
                     </button>
+
                     <Link
                       href={`/post/${post.id}/reposts`}
-                      className="block w-full text-left px-4 py-2 text-xs text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition border-t border-gray-100 dark:border-gray-700"
+                      className="
+                        block
+                        px-4
+                        py-2.5
+                        text-xs
+                        text-gray-400
+                        hover:bg-gray-100
+                        dark:hover:bg-gray-700
+                        border-t
+                        border-gray-100
+                        dark:border-gray-700
+                      "
                     >
-                      {formatCount(repostsCount)} reposts
+                      {formatCount(
+                        repostsCount
+                      )}{" "}
+                      reposts
                     </Link>
+
                     <Link
                       href={`/post/${post.id}/quotes`}
-                      className="block w-full text-left px-4 py-2 text-xs text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      className="
+                        block
+                        px-4
+                        py-2.5
+                        text-xs
+                        text-gray-400
+                        hover:bg-gray-100
+                        dark:hover:bg-gray-700
+                      "
                     >
-                      {formatCount(post._count?.quotedBy || 0)} quotes
+                      {formatCount(
+                        post._count
+                          ?.quotedBy ||
+                          0
+                      )}{" "}
+                      quotes
                     </Link>
                   </div>
                 )}
               </div>
 
+              {/* Like */}
               <button
-                onClick={handleLike}
-                className={`group flex items-center gap-1 text-sm ${liked ? "text-red-500" : "text-gray-500 dark:text-gray-400"} transition`}
+                onClick={
+                  handleLike
+                }
+                className={`
+                  group
+                  flex
+                  items-center
+                  gap-1
+                  transition
+                  ${
+                    liked
+                      ? "text-red-500"
+                      : "text-gray-500 dark:text-gray-400 hover:text-red-500"
+                  }
+                `}
               >
-                <span className="p-2 rounded-full transition group-hover:bg-red-50 dark:group-hover:bg-red-900/20 group-hover:text-red-500">
-                  <Heart className={`w-[18px] h-[18px] ${liked ? "fill-red-500" : ""}`} />
+                <span
+                  className="
+                    p-2
+                    rounded-full
+                    group-hover:bg-red-500/10
+                    transition
+                  "
+                >
+                  <Heart
+                    className={`
+                      w-[19px]
+                      h-[19px]
+                      transition-transform
+                      ${
+                        liked
+                          ? "fill-current scale-110"
+                          : ""
+                      }
+                    `}
+                  />
                 </span>
-                <span className="group-hover:text-red-500 transition -ml-1 whitespace-nowrap">{formatCount(likesCount)}</span>
+
+                <span className="text-xs sm:text-sm">
+                  {formatCount(
+                    likesCount
+                  )}
+                </span>
               </button>
 
-              <span className="flex items-center gap-1 text-sm text-gray-400 dark:text-gray-500 whitespace-nowrap" title={`${viewsCount.toLocaleString()} views`}>
+              {/* Views */}
+              <div
+                className="
+                  flex
+                  items-center
+                  gap-1
+                  text-gray-400
+                  dark:text-gray-500
+                "
+                title={`${viewsCount.toLocaleString()} views`}
+              >
                 <span className="p-2">
                   <BarChart3 className="w-[18px] h-[18px]" />
                 </span>
-                <span className="-ml-1 whitespace-nowrap">{formatCount(viewsCount)}</span>
-              </span>
 
-              <div className="flex items-center">
-                <button
-                  onClick={handleBookmark}
-                  disabled={bookmarkLoading}
-                  className={`group p-2 rounded-full transition hover:bg-blue-50 dark:hover:bg-blue-900/20 ${bookmarked ? "text-blue-500" : "text-gray-400 dark:text-gray-500 hover:text-blue-500"}`}
-                  title={bookmarked ? "Remove bookmark" : "Bookmark"}
-                >
-                  <Bookmark className={`w-[18px] h-[18px] ${bookmarked ? "fill-current" : ""}`} />
-                </button>
-
-                <button
-                  onClick={handleShare}
-                  className="p-2 rounded-full transition text-gray-400 dark:text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-500"
-                >
-                  <Share2 className="w-[18px] h-[18px]" />
-                </button>
+                <span className="text-xs sm:text-sm">
+                  {formatCount(
+                    viewsCount
+                  )}
+                </span>
               </div>
 
-              {/* ─── Comments disabled badge ───────────────────────────── */}
-              {!commentsEnabled && (
-                <span className="text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
-                  💬 Comments off
-                </span>
-              )}
+              {/* Bookmark */}
+              <button
+                onClick={
+                  handleBookmark
+                }
+                disabled={
+                  bookmarkLoading
+                }
+                className={`
+                  p-2
+                  rounded-full
+                  transition
+                  ${
+                    bookmarked
+                      ? "text-blue-500 bg-blue-500/10"
+                      : "text-gray-400 dark:text-gray-500 hover:text-blue-500 hover:bg-blue-500/10"
+                  }
+                `}
+                aria-label="Bookmark"
+              >
+                <Bookmark
+                  className="w-[19px] h-[19px]"
+                  fill={
+                    bookmarked
+                      ? "currentColor"
+                      : "none"
+                  }
+                />
+              </button>
+
+              {/* Share */}
+              <button
+                onClick={
+                  handleShare
+                }
+                className="
+                  p-2
+                  rounded-full
+                  text-gray-400
+                  dark:text-gray-500
+                  hover:text-blue-500
+                  hover:bg-blue-500/10
+                  transition
+                "
+                aria-label="Share"
+              >
+                <Share2 className="w-[19px] h-[19px]" />
+              </button>
             </div>
 
-            {/* ─── REACTIONS ────────────────────────────────────────── */}
-            {!reactionsLoading && (
-              <div className="flex items-center gap-2 mt-2 flex-wrap">
-                {Object.entries(reactions)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([emoji, count]) => (
-                    <button
-                      key={emoji}
-                      onClick={() => handleReaction(emoji)}
-                      className={`text-sm px-2 py-1 rounded-full border transition ${
-                        userReaction === emoji
-                          ? "bg-zrp-red/10 border-zrp-red text-zrp-red"
-                          : "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
-                      }`}
-                    >
-                      {emoji} <span className="ml-1 text-xs">{count}</span>
-                    </button>
-                  ))}
-                <button
-                  onClick={() => setShowEmojiPicker(true)}
-                  className="text-sm px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+            {/* ─────────────────────────────────────────
+                REACTIONS
+            ───────────────────────────────────────── */}
+
+            {!reactionsLoading &&
+              Object.keys(
+                reactions
+              ).length > 0 && (
+                <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
+
+                  {Object.entries(
+                    reactions
+                  )
+                    .sort(
+                      (a, b) =>
+                        b[1] - a[1]
+                    )
+                    .slice(0, 5)
+                    .map(
+                      ([
+                        emoji,
+                        count,
+                      ]) => (
+                        <button
+                          key={
+                            emoji
+                          }
+                          onClick={() =>
+                            handleReaction(
+                              emoji
+                            )
+                          }
+                          className={`
+                            inline-flex
+                            items-center
+                            gap-1
+                            px-2.5
+                            py-1
+                            rounded-full
+                            border
+                            text-xs
+                            transition
+                            ${
+                              userReaction ===
+                              emoji
+                                ? "bg-zrp-red/10 border-zrp-red/40 text-zrp-red"
+                                : "bg-gray-50 dark:bg-gray-800/70 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-zrp-red/40"
+                            }
+                          `}
+                        >
+                          <span className="text-sm">
+                            {
+                              emoji
+                            }
+                          </span>
+
+                          <span>
+                            {formatCount(
+                              count
+                            )}
+                          </span>
+                        </button>
+                      )
+                    )}
+
+                  <button
+                    onClick={() =>
+                      setShowEmojiPicker(
+                        true
+                      )
+                    }
+                    className="
+                      w-7
+                      h-7
+                      rounded-full
+                      border
+                      border-gray-200
+                      dark:border-gray-700
+                      flex
+                      items-center
+                      justify-center
+                      text-gray-400
+                      hover:text-zrp-red
+                      hover:border-zrp-red
+                      transition
+                    "
+                    aria-label="Add reaction"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+            {/* ─────────────────────────────────────────
+                COMMENTS OFF
+            ───────────────────────────────────────── */}
+
+            {!commentsEnabled && (
+              <div className="mt-2">
+                <span
+                  className="
+                    inline-flex
+                    items-center
+                    gap-1
+                    text-xs
+                    text-gray-400
+                    dark:text-gray-500
+                    bg-gray-100
+                    dark:bg-gray-800
+                    px-2.5
+                    py-1
+                    rounded-full
+                  "
                 >
-                  <Plus className="w-4 h-4" />
-                </button>
+                  <MessageCircle className="w-3 h-3" />
+                  Comments off
+                </span>
               </div>
             )}
 
-            {/* ─── Inline comments ───────────────────────────────────── */}
-            {commentsEnabled && showInlineComments && showComments && <Comments postId={post.id} onCommentAdded={handleCommentCountChange} />}
+            {/* ─────────────────────────────────────────
+                INLINE COMMENTS
+            ───────────────────────────────────────── */}
+
+            {commentsEnabled &&
+              showInlineComments &&
+              showComments && (
+                <div className="mt-3">
+                  <Comments
+                    postId={post.id}
+                    onCommentAdded={
+                      handleCommentCountChange
+                    }
+                  />
+                </div>
+              )}
           </div>
         </div>
-      </div>
+      </article>
 
-      <EditPostModal post={post} isOpen={showEditModal} onClose={() => setShowEditModal(false)} onUpdate={onUpdate} />
+      {/* ─────────────────────────────────────────────────────
+          EDIT
+      ───────────────────────────────────────────────────── */}
+
+      <EditPostModal
+        post={post}
+        isOpen={showEditModal}
+        onClose={() =>
+          setShowEditModal(false)
+        }
+        onUpdate={onUpdate}
+      />
+
+      {/* ─────────────────────────────────────────────────────
+          DELETE CONFIRMATION
+      ───────────────────────────────────────────────────── */}
 
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-xl max-w-sm w-full p-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Delete Post?</h2>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">This action cannot be undone.</p>
+        <div
+          className="
+            fixed
+            inset-0
+            bg-black/60
+            backdrop-blur-sm
+            flex
+            items-center
+            justify-center
+            z-[999]
+            px-4
+          "
+        >
+          <div
+            className="
+              bg-white
+              dark:bg-zrp-deepBlack
+              rounded-2xl
+              shadow-2xl
+              max-w-sm
+              w-full
+              p-6
+              border
+              border-gray-200
+              dark:border-gray-800
+            "
+          >
+            <h2
+              className="
+                text-xl
+                font-bold
+                text-gray-900
+                dark:text-white
+                mb-2
+              "
+            >
+              Delete Post?
+            </h2>
+
+            <p
+              className="
+                text-gray-600
+                dark:text-gray-400
+                text-sm
+                mb-6
+              "
+            >
+              This action cannot be
+              undone.
+            </p>
+
             <div className="flex gap-3 justify-end">
-              <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition">Cancel</button>
-              <button onClick={handleDelete} disabled={deleting} className="bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
-                {deleting ? "Deleting..." : "Delete"}
+              <button
+                onClick={() =>
+                  setShowDeleteConfirm(
+                    false
+                  )
+                }
+                className="
+                  px-4
+                  py-2
+                  border
+                  border-gray-300
+                  dark:border-gray-600
+                  rounded-full
+                  text-sm
+                  font-medium
+                  hover:bg-gray-50
+                  dark:hover:bg-gray-800
+                  transition
+                "
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={
+                  handleDelete
+                }
+                disabled={deleting}
+                className="
+                  bg-red-600
+                  text-white
+                  px-4
+                  py-2
+                  rounded-full
+                  text-sm
+                  font-medium
+                  hover:bg-red-700
+                  disabled:opacity-50
+                  disabled:cursor-not-allowed
+                  transition
+                "
+              >
+                {deleting
+                  ? "Deleting..."
+                  : "Delete"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <ReportModal isOpen={showReportModal} onClose={() => setShowReportModal(false)} onSubmit={handleReport} />
+      {/* ─────────────────────────────────────────────────────
+          REPORT MODAL
+      ───────────────────────────────────────────────────── */}
 
-      {/* ─── Image lightbox ──────────────────────────────────────────── */}
+      <ReportModal
+        isOpen={
+          showReportModal
+        }
+        onClose={() =>
+          setShowReportModal(
+            false
+          )
+        }
+        onSubmit={
+          handleReport
+        }
+      />
+
+      {/* ─────────────────────────────────────────────────────
+          IMAGE LIGHTBOX
+      ───────────────────────────────────────────────────── */}
+
       {lightboxImage && (
         <div
-          className="fixed inset-0 bg-black/90 flex items-center justify-center z-[999] p-4"
-          onClick={() => setLightboxImage(null)}
+          className="
+            fixed
+            inset-0
+            bg-black/95
+            flex
+            items-center
+            justify-center
+            z-[999]
+            p-4
+          "
+          onClick={() =>
+            setLightboxImage(
+              null
+            )
+          }
         >
-          <div className="relative max-w-3xl w-full" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="
+              relative
+              max-w-5xl
+              w-full
+              flex
+              items-center
+              justify-center
+            "
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+          >
             <img
-              src={lightboxImage}
+              src={
+                lightboxImage
+              }
               alt="Full size"
-              className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
+              className="
+                max-w-full
+                max-h-[90vh]
+                object-contain
+                rounded-xl
+              "
             />
+
             <button
-              onClick={() => setLightboxImage(null)}
-              className="absolute top-2 right-2 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition"
+              onClick={() =>
+                setLightboxImage(
+                  null
+                )
+              }
+              className="
+                absolute
+                top-3
+                right-3
+                text-white
+                bg-black/60
+                backdrop-blur-sm
+                rounded-full
+                p-2.5
+                hover:bg-black/80
+                transition
+              "
+              aria-label="Close image"
             >
               <X className="w-6 h-6" />
             </button>
@@ -1129,33 +3386,131 @@ export default function PostCard({
         </div>
       )}
 
+      {/* ─────────────────────────────────────────────────────
+          EMOJI PICKER
+      ───────────────────────────────────────────────────── */}
+
       {showEmojiPicker && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center bg-black/40" onClick={() => setShowEmojiPicker(false)}>
-          <div className="w-full sm:w-auto max-h-[70vh] sm:max-h-[80vh] overflow-hidden rounded-t-2xl sm:rounded-xl bg-white dark:bg-zrp-deepBlack shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-end p-2 border-b border-gray-200 dark:border-gray-700">
-              <button type="button" onClick={() => setShowEmojiPicker(false)} className="p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">
+        <div
+          className="
+            fixed
+            inset-0
+            z-[999]
+            flex
+            items-end
+            sm:items-center
+            sm:justify-center
+            bg-black/50
+            backdrop-blur-sm
+          "
+          onClick={() =>
+            setShowEmojiPicker(
+              false
+            )
+          }
+        >
+          <div
+            className="
+              w-full
+              sm:w-auto
+              max-h-[75vh]
+              overflow-hidden
+              rounded-t-2xl
+              sm:rounded-2xl
+              bg-white
+              dark:bg-zrp-deepBlack
+              shadow-2xl
+            "
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+          >
+            <div
+              className="
+                flex
+                items-center
+                justify-between
+                px-4
+                py-3
+                border-b
+                border-gray-200
+                dark:border-gray-700
+              "
+            >
+              <span
+                className="
+                  font-semibold
+                  text-gray-900
+                  dark:text-white
+                "
+              >
+                Add reaction
+              </span>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowEmojiPicker(
+                    false
+                  )
+                }
+                className="
+                  p-1.5
+                  rounded-full
+                  text-gray-500
+                  hover:bg-gray-100
+                  dark:hover:bg-gray-700
+                "
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <EmojiPicker onEmojiClick={(emoji) => handleReaction(emoji.emoji)} width="100%" height={380} />
+
+            <EmojiPicker
+              onEmojiClick={(
+                emoji
+              ) =>
+                handleReaction(
+                  emoji.emoji
+                )
+              }
+              width="100%"
+              height={380}
+            />
           </div>
         </div>
       )}
 
-      {/* ─── Quote Post Modal ────────────────────────────────────────── */}
+      {/* ─────────────────────────────────────────────────────
+          QUOTE POST
+      ───────────────────────────────────────────────────── */}
+
       {showQuoteModal && (
         <QuotePostModal
           post={post}
-          onClose={() => setShowQuoteModal(false)}
-          onQuotePosted={onUpdate}
+          onClose={() =>
+            setShowQuoteModal(
+              false
+            )
+          }
+          onQuotePosted={
+            onUpdate
+          }
         />
       )}
 
-      {/* ─── Fullscreen swipeable video viewer ─────────────────────────── */}
+      {/* ─────────────────────────────────────────────────────
+          FULLSCREEN VIDEO FEED
+      ───────────────────────────────────────────────────── */}
+
       {showVideoFeed && (
         <VideoFeedViewer
           startPostId={post.id}
-          onClose={() => setShowVideoFeed(false)}
+          onClose={() =>
+            setShowVideoFeed(
+              false
+            )
+          }
         />
       )}
     </>
