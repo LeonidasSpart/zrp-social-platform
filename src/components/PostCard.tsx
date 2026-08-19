@@ -2072,13 +2072,13 @@ export default function PostCard({
                             }`}
                           />
 
-                          {post.imageUrls.length >
+                          {galleryImages.length >
                             4 &&
                             idx === 3 && (
                               <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                                 <span className="text-white text-lg font-bold">
                                   +
-                                  {post.imageUrls.length -
+                                  {galleryImages.length -
                                     4}
                                 </span>
                               </div>
