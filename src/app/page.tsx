@@ -21,7 +21,6 @@ import {
   RefreshCw,
   SlidersHorizontal,
   WifiOff,
-  Radio,
   ChevronDown,
 } from "lucide-react";
 
@@ -467,55 +466,27 @@ export default function HomePage() {
       <div className="max-w-2xl mx-auto px-3 sm:px-4 py-3 sm:py-5">
 
         {/* ==========================================================
-            HOME HEADER
-        ========================================================== */}
+            REFRESH BUTTON
+            ========================================================== */}
 
-        <div className="mb-4">
-
-          <div className="flex items-center justify-between gap-3">
-
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <Radio className="w-4 h-4 text-zrp-red" />
-
-                <span className="text-xs font-semibold uppercase tracking-wider text-zrp-red">
-                  ZRP Social
-                </span>
-              </div>
-
-              <h1 className="mt-1 text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                Home
-              </h1>
-            </div>
-
-            <button
-              type="button"
-              onClick={() =>
-                loadPosts(true)
-              }
-              disabled={refreshing}
-              aria-label="Refresh feed"
-              className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-zrp-red hover:border-zrp-red/40 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50"
-            >
-              <RefreshCw
-                className={`w-5 h-5 ${
-                  refreshing
-                    ? "animate-spin"
-                    : ""
-                }`}
-              />
-            </button>
-
-          </div>
-
-          {/* Feed status */}
-          <div className="mt-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-            <span className="w-2 h-2 rounded-full bg-green-500" />
-            {isOnline
-              ? "Live feed"
-              : "Offline"}
-          </div>
-
+        <div className="flex justify-end mb-3">
+          <button
+            type="button"
+            onClick={() =>
+              loadPosts(true)
+            }
+            disabled={refreshing}
+            aria-label="Refresh feed"
+            className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-zrp-red hover:border-zrp-red/40 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50"
+          >
+            <RefreshCw
+              className={`w-5 h-5 ${
+                refreshing
+                  ? "animate-spin"
+                  : ""
+              }`}
+            />
+          </button>
         </div>
 
         {/* ==========================================================
