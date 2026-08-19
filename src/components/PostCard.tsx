@@ -26,6 +26,7 @@ import {
   Volume2,
   VolumeX,
   MapPin,
+  ExternalLink,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Comments from "./Comments";
@@ -1607,10 +1608,7 @@ export default function PostCard({
                 </div>
               )}
 
-              {/* ─────────────────────────────────────────────────────
-                  RECRUITMENT CARD
-              ───────────────────────────────────────────────────── */}
-
+              {/* RECRUITMENT CARD */}
               {postType ===
                 "RECRUITMENT" &&
                 (post.company ||
@@ -1942,10 +1940,7 @@ export default function PostCard({
               )}
             </div>
 
-            {/* ─────────────────────────────────────────────────────
-                ACTION BAR
-            ───────────────────────────────────────────────────── */}
-
+            {/* ACTION BAR */}
             <div className="flex items-center justify-between mt-3">
 
               {/* COMMENTS */}
@@ -2184,10 +2179,7 @@ export default function PostCard({
               )}
             </div>
 
-            {/* ─────────────────────────────────────────────────────
-                REACTIONS
-            ───────────────────────────────────────────────────── */}
-
+            {/* REACTIONS */}
             {!reactionsLoading && (
               <div className="flex items-center gap-2 mt-2 flex-wrap">
 
