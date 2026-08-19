@@ -10,7 +10,7 @@ function getWebPush() {
       "VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY are not configured"
     );
   }
-  // Safe diagnostics: never log the actual VAPID keys.
+  // Safe diagnostics. Never log the actual VAPID keys.
   console.log("VAPID diagnostics:", {
     publicLength: vapidPublicKey.length,
     privateLength: vapidPrivateKey.length,
@@ -53,7 +53,6 @@ export async function sendPushNotification(
           payload
         );
       } catch (err: any) {
-        // 404/410 means the push subscription is no longer valid.
         if (err?.statusCode === 404 || err?.statusCode === 410) {
           try {
             await prisma.pushSubscription.delete({
@@ -79,22 +78,3 @@ export async function sendPushNotification(
     console.error("Push notification error:", error);
   }
 }
-
-What changed
-
-* Trims accidental whitespace from Railway variables.
-* Adds safe VAPID diagnostics without exposing either key.
-* Treats both 404 and 410 push subscriptions as expired.
-* Keeps your existing VAPID key pair; it does not generate new keys.
-* Keeps the rest of your notification logic unchanged.
-
-After deploying, trigger one push notification and check Railway logs for:
-
-VAPID diagnostics: {
-  publicLength: ...,
-  privateLength: ...,
-  publicDecodedBytes: ...,
-  privateDecodedBytes: ...
-}
-
-Send me those four values only. Do not send the VAPID keys themselves.
