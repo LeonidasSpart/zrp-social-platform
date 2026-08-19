@@ -75,8 +75,11 @@ export default function HomePage() {
   const [isOnline, setIsOnline] = useState(true);
   const [feedMenuOpen, setFeedMenuOpen] = useState(false);
 
-  const cursorRef = useRef<string | null>(null);
-  const observerRef = useRef<HTMLDivElement | null>(null);
+  const cursorRef =
+    useRef<string | null>(null);
+
+  const observerRef =
+    useRef<HTMLDivElement | null>(null);
 
   /*
    * ================================================================
@@ -87,15 +90,32 @@ export default function HomePage() {
   useEffect(() => {
     setIsOnline(navigator.onLine);
 
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+    const handleOnline = () =>
+      setIsOnline(true);
 
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
+    const handleOffline = () =>
+      setIsOnline(false);
+
+    window.addEventListener(
+      "online",
+      handleOnline
+    );
+
+    window.addEventListener(
+      "offline",
+      handleOffline
+    );
 
     return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener(
+        "online",
+        handleOnline
+      );
+
+      window.removeEventListener(
+        "offline",
+        handleOffline
+      );
     };
   }, []);
 
@@ -106,7 +126,9 @@ export default function HomePage() {
    */
 
   const fetchPosts = useCallback(
-    async (cursor?: string | null) => {
+    async (
+      cursor?: string | null
+    ) => {
       const endpoint =
         feedType === "for-you"
           ? "/api/posts/explore"
@@ -121,7 +143,9 @@ export default function HomePage() {
       const res = await fetch(url);
 
       if (!res.ok) {
-        throw new Error("Failed to fetch posts");
+        throw new Error(
+          "Failed to fetch posts"
+        );
       }
 
       return res.json();
@@ -136,7 +160,9 @@ export default function HomePage() {
    */
 
   const loadPosts = useCallback(
-    async (showRefreshAnimation = false) => {
+    async (
+      showRefreshAnimation = false
+    ) => {
       if (showRefreshAnimation) {
         setRefreshing(true);
       } else {
@@ -146,16 +172,20 @@ export default function HomePage() {
       setError(null);
 
       try {
-        const data = await fetchPosts(null);
+        const data =
+          await fetchPosts(null);
 
-        const postsData = data.posts || data;
+        const postsData =
+          data.posts || data;
 
         setPosts(postsData);
 
         cursorRef.current =
           data.nextCursor || null;
 
-        setHasMore(!!data.nextCursor);
+        setHasMore(
+          !!data.nextCursor
+        );
       } catch (err) {
         setError(err as Error);
       } finally {
@@ -175,10 +205,14 @@ export default function HomePage() {
   useEffect(() => {
     fetch("/api/ads/serve")
       .then((res) =>
-        res.ok ? res.json() : { ad: null }
+        res.ok
+          ? res.json()
+          : { ad: null }
       )
       .then((data) => {
-        setAd(data.ad || null);
+        setAd(
+          data.ad || null
+        );
       })
       .catch(() => {
         setAd(null);
@@ -191,48 +225,53 @@ export default function HomePage() {
    * ================================================================
    */
 
-  const loadMore = useCallback(async () => {
-    if (
-      loadingMore ||
-      !hasMore ||
-      loading ||
-      !cursorRef.current
-    ) {
-      return;
-    }
+  const loadMore =
+    useCallback(async () => {
+      if (
+        loadingMore ||
+        !hasMore ||
+        loading ||
+        !cursorRef.current
+      ) {
+        return;
+      }
 
-    setLoadingMore(true);
+      setLoadingMore(true);
 
-    try {
-      const data = await fetchPosts(
-        cursorRef.current
-      );
+      try {
+        const data =
+          await fetchPosts(
+            cursorRef.current
+          );
 
-      const newPosts = data.posts || data;
+        const newPosts =
+          data.posts || data;
 
-      setPosts((prev) => [
-        ...prev,
-        ...newPosts,
-      ]);
+        setPosts((prev) => [
+          ...prev,
+          ...newPosts,
+        ]);
 
-      cursorRef.current =
-        data.nextCursor || null;
+        cursorRef.current =
+          data.nextCursor || null;
 
-      setHasMore(!!data.nextCursor);
-    } catch (err) {
-      console.error(
-        "Error loading more posts:",
-        err
-      );
-    } finally {
-      setLoadingMore(false);
-    }
-  }, [
-    fetchPosts,
-    hasMore,
-    loading,
-    loadingMore,
-  ]);
+        setHasMore(
+          !!data.nextCursor
+        );
+      } catch (err) {
+        console.error(
+          "Error loading more posts:",
+          err
+        );
+      } finally {
+        setLoadingMore(false);
+      }
+    }, [
+      fetchPosts,
+      hasMore,
+      loading,
+      loadingMore,
+    ]);
 
   /*
    * ================================================================
@@ -253,6 +292,7 @@ export default function HomePage() {
     setFeedType(tab);
 
     cursorRef.current = null;
+
     setHasMore(true);
     setPosts([]);
     setError(null);
@@ -264,7 +304,8 @@ export default function HomePage() {
    * ================================================================
    */
 
-  const userId = session?.user?.id;
+  const userId =
+    session?.user?.id;
 
   useEffect(() => {
     if (userId) {
@@ -291,7 +332,8 @@ export default function HomePage() {
       new IntersectionObserver(
         (entries) => {
           if (
-            entries[0].isIntersecting &&
+            entries[0]
+              .isIntersecting &&
             hasMore &&
             !loading &&
             !loadingMore
@@ -305,7 +347,9 @@ export default function HomePage() {
         }
       );
 
-    observer.observe(observerRef.current);
+    observer.observe(
+      observerRef.current
+    );
 
     return () => {
       observer.disconnect();
@@ -338,21 +382,25 @@ export default function HomePage() {
    * ================================================================
    */
 
-  const handleUpdate = useCallback(
-    (deletedPostId?: string) => {
-      if (deletedPostId) {
-        setPosts((prev) =>
-          prev.filter(
-            (post) =>
-              post.id !== deletedPostId
-          )
-        );
-      } else {
-        loadPosts(true);
-      }
-    },
-    [loadPosts]
-  );
+  const handleUpdate =
+    useCallback(
+      (
+        deletedPostId?: string
+      ) => {
+        if (deletedPostId) {
+          setPosts((prev) =>
+            prev.filter(
+              (post) =>
+                post.id !==
+                deletedPostId
+            )
+          );
+        } else {
+          loadPosts(true);
+        }
+      },
+      [loadPosts]
+    );
 
   /*
    * ================================================================
@@ -361,7 +409,10 @@ export default function HomePage() {
    */
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (
+      status ===
+      "unauthenticated"
+    ) {
       router.push("/login");
     }
   }, [status, router]);
@@ -380,7 +431,9 @@ export default function HomePage() {
             <WifiOff className="w-8 h-8 mx-auto mb-3 text-yellow-600 dark:text-yellow-400" />
 
             <p className="text-yellow-700 dark:text-yellow-400 font-semibold">
-              {t("feed.offline")}
+              {t(
+                "feed.offline"
+              )}
             </p>
 
             <button
@@ -389,7 +442,9 @@ export default function HomePage() {
               }
               className="mt-4 px-4 py-2 rounded-full bg-yellow-100 dark:bg-yellow-800 text-yellow-700 dark:text-yellow-300 text-sm font-semibold"
             >
-              {t("feed.tryAgain")}
+              {t(
+                "feed.tryAgain"
+              )}
             </button>
           </div>
         </div>
@@ -400,8 +455,11 @@ export default function HomePage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-zrp-red border-t-transparent rounded-full animate-spin" />
+
           <span className="text-sm text-gray-500">
-            {t("action.loading")}
+            {t(
+              "action.loading"
+            )}
           </span>
         </div>
       </div>
@@ -414,11 +472,16 @@ export default function HomePage() {
    * ================================================================
    */
 
-  if (status === "unauthenticated") {
+  if (
+    status ===
+    "unauthenticated"
+  ) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-gray-500">
-          {t("action.loading")}
+          {t(
+            "action.loading"
+          )}
         </div>
       </div>
     );
@@ -436,7 +499,8 @@ export default function HomePage() {
         <div className="rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-6 text-center">
           <p className="text-red-700 dark:text-red-400 font-semibold">
             {t("feed.error", {
-              message: error.message,
+              message:
+                error.message,
             })}
           </p>
 
@@ -447,7 +511,10 @@ export default function HomePage() {
             className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-300 text-sm font-semibold"
           >
             <RefreshCw className="w-4 h-4" />
-            {t("feed.retry")}
+
+            {t(
+              "feed.retry"
+            )}
           </button>
         </div>
       </div>
@@ -463,13 +530,13 @@ export default function HomePage() {
   return (
     <main className="w-full">
 
-      <div className="max-w-2xl mx-auto px-3 sm:px-4 py-3 sm:py-5">
+      <div className="max-w-2xl mx-auto px-3 sm:px-4 pt-0 pb-3 sm:pb-5">
 
         {/* ==========================================================
             REFRESH BUTTON
-            ========================================================== */}
+        ========================================================== */}
 
-        <div className="flex justify-end mb-3">
+        <div className="flex justify-end mb-1">
           <button
             type="button"
             onClick={() =>
@@ -493,7 +560,7 @@ export default function HomePage() {
             STORIES
         ========================================================== */}
 
-        <section className="mb-4">
+        <section className="mb-2 -mt-1">
           <StoriesBar />
         </section>
 
@@ -515,13 +582,14 @@ export default function HomePage() {
             FEED CONTROLS
         ========================================================== */}
 
-        <div className="sticky top-[64px] z-20 mt-4 bg-white/95 dark:bg-zrp-deepBlack/95 backdrop-blur-md">
+        <div className="sticky top-[64px] z-20 mt-3 bg-white/95 dark:bg-zrp-deepBlack/95 backdrop-blur-md">
 
           <div className="relative">
 
             <div className="flex items-center border-b border-gray-200 dark:border-gray-800">
 
               {/* For You */}
+
               <button
                 type="button"
                 onClick={() =>
@@ -551,6 +619,7 @@ export default function HomePage() {
               </button>
 
               {/* Following */}
+
               <button
                 type="button"
                 onClick={() =>
@@ -580,6 +649,7 @@ export default function HomePage() {
               </button>
 
               {/* Feed settings */}
+
               <button
                 type="button"
                 onClick={() =>
@@ -636,7 +706,9 @@ export default function HomePage() {
 
                   {feedType ===
                     "for-you" && (
-                    <span>✓</span>
+                    <span>
+                      ✓
+                    </span>
                   )}
                 </button>
 
@@ -664,7 +736,9 @@ export default function HomePage() {
 
                   {feedType ===
                     "following" && (
-                    <span>✓</span>
+                    <span>
+                      ✓
+                    </span>
                   )}
                 </button>
 
@@ -676,6 +750,7 @@ export default function HomePage() {
                     setFeedMenuOpen(
                       false
                     );
+
                     loadPosts(true);
                   }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
@@ -734,12 +809,14 @@ export default function HomePage() {
             <div className="py-16 px-6 text-center">
 
               <div className="mx-auto w-16 h-16 rounded-full bg-zrp-red/10 flex items-center justify-center">
+
                 {feedType ===
                 "following" ? (
                   <Users className="w-7 h-7 text-zrp-red" />
                 ) : (
                   <Sparkles className="w-7 h-7 text-zrp-red" />
                 )}
+
               </div>
 
               <h2 className="mt-5 text-lg font-bold text-gray-900 dark:text-white">
@@ -767,6 +844,7 @@ export default function HomePage() {
                 className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-zrp-red text-white text-sm font-semibold hover:bg-zrp-darkRed transition"
               >
                 <RefreshCw className="w-4 h-4" />
+
                 Refresh
               </button>
 
@@ -803,11 +881,11 @@ export default function HomePage() {
                         4 &&
                       posts.length >
                         5 && (
-                        <AdCard
-                          key={`ad-${ad.campaignId}`}
-                          ad={ad}
-                        />
-                      )}
+                      <AdCard
+                        key={`ad-${ad.campaignId}`}
+                        ad={ad}
+                      />
+                    )}
 
                   </Fragment>
                 )
@@ -827,11 +905,13 @@ export default function HomePage() {
 
                   {loadingMore ? (
                     <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500">
+
                       <div className="w-4 h-4 border-2 border-zrp-red border-t-transparent rounded-full animate-spin" />
 
                       {t(
                         "feed.loadingMore"
                       )}
+
                     </div>
                   ) : (
                     <button
@@ -857,24 +937,26 @@ export default function HomePage() {
               {!hasMore &&
                 posts.length >
                   0 && (
-                  <div className="py-10 text-center">
+                <div className="py-10 text-center">
 
-                    <div className="mx-auto w-8 h-8 rounded-full bg-zrp-red/10 flex items-center justify-center">
-                      <Sparkles className="w-4 h-4 text-zrp-red" />
-                    </div>
+                  <div className="mx-auto w-8 h-8 rounded-full bg-zrp-red/10 flex items-center justify-center">
 
-                    <p className="mt-3 text-sm font-medium text-gray-500 dark:text-gray-400">
-                      {t(
-                        "feed.endOfFeed"
-                      )}
-                    </p>
-
-                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                      You&apos;re all caught up.
-                    </p>
+                    <Sparkles className="w-4 h-4 text-zrp-red" />
 
                   </div>
-                )}
+
+                  <p className="mt-3 text-sm font-medium text-gray-500 dark:text-gray-400">
+                    {t(
+                      "feed.endOfFeed"
+                    )}
+                  </p>
+
+                  <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                    You&apos;re all caught up.
+                  </p>
+
+                </div>
+              )}
 
             </>
           )}
