@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -14,7 +14,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { SUPPORTED_LANGUAGES } from "@/lib/translations";
 import VerifiedBadge from "@/components/VerifiedBadge";
-import { useEffect } from "react";
 
 type NavItem = {
   href: string;
@@ -38,52 +37,77 @@ export default function Sidebar() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
+
     const fetchUnread = async () => {
       try {
         const res = await fetch("/api/notifications/unread");
+
         if (res.ok) {
           const data = await res.json();
           setUnreadCount(data.count);
         }
       } catch {}
     };
+
     fetchUnread();
+
     const interval = setInterval(fetchUnread, 30000);
+
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
-  // Same pattern as the notifications fetch above, just for the Messages
-  // nav item's own badge - this file already fetches its own unread
-  // counts independently rather than through the shared context, so
-  // matching that existing convention here rather than introducing a
-  // second, inconsistent data-fetching approach in the same component.
   useEffect(() => {
     if (!isAuthenticated) return;
+
     const fetchUnreadMessages = async () => {
       try {
         const res = await fetch("/api/messages/unread");
+
         if (res.ok) {
           const data = await res.json();
           setUnreadMessageCount(data.count);
         }
       } catch {}
     };
+
     fetchUnreadMessages();
+
     const interval = setInterval(fetchUnreadMessages, 30000);
+
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
-  if (!isAuthenticated || pathname?.startsWith("/onboarding") || pathname?.startsWith("/shorts")) return null;
+  if (
+    !isAuthenticated ||
+    pathname?.startsWith("/onboarding") ||
+    pathname?.startsWith("/shorts")
+  ) {
+    return null;
+  }
 
   const navItems: NavItem[] = [
     { href: "/", icon: Home, label: t("nav.home") },
     { href: "/shorts", icon: Film, label: "Shorts" },
     { href: "/explore", icon: Compass, label: t("nav.explore") },
     { href: "/search", icon: Search, label: t("nav.search") },
-    { href: "/messages", icon: MessageSquare, label: t("nav.messages"), badge: unreadMessageCount },
-    { href: "/notifications", icon: Bell, label: t("nav.notifications"), badge: unreadCount },
+    {
+      href: "/messages",
+      icon: MessageSquare,
+      label: t("nav.messages"),
+      badge: unreadMessageCount,
+    },
+    {
+      href: "/notifications",
+      icon: Bell,
+      label: t("nav.notifications"),
+      badge: unreadCount,
+    },
     { href: "/bookmarks", icon: Bookmark, label: t("nav.bookmarks") },
-    { href: `/profile/${session?.user?.username}`, icon: User, label: t("nav.profile") },
+    {
+      href: `/profile/${session?.user?.username}`,
+      icon: User,
+      label: t("nav.profile"),
+    },
   ];
 
   const isActive = (href: string) => {
@@ -95,19 +119,48 @@ export default function Sidebar() {
     await signOut({ callbackUrl: "/login" });
   };
 
-  const currentLangLabel = SUPPORTED_LANGUAGES.find((l) => l.code === language)?.code.toUpperCase() || "EN";
+  const currentLangLabel =
+    SUPPORTED_LANGUAGES.find((l) => l.code === language)?.code.toUpperCase() ||
+    "EN";
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 flex-shrink-0 h-screen sticky top-0 px-2 py-4 border-r border-gray-200 dark:border-gray-800 overflow-y-auto scrollbar-hide">
+    <aside
+      className="
+        hidden lg:flex
+        flex-col
+        w-64
+        flex-shrink-0
+        h-[100dvh]
+        sticky
+        top-0
+        px-2
+        py-4
+        border-r
+        border-gray-200
+        dark:border-gray-800
+        overflow-y-auto
+        scrollbar-hide
+      "
+    >
       {/* Logo */}
-      <Link href="/" className="flex items-center gap-2 px-3 py-2 mb-2">
-        <Image src="/logo.png" alt="ZRP" width={44} height={44} className="w-11 h-11 object-contain" />
+      <Link
+        href="/"
+        className="flex items-center gap-2 px-3 py-2 mb-2"
+      >
+        <Image
+          src="/logo.png"
+          alt="ZRP"
+          width={44}
+          height={44}
+          className="w-11 h-11 object-contain"
+        />
       </Link>
 
       {/* Nav items */}
       <nav className="flex-1 flex flex-col gap-1">
         {navItems.map((item) => {
           const active = isActive(item.href);
+
           return (
             <Link
               key={item.href}
@@ -118,8 +171,14 @@ export default function Sidebar() {
                   : "font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
               }`}
             >
-              <item.icon className={`w-6 h-6 ${active ? "text-zrp-red" : ""}`} />
+              <item.icon
+                className={`w-6 h-6 ${
+                  active ? "text-zrp-red" : ""
+                }`}
+              />
+
               <span>{item.label}</span>
+
               {item.badge !== undefined && item.badge > 0 && (
                 <span className="absolute left-7 top-1 bg-zrp-red text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
                   {item.badge > 9 ? "9+" : item.badge}
@@ -129,10 +188,10 @@ export default function Sidebar() {
           );
         })}
 
-        {/* Moderators (role: "MODERATOR") were previously invisible to
-            this check too - same fix as Header.tsx, so the desktop nav
-            now shows this link to staff, not just full admins. */}
-        {(session?.user?.isAdmin || session?.user?.role === "ADMIN" || session?.user?.role === "MODERATOR") && (
+        {/* Moderators / Admin */}
+        {(session?.user?.isAdmin ||
+          session?.user?.role === "ADMIN" ||
+          session?.user?.role === "MODERATOR") && (
           <Link
             href="/admin"
             className={`flex items-center gap-4 px-3 py-2.5 rounded-full text-lg transition ${
@@ -141,36 +200,62 @@ export default function Sidebar() {
                 : "font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
             }`}
           >
-            <LayoutDashboard className={`w-6 h-6 ${isActive("/admin") ? "text-zrp-red" : ""}`} />
+            <LayoutDashboard
+              className={`w-6 h-6 ${
+                isActive("/admin") ? "text-zrp-red" : ""
+              }`}
+            />
+
             <span>{t("nav.admin")}</span>
           </Link>
         )}
 
-        {/* ─── Quick theme toggle ──────────────────────────────────── */}
+        {/* Theme toggle */}
         <button
+          type="button"
           onClick={toggleTheme}
           className="w-full flex items-center gap-4 px-3 py-2.5 rounded-full text-lg font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
         >
-          {theme === "light" ? <Moon className="w-6 h-6" /> : <Sun className="w-6 h-6" />}
-          <span>{theme === "light" ? t("nav.darkMode") : t("nav.lightMode")}</span>
+          {theme === "light" ? (
+            <Moon className="w-6 h-6" />
+          ) : (
+            <Sun className="w-6 h-6" />
+          )}
+
+          <span>
+            {theme === "light"
+              ? t("nav.darkMode")
+              : t("nav.lightMode")}
+          </span>
         </button>
 
-        {/* ─── Language selector ──────────────────────────────────── */}
+        {/* Language selector */}
         <div className="relative">
           <button
+            type="button"
             onClick={() => setLangMenuOpen(!langMenuOpen)}
             className="w-full flex items-center gap-4 px-3 py-2.5 rounded-full text-lg font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
           >
             <Globe className="w-6 h-6" />
+
             <span>{t("nav.language")}</span>
-            <span className="ml-auto text-sm text-gray-400">{currentLangLabel}</span>
+
+            <span className="ml-auto text-sm text-gray-400">
+              {currentLangLabel}
+            </span>
           </button>
+
           {langMenuOpen && (
             <>
-              <div className="fixed inset-0 z-40" onClick={() => setLangMenuOpen(false)} />
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setLangMenuOpen(false)}
+              />
+
               <div className="absolute left-0 bottom-full mb-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
                 {SUPPORTED_LANGUAGES.map((lang) => (
                   <button
+                    type="button"
                     key={lang.code}
                     onClick={() => {
                       setLanguage(lang.code);
@@ -190,18 +275,25 @@ export default function Sidebar() {
           )}
         </div>
 
-        {/* ─── More menu (Settings, Team, API Keys) ──────────────── */}
+        {/* More menu */}
         <div className="relative">
           <button
+            type="button"
             onClick={() => setMoreMenuOpen(!moreMenuOpen)}
             className="w-full flex items-center gap-4 px-3 py-2.5 rounded-full text-lg font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
           >
             <MoreHorizontal className="w-6 h-6" />
+
             <span>More</span>
           </button>
+
           {moreMenuOpen && (
             <>
-              <div className="fixed inset-0 z-40" onClick={() => setMoreMenuOpen(false)} />
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setMoreMenuOpen(false)}
+              />
+
               <div className="absolute left-0 bottom-full mb-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
                 <Link
                   href="/settings"
@@ -211,6 +303,7 @@ export default function Sidebar() {
                   <Settings className="w-4 h-4" />
                   <span>Settings</span>
                 </Link>
+
                 {features?.teamManagement && (
                   <Link
                     href="/settings/team"
@@ -221,6 +314,7 @@ export default function Sidebar() {
                     <span>Team Management</span>
                   </Link>
                 )}
+
                 {features?.apiAccess && (
                   <Link
                     href="/settings/api-keys"
@@ -231,8 +325,11 @@ export default function Sidebar() {
                     <span>API Keys</span>
                   </Link>
                 )}
+
                 <hr className="my-1 border-gray-200 dark:border-gray-700" />
+
                 <button
+                  type="button"
                   onClick={handleLogout}
                   className="flex items-center gap-3 w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 transition text-red-600 dark:text-red-400"
                 >
@@ -262,16 +359,28 @@ export default function Sidebar() {
         >
           <div className="w-9 h-9 rounded-full bg-zrp-red/10 flex items-center justify-center text-zrp-red font-semibold flex-shrink-0 overflow-hidden">
             {session.user.avatarUrl ? (
-              <img src={session.user.avatarUrl} alt="" className="w-full h-full object-cover" />
+              <img
+                src={session.user.avatarUrl}
+                alt=""
+                className="w-full h-full object-cover"
+              />
             ) : (
               session.user.name?.[0]?.toUpperCase() || "?"
             )}
           </div>
+
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-1 min-w-0">
-              <span className="truncate">{session.user.name || session.user.username}</span>
-              <VerifiedBadge badgeType={session.user.badgeType} className="flex-shrink-0" />
+              <span className="truncate">
+                {session.user.name || session.user.username}
+              </span>
+
+              <VerifiedBadge
+                badgeType={session.user.badgeType}
+                className="flex-shrink-0"
+              />
             </p>
+
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
               @{session.user.username}
             </p>
