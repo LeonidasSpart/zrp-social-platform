@@ -5,10 +5,8 @@ import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
 import { sendPushNotification } from "@/lib/push-notifications";
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { username: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ username: string }> }) {
+  const params = await props.params;
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

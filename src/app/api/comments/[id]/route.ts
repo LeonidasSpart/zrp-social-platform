@@ -9,10 +9,8 @@ import { deleteUploadThingFiles } from "@/lib/uploadthing";
 export const dynamic = 'force-dynamic';
 
 // ─── UPDATE COMMENT ────────────────────────────────────────────────
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -85,10 +83,8 @@ async function collectCommentImageUrls(commentId: string): Promise<string[]> {
   ];
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

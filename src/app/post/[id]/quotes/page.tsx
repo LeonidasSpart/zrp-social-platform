@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import PostCard from "@/components/PostCard";
@@ -29,7 +29,8 @@ interface Post {
   liked?: boolean;
 }
 
-export default function QuotesPage({ params }: { params: { id: string } }) {
+export default function QuotesPage(props: { params: Promise<{ id: string }> }) {
+  const params = use(props.params);
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t } = useLanguage();

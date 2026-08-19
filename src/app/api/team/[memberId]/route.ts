@@ -4,10 +4,8 @@ import { prisma } from "@/lib/db";
 import { canManageTeam, isTeamAdmin } from "@/lib/permissions";
 
 // ─── PATCH: Update member role ────────────────────────────────────
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { memberId: string } }
-) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ memberId: string }> }) {
+  const params = await props.params;
   try {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     if (!token) {
@@ -113,10 +111,8 @@ export async function PATCH(
 }
 
 // ─── DELETE: Remove a team member ────────────────────────────────
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { memberId: string } }
-) {
+export async function DELETE(req: NextRequest, props: { params: Promise<{ memberId: string }> }) {
+  const params = await props.params;
   try {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     if (!token) {

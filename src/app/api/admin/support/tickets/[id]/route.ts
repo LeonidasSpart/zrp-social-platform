@@ -3,10 +3,8 @@ import { requireAdmin } from '@/lib/admin';
 import { prisma } from '@/lib/db';
 import { notifyTicketResolved, notifyTicketClosed } from '@/lib/notifications';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const adminCheck = await requireAdmin();
     if (!adminCheck.authorized) return adminCheck.response;
@@ -62,10 +60,8 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const adminCheck = await requireAdmin();
     if (!adminCheck.authorized) return adminCheck.response;
@@ -183,10 +179,8 @@ export async function PUT(
 }
 
 // ─── DELETE: Admin can delete any ticket ────────────────────────────
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const adminCheck = await requireAdmin();
     if (!adminCheck.authorized) return adminCheck.response;

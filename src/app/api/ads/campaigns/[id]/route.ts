@@ -6,10 +6,8 @@ import { getToken } from "next-auth/jwt";
 import { prisma } from "@/lib/db";
 
 // ─── GET: full details + stats for one campaign (owner only) ────────
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -47,10 +45,8 @@ export async function GET(
 }
 
 // ─── PUT: pause/resume, or edit budget/dates (owner only) ───────────
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -120,10 +116,8 @@ export async function PUT(
 }
 
 // ─── DELETE: remove a campaign (owner only) ──────────────────────────
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

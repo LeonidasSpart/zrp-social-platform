@@ -85,7 +85,10 @@ export async function POST(req: NextRequest) {
         priority,
         message: message.trim(),
         userAgent: req.headers.get('user-agent') || undefined,
-        ipAddress: req.headers.get('x-forwarded-for') || req.ip || undefined,
+        ipAddress:
+          req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+          req.headers.get('x-real-ip') ||
+          undefined,
         referrer: req.headers.get('referer') || undefined,
       },
       include: {

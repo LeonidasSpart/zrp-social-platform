@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { ArrowLeft, UserCheck, UserPlus, Loader2 } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -17,7 +17,8 @@ interface User {
   isFollowing: boolean;
 }
 
-export default function FollowingPage({ params }: { params: { username: string } }) {
+export default function FollowingPage(props: { params: Promise<{ username: string }> }) {
+  const params = use(props.params);
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t } = useLanguage();

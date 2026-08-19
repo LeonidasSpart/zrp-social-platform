@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, use } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import PostCard from "@/components/PostCard";
@@ -55,7 +55,8 @@ interface Comment {
   bookmarked?: boolean;
 }
 
-export default function PostPage({ params }: { params: { id: string } }) {
+export default function PostPage(props: { params: Promise<{ id: string }> }) {
+  const params = use(props.params);
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t } = useLanguage();

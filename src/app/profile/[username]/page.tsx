@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, use } from "react";
 import Link from "next/link";
 import {
   MapPin,
@@ -295,11 +295,12 @@ const tabIconMap: Record<
   media: ImageIcon,
 };
 
-export default function ProfilePage({
-  params,
-}: {
-  params: { username: string };
-}) {
+export default function ProfilePage(
+  props: {
+    params: Promise<{ username: string }>;
+  }
+) {
+  const params = use(props.params);
   const { data: session, status } = useSession();
 
   const router = useRouter();

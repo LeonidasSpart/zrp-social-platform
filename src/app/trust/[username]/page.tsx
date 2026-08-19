@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -153,11 +153,12 @@ function formatCount(value: number) {
  * ---------------------------------------------------------------
  */
 
-export default function TrustPassportPage({
-  params,
-}: {
-  params: { username: string };
-}) {
+export default function TrustPassportPage(
+  props: {
+    params: Promise<{ username: string }>;
+  }
+) {
+  const params = use(props.params);
   const [data, setData] = useState<TrustData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

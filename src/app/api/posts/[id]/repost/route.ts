@@ -5,10 +5,8 @@ import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 
 // ─── GET: Check if user has reposted ────────────────────────────────
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -33,10 +31,8 @@ export async function GET(
 }
 
 // ─── POST: Toggle repost / unrepost ─────────────────────────────────
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   // Rate limit: 60 repost-toggles per minute - blocks repost-bombing scripts.
   const limit = await rateLimit(req, { limit: 60, window: 60, type: "post-repost" });
   if (!limit.success) return limit.response;

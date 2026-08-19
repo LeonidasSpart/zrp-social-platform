@@ -5,10 +5,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const adminCheck = await requireStaff();
   if (!adminCheck.authorized) return adminCheck.response;
 

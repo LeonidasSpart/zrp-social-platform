@@ -5,10 +5,8 @@ import { prisma } from "@/lib/db";
 import { io } from "@/lib/socket-server"; // ✅ import the socket server instance
 
 // ─── POST – Block a user ────────────────────────────────────────────
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { username: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ username: string }> }) {
+  const params = await props.params;
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -70,10 +68,8 @@ export async function POST(
 }
 
 // ─── DELETE – Unblock a user ────────────────────────────────────────
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { username: string } }
-) {
+export async function DELETE(req: NextRequest, props: { params: Promise<{ username: string }> }) {
+  const params = await props.params;
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

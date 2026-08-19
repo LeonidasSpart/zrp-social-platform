@@ -6,10 +6,8 @@ import { createNotification } from "@/lib/notifications";
 import { sendPushNotification } from "@/lib/push-notifications"; // ← Added
 import { rateLimit } from "@/lib/rate-limit";
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   // Rate limit: 120 like-toggles per minute - generous for fast double-tap
   // scrolling/liking, still blocks scripted like-bombing.
   const limit = await rateLimit(req, { limit: 120, window: 60, type: "post-like" });

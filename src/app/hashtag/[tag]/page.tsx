@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import PostCard from "@/components/PostCard";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -30,7 +30,8 @@ interface Post {
   liked?: boolean;
 }
 
-export default function HashtagPage({ params }: { params: { tag: string } }) {
+export default function HashtagPage(props: { params: Promise<{ tag: string }> }) {
+  const params = use(props.params);
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t } = useLanguage();

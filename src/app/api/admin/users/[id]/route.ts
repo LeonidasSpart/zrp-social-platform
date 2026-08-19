@@ -7,10 +7,8 @@ import { deleteUploadThingFiles } from "@/lib/uploadthing";
 const VALID_BADGE_TYPES = ["verified", "organization", "government", "team", null];
 const VALID_ROLES = ["USER", "MODERATOR", "ADMIN"];
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const adminCheck = await requireAdmin();
   if (!adminCheck.authorized) return adminCheck.response;
 
@@ -57,10 +55,8 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const adminCheck = await requireAdmin();
   if (!adminCheck.authorized) return adminCheck.response;
 

@@ -4,10 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   // Rate limit: 60 repost-toggles per minute
   const limit = await rateLimit(req, { limit: 60, window: 60, type: "comment-repost" });
   if (!limit.success) return limit.response;

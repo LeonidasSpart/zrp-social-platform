@@ -4,10 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 // ─── POST /api/posts/[id]/reaction – Toggle reaction ──────────────
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -47,10 +45,8 @@ export async function POST(
 }
 
 // ─── GET /api/posts/[id]/reaction – Get all reactions ──────────────
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const reactions = await prisma.reaction.findMany({
     where: { postId: params.id },
     include: {

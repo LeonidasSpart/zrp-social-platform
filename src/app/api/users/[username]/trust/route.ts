@@ -2,15 +2,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
 interface RouteContext {
-  params: {
+  params: Promise<{
     username: string;
-  };
+  }>;
 }
 
-export async function GET(
-  _request: Request,
-  { params }: RouteContext
-) {
+export async function GET(_request: Request, props: RouteContext) {
+  const params = await props.params;
   try {
     const username = decodeURIComponent(params.username);
 

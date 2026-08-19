@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { ArrowLeft, Repeat } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -17,7 +17,8 @@ interface User {
   isFollowing?: boolean;
 }
 
-export default function RepostsPage({ params }: { params: { id: string } }) {
+export default function RepostsPage(props: { params: Promise<{ id: string }> }) {
+  const params = use(props.params);
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t } = useLanguage();

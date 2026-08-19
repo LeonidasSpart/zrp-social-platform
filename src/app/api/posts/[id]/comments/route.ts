@@ -12,10 +12,8 @@ import { checkPostLength } from "@/lib/limits";
 // reply subtrees belonging to that page's threads - not every comment on
 // the post. This avoids one giant query/payload on posts with thousands
 // of comments while keeping full nested reply threads intact.
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const postId = params.id;
     const session = await getServerSession(authOptions);
@@ -132,10 +130,8 @@ export async function GET(
 }
 
 // ─── POST: Create a comment (or reply) ──────────────────────────────
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   // Rate limit: 30 comments per 5 minutes - generous for active
   // conversations, blocks comment-flooding/spam scripts.
   const limit = await rateLimit(req, { limit: 30, window: 300, type: "comment-create" });

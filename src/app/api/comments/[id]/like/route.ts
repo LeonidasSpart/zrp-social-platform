@@ -5,10 +5,8 @@ import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
 import { rateLimit } from "@/lib/rate-limit";
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   // Rate limit: 120 like-toggles per minute
   const limit = await rateLimit(req, { limit: 120, window: 60, type: "comment-like" });
   if (!limit.success) return limit.response;

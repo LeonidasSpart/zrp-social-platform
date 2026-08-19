@@ -4,10 +4,8 @@ import { prisma } from "@/lib/db";
 import { canAccessApi } from "@/lib/permissions";
 
 // ─── DELETE: Revoke an API key ────────────────────────────────────
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     if (!token) {

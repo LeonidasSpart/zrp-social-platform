@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useLayoutEffect, useState, useRef } from "react";
+import { useEffect, useLayoutEffect, useState, useRef, use } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import ChatInterface from "@/components/ChatInterface";
@@ -34,7 +34,8 @@ async function getIceServers(): Promise<any[]> {
   }
 }
 
-export default function ChatPage({ params }: { params: { username: string } }) {
+export default function ChatPage(props: { params: Promise<{ username: string }> }) {
+  const params = use(props.params);
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t } = useLanguage();

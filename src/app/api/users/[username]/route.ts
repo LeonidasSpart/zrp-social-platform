@@ -4,10 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { username: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ username: string }> }) {
+  const params = await props.params;
   // This is a public, unauthenticated-accessible profile lookup - it had
   // no rate limiting at all, leaving it open to username enumeration and
   // bulk profile scraping at volume.

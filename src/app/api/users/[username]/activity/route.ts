@@ -3,10 +3,8 @@ import { prisma } from "@/lib/db";
 
 const DAYS = 371; // ~53 weeks, aligned to a GitHub-style grid
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { username: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ username: string }> }) {
+  const params = await props.params;
   try {
     const user = await prisma.user.findFirst({
       where: { username: { equals: params.username, mode: "insensitive" } },
