@@ -1,3 +1,6 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { requireStaff } from "@/lib/admin";
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
