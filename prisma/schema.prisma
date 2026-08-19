@@ -81,20 +81,13 @@ enum AdBidType {
   CPM
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * ZRP TRUST
- * ─────────────────────────────────────────────────────────────────────
- *
- * Trust is behavioral, NOT identity verification.
- *
- * ZRP does not require a phone number to establish trust.
- *
- * NEW        = newly created / insufficient behavioral history
- * BASIC      = normal account with some healthy activity
- * TRUSTED    = established account with healthy behavior
- * RESTRICTED = account currently subject to trust/safety restrictions
- */
+// ZRP TRUST
+// Trust is behavioral, NOT identity verification.
+// ZRP does not require a phone number to establish trust.
+// NEW        = newly created / insufficient behavioral history
+// BASIC      = normal account with some healthy activity
+// TRUSTED    = established account with healthy behavior
+// RESTRICTED = account currently subject to trust/safety restrictions
 
 enum TrustLevel {
   NEW
@@ -103,17 +96,13 @@ enum TrustLevel {
   RESTRICTED
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * USER
- * ─────────────────────────────────────────────────────────────────────
- */
+// USER
 
 model User {
-  id          String    @id @default(cuid())
-  email       String    @unique
-  username    String    @unique
-  password    String?
+  id       String  @id @default(cuid())
+  email    String  @unique
+  username String  @unique
+  password String?
 
   resetToken       String?   @unique
   resetTokenExpiry DateTime?
@@ -127,37 +116,25 @@ model User {
   deletionScheduledFor DateTime?
 
   name      String?
-  bio       String?   @db.Text
-  avatarUrl String?   @db.Text
-  coverUrl  String?   @db.Text
+  bio       String? @db.Text
+  avatarUrl String? @db.Text
+  coverUrl  String? @db.Text
 
   isPrivate Boolean @default(false)
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * ZRP SAFE MODE
-   *
-   * Safe Mode is a content-safety preference.
-   *
-   * It does NOT require a phone number or additional identity data.
-   *
-   * New users have Safe Mode enabled by default.
-   */
+  // ZRP SAFE MODE
+  // Safe Mode is a content-safety preference.
+  // It does NOT require a phone number or additional identity data.
+  // New users have Safe Mode enabled by default.
   safeMode Boolean @default(true)
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * ZRP TRUST LEVEL
-   *
-   * Behavioral trust, NOT identity verification.
-   */
+  // ZRP TRUST LEVEL
+  // Behavioral trust, NOT identity verification.
   trustLevel TrustLevel @default(NEW)
 
   badgeType String?
 
-  /*
-   * Professional profile
-   */
+  // Professional profile
   category     String?
   showCategory Boolean @default(true)
 
@@ -185,10 +162,7 @@ model User {
 
   emailPreferences Json?
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * PINNED POST
-   */
+  // PINNED POST
   pinnedPostId String? @unique
 
   pinnedPost Post? @relation(
@@ -198,10 +172,7 @@ model User {
     onDelete: SetNull
   )
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * SOCIAL
-   */
+  // SOCIAL
   posts    Post[]
   comments Comment[]
 
@@ -221,119 +192,74 @@ model User {
   followRequestsSent     FollowRequest[] @relation("FollowRequester")
   followRequestsReceived FollowRequest[] @relation("FollowTarget")
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * NOTIFICATIONS
-   */
+  // NOTIFICATIONS
   notifications     Notification[] @relation("Notification_user")
   sentNotifications Notification[] @relation("Notification_fromUser")
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * MESSAGES
-   */
+  // MESSAGES
   sentMessages     Message[] @relation("Message_sender")
   receivedMessages Message[] @relation("Message_receiver")
 
   messageReactions MessageReaction[]
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * POLLS / BOOKMARKS / PUSH
-   */
-  pollVotes        PollVote[]
-  bookmarks       Bookmark[]
+  // POLLS / BOOKMARKS / PUSH
+  pollVotes         PollVote[]
+  bookmarks         Bookmark[]
   pushSubscriptions PushSubscription[]
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * STORIES
-   */
+  // STORIES
   stories    Story[]
   storyViews StoryView[]
   storyLikes StoryLike[]
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * COMMENT INTERACTIONS
-   */
+  // COMMENT INTERACTIONS
   commentLikes     CommentLike[]
   commentReposts   CommentRepost[]
   commentBookmarks CommentBookmark[]
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * REPORTS
-   */
+  // REPORTS
   reports Report[] @relation("Reporter")
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * PAYMENTS / PLANS
-   */
-  upgradeRequests  UpgradeRequest[]
-  paymentRequests  PaymentRequest[]
+  // PAYMENTS / PLANS
+  upgradeRequests UpgradeRequest[]
+  paymentRequests PaymentRequest[]
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * TEAMS
-   */
+  // TEAMS
   teamAccount TeamMember[] @relation("TeamAccount")
   teamMembers TeamMember[] @relation("TeamMemberUser")
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * API
-   */
+  // API
   apiKeys ApiKey[]
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * CREATOR ECONOMY
-   */
+  // CREATOR ECONOMY
   creatorProfile CreatorProfile?
 
   sentTips     Tip[] @relation("TipSender")
   receivedTips Tip[] @relation("TipRecipient")
 
-  premiumPurchases  PremiumPurchase[]
+  premiumPurchases   PremiumPurchase[]
   withdrawalRequests WithdrawalRequest[]
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * SUPPORT
-   */
+  // SUPPORT
   supportTickets SupportTicket[]
 
   assignedTickets SupportTicket[] @relation("AssignedTickets")
 
   ticketReplies TicketReply[]
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * AI
-   */
+  // AI
   aiConversations AIConversation[]
   aiDailyUsage   AIDailyUsage[]
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * ADVERTISING
-   */
-  adCampaigns    AdCampaign[]   @relation("AdAdvertiser")
-  adImpressions  AdImpression[] @relation("AdImpressionUser")
-  adClicks       AdClick[]      @relation("AdClickUser")
+  // ADVERTISING
+  adCampaigns   AdCampaign[]   @relation("AdAdvertiser")
+  adImpressions AdImpression[] @relation("AdImpressionUser")
+  adClicks      AdClick[]      @relation("AdClickUser")
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * ZRP TRUST PROFILE
-   */
+  // ZRP TRUST PROFILE
   trustProfile UserTrust?
 
-  /*
-   * ──────────────────────────────────────────────────────────────────
-   * INDEXES
-   */
+  // INDEXES
   @@index([trustLevel])
   @@index([safeMode])
   @@index([createdAt])
@@ -341,18 +267,7 @@ model User {
   @@index([plan])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * ZRP TRUST PROFILE
- * ─────────────────────────────────────────────────────────────────────
- *
- * Stores behavioral signals used to calculate trust.
- *
- * IMPORTANT:
- * No phone number.
- * No government ID.
- * No additional identity verification.
- */
+// ZRP TRUST PROFILE
 
 model UserTrust {
   id String @id @default(cuid())
@@ -365,24 +280,18 @@ model UserTrust {
     onDelete: Cascade
   )
 
-  /*
-   * Behavioral counters
-   */
+  // Behavioral counters
   postsCount     Int @default(0)
   commentsCount  Int @default(0)
   followersCount Int @default(0)
 
-  /*
-   * Safety signals
-   */
+  // Safety signals
   reportsReceived Int @default(0)
 
   spamScore  Int @default(0)
   abuseScore Int @default(0)
 
-  /*
-   * Activity
-   */
+  // Activity
   lastActivityAt  DateTime?
   lastTrustUpdate DateTime?
 
@@ -394,11 +303,7 @@ model UserTrust {
   @@index([lastActivityAt])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * POSTS
- * ─────────────────────────────────────────────────────────────────────
- */
+// POSTS
 
 model Post {
   id      String @id @default(cuid())
@@ -410,7 +315,7 @@ model Post {
   linkUrl   String?
 
   authorId String
-  author   User   @relation(
+  author   User @relation(
     fields: [authorId],
     references: [id],
     onDelete: Cascade
@@ -480,11 +385,7 @@ model Post {
   @@index([type])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * COMMENTS
- * ─────────────────────────────────────────────────────────────────────
- */
+// COMMENTS
 
 model Comment {
   id      String @id @default(cuid())
@@ -493,14 +394,14 @@ model Comment {
   imageUrl String?
 
   postId String
-  post   Post   @relation(
+  post   Post @relation(
     fields: [postId],
     references: [id],
     onDelete: Cascade
   )
 
   authorId String
-  author   User   @relation(
+  author   User @relation(
     fields: [authorId],
     references: [id],
     onDelete: Cascade
@@ -532,17 +433,13 @@ model Comment {
   @@index([authorId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * FOLLOWING
- * ─────────────────────────────────────────────────────────────────────
- */
+// FOLLOWING
 
 model Follow {
   id String @id @default(cuid())
 
   followerId String
-  follower   User   @relation(
+  follower   User @relation(
     "Following",
     fields: [followerId],
     references: [id],
@@ -550,7 +447,7 @@ model Follow {
   )
 
   followingId String
-  following   User   @relation(
+  following   User @relation(
     "Followers",
     fields: [followingId],
     references: [id],
@@ -568,7 +465,7 @@ model FollowRequest {
   id String @id @default(cuid())
 
   requesterId String
-  requester   User   @relation(
+  requester   User @relation(
     "FollowRequester",
     fields: [requesterId],
     references: [id],
@@ -576,7 +473,7 @@ model FollowRequest {
   )
 
   targetId String
-  target   User   @relation(
+  target   User @relation(
     "FollowTarget",
     fields: [targetId],
     references: [id],
@@ -594,24 +491,20 @@ model FollowRequest {
   @@index([status])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * LIKES
- * ─────────────────────────────────────────────────────────────────────
- */
+// LIKES
 
 model Like {
   id String @id @default(cuid())
 
   postId String
-  post   Post   @relation(
+  post   Post @relation(
     fields: [postId],
     references: [id],
     onDelete: Cascade
   )
 
   userId String
-  user   User   @relation(
+  user   User @relation(
     fields: [userId],
     references: [id],
     onDelete: Cascade
@@ -624,24 +517,20 @@ model Like {
   @@index([userId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * REPOSTS
- * ─────────────────────────────────────────────────────────────────────
- */
+// REPOSTS
 
 model Repost {
   id String @id @default(cuid())
 
   postId String
-  post   Post   @relation(
+  post   Post @relation(
     fields: [postId],
     references: [id],
     onDelete: Cascade
   )
 
   userId String
-  user   User   @relation(
+  user   User @relation(
     fields: [userId],
     references: [id],
     onDelete: Cascade
@@ -656,25 +545,21 @@ model Repost {
   @@index([userId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * REACTIONS
- * ─────────────────────────────────────────────────────────────────────
- */
+// REACTIONS
 
 model Reaction {
   id    String @id @default(cuid())
   emoji String
 
   postId String
-  post   Post   @relation(
+  post   Post @relation(
     fields: [postId],
     references: [id],
     onDelete: Cascade
   )
 
   userId String
-  user   User   @relation(
+  user   User @relation(
     fields: [userId],
     references: [id],
     onDelete: Cascade
@@ -687,17 +572,13 @@ model Reaction {
   @@index([userId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * MUTES
- * ─────────────────────────────────────────────────────────────────────
- */
+// MUTES
 
 model Mute {
   id String @id @default(cuid())
 
   muterId String
-  muter   User   @relation(
+  muter   User @relation(
     "Muter",
     fields: [muterId],
     references: [id],
@@ -705,7 +586,7 @@ model Mute {
   )
 
   mutedId String
-  muted   User   @relation(
+  muted   User @relation(
     "Muted",
     fields: [mutedId],
     references: [id],
@@ -719,17 +600,13 @@ model Mute {
   @@index([mutedId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * BLOCKS
- * ─────────────────────────────────────────────────────────────────────
- */
+// BLOCKS
 
 model Blocked {
   id String @id @default(cuid())
 
   blockerId String
-  blocker   User   @relation(
+  blocker   User @relation(
     "Blocker",
     fields: [blockerId],
     references: [id],
@@ -737,7 +614,7 @@ model Blocked {
   )
 
   blockedId String
-  blocked   User   @relation(
+  blocked   User @relation(
     "Blocked",
     fields: [blockedId],
     references: [id],
@@ -751,17 +628,13 @@ model Blocked {
   @@index([blockedId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * NOTIFICATIONS
- * ─────────────────────────────────────────────────────────────────────
- */
+// NOTIFICATIONS
 
 model Notification {
   id String @id @default(cuid())
 
   userId String
-  user   User   @relation(
+  user   User @relation(
     "Notification_user",
     fields: [userId],
     references: [id],
@@ -771,7 +644,7 @@ model Notification {
   type String
 
   fromUserId String
-  fromUser   User   @relation(
+  fromUser   User @relation(
     "Notification_fromUser",
     fields: [fromUserId],
     references: [id],
@@ -796,11 +669,7 @@ model Notification {
   @@index([fromUserId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * MESSAGES
- * ─────────────────────────────────────────────────────────────────────
- */
+// MESSAGES
 
 model Message {
   id String @id @default(cuid())
@@ -809,7 +678,7 @@ model Message {
   imageUrl String?
 
   senderId String
-  sender   User   @relation(
+  sender   User @relation(
     "Message_sender",
     fields: [senderId],
     references: [id],
@@ -817,7 +686,7 @@ model Message {
   )
 
   receiverId String
-  receiver   User   @relation(
+  receiver   User @relation(
     "Message_receiver",
     fields: [receiverId],
     references: [id],
@@ -850,11 +719,7 @@ model Message {
   @@index([replyToId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * MESSAGE REACTIONS
- * ─────────────────────────────────────────────────────────────────────
- */
+// MESSAGE REACTIONS
 
 model MessageReaction {
   id String @id @default(cuid())
@@ -881,11 +746,7 @@ model MessageReaction {
   @@index([messageId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * POLLS
- * ─────────────────────────────────────────────────────────────────────
- */
+// POLLS
 
 model Poll {
   id String @id @default(cuid())
@@ -909,14 +770,14 @@ model PollVote {
   id String @id @default(cuid())
 
   pollId String
-  poll   Poll   @relation(
+  poll   Poll @relation(
     fields: [pollId],
     references: [id],
     onDelete: Cascade
   )
 
   userId String
-  user   User   @relation(
+  user   User @relation(
     fields: [userId],
     references: [id],
     onDelete: Cascade
@@ -931,11 +792,7 @@ model PollVote {
   @@index([userId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * GIFS
- * ─────────────────────────────────────────────────────────────────────
- */
+// GIFS
 
 model Gif {
   id String @id @default(cuid())
@@ -948,17 +805,13 @@ model Gif {
   createdAt DateTime @default(now())
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * REPORTS
- * ─────────────────────────────────────────────────────────────────────
- */
+// REPORTS
 
 model Report {
   id String @id @default(cuid())
 
   reporterId String
-  reporter   User   @relation(
+  reporter   User @relation(
     "Reporter",
     fields: [reporterId],
     references: [id],
@@ -999,24 +852,20 @@ model Report {
   @@index([reporterId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * BOOKMARKS
- * ─────────────────────────────────────────────────────────────────────
- */
+// BOOKMARKS
 
 model Bookmark {
   id String @id @default(cuid())
 
   userId String
-  user   User   @relation(
+  user   User @relation(
     fields: [userId],
     references: [id],
     onDelete: Cascade
   )
 
   postId String
-  post   Post   @relation(
+  post   Post @relation(
     fields: [postId],
     references: [id],
     onDelete: Cascade
@@ -1029,17 +878,13 @@ model Bookmark {
   @@index([postId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * PUSH NOTIFICATIONS
- * ─────────────────────────────────────────────────────────────────────
- */
+// PUSH NOTIFICATIONS
 
 model PushSubscription {
   id String @id @default(cuid())
 
   userId String
-  user   User   @relation(
+  user   User @relation(
     fields: [userId],
     references: [id],
     onDelete: Cascade
@@ -1053,17 +898,13 @@ model PushSubscription {
   @@index([userId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * UPGRADE REQUESTS
- * ─────────────────────────────────────────────────────────────────────
- */
+// UPGRADE REQUESTS
 
 model UpgradeRequest {
   id String @id @default(cuid())
 
   userId String
-  user   User   @relation(
+  user   User @relation(
     fields: [userId],
     references: [id],
     onDelete: Cascade
@@ -1086,17 +927,13 @@ model UpgradeRequest {
   @@index([status])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * PAYMENT REQUESTS
- * ─────────────────────────────────────────────────────────────────────
- */
+// PAYMENT REQUESTS
 
 model PaymentRequest {
   id String @id @default(cuid())
 
   userId String
-  user   User   @relation(
+  user   User @relation(
     fields: [userId],
     references: [id],
     onDelete: Cascade
@@ -1118,11 +955,7 @@ model PaymentRequest {
   @@index([status])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * COMMENT LIKES
- * ─────────────────────────────────────────────────────────────────────
- */
+// COMMENT LIKES
 
 model CommentLike {
   id String @id @default(cuid())
@@ -1135,7 +968,7 @@ model CommentLike {
   )
 
   userId String
-  user   User   @relation(
+  user   User @relation(
     fields: [userId],
     references: [id],
     onDelete: Cascade
@@ -1148,11 +981,7 @@ model CommentLike {
   @@index([userId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * COMMENT REPOSTS
- * ─────────────────────────────────────────────────────────────────────
- */
+// COMMENT REPOSTS
 
 model CommentRepost {
   id String @id @default(cuid())
@@ -1165,7 +994,7 @@ model CommentRepost {
   )
 
   userId String
-  user   User   @relation(
+  user   User @relation(
     fields: [userId],
     references: [id],
     onDelete: Cascade
@@ -1178,11 +1007,7 @@ model CommentRepost {
   @@index([userId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * COMMENT BOOKMARKS
- * ─────────────────────────────────────────────────────────────────────
- */
+// COMMENT BOOKMARKS
 
 model CommentBookmark {
   id String @id @default(cuid())
@@ -1195,7 +1020,7 @@ model CommentBookmark {
   )
 
   userId String
-  user   User   @relation(
+  user   User @relation(
     fields: [userId],
     references: [id],
     onDelete: Cascade
@@ -1208,24 +1033,20 @@ model CommentBookmark {
   @@index([userId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * STORIES
- * ─────────────────────────────────────────────────────────────────────
- */
+// STORIES
 
 model Story {
   id String @id @default(cuid())
 
   userId String
-  user   User   @relation(
+  user   User @relation(
     fields: [userId],
     references: [id],
     onDelete: Cascade
   )
 
-  content  String? @db.Text
-  mediaUrl String?
+  content   String? @db.Text
+  mediaUrl  String?
   mediaType String?
 
   createdAt DateTime @default(now())
@@ -1243,14 +1064,14 @@ model StoryView {
   id String @id @default(cuid())
 
   storyId String
-  story   Story  @relation(
+  story   Story @relation(
     fields: [storyId],
     references: [id],
     onDelete: Cascade
   )
 
   viewerId String
-  viewer   User   @relation(
+  viewer   User @relation(
     fields: [viewerId],
     references: [id],
     onDelete: Cascade
@@ -1267,14 +1088,14 @@ model StoryLike {
   id String @id @default(cuid())
 
   storyId String
-  story   Story  @relation(
+  story   Story @relation(
     fields: [storyId],
     references: [id],
     onDelete: Cascade
   )
 
   likerId String
-  liker   User   @relation(
+  liker   User @relation(
     fields: [likerId],
     references: [id],
     onDelete: Cascade
@@ -1287,11 +1108,7 @@ model StoryLike {
   @@index([likerId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * TEAMS
- * ─────────────────────────────────────────────────────────────────────
- */
+// TEAMS
 
 model TeamMember {
   id String @id @default(cuid())
@@ -1322,17 +1139,13 @@ model TeamMember {
   @@index([userId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * API KEYS
- * ─────────────────────────────────────────────────────────────────────
- */
+// API KEYS
 
 model ApiKey {
   id String @id @default(cuid())
 
   userId String
-  user   User   @relation(
+  user   User @relation(
     fields: [userId],
     references: [id],
     onDelete: Cascade
@@ -1341,7 +1154,7 @@ model ApiKey {
   keyHash String @unique
   name    String
 
-  lastUsed DateTime?
+  lastUsed  DateTime?
   expiresAt DateTime?
 
   createdAt DateTime @default(now())
@@ -1351,17 +1164,13 @@ model ApiKey {
   @@index([userId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * CREATOR PROFILE
- * ─────────────────────────────────────────────────────────────────────
- */
+// CREATOR PROFILE
 
 model CreatorProfile {
   id String @id @default(cuid())
 
   userId String @unique
-  user   User   @relation(
+  user   User @relation(
     fields: [userId],
     references: [id],
     onDelete: Cascade
@@ -1382,22 +1191,18 @@ model CreatorProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tips              Tip[]
-  premiumPosts      PremiumPost[]
+  tips               Tip[]
+  premiumPosts       PremiumPost[]
   withdrawalRequests WithdrawalRequest[]
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * TIPS
- * ─────────────────────────────────────────────────────────────────────
- */
+// TIPS
 
 model Tip {
   id String @id @default(cuid())
 
   senderId String
-  sender   User   @relation(
+  sender   User @relation(
     "TipSender",
     fields: [senderId],
     references: [id],
@@ -1405,7 +1210,7 @@ model Tip {
   )
 
   recipientId String
-  recipient   User   @relation(
+  recipient   User @relation(
     "TipRecipient",
     fields: [recipientId],
     references: [id],
@@ -1430,7 +1235,7 @@ model Tip {
 
   status TransactionStatus @default(PENDING)
 
-  platformFee  Float @default(0)
+  platformFee   Float @default(0)
   charityAmount Float @default(0)
   creatorAmount Float @default(0)
 
@@ -1444,11 +1249,7 @@ model Tip {
   @@index([creatorProfileId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * PREMIUM POSTS
- * ─────────────────────────────────────────────────────────────────────
- */
+// PREMIUM POSTS
 
 model PremiumPost {
   id String @id @default(cuid())
@@ -1475,7 +1276,7 @@ model PremiumPost {
 
   previewContent String? @db.Text
 
-  totalPurchases Int @default(0)
+  totalPurchases Int   @default(0)
   totalRevenue   Float @default(0)
 
   createdAt DateTime @default(now())
@@ -1488,11 +1289,7 @@ model PremiumPost {
   @@index([creatorProfileId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * PREMIUM PURCHASES
- * ─────────────────────────────────────────────────────────────────────
- */
+// PREMIUM PURCHASES
 
 model PremiumPurchase {
   id String @id @default(cuid())
@@ -1534,11 +1331,7 @@ model PremiumPurchase {
   @@index([status])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * WITHDRAWALS
- * ─────────────────────────────────────────────────────────────────────
- */
+// WITHDRAWALS
 
 model WithdrawalRequest {
   id String @id @default(cuid())
@@ -1579,11 +1372,7 @@ model WithdrawalRequest {
   @@index([creatorProfileId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * ADVERTISING
- * ─────────────────────────────────────────────────────────────────────
- */
+// ADVERTISING
 
 model AdCampaign {
   id String @id @default(cuid())
@@ -1637,11 +1426,7 @@ model AdCampaign {
   @@index([status, startDate, endDate])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * AD IMPRESSIONS
- * ─────────────────────────────────────────────────────────────────────
- */
+// AD IMPRESSIONS
 
 model AdImpression {
   id String @id @default(cuid())
@@ -1670,11 +1455,7 @@ model AdImpression {
   @@index([userId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * AD CLICKS
- * ─────────────────────────────────────────────────────────────────────
- */
+// AD CLICKS
 
 model AdClick {
   id String @id @default(cuid())
@@ -1703,11 +1484,7 @@ model AdClick {
   @@index([userId])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * SUPPORT TICKETS
- * ─────────────────────────────────────────────────────────────────────
- */
+// SUPPORT TICKETS
 
 model SupportTicket {
   id String @id @default(cuid())
@@ -1742,10 +1519,6 @@ model SupportTicket {
   resolvedAt DateTime?
   resolution String? @db.Text
 
-  /*
-   * These fields already existed in your system.
-   * Keep them if your support/security system uses them.
-   */
   userAgent String?
   ipAddress String?
   referrer  String?
@@ -1765,11 +1538,7 @@ model SupportTicket {
   @@index([status, priority])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * TICKET REPLIES
- * ─────────────────────────────────────────────────────────────────────
- */
+// TICKET REPLIES
 
 model TicketReply {
   id String @id @default(cuid())
@@ -1805,11 +1574,7 @@ model TicketReply {
   @@index([isInternal])
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * TICKET FEEDBACK
- * ─────────────────────────────────────────────────────────────────────
- */
+// TICKET FEEDBACK
 
 model TicketFeedback {
   id String @id @default(cuid())
@@ -1829,11 +1594,7 @@ model TicketFeedback {
   createdAt DateTime @default(now())
 }
 
-/*
- * ─────────────────────────────────────────────────────────────────────
- * AI
- * ─────────────────────────────────────────────────────────────────────
- */
+// AI
 
 model AIConversation {
   id String @id @default(cuid())
