@@ -111,7 +111,7 @@ export async function DELETE(req: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: token.id as string },
-      select: { id: true, plan: true },
+      select: { id: true, plan: true, username: true },
     });
 
     if (!user) {
@@ -132,7 +132,7 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Custom URL removed. Your profile is now at /" + (await prisma.user.findUnique({ where: { id: user.id }, select: { username: true } })).username,
+      message: "Custom URL removed. Your profile is now at /" + user.username,
     });
   } catch (error) {
     console.error("Custom URL delete error:", error);
