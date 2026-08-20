@@ -5,164 +5,480 @@ import { authOptions } from "./auth";
 
 const f = createUploadthing();
 
-// ─── FileRouter for authenticated users ─────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// MEDIA HELPERS
+// ─────────────────────────────────────────────────────────────
+
+function isGifFile(file: {
+  name?: string;
+  type?: string;
+}) {
+  const name = (file.name || "").toLowerCase();
+  const type = (file.type || "").toLowerCase();
+
+  return (
+    name.split("?")[0].split("#")[0].endsWith(".gif") ||
+    type === "image/gif"
+  );
+}
+
+function isVideoFile(file: {
+  name?: string;
+  type?: string;
+}) {
+  const name = (file.name || "").toLowerCase();
+  const type = (file.type || "").toLowerCase();
+
+  /*
+   * GIF ALWAYS wins.
+   *
+   * An animated GIF is still an image for ZRP's
+   * normal media system. It must never become a
+   * video/Short.
+   */
+  if (isGifFile(file)) {
+    return false;
+  }
+
+  if (type.startsWith("video/")) {
+    return true;
+  }
+
+  const videoExtensions = [
+    ".mp4",
+    ".webm",
+    ".mov",
+    ".avi",
+    ".mkv",
+    ".m4v",
+    ".3gp",
+    ".ogg",
+  ];
+
+  return videoExtensions.some((extension) =>
+    name.split("?")[0].split("#")[0].endsWith(extension)
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// FILE ROUTER
+// ─────────────────────────────────────────────────────────────
+
 export const ourFileRouter = {
-  // ─── Post image/video upload ──────────────────────────────────────
+  // ───────────────────────────────────────────────────────────
+  // POST IMAGE / VIDEO
+  // ───────────────────────────────────────────────────────────
   postMedia: f({
-    // maxFileCount was 1 for images, but the composer's own UI lets
-    // someone select up to 4 at once (Math.min(planLimit, 4), a
-    // deliberate ceiling matching the 4-image grid layout, applying
-    // even to Business/Enterprise plans with higher nominal limits) -
-    // any attempt to upload more than 1 image was rejected by
-    // UploadThing's own validation before it ever reached this app's
-    // code, with exactly the "FileCountMismatch" error reported.
-    image: { maxFileSize: "4MB", maxFileCount: 4 },
-    video: { maxFileSize: "32MB", maxFileCount: 1 },
-  })
-    .middleware(async () => {
-      const session = await getServerSession(authOptions);
-      if (!session?.user) throw new UploadThingError("Unauthorized");
-      return { userId: session.user.id };
-    })
-    .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Post media uploaded:", file.ufsUrl);
-      return { url: file.ufsUrl };
-    }),
+    image: {
+      maxFileSize: "4MB",
+      maxFileCount: 4,
+    },
 
-  // ─── Avatar upload ──────────────────────────────────────────────
+    video: {
+      maxFileSize: "32MB",
+      maxFileCount: 1,
+    },
+  })
+    .middleware(async ({ req }) => {
+      const session =
+        await getServerSession(authOptions);
+
+      if (!session?.user) {
+        throw new UploadThingError(
+          "Unauthorized"
+        );
+      }
+
+      return {
+        userId: session.user.id,
+      };
+    })
+    .onUploadComplete(
+      async ({ metadata, file }) => {
+        /*
+         * Final upload-level media check.
+         *
+         * UploadThing has already validated the
+         * file category, but we still explicitly
+         * detect GIFs here.
+         */
+        const fileInfo = {
+          name: file.name,
+          type: file.type,
+        };
+
+        if (isGifFile(fileInfo)) {
+          console.log(
+            "Post GIF uploaded as image:",
+            file.ufsUrl
+          );
+
+          return {
+            url: file.ufsUrl,
+            type: "image",
+            isGif: true,
+          };
+        }
+
+        if (isVideoFile(fileInfo)) {
+          console.log(
+            "Post video uploaded:",
+            file.ufsUrl
+          );
+
+          return {
+            url: file.ufsUrl,
+            type: "video",
+            isGif: false,
+          };
+        }
+
+        console.log(
+          "Post image uploaded:",
+          file.ufsUrl
+        );
+
+        return {
+          url: file.ufsUrl,
+          type: "image",
+          isGif: false,
+        };
+      }
+    ),
+
+  // ───────────────────────────────────────────────────────────
+  // AVATAR
+  // ───────────────────────────────────────────────────────────
   avatar: f({
-    image: { maxFileSize: "2MB", maxFileCount: 1 },
+    image: {
+      maxFileSize: "2MB",
+      maxFileCount: 1,
+    },
   })
     .middleware(async () => {
-      const session = await getServerSession(authOptions);
-      if (!session?.user) throw new UploadThingError("Unauthorized");
-      return { userId: session.user.id };
-    })
-    .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Avatar uploaded:", file.ufsUrl);
-      return { url: file.ufsUrl };
-    }),
+      const session =
+        await getServerSession(authOptions);
 
-  // ─── Banner upload ──────────────────────────────────────────────
+      if (!session?.user) {
+        throw new UploadThingError(
+          "Unauthorized"
+        );
+      }
+
+      return {
+        userId: session.user.id,
+      };
+    })
+    .onUploadComplete(
+      async ({ metadata, file }) => {
+        console.log(
+          "Avatar uploaded:",
+          file.ufsUrl
+        );
+
+        return {
+          url: file.ufsUrl,
+        };
+      }
+    ),
+
+  // ───────────────────────────────────────────────────────────
+  // BANNER
+  // ───────────────────────────────────────────────────────────
   banner: f({
-    image: { maxFileSize: "4MB", maxFileCount: 1 },
+    image: {
+      maxFileSize: "4MB",
+      maxFileCount: 1,
+    },
   })
     .middleware(async () => {
-      const session = await getServerSession(authOptions);
-      if (!session?.user) throw new UploadThingError("Unauthorized");
-      return { userId: session.user.id };
-    })
-    .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Banner uploaded:", file.ufsUrl);
-      return { url: file.ufsUrl };
-    }),
+      const session =
+        await getServerSession(authOptions);
 
-  // ─── Chat image upload ──────────────────────────────────────────
+      if (!session?.user) {
+        throw new UploadThingError(
+          "Unauthorized"
+        );
+      }
+
+      return {
+        userId: session.user.id,
+      };
+    })
+    .onUploadComplete(
+      async ({ metadata, file }) => {
+        console.log(
+          "Banner uploaded:",
+          file.ufsUrl
+        );
+
+        return {
+          url: file.ufsUrl,
+        };
+      }
+    ),
+
+  // ───────────────────────────────────────────────────────────
+  // CHAT IMAGE
+  // ───────────────────────────────────────────────────────────
   chatImage: f({
-    image: { maxFileSize: "4MB", maxFileCount: 1 },
+    image: {
+      maxFileSize: "4MB",
+      maxFileCount: 1,
+    },
   })
     .middleware(async () => {
-      const session = await getServerSession(authOptions);
-      if (!session?.user) throw new UploadThingError("Unauthorized");
-      return { userId: session.user.id };
-    })
-    .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Chat image uploaded:", file.ufsUrl);
-      return { url: file.ufsUrl };
-    }),
+      const session =
+        await getServerSession(authOptions);
 
-  // ─── Chat document upload (PDF, Word, Excel, PowerPoint, plain text) ──
+      if (!session?.user) {
+        throw new UploadThingError(
+          "Unauthorized"
+        );
+      }
+
+      return {
+        userId: session.user.id,
+      };
+    })
+    .onUploadComplete(
+      async ({ metadata, file }) => {
+        console.log(
+          "Chat image uploaded:",
+          file.ufsUrl
+        );
+
+        return {
+          url: file.ufsUrl,
+        };
+      }
+    ),
+
+  // ───────────────────────────────────────────────────────────
+  // CHAT DOCUMENT
+  // ───────────────────────────────────────────────────────────
   chatFile: f({
-    pdf: { maxFileSize: "8MB", maxFileCount: 1 },
-    text: { maxFileSize: "8MB", maxFileCount: 1 },
-    blob: { maxFileSize: "8MB", maxFileCount: 1 },
+    pdf: {
+      maxFileSize: "8MB",
+      maxFileCount: 1,
+    },
+
+    text: {
+      maxFileSize: "8MB",
+      maxFileCount: 1,
+    },
+
+    blob: {
+      maxFileSize: "8MB",
+      maxFileCount: 1,
+    },
   })
     .middleware(async () => {
-      const session = await getServerSession(authOptions);
-      if (!session?.user) throw new UploadThingError("Unauthorized");
-      return { userId: session.user.id };
-    })
-    .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Chat document uploaded:", file.ufsUrl, file.name);
-      return { url: file.ufsUrl, name: file.name };
-    }),
+      const session =
+        await getServerSession(authOptions);
 
-  // ─── Chat voice message upload ───────────────────────────────────
+      if (!session?.user) {
+        throw new UploadThingError(
+          "Unauthorized"
+        );
+      }
+
+      return {
+        userId: session.user.id,
+      };
+    })
+    .onUploadComplete(
+      async ({ metadata, file }) => {
+        console.log(
+          "Chat document uploaded:",
+          file.ufsUrl,
+          file.name
+        );
+
+        return {
+          url: file.ufsUrl,
+          name: file.name,
+        };
+      }
+    ),
+
+  // ───────────────────────────────────────────────────────────
+  // CHAT AUDIO
+  // ───────────────────────────────────────────────────────────
   chatAudio: f({
-    audio: { maxFileSize: "8MB", maxFileCount: 1 },
+    audio: {
+      maxFileSize: "8MB",
+      maxFileCount: 1,
+    },
   })
     .middleware(async () => {
-      const session = await getServerSession(authOptions);
-      if (!session?.user) throw new UploadThingError("Unauthorized");
-      return { userId: session.user.id };
-    })
-    .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Chat voice message uploaded:", file.ufsUrl);
-      return { url: file.ufsUrl };
-    }),
+      const session =
+        await getServerSession(authOptions);
 
-  // ─── Story media upload (image or video) ────────────────────────
+      if (!session?.user) {
+        throw new UploadThingError(
+          "Unauthorized"
+        );
+      }
+
+      return {
+        userId: session.user.id,
+      };
+    })
+    .onUploadComplete(
+      async ({ metadata, file }) => {
+        console.log(
+          "Chat voice message uploaded:",
+          file.ufsUrl
+        );
+
+        return {
+          url: file.ufsUrl,
+        };
+      }
+    ),
+
+  // ───────────────────────────────────────────────────────────
+  // STORY MEDIA
+  // ───────────────────────────────────────────────────────────
   storyMedia: f({
-    image: { maxFileSize: "4MB", maxFileCount: 1 },
-    video: { maxFileSize: "16MB", maxFileCount: 1 },
+    image: {
+      maxFileSize: "4MB",
+      maxFileCount: 1,
+    },
+
+    video: {
+      maxFileSize: "16MB",
+      maxFileCount: 1,
+    },
   })
     .middleware(async () => {
-      const session = await getServerSession(authOptions);
-      if (!session?.user) throw new UploadThingError("Unauthorized");
-      return { userId: session.user.id };
+      const session =
+        await getServerSession(authOptions);
+
+      if (!session?.user) {
+        throw new UploadThingError(
+          "Unauthorized"
+        );
+      }
+
+      return {
+        userId: session.user.id,
+      };
     })
-    .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Story media uploaded:", file.ufsUrl);
-      // file.type is "image" or "video" – you can use that to store mediaType
-      return { url: file.ufsUrl, type: file.type };
-    }),
+    .onUploadComplete(
+      async ({ metadata, file }) => {
+        const fileInfo = {
+          name: file.name,
+          type: file.type,
+        };
+
+        /*
+         * GIFs are explicitly returned as images.
+         */
+        if (isGifFile(fileInfo)) {
+          console.log(
+            "Story GIF uploaded as image:",
+            file.ufsUrl
+          );
+
+          return {
+            url: file.ufsUrl,
+            type: "image",
+            isGif: true,
+          };
+        }
+
+        const type =
+          isVideoFile(fileInfo)
+            ? "video"
+            : "image";
+
+        console.log(
+          "Story media uploaded:",
+          file.ufsUrl,
+          type
+        );
+
+        return {
+          url: file.ufsUrl,
+          type,
+          isGif: false,
+        };
+      }
+    ),
 } satisfies FileRouter;
 
-export type OurFileRouter = typeof ourFileRouter;
+export type OurFileRouter =
+  typeof ourFileRouter;
 
-// ─── Cleanup: delete the underlying UploadThing file when the post /
-// message / comment / story that referenced it gets deleted ──────────
-//
-// Every route above only ever stored the file's public URL, never its
-// UploadThing file key - deleting a post's database row never removed
-// the actual file from UploadThing, so every image/video anyone ever
-// deleted was still sitting in storage indefinitely (and still costing
-// storage, still reachable by URL). UploadThing's URLs always end in
-// `/f/{fileKey}` (both the legacy utfs.io domain and the current
-// {appId}.ufs.sh domain), so the key can be recovered from the stored
-// URL alone - no schema change or backfill needed to start cleaning
-// these up going forward.
-export function extractUploadThingKey(url: string | null | undefined): string | null {
+// ─────────────────────────────────────────────────────────────
+// UPLOADTHING FILE CLEANUP
+// ─────────────────────────────────────────────────────────────
+
+export function extractUploadThingKey(
+  url: string | null | undefined
+): string | null {
   if (!url) return null;
+
   try {
-    const path = new URL(url).pathname; // e.g. "/f/abc123"
-    const segments = path.split("/").filter(Boolean);
-    return segments[segments.length - 1] || null;
+    const path =
+      new URL(url).pathname;
+
+    const segments =
+      path
+        .split("/")
+        .filter(Boolean);
+
+    return (
+      segments[
+        segments.length - 1
+      ] || null
+    );
   } catch {
     return null;
   }
 }
 
-// Best-effort deletion - deliberately never throws. This is meant to be
-// called right alongside a prisma delete of the record that owned the
-// file; if UploadThing's API is briefly down or a URL doesn't parse,
-// that should never block or fail the actual content deletion the user
-// asked for. Worst case, a file is orphaned and this can be retried
-// later - better than a delete button that sometimes doesn't work.
+// ─────────────────────────────────────────────────────────────
+// DELETE UPLOADTHING FILES
+// ─────────────────────────────────────────────────────────────
+
 export async function deleteUploadThingFiles(
-  urls: (string | null | undefined)[]
+  urls: (
+    | string
+    | null
+    | undefined
+  )[]
 ): Promise<void> {
   const keys = urls
-    .map((u) => extractUploadThingKey(u))
-    .filter((k): k is string => !!k);
+    .map((u) =>
+      extractUploadThingKey(u)
+    )
+    .filter(
+      (k): k is string =>
+        !!k
+    );
 
-  if (keys.length === 0) return;
+  if (keys.length === 0) {
+    return;
+  }
 
   try {
-    const { UTApi } = await import("uploadthing/server");
+    const { UTApi } =
+      await import(
+        "uploadthing/server"
+      );
+
     const utapi = new UTApi();
-    await utapi.deleteFiles(keys);
+
+    await utapi.deleteFiles(
+      keys
+    );
   } catch (error) {
-    console.error("UploadThing cleanup failed (non-blocking):", error);
+    console.error(
+      "UploadThing cleanup failed (non-blocking):",
+      error
+    );
   }
 }
