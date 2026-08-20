@@ -102,45 +102,45 @@ enum NewsArticleCategory {
 }
 
 model User {
-  id          String    @id @default(cuid())
-  email       String    @unique
-  username    String    @unique
-  password    String?
+  id       String  @id @default(cuid())
+  email    String  @unique
+  username String  @unique
+  password String?
 
   resetToken       String?   @unique
   resetTokenExpiry DateTime?
 
-  emailVerified            DateTime?
-  verificationToken        String?   @unique
+  emailVerified           DateTime?
+  verificationToken       String?   @unique
   verificationTokenExpiry DateTime?
-  pendingEmail             String?   @unique
+  pendingEmail            String?   @unique
 
-  deletionRequestedAt  DateTime?
+  deletionRequestedAt DateTime?
   deletionScheduledFor DateTime?
 
-  name        String?
-  bio         String?   @db.Text
-  avatarUrl   String?   @db.Text
-  coverUrl    String?   @db.Text
-  isPrivate   Boolean   @default(false)
-  isAdmin     Boolean   @default(false)
-  badgeType   String?
+  name      String?
+  bio       String? @db.Text
+  avatarUrl String? @db.Text
+  coverUrl  String? @db.Text
+  isPrivate Boolean @default(false)
+  isAdmin   Boolean @default(false)
+  badgeType String?
 
   category     String?
   showCategory Boolean @default(true)
 
-  location           String?
-  country            String?
-  website            String?
-  usernameChangedAt  DateTime?
+  location          String?
+  country           String?
+  website           String?
+  usernameChangedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  role                 Role    @default(USER)
-  plan                 String  @default("free")
-  onboardingCompleted  Boolean @default(false)
-  banned               Boolean @default(false)
+  role                Role    @default(USER)
+  plan                String  @default("free")
+  onboardingCompleted Boolean @default(false)
+  banned              Boolean @default(false)
 
   publicLikes     Boolean @default(true)
   publicFollowing Boolean @default(true)
@@ -152,12 +152,7 @@ model User {
   emailPreferences Json?
 
   pinnedPostId String? @unique
-  pinnedPost   Post?   @relation(
-    "PinnedPost",
-    fields: [pinnedPostId],
-    references: [id],
-    onDelete: SetNull
-  )
+  pinnedPost   Post?   @relation("PinnedPost", fields: [pinnedPostId], references: [id], onDelete: SetNull)
 
   posts    Post[]
   comments Comment[]
@@ -245,8 +240,8 @@ model Post {
   updatedAt   DateTime @updatedAt
 
   quotePostId String?
-  quotePost   Post?   @relation("QuotePost", fields: [quotePostId], references: [id], onDelete: SetNull)
-  quotedBy    Post[]  @relation("QuotePost")
+  quotePost   Post?  @relation("QuotePost", fields: [quotePostId], references: [id], onDelete: SetNull)
+  quotedBy    Post[] @relation("QuotePost")
 
   views       Int       @default(0)
   scheduledAt DateTime?
@@ -621,8 +616,8 @@ model PushSubscription {
 model UpgradeRequest {
   id String @id @default(cuid())
 
-  userId User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   requestedPlan String
   paymentMethod String?
@@ -715,8 +710,8 @@ model Story {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  content  String? @db.Text
-  mediaUrl String?
+  content   String? @db.Text
+  mediaUrl  String?
   mediaType String?
 
   createdAt DateTime @default(now())
@@ -806,7 +801,7 @@ model CreatorProfile {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   tipsEnabled Boolean  @default(true)
-  tipsMessage String?  @db.Text
+  tipsMessage String? @db.Text
 
   premiumPostsEnabled Boolean @default(true)
 
@@ -1032,12 +1027,7 @@ model SupportTicket {
 
   assignedTo String?
 
-  assignedAdmin User? @relation(
-    "AssignedTickets",
-    fields: [assignedTo],
-    references: [id],
-    onDelete: SetNull
-  )
+  assignedAdmin User? @relation("AssignedTickets", fields: [assignedTo], references: [id], onDelete: SetNull)
 
   resolvedAt DateTime?
   resolution String? @db.Text
@@ -1092,7 +1082,7 @@ model TicketFeedback {
   ticket   SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
   rating   Int?
-  comment  String?  @db.Text
+  comment  String? @db.Text
   resolved Boolean?
 
   createdAt DateTime @default(now())
@@ -1169,12 +1159,7 @@ model NewsArticle {
   status   NewsArticleStatus   @default(DRAFT)
 
   authorId String
-  author   User   @relation(
-    "NewsAuthor",
-    fields: [authorId],
-    references: [id],
-    onDelete: Cascade
-  )
+  author   User   @relation("NewsAuthor", fields: [authorId], references: [id], onDelete: Cascade)
 
   views Int @default(0)
 
@@ -1190,10 +1175,6 @@ model NewsArticle {
   @@index([publishedAt])
   @@index([featured])
   @@index([authorId])
-
-  // Main News feed.
   @@index([status, publishedAt])
-
-  // Category News feeds.
   @@index([category, publishedAt])
 }
