@@ -147,6 +147,42 @@ export const ourFileRouter = {
     ),
 
   // ───────────────────────────────────────────────────────────
+  // NEWS COVER IMAGE (ZRP News / Journalist article editor)
+  // ───────────────────────────────────────────────────────────
+  newsCoverImage: f({
+    image: {
+      maxFileSize: "4MB",
+      maxFileCount: 1,
+    },
+  })
+    .middleware(async () => {
+      const session =
+        await getServerSession(authOptions);
+
+      if (!session?.user) {
+        throw new UploadThingError(
+          "Unauthorized"
+        );
+      }
+
+      return {
+        userId: session.user.id,
+      };
+    })
+    .onUploadComplete(
+      async ({ metadata, file }) => {
+        console.log(
+          "News cover image uploaded:",
+          file.ufsUrl
+        );
+
+        return {
+          url: file.ufsUrl,
+        };
+      }
+    ),
+
+  // ───────────────────────────────────────────────────────────
   // AVATAR
   // ───────────────────────────────────────────────────────────
   avatar: f({
