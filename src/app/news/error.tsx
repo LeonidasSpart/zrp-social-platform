@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export default function NewsError({
   reset,
 }: {
@@ -30,12 +32,12 @@ export default function NewsError({
             Try again
           </button>
 
-          <a
+          <Link
             href="/"
             className="rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
           >
             Go home
-          </a>
+          </Link>
         </div>
       </div>
     </main>
