@@ -80,6 +80,24 @@ export default function Footer() {
 
               <li>
                 <Link
+                  href="/news"
+                  className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
+                >
+                  ZRP News
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href="/journalist"
+                  className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
+                >
+                  Become a Journalist
+                </Link>
+              </li>
+
+              <li>
+                <Link
                   href="/investors"
                   className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
                 >
