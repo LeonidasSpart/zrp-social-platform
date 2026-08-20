@@ -22,15 +22,44 @@ function getMediaPath(url?: string | null) {
   return url
     .toLowerCase()
     .split("?")[0]
-    .split("#")[0];
+    .split("#")[0]
+    .trim();
 }
 
 function isGifUrl(url?: string | null) {
+  if (!url) return false;
+
+  const normalizedUrl = url.toLowerCase();
   const path = getMediaPath(url);
-  return path.endsWith(".gif");
+
+  /*
+   * GIF ALWAYS wins.
+   *
+   * Check both the URL extension and common CDN
+   * query parameters/content indicators.
+   */
+  if (path.endsWith(".gif")) {
+    return true;
+  }
+
+  if (
+    /[?&](format|fm|f)=gif(?:&|$)/i.test(
+      normalizedUrl
+    )
+  ) {
+    return true;
+  }
+
+  if (normalizedUrl.includes("image/gif")) {
+    return true;
+  }
+
+  return false;
 }
 
 function isVideoUrl(url?: string | null) {
+  if (!url) return false;
+
   const path = getMediaPath(url);
 
   const videoExtensions = [
@@ -50,8 +79,32 @@ function isVideoUrl(url?: string | null) {
 }
 
 function isVideoMediaType(mediaType?: string | null) {
-  return mediaType?.toLowerCase() === "video";
+  return mediaType?.toLowerCase().trim() === "video";
 }
+
+// ─────────────────────────────────────────────────────────────
+// NORMALIZE MEDIA TYPE
+// ─────────────────────────────────────────────────────────────
+//
+// IMPORTANT:
+//
+// GIF ALWAYS wins.
+//
+// However, video storage/CDN URLs do NOT always contain
+// ".mp4", ".webm", etc.
+//
+// Therefore:
+//
+//   mediaType: "video"
+//   imageUrl: "https://storage.example.com/abc123"
+//
+// MUST remain:
+//
+//   mediaType: "video"
+//
+// We must NOT convert it to "image" merely because the
+// storage URL has no video extension.
+// ─────────────────────────────────────────────────────────────
 
 function normalizeMediaType(
   requestedMediaType: unknown,
@@ -66,50 +119,46 @@ function normalizeMediaType(
       ? requestedMediaType.toLowerCase().trim()
       : "";
 
-  /*
-   * IMPORTANT:
-   *
-   * GIF ALWAYS wins.
-   *
-   * Even if the client sends:
-   *
-   * mediaType: "video"
-   *
-   * a GIF is NEVER stored as video.
-   */
+  // ─────────────────────────────────────────────────────────
+  // 1. GIF ALWAYS WINS
+  // ─────────────────────────────────────────────────────────
+
   if (isGifUrl(primaryImageUrl)) {
     return "image";
   }
 
-  /*
-   * If the client explicitly requests video,
-   * only accept it when the URL actually looks
-   * like a video file.
-   */
-  if (isVideoMediaType(requested)) {
-    if (isVideoUrl(primaryImageUrl)) {
-      return "video";
-    }
+  // ─────────────────────────────────────────────────────────
+  // 2. EXPLICIT VIDEO
+  // ─────────────────────────────────────────────────────────
+  //
+  // Trust the explicit video classification after GIF has
+  // already been rejected.
+  //
+  // This is required for storage/CDN URLs that have no
+  // recognizable video extension.
+  // ─────────────────────────────────────────────────────────
 
-    /*
-     * Do NOT trust mediaType: "video" for an unknown
-     * or image/GIF URL.
-     */
-    return "image";
+  if (isVideoMediaType(requested)) {
+    return "video";
   }
 
-  /*
-   * If the URL itself is clearly a video,
-   * automatically classify it as video.
-   */
+  // ─────────────────────────────────────────────────────────
+  // 3. VIDEO URL DETECTION
+  // ─────────────────────────────────────────────────────────
+
   if (isVideoUrl(primaryImageUrl)) {
     return "video";
   }
+
+  // ─────────────────────────────────────────────────────────
+  // 4. EVERYTHING ELSE IS AN IMAGE
+  // ─────────────────────────────────────────────────────────
 
   return "image";
 }
 
 // ─── GET (Feed) ─────────────────────────────────────────────────────
+
 export async function GET(req: NextRequest) {
   try {
     const token = await getToken({
@@ -303,6 +352,7 @@ export async function GET(req: NextRequest) {
 
     if (posts.length > take) {
       const nextItem = posts.pop();
+
       nextCursor =
         nextItem?.id || null;
     }
@@ -365,6 +415,7 @@ export async function GET(req: NextRequest) {
 }
 
 // ─── POST (Create) ──────────────────────────────────────────────────
+
 export async function POST(
   req: NextRequest
 ) {
@@ -470,20 +521,10 @@ export async function POST(
     // SERVER-SIDE MEDIA TYPE PROTECTION
     // ─────────────────────────────────────────────────────────
     //
-    // NEVER trust the mediaType supplied by the browser.
+    // GIFs are always protected from being stored as video.
     //
-    // This is the key fix.
-    //
-    // Before:
-    //
-    // mediaType: "video"
-    // imageUrl: "something.gif"
-    //
-    // could be saved as:
-    //
-    // mediaType = "video"
-    //
-    // Now GIF always becomes image.
+    // Explicit video uploads remain video even when their
+    // storage/CDN URL has no ".mp4" extension.
     // ─────────────────────────────────────────────────────────
 
     const normalizedMediaType =
