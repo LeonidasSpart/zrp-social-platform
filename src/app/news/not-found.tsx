@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function NewsNotFound() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -15,12 +17,12 @@ export default function NewsNotFound() {
           unpublished, or the link may be incorrect.
         </p>
 
-        <a
+        <Link
           href="/news"
           className="mt-7 inline-flex rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
         >
           Back to ZRP News
-        </a>
+        </Link>
       </div>
     </main>
   );
