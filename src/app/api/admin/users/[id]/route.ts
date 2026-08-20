@@ -5,7 +5,15 @@ import { Role } from "@prisma/client";
 import { deleteUploadThingFiles } from "@/lib/uploadthing";
 
 const VALID_BADGE_TYPES = ["verified", "organization", "government", "team", "journalist", null];
-const VALID_ROLES = ["USER", "MODERATOR", "ADMIN", "JOURNALIST"];
+// JOURNALIST is deliberately NOT settable here. It's only ever granted
+// via /api/admin/journalists/[id] (approve/restore), which sets the
+// role AND creates/updates the matching JournalistProfile AND syncs the
+// badge together in one transaction. Allowing it through this generic
+// endpoint would let an admin set role="JOURNALIST" with no
+// JournalistProfile row behind it - requireJournalistRole() checks for
+// both, so that user would show as a journalist everywhere but get a
+// 403 on every journalist API call.
+const VALID_ROLES = ["USER", "MODERATOR", "ADMIN"];
 
 export async function PUT(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
