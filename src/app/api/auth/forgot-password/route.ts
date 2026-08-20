@@ -2,8 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendPasswordResetEmail } from "@/lib/email"; // ✅ added
 import crypto from "crypto";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  // This endpoint is unauthenticated by necessity (a locked-out user
+  // still needs to request a reset), which is exactly why it needs a
+  // strict limit - without one, it's an open email-bombing vector
+  // against any address, since it accepts whatever email is put in the
+  // request body and always sends real mail (or at least always did
+  // the work up to that point) regardless of whether the account
+  // exists. Same limit as resend-verification, for the same reason.
+  const limit = await rateLimit(req, { limit: 3, window: 600, type: "forgot-password" });
+  if (!limit.success) return limit.response;
+
   try {
     const { email } = await req.json();
 
