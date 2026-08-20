@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient, NewsArticleCategory, NewsArticleStatus } from "@prisma/client";
+import {
+  PrismaClient,
+  NewsArticleCategory,
+  NewsArticleStatus,
+} from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
@@ -11,6 +15,18 @@ const prisma =
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
+}
+
+function isValidDate(value: unknown): value is string | Date {
+  if (value instanceof Date) {
+    return !Number.isNaN(value.getTime());
+  }
+
+  if (typeof value !== "string" || !value.trim()) {
+    return false;
+  }
+
+  return !Number.isNaN(new Date(value).getTime());
 }
 
 /**
@@ -48,63 +64,56 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    const where: {
-      status?: NewsArticleStatus;
-      category?: NewsArticleCategory;
-      OR?: Array<{
-        title?: { contains: string; mode: "insensitive" };
-        slug?: { contains: string; mode: "insensitive" };
-        excerpt?: { contains: string; mode: "insensitive" };
-        content?: { contains: string; mode: "insensitive" };
-      }>;
-    } = {};
-
-    if (
-      statusParam &&
+    const where = {
+      ...(statusParam &&
       Object.values(NewsArticleStatus).includes(
         statusParam as NewsArticleStatus
       )
-    ) {
-      where.status = statusParam as NewsArticleStatus;
-    }
+        ? {
+            status: statusParam as NewsArticleStatus,
+          }
+        : {}),
 
-    if (
-      categoryParam &&
+      ...(categoryParam &&
       Object.values(NewsArticleCategory).includes(
         categoryParam as NewsArticleCategory
       )
-    ) {
-      where.category = categoryParam as NewsArticleCategory;
-    }
+        ? {
+            category: categoryParam as NewsArticleCategory,
+          }
+        : {}),
 
-    if (search) {
-      where.OR = [
-        {
-          title: {
-            contains: search,
-            mode: "insensitive",
-          },
-        },
-        {
-          slug: {
-            contains: search,
-            mode: "insensitive",
-          },
-        },
-        {
-          excerpt: {
-            contains: search,
-            mode: "insensitive",
-          },
-        },
-        {
-          content: {
-            contains: search,
-            mode: "insensitive",
-          },
-        },
-      ];
-    }
+      ...(search
+        ? {
+            OR: [
+              {
+                title: {
+                  contains: search,
+                  mode: "insensitive" as const,
+                },
+              },
+              {
+                slug: {
+                  contains: search,
+                  mode: "insensitive" as const,
+                },
+              },
+              {
+                excerpt: {
+                  contains: search,
+                  mode: "insensitive" as const,
+                },
+              },
+              {
+                content: {
+                  contains: search,
+                  mode: "insensitive" as const,
+                },
+              },
+            ],
+          }
+        : {}),
+    };
 
     const [articles, total] = await Promise.all([
       prisma.newsArticle.findMany({
@@ -193,58 +202,74 @@ export async function POST(request: NextRequest) {
       publishedAt,
     } = body;
 
-    if (!title || typeof title !== "string") {
+    /*
+     * Basic validation
+     */
+    if (
+      typeof title !== "string" ||
+      !title.trim()
+    ) {
       return NextResponse.json(
         {
           success: false,
           error: "Title is required",
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
-    if (!slug || typeof slug !== "string") {
+    if (
+      typeof slug !== "string" ||
+      !slug.trim()
+    ) {
       return NextResponse.json(
         {
           success: false,
           error: "Slug is required",
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
-    if (!content || typeof content !== "string") {
+    if (
+      typeof content !== "string" ||
+      !content.trim()
+    ) {
       return NextResponse.json(
         {
           success: false,
           error: "Content is required",
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
-    if (!authorId || typeof authorId !== "string") {
+    if (
+      typeof authorId !== "string" ||
+      !authorId.trim()
+    ) {
       return NextResponse.json(
         {
           success: false,
           error: "Author ID is required",
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
+    /*
+     * Validate category
+     */
+    const articleCategory =
+      category === undefined ||
+      category === null ||
+      category === ""
+        ? NewsArticleCategory.WORLD
+        : category;
+
     if (
-      category &&
       !Object.values(NewsArticleCategory).includes(
-        category as NewsArticleCategory
+        articleCategory as NewsArticleCategory
       )
     ) {
       return NextResponse.json(
@@ -252,16 +277,23 @@ export async function POST(request: NextRequest) {
           success: false,
           error: "Invalid news category",
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
+    /*
+     * Validate status
+     */
+    const articleStatus =
+      status === undefined ||
+      status === null ||
+      status === ""
+        ? NewsArticleStatus.DRAFT
+        : status;
+
     if (
-      status &&
       !Object.values(NewsArticleStatus).includes(
-        status as NewsArticleStatus
+        articleStatus as NewsArticleStatus
       )
     ) {
       return NextResponse.json(
@@ -269,15 +301,87 @@ export async function POST(request: NextRequest) {
           success: false,
           error: "Invalid news status",
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
+    /*
+     * Validate publishedAt if provided.
+     */
+    let parsedPublishedAt: Date | null = null;
+
+    if (publishedAt !== undefined && publishedAt !== null && publishedAt !== "") {
+      if (!isValidDate(publishedAt)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Invalid publishedAt date",
+          },
+          { status: 400 }
+        );
+      }
+
+      parsedPublishedAt = new Date(publishedAt);
+    } else if (
+      articleStatus === NewsArticleStatus.PUBLISHED
+    ) {
+      parsedPublishedAt = new Date();
+    }
+
+    /*
+     * Validate views.
+     */
+    let articleViews = 0;
+
+    if (views !== undefined && views !== null) {
+      const numericViews = Number(views);
+
+      if (
+        !Number.isFinite(numericViews) ||
+        numericViews < 0
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Views must be a valid non-negative number",
+          },
+          { status: 400 }
+        );
+      }
+
+      articleViews = Math.floor(numericViews);
+    }
+
+    /*
+     * Verify author exists.
+     */
+    const author = await prisma.user.findUnique({
+      where: {
+        id: authorId.trim(),
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!author) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Author not found",
+        },
+        { status: 400 }
+      );
+    }
+
+    /*
+     * Check slug uniqueness.
+     */
+    const cleanSlug = slug.trim();
+
     const existingSlug = await prisma.newsArticle.findUnique({
       where: {
-        slug,
+        slug: cleanSlug,
       },
       select: {
         id: true,
@@ -290,54 +394,75 @@ export async function POST(request: NextRequest) {
           success: false,
           error: "An article with this slug already exists",
         },
-        {
-          status: 409,
-        }
+        { status: 409 }
       );
     }
 
-    const articleStatus =
-      (status as NewsArticleStatus | undefined) ||
-      NewsArticleStatus.DRAFT;
+    /*
+     * If this article is being created as featured,
+     * remove featured status from the existing article(s).
+     */
+    if (Boolean(featured)) {
+      await prisma.newsArticle.updateMany({
+        where: {
+          featured: true,
+        },
+        data: {
+          featured: false,
+        },
+      });
+    }
 
+    /*
+     * Create article.
+     */
     const article = await prisma.newsArticle.create({
       data: {
         title: title.trim(),
-        slug: slug.trim(),
+
+        slug: cleanSlug,
+
         excerpt:
-          typeof excerpt === "string" && excerpt.trim()
+          typeof excerpt === "string" &&
+          excerpt.trim()
             ? excerpt.trim()
             : null,
-        content,
+
+        content: content.trim(),
+
         coverImage:
-          typeof coverImage === "string" && coverImage.trim()
+          typeof coverImage === "string" &&
+          coverImage.trim()
             ? coverImage.trim()
             : null,
+
         sourceName:
-          typeof sourceName === "string" && sourceName.trim()
+          typeof sourceName === "string" &&
+          sourceName.trim()
             ? sourceName.trim()
             : null,
+
         sourceUrl:
-          typeof sourceUrl === "string" && sourceUrl.trim()
+          typeof sourceUrl === "string" &&
+          sourceUrl.trim()
             ? sourceUrl.trim()
             : null,
+
         category:
-          (category as NewsArticleCategory | undefined) ||
-          NewsArticleCategory.WORLD,
-        status: articleStatus,
-        authorId,
-        views:
-          typeof views === "number" && views >= 0
-            ? Math.floor(views)
-            : 0,
+          articleCategory as NewsArticleCategory,
+
+        status:
+          articleStatus as NewsArticleStatus,
+
+        authorId: authorId.trim(),
+
+        views: articleViews,
+
         featured: Boolean(featured),
-        publishedAt:
-          publishedAt
-            ? new Date(publishedAt)
-            : articleStatus === NewsArticleStatus.PUBLISHED
-              ? new Date()
-              : null,
+
+        publishedAt: parsedPublishedAt,
       },
+
       include: {
         author: {
           select: {
