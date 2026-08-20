@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { NewsArticleCategory, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+const ALLOWED_CATEGORIES = Object.values(NewsArticleCategory);
 
 /**
  * GET /api/news
@@ -18,40 +22,38 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
 
-    const category = searchParams.get("category");
-    const featured = searchParams.get("featured");
-    const cursor = searchParams.get("cursor");
+    const categoryParam = searchParams.get("category");
+    const featuredParam = searchParams.get("featured");
+    const cursorParam = searchParams.get("cursor");
 
-    const requestedLimit = Number(searchParams.get("limit") || "20");
-
-    const limit = Math.min(
-      Math.max(Number.isFinite(requestedLimit) ? requestedLimit : 20, 1),
-      50
+    const requestedLimit = Number(
+      searchParams.get("limit") || "20"
     );
 
-    const where: any = {
+    const limit =
+      Number.isFinite(requestedLimit) && requestedLimit > 0
+        ? Math.min(Math.floor(requestedLimit), 50)
+        : 20;
+
+    const where: Prisma.NewsArticleWhereInput = {
       status: "PUBLISHED",
       publishedAt: {
         not: null,
       },
     };
 
-    if (category) {
-      const allowedCategories = [
-        "WORLD",
-        "EUROPE",
-        "SWITZERLAND",
-        "POLITICS",
-        "BUSINESS",
-        "TECHNOLOGY",
-        "CRYPTO",
-        "SCIENCE",
-        "SPORTS",
-        "CULTURE",
-        "COMMUNITY",
-      ];
+    /*
+     * Category filter
+     */
+    if (categoryParam) {
+      const normalizedCategory =
+        categoryParam.toUpperCase();
 
-      if (!allowedCategories.includes(category.toUpperCase())) {
+      if (
+        !ALLOWED_CATEGORIES.includes(
+          normalizedCategory as NewsArticleCategory
+        )
+      ) {
         return NextResponse.json(
           {
             success: false,
@@ -61,15 +63,25 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      where.category = category.toUpperCase();
+      where.category =
+        normalizedCategory as NewsArticleCategory;
     }
 
-    if (featured === "true") {
+    /*
+     * Featured filter
+     */
+    if (featuredParam === "true") {
       where.featured = true;
     }
 
-    if (cursor) {
-      const cursorDate = new Date(cursor);
+    /*
+     * Cursor pagination
+     *
+     * The cursor is the publishedAt timestamp
+     * returned by the previous request.
+     */
+    if (cursorParam) {
+      const cursorDate = new Date(cursorParam);
 
       if (Number.isNaN(cursorDate.getTime())) {
         return NextResponse.json(
@@ -87,12 +99,24 @@ export async function GET(request: NextRequest) {
       };
     }
 
+    /*
+     * Fetch one extra article so we can determine
+     * whether another page exists.
+     */
     const articles = await prisma.newsArticle.findMany({
       where,
-      orderBy: {
-        publishedAt: "desc",
-      },
+
+      orderBy: [
+        {
+          publishedAt: "desc",
+        },
+        {
+          createdAt: "desc",
+        },
+      ],
+
       take: limit + 1,
+
       select: {
         id: true,
         title: true,
@@ -108,7 +132,7 @@ export async function GET(request: NextRequest) {
         featured: true,
         publishedAt: true,
         createdAt: true,
-        updatedAt: true,
+
         author: {
           select: {
             id: true,
@@ -123,22 +147,40 @@ export async function GET(request: NextRequest) {
 
     const hasMore = articles.length > limit;
 
-    const results = hasMore ? articles.slice(0, limit) : articles;
+    const results = hasMore
+      ? articles.slice(0, limit)
+      : articles;
 
-    const nextCursor =
-      hasMore && results.length > 0
-        ? results[results.length - 1].publishedAt?.toISOString() ?? null
+    const lastArticle =
+      results.length > 0
+        ? results[results.length - 1]
         : null;
 
-    return NextResponse.json({
-      success: true,
-      articles: results,
-      pagination: {
-        limit,
-        hasMore,
-        nextCursor,
+    const nextCursor =
+      hasMore && lastArticle?.publishedAt
+        ? lastArticle.publishedAt.toISOString()
+        : null;
+
+    return NextResponse.json(
+      {
+        success: true,
+
+        articles: results,
+
+        pagination: {
+          limit,
+          hasMore,
+          nextCursor,
+        },
       },
-    });
+      {
+        status: 200,
+        headers: {
+          "Cache-Control":
+            "no-store, no-cache, must-revalidate",
+        },
+      }
+    );
   } catch (error) {
     console.error("ZRP News GET error:", error);
 
