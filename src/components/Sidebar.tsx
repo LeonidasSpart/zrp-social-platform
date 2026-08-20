@@ -8,7 +8,7 @@ import { useSession, signOut } from "next-auth/react";
 import {
   Home, Compass, Search, MessageSquare, Bell, Bookmark, User,
   LayoutDashboard, Settings, Users, Key, LogOut, MoreHorizontal,
-  PenSquare, Sun, Moon, Globe, Film,
+  PenSquare, Sun, Moon, Globe, Film, Newspaper,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -89,6 +89,7 @@ export default function Sidebar() {
     { href: "/", icon: Home, label: t("nav.home") },
     { href: "/shorts", icon: Film, label: "Shorts" },
     { href: "/explore", icon: Compass, label: t("nav.explore") },
+    { href: "/news", icon: Newspaper, label: "News" },
     { href: "/search", icon: Search, label: t("nav.search") },
     {
       href: "/messages",
@@ -207,6 +208,26 @@ export default function Sidebar() {
             />
 
             <span>{t("nav.admin")}</span>
+          </Link>
+        )}
+
+        {/* Journalist */}
+        {session?.user?.role === "JOURNALIST" && (
+          <Link
+            href="/journalist"
+            className={`flex items-center gap-4 px-3 py-2.5 rounded-full text-lg transition ${
+              isActive("/journalist")
+                ? "font-bold text-gray-900 dark:text-white"
+                : "font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+            }`}
+          >
+            <Newspaper
+              className={`w-6 h-6 ${
+                isActive("/journalist") ? "text-zrp-red" : ""
+              }`}
+            />
+
+            <span>Journalist</span>
           </Link>
         )}
 
