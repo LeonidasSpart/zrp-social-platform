@@ -35,25 +35,21 @@ function pathMatches(path: string, list: string[]) {
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
-  // ─── INFRA / API EXEMPT PATHS ──────────────────────────────────────
-  // NOTE: "/api" here still exempts every API route from the checks
-  // below (banned/onboarding/page-auth) - each API route handles its
-  // own auth in-file (getServerSession/getToken/requireAdmin etc). This
-  // is unchanged from before; not part of what was reported here.
-  const exemptPaths = [
+  // ─── INFRA EXEMPT PATHS ─────────────────────────────────────────────
+  // These never need a token at all.
+  const infraExemptPaths = [
     "/api/auth/session",
     "/api/auth/callback",
     "/api/auth/csrf",
     "/api/auth/providers",
     "/api/auth/signin",
     "/api/auth/signout",
-    "/api",
     "/_next",
     "/favicon.ico",
     "/onboarding",
   ];
 
-  if (exemptPaths.some((p) => path.startsWith(p))) {
+  if (infraExemptPaths.some((p) => path.startsWith(p))) {
     return NextResponse.next();
   }
 
@@ -72,6 +68,29 @@ export async function middleware(req: NextRequest) {
 
   // ─── GET TOKEN ─────────────────────────────────────────────────────
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+  // ─── API ROUTES ─────────────────────────────────────────────────────
+  // Every /api/* route still handles its own auth in-file
+  // (getServerSession/getToken/requireAdmin etc) - that's unchanged and
+  // intentional. What WAS missing: a banned user's session token is
+  // only ever checked at the page level below, so a banned user could
+  // still freely call every write API (post, message, etc.) even
+  // though loading any page redirected them to /login?error=banned.
+  // This closes that gap - but only for the banned check. The
+  // onboarding-redirect check deliberately does NOT apply here: the
+  // onboarding page itself calls half a dozen API routes (profile
+  // save, avatar upload, follow-suggestions, the completion call
+  // itself) while onboardingCompleted is still false, so blocking API
+  // access until onboarding is done would break onboarding itself.
+  // A redirect also wouldn't make sense for a fetch() caller expecting
+  // JSON, which is why this returns a plain 403 instead of the
+  // page-level redirect-to-/login used below.
+  if (path.startsWith("/api")) {
+    if (token?.banned === true) {
+      return NextResponse.json({ error: "Account banned" }, { status: 403 });
+    }
+    return NextResponse.next();
+  }
 
   // ─── AUTH-FLOW PAGES ────────────────────────────────────────────────
   // A signed-in visitor hitting /login, /signup, etc. gets sent home
@@ -122,8 +141,11 @@ export async function middleware(req: NextRequest) {
   // ─── FEATURE‑BASED ROUTE PROTECTION ──────────────────────────────
   // These routes require specific plan features. (The matching
   // /api/team and /api/api-keys checks that used to live here never
-  // actually ran - "/api" is exempted above before this code is
-  // reached - so they've been dropped rather than kept as dead code.)
+  // actually ran - "/api" was exempted above before this code was
+  // reached - so they were dropped rather than kept as dead code. If
+  // those need enforcing again now that /api gets its own handling
+  // above, they'd need to be added back inside the API block, with a
+  // JSON 403 rather than a redirect.)
 
   if (path.startsWith("/settings/team")) {
     if (!hasFeature(token, "teamManagement")) {
