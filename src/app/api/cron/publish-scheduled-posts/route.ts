@@ -4,10 +4,17 @@ import { prisma } from "@/lib/db";
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  // Simple authentication: require a secret key to prevent abuse
+  // Require a secret key to prevent abuse. Deliberately fails CLOSED:
+  // if CRON_SECRET isn't set on Railway, every request is now rejected
+  // rather than silently accepted - the previous `if (secret && ...)`
+  // meant a missing env var (Railway misconfiguration, typo in the
+  // variable name, etc) turned this into a fully public, unauthenticated
+  // endpoint with zero warning. Better to have scheduled posts not
+  // publish (loud, obvious, fixable by setting the env var) than to
+  // have this silently open to anyone who finds the URL.
   const authHeader = req.headers.get("authorization");
   const secret = process.env.CRON_SECRET;
-  if (secret && authHeader !== `Bearer ${secret}`) {
+  if (!secret || authHeader !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
