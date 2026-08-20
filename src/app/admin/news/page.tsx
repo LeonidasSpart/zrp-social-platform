@@ -27,7 +27,7 @@ type NewsCategory =
   | "CULTURE"
   | "COMMUNITY";
 
-type NewsStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
+type NewsStatus = "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "REJECTED" | "ARCHIVED";
 
 type Author = {
   id: string;
@@ -54,6 +54,9 @@ type NewsArticle = {
   createdAt: string;
   updatedAt?: string;
   author: Author;
+  // Journalist editorial workflow
+  submittedAt?: string | null;
+  reviewNote?: string | null;
 };
 
 type Pagination = {
@@ -86,7 +89,9 @@ const statuses: Array<{
   label: string;
 }> = [
   { value: "DRAFT", label: "Draft" },
+  { value: "PENDING_REVIEW", label: "Pending Review" },
   { value: "PUBLISHED", label: "Published" },
+  { value: "REJECTED", label: "Rejected" },
   { value: "ARCHIVED", label: "Archived" },
 ];
 
@@ -395,6 +400,50 @@ export default function AdminNewsPage() {
     }
   }
 
+  async function reviewArticle(article: NewsArticle, decision: "approve" | "reject") {
+    let reviewNote: string | null = null;
+
+    if (decision === "reject") {
+      reviewNote = window.prompt(
+        "Feedback for the journalist (shown to them, optional):"
+      );
+      if (reviewNote === null) return; // cancelled
+    }
+
+    try {
+      setDeleting(article.id); // reuse the row-level busy indicator
+      setError(null);
+      setSuccess(null);
+
+      const response = await fetch(`/api/admin/news/${article.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: decision === "approve" ? "PUBLISHED" : "REJECTED",
+          ...(decision === "reject" ? { reviewNote: reviewNote || null } : {}),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || `Failed to ${decision} article`);
+      }
+
+      setSuccess(
+        decision === "approve"
+          ? "Article approved and published."
+          : "Article sent back to the journalist."
+      );
+
+      await loadArticles(page);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : `Failed to ${decision} article`);
+    } finally {
+      setDeleting(null);
+    }
+  }
+
   function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     loadArticles(1);
@@ -695,6 +744,11 @@ export default function AdminNewsPage() {
 
                         <td className="px-6 py-4">
                           <StatusBadge status={article.status} />
+                          {article.status === "REJECTED" && article.reviewNote && (
+                            <p className="mt-1 max-w-[14rem] truncate text-xs text-gray-500 dark:text-gray-400" title={article.reviewNote}>
+                              {article.reviewNote}
+                            </p>
+                          )}
                         </td>
 
                         <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
@@ -709,6 +763,29 @@ export default function AdminNewsPage() {
 
                         <td className="px-6 py-4">
                           <div className="flex justify-end gap-2">
+                            {article.status === "PENDING_REVIEW" && (
+                              <>
+                                <button
+                                  type="button"
+                                  disabled={deleting === article.id}
+                                  onClick={() => reviewArticle(article, "approve")}
+                                  className="rounded-lg border border-green-300 px-2 py-1 text-xs font-medium text-green-700 transition hover:bg-green-50 disabled:opacity-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-950/30"
+                                  title="Approve & publish"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={deleting === article.id}
+                                  onClick={() => reviewArticle(article, "reject")}
+                                  className="rounded-lg border border-red-300 px-2 py-1 text-xs font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30"
+                                  title="Reject submission"
+                                >
+                                  Reject
+                                </button>
+                              </>
+                            )}
+
                             <Link
                               href={`/news/${article.slug}`}
                               target="_blank"
@@ -779,8 +856,35 @@ export default function AdminNewsPage() {
                             {article.category}
                           </span>
                         </div>
+
+                        {article.status === "REJECTED" && article.reviewNote && (
+                          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            Feedback: {article.reviewNote}
+                          </p>
+                        )}
                       </div>
                     </div>
+
+                    {article.status === "PENDING_REVIEW" && (
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          type="button"
+                          disabled={deleting === article.id}
+                          onClick={() => reviewArticle(article, "approve")}
+                          className="flex-1 rounded-lg border border-green-300 px-3 py-1.5 text-xs font-medium text-green-700 disabled:opacity-50 dark:border-green-800 dark:text-green-400"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          type="button"
+                          disabled={deleting === article.id}
+                          onClick={() => reviewArticle(article, "reject")}
+                          className="flex-1 rounded-lg border border-red-300 px-3 py-1.5 text-xs font-medium text-red-700 disabled:opacity-50 dark:border-red-800 dark:text-red-400"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )}
 
                     <div className="mt-4 flex items-center justify-between">
                       <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -1154,8 +1258,12 @@ function StatusBadge({ status }: { status: NewsStatus }) {
   const styles: Record<NewsStatus, string> = {
     DRAFT:
       "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+    PENDING_REVIEW:
+      "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
     PUBLISHED:
       "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+    REJECTED:
+      "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
     ARCHIVED:
       "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
   };
@@ -1164,7 +1272,7 @@ function StatusBadge({ status }: { status: NewsStatus }) {
     <span
       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${styles[status]}`}
     >
-      {status}
+      {status.replace("_", " ")}
     </span>
   );
 }
