@@ -1,22 +1,13 @@
-import { BadgeCheck, Newspaper } from "lucide-react";
-import type { ComponentType } from "react";
+import { BadgeCheck, Newspaper, type LucideIcon } from "lucide-react";
 
 interface VerifiedBadgeProps {
   badgeType?: string | null;
   className?: string;
 }
 
-interface BadgeIconProps {
-  className?: string;
-  style?: React.CSSProperties;
-  stroke?: string;
-  strokeWidth?: number;
-  "aria-label"?: string;
-}
-
 const BADGE_STYLES: Record<
   string,
-  { color: string; label: string; icon: ComponentType<BadgeIconProps> }
+  { color: string; label: string; icon: LucideIcon }
 > = {
   verified: { color: "#3B82F6", label: "Verified account", icon: BadgeCheck }, // blue
   organization: { color: "#FFD700", label: "Verified organization", icon: BadgeCheck }, // gold ✅
