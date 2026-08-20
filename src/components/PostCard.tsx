@@ -136,8 +136,8 @@ function parseContent(content: string) {
       raw.startsWith("@")
         ? "mention"
         : raw.startsWith("#")
-        ? "hashtag"
-        : "url";
+          ? "hashtag"
+          : "url";
 
     if (type === "url") {
       const trailingMatch = raw.match(trailingPunctuation);
@@ -158,7 +158,6 @@ function parseContent(content: string) {
         });
 
         lastIndex = match.index + raw.length;
-
         continue;
       }
     }
@@ -197,9 +196,7 @@ function extractFirstUrl(content: string): string | null {
     ""
   );
 
-  return raw.startsWith("http")
-    ? raw
-    : `https://${raw}`;
+  return raw.startsWith("http") ? raw : `https://${raw}`;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -209,21 +206,82 @@ function extractFirstUrl(content: string): string | null {
 function formatCount(n: number) {
   if (n >= 1_000_000) {
     return (
-      (n / 1_000_000)
-        .toFixed(1)
-        .replace(/\.0$/, "") + "M"
+      (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M"
     );
   }
 
   if (n >= 1_000) {
     return (
-      (n / 1_000)
-        .toFixed(1)
-        .replace(/\.0$/, "") + "K"
+      (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K"
     );
   }
 
   return n.toString();
+}
+
+// ─────────────────────────────────────────────────────────────
+// MEDIA HELPERS
+// ─────────────────────────────────────────────────────────────
+
+function normalizeMediaType(value?: string | null) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "");
+}
+
+function getMediaPath(url?: string | null) {
+  if (!url) return "";
+
+  return url
+    .toLowerCase()
+    .split("?")[0]
+    .split("#")[0];
+}
+
+function isGifMedia(
+  url?: string | null,
+  mediaType?: string | null
+) {
+  const type = normalizeMediaType(mediaType);
+  const path = getMediaPath(url);
+
+  return (
+    path.endsWith(".gif") ||
+    type === "gif" ||
+    type === "image/gif"
+  );
+}
+
+function isExplicitVideoMediaType(
+  mediaType?: string | null
+) {
+  const type = normalizeMediaType(mediaType);
+
+  return (
+    type === "video" ||
+    type === "videos" ||
+    type === "movie" ||
+    type === "video/mp4" ||
+    type === "video/webm" ||
+    type === "video/mov" ||
+    type === "video/quicktime" ||
+    type.startsWith("video/")
+  );
+}
+
+function isExplicitImageMediaType(
+  mediaType?: string | null
+) {
+  const type = normalizeMediaType(mediaType);
+
+  return (
+    type === "image" ||
+    type === "images" ||
+    type === "photo" ||
+    type === "picture" ||
+    type.startsWith("image/")
+  );
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -371,19 +429,13 @@ export default function PostCard({
   // IMAGE GALLERY
   // ─────────────────────────────────────────────────────────────
 
-  /*
-   * Build one consistent gallery list.
-   *
-   * imageUrls is preferred because it contains all images.
-   * imageUrl is used as a fallback for older single-image posts.
-   */
   const galleryImages =
     post.imageUrls &&
     post.imageUrls.length > 0
       ? post.imageUrls
       : post.imageUrl
-      ? [post.imageUrl]
-      : [];
+        ? [post.imageUrl]
+        : [];
 
   const lightboxOpen =
     lightboxImageIndex !== null &&
@@ -411,9 +463,7 @@ export default function PostCard({
     }
 
     setLightboxImageIndex((current) => {
-      if (current === null) {
-        return null;
-      }
+      if (current === null) return null;
 
       return current > 0
         ? current - 1
@@ -427,25 +477,20 @@ export default function PostCard({
     }
 
     setLightboxImageIndex((current) => {
-      if (current === null) {
-        return null;
-      }
+      if (current === null) return null;
 
-      return current <
-        galleryImages.length - 1
+      return current < galleryImages.length - 1
         ? current + 1
         : 0;
     });
   };
 
   // ─────────────────────────────────────────────────────────────
-  // PREVENT BACKGROUND SCROLL
+  // LIGHTBOX SCROLL LOCK
   // ─────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    if (!lightboxOpen) {
-      return;
-    }
+    if (!lightboxOpen) return;
 
     const previousOverflow =
       document.body.style.overflow;
@@ -459,13 +504,11 @@ export default function PostCard({
   }, [lightboxOpen]);
 
   // ─────────────────────────────────────────────────────────────
-  // KEYBOARD LIGHTBOX NAVIGATION
+  // LIGHTBOX KEYBOARD
   // ─────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    if (!lightboxOpen) {
-      return;
-    }
+    if (!lightboxOpen) return;
 
     const handleKeyDown = (
       event: KeyboardEvent
@@ -505,7 +548,7 @@ export default function PostCard({
   ]);
 
   // ─────────────────────────────────────────────────────────────
-  // LIGHTBOX TOUCH SWIPE
+  // LIGHTBOX TOUCH
   // ─────────────────────────────────────────────────────────────
 
   const lightboxTouchStartX =
@@ -517,8 +560,9 @@ export default function PostCard({
   const handleLightboxTouchStart = (
     event: React.TouchEvent
   ) => {
-    const touch =
-      event.touches[0];
+    const touch = event.touches[0];
+
+    if (!touch) return;
 
     lightboxTouchStartX.current =
       touch.clientX;
@@ -537,8 +581,9 @@ export default function PostCard({
       return;
     }
 
-    const touch =
-      event.changedTouches[0];
+    const touch = event.changedTouches[0];
+
+    if (!touch) return;
 
     const deltaX =
       touch.clientX -
@@ -548,15 +593,9 @@ export default function PostCard({
       touch.clientY -
       lightboxTouchStartY.current;
 
-    lightboxTouchStartX.current =
-      null;
+    lightboxTouchStartX.current = null;
+    lightboxTouchStartY.current = null;
 
-    lightboxTouchStartY.current =
-      null;
-
-    /*
-     * Ignore mostly vertical gestures.
-     */
     if (
       Math.abs(deltaX) < 50 ||
       Math.abs(deltaX) <= Math.abs(deltaY)
@@ -574,40 +613,43 @@ export default function PostCard({
   // ─────────────────────────────────────────────────────────────
   // MEDIA DETECTION
   // ─────────────────────────────────────────────────────────────
-
-  /*
-   * IMPORTANT:
-   *
-   * GIF files are ALWAYS treated as images.
-   *
-   * This protects old posts where the database may incorrectly
-   * contain:
-   *
-   *   mediaType: "video"
-   *
-   * while the actual file is:
-   *
-   *   something.gif
-   *
-   * GIFs therefore:
-   *
-   * - do NOT use <video>
-   * - do NOT open VideoFeedViewer
-   * - do NOT behave as Shorts
-   * - use the normal image/lightbox viewer
-   */
+  //
+  // IMPORTANT:
+  //
+  // GIF ALWAYS = IMAGE
+  //
+  // Video detection is intentionally based on BOTH:
+  //
+  // 1. URL extension
+  // 2. database mediaType
+  //
+  // This is important because storage/CDN URLs often look like:
+  //
+  // https://cdn.example.com/file/abc123
+  //
+  // instead of:
+  //
+  // https://cdn.example.com/file/video.mp4
+  //
+  // If the API says mediaType = video, we therefore still
+  // render the media as a video and allow Shorts.
+  //
+  // ─────────────────────────────────────────────────────────────
 
   const mediaUrl =
-    post.imageUrl?.toLowerCase() || "";
+    post.imageUrl || "";
 
   const mediaPath =
-    mediaUrl
-      .split("?")[0]
-      .split("#")[0];
+    getMediaPath(mediaUrl);
+
+  const normalizedMediaType =
+    normalizeMediaType(post.mediaType);
 
   const isGif =
-    mediaPath.endsWith(".gif") ||
-    post.mediaType === "gif";
+    isGifMedia(
+      post.imageUrl,
+      post.mediaType
+    );
 
   const isImageGallery =
     !!post.imageUrls &&
@@ -622,6 +664,10 @@ export default function PostCard({
     "svg",
     "avif",
     "bmp",
+    "tif",
+    "tiff",
+    "heic",
+    "heif",
   ];
 
   const videoExtensions = [
@@ -632,6 +678,12 @@ export default function PostCard({
     "mkv",
     "m4v",
     "3gp",
+    "3g2",
+    "ogv",
+    "mpeg",
+    "mpg",
+    "m2v",
+    "ts",
   ];
 
   const hasImageExtension =
@@ -646,67 +698,31 @@ export default function PostCard({
         mediaPath.endsWith("." + ext)
     );
 
-  const isVideo = () => {
-    /*
-     * GIF always wins.
-     */
-    if (isGif) {
-      return false;
-    }
-
-    /*
-     * Multiple images are always a gallery.
-     */
-    if (isImageGallery) {
-      return false;
-    }
-
-    /*
-     * Explicit image.
-     */
-    if (post.mediaType === "image") {
-      return false;
-    }
-
-    /*
-     * Actual image file extension.
-     */
-    if (hasImageExtension) {
-      return false;
-    }
-
-    /*
-     * Actual video file extension.
-     */
-    if (hasVideoExtension) {
-      return true;
-    }
-
-    /*
-     * Explicit video type.
-     */
-    if (post.mediaType === "video") {
-      return true;
-    }
-
-    /*
-     * Some storage URLs may not expose a standard extension.
-     * Only obvious video paths are treated as video.
-     */
-    if (
-      mediaUrl.includes("/video/") ||
-      mediaUrl.includes("/videos/")
-    ) {
-      return true;
-    }
-
-    /*
-     * Unknown media is NOT assumed to be video.
-     */
-    return false;
-  };
-
-  const video = isVideo();
+  /*
+   * GIF ALWAYS wins.
+   */
+  const video =
+    !isGif &&
+    !isImageGallery &&
+    !isExplicitImageMediaType(
+      normalizedMediaType
+    ) &&
+    (
+      isExplicitVideoMediaType(
+        normalizedMediaType
+      ) ||
+      hasVideoExtension ||
+      (
+        !hasImageExtension &&
+        (
+          mediaUrl.includes("/video/") ||
+          mediaUrl.includes("/videos/") ||
+          mediaUrl.includes("/media/video/") ||
+          mediaUrl.includes("/uploads/video/") ||
+          mediaUrl.includes("video=true")
+        )
+      )
+    );
 
   const [videoLoadFailed, setVideoLoadFailed] =
     useState(false);
@@ -722,16 +738,17 @@ export default function PostCard({
   const nudgeVideoFrame = (
     el: HTMLVideoElement
   ) => {
-    if (posterNudged.current)
-      return;
+    if (posterNudged.current) return;
 
     posterNudged.current = true;
 
     try {
-      el.currentTime = Math.min(
-        0.1,
-        (el.duration || 1) * 0.05
-      );
+      if (Number.isFinite(el.duration)) {
+        el.currentTime = Math.min(
+          0.1,
+          (el.duration || 1) * 0.05
+        );
+      }
     } catch {
       // no-op
     }
@@ -745,6 +762,19 @@ export default function PostCard({
 
   const [videoMuted, setVideoMuted] =
     useState(true);
+
+  // Reset media state if a reused PostCard receives
+  // a completely different media URL.
+  useEffect(() => {
+    setVideoLoadFailed(false);
+    setVideoInView(false);
+    setVideoMuted(true);
+    posterNudged.current = false;
+  }, [
+    post.id,
+    post.imageUrl,
+    post.mediaType,
+  ]);
 
   // ─────────────────────────────────────────────────────────────
   // VIDEO AUTOPLAY
@@ -777,14 +807,16 @@ export default function PostCard({
 
     return () =>
       observer.disconnect();
-  }, [video]);
+  }, [
+    video,
+    post.id,
+  ]);
 
   useEffect(() => {
     const el =
       videoRef.current;
 
-    if (!el)
-      return;
+    if (!el || !video) return;
 
     if (videoInView) {
       el.muted = videoMuted;
@@ -799,6 +831,7 @@ export default function PostCard({
       el.pause();
     }
   }, [
+    video,
     videoInView,
     videoMuted,
   ]);
@@ -808,32 +841,30 @@ export default function PostCard({
   // ─────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    const checkRepost =
-      async () => {
-        if (!session)
-          return;
+    const checkRepost = async () => {
+      if (!session) return;
 
-        try {
-          const res =
-            await fetch(
-              `/api/posts/${post.id}/repost`
-            );
+      try {
+        const res =
+          await fetch(
+            `/api/posts/${post.id}/repost`
+          );
 
-          if (res.ok) {
-            const data =
-              await res.json();
+        if (res.ok) {
+          const data =
+            await res.json();
 
-            setReposted(
-              data.reposted
-            );
-          }
-        } catch (error) {
-          console.error(
-            "Error checking repost:",
-            error
+          setReposted(
+            data.reposted
           );
         }
-      };
+      } catch (error) {
+        console.error(
+          "Error checking repost:",
+          error
+        );
+      }
+    };
 
     checkRepost();
   }, [
@@ -860,15 +891,11 @@ export default function PostCard({
           const counts =
             data.reduce(
               (
-                acc: Record<
-                  string,
-                  number
-                >,
+                acc: Record<string, number>,
                 r: any
               ) => {
                 acc[r.emoji] =
-                  (acc[r.emoji] || 0) +
-                  1;
+                  (acc[r.emoji] || 0) + 1;
 
                 return acc;
               },
@@ -899,8 +926,9 @@ export default function PostCard({
     };
 
   useEffect(() => {
-    if (session)
+    if (session) {
       fetchReactions();
+    }
   }, [
     post.id,
     session,
@@ -908,8 +936,7 @@ export default function PostCard({
 
   const handleReaction =
     async (emoji: string) => {
-      if (!session)
-        return;
+      if (!session) return;
 
       try {
         const res =
@@ -940,7 +967,7 @@ export default function PostCard({
     };
 
   // ─────────────────────────────────────────────────────────────
-  // BOOKMARK
+  // BOOKMARK CHECK
   // ─────────────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -968,8 +995,9 @@ export default function PostCard({
         }
       };
 
-    if (session)
+    if (session) {
       checkBookmark();
+    }
   }, [
     post.id,
     session,
@@ -980,8 +1008,7 @@ export default function PostCard({
   // ─────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    if (hasCountedView.current)
-      return;
+    if (hasCountedView.current) return;
 
     hasCountedView.current = true;
 
@@ -1000,8 +1027,9 @@ export default function PostCard({
       viewed = [];
     }
 
-    if (viewed.includes(post.id))
+    if (viewed.includes(post.id)) {
       return;
+    }
 
     fetch(
       `/api/posts/${post.id}/view`,
@@ -1015,9 +1043,7 @@ export default function PostCard({
           : null
       )
       .then((data) => {
-        if (
-          data?.views != null
-        ) {
+        if (data?.views != null) {
           setViewsCount(
             data.views
           );
@@ -1076,7 +1102,10 @@ export default function PostCard({
 
           setLikesCount(
             liked
-              ? likesCount - 1
+              ? Math.max(
+                  0,
+                  likesCount - 1
+                )
               : likesCount + 1
           );
         }
@@ -1114,7 +1143,10 @@ export default function PostCard({
           setRepostsCount(
             data.reposted
               ? repostsCount + 1
-              : repostsCount - 1
+              : Math.max(
+                  0,
+                  repostsCount - 1
+                )
           );
         }
       } catch (error) {
@@ -1177,10 +1209,7 @@ export default function PostCard({
 
         if (res.ok) {
           onUpdate(post.id);
-
-          setShowDeleteConfirm(
-            false
-          );
+          setShowDeleteConfirm(false);
         } else {
           alert(
             "Failed to delete post"
@@ -1232,9 +1261,7 @@ export default function PostCard({
             "Report submitted. Thank you for helping keep the community safe."
           );
 
-          setShowReportModal(
-            false
-          );
+          setShowReportModal(false);
         } else {
           const err =
             await res
@@ -1249,9 +1276,7 @@ export default function PostCard({
           );
 
           if (res.status === 409) {
-            setShowReportModal(
-              false
-            );
+            setShowReportModal(false);
           }
         }
       } catch (error) {
@@ -1382,9 +1407,7 @@ export default function PostCard({
             data.translatedText
           );
 
-          setShowTranslation(
-            true
-          );
+          setShowTranslation(true);
         } else {
           setTranslateError(true);
         }
@@ -1540,8 +1563,7 @@ export default function PostCard({
                   href={`/profile/${post.author.username}`}
                 >
                   <span className="text-gray-500 dark:text-gray-400 text-sm hover:underline">
-                    @
-                    {post.author.username}
+                    @{post.author.username}
                   </span>
                 </Link>
 
@@ -1650,10 +1672,7 @@ export default function PostCard({
                       href={`/profile/${originalAuthor.username}`}
                       className="hover:underline text-zrp-red"
                     >
-                      @
-                      {
-                        originalAuthor.username
-                      }
+                      @{originalAuthor.username}
                     </Link>
                   </span>
                 </div>
@@ -1872,7 +1891,7 @@ export default function PostCard({
                 </div>
               )}
 
-              {/* RECRUITMENT CARD */}
+              {/* RECRUITMENT */}
               {postType ===
                 "RECRUITMENT" &&
                 (post.company ||
@@ -1897,23 +1916,17 @@ export default function PostCard({
                     </div>
 
                     <div className="px-4 py-3 space-y-2">
-
                       {post.company && (
                         <p className="font-semibold text-gray-900 dark:text-white">
-                          {
-                            post.company
-                          }
+                          {post.company}
                         </p>
                       )}
 
                       {post.location && (
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                           <MapPin className="w-4 h-4 flex-shrink-0" />
-
                           <span>
-                            {
-                              post.location
-                            }
+                            {post.location}
                           </span>
                         </div>
                       )}
@@ -1954,7 +1967,6 @@ export default function PostCard({
 
                     <div className="px-4 py-3">
                       <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-800 dark:prose-p:text-gray-200 prose-strong:text-gray-900 dark:prose-strong:text-white prose-li:text-gray-800 dark:prose-li:text-gray-200 prose-a:text-zrp-red hover:prose-a:underline">
-
                         {articleExpanded ? (
                           <div
                             dangerouslySetInnerHTML={{
@@ -1982,8 +1994,7 @@ export default function PostCard({
                         )}
                       </div>
 
-                      {post.body
-                        .length >
+                      {post.body.length >
                         300 && (
                         <button
                           onClick={(e) => {
@@ -2011,34 +2022,24 @@ export default function PostCard({
                 1 ? (
                 <div
                   className={`mt-3 rounded-2xl overflow-hidden grid gap-0.5 ${
-                    post.imageUrls
-                      .length ===
-                    2
+                    post.imageUrls.length === 2
                       ? "grid-cols-2"
                       : "grid-cols-2 grid-rows-2"
                   }`}
                 >
                   {post.imageUrls
-                    .slice(
-                      0,
-                      4
-                    )
+                    .slice(0, 4)
                     .map(
                       (
                         url,
                         idx
                       ) => (
                         <div
-                          key={
-                            url
-                          }
+                          key={url}
                           className={`relative cursor-pointer group bg-gray-100 dark:bg-gray-800 ${
-                            post
-                              .imageUrls!
-                              .length ===
+                            post.imageUrls!.length ===
                               3 &&
-                            idx ===
-                              0
+                            idx === 0
                               ? "row-span-2"
                               : ""
                           }`}
@@ -2053,20 +2054,14 @@ export default function PostCard({
                           }}
                         >
                           <img
-                            src={
-                              url
-                            }
+                            src={url}
                             alt={`Post image ${
-                              idx +
-                              1
+                              idx + 1
                             }`}
                             className={`w-full h-full object-cover ${
-                              post
-                                .imageUrls!
-                                .length ===
+                              post.imageUrls!.length ===
                                 3 &&
-                              idx ===
-                                0
+                              idx === 0
                                 ? ""
                                 : "aspect-square"
                             }`}
@@ -2099,10 +2094,9 @@ export default function PostCard({
                       e.stopPropagation();
 
                       /*
-                       * Only REAL videos open the video viewer.
+                       * Videos go to Shorts.
                        *
-                       * GIFs are protected by the media detector,
-                       * so they always go to the image lightbox.
+                       * GIFs never reach this branch as videos.
                        */
                       if (
                         video &&
@@ -2112,9 +2106,7 @@ export default function PostCard({
                           true
                         );
                       } else {
-                        openLightbox(
-                          0
-                        );
+                        openLightbox(0);
                       }
                     }}
                   >
@@ -2139,7 +2131,6 @@ export default function PostCard({
                           }
                           loop
                           playsInline
-                          webkit-playsinline="true"
                           preload="metadata"
                           onContextMenu={(
                             e
@@ -2160,11 +2151,24 @@ export default function PostCard({
                               e.currentTarget
                             )
                           }
-                          onError={() =>
+                          onCanPlay={(
+                            e
+                          ) => {
+                            if (
+                              videoInView
+                            ) {
+                              e.currentTarget
+                                .play()
+                                .catch(
+                                  () => {}
+                                );
+                            }
+                          }}
+                          onError={() => {
                             setVideoLoadFailed(
                               true
-                            )
-                          }
+                            );
+                          }}
                         />
 
                         {!videoInView && (
@@ -2175,8 +2179,13 @@ export default function PostCard({
                           </div>
                         )}
 
+                        <div className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full pointer-events-none">
+                          Video
+                        </div>
+
                         {videoInView && (
                           <button
+                            type="button"
                             onClick={(
                               e
                             ) => {
@@ -2187,11 +2196,16 @@ export default function PostCard({
                                   !m
                               );
                             }}
-                            className="absolute bottom-2 right-2 bg-black/50 hover:bg-black/70 rounded-full p-2 transition"
+                            className="absolute bottom-2 right-2 z-10 bg-black/50 hover:bg-black/70 rounded-full p-2 transition"
                             title={
                               videoMuted
                                 ? "Unmute"
                                 : "Mute"
+                            }
+                            aria-label={
+                              videoMuted
+                                ? "Unmute video"
+                                : "Mute video"
                             }
                           >
                             {videoMuted ? (
@@ -2201,6 +2215,14 @@ export default function PostCard({
                             )}
                           </button>
                         )}
+
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          {!videoInView && (
+                            <div className="bg-black/50 rounded-full p-3">
+                              <Play className="w-8 h-8 text-white fill-white" />
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ) : (
                       <>
@@ -2239,11 +2261,6 @@ export default function PostCard({
                 } transition`}
                 disabled={
                   !commentsEnabled
-                }
-                title={
-                  !commentsEnabled
-                    ? "Comments are disabled for this post"
-                    : ""
                 }
               >
                 <span
@@ -2296,7 +2313,7 @@ export default function PostCard({
                     )}
                   </span>
 
-                  <ChevronDown className="w-3 h-3 ml-0.5 group-hover:text-green-500 transition" />
+                  <ChevronDown className="w-3 h-3 ml-0.5" />
                 </button>
 
                 {repostDropdownOpen && (
@@ -2551,7 +2568,6 @@ export default function PostCard({
       {/* DELETE CONFIRMATION */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-
           <div className="bg-white dark:bg-zrp-deepBlack rounded-2xl shadow-xl max-w-sm w-full p-6">
 
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
@@ -2609,9 +2625,7 @@ export default function PostCard({
         }
       />
 
-      {/* =========================================================
-          SWIPEABLE IMAGE LIGHTBOX
-          ========================================================= */}
+      {/* IMAGE LIGHTBOX */}
       {lightboxOpen &&
         lightboxImageIndex !== null && (
           <div
@@ -2627,20 +2641,17 @@ export default function PostCard({
               handleLightboxTouchEnd
             }
           >
-            {/* TOP BAR */}
             <div
               className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 sm:px-6 py-4 bg-gradient-to-b from-black/70 to-transparent"
               onClick={(e) =>
                 e.stopPropagation()
               }
             >
-              {/* IMAGE COUNTER */}
               <div className="text-white text-sm font-semibold bg-black/40 backdrop-blur-sm rounded-full px-3 py-1.5">
                 {lightboxImageIndex + 1} /{" "}
                 {galleryImages.length}
               </div>
 
-              {/* CLOSE */}
               <button
                 type="button"
                 onClick={closeLightbox}
@@ -2651,7 +2662,6 @@ export default function PostCard({
               </button>
             </div>
 
-            {/* PREVIOUS */}
             {galleryImages.length > 1 && (
               <button
                 type="button"
@@ -2666,7 +2676,6 @@ export default function PostCard({
               </button>
             )}
 
-            {/* IMAGE */}
             <div
               className="relative w-full h-full flex items-center justify-center px-3 sm:px-16 lg:px-24 py-16 sm:py-20"
               onClick={(e) =>
@@ -2685,8 +2694,7 @@ export default function PostCard({
                   ]
                 }
                 alt={`Post image ${
-                  lightboxImageIndex +
-                  1
+                  lightboxImageIndex + 1
                 } of ${
                   galleryImages.length
                 }`}
@@ -2695,7 +2703,6 @@ export default function PostCard({
               />
             </div>
 
-            {/* NEXT */}
             {galleryImages.length > 1 && (
               <button
                 type="button"
@@ -2710,7 +2717,6 @@ export default function PostCard({
               </button>
             )}
 
-            {/* MOBILE SWIPE HINT */}
             {galleryImages.length > 1 && (
               <div
                 className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 sm:hidden"
@@ -2731,9 +2737,7 @@ export default function PostCard({
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center bg-black/40"
           onClick={() =>
-            setShowEmojiPicker(
-              false
-            )
+            setShowEmojiPicker(false)
           }
         >
           <div
@@ -2743,19 +2747,15 @@ export default function PostCard({
             }
           >
             <div className="flex justify-end p-2 border-b border-gray-200 dark:border-gray-700">
-
               <button
                 type="button"
                 onClick={() =>
-                  setShowEmojiPicker(
-                    false
-                  )
+                  setShowEmojiPicker(false)
                 }
                 className="p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <X className="w-5 h-5" />
               </button>
-
             </div>
 
             <EmojiPicker
@@ -2778,9 +2778,7 @@ export default function PostCard({
         <QuotePostModal
           post={post}
           onClose={() =>
-            setShowQuoteModal(
-              false
-            )
+            setShowQuoteModal(false)
           }
           onQuotePosted={
             onUpdate
@@ -2788,16 +2786,14 @@ export default function PostCard({
         />
       )}
 
-      {/* VIDEO VIEWER */}
+      {/* VIDEO VIEWER / SHORTS */}
       {showVideoFeed && (
         <VideoFeedViewer
           startPostId={
             post.id
           }
           onClose={() =>
-            setShowVideoFeed(
-              false
-            )
+            setShowVideoFeed(false)
           }
         />
       )}
