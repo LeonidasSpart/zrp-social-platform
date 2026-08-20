@@ -23,6 +23,7 @@ import {
   Settings,
   Users,
   Key,
+  Newspaper,
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
@@ -57,6 +58,8 @@ export default function Header() {
     (session?.user?.isAdmin ||
       session?.user?.role === "ADMIN" ||
       session?.user?.role === "MODERATOR");
+
+  const isJournalist = isAuthenticated && session?.user?.role === "JOURNALIST";
 
   /*
    * Keep the language handler compatible with whatever Language type
@@ -153,6 +156,11 @@ export default function Header() {
       href: "/explore",
       icon: Compass,
       label: t("nav.explore"),
+    },
+    {
+      href: "/news",
+      icon: Newspaper,
+      label: "News",
     },
     {
       href: "/search",
@@ -276,6 +284,21 @@ export default function Header() {
 
                   <span>
                     {t("nav.admin")}
+                  </span>
+                </Link>
+              )}
+
+              {/* Journalist */}
+
+              {isJournalist && (
+                <Link
+                  href="/journalist"
+                  className="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-zrp-red transition"
+                >
+                  <Newspaper className="w-5 h-5" />
+
+                  <span>
+                    Journalist
                   </span>
                 </Link>
               )}
@@ -490,7 +513,7 @@ export default function Header() {
                       >
                         <Settings className="w-5 h-5" />
 
-                        <span>
+                                                <span>
                           Settings
                         </span>
                       </Link>
@@ -753,6 +776,32 @@ export default function Header() {
               )}
 
               {/* =================================================
+                  JOURNALIST
+              ================================================= */}
+
+              {isJournalist && (
+                <div className="mt-5 pt-5 border-t border-gray-200 dark:border-gray-800">
+                  <p className="px-4 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    Journalist
+                  </p>
+
+                  <Link
+                    href="/journalist"
+                    onClick={closeMobileMenu}
+                    className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  >
+                    <Newspaper className="w-5 h-5 text-zrp-red" />
+
+                    <span className="flex-1 font-medium">
+                      Journalist Dashboard
+                    </span>
+
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </Link>
+                </div>
+              )}
+
+              {/* =================================================
                   ACCOUNT
               ================================================= */}
 
@@ -975,3 +1024,5 @@ export default function Header() {
     </>
   );
 }
+
+                        
