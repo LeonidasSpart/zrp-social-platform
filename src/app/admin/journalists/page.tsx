@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -11,6 +11,7 @@ import {
   RotateCcw,
   Trash2,
   ExternalLink,
+  UserPlus,
 } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
@@ -61,6 +62,8 @@ export default function AdminJournalistsPage() {
   const [statusTab, setStatusTab] = useState<JournalistStatus | "">("PENDING");
   const [search, setSearch] = useState("");
   const [actingOn, setActingOn] = useState<string | null>(null);
+  const [grantUsername, setGrantUsername] = useState("");
+  const [granting, setGranting] = useState(false);
 
   async function load() {
     try {
@@ -133,6 +136,43 @@ export default function AdminJournalistsPage() {
     }
   }
 
+  // Directly makes an existing user a VERIFIED journalist without them
+  // submitting an application - for onboarding a known reporter.
+  // Hits POST /api/admin/journalists, which sets role + creates/updates
+  // the JournalistProfile + syncs the badge together, same as the
+  // approve/restore actions above.
+  async function grant(e: FormEvent) {
+    e.preventDefault();
+    const username = grantUsername.trim().replace(/^@/, "");
+    if (!username) return;
+
+    try {
+      setGranting(true);
+      setError(null);
+      setSuccess(null);
+
+      const response = await fetch("/api/admin/journalists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to grant journalist status");
+      }
+
+      setSuccess(`@${username} is now a verified journalist.`);
+      setGrantUsername("");
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to grant journalist status");
+    } finally {
+      setGranting(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
@@ -171,6 +211,36 @@ export default function AdminJournalistsPage() {
             </div>
           </form>
         </div>
+
+        {/* Grant journalist status directly, without an application */}
+        <form
+          onSubmit={grant}
+          className="mb-5 flex flex-col gap-2 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:flex-row sm:items-center"
+        >
+          <div className="flex-1">
+            <p className="text-sm font-medium text-gray-900 dark:text-white">Grant journalist status</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Skip the application - verify a known reporter directly by username.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={grantUsername}
+              onChange={(e) => setGrantUsername(e.target.value)}
+              placeholder="username"
+              className="w-48 rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+            />
+            <button
+              type="submit"
+              disabled={granting || !grantUsername.trim()}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-zrp-red px-3 py-2 text-xs font-medium text-white transition hover:bg-zrp-darkRed disabled:opacity-50"
+            >
+              <UserPlus className="h-3.5 w-3.5" />
+              {granting ? "Granting…" : "Grant"}
+            </button>
+          </div>
+        </form>
 
         {error && (
           <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
