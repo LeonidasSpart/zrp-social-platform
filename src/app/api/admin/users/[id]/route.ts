@@ -4,8 +4,8 @@ import { prisma } from "@/lib/db";
 import { Role } from "@prisma/client";
 import { deleteUploadThingFiles } from "@/lib/uploadthing";
 
-const VALID_BADGE_TYPES = ["verified", "organization", "government", "team", null];
-const VALID_ROLES = ["USER", "MODERATOR", "ADMIN"];
+const VALID_BADGE_TYPES = ["verified", "organization", "government", "team", "journalist", null];
+const VALID_ROLES = ["USER", "MODERATOR", "ADMIN", "JOURNALIST"];
 
 export async function PUT(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
