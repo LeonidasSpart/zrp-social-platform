@@ -3,9 +3,18 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Users, FileText, MessageCircle, Flag, UserCheck, UserPlus,
-  Activity, AlertTriangle, UserX, CheckCircle, CreditCard,
-  Ticket // ➕ ADDED
+  Users,
+  FileText,
+  MessageCircle,
+  Flag,
+  UserCheck,
+  UserPlus,
+  Activity,
+  AlertTriangle,
+  CheckCircle,
+  CreditCard,
+  Ticket,
+  Newspaper,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -19,7 +28,6 @@ interface Stats {
   activeUsers?: number;
 }
 
-// ➕ ADDED: interface for ticket stats
 interface TicketStats {
   open: number;
   inProgress: number;
@@ -30,10 +38,11 @@ interface TicketStats {
 
 export default function AdminDashboard() {
   const { t, language } = useLanguage();
+
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [pendingPayments, setPendingPayments] = useState(0);
-  // ➕ ADDED: ticket stats state
+
   const [ticketStats, setTicketStats] = useState<TicketStats>({
     open: 0,
     inProgress: 0,
@@ -42,7 +51,12 @@ export default function AdminDashboard() {
     total: 0,
   });
 
-  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
+  const localeMap: Record<string, string> = {
+    en: "en-US",
+    fr: "fr-FR",
+    de: "de-DE",
+    it: "it-IT",
+  };
 
   useEffect(() => {
     // Fetch main stats
@@ -65,7 +79,7 @@ export default function AdminDashboard() {
       })
       .catch(() => {});
 
-    // ➕ ADDED: fetch ticket stats
+    // Fetch ticket stats
     fetch("/api/admin/support/tickets/stats")
       .then((res) => res.json())
       .then((data) => {
@@ -76,13 +90,12 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-zrp-red border-t-transparent" />
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zrp-red border-t-transparent" />
       </div>
     );
   }
 
-  // Card configuration with safe color classes
   const cards = [
     {
       label: t("adminDash.totalUsers"),
@@ -140,7 +153,6 @@ export default function AdminDashboard() {
       bgColor: "bg-teal-100 dark:bg-teal-900/30",
       textColor: "text-teal-600 dark:text-teal-400",
     },
-    // ➕ ADDED: Support Tickets card
     {
       label: "Open Support Tickets",
       value: ticketStats.open,
@@ -153,28 +165,44 @@ export default function AdminDashboard() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("adminDash.title")}</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          {t("adminDash.title")}
+        </h1>
+
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-          <Activity className="w-4 h-4" />
-          <span>{t("adminDash.updated", { time: new Date().toLocaleTimeString(localeMap[language] || "en-US") })}</span>
+          <Activity className="h-4 w-4" />
+
+          <span>
+            {t("adminDash.updated", {
+              time: new Date().toLocaleTimeString(
+                localeMap[language] || "en-US"
+              ),
+            })}
+          </span>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card) => (
           <div
             key={card.label}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition"
+            className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{card.label}</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{card.value}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {card.label}
+                </p>
+
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {card.value}
+                </p>
               </div>
-              <div className={`p-3 rounded-full ${card.bgColor}`}>
-                <card.icon className={`w-5 h-5 ${card.textColor}`} />
+
+              <div className={`rounded-full p-3 ${card.bgColor}`}>
+                <card.icon className={`h-5 w-5 ${card.textColor}`} />
               </div>
             </div>
           </div>
@@ -182,75 +210,121 @@ export default function AdminDashboard() {
       </div>
 
       {/* Bottom Row */}
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* User Roles Breakdown */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t("adminDash.userRoles")}</h2>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+            {t("adminDash.userRoles")}
+          </h2>
+
           <div className="space-y-2">
             {stats?.roleCounts ? (
               Object.entries(stats.roleCounts).map(([role, count]) => (
-                <div key={role} className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2 last:border-0">
-                  <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">{role}</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">{count}</span>
+                <div
+                  key={role}
+                  className="flex items-center justify-between border-b border-gray-100 pb-2 last:border-0 dark:border-gray-700"
+                >
+                  <span className="text-sm capitalize text-gray-700 dark:text-gray-300">
+                    {role}
+                  </span>
+
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    {count}
+                  </span>
                 </div>
               ))
             ) : (
-              <p className="text-sm text-gray-500">{t("adminDash.noRoleData")}</p>
+              <p className="text-sm text-gray-500">
+                {t("adminDash.noRoleData")}
+              </p>
             )}
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t("adminDash.quickActions")}</h2>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+            {t("adminDash.quickActions")}
+          </h2>
+
           <div className="space-y-3">
+            {/* Users */}
             <Link
               href="/admin/users"
-              className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition"
+              className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
             >
-              <Users className="w-5 h-5 text-blue-500" />
+              <Users className="h-5 w-5 text-blue-500" />
+
               <span>{t("adminDash.manageUsers")}</span>
             </Link>
+
+            {/* Posts */}
             <Link
               href="/admin/posts"
-              className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition"
+              className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
             >
-              <FileText className="w-5 h-5 text-green-500" />
+              <FileText className="h-5 w-5 text-green-500" />
+
               <span>{t("adminDash.managePosts")}</span>
             </Link>
+
+            {/* NEWS */}
+            <Link
+              href="/admin/news"
+              className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-red-50 hover:text-red-600 dark:text-gray-300 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+            >
+              <Newspaper className="h-5 w-5 text-red-500" />
+
+              <span>Manage News</span>
+            </Link>
+
+            {/* Reports */}
             <Link
               href="/admin/reports"
-              className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition"
+              className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
             >
-              <Flag className="w-5 h-5 text-red-500" />
+              <Flag className="h-5 w-5 text-red-500" />
+
               <span>
-                {t("adminDash.viewReports")} {stats?.pendingReports ? t("adminDash.pendingSuffix", { n: stats.pendingReports }) : ""}
+                {t("adminDash.viewReports")}{" "}
+                {stats?.pendingReports
+                  ? t("adminDash.pendingSuffix", {
+                      n: stats.pendingReports,
+                    })
+                  : ""}
               </span>
             </Link>
+
+            {/* Payments */}
             <Link
               href="/admin/payments"
-              className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition"
+              className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
             >
-              <CreditCard className="w-5 h-5 text-green-500" />
+              <CreditCard className="h-5 w-5 text-green-500" />
+
               <span>
                 {t("adminDash.paymentRequests")}
+
                 {pendingPayments > 0 && (
-                  <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">
                     {pendingPayments}
                   </span>
                 )}
               </span>
             </Link>
-            {/* ➕ ADDED: Support Tickets quick action */}
+
+            {/* Support Tickets */}
             <Link
               href="/admin/support"
-              className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition"
+              className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
             >
-              <Ticket className="w-5 h-5 text-indigo-500" />
+              <Ticket className="h-5 w-5 text-indigo-500" />
+
               <span>
                 Support Tickets
+
                 {ticketStats.open > 0 && (
-                  <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  <span className="ml-2 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">
                     {ticketStats.open}
                   </span>
                 )}
