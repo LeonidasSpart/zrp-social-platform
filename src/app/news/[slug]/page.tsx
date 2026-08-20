@@ -5,17 +5,19 @@ import { prisma } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 type NewsArticlePageProps = {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 };
 
 export default async function NewsArticlePage({
   params,
 }: NewsArticlePageProps) {
+  const { slug } = await params;
+
   const article = await prisma.newsArticle.findUnique({
     where: {
-      slug: params.slug,
+      slug,
     },
     include: {
       author: {
