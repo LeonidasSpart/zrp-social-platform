@@ -11,6 +11,14 @@ enum Role {
   USER
   MODERATOR
   ADMIN
+  JOURNALIST
+}
+
+enum JournalistStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  SUSPENDED
 }
 
 enum PostType {
@@ -83,7 +91,9 @@ enum AdBidType {
 
 enum NewsArticleStatus {
   DRAFT
+  PENDING_REVIEW
   PUBLISHED
+  REJECTED
   ARCHIVED
 }
 
@@ -225,6 +235,47 @@ model User {
   adClicks      AdClick[]      @relation("AdClickUser")
 
   newsArticles NewsArticle[] @relation("NewsAuthor")
+
+  // ─── Journalist program ─────────────────────────────────────
+  // A user's own journalist application/profile (present only if
+  // they have ever applied to become a ZRP Journalist).
+  journalistProfile JournalistProfile?
+
+  // Journalist applications this user (an admin/moderator) has reviewed.
+  journalistReviewsGiven JournalistProfile[] @relation("JournalistReviewedBy")
+
+  // News articles this user (an admin/moderator) has reviewed
+  // (approved/rejected) as part of the journalist submission workflow.
+  newsReviewsGiven NewsArticle[] @relation("NewsReviewedBy")
+}
+
+model JournalistProfile {
+  id String @id @default(cuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status JournalistStatus @default(PENDING)
+
+  // Application details supplied by the applicant.
+  outlet       String? @db.Text
+  pitch        String? @db.Text
+  portfolioUrl String?
+
+  appliedAt DateTime @default(now())
+
+  reviewedAt   DateTime?
+  reviewedById String?
+  reviewedBy   User?     @relation("JournalistReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  rejectionReason  String? @db.Text
+  suspensionReason String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([reviewedById])
 }
 
 model Post {
@@ -1167,6 +1218,18 @@ model NewsArticle {
 
   publishedAt DateTime?
 
+  // ─── Journalist editorial workflow ──────────────────────────
+  // Set when a journalist submits a DRAFT for admin review.
+  submittedAt DateTime?
+
+  // Feedback left by the admin/moderator who reviewed the
+  // submission — shown to the journalist, especially on rejection.
+  reviewNote String? @db.Text
+
+  reviewedAt   DateTime?
+  reviewedById String?
+  reviewedBy   User?     @relation("NewsReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -1177,4 +1240,5 @@ model NewsArticle {
   @@index([authorId])
   @@index([status, publishedAt])
   @@index([category, publishedAt])
+  @@index([reviewedById])
 }
