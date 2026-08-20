@@ -2,20 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   NewsArticleCategory,
   NewsArticleStatus,
-  PrismaClient,
 } from "@prisma/client";
-
-const globalForPrisma = globalThis as unknown as {
-  prisma?: PrismaClient;
-};
-
-const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-}
+// SECURITY FIX: see /api/admin/news/route.ts — these routes had no
+// server-side auth check at all.
+import { requireStaff } from "@/lib/admin";
+import { prisma } from "@/lib/db";
 
 type RouteContext = {
   params: Promise<{
@@ -32,6 +23,9 @@ export async function GET(
   _request: NextRequest,
   context: RouteContext
 ) {
+  const adminCheck = await requireStaff();
+  if (!adminCheck.authorized) return adminCheck.response;
+
   try {
     const { id } = await context.params;
 
@@ -98,6 +92,9 @@ export async function PATCH(
   request: NextRequest,
   context: RouteContext
 ) {
+  const adminCheck = await requireStaff();
+  if (!adminCheck.authorized) return adminCheck.response;
+
   try {
     const { id } = await context.params;
 
@@ -143,6 +140,7 @@ export async function PATCH(
       views,
       featured,
       publishedAt,
+      reviewNote,
     } = body;
 
     if (
@@ -296,6 +294,9 @@ export async function PATCH(
       views?: number;
       featured?: boolean;
       publishedAt?: Date | null;
+      reviewNote?: string | null;
+      reviewedAt?: Date;
+      reviewedById?: string;
     } = {};
 
     if (title !== undefined) {
@@ -344,6 +345,23 @@ export async function PATCH(
 
     if (status !== undefined) {
       data.status = status as NewsArticleStatus;
+
+      // Journalist editorial workflow: whenever an admin moves an
+      // article out of PENDING_REVIEW (approving to PUBLISHED or
+      // sending it back as REJECTED), record who reviewed it and when,
+      // so the journalist dashboard can show who acted on it.
+      if (
+        existing.status === "PENDING_REVIEW" &&
+        (data.status === "PUBLISHED" || data.status === "REJECTED")
+      ) {
+        data.reviewedAt = new Date();
+        data.reviewedById = adminCheck.session.user.id;
+      }
+    }
+
+    if (reviewNote !== undefined) {
+      data.reviewNote =
+        typeof reviewNote === "string" && reviewNote.trim() ? reviewNote.trim() : null;
     }
 
     if (authorId !== undefined) {
@@ -428,6 +446,12 @@ export async function PATCH(
   }
 }
 
+// BUG FIX: the admin News editor's "Update Article" button sends
+// PUT (see src/app/admin/news/page.tsx handleSubmit), but only PATCH
+// was ever exported here — every edit was silently failing with a 405.
+// PUT is aliased straight to the same handler as PATCH.
+export { PATCH as PUT };
+
 /**
  * DELETE /api/admin/news/[id]
  *
@@ -437,6 +461,9 @@ export async function DELETE(
   _request: NextRequest,
   context: RouteContext
 ) {
+  const adminCheck = await requireStaff();
+  if (!adminCheck.authorized) return adminCheck.response;
+
   try {
     const { id } = await context.params;
 
