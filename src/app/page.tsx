@@ -33,6 +33,8 @@ interface Post {
   imageUrls?: string[];
   mediaType?: string;
   createdAt: string;
+  updatedAt?: string;
+  views?: number;
 
   author: {
     id: string;
@@ -50,6 +52,25 @@ interface Post {
   };
 
   liked?: boolean;
+
+  isRepost?: boolean;
+
+  repostOriginalAuthor?: {
+    id: string;
+    username: string;
+    name: string;
+  } | null;
+
+  repostId?: string | null;
+
+  commentsEnabled?: boolean;
+
+  type?: "POST" | "RECRUITMENT" | "ARTICLE";
+
+  company?: string;
+  location?: string;
+  applyUrl?: string;
+  body?: string;
 }
 
 type FeedType = "for-you" | "following";
@@ -66,20 +87,64 @@ export default function HomePage() {
   const [ad, setAd] = useState<any>(null);
 
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] =
+    useState(false);
+  const [refreshing, setRefreshing] =
+    useState(false);
 
-  const [hasMore, setHasMore] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [hasMore, setHasMore] =
+    useState(true);
 
-  const [isOnline, setIsOnline] = useState(true);
-  const [feedMenuOpen, setFeedMenuOpen] = useState(false);
+  const [error, setError] =
+    useState<Error | null>(null);
+
+  const [isOnline, setIsOnline] =
+    useState(true);
+
+  const [feedMenuOpen, setFeedMenuOpen] =
+    useState(false);
+
+  /*
+   * ================================================================
+   * FEED REQUEST CONTROL
+   * ================================================================
+   *
+   * These refs protect the feed from asynchronous race conditions.
+   *
+   * Example:
+   *
+   * Request A starts
+   * Request B starts
+   * Request B finishes first
+   * Request A finishes later
+   *
+   * Without protection, Request A could overwrite the newer data.
+   */
 
   const cursorRef =
     useRef<string | null>(null);
 
   const observerRef =
     useRef<HTMLDivElement | null>(null);
+
+  const requestIdRef =
+    useRef(0);
+
+  const abortControllerRef =
+    useRef<AbortController | null>(null);
+
+  const loadingMoreRef =
+    useRef(false);
+
+  const refreshingRef =
+    useRef(false);
+
+  /*
+   * Changes whenever the logical feed changes
+   * or a local mutation invalidates existing requests.
+   */
+  const feedGenerationRef =
+    useRef(0);
 
   /*
    * ================================================================
@@ -88,7 +153,9 @@ export default function HomePage() {
    */
 
   useEffect(() => {
-    setIsOnline(navigator.onLine);
+    setIsOnline(
+      navigator.onLine
+    );
 
     const handleOnline = () =>
       setIsOnline(true);
@@ -121,13 +188,26 @@ export default function HomePage() {
 
   /*
    * ================================================================
+   * CLEANUP ON UNMOUNT
+   * ================================================================
+   */
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+
+  /*
+   * ================================================================
    * FETCH POSTS
    * ================================================================
    */
 
   const fetchPosts = useCallback(
     async (
-      cursor?: string | null
+      cursor?: string | null,
+      signal?: AbortSignal
     ) => {
       const endpoint =
         feedType === "for-you"
@@ -140,7 +220,10 @@ export default function HomePage() {
           )}&limit=10`
         : `${endpoint}?limit=10`;
 
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        signal,
+        cache: "no-store",
+      });
 
       if (!res.ok) {
         throw new Error(
@@ -155,7 +238,38 @@ export default function HomePage() {
 
   /*
    * ================================================================
-   * LOAD POSTS
+   * UNIQUE POSTS
+   * ================================================================
+   */
+
+  const uniquePosts = (
+    input: Post[]
+  ): Post[] => {
+    const seen =
+      new Set<string>();
+
+    return input.filter(
+      (post) => {
+        if (!post?.id) {
+          return false;
+        }
+
+        if (
+          seen.has(post.id)
+        ) {
+          return false;
+        }
+
+        seen.add(post.id);
+
+        return true;
+      }
+    );
+  };
+
+  /*
+   * ================================================================
+   * LOAD / REFRESH FIRST PAGE
    * ================================================================
    */
 
@@ -163,34 +277,152 @@ export default function HomePage() {
     async (
       showRefreshAnimation = false
     ) => {
-      if (showRefreshAnimation) {
+      /*
+       * Every first-page request receives a unique ID.
+       */
+      const requestId =
+        ++requestIdRef.current;
+
+      /*
+       * Capture the current feed generation.
+       */
+      const generation =
+        feedGenerationRef.current;
+
+      /*
+       * Cancel the previous request.
+       */
+      abortControllerRef.current?.abort();
+
+      const controller =
+        new AbortController();
+
+      abortControllerRef.current =
+        controller;
+
+      if (
+        showRefreshAnimation
+      ) {
         setRefreshing(true);
+        refreshingRef.current =
+          true;
       } else {
         setLoading(true);
       }
 
       setError(null);
 
+      /*
+       * The old pagination cursor must never be used while
+       * the first page is being loaded.
+       */
+      cursorRef.current = null;
+
+      setHasMore(false);
+
+      /*
+       * Prevent load-more requests from racing with refresh.
+       */
+      loadingMoreRef.current =
+        false;
+
+      setLoadingMore(false);
+
       try {
         const data =
-          await fetchPosts(null);
+          await fetchPosts(
+            null,
+            controller.signal
+          );
+
+        /*
+         * Ignore stale responses.
+         */
+        if (
+          requestId !==
+            requestIdRef.current ||
+          generation !==
+            feedGenerationRef.current
+        ) {
+          return;
+        }
 
         const postsData =
-          data.posts || data;
+          Array.isArray(
+            data?.posts
+          )
+            ? data.posts
+            : Array.isArray(data)
+            ? data
+            : [];
 
-        setPosts(postsData);
+        const cleanPosts =
+          uniquePosts(
+            postsData
+          );
+
+        setPosts(
+          cleanPosts
+        );
 
         cursorRef.current =
-          data.nextCursor || null;
+          data?.nextCursor ||
+          null;
 
         setHasMore(
-          !!data.nextCursor
+          Boolean(
+            data?.nextCursor
+          )
         );
       } catch (err) {
-        setError(err as Error);
+        /*
+         * Abort is normal when a newer request replaces this one.
+         */
+        if (
+          err instanceof
+            DOMException &&
+          err.name ===
+            "AbortError"
+        ) {
+          return;
+        }
+
+        /*
+         * Ignore stale errors too.
+         */
+        if (
+          requestId !==
+          requestIdRef.current
+        ) {
+          return;
+        }
+
+        console.error(
+          "Error loading posts:",
+          err
+        );
+
+        setError(
+          err instanceof Error
+            ? err
+            : new Error(
+                "Failed to load posts"
+              )
+        );
       } finally {
-        setLoading(false);
-        setRefreshing(false);
+        /*
+         * Only the currently active request may change loading state.
+         */
+        if (
+          requestId ===
+          requestIdRef.current
+        ) {
+          setLoading(false);
+          setRefreshing(false);
+
+          refreshingRef.current =
+            false;
+        }
       }
     },
     [fetchPosts]
@@ -203,20 +435,34 @@ export default function HomePage() {
    */
 
   useEffect(() => {
-    fetch("/api/ads/serve")
+    let cancelled = false;
+
+    fetch("/api/ads/serve", {
+      cache: "no-store",
+    })
       .then((res) =>
         res.ok
           ? res.json()
           : { ad: null }
       )
       .then((data) => {
+        if (cancelled) {
+          return;
+        }
+
         setAd(
-          data.ad || null
+          data?.ad || null
         );
       })
       .catch(() => {
-        setAd(null);
+        if (!cancelled) {
+          setAd(null);
+        }
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   /*
@@ -227,50 +473,126 @@ export default function HomePage() {
 
   const loadMore =
     useCallback(async () => {
+      /*
+       * React state can be one render behind.
+       * The refs prevent duplicate observer calls immediately.
+       */
       if (
-        loadingMore ||
-        !hasMore ||
+        loadingMoreRef.current ||
+        refreshingRef.current ||
         loading ||
+        !hasMore ||
         !cursorRef.current
       ) {
         return;
       }
+
+      const cursor =
+        cursorRef.current;
+
+      const generation =
+        feedGenerationRef.current;
+
+      /*
+       * Each pagination request also gets an ID.
+       */
+      const requestId =
+        ++requestIdRef.current;
+
+      loadingMoreRef.current =
+        true;
 
       setLoadingMore(true);
 
       try {
         const data =
           await fetchPosts(
-            cursorRef.current
+            cursor
           );
 
-        const newPosts =
-          data.posts || data;
+        /*
+         * If the user changed feed, refreshed, created a post,
+         * deleted a post, or otherwise invalidated this request,
+         * do not touch the current feed.
+         */
+        if (
+          generation !==
+            feedGenerationRef.current ||
+          requestId !==
+            requestIdRef.current
+        ) {
+          return;
+        }
 
-        setPosts((prev) => [
-          ...prev,
-          ...newPosts,
-        ]);
+        const newPosts =
+          Array.isArray(
+            data?.posts
+          )
+            ? data.posts
+            : Array.isArray(data)
+            ? data
+            : [];
+
+        /*
+         * Append only posts that are not already present.
+         */
+        setPosts((prev) => {
+          const existingIds =
+            new Set(
+              prev.map(
+                (post) =>
+                  post.id
+              )
+            );
+
+          const uniqueNewPosts =
+            newPosts.filter(
+              (post: Post) =>
+                post?.id &&
+                !existingIds.has(
+                  post.id
+                )
+            );
+
+          return [
+            ...prev,
+            ...uniqueNewPosts,
+          ];
+        });
 
         cursorRef.current =
-          data.nextCursor || null;
+          data?.nextCursor ||
+          null;
 
         setHasMore(
-          !!data.nextCursor
+          Boolean(
+            data?.nextCursor
+          )
         );
       } catch (err) {
+        if (
+          err instanceof
+            DOMException &&
+          err.name ===
+            "AbortError"
+        ) {
+          return;
+        }
+
         console.error(
           "Error loading more posts:",
           err
         );
       } finally {
+        loadingMoreRef.current =
+          false;
+
         setLoadingMore(false);
       }
     }, [
       fetchPosts,
       hasMore,
       loading,
-      loadingMore,
     ]);
 
   /*
@@ -282,10 +604,32 @@ export default function HomePage() {
   const handleTabChange = (
     tab: FeedType
   ) => {
-    if (tab === feedType) {
+    if (
+      tab === feedType
+    ) {
       setFeedMenuOpen(false);
       return;
     }
+
+    /*
+     * Invalidate everything belonging to the old feed.
+     */
+    feedGenerationRef.current +=
+      1;
+
+    requestIdRef.current +=
+      1;
+
+    abortControllerRef.current?.abort();
+
+    loadingMoreRef.current =
+      false;
+
+    refreshingRef.current =
+      false;
+
+    setLoadingMore(false);
+    setRefreshing(false);
 
     setFeedMenuOpen(false);
 
@@ -300,12 +644,18 @@ export default function HomePage() {
 
   /*
    * ================================================================
-   * LOAD WHEN USER / FEED CHANGES
+   * USER
    * ================================================================
    */
 
   const userId =
     session?.user?.id;
+
+  /*
+   * ================================================================
+   * LOAD WHEN USER / FEED CHANGES
+   * ================================================================
+   */
 
   useEffect(() => {
     if (userId) {
@@ -324,7 +674,9 @@ export default function HomePage() {
    */
 
   useEffect(() => {
-    if (!observerRef.current) {
+    if (
+      !observerRef.current
+    ) {
       return;
     }
 
@@ -333,10 +685,12 @@ export default function HomePage() {
         (entries) => {
           if (
             entries[0]
-              .isIntersecting &&
+              ?.isIntersecting &&
             hasMore &&
             !loading &&
-            !loadingMore
+            !loadingMore &&
+            !refreshingRef.current &&
+            !loadingMoreRef.current
           ) {
             loadMore();
           }
@@ -367,18 +721,79 @@ export default function HomePage() {
    * ================================================================
    */
 
-  const handlePostCreated = (
-    newPost: Post
-  ) => {
-    setPosts((prev) => [
-      newPost,
-      ...prev,
-    ]);
-  };
+  const handlePostCreated =
+    useCallback(
+      (newPost: Post) => {
+        /*
+         * Protect against an empty response.
+         */
+        if (
+          !newPost ||
+          !newPost.id
+        ) {
+          /*
+           * If the API returned no post object, perform a safe
+           * refresh so the new post can still appear.
+           */
+          loadPosts(true);
+          return;
+        }
+
+        /*
+         * IMPORTANT:
+         *
+         * A post was created locally.
+         *
+         * Any request that started before this mutation must
+         * no longer be allowed to overwrite the feed.
+         */
+        feedGenerationRef.current +=
+          1;
+
+        requestIdRef.current +=
+          1;
+
+        abortControllerRef.current?.abort();
+
+        refreshingRef.current =
+          false;
+
+        setRefreshing(false);
+
+        /*
+         * Insert immediately at the top.
+         *
+         * Remove an existing copy first so the post can never
+         * appear twice.
+         */
+        setPosts((prev) => {
+          const withoutExisting =
+            prev.filter(
+              (post) =>
+                post.id !==
+                newPost.id
+            );
+
+          return [
+            newPost,
+            ...withoutExisting,
+          ];
+        });
+
+        /*
+         * Do NOT reset the pagination cursor.
+         *
+         * The new post is already in the local feed.
+         * The existing cursor still represents the older portion
+         * of the server feed.
+         */
+      },
+      [loadPosts]
+    );
 
   /*
    * ================================================================
-   * POST UPDATE
+   * POST UPDATE / DELETE
    * ================================================================
    */
 
@@ -387,7 +802,32 @@ export default function HomePage() {
       (
         deletedPostId?: string
       ) => {
-        if (deletedPostId) {
+        /*
+         * Invalidate requests created before the mutation.
+         */
+        feedGenerationRef.current +=
+          1;
+
+        requestIdRef.current +=
+          1;
+
+        abortControllerRef.current?.abort();
+
+        loadingMoreRef.current =
+          false;
+
+        refreshingRef.current =
+          false;
+
+        setLoadingMore(false);
+        setRefreshing(false);
+
+        if (
+          deletedPostId
+        ) {
+          /*
+           * Delete immediately from the UI.
+           */
           setPosts((prev) =>
             prev.filter(
               (post) =>
@@ -395,9 +835,15 @@ export default function HomePage() {
                 deletedPostId
             )
           );
-        } else {
-          loadPosts(true);
+
+          return;
         }
+
+        /*
+         * Edit/update:
+         * reload the current feed safely.
+         */
+        loadPosts(true);
       },
       [loadPosts]
     );
@@ -413,9 +859,14 @@ export default function HomePage() {
       status ===
       "unauthenticated"
     ) {
-      router.push("/login");
+      router.push(
+        "/login"
+      );
     }
-  }, [status, router]);
+  }, [
+    status,
+    router,
+  ]);
 
   /*
    * ================================================================
@@ -423,7 +874,9 @@ export default function HomePage() {
    * ================================================================
    */
 
-  if (status === "loading") {
+  if (
+    status === "loading"
+  ) {
     if (!isOnline) {
       return (
         <div className="max-w-2xl mx-auto py-8 px-4">
@@ -529,7 +982,6 @@ export default function HomePage() {
 
   return (
     <main className="w-full">
-
       <div className="relative max-w-2xl mx-auto px-3 sm:px-4 pt-0 pb-3 sm:pb-5">
 
         {/* ==========================================================
@@ -541,7 +993,9 @@ export default function HomePage() {
           onClick={() =>
             loadPosts(true)
           }
-          disabled={refreshing}
+          disabled={
+            refreshing
+          }
           aria-label="Refresh feed"
           className="absolute right-3 sm:right-4 top-10 z-10 flex items-center justify-center w-9 h-9 rounded-full bg-gray-50/90 dark:bg-gray-800/90 text-gray-500 dark:text-gray-400 hover:text-zrp-red hover:bg-zrp-red/10 transition disabled:opacity-50"
         >
@@ -567,13 +1021,11 @@ export default function HomePage() {
         ========================================================== */}
 
         <section className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-zrp-deepBlack overflow-hidden">
-
           <PostComposer
             onPostCreated={
               handlePostCreated
             }
           />
-
         </section>
 
         {/* ==========================================================
@@ -583,10 +1035,9 @@ export default function HomePage() {
         <div className="sticky top-[64px] z-20 mt-3 bg-white/95 dark:bg-zrp-deepBlack/95 backdrop-blur-md">
 
           <div className="relative">
-
             <div className="flex items-center border-b border-gray-200 dark:border-gray-800">
 
-              {/* For You */}
+              {/* FOR YOU */}
 
               <button
                 type="button"
@@ -616,7 +1067,7 @@ export default function HomePage() {
                 )}
               </button>
 
-              {/* Following */}
+              {/* FOLLOWING */}
 
               <button
                 type="button"
@@ -646,7 +1097,7 @@ export default function HomePage() {
                 )}
               </button>
 
-              {/* Feed settings */}
+              {/* FEED SETTINGS */}
 
               <button
                 type="button"
@@ -664,7 +1115,6 @@ export default function HomePage() {
               >
                 <SlidersHorizontal className="w-4 h-4" />
               </button>
-
             </div>
 
             {/* ======================================================
@@ -759,12 +1209,9 @@ export default function HomePage() {
                     Refresh feed
                   </span>
                 </button>
-
               </div>
             )}
-
           </div>
-
         </div>
 
         {/* ==========================================================
@@ -772,10 +1219,8 @@ export default function HomePage() {
         ========================================================== */}
 
         <section className="mt-1">
-
           {loading ? (
             <div className="space-y-4 py-5">
-
               {[1, 2, 3].map(
                 (item) => (
                   <div
@@ -783,37 +1228,30 @@ export default function HomePage() {
                     className="rounded-2xl border border-gray-200 dark:border-gray-800 p-4 animate-pulse"
                   >
                     <div className="flex gap-3">
-
                       <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800" />
 
                       <div className="flex-1 space-y-3">
-
                         <div className="w-32 h-3 rounded bg-gray-200 dark:bg-gray-800" />
 
                         <div className="w-full h-3 rounded bg-gray-200 dark:bg-gray-800" />
 
                         <div className="w-3/4 h-3 rounded bg-gray-200 dark:bg-gray-800" />
-
                       </div>
                     </div>
                   </div>
                 )
               )}
-
             </div>
-          ) : posts.length === 0 ? (
-
+          ) : posts.length ===
+            0 ? (
             <div className="py-16 px-6 text-center">
-
               <div className="mx-auto w-16 h-16 rounded-full bg-zrp-red/10 flex items-center justify-center">
-
                 {feedType ===
                 "following" ? (
                   <Users className="w-7 h-7 text-zrp-red" />
                 ) : (
                   <Sparkles className="w-7 h-7 text-zrp-red" />
                 )}
-
               </div>
 
               <h2 className="mt-5 text-lg font-bold text-gray-900 dark:text-white">
@@ -844,10 +1282,8 @@ export default function HomePage() {
 
                 Refresh
               </button>
-
             </div>
           ) : (
-
             <>
               {posts.map(
                 (
@@ -859,7 +1295,6 @@ export default function HomePage() {
                       post.id
                     }
                   >
-
                     <PostCard
                       post={
                         post
@@ -878,12 +1313,11 @@ export default function HomePage() {
                         4 &&
                       posts.length >
                         5 && (
-                      <AdCard
-                        key={`ad-${ad.campaignId}`}
-                        ad={ad}
-                      />
-                    )}
-
+                        <AdCard
+                          key={`ad-${ad.campaignId}`}
+                          ad={ad}
+                        />
+                      )}
                   </Fragment>
                 )
               )}
@@ -899,16 +1333,13 @@ export default function HomePage() {
                   }
                   className="h-20 flex items-center justify-center"
                 >
-
                   {loadingMore ? (
                     <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500">
-
                       <div className="w-4 h-4 border-2 border-zrp-red border-t-transparent rounded-full animate-spin" />
 
                       {t(
                         "feed.loadingMore"
                       )}
-
                     </div>
                   ) : (
                     <button
@@ -916,14 +1347,17 @@ export default function HomePage() {
                       onClick={
                         loadMore
                       }
-                      className="flex items-center gap-2 px-4 py-2 rounded-full text-sm text-gray-400 dark:text-gray-500 hover:text-zrp-red hover:bg-zrp-red/5 transition"
+                      disabled={
+                        refreshing ||
+                        loading
+                      }
+                      className="flex items-center gap-2 px-4 py-2 rounded-full text-sm text-gray-400 dark:text-gray-500 hover:text-zrp-red hover:bg-zrp-red/5 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Load more
 
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   )}
-
                 </div>
               )}
 
@@ -934,32 +1368,25 @@ export default function HomePage() {
               {!hasMore &&
                 posts.length >
                   0 && (
-                <div className="py-10 text-center">
+                  <div className="py-10 text-center">
+                    <div className="mx-auto w-8 h-8 rounded-full bg-zrp-red/10 flex items-center justify-center">
+                      <Sparkles className="w-4 h-4 text-zrp-red" />
+                    </div>
 
-                  <div className="mx-auto w-8 h-8 rounded-full bg-zrp-red/10 flex items-center justify-center">
+                    <p className="mt-3 text-sm font-medium text-gray-500 dark:text-gray-400">
+                      {t(
+                        "feed.endOfFeed"
+                      )}
+                    </p>
 
-                    <Sparkles className="w-4 h-4 text-zrp-red" />
-
+                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                      You&apos;re all caught up.
+                    </p>
                   </div>
-
-                  <p className="mt-3 text-sm font-medium text-gray-500 dark:text-gray-400">
-                    {t(
-                      "feed.endOfFeed"
-                    )}
-                  </p>
-
-                  <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                    You&apos;re all caught up.
-                  </p>
-
-                </div>
-              )}
-
+                )}
             </>
           )}
-
         </section>
-
       </div>
 
       {/* ============================================================
@@ -968,18 +1395,13 @@ export default function HomePage() {
 
       {!isOnline && (
         <div className="fixed left-1/2 bottom-20 lg:bottom-6 -translate-x-1/2 z-40">
-
           <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-xl text-xs font-semibold">
-
             <WifiOff className="w-4 h-4" />
 
             You&apos;re offline
-
           </div>
-
         </div>
       )}
-
     </main>
   );
 }
