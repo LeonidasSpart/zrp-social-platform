@@ -479,6 +479,72 @@ export function extractUploadThingKey(
 // ─────────────────────────────────────────────────────────────
 // DELETE UPLOADTHING FILES
 // ─────────────────────────────────────────────────────────────
+//
+// UTApi.deleteFiles() does NOT throw when only some keys in a batch
+// actually get deleted - it resolves with { success, deletedCount }
+// even on a partial failure. The previous version of this function
+// awaited the call and never looked at that return value, so e.g.
+// deleting a 4-image post could silently delete only 1 of the 4 files
+// from UploadThing with zero error, zero log line, nothing - the
+// other 3 just sat there forever. This now checks deletedCount against
+// what was requested, retries once (a single retry is usually enough
+// for the transient batch hiccups that cause this), and - critically -
+// actually logs when files are still left over after that, so a
+// standing gap is visible instead of invisible.
+async function deleteKeysWithRetry(
+  utapi: InstanceType<
+    typeof import("uploadthing/server").UTApi
+  >,
+  keys: string[]
+): Promise<void> {
+  let remaining = keys;
+
+  for (let attempt = 1; attempt <= 2 && remaining.length > 0; attempt++) {
+    let result: { success: boolean; deletedCount: number } | undefined;
+
+    try {
+      result = await utapi.deleteFiles(remaining);
+    } catch (error) {
+      console.error(
+        `UploadThing deleteFiles threw on attempt ${attempt} (${remaining.length} key(s)):`,
+        error
+      );
+      // A thrown error gives no per-key info, so on attempt 1 we still
+      // retry the same full list once; on attempt 2 we fall through
+      // and log below.
+      if (attempt === 2) {
+        console.error(
+          "UploadThing cleanup incomplete after retry - these keys were never confirmed deleted:",
+          remaining
+        );
+      }
+      continue;
+    }
+
+    if (result.deletedCount >= remaining.length) {
+      // Full success this round - nothing left to retry.
+      remaining = [];
+      break;
+    }
+
+    // Partial success: some number succeeded, but the SDK doesn't tell
+    // us *which* keys failed - only how many. Retrying the same full
+    // list is the only option available; UploadThing's delete is
+    // idempotent (deleting an already-deleted key is a no-op), so this
+    // is safe to repeat.
+    console.error(
+      `UploadThing cleanup partial: ${result.deletedCount}/${remaining.length} deleted on attempt ${attempt}.` +
+        (attempt === 1 ? " Retrying once…" : "")
+    );
+
+    if (attempt === 2) {
+      console.error(
+        "UploadThing cleanup still incomplete after retry - keys attempted:",
+        remaining
+      );
+    }
+  }
+}
 
 export async function deleteUploadThingFiles(
   urls: (
@@ -508,9 +574,7 @@ export async function deleteUploadThingFiles(
 
     const utapi = new UTApi();
 
-    await utapi.deleteFiles(
-      keys
-    );
+    await deleteKeysWithRetry(utapi, keys);
   } catch (error) {
     console.error(
       "UploadThing cleanup failed (non-blocking):",
