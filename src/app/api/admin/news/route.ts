@@ -1,21 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  PrismaClient,
   NewsArticleCategory,
   NewsArticleStatus,
 } from "@prisma/client";
-
-const globalForPrisma = globalThis as unknown as {
-  prisma?: PrismaClient;
-};
-
-const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-}
+// SECURITY FIX: these routes previously had no server-side auth check
+// at all — any signed-in (or signed-out) request could list, create,
+// or edit ZRP News articles. requireStaff (ADMIN or MODERATOR) matches
+// the guard already used on the other admin content-moderation routes
+// (e.g. /api/admin/users, /api/admin/posts).
+import { requireStaff } from "@/lib/admin";
+import { prisma } from "@/lib/db";
 
 function isValidDate(value: unknown): value is string | Date {
   if (value instanceof Date) {
@@ -42,6 +36,9 @@ function isValidDate(value: unknown): value is string | Date {
  * - limit
  */
 export async function GET(request: NextRequest) {
+  const adminCheck = await requireStaff();
+  if (!adminCheck.authorized) return adminCheck.response;
+
   try {
     const { searchParams } = new URL(request.url);
 
@@ -183,6 +180,9 @@ export async function GET(request: NextRequest) {
  * Creates a new news article.
  */
 export async function POST(request: NextRequest) {
+  const adminCheck = await requireStaff();
+  if (!adminCheck.authorized) return adminCheck.response;
+
   try {
     const body = await request.json();
 
