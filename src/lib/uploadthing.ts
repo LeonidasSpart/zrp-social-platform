@@ -491,58 +491,83 @@ export function extractUploadThingKey(
 // for the transient batch hiccups that cause this), and - critically -
 // actually logs when files are still left over after that, so a
 // standing gap is visible instead of invisible.
-async function deleteKeysWithRetry(
-  utapi: InstanceType<
-    typeof import("uploadthing/server").UTApi
-  >,
+//
+// Exported (not just used internally by deleteUploadThingFiles below)
+// because the storage cleanup tool (/admin/storage,
+// /api/admin/cleanup-uploadthing) already has raw UploadThing keys
+// from utapi.listFiles() - it has no URLs to extract keys from, so it
+// needs to delete by key directly rather than going through the
+// URL-based wrapper.
+export async function deleteUploadThingKeys(
   keys: string[]
-): Promise<void> {
-  let remaining = keys;
+): Promise<{ requested: number; deleted: number }> {
+  if (keys.length === 0) {
+    return { requested: 0, deleted: 0 };
+  }
 
-  for (let attempt = 1; attempt <= 2 && remaining.length > 0; attempt++) {
-    let result: { success: boolean; deletedCount: number } | undefined;
-
-    try {
-      result = await utapi.deleteFiles(remaining);
-    } catch (error) {
-      console.error(
-        `UploadThing deleteFiles threw on attempt ${attempt} (${remaining.length} key(s)):`,
-        error
+  try {
+    const { UTApi } =
+      await import(
+        "uploadthing/server"
       );
-      // A thrown error gives no per-key info, so on attempt 1 we still
-      // retry the same full list once; on attempt 2 we fall through
-      // and log below.
+
+    const utapi = new UTApi();
+
+    let remaining = keys;
+    let deleted = 0;
+
+    for (let attempt = 1; attempt <= 2 && remaining.length > 0; attempt++) {
+      let result: { success: boolean; deletedCount: number } | undefined;
+
+      try {
+        result = await utapi.deleteFiles(remaining);
+      } catch (error) {
+        console.error(
+          `UploadThing deleteFiles threw on attempt ${attempt} (${remaining.length} key(s)):`,
+          error
+        );
+        if (attempt === 2) {
+          console.error(
+            "UploadThing cleanup incomplete after retry - these keys were never confirmed deleted:",
+            remaining
+          );
+        }
+        continue;
+      }
+
+      if (result.deletedCount >= remaining.length) {
+        deleted += remaining.length;
+        remaining = [];
+        break;
+      }
+
+      // Partial success: some number succeeded, but the SDK doesn't
+      // tell us *which* keys failed - only how many. Retrying the same
+      // full list is the only option available; UploadThing's delete
+      // is idempotent (deleting an already-deleted key is a no-op), so
+      // this is safe to repeat.
+      deleted += result.deletedCount;
+
+      console.error(
+        `UploadThing cleanup partial: ${result.deletedCount}/${remaining.length} deleted on attempt ${attempt}.` +
+          (attempt === 1 ? " Retrying once…" : "")
+      );
+
       if (attempt === 2) {
         console.error(
-          "UploadThing cleanup incomplete after retry - these keys were never confirmed deleted:",
+          "UploadThing cleanup still incomplete after retry - keys attempted:",
           remaining
         );
       }
-      continue;
     }
 
-    if (result.deletedCount >= remaining.length) {
-      // Full success this round - nothing left to retry.
-      remaining = [];
-      break;
-    }
-
-    // Partial success: some number succeeded, but the SDK doesn't tell
-    // us *which* keys failed - only how many. Retrying the same full
-    // list is the only option available; UploadThing's delete is
-    // idempotent (deleting an already-deleted key is a no-op), so this
-    // is safe to repeat.
+    return { requested: keys.length, deleted };
+  } catch (error) {
     console.error(
-      `UploadThing cleanup partial: ${result.deletedCount}/${remaining.length} deleted on attempt ${attempt}.` +
-        (attempt === 1 ? " Retrying once…" : "")
+      "UploadThing cleanup failed (non-blocking):",
+      error
     );
-
-    if (attempt === 2) {
-      console.error(
-        "UploadThing cleanup still incomplete after retry - keys attempted:",
-        remaining
-      );
-    }
+    return { requested: keys.length, deleted: 0 };
   }
 }
 
@@ -562,23 +587,5 @@ export async function deleteUploadThingFiles(
         !!k
     );
 
-  if (keys.length === 0) {
-    return;
-  }
-
-  try {
-    const { UTApi } =
-      await import(
-        "uploadthing/server"
-      );
-
-    const utapi = new UTApi();
-
-    await deleteKeysWithRetry(utapi, keys);
-  } catch (error) {
-    console.error(
-      "UploadThing cleanup failed (non-blocking):",
-      error
-    );
-  }
+  await deleteUploadThingKeys(keys);
 }
