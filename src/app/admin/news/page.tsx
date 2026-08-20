@@ -110,7 +110,7 @@ function slugify(value: string) {
   return value
     .toLowerCase()
     .trim()
-    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
 }
@@ -379,8 +379,7 @@ export default function AdminNewsPage() {
 
       setSuccess("News article deleted successfully.");
 
-      const shouldGoBack =
-        articles.length === 1 && page > 1;
+      const shouldGoBack = articles.length === 1 && page > 1;
 
       await loadArticles(shouldGoBack ? page - 1 : page);
     } catch (err) {
@@ -838,9 +837,7 @@ export default function AdminNewsPage() {
 
                     <button
                       type="button"
-                      disabled={
-                        !pagination.hasMore || loading
-                      }
+                      disabled={!pagination.hasMore || loading}
                       onClick={() => loadArticles(page + 1)}
                       className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700"
                     >
@@ -861,7 +858,9 @@ export default function AdminNewsPage() {
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900">
               <div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {editingArticle ? "Edit News Article" : "Create News Article"}
+                  {editingArticle
+                    ? "Edit News Article"
+                    : "Create News Article"}
                 </h2>
 
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
