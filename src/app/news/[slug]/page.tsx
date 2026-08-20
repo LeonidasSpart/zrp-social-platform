@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 
@@ -63,12 +64,12 @@ export default async function NewsArticlePage({
     <main className="min-h-screen bg-background">
       <article className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <a
+          <Link
             href="/news"
             className="inline-flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             ← Back to ZRP News
-          </a>
+          </Link>
         </div>
 
         <header className="mb-8">
@@ -176,12 +177,12 @@ export default async function NewsArticlePage({
         </div>
 
         <footer className="mt-12 border-t pt-6">
-          <a
+          <Link
             href="/news"
             className="inline-flex items-center rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
           >
             ← More ZRP News
-          </a>
+          </Link>
         </footer>
       </article>
     </main>
