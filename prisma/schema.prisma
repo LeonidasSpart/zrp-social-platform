@@ -77,8 +77,28 @@ enum AdCampaignStatus {
 }
 
 enum AdBidType {
-  CPC // cost per click
-  CPM // cost per 1000 impressions
+  CPC
+  CPM
+}
+
+enum NewsArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum NewsArticleCategory {
+  WORLD
+  EUROPE
+  SWITZERLAND
+  POLITICS
+  BUSINESS
+  TECHNOLOGY
+  CRYPTO
+  SCIENCE
+  SPORTS
+  CULTURE
+  COMMUNITY
 }
 
 model User {
@@ -105,16 +125,15 @@ model User {
   isPrivate   Boolean   @default(false)
   isAdmin     Boolean   @default(false)
   badgeType   String?
-  // Professional profile - a single category chosen from a fixed list
-  // (see src/lib/professionalCategories.ts), matching X's "professional
-  // profile" feature. showCategory lets someone select a category
-  // without displaying it publicly, same as X's own toggle for this.
+
   category    String?
   showCategory Boolean  @default(true)
+
   location    String?
   country     String?
   website     String?
   usernameChangedAt DateTime?
+
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -137,20 +156,28 @@ model User {
 
   posts       Post[]
   comments    Comment[]
+
   following   Follow[]  @relation("Following")
   followers   Follow[]  @relation("Followers")
+
   likes       Like[]
   reposts     Repost[]
   reactions   Reaction[]
+
   muter       Mute[]    @relation("Muter")
   mutedBy     Mute[]    @relation("Muted")
+
   notifications Notification[] @relation("Notification_user")
   sentNotifications Notification[] @relation("Notification_fromUser")
+
   sentMessages Message[] @relation("Message_sender")
   receivedMessages Message[] @relation("Message_receiver")
+
   messageReactions MessageReaction[]
+
   pollVotes   PollVote[]
   bookmarks   Bookmark[]
+
   pushSubscriptions PushSubscription[]
 
   stories     Story[]
@@ -166,6 +193,7 @@ model User {
 
   blockedUsers Blocked[] @relation("Blocker")
   blockedBy    Blocked[] @relation("Blocked")
+
   reports      Report[]  @relation("Reporter")
 
   teamAccount  TeamMember[] @relation("TeamAccount")
@@ -174,27 +202,29 @@ model User {
   apiKeys      ApiKey[]
 
   creatorProfile   CreatorProfile?
+
   sentTips         Tip[]           @relation("TipSender")
   receivedTips     Tip[]           @relation("TipRecipient")
+
   premiumPurchases PremiumPurchase[]
+
   withdrawalRequests WithdrawalRequest[]
 
   followRequestsSent   FollowRequest[] @relation("FollowRequester")
   followRequestsReceived FollowRequest[] @relation("FollowTarget")
 
-  // ─── Support Tickets ────────────────────────────────────────────
-  supportTickets      SupportTicket[]   // tickets created by user
-  assignedTickets     SupportTicket[]   @relation("AssignedTickets") // tickets assigned to admin
-  ticketReplies       TicketReply[]     // replies sent by user/admin
+  supportTickets      SupportTicket[]
+  assignedTickets     SupportTicket[] @relation("AssignedTickets")
+  ticketReplies       TicketReply[]
 
-  // ─── AI Chat ──────────────────────────────────────────────────────
   aiConversations     AIConversation[]
   aiDailyUsage        AIDailyUsage[]
 
-  // ─── Advertising ────────────────────────────────────────────────
   adCampaigns    AdCampaign[]   @relation("AdAdvertiser")
   adImpressions  AdImpression[] @relation("AdImpressionUser")
   adClicks       AdClick[]      @relation("AdClickUser")
+
+  newsArticles  NewsArticle[]   @relation("NewsAuthor")
 }
 
 model Post {
@@ -219,6 +249,7 @@ model Post {
 
   hashtags    String[]
   mentions    String[]
+
   pollId      String?   @unique
   poll        Poll?     @relation(fields: [pollId], references: [id])
   isPoll      Boolean   @default(false)
@@ -237,7 +268,9 @@ model Post {
   likes       Like[]
   reposts     Repost[]
   reactions   Reaction[]
+
   notifications Notification[] @relation("Notification_post")
+
   reports     Report[]
   bookmarks   Bookmark[]
 
@@ -256,8 +289,10 @@ model Comment {
   id          String    @id @default(cuid())
   content     String    @db.Text
   imageUrl    String?
+
   postId      String
   post        Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+
   authorId    String
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
@@ -277,10 +312,6 @@ model Comment {
   @@index([postId])
   @@index([createdAt])
   @@index([parentId])
-  // authorId was queried directly in several places (profile activity,
-  // moderator tools, account-deletion cleanup collecting a user's
-  // comment images) with no index backing it - every one of those
-  // queries was doing a full table scan.
   @@index([authorId])
 }
 
@@ -288,8 +319,10 @@ model Follow {
   id          String    @id @default(cuid())
   followerId  String
   follower    User      @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+
   followingId String
   following   User      @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+
   createdAt   DateTime  @default(now())
 
   @@unique([followerId, followingId])
@@ -299,11 +332,15 @@ model Follow {
 
 model FollowRequest {
   id          String   @id @default(cuid())
+
   requesterId String
   requester   User     @relation("FollowRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+
   targetId    String
   target      User     @relation("FollowTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
   status      String   @default("pending")
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -315,10 +352,13 @@ model FollowRequest {
 
 model Like {
   id          String    @id @default(cuid())
+
   postId      String
   post        Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt   DateTime  @default(now())
 
   @@unique([postId, userId])
@@ -328,11 +368,15 @@ model Like {
 
 model Repost {
   id            String    @id @default(cuid())
+
   postId        String
   post          Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+
   userId        String
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   quoteContent  String?   @db.Text
+
   createdAt     DateTime  @default(now())
 
   @@unique([postId, userId])
@@ -343,10 +387,13 @@ model Repost {
 model Reaction {
   id        String   @id @default(cuid())
   emoji     String
+
   postId    String
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
 
   @@unique([postId, userId, emoji])
@@ -356,10 +403,13 @@ model Reaction {
 
 model Mute {
   id        String   @id @default(cuid())
+
   muterId   String
   muter     User     @relation("Muter", fields: [muterId], references: [id], onDelete: Cascade)
+
   mutedId   String
   muted     User     @relation("Muted", fields: [mutedId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
 
   @@unique([muterId, mutedId])
@@ -369,14 +419,20 @@ model Mute {
 
 model Notification {
   id          String    @id @default(cuid())
+
   userId      String
   user        User      @relation("Notification_user", fields: [userId], references: [id], onDelete: Cascade)
+
   type        String
+
   fromUserId  String
   fromUser    User      @relation("Notification_fromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
+
   postId      String?
   post        Post?     @relation("Notification_post", fields: [postId], references: [id], onDelete: Cascade)
+
   read        Boolean   @default(false)
+
   createdAt   DateTime  @default(now())
 
   @@index([userId])
@@ -387,16 +443,22 @@ model Notification {
 
 model Message {
   id          String    @id @default(cuid())
+
   content     String    @db.Text
   imageUrl    String?
+
   senderId    String
   sender      User      @relation("Message_sender", fields: [senderId], references: [id], onDelete: Cascade)
+
   receiverId  String
   receiver    User      @relation("Message_receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
   read        Boolean   @default(false)
   edited      Boolean   @default(false)
+
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now()) @updatedAt  // ✅ Fixed: added @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+
   replyToId   String?
   replyTo     Message?  @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
   replies     Message[] @relation("MessageReplies")
@@ -412,11 +474,15 @@ model Message {
 
 model MessageReaction {
   id        String   @id @default(cuid())
+
   messageId String
   message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   emoji     String
+
   createdAt DateTime @default(now())
 
   @@unique([messageId, userId])
@@ -425,11 +491,16 @@ model MessageReaction {
 
 model Poll {
   id          String    @id @default(cuid())
+
   question    String    @db.Text
   options     String[]
+
   votes       Json?
+
   post        Post?
+
   expiresAt   DateTime?
+
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -438,11 +509,15 @@ model Poll {
 
 model PollVote {
   id          String    @id @default(cuid())
+
   pollId      String
   poll        Poll      @relation(fields: [pollId], references: [id], onDelete: Cascade)
+
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   optionIndex Int
+
   createdAt   DateTime  @default(now())
 
   @@unique([pollId, userId])
@@ -452,19 +527,24 @@ model PollVote {
 
 model Gif {
   id          String    @id @default(cuid())
+
   url         String
   title       String?
   width       Int?
   height      Int?
+
   createdAt   DateTime  @default(now())
 }
 
 model Blocked {
   id          String    @id @default(cuid())
+
   blockerId   String
   blocker     User      @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+
   blockedId   String
   blocked     User      @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
   createdAt   DateTime  @default(now())
 
   @@unique([blockerId, blockedId])
@@ -474,15 +554,21 @@ model Blocked {
 
 model Report {
   id          String    @id @default(cuid())
+
   reporterId  String
   reporter    User      @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+
   postId      String?
   post        Post?     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
   commentId   String?
   comment     Comment?  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
   reason      String
   details     String?   @db.Text
+
   status      String    @default("pending")
+
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -498,10 +584,13 @@ model Report {
 
 model Bookmark {
   id        String   @id @default(cuid())
+
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   postId    String
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
 
   @@unique([userId, postId])
@@ -511,10 +600,13 @@ model Bookmark {
 
 model PushSubscription {
   id        String   @id @default(cuid())
+
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   endpoint  String   @unique
   keys      Json
+
   createdAt DateTime @default(now())
 
   @@index([userId])
@@ -522,14 +614,19 @@ model PushSubscription {
 
 model UpgradeRequest {
   id             String    @id @default(cuid())
+
   userId         String
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   requestedPlan  String
   paymentMethod  String?
   message        String?   @db.Text
+
   status         String    @default("pending")
+
   approvedBy     String?
   approvedAt     DateTime?
+
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -539,13 +636,18 @@ model UpgradeRequest {
 
 model PaymentRequest {
   id            String   @id @default(cuid())
+
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   plan          String
   amount        Float
   currency      String   @default("USDC")
+
   transactionId String?
+
   status        String   @default("pending")
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -555,10 +657,13 @@ model PaymentRequest {
 
 model CommentLike {
   id        String   @id @default(cuid())
+
   commentId String
   comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
 
   @@unique([commentId, userId])
@@ -568,10 +673,13 @@ model CommentLike {
 
 model CommentRepost {
   id        String   @id @default(cuid())
+
   commentId String
   comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
 
   @@unique([commentId, userId])
@@ -581,10 +689,13 @@ model CommentRepost {
 
 model CommentBookmark {
   id        String   @id @default(cuid())
+
   commentId String
   comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
 
   @@unique([commentId, userId])
@@ -594,13 +705,17 @@ model CommentBookmark {
 
 model Story {
   id          String    @id @default(cuid())
+
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   content     String?   @db.Text
   mediaUrl    String?
   mediaType   String?
+
   createdAt   DateTime  @default(now())
   expiresAt   DateTime
+
   views       StoryView[]
   likes       StoryLike[]
 
@@ -610,12 +725,15 @@ model Story {
 }
 
 model StoryView {
-  id          String    @id @default(cuid())
-  storyId     String
-  story       Story     @relation(fields: [storyId], references: [id], onDelete: Cascade)
-  viewerId    String
-  viewer      User      @relation(fields: [viewerId], references: [id], onDelete: Cascade)
-  viewedAt    DateTime  @default(now())
+  id        String   @id @default(cuid())
+
+  storyId   String
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  viewerId  String
+  viewer    User     @relation(fields: [viewerId], references: [id], onDelete: Cascade)
+
+  viewedAt  DateTime @default(now())
 
   @@unique([storyId, viewerId])
   @@index([storyId])
@@ -623,12 +741,15 @@ model StoryView {
 }
 
 model StoryLike {
-  id          String    @id @default(cuid())
-  storyId     String
-  story       Story     @relation(fields: [storyId], references: [id], onDelete: Cascade)
-  likerId     String
-  liker       User      @relation(fields: [likerId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
+  id        String   @id @default(cuid())
+
+  storyId   String
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  likerId   String
+  liker     User     @relation(fields: [likerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 
   @@unique([storyId, likerId])
   @@index([storyId])
@@ -637,9 +758,12 @@ model StoryLike {
 
 model TeamMember {
   id         String    @id @default(cuid())
+
   accountId  String
   userId     String
+
   role       TeamRole  @default(VIEWER)
+
   createdAt  DateTime  @default(now())
 
   account    User      @relation("TeamAccount", fields: [accountId], references: [id], onDelete: Cascade)
@@ -652,13 +776,18 @@ model TeamMember {
 
 model ApiKey {
   id          String    @id @default(cuid())
+
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   keyHash     String    @unique
   name        String
+
   lastUsed    DateTime?
   expiresAt   DateTime?
+
   createdAt   DateTime  @default(now())
+
   revoked     Boolean   @default(false)
 
   @@index([userId])
@@ -666,11 +795,13 @@ model ApiKey {
 
 model CreatorProfile {
   id              String   @id @default(cuid())
+
   userId          String   @unique
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   tipsEnabled     Boolean  @default(true)
   tipsMessage     String?  @db.Text
+
   premiumPostsEnabled Boolean @default(true)
 
   totalTips       Float    @default(0)
@@ -689,17 +820,23 @@ model CreatorProfile {
 
 model Tip {
   id              String   @id @default(cuid())
+
   senderId        String
   sender          User     @relation("TipSender", fields: [senderId], references: [id], onDelete: Cascade)
+
   recipientId     String
   recipient       User     @relation("TipRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+
   creatorProfileId String
   creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
 
   amount          Float
   currency        String   @default("USDC")
+
   message         String?  @db.Text
+
   transactionId   String?  @unique
+
   status          TransactionStatus @default(PENDING)
 
   platformFee     Float    @default(0)
@@ -713,20 +850,21 @@ model Tip {
   @@index([senderId])
   @@index([status])
   @@index([createdAt])
-  // Creator dashboard queries tips directly by creatorProfileId - was
-  // unindexed, so every dashboard load did a full table scan.
   @@index([creatorProfileId])
 }
 
 model PremiumPost {
   id              String   @id @default(cuid())
+
   postId          String   @unique
   post            Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
   creatorProfileId String
   creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
 
   price           Float    @default(1.0)
   currency        String   @default("USDC")
+
   previewContent  String?  @db.Text
 
   totalPurchases  Int      @default(0)
@@ -739,21 +877,23 @@ model PremiumPost {
 
   @@index([postId])
   @@index([price])
-  // Same as Tip - the creator dashboard queries premium posts directly
-  // by creatorProfileId.
   @@index([creatorProfileId])
 }
 
 model PremiumPurchase {
   id              String   @id @default(cuid())
+
   premiumPostId   String
   premiumPost     PremiumPost @relation(fields: [premiumPostId], references: [id], onDelete: Cascade)
+
   userId          String
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   amount          Float
   currency        String   @default("USDC")
+
   transactionId   String?  @unique
+
   status          TransactionStatus @default(PENDING)
 
   platformFee     Float    @default(0)
@@ -771,64 +911,57 @@ model PremiumPurchase {
 
 model WithdrawalRequest {
   id              String   @id @default(cuid())
+
   creatorProfileId String
   creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
+
   userId          String
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   amount          Float
   currency        String   @default("USDC")
+
   walletAddress   String
+
   status          WithdrawalStatus @default(PENDING)
+
   transactionHash String?
 
   processedAt     DateTime?
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   @@index([userId])
   @@index([status])
-  // Same as Tip/PremiumPost - the creator dashboard queries withdrawal
-  // requests directly by creatorProfileId.
   @@index([creatorProfileId])
 }
 
-// ─── ADVERTISING PLATFORM ────────────────────────────────────────────
-// Full self-serve ad platform: any authenticated user can create a
-// campaign around one of their own posts, set a budget and a bid
-// (per-click or per-1000-impressions), and it goes through moderator
-// review before it can actually start serving - matching the same
-// requireStaff() review pattern already used for content moderation
-// elsewhere in this app, since ads are exactly the kind of content
-// that benefits from a human check before it reaches every feed.
-
 model AdCampaign {
   id           String            @id @default(cuid())
+
   advertiserId String
   advertiser   User              @relation("AdAdvertiser", fields: [advertiserId], references: [id], onDelete: Cascade)
 
-  // The actual ad creative is a real Post - same content model everyone
-  // already knows, just specially marked and boosted into feeds, rather
-  // than inventing a parallel "ad content" shape.
   postId String @unique
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-  name   String // internal campaign name, shown only to the advertiser/admins, never publicly
+  name   String
   status AdCampaignStatus @default(DRAFT)
 
   bidType     AdBidType
-  bidAmount   Float // $ per click (CPC) or $ per 1000 impressions (CPM)
+  bidAmount   Float
+
   budgetTotal Float
   budgetSpent Float @default(0)
 
-  // Optional external destination - if unset, a click just opens the post
-  // itself, same as clicking any other post.
   targetUrl String?
 
   startDate DateTime?
   endDate   DateTime?
 
   rejectionReason String?   @db.Text
+
   reviewedBy      String?
   reviewedAt      DateTime?
 
@@ -840,19 +973,17 @@ model AdCampaign {
 
   @@index([advertiserId])
   @@index([status])
-  // The serving endpoint filters active campaigns within their date
-  // window on every feed load - this is the route that needs to be fast.
   @@index([status, startDate, endDate])
 }
 
 model AdImpression {
   id         String     @id @default(cuid())
+
   campaignId String
   campaign   AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  // Nullable - an impression can come from a logged-out viewer, unlike
-  // most other event models in this schema which require a real user.
+
   userId String?
-  user   User?   @relation("AdImpressionUser", fields: [userId], references: [id], onDelete: SetNull)
+  user   User?      @relation("AdImpressionUser", fields: [userId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 
@@ -863,8 +994,10 @@ model AdImpression {
 
 model AdClick {
   id         String     @id @default(cuid())
+
   campaignId String
   campaign   AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
   userId     String?
   user       User?      @relation("AdClickUser", fields: [userId], references: [id], onDelete: SetNull)
 
@@ -875,22 +1008,24 @@ model AdClick {
   @@index([userId])
 }
 
-// ─── SUPPORT TICKET SYSTEM ─────────────────────────────────
-
 model SupportTicket {
   id          String    @id @default(cuid())
+
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   subject     String
+
   category    TicketCategory @default(GENERAL)
   priority    TicketPriority @default(NORMAL)
   status      TicketStatus  @default(OPEN)
+
   message     String    @db.Text
 
   attachments String[]
 
   assignedTo  String?
+
   assignedAdmin User?   @relation("AssignedTickets", fields: [assignedTo], references: [id], onDelete: SetNull)
 
   resolvedAt  DateTime?
@@ -918,6 +1053,7 @@ model SupportTicket {
 
 model TicketReply {
   id          String   @id @default(cuid())
+
   ticketId    String
   ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
@@ -925,11 +1061,13 @@ model TicketReply {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   message     String   @db.Text
+
   isInternal  Boolean  @default(false)
+
   attachments String[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([ticketId])
   @@index([userId])
@@ -939,24 +1077,25 @@ model TicketReply {
 
 model TicketFeedback {
   id          String   @id @default(cuid())
+
   ticketId    String   @unique
   ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
-  rating      Int?     // 1-5 stars
+  rating      Int?
   comment     String?  @db.Text
-  resolved    Boolean? // Was the issue fully resolved?
+  resolved    Boolean?
 
   createdAt   DateTime @default(now())
 }
 
-// ─── AI CHAT ─────────────────────────────────────────────────────────
-
 model AIConversation {
   id          String   @id @default(cuid())
+
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   title       String   @default("New Conversation")
+
   messages    AIMessage[]
 
   createdAt   DateTime @default(now())
@@ -968,12 +1107,13 @@ model AIConversation {
 
 model AIMessage {
   id          String   @id @default(cuid())
+
   conversationId String
   conversation AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  role        String   // "user" | "assistant" | "system"
+  role        String
   content     String   @db.Text
-  model       String   // "deepseek-v4-flash"
+  model       String
 
   createdAt   DateTime @default(now())
 
@@ -983,14 +1123,58 @@ model AIMessage {
 
 model AIDailyUsage {
   id          String   @id @default(cuid())
+
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   date        DateTime @default(now())
+
   messages    Int      @default(0)
   tokensUsed  Int      @default(0)
 
   @@unique([userId, date])
   @@index([userId])
   @@index([date])
+}
+
+// ─── ZRP NEWS ────────────────────────────────────────────────────────
+// Dedicated editorial news system.
+// Kept completely separate from the existing Post, Shorts and Video
+// systems so the News feature can be developed without modifying them.
+
+model NewsArticle {
+  id          String   @id @default(cuid())
+
+  title       String   @db.Text
+  slug        String   @unique
+
+  excerpt     String?  @db.Text
+  content     String   @db.Text
+
+  coverImage  String?
+
+  sourceName  String?
+  sourceUrl   String?
+
+  category    NewsArticleCategory @default(WORLD)
+  status      NewsArticleStatus   @default(DRAFT)
+
+  authorId    String
+  author      User     @relation("NewsAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  views       Int      @default(0)
+
+  featured    Boolean  @default(false)
+
+  publishedAt DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([category])
+  @@index([publishedAt])
+  @@index([featured])
+  @@index([authorId])
+  @@index([status, publishedAt])
 }
