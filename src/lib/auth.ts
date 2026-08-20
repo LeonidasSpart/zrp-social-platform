@@ -18,7 +18,7 @@ declare module "next-auth" {
       name?: string | null;
       username?: string | null;
       isAdmin?: boolean;
-      role?: "USER" | "MODERATOR" | "ADMIN";
+      role?: "USER" | "MODERATOR" | "ADMIN" | "JOURNALIST";
       badgeType?: string | null;
       avatarUrl?: string | null;
       onboardingCompleted?: boolean;
@@ -276,7 +276,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
         session.user.isAdmin = token.isAdmin as boolean;
-        session.user.role = token.role as "USER" | "MODERATOR" | "ADMIN";
+        session.user.role = token.role as "USER" | "MODERATOR" | "ADMIN" | "JOURNALIST";
         session.user.badgeType = token.badgeType as string || null;
         session.user.avatarUrl = token.avatarUrl as string || null;
         session.user.onboardingCompleted = token.onboardingCompleted as boolean;
