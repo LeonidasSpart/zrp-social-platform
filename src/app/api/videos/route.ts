@@ -11,35 +11,31 @@ export const dynamic = "force-dynamic";
 //
 // IMPORTANT:
 //
-// This endpoint is intentionally STRICT.
+// Videos may be stored at URLs that DO NOT contain a file
+// extension.
 //
-// A post is returned as a video ONLY when its media URL has a
-// known video extension.
+// Therefore:
 //
-// We DO NOT trust:
+//   mediaType === "video"
+//
+// is valid AFTER GIF/image protection has been applied.
+//
+// GIFs must NEVER enter the video feed.
+//
+// Known image extensions are also rejected.
+//
+// Known video extensions are accepted even if mediaType is
+// missing.
+//
+// This works with both:
 //
 //   mediaType: "video"
+//   imageUrl: "https://.../file"
 //
-// by itself.
-//
-// This is important because old database records may contain:
+// and:
 //
 //   mediaType: "video"
-//   imageUrl: "...gif"
-//
-// Such records MUST NOT enter the video feed or Shorts.
-//
-// Supported videos:
-//
-//   .mp4
-//   .webm
-//   .mov
-//   .avi
-//   .mkv
-//   .m4v
-//   .3gp
-//
-// GIFs and all normal image formats are rejected.
+//   imageUrl: "https://.../video.mp4"
 // ─────────────────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
@@ -115,15 +111,14 @@ export async function GET(req: NextRequest) {
     }
 
     // ─────────────────────────────────────────────────────────
-    // BASE DATABASE FILTER
+    // DATABASE FILTER
     // ─────────────────────────────────────────────────────────
     //
-    // mediaType: "video" is still used as a database filter so
-    // we do not scan every post.
+    // Keep mediaType: "video" here so the database does not
+    // have to scan every post.
     //
-    // BUT mediaType alone is NEVER trusted.
-    //
-    // isRealVideoPost() performs the final validation.
+    // The final validation below protects against old bad
+    // records where a GIF was incorrectly marked as video.
     // ─────────────────────────────────────────────────────────
 
     const where: any = {
@@ -144,11 +139,6 @@ export async function GET(req: NextRequest) {
 
     // ─────────────────────────────────────────────────────────
     // START VIDEO
-    // ─────────────────────────────────────────────────────────
-    //
-    // Used by VideoFeedViewer when opening a video from PostCard.
-    //
-    // A GIF can NEVER become the first item.
     // ─────────────────────────────────────────────────────────
 
     if (startId && !cursor) {
@@ -189,8 +179,8 @@ export async function GET(req: NextRequest) {
         );
       }
 
-      // The requested post is not a valid video.
-      // Fall through to the normal video feed.
+      // If the requested post is not a valid video,
+      // continue with the normal video feed.
     }
 
     // ─────────────────────────────────────────────────────────
@@ -228,15 +218,6 @@ export async function GET(req: NextRequest) {
 // ─────────────────────────────────────────────────────────────
 // FETCH VIDEO BATCH
 // ─────────────────────────────────────────────────────────────
-//
-// We fetch extra candidates because old records may have:
-//
-//   mediaType = "video"
-//
-// while actually being GIFs/images.
-//
-// Only posts that pass isRealVideoPost() are returned.
-// ─────────────────────────────────────────────────────────────
 
 async function fetchVideoBatch({
   where,
@@ -273,10 +254,7 @@ async function fetchVideoBatch({
     select: postSelect(),
   });
 
-  // ─────────────────────────────────────────────────────────
-  // STRICT FINAL FILTER
-  // ─────────────────────────────────────────────────────────
-
+  // Final protection against GIFs/images.
   const validVideos = posts.filter(
     isRealVideoPost
   );
@@ -286,7 +264,6 @@ async function fetchVideoBatch({
     limit
   );
 
-  // Cursor is always based on the last REAL VIDEO returned.
   const nextCursor =
     resultPosts.length === limit
       ? resultPosts[resultPosts.length - 1]?.id || null
@@ -322,44 +299,38 @@ function getMediaPath(
 //
 // GIF ALWAYS WINS.
 //
-// We check both:
-//
-// 1. File extension
-// 2. Common URL parameters used by image/CDN services
-//
-// Examples:
-//
-// image.gif
-// image.gif?width=800
-// image.gif#something
-// ?format=gif
-// ?fm=gif
-// ?f=gif
+// A record marked "video" is STILL rejected if the URL clearly
+// identifies a GIF.
 // ─────────────────────────────────────────────────────────────
 
 function isGifMedia(
   url?: string | null,
   mediaType?: string | null
 ) {
+  const normalizedType =
+    mediaType?.toLowerCase().trim();
+
   if (!url) {
-    return mediaType?.toLowerCase() === "gif";
+    return normalizedType === "gif";
   }
 
-  const normalizedUrl = url.toLowerCase();
+  const normalizedUrl =
+    url.toLowerCase();
 
-  const path = getMediaPath(url);
+  const path =
+    getMediaPath(url);
 
+  // .gif
   if (path.endsWith(".gif")) {
     return true;
   }
 
-  if (
-    mediaType?.toLowerCase() === "gif"
-  ) {
+  // mediaType = gif
+  if (normalizedType === "gif") {
     return true;
   }
 
-  // Common image/CDN GIF indicators.
+  // CDN parameters
   if (
     /[?&](format|fm|f)=gif(?:&|$)/i.test(
       normalizedUrl
@@ -368,10 +339,9 @@ function isGifMedia(
     return true;
   }
 
+  // MIME indicator in URL
   if (
-    normalizedUrl.includes(
-      "image/gif"
-    )
+    normalizedUrl.includes("image/gif")
   ) {
     return true;
   }
@@ -382,9 +352,6 @@ function isGifMedia(
 // ─────────────────────────────────────────────────────────────
 // IMAGE DETECTION
 // ─────────────────────────────────────────────────────────────
-//
-// These formats are NEVER videos.
-// ─────────────────────────────────────────────────────────────
 
 function isImageMedia(
   url?: string | null
@@ -393,7 +360,8 @@ function isImageMedia(
     return false;
   }
 
-  const path = getMediaPath(url);
+  const path =
+    getMediaPath(url);
 
   const imageExtensions = [
     ".jpg",
@@ -423,16 +391,17 @@ function isImageMedia(
 //
 // IMPORTANT:
 //
-// We deliberately DO NOT have:
+// DO NOT require a video file extension.
 //
-//   if (mediaType === "video") return true;
+// Railway/storage/CDN URLs can be extensionless.
 //
-// anymore.
+// Priority:
 //
-// That was the dangerous fallback that allowed old GIF records
-// to enter Shorts.
-//
-// A video must have a known video extension.
+// 1. GIF -> reject
+// 2. Known image -> reject
+// 3. mediaType === "video" -> accept
+// 4. Known video extension -> accept
+// 5. Otherwise -> reject
 // ─────────────────────────────────────────────────────────────
 
 function isRealVideoPost(
@@ -444,7 +413,7 @@ function isRealVideoPost(
   const url = post.imageUrl;
 
   const mediaType =
-    post.mediaType?.toLowerCase();
+    post.mediaType?.toLowerCase().trim();
 
   if (!url) {
     return false;
@@ -477,7 +446,7 @@ function isRealVideoPost(
     getMediaPath(url);
 
   // ───────────────────────────────────────────────────────
-  // 3. ONLY KNOWN VIDEO EXTENSIONS ARE ACCEPTED
+  // 3. KNOWN VIDEO EXTENSIONS
   // ───────────────────────────────────────────────────────
 
   const videoExtensions = [
@@ -493,34 +462,46 @@ function isRealVideoPost(
   const hasVideoExtension =
     videoExtensions.some(
       (extension) =>
-        path.endsWith(
-          extension
-        )
+        path.endsWith(extension)
     );
 
-  if (!hasVideoExtension) {
-    return false;
+  if (hasVideoExtension) {
+    // Never allow an explicit image type through.
+    if (
+      mediaType === "image" ||
+      mediaType === "gif"
+    ) {
+      return false;
+    }
+
+    return true;
   }
 
   // ───────────────────────────────────────────────────────
-  // 4. FINAL MEDIA TYPE CHECK
+  // 4. EXTENSIONLESS VIDEO
   // ───────────────────────────────────────────────────────
   //
-  // If the URL is a known video format, accept it even if
-  // mediaType is missing.
+  // This is the important fix.
   //
-  // But if the database explicitly says it is an image/GIF,
-  // reject it.
+  // If the database says video and the URL is not a known
+  // image/GIF, accept it.
+  //
+  // This supports storage/CDN URLs such as:
+  //
+  // https://storage.example.com/abc123
+  //
+  // where there is no .mp4 at the end.
   // ───────────────────────────────────────────────────────
 
-  if (
-    mediaType === "image" ||
-    mediaType === "gif"
-  ) {
-    return false;
+  if (mediaType === "video") {
+    return true;
   }
 
-  return true;
+  // ───────────────────────────────────────────────────────
+  // 5. EVERYTHING ELSE IS REJECTED
+  // ───────────────────────────────────────────────────────
+
+  return false;
 }
 
 // ─────────────────────────────────────────────────────────────
