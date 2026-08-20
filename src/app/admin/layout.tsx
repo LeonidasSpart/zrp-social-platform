@@ -13,6 +13,7 @@ import {
   DollarSign,
   Newspaper,
   BadgeCheck,
+  HardDrive,
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -90,13 +91,18 @@ export default function AdminLayout({
       icon: Megaphone,
     },
 
-    // Upgrade Requests requires full admin access.
+    // Upgrade Requests and Storage Cleanup require full admin access.
     ...(isFullAdmin
       ? [
           {
             href: "/admin/upgrade-requests",
             label: "Upgrade Requests",
             icon: DollarSign,
+          },
+          {
+            href: "/admin/storage",
+            label: "Storage Cleanup",
+            icon: HardDrive,
           },
         ]
       : []),
