@@ -12,6 +12,7 @@ import {
   Megaphone,
   DollarSign,
   Newspaper,
+  BadgeCheck,
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -72,6 +73,11 @@ export default function AdminLayout({
       href: "/admin/news",
       label: "News",
       icon: Newspaper,
+    },
+    {
+      href: "/admin/journalists",
+      label: "Journalists",
+      icon: BadgeCheck,
     },
     {
       href: "/admin/reports",
