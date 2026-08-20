@@ -9,51 +9,57 @@ export const dynamic = "force-dynamic";
 // VIDEO FEED
 // ─────────────────────────────────────────────────────────────
 //
-// Cursor-paginated, most recent real video posts first.
-//
 // IMPORTANT:
 //
-// GIFs are NEVER allowed into this endpoint's result,
-// even if an old database record incorrectly contains:
+// This endpoint is intentionally STRICT.
+//
+// A post is returned as a video ONLY when its media URL has a
+// known video extension.
+//
+// We DO NOT trust:
 //
 //   mediaType: "video"
 //
-// while imageUrl is actually:
+// by itself.
 //
-//   something.gif
+// This is important because old database records may contain:
 //
-// This protects Shorts from displaying GIFs as <video>.
+//   mediaType: "video"
+//   imageUrl: "...gif"
+//
+// Such records MUST NOT enter the video feed or Shorts.
+//
+// Supported videos:
+//
+//   .mp4
+//   .webm
+//   .mov
+//   .avi
+//   .mkv
+//   .m4v
+//   .3gp
+//
+// GIFs and all normal image formats are rejected.
 // ─────────────────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
   try {
-    const session =
-      await getServerSession(
-        authOptions
-      );
+    const session = await getServerSession(authOptions);
 
-    const userId =
-      session?.user?.id;
+    const userId = session?.user?.id;
 
-    const { searchParams } =
-      new URL(req.url);
+    const { searchParams } = new URL(req.url);
 
-    const cursor =
-      searchParams.get("cursor");
+    const cursor = searchParams.get("cursor");
 
-    const requestedLimit =
-      parseInt(
-        searchParams.get(
-          "limit"
-        ) || "10",
-        10
-      );
+    const requestedLimit = parseInt(
+      searchParams.get("limit") || "10",
+      10
+    );
 
     const limit = Math.min(
       Math.max(
-        Number.isFinite(
-          requestedLimit
-        )
+        Number.isFinite(requestedLimit)
           ? requestedLimit
           : 10,
         1
@@ -61,24 +67,16 @@ export async function GET(req: NextRequest) {
       30
     );
 
-    const startId =
-      searchParams.get(
-        "startId"
-      );
+    const startId = searchParams.get("startId");
 
     // ─────────────────────────────────────────────────────────
     // BLOCKED / MUTED USERS
     // ─────────────────────────────────────────────────────────
 
-    let excludedAuthorIds: string[] =
-      [];
+    let excludedAuthorIds: string[] = [];
 
     if (userId) {
-      const [
-        blocked,
-        blockers,
-        muted,
-      ] = await Promise.all([
+      const [blocked, blockers, muted] = await Promise.all([
         prisma.blocked.findMany({
           where: {
             blockerId: userId,
@@ -109,15 +107,9 @@ export async function GET(req: NextRequest) {
 
       excludedAuthorIds = Array.from(
         new Set([
-          ...blocked.map(
-            (b) => b.blockedId
-          ),
-          ...blockers.map(
-            (b) => b.blockerId
-          ),
-          ...muted.map(
-            (m) => m.mutedId
-          ),
+          ...blocked.map((item) => item.blockedId),
+          ...blockers.map((item) => item.blockerId),
+          ...muted.map((item) => item.mutedId),
         ])
       );
     }
@@ -126,20 +118,12 @@ export async function GET(req: NextRequest) {
     // BASE DATABASE FILTER
     // ─────────────────────────────────────────────────────────
     //
-    // We still use mediaType: "video" here for database-level
-    // filtering/performance.
+    // mediaType: "video" is still used as a database filter so
+    // we do not scan every post.
     //
-    // BUT this is NOT enough by itself because older records
-    // may incorrectly have:
+    // BUT mediaType alone is NEVER trusted.
     //
-    // mediaType = "video"
-    //
-    // with:
-    //
-    // imageUrl = "...gif"
-    //
-    // Therefore every result is also checked by
-    // isRealVideoPost() below.
+    // isRealVideoPost() performs the final validation.
     // ─────────────────────────────────────────────────────────
 
     const where: any = {
@@ -159,58 +143,39 @@ export async function GET(req: NextRequest) {
     };
 
     // ─────────────────────────────────────────────────────────
-    // START POST
+    // START VIDEO
     // ─────────────────────────────────────────────────────────
     //
-    // When opening Shorts from a particular post, make sure the
-    // requested post is ACTUALLY a real video.
+    // Used by VideoFeedViewer when opening a video from PostCard.
     //
-    // Previously this used findUnique() without the video filter,
-    // meaning a GIF could become the first Short.
+    // A GIF can NEVER become the first item.
     // ─────────────────────────────────────────────────────────
 
-    if (
-      startId &&
-      !cursor
-    ) {
-      const startPost =
-        await prisma.post.findFirst({
+    if (startId && !cursor) {
+      const startPost = await prisma.post.findFirst({
+        where: {
+          id: startId,
+          ...where,
+        },
+        select: postSelect(),
+      });
+
+      if (startPost && isRealVideoPost(startPost)) {
+        const rest = await fetchVideoBatch({
           where: {
-            id: startId,
             ...where,
-          },
-          select:
-            postSelect(),
-        });
 
-      /*
-       * Even with the Prisma mediaType filter, perform the
-       * final GIF/video check.
-       */
-      if (
-        startPost &&
-        isRealVideoPost(
-          startPost
-        )
-      ) {
-        const rest =
-          await fetchVideoBatch({
-            where: {
-              ...where,
-
-              id: {
-                not: startId,
-              },
-
-              createdAt: {
-                lt:
-                  startPost.createdAt,
-              },
+            id: {
+              not: startId,
             },
 
-            limit,
+            createdAt: {
+              lt: startPost.createdAt,
+            },
+          },
 
-          });
+          limit,
+        });
 
         const posts = [
           startPost,
@@ -224,23 +189,19 @@ export async function GET(req: NextRequest) {
         );
       }
 
-      /*
-       * If startId is not a real video, do NOT return it.
-       *
-       * Fall through and return the normal latest video feed.
-       */
+      // The requested post is not a valid video.
+      // Fall through to the normal video feed.
     }
 
     // ─────────────────────────────────────────────────────────
-    // NORMAL CURSOR PAGINATION
+    // NORMAL VIDEO FEED
     // ─────────────────────────────────────────────────────────
 
-    const result =
-      await fetchVideoBatch({
-        where,
-        cursor,
-        limit,
-      });
+    const result = await fetchVideoBatch({
+      where,
+      cursor,
+      limit,
+    });
 
     return await withLiked(
       result.posts,
@@ -255,8 +216,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(
       {
-        error:
-          "Failed to fetch video feed",
+        error: "Failed to fetch video feed",
       },
       {
         status: 500,
@@ -269,21 +229,13 @@ export async function GET(req: NextRequest) {
 // FETCH VIDEO BATCH
 // ─────────────────────────────────────────────────────────────
 //
-// Because the database can contain old incorrect mediaType
-// values, we fetch a larger candidate batch and filter GIFs
-// in JavaScript.
+// We fetch extra candidates because old records may have:
 //
-// This guarantees that:
+//   mediaType = "video"
 //
-// .gif       -> excluded
-// mediaType gif -> excluded
-// mp4        -> included
-// webm       -> included
-// mov        -> included
-// avi        -> included
-// mkv        -> included
+// while actually being GIFs/images.
 //
-// If old bad GIF records exist, they are simply skipped.
+// Only posts that pass isRealVideoPost() are returned.
 // ─────────────────────────────────────────────────────────────
 
 async function fetchVideoBatch({
@@ -295,72 +247,49 @@ async function fetchVideoBatch({
   cursor?: string | null;
   limit: number;
 }) {
-  /*
-   * Fetch extra candidates because some records may be
-   * incorrectly marked as video while actually being GIFs.
-   *
-   * 3x normally gives enough room without creating an
-   * unnecessarily large query.
-   */
   const candidateLimit = Math.min(
-    Math.max(limit * 3, 20),
+    Math.max(limit * 5, 30),
     100
   );
 
-  const posts =
-    await prisma.post.findMany({
-      take: candidateLimit,
+  const posts = await prisma.post.findMany({
+    take: candidateLimit,
 
-      ...(cursor
-        ? {
-            skip: 1,
-            cursor: {
-              id: cursor,
-            },
-          }
-        : {}),
+    ...(cursor
+      ? {
+          skip: 1,
+          cursor: {
+            id: cursor,
+          },
+        }
+      : {}),
 
-      where,
+    where,
 
-      orderBy: {
-        createdAt: "desc",
-      },
+    orderBy: {
+      createdAt: "desc",
+    },
 
-      select:
-        postSelect(),
-    });
+    select: postSelect(),
+  });
 
-  /*
-   * Final application-level protection.
-   *
-   * This is the most important line for old data.
-   */
-  const validVideos =
-    posts.filter(
-      isRealVideoPost
-    );
+  // ─────────────────────────────────────────────────────────
+  // STRICT FINAL FILTER
+  // ─────────────────────────────────────────────────────────
 
-  /*
-   * Only return the requested amount.
-   */
-  const resultPosts =
-    validVideos.slice(
-      0,
-      limit
-    );
+  const validVideos = posts.filter(
+    isRealVideoPost
+  );
 
-  /*
-   * The cursor must point to the LAST ACTUAL VIDEO we returned,
-   * not the last database candidate.
-   *
-   * This prevents GIF records from accidentally breaking
-   * pagination.
-   */
+  const resultPosts = validVideos.slice(
+    0,
+    limit
+  );
+
+  // Cursor is always based on the last REAL VIDEO returned.
   const nextCursor =
     resultPosts.length === limit
-      ? resultPosts[
-          resultPosts.length - 1
-        ]?.id || null
+      ? resultPosts[resultPosts.length - 1]?.id || null
       : null;
 
   return {
@@ -370,7 +299,7 @@ async function fetchVideoBatch({
 }
 
 // ─────────────────────────────────────────────────────────────
-// MEDIA HELPERS
+// MEDIA PATH
 // ─────────────────────────────────────────────────────────────
 
 function getMediaPath(
@@ -383,38 +312,127 @@ function getMediaPath(
   return url
     .toLowerCase()
     .split("?")[0]
-    .split("#")[0];
+    .split("#")[0]
+    .trim();
 }
 
 // ─────────────────────────────────────────────────────────────
 // GIF DETECTION
 // ─────────────────────────────────────────────────────────────
 //
-// GIF ALWAYS wins.
+// GIF ALWAYS WINS.
 //
-// Even if:
+// We check both:
 //
-// mediaType = "video"
+// 1. File extension
+// 2. Common URL parameters used by image/CDN services
 //
-// a .gif URL is still treated as GIF.
+// Examples:
+//
+// image.gif
+// image.gif?width=800
+// image.gif#something
+// ?format=gif
+// ?fm=gif
+// ?f=gif
 // ─────────────────────────────────────────────────────────────
 
 function isGifMedia(
   url?: string | null,
   mediaType?: string | null
 ) {
-  const path =
-    getMediaPath(url);
+  if (!url) {
+    return mediaType?.toLowerCase() === "gif";
+  }
 
-  return (
-    path.endsWith(".gif") ||
-    mediaType?.toLowerCase() ===
-      "gif"
+  const normalizedUrl = url.toLowerCase();
+
+  const path = getMediaPath(url);
+
+  if (path.endsWith(".gif")) {
+    return true;
+  }
+
+  if (
+    mediaType?.toLowerCase() === "gif"
+  ) {
+    return true;
+  }
+
+  // Common image/CDN GIF indicators.
+  if (
+    /[?&](format|fm|f)=gif(?:&|$)/i.test(
+      normalizedUrl
+    )
+  ) {
+    return true;
+  }
+
+  if (
+    normalizedUrl.includes(
+      "image/gif"
+    )
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+// ─────────────────────────────────────────────────────────────
+// IMAGE DETECTION
+// ─────────────────────────────────────────────────────────────
+//
+// These formats are NEVER videos.
+// ─────────────────────────────────────────────────────────────
+
+function isImageMedia(
+  url?: string | null
+) {
+  if (!url) {
+    return false;
+  }
+
+  const path = getMediaPath(url);
+
+  const imageExtensions = [
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".webp",
+    ".svg",
+    ".avif",
+    ".bmp",
+    ".ico",
+    ".tif",
+    ".tiff",
+    ".heic",
+    ".heif",
+  ];
+
+  return imageExtensions.some(
+    (extension) =>
+      path.endsWith(extension)
   );
 }
 
 // ─────────────────────────────────────────────────────────────
 // REAL VIDEO DETECTION
+// ─────────────────────────────────────────────────────────────
+//
+// IMPORTANT:
+//
+// We deliberately DO NOT have:
+//
+//   if (mediaType === "video") return true;
+//
+// anymore.
+//
+// That was the dangerous fallback that allowed old GIF records
+// to enter Shorts.
+//
+// A video must have a known video extension.
 // ─────────────────────────────────────────────────────────────
 
 function isRealVideoPost(
@@ -423,17 +441,19 @@ function isRealVideoPost(
     mediaType?: string | null;
   }
 ) {
-  const url =
-    post.imageUrl;
+  const url = post.imageUrl;
 
   const mediaType =
-    post.mediaType;
+    post.mediaType?.toLowerCase();
 
-  /*
-   * GIF MUST NEVER be a video.
-   *
-   * This check happens FIRST.
-   */
+  if (!url) {
+    return false;
+  }
+
+  // ───────────────────────────────────────────────────────
+  // 1. GIF ALWAYS REJECTED
+  // ───────────────────────────────────────────────────────
+
   if (
     isGifMedia(
       url,
@@ -443,7 +463,13 @@ function isRealVideoPost(
     return false;
   }
 
-  if (!url) {
+  // ───────────────────────────────────────────────────────
+  // 2. KNOWN IMAGE FORMATS REJECTED
+  // ───────────────────────────────────────────────────────
+
+  if (
+    isImageMedia(url)
+  ) {
     return false;
   }
 
@@ -451,7 +477,7 @@ function isRealVideoPost(
     getMediaPath(url);
 
   // ───────────────────────────────────────────────────────
-  // KNOWN VIDEO EXTENSIONS
+  // 3. ONLY KNOWN VIDEO EXTENSIONS ARE ACCEPTED
   // ───────────────────────────────────────────────────────
 
   const videoExtensions = [
@@ -464,47 +490,37 @@ function isRealVideoPost(
     ".3gp",
   ];
 
-  if (
+  const hasVideoExtension =
     videoExtensions.some(
       (extension) =>
         path.endsWith(
           extension
         )
-    )
-  ) {
-    return true;
+    );
+
+  if (!hasVideoExtension) {
+    return false;
   }
 
   // ───────────────────────────────────────────────────────
-  // EXPLICIT VIDEO TYPE
+  // 4. FINAL MEDIA TYPE CHECK
   // ───────────────────────────────────────────────────────
   //
-  // Only trust this AFTER GIF has been excluded.
+  // If the URL is a known video format, accept it even if
+  // mediaType is missing.
+  //
+  // But if the database explicitly says it is an image/GIF,
+  // reject it.
   // ───────────────────────────────────────────────────────
 
   if (
-    mediaType?.toLowerCase() ===
-    "video"
+    mediaType === "image" ||
+    mediaType === "gif"
   ) {
-    return true;
+    return false;
   }
 
-  // ───────────────────────────────────────────────────────
-  // STORAGE PATH FALLBACK
-  // ───────────────────────────────────────────────────────
-
-  if (
-    path.includes(
-      "/video/"
-    ) ||
-    path.includes(
-      "/videos/"
-    )
-  ) {
-    return true;
-  }
-
-  return false;
+  return true;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -567,7 +583,7 @@ async function withLiked(
   ) {
     const postIds =
       posts.map(
-        (p) => p.id
+        (post) => post.id
       );
 
     const [
@@ -577,6 +593,7 @@ async function withLiked(
       prisma.like.findMany({
         where: {
           userId,
+
           postId: {
             in: postIds,
           },
@@ -590,6 +607,7 @@ async function withLiked(
       prisma.repost.findMany({
         where: {
           userId,
+
           postId: {
             in: postIds,
           },
@@ -604,28 +622,32 @@ async function withLiked(
     const likedIds =
       new Set(
         likes.map(
-          (l) => l.postId
+          (like) =>
+            like.postId
         )
       );
 
     const repostedIds =
       new Set(
         reposts.map(
-          (r) => r.postId
+          (repost) =>
+            repost.postId
         )
       );
 
-    posts.forEach((post) => {
-      post.liked =
-        likedIds.has(
-          post.id
-        );
+    posts.forEach(
+      (post) => {
+        post.liked =
+          likedIds.has(
+            post.id
+          );
 
-      post.reposted =
-        repostedIds.has(
-          post.id
-        );
-    });
+        post.reposted =
+          repostedIds.has(
+            post.id
+          );
+      }
+    );
   }
 
   return NextResponse.json({
