@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Search, User, Shield, ShieldAlert, Ban, CheckCircle,
   BadgeCheck, Building2, Landmark, Circle, CircleDot,
-  ChevronDown, ChevronUp, Users, UserX, UserCheck, Award
+  ChevronDown, ChevronUp, Users, UserX, UserCheck, Award, Newspaper
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -14,7 +14,7 @@ interface User {
   username: string;
   name: string;
   email: string;
-  role: "USER" | "MODERATOR" | "ADMIN";
+  role: "USER" | "MODERATOR" | "ADMIN" | "JOURNALIST";
   badgeType: string | null;
   banned: boolean;
   plan: string;
@@ -40,11 +40,22 @@ export default function AdminUsers() {
   // instead of matching the real user count shown on the Dashboard.
   const [stats, setStats] = useState({ total: 0, active: 0, banned: 0, admins: 0, mods: 0 });
 
+  // Selectable from the dropdown below - JOURNALIST is deliberately
+  // excluded (see /api/admin/users/[id], which now rejects it too).
+  // Journalist status is granted/revoked from the dedicated
+  // /admin/journalists workflow, since it also has to create/update a
+  // JournalistProfile row and sync the badge - this generic role PUT
+  // only ever touches user.role.
   const ROLE_OPTIONS = [
     { value: "USER", label: t("adminUsers.roleUser"), icon: User, color: "bg-gray-100 text-gray-700" },
     { value: "MODERATOR", label: t("adminUsers.roleModerator"), icon: Shield, color: "bg-orange-100 text-orange-700" },
     { value: "ADMIN", label: t("adminUsers.roleAdmin"), icon: ShieldAlert, color: "bg-rose-100 text-rose-700" },
   ];
+
+  // Display-only style for JOURNALIST, used for the badge next to the
+  // dropdown - not part of ROLE_OPTIONS since it's not a valid choice
+  // in the dropdown itself.
+  const JOURNALIST_ROLE_STYLE = { icon: Newspaper, color: "bg-red-100 text-red-700" };
 
   const BADGE_OPTIONS = [
     { value: "", label: t("adminUsers.badgeNone"), color: "bg-gray-100 text-gray-400" },
@@ -266,6 +277,7 @@ export default function AdminUsers() {
           <option value="USER">{t("adminUsers.roleUser")}</option>
           <option value="MODERATOR">{t("adminUsers.roleModerator")}</option>
           <option value="ADMIN">{t("adminUsers.roleAdmin")}</option>
+          <option value="JOURNALIST">Journalist</option>
         </select>
 
         <select
@@ -323,7 +335,10 @@ export default function AdminUsers() {
                 </tr>
               ) : (
                 filteredUsers.map((user) => {
-                  const roleStyle = ROLE_OPTIONS.find(r => r.value === user.role)?.color || "bg-gray-100 text-gray-700";
+                  const roleStyle =
+                    user.role === "JOURNALIST"
+                      ? JOURNALIST_ROLE_STYLE.color
+                      : ROLE_OPTIONS.find(r => r.value === user.role)?.color || "bg-gray-100 text-gray-700";
                   const badgeInfo = BADGE_OPTIONS.find(b => b.value === user.badgeType);
                   const badgeStyle = badgeInfo?.color || "bg-gray-100 text-gray-400";
                   const BadgeIcon = badgeInfo?.icon || null;
@@ -354,19 +369,30 @@ export default function AdminUsers() {
                             {user.role === "ADMIN" && <ShieldAlert className="w-3 h-3" />}
                             {user.role === "MODERATOR" && <Shield className="w-3 h-3" />}
                             {user.role === "USER" && <User className="w-3 h-3" />}
+                            {user.role === "JOURNALIST" && <Newspaper className="w-3 h-3" />}
                             {user.role}
                           </span>
-                          <select
-                            value={user.role}
-                            onChange={(e) => updateRole(user.id, e.target.value)}
-                            className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
-                          >
-                            {ROLE_OPTIONS.map((opt) => (
-                              <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                              </option>
-                            ))}
-                          </select>
+                          {user.role === "JOURNALIST" ? (
+                            <Link
+                              href="/admin/journalists"
+                              className="text-xs text-gray-500 dark:text-gray-400 hover:underline whitespace-nowrap"
+                              title="Manage journalist status from the Journalists page"
+                            >
+                              Manage in Journalists →
+                            </Link>
+                          ) : (
+                            <select
+                              value={user.role}
+                              onChange={(e) => updateRole(user.id, e.target.value)}
+                              className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
+                            >
+                              {ROLE_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </option>
+                              ))}
+                            </select>
+                          )}
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
