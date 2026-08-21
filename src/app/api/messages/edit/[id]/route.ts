@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { rateLimit } from "@/lib/rate-limit";
+
+const MAX_MESSAGE_LENGTH = 10000;
 
 export async function PUT(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
+
+  const limit = await rateLimit(req, { limit: 30, window: 300, type: "messages-edit" });
+  if (!limit.success) return limit.response;
+
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -16,6 +23,9 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
     const { content } = await req.json();
     if (!content || content.trim().length === 0) {
       return NextResponse.json({ error: "Message content is required" }, { status: 400 });
+    }
+    if (content.length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json({ error: "Message is too long" }, { status: 400 });
     }
 
     const existing = await prisma.message.findUnique({
