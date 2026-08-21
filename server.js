@@ -127,6 +127,29 @@ app.prepare().then(() => {
       socket.to(receiverId).emit("user-typing", { userId, isTyping });
     });
 
+    // ─── Delete / edit / reaction relay ──────────────────────────
+    // Added because the client now emits these three events (real-time
+    // sync for deleting/editing a message and toggling a reaction) but
+    // nothing here was listening for them - the REST calls that
+    // actually perform the delete/edit/reaction already succeeded by
+    // the time these fire, so this is purely relaying the UI update to
+    // the other participant, the same trust level send-message already
+    // uses for receiverId (routing target, not an identity claim).
+    socket.on("delete-message", ({ messageId, receiverId }) => {
+      if (!messageId || !receiverId || typeof receiverId !== "string") return;
+      io.to(receiverId).emit("message-deleted", { messageId });
+    });
+
+    socket.on("edit-message", ({ message, receiverId }) => {
+      if (!message || !receiverId || typeof receiverId !== "string") return;
+      io.to(receiverId).emit("message-edited", { message });
+    });
+
+    socket.on("message-reaction", ({ messageId, reactions, receiverId }) => {
+      if (!messageId || !receiverId || typeof receiverId !== "string") return;
+      io.to(receiverId).emit("reaction-updated", { messageId, reactions });
+    });
+
     socket.on("mark-read", async ({ messageId }) => {
       if (!messageId) return;
       try {
