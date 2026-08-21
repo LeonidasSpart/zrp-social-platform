@@ -144,6 +144,7 @@ export default function ChatInterface({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const lastMessageCountRef = useRef(0);
   const initialMessagesLoadedRef = useRef(false);
@@ -236,6 +237,34 @@ export default function ChatInterface({
       );
 
       recordingSecondsRef.current = 0;
+    },
+
+    onUploadError: (error) => {
+      setUploadingImage(false);
+      alert(t("chat.errImageUploadFailed") + " " + error.message);
+    },
+  });
+
+  // ---------------------------------------------------------------------------
+  // Upload video
+  // ---------------------------------------------------------------------------
+
+  const { startUpload: startVideoUpload } = useUploadThing("chatVideo", {
+    onClientUploadComplete: (files) => {
+      if (!files?.length) {
+        setUploadingImage(false);
+        return;
+      }
+
+      const url = files[0].ufsUrl;
+
+      setUploadingImage(false);
+
+      // 🎬 marker follows the same convention as the 🎤 voice-message
+      // marker above - Message has no separate "type" column, so the
+      // attachment kind is read back out of this content prefix when
+      // rendering the bubble.
+      sendMessage("🎬 Video", url);
     },
 
     onUploadError: (error) => {
@@ -956,6 +985,58 @@ export default function ChatInterface({
     } catch (error) {
       console.error(
         "Document upload error:",
+        error
+      );
+
+      setUploadingImage(false);
+
+      alert(
+        t("chat.errUploadFailedRetry")
+      );
+    }
+
+    event.target.value = "";
+  };
+
+  // ---------------------------------------------------------------------------
+  // Video upload
+  // ---------------------------------------------------------------------------
+
+  const VIDEO_TYPES = [
+    "video/mp4",
+    "video/webm",
+    "video/quicktime",
+    "video/x-m4v",
+  ];
+
+  const handleVideoUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (file.size > 32 * 1024 * 1024) {
+      alert(t("chat.errFileTooLarge"));
+      event.target.value = "";
+      return;
+    }
+
+    if (!VIDEO_TYPES.includes(file.type)) {
+      alert(t("chat.errInvalidFileType"));
+      event.target.value = "";
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      await startVideoUpload([file]);
+    } catch (error) {
+      console.error(
+        "Video upload error:",
         error
       );
 
@@ -2171,9 +2252,32 @@ export default function ChatInterface({
 
                         {message.imageUrl && (
                           <>
-                            {/* VOICE MESSAGE */}
+                            {/* VIDEO MESSAGE */}
 
                             {message.content?.startsWith(
+                              "🎬"
+                            ) ? (
+                              <video
+                                controls
+                                preload="metadata"
+                                src={
+                                  message.imageUrl
+                                }
+                                onClick={(
+                                  event
+                                ) =>
+                                  event.stopPropagation()
+                                }
+                                className="
+                                  block
+                                  max-h-72
+                                  max-w-full
+                                  rounded-xl
+                                  sm:max-h-80
+                                "
+                              />
+                            ) : /* VOICE MESSAGE */
+                            message.content?.startsWith(
                               "🎤"
                             ) ? (
                               <div
@@ -2981,6 +3085,47 @@ export default function ChatInterface({
               onChange={
                 handleDocumentUpload
               }
+              className="hidden"
+            />
+
+            {/* VIDEO */}
+
+            <button
+              type="button"
+              onClick={() =>
+                videoInputRef.current?.click()
+              }
+              disabled={
+                uploadingImage
+              }
+              className="
+                hidden
+                h-10
+                w-10
+                shrink-0
+                items-center
+                justify-center
+                rounded-full
+                text-gray-500
+                transition
+                hover:bg-gray-100
+                hover:text-zrp-red
+                disabled:opacity-50
+                dark:text-gray-400
+                dark:hover:bg-gray-700
+                sm:flex
+              "
+              title="Upload video"
+              aria-label="Upload video"
+            >
+              <Video className="h-5 w-5" />
+            </button>
+
+            <input
+              ref={videoInputRef}
+              type="file"
+              accept="video/mp4,video/webm,video/quicktime,video/x-m4v"
+              onChange={handleVideoUpload}
               className="hidden"
             />
 
