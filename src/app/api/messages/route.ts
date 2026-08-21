@@ -6,6 +6,12 @@ import { sendPushNotification } from "@/lib/push-notifications";
 import { createNotification } from "@/lib/notifications";
 import { rateLimit } from "@/lib/rate-limit";
 
+// Any message longer than this is far beyond anything a real DM needs -
+// content is unbounded text in the schema, so without a cap this was an
+// open-ended storage/abuse vector (one request could write megabytes
+// into a single message row).
+const MAX_MESSAGE_LENGTH = 10000;
+
 // ─── GET conversations ──────────────────────────────────────────────
 export async function GET(req: NextRequest) {
   // Rate limit: 60 requests per minute (light)
@@ -107,6 +113,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Message content or image is required" }, { status: 400 });
     }
 
+    if (content && content.length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json({ error: "Message is too long" }, { status: 400 });
+    }
+
     if (!receiverId) {
       return NextResponse.json({ error: "Receiver ID required" }, { status: 400 });
     }
@@ -118,6 +128,26 @@ export async function POST(req: NextRequest) {
     });
     if (!receiver) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // ─── Blocked check ────────────────────────────────────────────────
+    // Neither direction was ever checked here - a user the receiver had
+    // blocked could still message them freely, and (the less obvious
+    // half) so could someone the SENDER themselves had blocked, since
+    // blocking someone doesn't stop them from still being able to reach
+    // you unless both directions are checked.
+    if (receiverId !== session.user.id) {
+      const blockExists = await prisma.blocked.findFirst({
+        where: {
+          OR: [
+            { blockerId: session.user.id, blockedId: receiverId },
+            { blockerId: receiverId, blockedId: session.user.id },
+          ],
+        },
+      });
+      if (blockExists) {
+        return NextResponse.json({ error: "Unable to send message to this user" }, { status: 403 });
+      }
     }
 
     // ─── If replying, verify the target message belongs to this conversation ──
