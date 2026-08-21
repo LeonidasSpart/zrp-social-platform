@@ -113,9 +113,28 @@ export default function ChatInterface({
   );
 
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(
     null
   );
+
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  const [reactionPickerFor, setReactionPickerFor] = useState<string | null>(
+    null
+  );
+
+  const [activeMessageActions, setActiveMessageActions] = useState<
+    string | null
+  >(null);
+
+  // ---------------------------------------------------------------------------
+  // Refs
+  // ---------------------------------------------------------------------------
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -131,6 +150,8 @@ export default function ChatInterface({
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const userId = session?.user?.id;
+
   // ---------------------------------------------------------------------------
   // Voice recording
   // ---------------------------------------------------------------------------
@@ -144,41 +165,6 @@ export default function ChatInterface({
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const recordingCancelledRef = useRef(false);
-
-  // ---------------------------------------------------------------------------
-  // Reply
-  // ---------------------------------------------------------------------------
-
-  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
-
-  // ---------------------------------------------------------------------------
-  // Edit
-  // ---------------------------------------------------------------------------
-
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editContent, setEditContent] = useState("");
-  const [savingEdit, setSavingEdit] = useState(false);
-
-  // ---------------------------------------------------------------------------
-  // Reactions
-  // ---------------------------------------------------------------------------
-
-  const [reactionPickerFor, setReactionPickerFor] = useState<string | null>(
-    null
-  );
-
-  // ---------------------------------------------------------------------------
-  // MOBILE MESSAGE ACTIONS
-  //
-  // On touch devices the action bar is hidden by default.
-  // Tapping a message reveals actions only for that message.
-  // ---------------------------------------------------------------------------
-
-  const [activeMessageActions, setActiveMessageActions] = useState<
-    string | null
-  >(null);
-
-  const userId = session?.user?.id;
 
   // ---------------------------------------------------------------------------
   // Upload image
@@ -291,10 +277,14 @@ export default function ChatInterface({
   const setupSocketListeners = () => {
     const socket = socketRef.current;
 
-    if (!socket) return;
+    if (!socket) {
+      return;
+    }
 
     socket.on("receive-message", (message: Message) => {
-      if (message.senderId !== receiverId) return;
+      if (message.senderId !== receiverId) {
+        return;
+      }
 
       setMessages((prev) => {
         if (prev.some((item) => item.id === message.id)) {
@@ -314,7 +304,9 @@ export default function ChatInterface({
 
     socket.on("message-sent", (message: Message) => {
       setMessages((prev) =>
-        prev.map((item) => (item.id === message.id ? message : item))
+        prev.map((item) =>
+          item.id === message.id ? message : item
+        )
       );
     });
 
@@ -333,23 +325,31 @@ export default function ChatInterface({
       }
     );
 
-    socket.on("message-read", ({ messageId }: { messageId: string }) => {
-      setMessages((prev) =>
-        prev.map((item) =>
-          item.id === messageId ? { ...item, read: true } : item
-        )
-      );
-    });
+    socket.on(
+      "message-read",
+      ({ messageId }: { messageId: string }) => {
+        setMessages((prev) =>
+          prev.map((item) =>
+            item.id === messageId
+              ? { ...item, read: true }
+              : item
+          )
+        );
+      }
+    );
 
-    socket.on("message-deleted", ({ messageId }: { messageId: string }) => {
-      setMessages((prev) =>
-        prev.filter((item) => item.id !== messageId)
-      );
+    socket.on(
+      "message-deleted",
+      ({ messageId }: { messageId: string }) => {
+        setMessages((prev) =>
+          prev.filter((item) => item.id !== messageId)
+        );
 
-      setActiveMessageActions((current) =>
-        current === messageId ? null : current
-      );
-    });
+        setActiveMessageActions((current) =>
+          current === messageId ? null : current
+        );
+      }
+    );
 
     socket.on(
       "message-edited",
@@ -387,7 +387,9 @@ export default function ChatInterface({
   // ---------------------------------------------------------------------------
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      return;
+    }
 
     const socket = getSocket(userId);
 
@@ -427,9 +429,9 @@ export default function ChatInterface({
       socket.off("connect_error", handleConnectError);
 
       socket.off("receive-message");
+      socket.off("message-sent");
       socket.off("user-typing");
       socket.off("message-read");
-      socket.off("message-sent");
       socket.off("message-deleted");
       socket.off("message-edited");
       socket.off("reaction-updated");
@@ -437,7 +439,7 @@ export default function ChatInterface({
   }, [userId, receiverId]);
 
   // ---------------------------------------------------------------------------
-  // Cleanup recording
+  // Cleanup
   // ---------------------------------------------------------------------------
 
   useEffect(() => {
@@ -460,7 +462,9 @@ export default function ChatInterface({
   // Scroll behavior
   // ---------------------------------------------------------------------------
 
-  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+  const scrollToBottom = (
+    behavior: ScrollBehavior = "smooth"
+  ) => {
     requestAnimationFrame(() => {
       messagesEndRef.current?.scrollIntoView({
         behavior,
@@ -470,7 +474,10 @@ export default function ChatInterface({
   };
 
   useEffect(() => {
-    if (!initialMessagesLoadedRef.current && messages.length > 0) {
+    if (
+      !initialMessagesLoadedRef.current &&
+      messages.length > 0
+    ) {
       initialMessagesLoadedRef.current = true;
       lastMessageCountRef.current = messages.length;
 
@@ -481,7 +488,9 @@ export default function ChatInterface({
       return;
     }
 
-    if (messages.length > lastMessageCountRef.current) {
+    if (
+      messages.length > lastMessageCountRef.current
+    ) {
       scrollToBottom("smooth");
     }
 
@@ -496,8 +505,13 @@ export default function ChatInterface({
     content: string,
     imageUrl: string | null
   ) => {
-    if (!content.trim() && !imageUrl) return;
-    if (!userId) return;
+    if (!content.trim() && !imageUrl) {
+      return;
+    }
+
+    if (!userId) {
+      return;
+    }
 
     setSending(true);
 
@@ -538,7 +552,10 @@ export default function ChatInterface({
       reactions: [],
     };
 
-    setMessages((prev) => [...prev, optimisticMessage]);
+    setMessages((prev) => [
+      ...prev,
+      optimisticMessage,
+    ]);
 
     setNewMessage("");
     setReplyingTo(null);
@@ -564,7 +581,9 @@ export default function ChatInterface({
       });
 
       if (!res.ok) {
-        const error = await res.json().catch(() => null);
+        const error = await res
+          .json()
+          .catch(() => null);
 
         throw new Error(
           error?.error || "Failed to send message"
@@ -575,7 +594,9 @@ export default function ChatInterface({
 
       setMessages((prev) =>
         prev.map((item) =>
-          item.id === tempId ? savedMessage : item
+          item.id === tempId
+            ? savedMessage
+            : item
         )
       );
 
@@ -594,7 +615,8 @@ export default function ChatInterface({
 
       alert(
         t("chat.errSendFailed", {
-          error: error?.message || "Unknown error",
+          error:
+            error?.message || "Unknown error",
         })
       );
     } finally {
@@ -602,20 +624,35 @@ export default function ChatInterface({
     }
   };
 
-  const handleSend = async (e?: React.FormEvent) => {
-    e?.preventDefault();
+  const handleSend = async (
+    event?: React.FormEvent
+  ) => {
+    event?.preventDefault();
 
-    if (!newMessage.trim() || !userId) return;
+    if (!newMessage.trim() || !userId) {
+      return;
+    }
 
-    await sendMessage(newMessage.trim(), null);
+    await sendMessage(
+      newMessage.trim(),
+      null
+    );
   };
 
   // ---------------------------------------------------------------------------
-  // Delete
+  // Delete message
   // ---------------------------------------------------------------------------
 
-  const handleDeleteMessage = async (messageId: string) => {
-    if (!confirm(t("chat.deleteMessageConfirm"))) return;
+  const handleDeleteMessage = async (
+    messageId: string
+  ) => {
+    if (
+      !confirm(
+        t("chat.deleteMessageConfirm")
+      )
+    ) {
+      return;
+    }
 
     setDeletingMessageId(messageId);
     setActiveMessageActions(null);
@@ -635,33 +672,47 @@ export default function ChatInterface({
         );
 
         setMessages((prev) =>
-          prev.filter((item) => item.id !== messageId)
+          prev.filter(
+            (item) => item.id !== messageId
+          )
         );
 
         if (message) {
-          socketRef.current?.emit("delete-message", {
-            messageId,
-            senderId: message.senderId,
-            receiverId: message.receiverId,
-          });
+          socketRef.current?.emit(
+            "delete-message",
+            {
+              messageId,
+              senderId: message.senderId,
+              receiverId: message.receiverId,
+            }
+          );
         }
       } else {
-        const err = await res.json().catch(() => null);
+        const err = await res
+          .json()
+          .catch(() => null);
 
         alert(
-          err?.error || t("chat.errDeleteMessage")
+          err?.error ||
+            t("chat.errDeleteMessage")
         );
       }
     } catch (error) {
-      console.error("Delete message error:", error);
-      alert(t("chat.errDeleteMessage"));
+      console.error(
+        "Delete message error:",
+        error
+      );
+
+      alert(
+        t("chat.errDeleteMessage")
+      );
     } finally {
       setDeletingMessageId(null);
     }
   };
 
   // ---------------------------------------------------------------------------
-  // Edit
+  // Edit message
   // ---------------------------------------------------------------------------
 
   const startEdit = (message: Message) => {
@@ -677,8 +728,12 @@ export default function ChatInterface({
     setEditContent("");
   };
 
-  const saveEdit = async (messageId: string) => {
-    if (!editContent.trim()) return;
+  const saveEdit = async (
+    messageId: string
+  ) => {
+    if (!editContent.trim()) {
+      return;
+    }
 
     setSavingEdit(true);
 
@@ -701,28 +756,40 @@ export default function ChatInterface({
 
         setMessages((prev) =>
           prev.map((item) =>
-            item.id === messageId ? updated : item
+            item.id === messageId
+              ? updated
+              : item
           )
         );
 
-        socketRef.current?.emit("edit-message", {
-          message: updated,
-          senderId: updated.senderId,
-          receiverId: updated.receiverId,
-        });
+        socketRef.current?.emit(
+          "edit-message",
+          {
+            message: updated,
+            senderId: updated.senderId,
+            receiverId: updated.receiverId,
+          }
+        );
 
         setEditingId(null);
         setEditContent("");
         setActiveMessageActions(null);
       } else {
-        const err = await res.json().catch(() => null);
+        const err = await res
+          .json()
+          .catch(() => null);
 
         alert(
-          err?.error || "Failed to edit message"
+          err?.error ||
+            "Failed to edit message"
         );
       }
     } catch (error) {
-      console.error("Edit message error:", error);
+      console.error(
+        "Edit message error:",
+        error
+      );
+
       alert("Failed to edit message");
     } finally {
       setSavingEdit(false);
@@ -754,7 +821,9 @@ export default function ChatInterface({
         }
       );
 
-      if (!res.ok) return;
+      if (!res.ok) {
+        return;
+      }
 
       const data = await res.json();
 
@@ -774,15 +843,21 @@ export default function ChatInterface({
       );
 
       if (message) {
-        socketRef.current?.emit("message-reaction", {
-          messageId,
-          reactions: data.reactions,
-          senderId: message.senderId,
-          receiverId: message.receiverId,
-        });
+        socketRef.current?.emit(
+          "message-reaction",
+          {
+            messageId,
+            reactions: data.reactions,
+            senderId: message.senderId,
+            receiverId: message.receiverId,
+          }
+        );
       }
     } catch (error) {
-      console.error("Reaction error:", error);
+      console.error(
+        "Reaction error:",
+        error
+      );
     }
   };
 
@@ -791,15 +866,17 @@ export default function ChatInterface({
   // ---------------------------------------------------------------------------
 
   const handleImageUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const file = e.target.files?.[0];
+    const file = event.target.files?.[0];
 
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     if (file.size > 4 * 1024 * 1024) {
       alert(t("chat.errFileTooLarge"));
-      e.target.value = "";
+      event.target.value = "";
       return;
     }
 
@@ -812,7 +889,7 @@ export default function ChatInterface({
 
     if (!validTypes.includes(file.type)) {
       alert(t("chat.errInvalidFileType"));
-      e.target.value = "";
+      event.target.value = "";
       return;
     }
 
@@ -821,14 +898,19 @@ export default function ChatInterface({
     try {
       await startUpload([file]);
     } catch (error) {
-      console.error("Upload error:", error);
+      console.error(
+        "Image upload error:",
+        error
+      );
 
       setUploadingImage(false);
 
-      alert(t("chat.errUploadFailedRetry"));
+      alert(
+        t("chat.errUploadFailedRetry")
+      );
     }
 
-    e.target.value = "";
+    event.target.value = "";
   };
 
   // ---------------------------------------------------------------------------
@@ -847,21 +929,23 @@ export default function ChatInterface({
   ];
 
   const handleDocumentUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const file = e.target.files?.[0];
+    const file = event.target.files?.[0];
 
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     if (file.size > 8 * 1024 * 1024) {
       alert(t("chat.errFileTooLarge"));
-      e.target.value = "";
+      event.target.value = "";
       return;
     }
 
     if (!DOCUMENT_TYPES.includes(file.type)) {
       alert(t("chat.errInvalidFileType"));
-      e.target.value = "";
+      event.target.value = "";
       return;
     }
 
@@ -870,23 +954,34 @@ export default function ChatInterface({
     try {
       await startFileUpload([file]);
     } catch (error) {
-      console.error("Upload error:", error);
+      console.error(
+        "Document upload error:",
+        error
+      );
 
       setUploadingImage(false);
 
-      alert(t("chat.errUploadFailedRetry"));
+      alert(
+        t("chat.errUploadFailedRetry")
+      );
     }
 
-    e.target.value = "";
+    event.target.value = "";
   };
 
   // ---------------------------------------------------------------------------
   // Voice recording
   // ---------------------------------------------------------------------------
 
-  const formatRecordingTime = (totalSeconds: number) => {
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
+  const formatRecordingTime = (
+    totalSeconds: number
+  ) => {
+    const minutes = Math.floor(
+      totalSeconds / 60
+    );
+
+    const seconds =
+      totalSeconds % 60;
 
     return `${minutes}:${seconds
       .toString()
@@ -894,16 +989,20 @@ export default function ChatInterface({
   };
 
   const startRecording = async () => {
-    if (!navigator.mediaDevices?.getUserMedia) {
+    if (
+      !navigator.mediaDevices?.getUserMedia
+    ) {
       alert(t("chat.errMicAccess"));
       return;
     }
 
     try {
       const stream =
-        await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
+        await navigator.mediaDevices.getUserMedia(
+          {
+            audio: true,
+          }
+        );
 
       mediaStreamRef.current = stream;
 
@@ -913,35 +1012,50 @@ export default function ChatInterface({
         "audio/mp4",
       ];
 
-      const mimeType = mimeCandidates.find((type) =>
-        MediaRecorder.isTypeSupported(type)
-      );
+      const mimeType =
+        mimeCandidates.find((type) =>
+          MediaRecorder.isTypeSupported(
+            type
+          )
+        );
 
       const recorder = new MediaRecorder(
         stream,
-        mimeType ? { mimeType } : undefined
+        mimeType
+          ? { mimeType }
+          : undefined
       );
 
-      mediaRecorderRef.current = recorder;
-      audioChunksRef.current = [];
-      recordingCancelledRef.current = false;
+      mediaRecorderRef.current =
+        recorder;
 
-      recorder.ondataavailable = (event) => {
+      audioChunksRef.current = [];
+      recordingCancelledRef.current =
+        false;
+
+      recorder.ondataavailable = (
+        event
+      ) => {
         if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
+          audioChunksRef.current.push(
+            event.data
+          );
         }
       };
 
       recorder.onstop = async () => {
         mediaStreamRef.current
           ?.getTracks()
-          .forEach((track) => track.stop());
+          .forEach((track) =>
+            track.stop()
+          );
 
         mediaStreamRef.current = null;
 
         if (
           recordingCancelledRef.current ||
-          audioChunksRef.current.length === 0
+          audioChunksRef.current.length ===
+            0
         ) {
           audioChunksRef.current = [];
           return;
@@ -950,15 +1064,18 @@ export default function ChatInterface({
         const blob = new Blob(
           audioChunksRef.current,
           {
-            type: mimeType || "audio/webm",
+            type:
+              mimeType ||
+              "audio/webm",
           }
         );
 
         audioChunksRef.current = [];
 
-        const extension = mimeType?.includes("mp4")
-          ? "m4a"
-          : "webm";
+        const extension =
+          mimeType?.includes("mp4")
+            ? "m4a"
+            : "webm";
 
         const file = new File(
           [blob],
@@ -971,7 +1088,9 @@ export default function ChatInterface({
         setUploadingImage(true);
 
         try {
-          await startAudioUpload([file]);
+          await startAudioUpload([
+            file,
+          ]);
         } catch (error) {
           console.error(
             "Voice message upload error:",
@@ -980,7 +1099,11 @@ export default function ChatInterface({
 
           setUploadingImage(false);
 
-          alert(t("chat.errUploadFailedRetry"));
+          alert(
+            t(
+              "chat.errUploadFailedRetry"
+            )
+          );
         }
       };
 
@@ -990,15 +1113,20 @@ export default function ChatInterface({
       setRecordingSeconds(0);
       recordingSecondsRef.current = 0;
 
-      recordingIntervalRef.current = setInterval(() => {
-        setRecordingSeconds((previous) => {
-          const next = previous + 1;
+      recordingIntervalRef.current =
+        setInterval(() => {
+          setRecordingSeconds(
+            (previous) => {
+              const next =
+                previous + 1;
 
-          recordingSecondsRef.current = next;
+              recordingSecondsRef.current =
+                next;
 
-          return next;
-        });
-      }, 1000);
+              return next;
+            }
+          );
+        }, 1000);
     } catch (error) {
       console.error(
         "Microphone access error:",
@@ -1011,15 +1139,21 @@ export default function ChatInterface({
 
   const stopAndSendRecording = () => {
     if (recordingIntervalRef.current) {
-      clearInterval(recordingIntervalRef.current);
-      recordingIntervalRef.current = null;
+      clearInterval(
+        recordingIntervalRef.current
+      );
+
+      recordingIntervalRef.current =
+        null;
     }
 
-    recordingCancelledRef.current = false;
+    recordingCancelledRef.current =
+      false;
 
     if (
       mediaRecorderRef.current &&
-      mediaRecorderRef.current.state !== "inactive"
+      mediaRecorderRef.current.state !==
+        "inactive"
     ) {
       mediaRecorderRef.current.stop();
     }
@@ -1029,15 +1163,21 @@ export default function ChatInterface({
 
   const cancelRecording = () => {
     if (recordingIntervalRef.current) {
-      clearInterval(recordingIntervalRef.current);
-      recordingIntervalRef.current = null;
+      clearInterval(
+        recordingIntervalRef.current
+      );
+
+      recordingIntervalRef.current =
+        null;
     }
 
-    recordingCancelledRef.current = true;
+    recordingCancelledRef.current =
+      true;
 
     if (
       mediaRecorderRef.current &&
-      mediaRecorderRef.current.state !== "inactive"
+      mediaRecorderRef.current.state !==
+        "inactive"
     ) {
       mediaRecorderRef.current.stop();
     }
@@ -1051,8 +1191,11 @@ export default function ChatInterface({
   // Emoji
   // ---------------------------------------------------------------------------
 
-  const handleEmojiClick = (emoji: any) => {
-    const textarea = textareaRef.current;
+  const handleEmojiClick = (
+    emoji: any
+  ) => {
+    const textarea =
+      textareaRef.current;
 
     const start =
       textarea?.selectionStart ??
@@ -1062,17 +1205,25 @@ export default function ChatInterface({
       textarea?.selectionEnd ??
       newMessage.length;
 
-    const before = newMessage.slice(0, start);
+    const before = newMessage.slice(
+      0,
+      start
+    );
+
     const after = newMessage.slice(end);
 
     const updated =
-      before + emoji.emoji + after;
+      before +
+      emoji.emoji +
+      after;
 
     setNewMessage(updated);
     setShowEmojiPicker(false);
 
     setTimeout(() => {
-      if (!textareaRef.current) return;
+      if (!textareaRef.current) {
+        return;
+      }
 
       const newPosition =
         start + emoji.emoji.length;
@@ -1083,7 +1234,8 @@ export default function ChatInterface({
       textareaRef.current.selectionEnd =
         newPosition;
 
-      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height =
+        "auto";
 
       textareaRef.current.style.height = `${Math.min(
         textareaRef.current.scrollHeight,
@@ -1099,47 +1251,60 @@ export default function ChatInterface({
   // ---------------------------------------------------------------------------
 
   const handleTyping = (
-    e: React.ChangeEvent<HTMLTextAreaElement>
+    event: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
-    const value = e.target.value;
+    const value =
+      event.target.value;
 
     setNewMessage(value);
 
-    e.target.style.height = "auto";
+    event.target.style.height =
+      "auto";
 
-    e.target.style.height = `${Math.min(
-      e.target.scrollHeight,
+    event.target.style.height = `${Math.min(
+      event.target.scrollHeight,
       128
     )}px`;
 
     if (!isTyping) {
       setIsTyping(true);
 
-      socketRef.current?.emit("typing", {
-        receiverId,
-        isTyping: true,
-      });
+      socketRef.current?.emit(
+        "typing",
+        {
+          receiverId,
+          isTyping: true,
+        }
+      );
     }
 
     if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
+      clearTimeout(
+        typingTimeoutRef.current
+      );
     }
 
-    typingTimeoutRef.current = setTimeout(() => {
-      setIsTyping(false);
+    typingTimeoutRef.current =
+      setTimeout(() => {
+        setIsTyping(false);
 
-      socketRef.current?.emit("typing", {
-        receiverId,
-        isTyping: false,
-      });
-    }, 1000);
+        socketRef.current?.emit(
+          "typing",
+          {
+            receiverId,
+            isTyping: false,
+          }
+        );
+      }, 1000);
   };
 
   // ---------------------------------------------------------------------------
   // Lightbox
   // ---------------------------------------------------------------------------
 
-  const openLightbox = (imageUrl: string) => {
+  const openLightbox = (
+    imageUrl: string
+  ) => {
     setActiveMessageActions(null);
     setLightboxImage(imageUrl);
   };
@@ -1149,9 +1314,12 @@ export default function ChatInterface({
   };
 
   const downloadImage = () => {
-    if (!lightboxImage) return;
+    if (!lightboxImage) {
+      return;
+    }
 
-    const link = document.createElement("a");
+    const link =
+      document.createElement("a");
 
     link.href = lightboxImage;
     link.download = `image-${Date.now()}.jpg`;
@@ -1167,14 +1335,19 @@ export default function ChatInterface({
   // Reply navigation
   // ---------------------------------------------------------------------------
 
-  const scrollToMessage = (messageId: string) => {
+  const scrollToMessage = (
+    messageId: string
+  ) => {
     setActiveMessageActions(null);
 
-    const element = document.getElementById(
-      `msg-${messageId}`
-    );
+    const element =
+      document.getElementById(
+        `msg-${messageId}`
+      );
 
-    if (!element) return;
+    if (!element) {
+      return;
+    }
 
     element.scrollIntoView({
       behavior: "smooth",
@@ -1195,13 +1368,15 @@ export default function ChatInterface({
   };
 
   // ---------------------------------------------------------------------------
-  // Reactions grouping
+  // Reaction grouping
   // ---------------------------------------------------------------------------
 
   const groupReactions = (
     reactions?: Reaction[]
   ) => {
-    if (!reactions?.length) return [];
+    if (!reactions?.length) {
+      return [];
+    }
 
     const map = new Map<
       string,
@@ -1218,15 +1393,18 @@ export default function ChatInterface({
         .push(reaction.user);
     });
 
-    return Array.from(map.entries()).map(
-      ([emoji, users]) => ({
-        emoji,
-        users,
-      })
-    );
+    return Array.from(
+      map.entries()
+    ).map(([emoji, users]) => ({
+      emoji,
+      users,
+    }));
   };
 
-  const localeMap: Record<string, string> = {
+  const localeMap: Record<
+    string,
+    string
+  > = {
     en: "en-US",
     fr: "fr-FR",
     de: "de-DE",
@@ -1239,9 +1417,29 @@ export default function ChatInterface({
 
   if (loading) {
     return (
-      <div className="flex h-full min-h-[240px] w-full items-center justify-center bg-white dark:bg-zrp-deepBlack">
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+      <div
+        className="
+          flex
+          h-full
+          min-h-[240px]
+          w-full
+          items-center
+          justify-center
+          bg-white
+          dark:bg-zrp-deepBlack
+        "
+      >
+        <div
+          className="
+            flex
+            items-center
+            gap-2
+            text-sm
+            text-gray-500
+          "
+        >
           <Loader2 className="h-5 w-5 animate-spin" />
+
           {t("chat.loadingMessages")}
         </div>
       </div>
@@ -1257,29 +1455,29 @@ export default function ChatInterface({
       className="
         relative
         flex
-        flex-col
-        min-h-0
         h-full
+        min-h-0
         w-full
         max-w-full
+        flex-col
         overflow-hidden
-        bg-white
-        dark:bg-zrp-deepBlack
+        rounded-none
         border
         border-gray-200
-        dark:border-gray-700
-        rounded-none
-        sm:rounded-xl
+        bg-white
         shadow-sm
+        dark:border-gray-700
+        dark:bg-zrp-deepBlack
+        sm:rounded-xl
       "
       style={{
         height: "100%",
         minHeight: 0,
       }}
     >
-      {/* =======================================================================
+      {/* =====================================================================
           HEADER
-      ======================================================================= */}
+      ====================================================================== */}
 
       <header
         className="
@@ -1293,11 +1491,11 @@ export default function ChatInterface({
           gap-2
           border-b
           border-gray-200
-          dark:border-gray-700
           bg-white
-          dark:bg-zrp-deepBlack
           px-3
           py-2
+          dark:border-gray-700
+          dark:bg-zrp-deepBlack
           sm:min-h-[68px]
           sm:px-4
         "
@@ -1313,11 +1511,11 @@ export default function ChatInterface({
             flex-1
             items-center
             gap-2
-            sm:gap-3
             text-left
             transition-opacity
             hover:opacity-80
             focus:outline-none
+            sm:gap-3
           "
         >
           <div
@@ -1341,7 +1539,11 @@ export default function ChatInterface({
               <img
                 src={receiverAvatar}
                 alt={receiverName}
-                className="h-full w-full object-cover"
+                className="
+                  h-full
+                  w-full
+                  object-cover
+                "
               />
             ) : (
               receiverName?.[0]?.toUpperCase() ||
@@ -1366,7 +1568,9 @@ export default function ChatInterface({
               </span>
 
               <VerifiedBadge
-                badgeType={receiverBadgeType}
+                badgeType={
+                  receiverBadgeType
+                }
               />
             </div>
 
@@ -1445,16 +1649,22 @@ export default function ChatInterface({
         </div>
       </header>
 
-      {/* =======================================================================
+      {/* =====================================================================
           CONTACT DRAWER
-      ======================================================================= */}
+      ====================================================================== */}
 
       {showContactInfo && (
         <ChatContactDrawer
-          receiverUsername={receiverUsername}
+          receiverUsername={
+            receiverUsername
+          }
           receiverName={receiverName}
-          receiverAvatar={receiverAvatar}
-          receiverBadgeType={receiverBadgeType}
+          receiverAvatar={
+            receiverAvatar
+          }
+          receiverBadgeType={
+            receiverBadgeType
+          }
           messages={messages}
           onClose={() =>
             setShowContactInfo(false)
@@ -1464,9 +1674,9 @@ export default function ChatInterface({
         />
       )}
 
-      {/* =======================================================================
+      {/* =====================================================================
           MESSAGES
-      ======================================================================= */}
+      ====================================================================== */}
 
       <main
         ref={messagesContainerRef}
@@ -1484,7 +1694,8 @@ export default function ChatInterface({
           sm:py-4
         "
         style={{
-          WebkitOverflowScrolling: "touch",
+          WebkitOverflowScrolling:
+            "touch",
           scrollbarGutter: "stable",
         }}
       >
@@ -1527,16 +1738,19 @@ export default function ChatInterface({
             <div className="space-y-2 sm:space-y-2.5">
               {messages.map((message) => {
                 const isOwn =
-                  message.senderId === userId;
+                  message.senderId ===
+                  userId;
 
                 const displayContent =
                   message.content &&
-                  message.content !== "📷 Image"
+                  message.content !==
+                    "📷 Image"
                     ? message.content
                     : "";
 
                 const isEditing =
-                  editingId === message.id;
+                  editingId ===
+                  message.id;
 
                 const reactionGroups =
                   groupReactions(
@@ -1554,7 +1768,8 @@ export default function ChatInterface({
                     onClick={() => {
                       setActiveMessageActions(
                         (current) =>
-                          current === message.id
+                          current ===
+                          message.id
                             ? null
                             : message.id
                       );
@@ -1564,7 +1779,9 @@ export default function ChatInterface({
                         reactionPickerFor !==
                           message.id
                       ) {
-                        setReactionPickerFor(null);
+                        setReactionPickerFor(
+                          null
+                        );
                       }
                     }}
                     className={`
@@ -1596,9 +1813,7 @@ export default function ChatInterface({
                         }
                       `}
                     >
-                      {/* =====================================================
-                          BUBBLE
-                      ===================================================== */}
+                      {/* MESSAGE BUBBLE */}
 
                       <div
                         className={`
@@ -1616,15 +1831,7 @@ export default function ChatInterface({
                           }
                         `}
                       >
-                        {/* ===================================================
-                            MESSAGE ACTIONS
-
-                            Desktop:
-                            Actions appear on hover.
-
-                            Mobile/tablet:
-                            Actions appear only after tapping that message.
-                        =================================================== */}
+                        {/* MESSAGE ACTIONS */}
 
                         {isActive && (
                           <div
@@ -1657,9 +1864,13 @@ export default function ChatInterface({
                               }
                             `}
                           >
+                            {/* React */}
+
                             <button
                               type="button"
-                              onClick={(event) => {
+                              onClick={(
+                                event
+                              ) => {
                                 event.stopPropagation();
 
                                 setReactionPickerFor(
@@ -1686,14 +1897,24 @@ export default function ChatInterface({
                               <Smile className="h-4 w-4" />
                             </button>
 
+                            {/* Reply */}
+
                             <button
                               type="button"
-                              onClick={(event) => {
+                              onClick={(
+                                event
+                              ) => {
                                 event.stopPropagation();
 
-                                setReplyingTo(message);
-                                setReactionPickerFor(null);
-                                setActiveMessageActions(null);
+                                setReplyingTo(
+                                  message
+                                );
+                                setReactionPickerFor(
+                                  null
+                                );
+                                setActiveMessageActions(
+                                  null
+                                );
                               }}
                               className="
                                 flex
@@ -1712,13 +1933,19 @@ export default function ChatInterface({
                               <Reply className="h-4 w-4" />
                             </button>
 
+                            {/* Edit */}
+
                             {isOwn &&
                               !message.imageUrl && (
                                 <button
                                   type="button"
-                                  onClick={(event) => {
+                                  onClick={(
+                                    event
+                                  ) => {
                                     event.stopPropagation();
-                                    startEdit(message);
+                                    startEdit(
+                                      message
+                                    );
                                   }}
                                   className="
                                     flex
@@ -1738,11 +1965,16 @@ export default function ChatInterface({
                                 </button>
                               )}
 
+                            {/* Delete */}
+
                             {isOwn && (
                               <button
                                 type="button"
-                                onClick={(event) => {
+                                onClick={(
+                                  event
+                                ) => {
                                   event.stopPropagation();
+
                                   handleDeleteMessage(
                                     message.id
                                   );
@@ -1780,9 +2012,7 @@ export default function ChatInterface({
                           </div>
                         )}
 
-                        {/* ===================================================
-                            QUICK REACTIONS
-                        =================================================== */}
+                        {/* QUICK REACTIONS */}
 
                         {reactionPickerFor ===
                           message.id && (
@@ -1790,12 +2020,21 @@ export default function ChatInterface({
                             <button
                               type="button"
                               aria-label="Close reaction picker"
-                              className="fixed inset-0 z-10 cursor-default"
-                              onClick={(event) => {
+                              className="
+                                fixed
+                                inset-0
+                                z-10
+                                cursor-default
+                              "
+                              onClick={(
+                                event
+                              ) => {
                                 event.stopPropagation();
+
                                 setReactionPickerFor(
                                   null
                                 );
+
                                 setActiveMessageActions(
                                   null
                                 );
@@ -1803,7 +2042,9 @@ export default function ChatInterface({
                             />
 
                             <div
-                              onClick={(event) =>
+                              onClick={(
+                                event
+                              ) =>
                                 event.stopPropagation()
                               }
                               className={`
@@ -1834,7 +2075,9 @@ export default function ChatInterface({
                                   <button
                                     key={emoji}
                                     type="button"
-                                    onClick={(event) => {
+                                    onClick={(
+                                      event
+                                    ) => {
                                       event.stopPropagation();
 
                                       handleReact(
@@ -1864,18 +2107,20 @@ export default function ChatInterface({
                           </>
                         )}
 
-                        {/* ===================================================
-                            REPLY PREVIEW
-                        =================================================== */}
+                        {/* REPLY PREVIEW */}
 
                         {message.replyTo && (
                           <button
                             type="button"
-                            onClick={(event) => {
+                            onClick={(
+                              event
+                            ) => {
                               event.stopPropagation();
 
                               scrollToMessage(
-                                message.replyTo!.id
+                                message
+                                  .replyTo!
+                                  .id
                               );
                             }}
                             className={`
@@ -1897,18 +2142,24 @@ export default function ChatInterface({
                             `}
                           >
                             <p className="truncate font-semibold">
-                              {message.replyTo
-                                .sender.id ===
+                              {message
+                                .replyTo
+                                .sender
+                                .id ===
                               userId
                                 ? "You"
-                                : message.replyTo
-                                    .sender.name}
+                                : message
+                                    .replyTo
+                                    .sender
+                                    .name}
                             </p>
 
                             <p className="mt-0.5 truncate opacity-90">
-                              {message.replyTo
+                              {message
+                                .replyTo
                                 .content ||
-                                (message.replyTo
+                                (message
+                                  .replyTo
                                   .imageUrl
                                   ? "📷 Image"
                                   : "")}
@@ -1916,189 +2167,225 @@ export default function ChatInterface({
                           </button>
                         )}
 
-                        {/* ===================================================
-                            IMAGE / FILE / AUDIO
-                        =================================================== */}
+                        {/* ATTACHMENT */}
 
-                        {message.imageUrl &&
-                          (message.content?.startsWith(
-                            "🎤"
-                          ) ? (
-                            <div
-                              onClick={(event) =>
-                                event.stopPropagation()
-                              }
-                              className="
-                                overflow-hidden
-                                rounded-xl
-                                bg-black/5
-                                dark:bg-black/20
-                              "
-                            >
-                              <audio
-                                controls
-                                preload="metadata"
-                                src={
-                                  message.imageUrl
-                                }
-                                onClick={(event) =>
+                        {message.imageUrl && (
+                          <>
+                            {/* VOICE MESSAGE */}
+
+                            {message.content?.startsWith(
+                              "🎤"
+                            ) ? (
+                              <div
+                                onClick={(
+                                  event
+                                ) =>
                                   event.stopPropagation()
                                 }
-                                className="block max-w-full"
-                                style={{
-                                  height: "40px",
-                                  width: "min(280px, 100%)",
-                                }}
-                              />
-                            </div>
-                          ) : failedImageIds.has(
-                              message.id
-                            ) ? (
-                            <a
-                              href={
-                                message.imageUrl
-                              }
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                setActiveMessageActions(
-                                  null
-                                );
-                              }}
-                              className={`
-                                flex
-                                min-w-0
-                                items-center
-                                gap-2.5
-                                rounded-xl
-                                px-3
-                                py-2.5
-                                transition
-                                ${
-                                  isOwn
-                                    ? "bg-white/15 hover:bg-white/25"
-                                    : "bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500"
-                                }
-                              `}
-                            >
-                              <FileText className="h-6 w-6 shrink-0" />
-
-                              <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                                {message.content?.replace(
-                                  /^📎\s*/,
-                                  ""
-                                ) ||
-                                  t(
-                                    "chat.attachment"
-                                  )}
-                              </span>
-
-                              <Download className="h-4 w-4 shrink-0" />
-                            </a>
-                          ) : (
-                            <button
-                              type="button"
-                              className="
-                                group/image
-                                relative
-                                block
-                                max-w-full
-                                overflow-hidden
-                                rounded-xl
-                                text-left
-                              "
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                openLightbox(
-                                  message.imageUrl!
-                                );
-                              }}
-                            >
-                              <img
-                                src={
-                                  message.imageUrl
-                                }
-                                alt="Message attachment"
                                 className="
-                                  block
-                                  max-h-72
-                                  max-w-full
+                                  overflow-hidden
                                   rounded-xl
-                                  object-contain
-                                  sm:max-h-80
-                                "
-                                onError={() => {
-                                  setFailedImageIds(
-                                    (previous) => {
-                                      const next =
-                                        new Set(
-                                          previous
-                                        );
-
-                                      next.add(
-                                        message.id
-                                      );
-
-                                      return next;
-                                    }
-                                  });
-                                }}
-                              />
-
-                              <span
-                                className="
-                                  absolute
-                                  inset-0
-                                  flex
-                                  items-center
-                                  justify-center
-                                  rounded-xl
-                                  bg-black/30
-                                  opacity-0
-                                  transition-opacity
-                                  group-hover/image:opacity-100
+                                  bg-black/5
+                                  dark:bg-black/20
                                 "
                               >
-                                <ZoomIn className="h-8 w-8 text-white" />
-                              </span>
-                            </button>
-                          ))}
+                                <audio
+                                  controls
+                                  preload="metadata"
+                                  src={
+                                    message.imageUrl
+                                  }
+                                  onClick={(
+                                    event
+                                  ) =>
+                                    event.stopPropagation()
+                                  }
+                                  className="block max-w-full"
+                                  style={{
+                                    height:
+                                      "40px",
+                                    width:
+                                      "min(280px, 100%)",
+                                  }}
+                                />
+                              </div>
+                            ) : failedImageIds.has(
+                                message.id
+                              ) ? (
+                              /* FILE FALLBACK */
 
-                        {/* ===================================================
-                            EDITING
-                        =================================================== */}
+                              <a
+                                href={
+                                  message.imageUrl
+                                }
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(
+                                  event
+                                ) => {
+                                  event.stopPropagation();
+
+                                  setActiveMessageActions(
+                                    null
+                                  );
+                                }}
+                                className={`
+                                  flex
+                                  min-w-0
+                                  items-center
+                                  gap-2.5
+                                  rounded-xl
+                                  px-3
+                                  py-2.5
+                                  transition
+                                  ${
+                                    isOwn
+                                      ? "bg-white/15 hover:bg-white/25"
+                                      : "bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500"
+                                  }
+                                `}
+                              >
+                                <FileText className="h-6 w-6 shrink-0" />
+
+                                <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                                  {message.content?.replace(
+                                    /^📎\s*/,
+                                    ""
+                                  ) ||
+                                    t(
+                                      "chat.attachment"
+                                    )}
+                                </span>
+
+                                <Download className="h-4 w-4 shrink-0" />
+                              </a>
+                            ) : (
+                              /* IMAGE */
+
+                              <button
+                                type="button"
+                                className="
+                                  group/image
+                                  relative
+                                  block
+                                  max-w-full
+                                  overflow-hidden
+                                  rounded-xl
+                                  text-left
+                                "
+                                onClick={(
+                                  event
+                                ) => {
+                                  event.stopPropagation();
+
+                                  openLightbox(
+                                    message.imageUrl!
+                                  );
+                                }}
+                              >
+                                <img
+                                  src={
+                                    message.imageUrl
+                                  }
+                                  alt="Message attachment"
+                                  className="
+                                    block
+                                    max-h-72
+                                    max-w-full
+                                    rounded-xl
+                                    object-contain
+                                    sm:max-h-80
+                                  "
+                                  onError={() => {
+                                    setFailedImageIds(
+                                      (
+                                        previous
+                                      ) => {
+                                        const next =
+                                          new Set(
+                                            previous
+                                          );
+
+                                        next.add(
+                                          message.id
+                                        );
+
+                                        return next;
+                                      }
+                                    );
+                                  }}
+                                />
+
+                                <span
+                                  className="
+                                    absolute
+                                    inset-0
+                                    flex
+                                    items-center
+                                    justify-center
+                                    rounded-xl
+                                    bg-black/30
+                                    opacity-0
+                                    transition-opacity
+                                    group-hover/image:opacity-100
+                                  "
+                                >
+                                  <ZoomIn className="h-8 w-8 text-white" />
+                                </span>
+                              </button>
+                            )}
+                          </>
+                        )}
+
+                        {/* EDITING */}
 
                         {isEditing ? (
                           <div
-                            onClick={(event) =>
+                            onClick={(
+                              event
+                            ) =>
                               event.stopPropagation()
                             }
-                            className="flex min-w-[180px] items-end gap-2"
+                            className="
+                              flex
+                              min-w-[180px]
+                              items-end
+                              gap-2
+                            "
                           >
                             <textarea
-                              value={editContent}
-                              onChange={(event) => {
+                              value={
+                                editContent
+                              }
+                              onChange={(
+                                event
+                              ) => {
                                 setEditContent(
-                                  event.target.value
+                                  event
+                                    .target
+                                    .value
                                 );
 
                                 event.target.style.height =
                                   "auto";
 
                                 event.target.style.height = `${Math.min(
-                                  event.target
+                                  event
+                                    .target
                                     .scrollHeight,
                                   128
                                 )}px`;
                               }}
-                              onKeyDown={(event) => {
+                              onKeyDown={(
+                                event
+                              ) => {
                                 if (
                                   event.key ===
                                     "Enter" &&
                                   !event.shiftKey
                                 ) {
                                   event.preventDefault();
+
                                   saveEdit(
                                     message.id
                                   );
@@ -2131,8 +2418,11 @@ export default function ChatInterface({
 
                             <button
                               type="button"
-                              onClick={(event) => {
+                              onClick={(
+                                event
+                              ) => {
                                 event.stopPropagation();
+
                                 saveEdit(
                                   message.id
                                 );
@@ -2162,8 +2452,11 @@ export default function ChatInterface({
 
                             <button
                               type="button"
-                              onClick={(event) => {
+                              onClick={(
+                                event
+                              ) => {
                                 event.stopPropagation();
+
                                 cancelEdit();
                               }}
                               className="
@@ -2181,6 +2474,8 @@ export default function ChatInterface({
                             </button>
                           </div>
                         ) : (
+                          /* MESSAGE TEXT */
+
                           displayContent && (
                             <p
                               className="
@@ -2192,14 +2487,14 @@ export default function ChatInterface({
                                 sm:leading-5
                               "
                             >
-                              {displayContent}
+                              {
+                                displayContent
+                              }
                             </p>
                           )
                         )}
 
-                        {/* ===================================================
-                            TIME
-                        =================================================== */}
+                        {/* TIME */}
 
                         <div
                           className={`
@@ -2223,10 +2518,12 @@ export default function ChatInterface({
                             ).toLocaleTimeString(
                               localeMap[
                                 language
-                              ] || "en-US",
+                              ] ||
+                                "en-US",
                               {
                                 hour: "2-digit",
-                                minute: "2-digit",
+                                minute:
+                                  "2-digit",
                               }
                             )}
                           </span>
@@ -2246,14 +2543,14 @@ export default function ChatInterface({
                         </div>
                       </div>
 
-                      {/* =====================================================
-                          REACTION PILLS
-                      ===================================================== */}
+                      {/* REACTION PILLS */}
 
                       {reactionGroups.length >
                         0 && (
                         <div
-                          onClick={(event) =>
+                          onClick={(
+                            event
+                          ) =>
                             event.stopPropagation()
                           }
                           className={`
@@ -2283,7 +2580,9 @@ export default function ChatInterface({
                                   key={
                                     group.emoji
                                   }
-                                  onClick={(event) => {
+                                  onClick={(
+                                    event
+                                  ) => {
                                     event.stopPropagation();
 
                                     handleReact(
@@ -2293,7 +2592,9 @@ export default function ChatInterface({
                                   }}
                                   title={group.users
                                     .map(
-                                      (user) =>
+                                      (
+                                        user
+                                      ) =>
                                         user.name ||
                                         user.username
                                     )
@@ -2324,8 +2625,9 @@ export default function ChatInterface({
                                     }
                                   </span>
 
-                                  {group.users
-                                      .length >
+                                  {group
+                                    .users
+                                    .length >
                                     1 && (
                                     <span>
                                       {
@@ -2349,16 +2651,20 @@ export default function ChatInterface({
 
             <div
               ref={messagesEndRef}
-              className="h-px w-full shrink-0"
+              className="
+                h-px
+                w-full
+                shrink-0
+              "
               aria-hidden="true"
             />
           </div>
         )}
       </main>
 
-      {/* =======================================================================
+      {/* =====================================================================
           REPLY PREVIEW
-      ======================================================================= */}
+      ====================================================================== */}
 
       {replyingTo && (
         <div
@@ -2384,7 +2690,8 @@ export default function ChatInterface({
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-medium text-zrp-red">
               Replying to{" "}
-              {replyingTo.senderId === userId
+              {replyingTo.senderId ===
+              userId
                 ? "yourself"
                 : receiverName}
             </p>
@@ -2401,7 +2708,9 @@ export default function ChatInterface({
             type="button"
             onClick={() => {
               setReplyingTo(null);
-              setActiveMessageActions(null);
+              setActiveMessageActions(
+                null
+              );
             }}
             className="
               flex
@@ -2424,9 +2733,9 @@ export default function ChatInterface({
         </div>
       )}
 
-      {/* =======================================================================
+      {/* =====================================================================
           COMPOSER
-      ======================================================================= */}
+      ====================================================================== */}
 
       <form
         onSubmit={handleSend}
@@ -2460,7 +2769,9 @@ export default function ChatInterface({
           >
             <button
               type="button"
-              onClick={cancelRecording}
+              onClick={
+                cancelRecording
+              }
               className="
                 flex
                 h-10
@@ -2485,7 +2796,16 @@ export default function ChatInterface({
               <Trash2 className="h-5 w-5" />
             </button>
 
-            <span className="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-red-500" />
+            <span
+              className="
+                h-2.5
+                w-2.5
+                shrink-0
+                animate-pulse
+                rounded-full
+                bg-red-500
+              "
+            />
 
             <span className="shrink-0 text-sm font-medium tabular-nums text-gray-700 dark:text-gray-200">
               {formatRecordingTime(
@@ -2547,7 +2867,9 @@ export default function ChatInterface({
               onClick={() =>
                 fileInputRef.current?.click()
               }
-              disabled={uploadingImage}
+              disabled={
+                uploadingImage
+              }
               className="
                 flex
                 h-10
@@ -2572,7 +2894,17 @@ export default function ChatInterface({
               )}
             >
               {uploadingImage ? (
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-zrp-red border-t-transparent" />
+                <div
+                  className="
+                    h-5
+                    w-5
+                    animate-spin
+                    rounded-full
+                    border-2
+                    border-zrp-red
+                    border-t-transparent
+                  "
+                />
               ) : (
                 <Image className="h-5 w-5" />
               )}
@@ -2582,7 +2914,9 @@ export default function ChatInterface({
               ref={fileInputRef}
               type="file"
               accept="image/*"
-              onChange={handleImageUpload}
+              onChange={
+                handleImageUpload
+              }
               className="hidden"
             />
 
@@ -2593,7 +2927,9 @@ export default function ChatInterface({
               onClick={() =>
                 documentInputRef.current?.click()
               }
-              disabled={uploadingImage}
+              disabled={
+                uploadingImage
+              }
               className="
                 hidden
                 h-10
@@ -2654,7 +2990,8 @@ export default function ChatInterface({
               type="button"
               onClick={() =>
                 setShowEmojiPicker(
-                  (previous) => !previous
+                  (previous) =>
+                    !previous
                 )
               }
               className="
@@ -2690,7 +3027,8 @@ export default function ChatInterface({
               onChange={handleTyping}
               onKeyDown={(event) => {
                 if (
-                  event.key === "Enter" &&
+                  event.key ===
+                    "Enter" &&
                   !event.shiftKey
                 ) {
                   event.preventDefault();
@@ -2770,8 +3108,12 @@ export default function ChatInterface({
             ) : (
               <button
                 type="button"
-                onClick={startRecording}
-                disabled={uploadingImage}
+                onClick={
+                  startRecording
+                }
+                disabled={
+                  uploadingImage
+                }
                 className="
                   flex
                   h-10
@@ -2801,9 +3143,9 @@ export default function ChatInterface({
         )}
       </form>
 
-      {/* =======================================================================
+      {/* =====================================================================
           EMOJI PICKER
-      ======================================================================= */}
+      ====================================================================== */}
 
       {showEmojiPicker && (
         <div
@@ -2842,7 +3184,18 @@ export default function ChatInterface({
               event.stopPropagation()
             }
           >
-            <div className="flex h-11 items-center justify-between border-b border-gray-200 px-3 dark:border-gray-700">
+            <div
+              className="
+                flex
+                h-11
+                items-center
+                justify-between
+                border-b
+                border-gray-200
+                px-3
+                dark:border-gray-700
+              "
+            >
               <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
                 {t("chat.addEmoji")}
               </span>
@@ -2850,7 +3203,9 @@ export default function ChatInterface({
               <button
                 type="button"
                 onClick={() =>
-                  setShowEmojiPicker(false)
+                  setShowEmojiPicker(
+                    false
+                  )
                 }
                 className="
                   flex
@@ -2880,9 +3235,9 @@ export default function ChatInterface({
         </div>
       )}
 
-      {/* =======================================================================
+      {/* =====================================================================
           LIGHTBOX
-      ======================================================================= */}
+      ====================================================================== */}
 
       {lightboxImage && (
         <div
@@ -2925,6 +3280,8 @@ export default function ChatInterface({
               "
             />
 
+            {/* CLOSE */}
+
             <button
               type="button"
               onClick={closeLightbox}
@@ -2949,6 +3306,8 @@ export default function ChatInterface({
             >
               <X className="h-6 w-6" />
             </button>
+
+            {/* DOWNLOAD */}
 
             <button
               type="button"
