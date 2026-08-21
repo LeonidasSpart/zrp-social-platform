@@ -375,6 +375,42 @@ export const ourFileRouter = {
     ),
 
   // ───────────────────────────────────────────────────────────
+  // CHAT VIDEO
+  // ───────────────────────────────────────────────────────────
+  chatVideo: f({
+    video: {
+      maxFileSize: "32MB",
+      maxFileCount: 1,
+    },
+  })
+    .middleware(async () => {
+      const session =
+        await getServerSession(authOptions);
+
+      if (!session?.user) {
+        throw new UploadThingError(
+          "Unauthorized"
+        );
+      }
+
+      return {
+        userId: session.user.id,
+      };
+    })
+    .onUploadComplete(
+      async ({ metadata, file }) => {
+        console.log(
+          "Chat video uploaded:",
+          file.ufsUrl
+        );
+
+        return {
+          url: file.ufsUrl,
+        };
+      }
+    ),
+
+  // ───────────────────────────────────────────────────────────
   // STORY MEDIA
   // ───────────────────────────────────────────────────────────
   storyMedia: f({
