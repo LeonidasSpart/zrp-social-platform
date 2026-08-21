@@ -34,12 +34,30 @@ function getWebPush() {
 
   let isValidCurvePoint = true;
   let curveValidationError: string | null = null;
-  try {
-    const ecdh = crypto.createECDH("prime256v1");
-    ecdh.setPublicKey(publicKeyBuffer);
-  } catch (err) {
+  if (publicKeyBuffer.length !== 65 || publicKeyBuffer[0] !== 0x04) {
     isValidCurvePoint = false;
-    curveValidationError = err instanceof Error ? err.message : String(err);
+    curveValidationError = `Expected a 65-byte uncompressed P-256 point starting with 0x04, got ${publicKeyBuffer.length} byte(s) starting with 0x${publicKeyBuffer[0]?.toString(16) ?? "??"}`;
+  } else {
+    try {
+      // Importing as a JWK EC key makes Node/OpenSSL actually validate
+      // that (x, y) is a real point on the P-256 curve - the same
+      // check FCM performs. ECDH.setPublicKey() used to be the
+      // simpler way to do this, but it was dropped from @types/node
+      // (Node deprecated it years ago), so this uses the currently
+      // supported, properly-typed path instead.
+      crypto.createPublicKey({
+        key: {
+          kty: "EC",
+          crv: "P-256",
+          x: publicKeyBuffer.subarray(1, 33).toString("base64url"),
+          y: publicKeyBuffer.subarray(33, 65).toString("base64url"),
+        },
+        format: "jwk",
+      });
+    } catch (err) {
+      isValidCurvePoint = false;
+      curveValidationError = err instanceof Error ? err.message : String(err);
+    }
   }
 
   console.log("VAPID diagnostics:", {
