@@ -167,6 +167,17 @@ export default function ChatInterface({
     null
   );
 
+  // ---------------------------------------------------------------------------
+  // MOBILE MESSAGE ACTIONS
+  //
+  // On touch devices the action bar is hidden by default.
+  // Tapping a message reveals actions only for that message.
+  // ---------------------------------------------------------------------------
+
+  const [activeMessageActions, setActiveMessageActions] = useState<
+    string | null
+  >(null);
+
   const userId = session?.user?.id;
 
   // ---------------------------------------------------------------------------
@@ -322,25 +333,23 @@ export default function ChatInterface({
       }
     );
 
-    socket.on(
-      "message-read",
-      ({ messageId }: { messageId: string }) => {
-        setMessages((prev) =>
-          prev.map((item) =>
-            item.id === messageId ? { ...item, read: true } : item
-          )
-        );
-      }
-    );
+    socket.on("message-read", ({ messageId }: { messageId: string }) => {
+      setMessages((prev) =>
+        prev.map((item) =>
+          item.id === messageId ? { ...item, read: true } : item
+        )
+      );
+    });
 
-    socket.on(
-      "message-deleted",
-      ({ messageId }: { messageId: string }) => {
-        setMessages((prev) =>
-          prev.filter((item) => item.id !== messageId)
-        );
-      }
-    );
+    socket.on("message-deleted", ({ messageId }: { messageId: string }) => {
+      setMessages((prev) =>
+        prev.filter((item) => item.id !== messageId)
+      );
+
+      setActiveMessageActions((current) =>
+        current === messageId ? null : current
+      );
+    });
 
     socket.on(
       "message-edited",
@@ -533,6 +542,8 @@ export default function ChatInterface({
 
     setNewMessage("");
     setReplyingTo(null);
+    setActiveMessageActions(null);
+    setReactionPickerFor(null);
 
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -607,6 +618,8 @@ export default function ChatInterface({
     if (!confirm(t("chat.deleteMessageConfirm"))) return;
 
     setDeletingMessageId(messageId);
+    setActiveMessageActions(null);
+    setReactionPickerFor(null);
 
     try {
       const res = await fetch(
@@ -656,6 +669,7 @@ export default function ChatInterface({
     setEditContent(message.content);
     setReplyingTo(null);
     setReactionPickerFor(null);
+    setActiveMessageActions(null);
   };
 
   const cancelEdit = () => {
@@ -699,6 +713,7 @@ export default function ChatInterface({
 
         setEditingId(null);
         setEditContent("");
+        setActiveMessageActions(null);
       } else {
         const err = await res.json().catch(() => null);
 
@@ -723,6 +738,7 @@ export default function ChatInterface({
     emoji: string
   ) => {
     setReactionPickerFor(null);
+    setActiveMessageActions(null);
 
     try {
       const res = await fetch(
@@ -1124,6 +1140,7 @@ export default function ChatInterface({
   // ---------------------------------------------------------------------------
 
   const openLightbox = (imageUrl: string) => {
+    setActiveMessageActions(null);
     setLightboxImage(imageUrl);
   };
 
@@ -1151,6 +1168,8 @@ export default function ChatInterface({
   // ---------------------------------------------------------------------------
 
   const scrollToMessage = (messageId: string) => {
+    setActiveMessageActions(null);
+
     const element = document.getElementById(
       `msg-${messageId}`
     );
@@ -1447,7 +1466,6 @@ export default function ChatInterface({
 
       {/* =======================================================================
           MESSAGES
-          This is the ONLY scrolling area.
       ======================================================================= */}
 
       <main
@@ -1525,14 +1543,35 @@ export default function ChatInterface({
                     message.reactions
                   );
 
+                const isActive =
+                  activeMessageActions ===
+                  message.id;
+
                 return (
                   <div
                     id={`msg-${message.id}`}
                     key={message.id}
+                    onClick={() => {
+                      setActiveMessageActions(
+                        (current) =>
+                          current === message.id
+                            ? null
+                            : message.id
+                      );
+
+                      if (
+                        reactionPickerFor &&
+                        reactionPickerFor !==
+                          message.id
+                      ) {
+                        setReactionPickerFor(null);
+                      }
+                    }}
                     className={`
                       group/message
                       flex
                       w-full
+                      cursor-pointer
                       ${
                         isOwn
                           ? "justify-end"
@@ -1580,95 +1619,137 @@ export default function ChatInterface({
                         {/* ===================================================
                             MESSAGE ACTIONS
 
-                            Visible on touch devices.
-                            Hover behavior on desktop.
+                            Desktop:
+                            Actions appear on hover.
+
+                            Mobile/tablet:
+                            Actions appear only after tapping that message.
                         =================================================== */}
 
-                        <div
-                          className={`
-                            absolute
-                            -top-10
-                            z-20
-                            flex
-                            items-center
-                            gap-0.5
-                            rounded-full
-                            border
-                            border-gray-200
-                            bg-white
-                            px-1
-                            py-1
-                            shadow-lg
-                            dark:border-gray-600
-                            dark:bg-gray-800
-                            sm:opacity-0
-                            sm:transition-opacity
-                            sm:group-hover/message:opacity-100
-                            ${
-                              isOwn
-                                ? "right-0"
-                                : "left-0"
+                        {isActive && (
+                          <div
+                            onClick={(event) =>
+                              event.stopPropagation()
                             }
-                          `}
-                        >
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setReactionPickerFor(
-                                reactionPickerFor ===
-                                  message.id
-                                  ? null
-                                  : message.id
-                              )
-                            }
-                            className="
+                            className={`
+                              absolute
+                              -top-10
+                              z-20
                               flex
-                              h-8
-                              w-8
                               items-center
-                              justify-center
+                              gap-0.5
                               rounded-full
-                              text-gray-500
-                              hover:bg-gray-100
-                              dark:text-gray-300
-                              dark:hover:bg-gray-700
-                            "
-                            aria-label="React"
+                              border
+                              border-gray-200
+                              bg-white
+                              px-1
+                              py-1
+                              shadow-lg
+                              dark:border-gray-600
+                              dark:bg-gray-800
+                              sm:opacity-0
+                              sm:transition-opacity
+                              sm:group-hover/message:opacity-100
+                              ${
+                                isOwn
+                                  ? "right-0"
+                                  : "left-0"
+                              }
+                            `}
                           >
-                            <Smile className="h-4 w-4" />
-                          </button>
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
 
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setReplyingTo(message);
-                              setReactionPickerFor(null);
-                            }}
-                            className="
-                              flex
-                              h-8
-                              w-8
-                              items-center
-                              justify-center
-                              rounded-full
-                              text-gray-500
-                              hover:bg-gray-100
-                              dark:text-gray-300
-                              dark:hover:bg-gray-700
-                            "
-                            aria-label="Reply"
-                          >
-                            <Reply className="h-4 w-4" />
-                          </button>
+                                setReactionPickerFor(
+                                  reactionPickerFor ===
+                                    message.id
+                                    ? null
+                                    : message.id
+                                );
+                              }}
+                              className="
+                                flex
+                                h-8
+                                w-8
+                                items-center
+                                justify-center
+                                rounded-full
+                                text-gray-500
+                                hover:bg-gray-100
+                                dark:text-gray-300
+                                dark:hover:bg-gray-700
+                              "
+                              aria-label="React"
+                            >
+                              <Smile className="h-4 w-4" />
+                            </button>
 
-                          {isOwn &&
-                            !message.imageUrl && (
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+
+                                setReplyingTo(message);
+                                setReactionPickerFor(null);
+                                setActiveMessageActions(null);
+                              }}
+                              className="
+                                flex
+                                h-8
+                                w-8
+                                items-center
+                                justify-center
+                                rounded-full
+                                text-gray-500
+                                hover:bg-gray-100
+                                dark:text-gray-300
+                                dark:hover:bg-gray-700
+                              "
+                              aria-label="Reply"
+                            >
+                              <Reply className="h-4 w-4" />
+                            </button>
+
+                            {isOwn &&
+                              !message.imageUrl && (
+                                <button
+                                  type="button"
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    startEdit(message);
+                                  }}
+                                  className="
+                                    flex
+                                    h-8
+                                    w-8
+                                    items-center
+                                    justify-center
+                                    rounded-full
+                                    text-gray-500
+                                    hover:bg-gray-100
+                                    dark:text-gray-300
+                                    dark:hover:bg-gray-700
+                                  "
+                                  aria-label="Edit"
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </button>
+                              )}
+
+                            {isOwn && (
                               <button
                                 type="button"
-                                onClick={() =>
-                                  startEdit(
-                                    message
-                                  )
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  handleDeleteMessage(
+                                    message.id
+                                  );
+                                }}
+                                disabled={
+                                  deletingMessageId ===
+                                  message.id
                                 }
                                 className="
                                   flex
@@ -1678,55 +1759,26 @@ export default function ChatInterface({
                                   justify-center
                                   rounded-full
                                   text-gray-500
-                                  hover:bg-gray-100
+                                  hover:bg-red-100
+                                  hover:text-red-600
+                                  disabled:opacity-50
                                   dark:text-gray-300
-                                  dark:hover:bg-gray-700
+                                  dark:hover:bg-red-900/30
                                 "
-                                aria-label="Edit"
+                                aria-label={t(
+                                  "chat.deleteMessage"
+                                )}
                               >
-                                <Pencil className="h-4 w-4" />
+                                {deletingMessageId ===
+                                message.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4" />
+                                )}
                               </button>
                             )}
-
-                          {isOwn && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleDeleteMessage(
-                                  message.id
-                                )
-                              }
-                              disabled={
-                                deletingMessageId ===
-                                message.id
-                              }
-                              className="
-                                flex
-                                h-8
-                                w-8
-                                items-center
-                                justify-center
-                                rounded-full
-                                text-gray-500
-                                hover:bg-red-100
-                                hover:text-red-600
-                                disabled:opacity-50
-                                dark:text-gray-300
-                                dark:hover:bg-red-900/30
-                              "
-                              aria-label={t(
-                                "chat.deleteMessage"
-                              )}
-                            >
-                              {deletingMessageId ===
-                              message.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Trash2 className="h-4 w-4" />
-                              )}
-                            </button>
-                          )}
-                        </div>
+                          </div>
+                        )}
 
                         {/* ===================================================
                             QUICK REACTIONS
@@ -1739,14 +1791,21 @@ export default function ChatInterface({
                               type="button"
                               aria-label="Close reaction picker"
                               className="fixed inset-0 z-10 cursor-default"
-                              onClick={() =>
+                              onClick={(event) => {
+                                event.stopPropagation();
                                 setReactionPickerFor(
                                   null
-                                )
-                              }
+                                );
+                                setActiveMessageActions(
+                                  null
+                                );
+                              }}
                             />
 
                             <div
+                              onClick={(event) =>
+                                event.stopPropagation()
+                              }
                               className={`
                                 absolute
                                 -top-12
@@ -1775,12 +1834,14 @@ export default function ChatInterface({
                                   <button
                                     key={emoji}
                                     type="button"
-                                    onClick={() =>
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+
                                       handleReact(
                                         message.id,
                                         emoji
-                                      )
-                                    }
+                                      );
+                                    }}
                                     className="
                                       flex
                                       h-8
@@ -1810,11 +1871,13 @@ export default function ChatInterface({
                         {message.replyTo && (
                           <button
                             type="button"
-                            onClick={() =>
+                            onClick={(event) => {
+                              event.stopPropagation();
+
                               scrollToMessage(
                                 message.replyTo!.id
-                              )
-                            }
+                              );
+                            }}
                             className={`
                               mb-1.5
                               block
@@ -1862,6 +1925,9 @@ export default function ChatInterface({
                             "🎤"
                           ) ? (
                             <div
+                              onClick={(event) =>
+                                event.stopPropagation()
+                              }
                               className="
                                 overflow-hidden
                                 rounded-xl
@@ -1894,9 +1960,12 @@ export default function ChatInterface({
                               }
                               target="_blank"
                               rel="noopener noreferrer"
-                              onClick={(event) =>
-                                event.stopPropagation()
-                              }
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                setActiveMessageActions(
+                                  null
+                                );
+                              }}
                               className={`
                                 flex
                                 min-w-0
@@ -1939,11 +2008,12 @@ export default function ChatInterface({
                                 rounded-xl
                                 text-left
                               "
-                              onClick={() =>
+                              onClick={(event) => {
+                                event.stopPropagation();
                                 openLightbox(
                                   message.imageUrl!
-                                )
-                              }
+                                );
+                              }}
                             >
                               <img
                                 src={
@@ -1972,7 +2042,7 @@ export default function ChatInterface({
 
                                       return next;
                                     }
-                                  );
+                                  });
                                 }}
                               />
 
@@ -2000,7 +2070,12 @@ export default function ChatInterface({
                         =================================================== */}
 
                         {isEditing ? (
-                          <div className="flex min-w-[180px] items-end gap-2">
+                          <div
+                            onClick={(event) =>
+                              event.stopPropagation()
+                            }
+                            className="flex min-w-[180px] items-end gap-2"
+                          >
                             <textarea
                               value={editContent}
                               onChange={(event) => {
@@ -2056,11 +2131,12 @@ export default function ChatInterface({
 
                             <button
                               type="button"
-                              onClick={() =>
+                              onClick={(event) => {
+                                event.stopPropagation();
                                 saveEdit(
                                   message.id
-                                )
-                              }
+                                );
+                              }}
                               disabled={
                                 savingEdit ||
                                 !editContent.trim()
@@ -2086,7 +2162,10 @@ export default function ChatInterface({
 
                             <button
                               type="button"
-                              onClick={cancelEdit}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                cancelEdit();
+                              }}
                               className="
                                 flex
                                 h-8
@@ -2174,6 +2253,9 @@ export default function ChatInterface({
                       {reactionGroups.length >
                         0 && (
                         <div
+                          onClick={(event) =>
+                            event.stopPropagation()
+                          }
                           className={`
                             mt-1
                             flex
@@ -2201,12 +2283,14 @@ export default function ChatInterface({
                                   key={
                                     group.emoji
                                   }
-                                  onClick={() =>
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+
                                     handleReact(
                                       message.id,
                                       group.emoji
-                                    )
-                                  }
+                                    );
+                                  }}
                                   title={group.users
                                     .map(
                                       (user) =>
@@ -2315,9 +2399,10 @@ export default function ChatInterface({
 
           <button
             type="button"
-            onClick={() =>
-              setReplyingTo(null)
-            }
+            onClick={() => {
+              setReplyingTo(null);
+              setActiveMessageActions(null);
+            }}
             className="
               flex
               h-8
@@ -2341,10 +2426,6 @@ export default function ChatInterface({
 
       {/* =======================================================================
           COMPOSER
-
-          This stays outside the scrolling message area.
-
-          The safe-area padding is important for iPhone/iPad home indicators.
       ======================================================================= */}
 
       <form
