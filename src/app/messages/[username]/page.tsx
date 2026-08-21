@@ -124,6 +124,20 @@ export default function ChatPage(
 
   const socketRef = useRef<any>(null);
 
+  // Set right before we deliberately destroy() the peer (in endCall,
+  // regardless of whether that's us hanging up, the other side hanging
+  // up, or a rejection) - and reset false whenever a fresh call
+  // attempt actually starts. destroy()-ing an active RTCPeerConnection
+  // reliably fires a benign "error" event on the peer ("User-Initiated
+  // Abort, reason=Close called") as part of normal, successful
+  // teardown - the log showed exactly this after a call that had
+  // already connected fine and then ended normally. Without this flag
+  // the "error" handlers below couldn't tell that apart from a real
+  // connection failure, so every ordinary hang-up was shown to the
+  // user as a scary "Connection error" even though nothing had
+  // actually gone wrong.
+  const endingCallRef = useRef(false);
+
   /*
    * The chat must occupy exactly the visible viewport area.
    *
@@ -350,6 +364,7 @@ export default function ChatPage(
     isVideo: boolean
   ) => {
     setCallError(null);
+    endingCallRef.current = false;
 
     try {
       const [
@@ -439,6 +454,17 @@ export default function ChatPage(
       newPeer.on(
         "error",
         (err) => {
+          if (endingCallRef.current) {
+            // Expected: destroy() during a deliberate hang-up/teardown
+            // reliably fires a benign "error" event - not a real
+            // connection failure, so don't scare the user with it.
+            console.log(
+              "Ignoring peer error during intentional teardown:",
+              err?.message
+            );
+            return;
+          }
+
           console.error(
             "❌ Peer error:",
             err
@@ -480,6 +506,7 @@ export default function ChatPage(
 
   const acceptCall = async () => {
     setCallError(null);
+    endingCallRef.current = false;
 
     try {
       console.log(
@@ -576,6 +603,14 @@ export default function ChatPage(
       newPeer.on(
         "error",
         (err) => {
+          if (endingCallRef.current) {
+            console.log(
+              "Ignoring peer error during intentional teardown (accept):",
+              err?.message
+            );
+            return;
+          }
+
           console.error(
             "❌ Peer error (accept):",
             err
@@ -642,6 +677,8 @@ export default function ChatPage(
   };
 
   const endCall = () => {
+    endingCallRef.current = true;
+
     if (peerRef.current) {
       peerRef.current.destroy();
       peerRef.current = null;
