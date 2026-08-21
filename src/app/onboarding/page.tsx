@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Loader2, Check } from "lucide-react";
 import LocationAutocomplete from "@/components/LocationAutocomplete"; // ✅ added
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SuggestedUser {
@@ -12,6 +13,7 @@ interface SuggestedUser {
   username: string;
   name: string | null;
   avatarUrl: string | null;
+  badgeType: string | null;
 }
 
 export default function OnboardingPage() {
@@ -328,8 +330,9 @@ export default function OnboardingPage() {
                             )}
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900 dark:text-white">
+                            <p className="font-medium text-gray-900 dark:text-white flex items-center gap-1">
                               {user.name || user.username}
+                              <VerifiedBadge badgeType={user.badgeType} />
                             </p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">@{user.username}</p>
                           </div>
