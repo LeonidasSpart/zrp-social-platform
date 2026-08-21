@@ -5,6 +5,30 @@ const { Server } = require("socket.io");
 const { PrismaClient } = require("@prisma/client");
 const { getToken } = require("next-auth/jwt");
 
+// Minimal cookie-header parser, written inline rather than requiring
+// the "cookie" package - this file is the process entrypoint, so a
+// missing/unhoisted transitive dependency here would crash the entire
+// server at startup instead of just failing one route. The format is
+// simple enough (name=value pairs separated by "; ") that a tiny
+// hand-rolled parser is safer than betting on module resolution.
+function parseCookieHeader(header) {
+  const result = {};
+  if (!header) return result;
+  header.split(";").forEach((pair) => {
+    const index = pair.indexOf("=");
+    if (index === -1) return;
+    const name = pair.slice(0, index).trim();
+    const value = pair.slice(index + 1).trim();
+    if (!name) return;
+    try {
+      result[name] = decodeURIComponent(value);
+    } catch {
+      result[name] = value;
+    }
+  });
+  return result;
+}
+
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
@@ -55,34 +79,41 @@ app.prepare().then(() => {
   // anything identity-related instead of trusting the payload.
   io.use(async (socket, next) => {
     try {
-      // Previously this guessed the cookie name via `secureCookie: !dev`,
-      // which depends on THIS process having NODE_ENV=production set -
-      // a completely different, independent decision from the one
-      // NextAuth itself makes when it originally SET the cookie (which
-      // is based on whether NEXTAUTH_URL starts with https://). Railway
-      // doesn't automatically set NODE_ENV=production for a custom
-      // server the way it does for Next.js's own `next start`, so if it
-      // wasn't set explicitly, `dev` here evaluates true, secureCookie
-      // becomes false, and getToken() looks for the plain
-      // "next-auth.session-token" cookie while the browser is actually
-      // holding "__Secure-next-auth.session-token" - a silent mismatch
-      // that fails EVERY socket handshake with no error, no log, no
-      // client-visible message beyond a generic connect_error. That
-      // exactly matches presence (online/offline) and calls both being
-      // broken while regular messages kept working - messages have a
-      // 5-second REST polling fallback that masks a dead socket;
-      // presence and calls have no such fallback and depend on the
-      // socket alone. Trying both cookie names removes the guesswork
-      // entirely instead of hoping NODE_ENV is configured correctly.
+      // Two separate problems needed fixing here, both stemming from
+      // socket.request being a raw Node http.IncomingMessage rather
+      // than a Next.js-normalized request:
+      //
+      // 1. secureCookie guessing (fixed previously - tries both cookie
+      //    name variants below, independent of NODE_ENV).
+      //
+      // 2. Cookie CHUNKING. This app's JWT carries a lot - id,
+      //    username, role, badgeType, plan, features, onboardingCompleted,
+      //    a full avatarUrl, etc. Once that's JWE-encrypted it very
+      //    plausibly exceeds the ~4KB single-cookie limit, so NextAuth
+      //    splits it into "next-auth.session-token.0",
+      //    ".1", etc. getToken() knows how to reconstruct chunked
+      //    cookies, but only when it's given a pre-parsed `cookies`
+      //    object - a raw request only has `.headers.cookie` as one
+      //    unparsed string, so getToken() had nothing to reconstruct
+      //    from and always came back empty even with a perfectly valid
+      //    session, matching the Railway logs exactly (cookie header
+      //    present: true, yet no valid token found - immediately after
+      //    a successful login too). Manually parsing the raw cookie
+      //    header into an object and handing it to getToken() as
+      //    req.cookies gives it everything it needs regardless of
+      //    whether the token happens to be chunked.
+      const parsedCookies = parseCookieHeader(socket.request.headers.cookie);
+      const reqWithCookies = { ...socket.request, cookies: parsedCookies };
+
       let token = await getToken({
-        req: socket.request,
+        req: reqWithCookies,
         secret: process.env.NEXTAUTH_SECRET,
         secureCookie: true,
       });
 
       if (!token) {
         token = await getToken({
-          req: socket.request,
+          req: reqWithCookies,
           secret: process.env.NEXTAUTH_SECRET,
           secureCookie: false,
         });
@@ -92,7 +123,7 @@ app.prepare().then(() => {
         console.error(
           `Socket auth rejected: no valid session token found (cookie header present: ${Boolean(
             socket.request.headers.cookie
-          )})`
+          )}, cookie names: ${Object.keys(parsedCookies).join(", ") || "none"})`
         );
         return next(new Error("Unauthorized"));
       }
