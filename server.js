@@ -55,13 +55,45 @@ app.prepare().then(() => {
   // anything identity-related instead of trusting the payload.
   io.use(async (socket, next) => {
     try {
-      const token = await getToken({
+      // Previously this guessed the cookie name via `secureCookie: !dev`,
+      // which depends on THIS process having NODE_ENV=production set -
+      // a completely different, independent decision from the one
+      // NextAuth itself makes when it originally SET the cookie (which
+      // is based on whether NEXTAUTH_URL starts with https://). Railway
+      // doesn't automatically set NODE_ENV=production for a custom
+      // server the way it does for Next.js's own `next start`, so if it
+      // wasn't set explicitly, `dev` here evaluates true, secureCookie
+      // becomes false, and getToken() looks for the plain
+      // "next-auth.session-token" cookie while the browser is actually
+      // holding "__Secure-next-auth.session-token" - a silent mismatch
+      // that fails EVERY socket handshake with no error, no log, no
+      // client-visible message beyond a generic connect_error. That
+      // exactly matches presence (online/offline) and calls both being
+      // broken while regular messages kept working - messages have a
+      // 5-second REST polling fallback that masks a dead socket;
+      // presence and calls have no such fallback and depend on the
+      // socket alone. Trying both cookie names removes the guesswork
+      // entirely instead of hoping NODE_ENV is configured correctly.
+      let token = await getToken({
         req: socket.request,
         secret: process.env.NEXTAUTH_SECRET,
-        secureCookie: !dev,
+        secureCookie: true,
       });
 
+      if (!token) {
+        token = await getToken({
+          req: socket.request,
+          secret: process.env.NEXTAUTH_SECRET,
+          secureCookie: false,
+        });
+      }
+
       if (!token?.id) {
+        console.error(
+          `Socket auth rejected: no valid session token found (cookie header present: ${Boolean(
+            socket.request.headers.cookie
+          )})`
+        );
         return next(new Error("Unauthorized"));
       }
 
