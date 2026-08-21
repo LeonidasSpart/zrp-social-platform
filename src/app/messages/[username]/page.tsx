@@ -16,6 +16,22 @@ const FALLBACK_ICE_SERVERS = [
   { urls: "stun:stun1.l.google.com:19302" },
 ];
 
+// Nothing shows up in browser devtools when testing from a phone/iPad
+// with no console access, so ICE state changes and peer errors had no
+// way to reach anywhere visible. This mirrors them to
+// /api/call-diagnostics, which logs straight to the Railway server
+// console - same place the socket server's own logs already show up -
+// so a failed call attempt leaves a visible trail without needing
+// devtools. Deliberately fire-and-forget (no await, swallow errors) so
+// a diagnostics-logging failure can never itself break a call.
+function reportCallDiagnostic(event: string, detail?: unknown) {
+  fetch("/api/call-diagnostics", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ event, detail }),
+  }).catch(() => {});
+}
+
 async function getIceServers(): Promise<any[]> {
   try {
     const res = await fetch("/api/turn-credentials");
@@ -32,12 +48,14 @@ async function getIceServers(): Promise<any[]> {
         servers.length,
         "entries"
       );
+      reportCallDiagnostic("ice-servers-fetched", { count: servers.length });
       return servers;
     }
 
     console.warn(
       "🧊 TURN fetch returned empty/invalid, using fallback"
     );
+    reportCallDiagnostic("ice-servers-empty-fallback");
 
     return FALLBACK_ICE_SERVERS;
   } catch (err) {
@@ -45,6 +63,9 @@ async function getIceServers(): Promise<any[]> {
       "🧊 Failed to fetch TURN credentials, using fallback:",
       err
     );
+    reportCallDiagnostic("ice-servers-fetch-failed", {
+      error: err instanceof Error ? err.message : String(err),
+    });
 
     return FALLBACK_ICE_SERVERS;
   }
@@ -78,6 +99,22 @@ export default function ChatPage(
 
   const [peer, setPeer] =
     useState<Peer.Instance | null>(null);
+
+  // The socket listeners below (registered once in setupSocket(), via
+  // a mount-time useEffect) close over React state from the render
+  // they were created in - peer/localStream/callerId were all still
+  // null at that point, since a call hadn't started yet. Without
+  // these refs, "call-accepted" always saw peer as null and never
+  // actually called peer.signal(answerSignal), so the caller's side
+  // of the connection never received the callee's answer and the UI
+  // hung on "Ringing…"/"Connecting…" forever - the exact symptom
+  // reported. Refs are always current regardless of which closure
+  // reads them, so every place that sets the state below also writes
+  // the matching ref, and anything invoked from inside a socket
+  // handler reads the ref instead of the (potentially stale) state.
+  const peerRef = useRef<Peer.Instance | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
+  const callerIdRef = useRef<string | null>(null);
 
   const [incomingSignal, setIncomingSignal] =
     useState<any>(null);
@@ -203,12 +240,12 @@ export default function ChatPage(
         socketRef.current.off("call-ended");
       }
 
-      if (peer) {
-        peer.destroy();
+      if (peerRef.current) {
+        peerRef.current.destroy();
       }
 
-      if (localStream) {
-        localStream
+      if (localStreamRef.current) {
+        localStreamRef.current
           .getTracks()
           .forEach((track) => track.stop());
       }
@@ -270,6 +307,7 @@ export default function ChatPage(
 
         setCallerName(callerName);
         setCallerId(callerId);
+        callerIdRef.current = callerId;
         setIsVideoCall(isVideo);
         setIncomingSignal(signal);
         setCallState("incoming");
@@ -283,8 +321,8 @@ export default function ChatPage(
           "✅ Call accepted by receiver"
         );
 
-        if (peer) {
-          peer.signal(signal);
+        if (peerRef.current) {
+          peerRef.current.signal(signal);
         }
       }
     );
@@ -326,6 +364,7 @@ export default function ChatPage(
       ]);
 
       setLocalStream(stream);
+      localStreamRef.current = stream;
       setIsVideoCall(isVideo);
       setCallState("calling");
 
@@ -337,6 +376,8 @@ export default function ChatPage(
           iceServers,
         },
       });
+
+      peerRef.current = newPeer;
 
       newPeer.on(
         "signal",
@@ -367,6 +408,7 @@ export default function ChatPage(
           console.log(
             "📡 Remote stream received"
           );
+          reportCallDiagnostic("caller-remote-stream-received");
 
           setRemoteStream(remoteStream);
           setCallState("active");
@@ -380,6 +422,7 @@ export default function ChatPage(
             "🧊 ICE state:",
             state
           );
+          reportCallDiagnostic("caller-ice-state", { state });
         }
       );
 
@@ -389,6 +432,7 @@ export default function ChatPage(
           console.log(
             "✅ Peer connected!"
           );
+          reportCallDiagnostic("caller-peer-connected");
         }
       );
 
@@ -399,6 +443,9 @@ export default function ChatPage(
             "❌ Peer error:",
             err
           );
+          reportCallDiagnostic("caller-peer-error", {
+            message: err?.message || String(err),
+          });
 
           setCallError(
             t("chat.connectionError") +
@@ -451,6 +498,7 @@ export default function ChatPage(
       ]);
 
       setLocalStream(stream);
+      localStreamRef.current = stream;
 
       const newPeer = new Peer({
         initiator: false,
@@ -460,6 +508,8 @@ export default function ChatPage(
           iceServers,
         },
       });
+
+      peerRef.current = newPeer;
 
       newPeer.on(
         "signal",
@@ -495,6 +545,7 @@ export default function ChatPage(
           console.log(
             "📡 Remote stream received (accept)"
           );
+          reportCallDiagnostic("receiver-remote-stream-received");
 
           setRemoteStream(remoteStream);
           setCallState("active");
@@ -508,6 +559,7 @@ export default function ChatPage(
             "🧊 ICE state (accept):",
             state
           );
+          reportCallDiagnostic("receiver-ice-state", { state });
         }
       );
 
@@ -517,6 +569,7 @@ export default function ChatPage(
           console.log(
             "✅ Peer connected (accept)!"
           );
+          reportCallDiagnostic("receiver-peer-connected");
         }
       );
 
@@ -527,6 +580,9 @@ export default function ChatPage(
             "❌ Peer error (accept):",
             err
           );
+          reportCallDiagnostic("receiver-peer-error", {
+            message: err?.message || String(err),
+          });
 
           setCallError(
             t("chat.connectionError") +
@@ -570,11 +626,11 @@ export default function ChatPage(
   };
 
   const rejectCall = () => {
-    if (callerId) {
+    if (callerIdRef.current) {
       socketRef.current?.emit(
         "reject-call",
         {
-          callerId,
+          callerId: callerIdRef.current,
         }
       );
     }
@@ -582,21 +638,24 @@ export default function ChatPage(
     setCallState("idle");
     setIncomingSignal(null);
     setCallerId(null);
+    callerIdRef.current = null;
   };
 
   const endCall = () => {
-    if (peer) {
-      peer.destroy();
+    if (peerRef.current) {
+      peerRef.current.destroy();
+      peerRef.current = null;
       setPeer(null);
     }
 
-    if (localStream) {
-      localStream
+    if (localStreamRef.current) {
+      localStreamRef.current
         .getTracks()
         .forEach((track) =>
           track.stop()
         );
 
+      localStreamRef.current = null;
       setLocalStream(null);
     }
 
@@ -604,16 +663,17 @@ export default function ChatPage(
     setCallState("idle");
     setIncomingSignal(null);
 
-    if (callerId) {
+    if (callerIdRef.current) {
       socketRef.current?.emit(
         "end-call",
         {
-          callerId,
+          callerId: callerIdRef.current,
         }
       );
     }
 
     setCallerId(null);
+    callerIdRef.current = null;
     setCallerName("");
   };
 
