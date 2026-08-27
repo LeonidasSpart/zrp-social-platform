@@ -2853,10 +2853,6 @@ export default function ChatInterface({
           dark:border-gray-700
           dark:bg-zrp-deepBlack
         "
-        style={{
-          paddingBottom:
-            "max(8px, env(safe-area-inset-bottom))",
-        }}
       >
         {isRecording ? (
           <div
