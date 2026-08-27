@@ -314,7 +314,7 @@ export default function RootLayout({
       </head>
 
       <body
-        className={`${inter.variable} ${orbitron.variable} font-inter min-h-screen flex flex-col bg-white dark:bg-zrp-deepBlack`}
+        className={`zrp-app ${inter.variable} ${orbitron.variable} font-inter min-h-screen flex flex-col bg-white dark:bg-zrp-deepBlack`}
       >
         <div className="app-shell-clip w-full flex flex-col min-h-screen pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0">
           <ErrorBoundary>
