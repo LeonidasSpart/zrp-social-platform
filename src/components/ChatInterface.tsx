@@ -1534,6 +1534,7 @@ export default function ChatInterface({
   return (
     <div
       className="
+        zrp-chat-interface
         relative
         flex
         h-full
@@ -2853,6 +2854,10 @@ export default function ChatInterface({
           dark:border-gray-700
           dark:bg-zrp-deepBlack
         "
+        style={{
+          paddingBottom:
+            "max(8px, env(safe-area-inset-bottom))",
+        }}
       >
         {isRecording ? (
           <div

@@ -98,7 +98,7 @@ export default function RightPanel() {
 
   return (
     <aside
-      className="
+      className="zrp-right-panel
         hidden xl:flex
         flex-col
         w-80

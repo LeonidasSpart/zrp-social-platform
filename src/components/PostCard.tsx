@@ -1515,7 +1515,7 @@ export default function PostCard({
 
   return (
     <>
-      <div className="bg-white dark:bg-zrp-deepBlack px-4 py-3 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50/70 dark:hover:bg-white/[0.03] transition">
+      <div className="zrp-post-card bg-white dark:bg-zrp-deepBlack px-4 py-3 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50/70 dark:hover:bg-white/[0.03] transition">
         <div className="flex items-start gap-3">
 
           {/* AVATAR */}
