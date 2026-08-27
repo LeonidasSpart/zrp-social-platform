@@ -1748,7 +1748,6 @@ export default function PostComposer({
     <div
       ref={composerRef}
       className="
-        zrp-post-composer
         bg-white
         dark:bg-zrp-deepBlack
         rounded-2xl

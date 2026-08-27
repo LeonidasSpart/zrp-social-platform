@@ -1534,7 +1534,6 @@ export default function ChatInterface({
   return (
     <div
       className="
-        zrp-chat-interface
         relative
         flex
         h-full

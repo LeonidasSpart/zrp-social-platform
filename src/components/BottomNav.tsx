@@ -68,7 +68,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="zrp-bottom-nav lg:hidden fixed inset-x-0 bottom-0 z-50 bg-white/95 dark:bg-zrp-deepBlack/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800"
+      className="lg:hidden fixed inset-x-0 bottom-0 z-50 bg-white/95 dark:bg-zrp-deepBlack/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-label="Primary"
     >

@@ -243,7 +243,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="zrp-header sticky top-0 z-50 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-zrp-deepBlack">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-zrp-deepBlack">
         <div className="w-full max-w-[1400px] mx-auto px-3 sm:px-4">
           <div className="h-[64px] flex items-center justify-between gap-3">
 

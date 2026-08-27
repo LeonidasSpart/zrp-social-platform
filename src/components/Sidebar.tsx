@@ -126,7 +126,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="zrp-sidebar
+      className="
         hidden lg:flex
         flex-col
         w-64
