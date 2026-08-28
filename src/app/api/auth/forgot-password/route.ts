@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { sendPasswordResetEmail } from "@/lib/email"; // ✅ added
 import crypto from "crypto";
 import { rateLimit } from "@/lib/rate-limit";
+import { hashToken } from "@/lib/tokens";
 
 export async function POST(req: NextRequest) {
   // This endpoint is unauthenticated by necessity (a locked-out user
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        resetToken,
+        resetToken: hashToken(resetToken),
         resetTokenExpiry,
       },
     });

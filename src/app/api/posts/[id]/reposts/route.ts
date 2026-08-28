@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { canViewPrivateContent } from "@/lib/permissions";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -9,6 +10,17 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
     const postId = params.id;
     const session = await getServerSession(authOptions);
     const viewerId = session?.user?.id;
+
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { authorId: true, author: { select: { isPrivate: true } } },
+    });
+    if (!post) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+    if (!(await canViewPrivateContent(viewerId, post.authorId, post.author.isPrivate))) {
+      return NextResponse.json([]);
+    }
 
     const reposts = await prisma.repost.findMany({
       where: { postId },

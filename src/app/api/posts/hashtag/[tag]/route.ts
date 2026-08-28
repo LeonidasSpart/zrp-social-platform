@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { viewablePostAuthorFilter } from "@/lib/permissions";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ tag: string }> }) {
   const params = await props.params;
@@ -43,6 +44,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ tag: stri
         status: "published",
         scheduledAt: null,
         authorId: { notIn: excludedAuthorIds },
+        author: viewablePostAuthorFilter(viewerId),
       },
       take: 50,
       orderBy: { createdAt: "desc" },

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { sendVerificationEmail } from "@/lib/email";
+import { hashToken } from "@/lib/tokens";
 
 export async function PUT(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -58,7 +59,7 @@ export async function PUT(req: NextRequest) {
     where: { id: session.user.id },
     data: {
       pendingEmail: newEmail,
-      verificationToken: token,
+      verificationToken: hashToken(token),
       verificationTokenExpiry: expiry,
     },
   });

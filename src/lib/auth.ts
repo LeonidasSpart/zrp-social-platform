@@ -4,6 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "./db";
 import bcrypt from "bcryptjs";
 import { getFeatureStatus, FeatureStatus } from "./permissions";
+import { checkRateLimitKey } from "./rate-limit";
 
 // ─── Extend NextAuth types ────────────────────────────────────────
 declare module "next-auth" {
@@ -79,7 +80,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email or Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Invalid credentials");
         }
@@ -88,7 +89,27 @@ export const authOptions: NextAuthOptions = {
         const inputPassword = credentials.password.trim();
         const isEmail = identifier.includes("@");
 
-        console.log("🔑 Login attempt for:", identifier, isEmail ? "(email)" : "(username)");
+        // ⚠️ SECURITY: brute-force protection. Limit both by source IP
+        // (protects against distributed guessing across many accounts)
+        // and by the targeted account/email (protects a single account
+        // from being hammered from many IPs). Either limit tripping
+        // blocks the attempt with a generic error and a retry delay.
+        const forwardedFor = req?.headers?.["x-forwarded-for"];
+        const ip =
+          (Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor)
+            ?.split(",")[0]
+            ?.trim() ||
+          (req?.headers as Record<string, string> | undefined)?.["x-real-ip"] ||
+          "unknown";
+
+        const [ipLimit, acctLimit] = await Promise.all([
+          checkRateLimitKey(`login-ip:${ip}`, 20, 900),
+          checkRateLimitKey(`login-acct:${identifier.toLowerCase()}`, 8, 900),
+        ]);
+
+        if (!ipLimit.success || !acctLimit.success) {
+          throw new Error("Too many login attempts. Please try again later.");
+        }
 
         const user = await prisma.user.findUnique({
           where: isEmail
@@ -147,13 +168,10 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (!user.emailVerified) {
-          console.log("🔑 ❌ Email not verified for:", user.email);
           throw new Error(
             "Please verify your email before logging in. Check your inbox for the verification link."
           );
         }
-
-        console.log("🔑 ✅ Login successful for:", user.email);
 
         return {
           id: user.id,

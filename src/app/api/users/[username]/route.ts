@@ -190,8 +190,21 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       isBlocked = !!block;
     }
 
+    // ⚠️ SECURITY: data minimization for a public, unauthenticated
+    // profile response. `isAdmin` was returned unconditionally and
+    // unused by the frontend - pure leakage of privileged status.
+    // `solanaWallet` is genuinely needed by the tip UI, but only for
+    // creators who've actually enabled tipping; otherwise it's an
+    // address with no legitimate reason to be public here.
+    const isOwner = session?.user?.id === user.id;
+    const { isAdmin: _isAdmin, solanaWallet, ...publicUser } = user as typeof user & {
+      isAdmin: boolean;
+      solanaWallet: string | null;
+    };
+
     return NextResponse.json({
-      ...user,
+      ...publicUser,
+      solanaWallet: isOwner || user.creatorProfile?.tipsEnabled ? solanaWallet : null,
       isFollowing,
       isBlocked,
     });

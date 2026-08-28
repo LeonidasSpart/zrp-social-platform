@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import crypto from "crypto";
 import { sendVerificationEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
+import { hashToken } from "@/lib/tokens";
 
 export async function POST(req: NextRequest) {
   // This endpoint is unauthenticated by necessity (a user who can't log
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        verificationToken: token,
+        verificationToken: hashToken(token),
         verificationTokenExpiry: expiry,
       },
     });

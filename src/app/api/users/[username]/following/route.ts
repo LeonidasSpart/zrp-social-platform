@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { canViewPrivateContent } from "@/lib/permissions";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
@@ -10,11 +11,22 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
 
     const user = await prisma.user.findUnique({
       where: { username: params.username },
-      select: { id: true },
+      select: { id: true, isPrivate: true, publicFollowing: true },
     });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // ─── Private accounts: only the owner or an approved follower.
+    // Even for non-private accounts, the following list is only shown
+    // if the owner has opted in via publicFollowing. ─────────────────
+    const isOwner = session?.user?.id === user.id;
+    if (!isOwner && !user.publicFollowing) {
+      return NextResponse.json([]);
+    }
+    if (!(await canViewPrivateContent(session?.user?.id, user.id, user.isPrivate))) {
+      return NextResponse.json([]);
     }
 
     const following = await prisma.follow.findMany({

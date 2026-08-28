@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { hashToken } from "@/lib/tokens";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest) {
+  // Prevent brute-forcing the verification token by request volume.
+  const limit = await rateLimit(req, { limit: 20, window: 600, type: "auth-verify" });
+  if (!limit.success) return limit.response;
+
   const token = req.nextUrl.searchParams.get("token");
 
   if (!token) {
@@ -11,7 +17,7 @@ export async function GET(req: NextRequest) {
   try {
     const user = await prisma.user.findFirst({
       where: {
-        verificationToken: token,
+        verificationToken: hashToken(token),
         verificationTokenExpiry: { gt: new Date() },
       },
     });

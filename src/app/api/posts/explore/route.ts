@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getCached, setCached } from "@/lib/redis";
+import { viewablePostAuthorFilter } from "@/lib/permissions";
 
 export const dynamic = 'force-dynamic';
 
@@ -81,6 +82,7 @@ export async function GET(req: NextRequest) {
           authorId: { notIn: excludedAuthorIds },
           status: "published",
           scheduledAt: null,
+          author: viewablePostAuthorFilter(userId),
         },
         select: {
           id: true,

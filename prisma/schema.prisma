@@ -44,6 +44,7 @@ enum WithdrawalStatus {
   PROCESSING
   COMPLETED
   FAILED
+  REJECTED
 }
 
 enum TicketCategory {
@@ -158,6 +159,16 @@ model User {
   customUrl String? @unique
 
   solanaWallet String?
+
+  // ⚠️ SECURITY: cryptographically verified wallet ownership, used to
+  // bind on-chain payments (tips, purchases) to the authenticated
+  // account that actually controls the paying wallet - unlike
+  // `solanaWallet` above, which is just an unverified payout address a
+  // creator types into settings. Set only via the sign-a-nonce flow in
+  // /api/wallet/link (see src/lib/wallet-link.ts).
+  verifiedSolanaWallet   String?   @unique
+  walletLinkNonce        String?
+  walletLinkNonceExpiry  DateTime?
 
   emailPreferences Json?
 

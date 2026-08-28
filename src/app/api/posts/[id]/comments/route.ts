@@ -6,6 +6,7 @@ import { createNotification } from "@/lib/notifications";
 import { sendPushNotification } from "@/lib/push-notifications";
 import { rateLimit } from "@/lib/rate-limit";
 import { checkPostLength } from "@/lib/limits";
+import { canViewPrivateContent } from "@/lib/permissions";
 
 // ─── GET: Fetch a page of threaded comments with counts and status ──
 // Paginates by top-level comment (cursor + limit), then loads only the
@@ -26,11 +27,20 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
     // ─── Check if comments are enabled for this post ────────────────
     const post = await prisma.post.findUnique({
       where: { id: postId },
-      select: { commentsEnabled: true },
+      select: {
+        commentsEnabled: true,
+        authorId: true,
+        author: { select: { isPrivate: true } },
+      },
     });
 
     // If post not found or comments disabled, return empty page
     if (!post || post.commentsEnabled === false) {
+      return NextResponse.json({ comments: [], nextCursor: null });
+    }
+
+    // ─── Private accounts: only the owner or an approved follower ────
+    if (!(await canViewPrivateContent(viewerId, post.authorId, post.author.isPrivate))) {
       return NextResponse.json({ comments: [], nextCursor: null });
     }
 
