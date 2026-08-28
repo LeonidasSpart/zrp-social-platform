@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { sendPushNotification } from "@/lib/push-notifications";
 import { createNotification } from "@/lib/notifications";
 import { rateLimit } from "@/lib/rate-limit";
+import { getUserConversations } from "@/lib/conversations";
 
 // Any message longer than this is far beyond anything a real DM needs -
 // content is unbounded text in the schema, so without a cap this was an
@@ -26,68 +27,9 @@ export async function GET(req: NextRequest) {
   try {
     const userId = session.user.id;
 
-    // Get distinct conversations via latest messages
-    const conversations = await prisma.message.findMany({
-      where: {
-        OR: [{ senderId: userId }, { receiverId: userId }],
-      },
-      orderBy: { createdAt: "desc" },
-      distinct: ["senderId", "receiverId"],
-      include: {
-        sender: {
-          select: {
-            id: true,
-            username: true,
-            name: true,
-            avatarUrl: true,
-            badgeType: true,
-          },
-        },
-        receiver: {
-          select: {
-            id: true,
-            username: true,
-            name: true,
-            avatarUrl: true,
-            badgeType: true,
-          },
-        },
-      },
-    });
+    const conversations = await getUserConversations(userId);
 
-    const conversationMap = new Map();
-    conversations.forEach((msg) => {
-      const partnerId = msg.senderId === userId ? msg.receiverId : msg.senderId;
-      const partner = msg.senderId === userId ? msg.receiver : msg.sender;
-      if (!conversationMap.has(partnerId)) {
-        conversationMap.set(partnerId, {
-          partner,
-          lastMessage: msg,
-          unreadCount: 0,
-        });
-      }
-    });
-
-    // Count unread messages per sender
-    const unreadMessages = await prisma.message.groupBy({
-      by: ["senderId"],
-      where: {
-        receiverId: userId,
-        read: false,
-      },
-      _count: {
-        senderId: true,
-      },
-    });
-
-    unreadMessages.forEach((u) => {
-      const conv = conversationMap.get(u.senderId);
-      if (conv) {
-        conv.unreadCount = u._count.senderId;
-      }
-    });
-
-    return NextResponse.json(Array.from(conversationMap.values()));
+    return NextResponse.json(conversations);
   } catch (error) {
     console.error("Error fetching conversations:", error);
     return NextResponse.json({ error: "Failed to fetch conversations" }, { status: 500 });
