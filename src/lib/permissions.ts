@@ -87,6 +87,67 @@ export function getFeatureStatus(user: UserWithPlan): FeatureStatus {
 
 import { prisma } from './db';
 
+// ─── Private Account Enforcement ─────────────────────────────────
+//
+// ⚠️ SECURITY: this is the single server-side gate content endpoints
+// must use before returning a private account's posts, likes,
+// reposts, replies, media, or relationship lists to a caller who
+// isn't the account owner. Never rely on the frontend to hide this
+// data - the API must refuse to serve it in the first place.
+
+/**
+ * Prisma `where` fragment to attach under an `author:` relation filter
+ * (e.g. `where: { author: viewablePostAuthorFilter(viewerId), ... }`)
+ * so that public listings (explore, search, hashtags) only ever
+ * surface posts from non-private accounts, the viewer's own posts, or
+ * accounts the viewer has an approved follow relationship with.
+ * Blocked/muted-author exclusion is a separate, existing concern and
+ * should still be applied alongside this.
+ */
+export function viewablePostAuthorFilter(viewerId: string | null | undefined) {
+  return {
+    OR: [
+      { isPrivate: false },
+      ...(viewerId
+        ? [
+            { id: viewerId },
+            { followers: { some: { followerId: viewerId } } },
+          ]
+        : []),
+    ],
+  };
+}
+
+/**
+ * Can `viewerId` see private content belonging to `targetUserId`?
+ * True when the target isn't private, the viewer *is* the target, or
+ * the viewer has an approved (accepted) follow relationship with the
+ * target - i.e. a row exists in Follow, which is only ever created
+ * once a private-account follow request has been approved (see
+ * POST /api/users/[username]/follow).
+ */
+export async function canViewPrivateContent(
+  viewerId: string | null | undefined,
+  targetUserId: string,
+  isTargetPrivate: boolean
+): Promise<boolean> {
+  if (!isTargetPrivate) return true;
+  if (!viewerId) return false;
+  if (viewerId === targetUserId) return true;
+
+  const follow = await prisma.follow.findUnique({
+    where: {
+      followerId_followingId: {
+        followerId: viewerId,
+        followingId: targetUserId,
+      },
+    },
+    select: { id: true },
+  });
+
+  return !!follow;
+}
+
 /**
  * Check if a user is a member of a specific team (account owner's team).
  * Returns true if they are an OWNER (admin) or a regular member.

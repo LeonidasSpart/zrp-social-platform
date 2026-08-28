@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { canViewPrivateContent } from "@/lib/permissions";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
@@ -25,11 +26,16 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
     // ─── Find the user by username ──────────────────────────────────
     const user = await prisma.user.findUnique({
       where: { username },
-      select: { id: true },
+      select: { id: true, isPrivate: true },
     });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // ─── Private accounts: only the owner or an approved follower ────
+    if (!(await canViewPrivateContent(session?.user?.id, user.id, user.isPrivate))) {
+      return NextResponse.json({ posts: [], nextCursor: null });
     }
 
     // ─── Get blocked users (if logged in) ──────────────────────────

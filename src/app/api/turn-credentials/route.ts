@@ -1,10 +1,26 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
 
 // Fetches fresh TURN/STUN credentials from Metered's TURN service.
 // Proxied server-side so the app name/key aren't hardcoded in the
 // client bundle, and so we can swap providers later without touching
 // every call site.
-export async function GET() {
+//
+// ⚠️ SECURITY: this used to be unauthenticated. Even without leaking
+// the provider secret, unrestricted credential issuance lets anyone
+// burn through the TURN provider's quota/cost. Require a session and
+// cap how often each user can mint new credentials.
+export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const limit = await rateLimit(req, { limit: 20, window: 60, type: "turn-credentials" });
+  if (!limit.success) return limit.response;
+
   const appName = process.env.METERED_APP_NAME;
   const apiKey = process.env.METERED_API_KEY;
 

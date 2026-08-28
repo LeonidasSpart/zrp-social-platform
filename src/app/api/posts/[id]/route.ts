@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { checkPostLength } from "@/lib/limits";
 import { deleteUploadThingFiles } from "@/lib/uploadthing";
+import { canViewPrivateContent } from "@/lib/permissions";
 
 // GET a single post (with all data for the post page)
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -21,6 +22,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
             name: true,
             avatarUrl: true,
             badgeType: true,
+            isPrivate: true,
           },
         },
         poll: {
@@ -65,6 +67,11 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
     });
 
     if (!post) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    // ─── Private accounts: only the owner or an approved follower ────
+    if (!(await canViewPrivateContent(session?.user?.id, post.author.id, post.author.isPrivate))) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 

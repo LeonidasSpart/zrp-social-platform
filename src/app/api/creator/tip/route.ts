@@ -4,11 +4,16 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { prisma } from "@/lib/db";
+import { rateLimit } from "@/lib/rate-limit";
 
 const PLATFORM_FEE = 0.10; // 10% platform fee
 const CHARITY_PERCENTAGE = 0.35; // 35% of platform fee goes to charity
 
 export async function POST(req: NextRequest) {
+  // Tip verification does real RPC + DB work per call - cap abuse.
+  const limit = await rateLimit(req, { limit: 10, window: 60, type: "creator-tip" });
+  if (!limit.success) return limit.response;
+
   try {
     // ─────────────────────────────────────────────────────────────
     // Authentication
@@ -34,6 +39,11 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
+
+    const sender = await prisma.user.findUnique({
+      where: { id: senderId },
+      select: { verifiedSolanaWallet: true },
+    });
 
     // ─────────────────────────────────────────────────────────────
     // Parse request
@@ -108,6 +118,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Same signature reuse guard as premium purchases - a transactionId
+    // is only ever allowed to credit one payment record, tip or
+    // purchase, ever.
+    const reusedAsPurchase = await prisma.premiumPurchase.findUnique({
+      where: { transactionId },
+    });
+    if (reusedAsPurchase) {
+      return NextResponse.json(
+        { error: "This transaction has already been used for a payment." },
+        { status: 409 }
+      );
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Verify transaction on-chain
     //
@@ -174,6 +197,29 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
+
+      // ⚠️ SECURITY: bind the on-chain sender to the authenticated ZRP
+      // account. Without this, verifying that *a* valid payment arrived
+      // says nothing about who sent it - anyone could submit someone
+      // else's public transaction signature and claim the tip credit
+      // for their own account. Enforced once the account has gone
+      // through the signature-based wallet link flow
+      // (/api/wallet/link-challenge + link-verify); accounts that
+      // haven't linked a wallet yet keep today's behavior so existing
+      // tipping isn't broken by this change.
+      if (
+        sender?.verifiedSolanaWallet &&
+        result.from &&
+        result.from !== sender.verifiedSolanaWallet
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "This transaction was sent from a wallet that isn't linked to your account.",
+          },
+          { status: 400 }
+        );
+      }
     } catch (err: unknown) {
       console.error(
         "Transaction verification error:",
@@ -236,54 +282,64 @@ export async function POST(req: NextRequest) {
       numericAmount - platformFee;
 
     // ─────────────────────────────────────────────────────────────
-    // Create tip
+    // Create tip + credit creator balance atomically. The DB's unique
+    // constraint on transactionId is the race-proof guard against two
+    // concurrent requests both passing the earlier duplicate check.
     // ─────────────────────────────────────────────────────────────
 
-    const tip = await prisma.tip.create({
-      data: {
-        senderId,
-        recipientId,
-        creatorProfileId: creatorProfile.id,
+    let tip;
+    try {
+      [tip] = await prisma.$transaction([
+        prisma.tip.create({
+          data: {
+            senderId,
+            recipientId,
+            creatorProfileId: creatorProfile.id,
 
-        amount: numericAmount,
+            amount: numericAmount,
 
-        message:
-          typeof message === "string"
-            ? message.slice(0, 1000)
-            : null,
+            message:
+              typeof message === "string"
+                ? message.slice(0, 1000)
+                : null,
 
-        transactionId,
+            transactionId,
 
-        platformFee,
-        charityAmount,
-        creatorAmount,
+            platformFee,
+            charityAmount,
+            creatorAmount,
 
-        status: "COMPLETED",
-      },
-    });
+            status: "COMPLETED",
+          },
+        }),
+        prisma.creatorProfile.update({
+          where: {
+            id: creatorProfile.id,
+          },
+          data: {
+            totalTips: {
+              increment: numericAmount,
+            },
 
-    // ─────────────────────────────────────────────────────────────
-    // Update creator balance/statistics
-    // ─────────────────────────────────────────────────────────────
+            totalEarnings: {
+              increment: creatorAmount,
+            },
 
-    await prisma.creatorProfile.update({
-      where: {
-        id: creatorProfile.id,
-      },
-      data: {
-        totalTips: {
-          increment: numericAmount,
-        },
-
-        totalEarnings: {
-          increment: creatorAmount,
-        },
-
-        balance: {
-          increment: creatorAmount,
-        },
-      },
-    });
+            balance: {
+              increment: creatorAmount,
+            },
+          },
+        }),
+      ]);
+    } catch (err: any) {
+      if (err?.code === "P2002") {
+        return NextResponse.json(
+          { error: "Transaction already processed." },
+          { status: 409 }
+        );
+      }
+      throw err;
+    }
 
     // ─────────────────────────────────────────────────────────────
     // Create notification

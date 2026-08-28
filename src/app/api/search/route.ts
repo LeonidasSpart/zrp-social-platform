@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { viewablePostAuthorFilter } from "@/lib/permissions";
 
 export async function GET(req: NextRequest) {
   const query = req.nextUrl.searchParams.get("q") || "";
@@ -80,6 +81,7 @@ export async function GET(req: NextRequest) {
             },
             { authorId: { notIn: excludedAuthorIds } },
             { status: "published" },
+            { author: viewablePostAuthorFilter(userId) },
           ],
         },
         orderBy: { createdAt: "desc" },

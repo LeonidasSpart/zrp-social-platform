@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { hashToken } from "@/lib/tokens";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  // Prevent brute-forcing the reset token by request volume.
+  const limit = await rateLimit(req, { limit: 10, window: 600, type: "auth-reset-password" });
+  if (!limit.success) return limit.response;
+
   try {
     const { token, password } = await req.json();
 
@@ -15,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.user.findFirst({
       where: {
-        resetToken: token,
+        resetToken: hashToken(token),
         resetTokenExpiry: { gt: new Date() },
       },
     });

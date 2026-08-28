@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCached, setCached } from "@/lib/redis";
+import { safeFetch, SsrfBlockedError } from "@/lib/ssrf-guard";
+import { rateLimit } from "@/lib/rate-limit";
 
 interface LinkPreview {
   url: string;
@@ -45,9 +47,11 @@ function extractTitleTag(html: string): string | null {
 async function fetchYouTubePreview(url: string): Promise<LinkPreview | null> {
   try {
     const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
-    const res = await fetch(oembedUrl, { signal: AbortSignal.timeout(5000) });
-    if (!res.ok) return null;
-    const data = await res.json();
+    // youtube.com is a fixed, trusted host, but route it through the
+    // same guarded fetch for consistency and the same size/time caps.
+    const res = await safeFetch(oembedUrl, { timeoutMs: 5000, maxBytes: 50_000 });
+    if (res.statusCode < 200 || res.statusCode >= 300) return null;
+    const data = JSON.parse(res.body.toString("utf-8"));
     // oEmbed doesn't return a direct thumbnail field consistently across
     // all video states, so derive it from the video id instead.
     const videoId = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/)?.[1];
@@ -65,8 +69,9 @@ async function fetchYouTubePreview(url: string): Promise<LinkPreview | null> {
 
 async function fetchGenericPreview(url: string): Promise<LinkPreview | null> {
   try {
-    const res = await fetch(url, {
-      signal: AbortSignal.timeout(6000),
+    const res = await safeFetch(url, {
+      timeoutMs: 6000,
+      maxBytes: 200_000,
       headers: {
         // Many sites serve minimal/no OG tags to unrecognized bots -
         // a normal browser UA gets the real page most reliably.
@@ -74,29 +79,13 @@ async function fetchGenericPreview(url: string): Promise<LinkPreview | null> {
           "Mozilla/5.0 (compatible; ZRPLinkPreview/1.0; +https://zrp.one)",
         Accept: "text/html,application/xhtml+xml",
       },
-      redirect: "follow",
     });
-    if (!res.ok) return null;
+    if (res.statusCode < 200 || res.statusCode >= 300) return null;
 
-    const contentType = res.headers.get("content-type") || "";
+    const contentType = (res.headers["content-type"] as string) || "";
     if (!contentType.includes("text/html")) return null;
 
-    // Only read enough of the response to cover the <head> - avoids
-    // downloading an entire large page just for its meta tags.
-    const reader = res.body?.getReader();
-    if (!reader) return null;
-    const decoder = new TextDecoder();
-    let html = "";
-    const maxBytes = 200_000;
-    let received = 0;
-    while (received < maxBytes) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      html += decoder.decode(value, { stream: true });
-      received += value.length;
-      if (html.includes("</head>")) break;
-    }
-    reader.cancel().catch(() => {});
+    const html = res.body.toString("utf-8");
 
     const title =
       extractMeta(html, ["og:title", "twitter:title"]) || extractTitleTag(html);
@@ -119,6 +108,13 @@ async function fetchGenericPreview(url: string): Promise<LinkPreview | null> {
 }
 
 export async function GET(req: NextRequest) {
+  // Each preview request causes an outbound server-side fetch, so cap
+  // how often a single client can trigger new lookups (cached results
+  // above don't count against this, since they skip straight to the
+  // early return).
+  const limit = await rateLimit(req, { limit: 30, window: 60, type: "link-preview" });
+  if (!limit.success) return limit.response;
+
   const { searchParams } = new URL(req.url);
   const rawUrl = searchParams.get("url");
 
@@ -131,6 +127,9 @@ export async function GET(req: NextRequest) {
     target = new URL(rawUrl);
     if (target.protocol !== "http:" && target.protocol !== "https:") {
       throw new Error("Unsupported protocol");
+    }
+    if (target.username || target.password) {
+      throw new Error("URLs with embedded credentials are not allowed");
     }
   } catch {
     return NextResponse.json({ error: "Invalid URL" }, { status: 400 });

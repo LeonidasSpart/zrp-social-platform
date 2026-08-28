@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { sendVerificationEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
+import { hashToken } from "@/lib/tokens";
 
 export async function POST(req: NextRequest) {
   // Account creation had no rate limit at all - every signup also
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
         email,
         password: hashed,
         role: "USER", // ✅ explicit default
-        verificationToken: token,
+        verificationToken: hashToken(token),
         verificationTokenExpiry: expiry,
       },
     });

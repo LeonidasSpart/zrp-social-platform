@@ -11,6 +11,7 @@ import {
   canPublishArticle,
 } from "@/lib/permissions";
 import { rateLimit } from "@/lib/rate-limit";
+import { sanitizeArticleHtml } from "@/lib/sanitize";
 
 // ─────────────────────────────────────────────────────────────
 // MEDIA HELPERS
@@ -786,7 +787,7 @@ export async function POST(
       body:
         type ===
         "ARTICLE"
-          ? articleBody
+          ? sanitizeArticleHtml(articleBody || "")
           : null,
     };
 

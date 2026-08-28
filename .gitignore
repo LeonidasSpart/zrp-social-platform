@@ -1,5 +1,6 @@
 node_modules
 .next
+*.tsbuildinfo
 
 # Environment files - never commit real secrets. .env in this repo is
 # a placeholder template; this rule protects against anyone (including
