@@ -1,6 +1,17 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Constructed lazily (only once actually needed to send) rather than at
+// module load - the Resend SDK throws immediately if given an empty/
+// missing key, which previously crashed anything that imported this
+// module (including Next's build-time route analysis) whenever
+// RESEND_API_KEY wasn't set, instead of hitting the graceful "not
+// configured" fallback below.
+let resend: Resend | null = null;
+function getResendClient(): Resend | null {
+  if (!process.env.RESEND_API_KEY) return null;
+  if (!resend) resend = new Resend(process.env.RESEND_API_KEY);
+  return resend;
+}
 
 // ─── Generic Email Sender (used by notifications) ──────────────────
 export async function sendEmail({
@@ -12,13 +23,14 @@ export async function sendEmail({
   subject: string;
   html: string;
 }) {
-  if (!process.env.RESEND_API_KEY) {
+  const client = getResendClient();
+  if (!client) {
     console.warn('RESEND_API_KEY not set – email not sent');
     return;
   }
 
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await client.emails.send({
       from: process.env.EMAIL_FROM || 'noreply@zrp.one',
       to,
       subject,
@@ -247,10 +259,16 @@ export async function sendVerificationEmail(
   token: string,
   customUrl?: string
 ) {
+  const client = getResendClient();
+  if (!client) {
+    console.warn('RESEND_API_KEY not set – verification email not sent');
+    return;
+  }
+
   const baseUrl = process.env.NEXTAUTH_URL;
   const link = customUrl || `${baseUrl}/verify-email?token=${token}`;
 
-  await resend.emails.send({
+  await client.emails.send({
     from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
     to: email,
     subject: 'Confirm your email address',
@@ -273,8 +291,14 @@ export async function sendPasswordResetEmail(
   name: string | undefined,
   resetLink: string
 ) {
+  const client = getResendClient();
+  if (!client) {
+    console.warn('RESEND_API_KEY not set – password reset email not sent');
+    return;
+  }
+
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await client.emails.send({
       from: process.env.EMAIL_FROM || 'noreply@zrp.one',
       to,
       subject: 'Reset Your Password – ZRP Social',
@@ -328,8 +352,14 @@ export async function sendTeamInvitation({
   role: string;
   teamLink: string;
 }) {
+  const client = getResendClient();
+  if (!client) {
+    console.warn('RESEND_API_KEY not set – team invitation email not sent');
+    return;
+  }
+
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await client.emails.send({
       from: process.env.EMAIL_FROM || 'noreply@zrp.one',
       to,
       subject: `You've been added to a team on ZRP Social`,
