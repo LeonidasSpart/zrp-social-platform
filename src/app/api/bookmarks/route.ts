@@ -13,8 +13,13 @@ export async function GET(req: NextRequest) {
     const userId = session.user.id;
 
     // ─── Fetch post bookmarks ──────────────────────────────────────
+    // Stopgap hard cap - a long-time user's full bookmark history was
+    // previously unbounded. Each of the two queries below is capped
+    // independently, so the merged/sorted result can have up to 200
+    // items; see users/[username]/posts/route.ts for the same pattern.
     const postBookmarks = await prisma.bookmark.findMany({
       where: { userId },
+      take: 100,
       include: {
         post: {
           include: {
@@ -39,6 +44,7 @@ export async function GET(req: NextRequest) {
     // ─── Fetch comment bookmarks ──────────────────────────────────
     const commentBookmarks = await prisma.commentBookmark.findMany({
       where: { userId },
+      take: 100,
       include: {
         comment: {
           include: {

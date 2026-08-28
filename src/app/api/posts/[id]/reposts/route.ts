@@ -25,6 +25,10 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
     const reposts = await prisma.repost.findMany({
       where: { postId },
       orderBy: { createdAt: "desc" },
+      // Stopgap hard cap - a viral post's repost list was previously
+      // unbounded. See users/[username]/posts/route.ts for the same
+      // pattern applied earlier.
+      take: 100,
       include: {
         user: {
           select: {

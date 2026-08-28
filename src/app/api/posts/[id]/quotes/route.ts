@@ -25,6 +25,10 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
     const quotes = await prisma.post.findMany({
       where: { quotePostId: postId },
       orderBy: { createdAt: "desc" },
+      // Stopgap hard cap - a viral post's quote list was previously
+      // unbounded. See users/[username]/posts/route.ts for the same
+      // pattern applied earlier.
+      take: 100,
       include: {
         author: {
           select: {
