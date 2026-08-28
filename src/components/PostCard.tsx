@@ -29,6 +29,7 @@ import {
   VolumeX,
   MapPin,
   ExternalLink,
+  Quote,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Comments from "./Comments";
@@ -93,6 +94,24 @@ interface PostCardProps {
     location?: string;
     applyUrl?: string;
     body?: string;
+
+    // Original post referenced by a quote post.
+    // Kept optional so older API responses remain safe.
+    quotePost?: {
+      id: string;
+      content: string;
+      imageUrl?: string | null;
+      imageUrls?: string[];
+      mediaType?: string | null;
+      createdAt: string;
+      author: {
+        id: string;
+        username: string;
+        name: string | null;
+        avatarUrl?: string | null;
+        badgeType?: string | null;
+      };
+    } | null;
   };
 
   onUpdate: (deletedPostId?: string) => void;
@@ -1822,6 +1841,78 @@ export default function PostCard({
                     ? "Show less"
                     : "Show more"}
                 </button>
+              )}
+
+              {/* QUOTED ORIGINAL POST */}
+              {post.quotePost && (
+                <div
+                  role="link"
+                  tabIndex={0}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.location.href = `/post/${post.quotePost!.id}`;
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      window.location.href = `/post/${post.quotePost!.id}`;
+                    }
+                  }}
+                  className="mt-3 rounded-2xl border border-gray-300 dark:border-gray-700 bg-gray-50/80 dark:bg-white/[0.035] p-3 sm:p-4 cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/[0.06] transition-colors focus:outline-none focus:ring-2 focus:ring-zrp-red/60"
+                  aria-label={`Quoted post by @${post.quotePost.author.username}`}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <Quote className="w-4 h-4 text-zrp-red flex-shrink-0" />
+                    <span className="text-xs font-semibold uppercase tracking-wide text-zrp-red">
+                      Quoted post
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {post.quotePost.author.avatarUrl ? (
+                        <img
+                          src={post.quotePost.author.avatarUrl}
+                          alt={post.quotePost.author.name || post.quotePost.author.username}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+                          {(post.quotePost.author.name || post.quotePost.author.username).charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-semibold text-sm text-gray-900 dark:text-white">
+                          {post.quotePost.author.name || post.quotePost.author.username}
+                        </span>
+                        <VerifiedBadge badgeType={post.quotePost.author.badgeType} />
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          @{post.quotePost.author.username}
+                        </span>
+                      </div>
+
+                      <p className="mt-1 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words line-clamp-6">
+                        {post.quotePost.content}
+                      </p>
+
+                      {(post.quotePost.imageUrl || post.quotePost.imageUrls?.length) && (
+                        <div className="mt-2 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
+                          <img
+                            src={post.quotePost.imageUrl || post.quotePost.imageUrls?.[0] || ""}
+                            alt="Quoted post media"
+                            className="w-full max-h-72 object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               )}
 
               {/* LINK PREVIEW */}
