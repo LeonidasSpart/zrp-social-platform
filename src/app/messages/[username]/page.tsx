@@ -170,9 +170,18 @@ export default function ChatPage(
 
       const top = Math.max(0, rect.top);
 
+      // BottomNav is fixed over the application on phones/tablets.
+      // Keep the chat viewport above it so the composer can never be
+      // covered by the navigation bar. The safe-area padding is handled
+      // by the shell/BottomNav itself.
+      const bottomNavigationHeight =
+        window.innerWidth < 1024 ? 56 : 0;
+
       const height = Math.max(
         0,
-        viewportHeight - top
+        viewportHeight -
+          top -
+          bottomNavigationHeight
       );
 
       setAvailableHeight(height);
@@ -776,8 +785,8 @@ export default function ChatPage(
       "
       style={{
         height: availableHeight
-          ? `${availableHeight}px`
-          : "calc(100dvh - env(safe-area-inset-top))",
+          ? `calc(${availableHeight}px - env(safe-area-inset-bottom))`
+          : "calc(100dvh - env(safe-area-inset-top) - 3.5rem - env(safe-area-inset-bottom))",
 
         paddingBottom:
           "env(safe-area-inset-bottom)",
