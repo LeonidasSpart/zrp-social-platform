@@ -37,6 +37,8 @@ export default function QuotesPage(props: { params: Promise<{ id: string }> }) {
   const [quotes, setQuotes] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -56,11 +58,28 @@ export default function QuotesPage(props: { params: Promise<{ id: string }> }) {
       const res = await fetch(`/api/posts/${params.id}/quotes`);
       if (!res.ok) throw new Error(t("quotes.errFetch"));
       const data = await res.json();
-      setQuotes(data);
+      setQuotes(data.items || []);
+      setNextCursor(data.nextCursor || null);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("quotes.errLoad"));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMoreQuotes = async () => {
+    if (!nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/posts/${params.id}/quotes?cursor=${nextCursor}`);
+      if (!res.ok) throw new Error(t("quotes.errFetch"));
+      const data = await res.json();
+      setQuotes((prev) => [...prev, ...(data.items || [])]);
+      setNextCursor(data.nextCursor || null);
+    } catch (err) {
+      console.error("Error loading more quotes:", err);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -87,6 +106,17 @@ export default function QuotesPage(props: { params: Promise<{ id: string }> }) {
           {quotes.map((post) => (
             <PostCard key={post.id} post={post} onUpdate={fetchQuotes} />
           ))}
+          {nextCursor && (
+            <div className="flex justify-center py-4">
+              <button
+                onClick={loadMoreQuotes}
+                disabled={loadingMore}
+                className="text-sm text-zrp-red hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loadingMore ? t("feed.loadingMore") : t("feed.loadMore")}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -3,12 +3,14 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canViewPrivateContent } from "@/lib/permissions";
+import { parseCursorParams, buildPage } from "@/lib/pagination";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     const viewerId = session?.user?.id;
+    const { cursor, limit } = parseCursorParams(req);
 
     // ─── Find profile owner ──────────────────────────────────────────
     const profileOwner = await prisma.user.findUnique({
@@ -22,7 +24,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
 
     // ─── Private accounts: only the owner or an approved follower ────
     if (!(await canViewPrivateContent(viewerId, profileOwner.id, profileOwner.isPrivate))) {
-      return NextResponse.json([]);
+      return NextResponse.json({ items: [], nextCursor: null });
     }
 
     // ─── Get excluded users (blocked + blockers + muted) ──────────
@@ -51,15 +53,15 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
     // ─── If profile owner is excluded, return empty ──────────────────
     const isExcluded = excludedAuthorIds.includes(profileOwner.id);
     if (isExcluded) {
-      return NextResponse.json([]);
+      return NextResponse.json({ items: [], nextCursor: null });
     }
 
     // ─── Fetch replies (comments) by this user ──────────────────────
-    const replies = await prisma.comment.findMany({
+    const rawReplies = await prisma.comment.findMany({
       where: { authorId: profileOwner.id },
       orderBy: { createdAt: "desc" },
-      // Stopgap hard cap, see users/[username]/posts/route.ts.
-      take: 100,
+      take: limit + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
       include: {
         author: {
           select: {
@@ -85,6 +87,8 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       },
     });
 
+    const { items: replies, nextCursor } = buildPage(rawReplies, limit);
+
     // ─── Format replies with replyTo context and postId ────────────
     const formattedReplies = replies.map((reply) => ({
       id: reply.id,
@@ -103,7 +107,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       },
     }));
 
-    return NextResponse.json(formattedReplies);
+    return NextResponse.json({ items: formattedReplies, nextCursor });
   } catch (error) {
     console.error("Error fetching replies:", error);
     return NextResponse.json({ error: "Failed to fetch replies" }, { status: 500 });

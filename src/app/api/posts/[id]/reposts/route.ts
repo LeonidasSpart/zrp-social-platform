@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canViewPrivateContent } from "@/lib/permissions";
+import { parseCursorParams, buildPage } from "@/lib/pagination";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -10,6 +11,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
     const postId = params.id;
     const session = await getServerSession(authOptions);
     const viewerId = session?.user?.id;
+    const { cursor, limit } = parseCursorParams(req);
 
     const post = await prisma.post.findUnique({
       where: { id: postId },
@@ -19,16 +21,16 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
     if (!(await canViewPrivateContent(viewerId, post.authorId, post.author.isPrivate))) {
-      return NextResponse.json([]);
+      return NextResponse.json({ items: [], nextCursor: null });
     }
 
-    const reposts = await prisma.repost.findMany({
+    // Cursor/paging is on the Repost row itself, not the reposting
+    // user's id.
+    const rawReposts = await prisma.repost.findMany({
       where: { postId },
       orderBy: { createdAt: "desc" },
-      // Stopgap hard cap - a viral post's repost list was previously
-      // unbounded. See users/[username]/posts/route.ts for the same
-      // pattern applied earlier.
-      take: 100,
+      take: limit + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
       include: {
         user: {
           select: {
@@ -42,6 +44,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
       },
     });
 
+    const { items: reposts, nextCursor } = buildPage(rawReposts, limit);
     const users = reposts.map(r => r.user);
 
     // Check if viewer follows each user
@@ -57,7 +60,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
       users.forEach(u => (u as any).isFollowing = followingIds.has(u.id));
     }
 
-    return NextResponse.json(users);
+    return NextResponse.json({ items: users, nextCursor });
   } catch (error) {
     console.error("Error fetching reposts:", error);
     return NextResponse.json({ error: "Failed to fetch reposts" }, { status: 500 });

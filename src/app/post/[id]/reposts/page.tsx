@@ -25,6 +25,8 @@ export default function RepostsPage(props: { params: Promise<{ id: string }> }) 
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -44,11 +46,28 @@ export default function RepostsPage(props: { params: Promise<{ id: string }> }) 
       const res = await fetch(`/api/posts/${params.id}/reposts`);
       if (!res.ok) throw new Error(t("reposts.errFetch"));
       const data = await res.json();
-      setUsers(data);
+      setUsers(data.items || []);
+      setNextCursor(data.nextCursor || null);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("reposts.errLoad"));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMoreReposts = async () => {
+    if (!nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/posts/${params.id}/reposts?cursor=${nextCursor}`);
+      if (!res.ok) throw new Error(t("reposts.errFetch"));
+      const data = await res.json();
+      setUsers((prev) => [...prev, ...(data.items || [])]);
+      setNextCursor(data.nextCursor || null);
+    } catch (err) {
+      console.error("Error loading more reposts:", err);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -110,6 +129,17 @@ export default function RepostsPage(props: { params: Promise<{ id: string }> }) 
               )}
             </Link>
           ))}
+          {nextCursor && (
+            <div className="flex justify-center py-4">
+              <button
+                onClick={loadMoreReposts}
+                disabled={loadingMore}
+                className="text-sm text-zrp-red hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loadingMore ? t("feed.loadingMore") : t("feed.loadMore")}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

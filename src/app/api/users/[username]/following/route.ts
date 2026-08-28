@@ -3,11 +3,13 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canViewPrivateContent } from "@/lib/permissions";
+import { parseCursorParams, buildPage } from "@/lib/pagination";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
+    const { cursor, limit } = parseCursorParams(req);
 
     const user = await prisma.user.findUnique({
       where: { username: params.username },
@@ -23,17 +25,18 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
     // if the owner has opted in via publicFollowing. ─────────────────
     const isOwner = session?.user?.id === user.id;
     if (!isOwner && !user.publicFollowing) {
-      return NextResponse.json([]);
+      return NextResponse.json({ items: [], nextCursor: null });
     }
     if (!(await canViewPrivateContent(session?.user?.id, user.id, user.isPrivate))) {
-      return NextResponse.json([]);
+      return NextResponse.json({ items: [], nextCursor: null });
     }
 
-    const following = await prisma.follow.findMany({
+    // Cursor/paging is on the Follow row itself.
+    const rawFollowing = await prisma.follow.findMany({
       where: { followerId: user.id },
       orderBy: { createdAt: "desc" },
-      // Stopgap hard cap, see users/[username]/posts/route.ts.
-      take: 100,
+      take: limit + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
       include: {
         following: {
           select: {
@@ -47,6 +50,8 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
         },
       },
     });
+
+    const { items: following, nextCursor } = buildPage(rawFollowing, limit);
 
     let isFollowingMap = new Map();
     if (session && session.user) {
@@ -64,7 +69,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       isFollowing: isFollowingMap.has(f.following.id) || false,
     }));
 
-    return NextResponse.json(result);
+    return NextResponse.json({ items: result, nextCursor });
   } catch (error) {
     console.error("Error fetching following:", error);
     return NextResponse.json({ error: "Failed to fetch following" }, { status: 500 });

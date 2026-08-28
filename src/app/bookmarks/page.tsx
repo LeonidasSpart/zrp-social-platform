@@ -73,6 +73,8 @@ export default function BookmarksPage() {
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
@@ -94,11 +96,28 @@ export default function BookmarksPage() {
       const res = await fetch("/api/bookmarks");
       if (!res.ok) throw new Error(t("bookmarks.errFetch"));
       const data = await res.json();
-      setBookmarks(data);
+      setBookmarks(data.items || []);
+      setNextCursor(data.nextCursor || null);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("bookmarks.errLoad"));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMoreBookmarks = async () => {
+    if (!nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/bookmarks?cursor=${nextCursor}`);
+      if (!res.ok) throw new Error(t("bookmarks.errFetch"));
+      const data = await res.json();
+      setBookmarks((prev) => [...prev, ...(data.items || [])]);
+      setNextCursor(data.nextCursor || null);
+    } catch (err) {
+      console.error("Error loading more bookmarks:", err);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -201,6 +220,17 @@ export default function BookmarksPage() {
             }
             return null;
           })}
+          {nextCursor && (
+            <div className="flex justify-center py-4">
+              <button
+                onClick={loadMoreBookmarks}
+                disabled={loadingMore}
+                className="text-sm text-zrp-red hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loadingMore ? t("feed.loadingMore") : t("feed.loadMore")}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

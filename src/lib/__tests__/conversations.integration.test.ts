@@ -198,7 +198,10 @@ describe.skipIf(!hasRealDatabaseUrl)(
         // (id DESC among equal timestamps).
         tieBreakLatestId = idA > idB ? idA : idB;
         expectedLatestMessageId.set(tieBreakPartner.id, tieBreakLatestId);
-        expectedUnreadCount.set(tieBreakPartner.id, tieBreakLatestId === idB ? 1 : 0);
+        // Unread count is independent of which message displays as
+        // "latest" - idB (partner -> alice) is seeded unread regardless
+        // of how the tiebreak resolves, so the expected count is always 1.
+        expectedUnreadCount.set(tieBreakPartner.id, 1);
       }
 
       // ── Self-conversation: Alice messages herself ──────────────────

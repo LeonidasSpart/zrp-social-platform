@@ -25,6 +25,8 @@ export default function FollowingPage(props: { params: Promise<{ username: strin
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [followLoading, setFollowLoading] = useState<string | null>(null);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -43,11 +45,27 @@ export default function FollowingPage(props: { params: Promise<{ username: strin
     try {
       const res = await fetch(`/api/users/${params.username}/following`);
       const data = await res.json();
-      setUsers(data);
+      setUsers(data.items || []);
+      setNextCursor(data.nextCursor || null);
     } catch (error) {
       console.error("Error fetching following:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMoreFollowing = async () => {
+    if (!nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/users/${params.username}/following?cursor=${nextCursor}`);
+      const data = await res.json();
+      setUsers((prev) => [...prev, ...(data.items || [])]);
+      setNextCursor(data.nextCursor || null);
+    } catch (error) {
+      console.error("Error loading more following:", error);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -167,6 +185,17 @@ export default function FollowingPage(props: { params: Promise<{ username: strin
               )}
             </div>
           ))}
+          {nextCursor && (
+            <div className="flex justify-center py-4">
+              <button
+                onClick={loadMoreFollowing}
+                disabled={loadingMore}
+                className="text-sm text-zrp-red hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loadingMore ? t("feed.loadingMore") : t("feed.loadMore")}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

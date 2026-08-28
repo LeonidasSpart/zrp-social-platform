@@ -3,12 +3,14 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canViewPrivateContent } from "@/lib/permissions";
+import { parseCursorParams, buildPage } from "@/lib/pagination";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     const viewerId = session?.user?.id;
+    const { cursor, limit } = parseCursorParams(req);
 
     // ─── Find profile owner ──────────────────────────────────────────
     const profileOwner = await prisma.user.findUnique({
@@ -25,10 +27,10 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
     // has opted in via publicLikes. ─────────────────────────────────
     const isOwner = viewerId === profileOwner.id;
     if (!isOwner && !profileOwner.publicLikes) {
-      return NextResponse.json([]);
+      return NextResponse.json({ items: [], nextCursor: null });
     }
     if (!(await canViewPrivateContent(viewerId, profileOwner.id, profileOwner.isPrivate))) {
-      return NextResponse.json([]);
+      return NextResponse.json({ items: [], nextCursor: null });
     }
 
     // ─── Get excluded users (blocked + blockers + muted) ──────────
@@ -57,11 +59,14 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
     // ─── If profile owner is excluded, return empty ──────────────────
     const isExcluded = excludedAuthorIds.includes(profileOwner.id);
     if (isExcluded) {
-      return NextResponse.json([]);
+      return NextResponse.json({ items: [], nextCursor: null });
     }
 
     // ─── Fetch likes by profile owner, excluding posts from blocked authors ──
-    const likes = await prisma.like.findMany({
+    // Cursor/paging is on the Like row itself, not the Post it points
+    // to (a Post can be liked by many users, so Post.id alone wouldn't
+    // be a valid position marker for "this user's likes, in order").
+    const rawLikes = await prisma.like.findMany({
       where: {
         userId: profileOwner.id,
         post: {
@@ -70,8 +75,8 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
         },
       },
       orderBy: { createdAt: "desc" },
-      // Stopgap hard cap, see users/[username]/posts/route.ts.
-      take: 100,
+      take: limit + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
       include: {
         post: {
           include: {
@@ -118,6 +123,8 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       },
     });
 
+    const { items: likes, nextCursor } = buildPage(rawLikes, limit);
+
     // ─── Extract posts from likes ────────────────────────────────────
     let posts = likes.map((like) => like.post);
 
@@ -135,7 +142,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       });
     }
 
-    return NextResponse.json(posts);
+    return NextResponse.json({ items: posts, nextCursor });
   } catch (error) {
     console.error("Error fetching liked posts:", error);
     return NextResponse.json({ error: "Failed to fetch liked posts" }, { status: 500 });

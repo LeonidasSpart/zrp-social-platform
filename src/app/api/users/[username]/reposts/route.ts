@@ -3,12 +3,14 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canViewPrivateContent } from "@/lib/permissions";
+import { parseCursorParams, buildPage } from "@/lib/pagination";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     const viewerId = session?.user?.id;
+    const { cursor, limit } = parseCursorParams(req);
 
     // Find the user
     const user = await prisma.user.findUnique({
@@ -21,14 +23,15 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
 
     // ─── Private accounts: only the owner or an approved follower ────
     if (!(await canViewPrivateContent(viewerId, user.id, user.isPrivate))) {
-      return NextResponse.json([]);
+      return NextResponse.json({ items: [], nextCursor: null });
     }
 
-    // Get posts this user has reposted
-    const reposts = await prisma.repost.findMany({
+    // Get posts this user has reposted. Cursor/paging is on the Repost
+    // row itself, not the Post (a Post can be reposted by many users).
+    const rawReposts = await prisma.repost.findMany({
       where: { userId: user.id },
-      // Stopgap hard cap, see users/[username]/posts/route.ts.
-      take: 100,
+      take: limit + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
       include: {
         post: {
           include: {
@@ -50,6 +53,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       orderBy: { createdAt: "desc" },
     });
 
+    const { items: reposts, nextCursor } = buildPage(rawReposts, limit);
     const posts = reposts.map((r) => r.post);
 
     // Add liked status for viewer
@@ -66,7 +70,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       });
     }
 
-    return NextResponse.json(posts);
+    return NextResponse.json({ items: posts, nextCursor });
   } catch (error) {
     console.error("Error fetching reposts:", error);
     return NextResponse.json({ error: "Failed to fetch reposts" }, { status: 500 });

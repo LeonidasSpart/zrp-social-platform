@@ -3,12 +3,14 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canViewPrivateContent } from "@/lib/permissions";
+import { parseCursorParams, buildPage } from "@/lib/pagination";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     const viewerId = session?.user?.id;
+    const { cursor, limit } = parseCursorParams(req);
 
     // ─── Find profile owner ──────────────────────────────────────────
     const profileOwner = await prisma.user.findUnique({
@@ -22,7 +24,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
 
     // ─── Private accounts: only the owner or an approved follower ────
     if (!(await canViewPrivateContent(viewerId, profileOwner.id, profileOwner.isPrivate))) {
-      return NextResponse.json([]);
+      return NextResponse.json({ items: [], nextCursor: null });
     }
 
     // ─── Get excluded users (blocked + blockers + muted) ──────────
@@ -51,19 +53,19 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
     // ─── If profile owner is excluded, return empty ──────────────────
     const isExcluded = excludedAuthorIds.includes(profileOwner.id);
     if (isExcluded) {
-      return NextResponse.json([]);
+      return NextResponse.json({ items: [], nextCursor: null });
     }
 
     // ─── Fetch media posts (with images) by this user ──────────────
-    const posts = await prisma.post.findMany({
+    const rawPosts = await prisma.post.findMany({
       where: {
         authorId: profileOwner.id,
         imageUrl: { not: null },
         status: "published",
       },
       orderBy: { createdAt: "desc" },
-      // Stopgap hard cap, see users/[username]/posts/route.ts.
-      take: 100,
+      take: limit + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
       include: {
         author: {
           select: {
@@ -106,6 +108,8 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       },
     });
 
+    const { items: posts, nextCursor } = buildPage(rawPosts, limit);
+
     // ─── Add liked status ────────────────────────────────────────────
     if (viewerId) {
       const likes = await prisma.like.findMany({
@@ -120,7 +124,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       });
     }
 
-    return NextResponse.json(posts);
+    return NextResponse.json({ items: posts, nextCursor });
   } catch (error) {
     console.error("Error fetching media:", error);
     return NextResponse.json({ error: "Failed to fetch media" }, { status: 500 });

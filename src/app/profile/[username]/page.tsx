@@ -311,6 +311,8 @@ export default function ProfilePage(
     useState<UserProfile | null>(null);
 
   const [posts, setPosts] = useState<Post[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const [pinnedPost, setPinnedPost] =
     useState<Post | null>(null);
@@ -492,33 +494,42 @@ export default function ProfilePage(
 
   // ─── Fetch posts based on active tab ──────────────────────────
 
+  const getTabEndpoint = useCallback(
+    () => {
+      if (activeTab === "replies") {
+        return `/api/users/${params.username}/replies`;
+      } else if (activeTab === "media") {
+        return `/api/users/${params.username}/media`;
+      } else if (activeTab === "likes") {
+        return `/api/users/${params.username}/likes`;
+      } else if (activeTab === "reposts") {
+        return `/api/users/${params.username}/reposts`;
+      }
+      return `/api/users/${params.username}/posts`;
+    },
+    [params.username, activeTab]
+  );
+
   const fetchPosts = useCallback(
     async () => {
       setLoading(true);
+      setNextCursor(null);
 
       try {
-        let endpoint =
-          `/api/users/${params.username}/posts`;
-
-        if (activeTab === "replies") {
-          endpoint =
-            `/api/users/${params.username}/replies`;
-        } else if (activeTab === "media") {
-          endpoint =
-            `/api/users/${params.username}/media`;
-        } else if (activeTab === "likes") {
-          endpoint =
-            `/api/users/${params.username}/likes`;
-        } else if (activeTab === "reposts") {
-          endpoint =
-            `/api/users/${params.username}/reposts`;
-        }
-
-        const res = await fetch(endpoint);
-
+        const res = await fetch(getTabEndpoint());
         const data = await res.json();
 
-        setPosts(data);
+        // Tabs that don't support pagination (e.g. "analytics" isn't
+        // fetched through this path at all) still get a bare array
+        // from some code paths - handle both shapes defensively so a
+        // partially-migrated response never crashes the page.
+        if (Array.isArray(data)) {
+          setPosts(data);
+          setNextCursor(null);
+        } else {
+          setPosts(data.items || []);
+          setNextCursor(data.nextCursor || null);
+        }
       } catch (error) {
         console.error(
           "Error fetching posts:",
@@ -528,7 +539,33 @@ export default function ProfilePage(
         setLoading(false);
       }
     },
-    [params.username, activeTab]
+    [getTabEndpoint]
+  );
+
+  const loadMorePosts = useCallback(
+    async () => {
+      if (!nextCursor || loadingMore) return;
+      setLoadingMore(true);
+
+      try {
+        const separator = getTabEndpoint().includes("?") ? "&" : "?";
+        const res = await fetch(`${getTabEndpoint()}${separator}cursor=${nextCursor}`);
+        const data = await res.json();
+
+        if (!Array.isArray(data)) {
+          setPosts((prev) => [...prev, ...(data.items || [])]);
+          setNextCursor(data.nextCursor || null);
+        }
+      } catch (error) {
+        console.error(
+          "Error loading more posts:",
+          error
+        );
+      } finally {
+        setLoadingMore(false);
+      }
+    },
+    [getTabEndpoint, nextCursor, loadingMore]
   );
 
   // ─── Authentication ────────────────────────────────────────────
@@ -2277,6 +2314,18 @@ export default function ProfilePage(
                   )
                 )}
               </>
+            )}
+
+            {nextCursor && (
+              <div className="flex justify-center py-4">
+                <button
+                  onClick={loadMorePosts}
+                  disabled={loadingMore}
+                  className="text-sm text-zrp-red hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loadingMore ? t("feed.loadingMore") : t("feed.loadMore")}
+                </button>
+              </div>
             )}
           </div>
         )}
