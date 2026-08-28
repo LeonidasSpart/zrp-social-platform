@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { jsonWithDecimals } from "@/lib/serialize-decimal";
 
 export async function GET(req: NextRequest) {
   const adminCheck = await requireAdmin();
@@ -21,5 +22,5 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  return NextResponse.json(payments);
+  return jsonWithDecimals(payments);
 }

@@ -7,6 +7,7 @@ import {
 // server-side auth check at all.
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { logAdminAction } from "@/lib/audit-log";
 
 type RouteContext = {
   params: Promise<{
@@ -429,6 +430,19 @@ export async function PATCH(
       },
     });
 
+    // Only log actual editorial moderation decisions (status/featured
+    // transitions), not routine copy edits (title/body/etc.), to keep
+    // the audit log focused on the actions that matter for review.
+    if (data.status !== undefined || data.featured !== undefined) {
+      await logAdminAction({
+        actor: adminCheck.session,
+        action: "news_article.update_status",
+        targetType: "NewsArticle",
+        targetId: id,
+        metadata: { status: data.status, featured: data.featured, reviewNote: data.reviewNote },
+      });
+    }
+
     return NextResponse.json({
       success: true,
       article,
@@ -500,6 +514,13 @@ export async function DELETE(
       where: {
         id,
       },
+    });
+
+    await logAdminAction({
+      actor: adminCheck.session,
+      action: "news_article.delete",
+      targetType: "NewsArticle",
+      targetId: id,
     });
 
     return NextResponse.json({

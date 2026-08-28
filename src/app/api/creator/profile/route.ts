@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { prisma } from "@/lib/db";
+import { jsonWithDecimals } from "@/lib/serialize-decimal";
 
 export async function GET(req: NextRequest) {
   try {
@@ -58,7 +59,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({
+    return jsonWithDecimals({
       profile,
       isEligible: true,
     });
@@ -88,7 +89,7 @@ export async function PATCH(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ profile });
+    return jsonWithDecimals({ profile });
   } catch (error) {
     console.error("Update creator profile error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

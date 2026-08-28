@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { jsonWithDecimals } from "@/lib/serialize-decimal";
 
 // ─── GET: list the current user's own campaigns ─────────────────────
 export async function GET(req: NextRequest) {
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ campaigns });
+    return jsonWithDecimals({ campaigns });
   } catch (error) {
     console.error("Error listing ad campaigns:", error);
     return NextResponse.json({ error: "Failed to fetch campaigns" }, { status: 500 });
@@ -122,7 +123,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ campaign }, { status: 201 });
+    return jsonWithDecimals({ campaign }, { status: 201 });
   } catch (error) {
     console.error("Error creating ad campaign:", error);
     return NextResponse.json({ error: "Failed to create campaign" }, { status: 500 });

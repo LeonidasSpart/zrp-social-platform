@@ -31,6 +31,9 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
 
     const following = await prisma.follow.findMany({
       where: { followerId: user.id },
+      orderBy: { createdAt: "desc" },
+      // Stopgap hard cap, see users/[username]/posts/route.ts.
+      take: 100,
       include: {
         following: {
           select: {

@@ -3,8 +3,10 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { jsonWithDecimals } from "@/lib/serialize-decimal";
 
 const PLATFORM_FEE = 0.10; // 10% platform fee
 const CHARITY_PERCENTAGE = 0.35; // 35% of platform fee goes to charity
@@ -269,17 +271,21 @@ export async function POST(req: NextRequest) {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // Calculate fees
+    // Calculate fees - Decimal arithmetic so the fee split doesn't
+    // accumulate binary floating-point error (see the premium-purchase
+    // route for the same reasoning).
     // ─────────────────────────────────────────────────────────────
 
+    const decimalAmount = new Prisma.Decimal(numericAmount);
+
     const platformFee =
-      numericAmount * PLATFORM_FEE;
+      decimalAmount.times(PLATFORM_FEE);
 
     const charityAmount =
-      platformFee * CHARITY_PERCENTAGE;
+      platformFee.times(CHARITY_PERCENTAGE);
 
     const creatorAmount =
-      numericAmount - platformFee;
+      decimalAmount.minus(platformFee);
 
     // ─────────────────────────────────────────────────────────────
     // Create tip + credit creator balance atomically. The DB's unique
@@ -357,7 +363,7 @@ export async function POST(req: NextRequest) {
     // Response
     // ─────────────────────────────────────────────────────────────
 
-    return NextResponse.json({
+    return jsonWithDecimals({
       success: true,
 
       tip,

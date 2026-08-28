@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { jsonWithDecimals } from "@/lib/serialize-decimal";
 
 // List withdrawal requests for admin review/processing. Defaults to
 // pending ones (the actionable queue); pass ?status=COMPLETED etc. to
@@ -21,5 +22,5 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  return NextResponse.json(withdrawals);
+  return jsonWithDecimals(withdrawals);
 }

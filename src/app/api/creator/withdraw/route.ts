@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { jsonWithDecimals } from "@/lib/serialize-decimal";
 
 export async function POST(req: NextRequest) {
   const limit = await rateLimit(req, { limit: 5, window: 300, type: "creator-withdraw" });
@@ -73,7 +74,7 @@ export async function POST(req: NextRequest) {
       throw err;
     }
 
-    return NextResponse.json({
+    return jsonWithDecimals({
       withdrawal,
       message: "Withdrawal request submitted. It will be processed within 24-48 hours.",
     });

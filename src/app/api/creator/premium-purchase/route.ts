@@ -3,6 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { prisma } from "@/lib/db";
 import { verifyUsdcTransaction } from "@/lib/solana";
 import { rateLimit } from "@/lib/rate-limit";
+import { jsonWithDecimals } from "@/lib/serialize-decimal";
 
 const PLATFORM_FEE = 0.10;
 const CHARITY_PERCENTAGE = 0.35;
@@ -92,7 +93,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (verification.amount + AMOUNT_EPSILON < premiumPost.price) {
+    if (verification.amount + AMOUNT_EPSILON < premiumPost.price.toNumber()) {
       return NextResponse.json(
         {
           error: `Transaction amount (${verification.amount} USDC) does not cover the required price (${premiumPost.price} USDC).`,
@@ -122,10 +123,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Calculate fees
-    const platformFee = premiumPost.price * PLATFORM_FEE;
-    const charityAmount = platformFee * CHARITY_PERCENTAGE;
-    const creatorAmount = premiumPost.price - platformFee;
+    // Calculate fees - Decimal arithmetic throughout so fee splits on a
+    // purchase price don't accumulate the binary floating-point error a
+    // plain `price * 0.1` would (e.g. 0.1 isn't exactly representable
+    // in IEEE 754, so repeated fee math on many transactions can drift
+    // a fraction of a cent off from the true value over time).
+    const platformFee = premiumPost.price.times(PLATFORM_FEE);
+    const charityAmount = platformFee.times(CHARITY_PERCENTAGE);
+    const creatorAmount = premiumPost.price.minus(platformFee);
 
     // Create the purchase record and credit the creator atomically - and
     // let the DB's unique constraint on transactionId be the final,
@@ -183,7 +188,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({
+    return jsonWithDecimals({
       purchase,
       message: "Purchase successful! You can now view the full post.",
     });

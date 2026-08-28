@@ -46,7 +46,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
   }
 
   try {
-    const signature = await sendUsdc(withdrawal.walletAddress, withdrawal.amount);
+    const signature = await sendUsdc(withdrawal.walletAddress, withdrawal.amount.toNumber());
 
     await prisma.$transaction([
       prisma.withdrawalRequest.update({
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
       action: "withdrawal.approve",
       targetType: "WithdrawalRequest",
       targetId: id,
-      metadata: { amount: withdrawal.amount, walletAddress: withdrawal.walletAddress, transactionHash: signature },
+      metadata: { amount: withdrawal.amount.toString(), walletAddress: withdrawal.walletAddress, transactionHash: signature },
     });
 
     return NextResponse.json({ success: true, transactionHash: signature });
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
       action: "withdrawal.approve_failed",
       targetType: "WithdrawalRequest",
       targetId: id,
-      metadata: { amount: withdrawal.amount, error: error instanceof Error ? error.message : String(error) },
+      metadata: { amount: withdrawal.amount.toString(), error: error instanceof Error ? error.message : String(error) },
     });
 
     return NextResponse.json(

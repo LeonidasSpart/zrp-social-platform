@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { syncJournalistBadge } from "@/lib/journalist";
+import { logAdminAction } from "@/lib/audit-log";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -143,6 +144,14 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     ]);
 
     await syncJournalistBadge(userId, newStatus);
+
+    await logAdminAction({
+      actor: adminCheck.session,
+      action: `journalist.${action}`,
+      targetType: "User",
+      targetId: userId,
+      metadata: { reason },
+    });
 
     return NextResponse.json({ success: true, profile: updatedProfile });
   } catch (error) {

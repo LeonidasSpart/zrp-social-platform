@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 // able to keep the review queue moving day to day.
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { jsonWithDecimals } from "@/lib/serialize-decimal";
 
 export async function GET(req: NextRequest) {
   const check = await requireStaff();
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
       prisma.adCampaign.count({ where }),
     ]);
 
-    return NextResponse.json({ campaigns, total, page, totalPages: Math.ceil(total / limit) });
+    return jsonWithDecimals({ campaigns, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error) {
     console.error("Error fetching ad review queue:", error);
     return NextResponse.json({ error: "Failed to fetch campaigns" }, { status: 500 });

@@ -41,12 +41,12 @@ export async function POST(req: NextRequest) {
           select: { budgetSpent: true, budgetTotal: true },
         });
         if (!fresh) return;
-        const newSpent = fresh.budgetSpent + cost;
+        const newSpent = fresh.budgetSpent.plus(cost);
         await tx.adCampaign.update({
           where: { id: campaignId },
           data: {
             budgetSpent: newSpent,
-            ...(newSpent >= fresh.budgetTotal ? { status: "COMPLETED" } : {}),
+            ...(newSpent.greaterThanOrEqualTo(fresh.budgetTotal) ? { status: "COMPLETED" } : {}),
           },
         });
       });

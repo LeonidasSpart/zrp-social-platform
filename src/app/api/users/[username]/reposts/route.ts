@@ -27,6 +27,8 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
     // Get posts this user has reposted
     const reposts = await prisma.repost.findMany({
       where: { userId: user.id },
+      // Stopgap hard cap, see users/[username]/posts/route.ts.
+      take: 100,
       include: {
         post: {
           include: {

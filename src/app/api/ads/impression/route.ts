@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     // Only CPM campaigns spend budget on impressions - CPC campaigns
     // only spend on an actual click, tracked separately below.
     if (campaign.bidType === "CPM") {
-      const cost = campaign.bidAmount / 1000;
+      const cost = campaign.bidAmount.dividedBy(1000);
       // Prisma can't compare budgetSpent + cost <= budgetTotal directly
       // in a single atomic where clause (that needs two columns compared
       // to each other), so this is a check-then-update inside a
@@ -55,12 +55,12 @@ export async function POST(req: NextRequest) {
           select: { budgetSpent: true, budgetTotal: true },
         });
         if (!fresh) return;
-        const newSpent = fresh.budgetSpent + cost;
+        const newSpent = fresh.budgetSpent.plus(cost);
         await tx.adCampaign.update({
           where: { id: campaignId },
           data: {
             budgetSpent: newSpent,
-            ...(newSpent >= fresh.budgetTotal ? { status: "COMPLETED" } : {}),
+            ...(newSpent.greaterThanOrEqualTo(fresh.budgetTotal) ? { status: "COMPLETED" } : {}),
           },
         });
       });

@@ -29,7 +29,7 @@ import https from "https";
 
 const MAX_REDIRECTS = 5;
 
-function isDisallowedIPv4(ip: string): boolean {
+export function isDisallowedIPv4(ip: string): boolean {
   const parts = ip.split(".").map(Number);
   if (parts.length !== 4 || parts.some((p) => Number.isNaN(p))) return true;
   const [a, b] = parts;
@@ -47,7 +47,7 @@ function isDisallowedIPv4(ip: string): boolean {
   return false;
 }
 
-function isDisallowedIPv6(ip: string): boolean {
+export function isDisallowedIPv6(ip: string): boolean {
   const normalized = ip.toLowerCase();
 
   if (normalized === "::1" || normalized === "::") return true; // loopback / unspecified

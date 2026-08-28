@@ -62,6 +62,8 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
         status: "published",
       },
       orderBy: { createdAt: "desc" },
+      // Stopgap hard cap, see users/[username]/posts/route.ts.
+      take: 100,
       include: {
         author: {
           select: {

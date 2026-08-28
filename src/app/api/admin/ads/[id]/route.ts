@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireStaff } from "@/lib/admin";
 import { getToken } from "next-auth/jwt";
 import { prisma } from "@/lib/db";
+import { jsonWithDecimals } from "@/lib/serialize-decimal";
+import { logAdminAction } from "@/lib/audit-log";
 
 export async function PUT(
   req: NextRequest,
@@ -64,7 +66,15 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json({ campaign: updated });
+    await logAdminAction({
+      actor: check.session,
+      action: action === "approve" ? "ad_campaign.approve" : "ad_campaign.reject",
+      targetType: "AdCampaign",
+      targetId: id,
+      metadata: { rejectionReason: rejectionReason || null },
+    });
+
+    return jsonWithDecimals({ campaign: updated });
   } catch (error) {
     console.error("Error reviewing ad campaign:", error);
 

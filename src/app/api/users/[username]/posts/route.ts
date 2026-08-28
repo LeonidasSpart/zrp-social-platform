@@ -62,6 +62,12 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
         status: "published",
       },
       orderBy: { createdAt: "desc" },
+      // ⚠️ PERFORMANCE: this endpoint had no result cap - a prolific
+      // account's full post history came back in one response. This is
+      // a stopgap hard cap, not cursor pagination (that needs a
+      // frontend change); it bounds the worst case without changing
+      // the response shape.
+      take: 100,
       include: {
         author: {
           select: {

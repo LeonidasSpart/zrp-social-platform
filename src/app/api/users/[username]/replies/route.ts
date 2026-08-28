@@ -58,6 +58,8 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
     const replies = await prisma.comment.findMany({
       where: { authorId: profileOwner.id },
       orderBy: { createdAt: "desc" },
+      // Stopgap hard cap, see users/[username]/posts/route.ts.
+      take: 100,
       include: {
         author: {
           select: {

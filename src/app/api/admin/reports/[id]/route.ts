@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireStaff } from "@/lib/admin";
+import { logAdminAction } from "@/lib/audit-log";
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -31,6 +32,14 @@ export async function PUT(
     const report = await prisma.report.update({
       where: { id },
       data,
+    });
+
+    await logAdminAction({
+      actor: adminCheck.session,
+      action: "report.update_status",
+      targetType: "Report",
+      targetId: id,
+      metadata: { status, actionType, actionNote },
     });
 
     return NextResponse.json(report);

@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { deleteUploadThingFiles } from "@/lib/uploadthing";
+import { logAdminAction } from "@/lib/audit-log";
 
 export async function DELETE(
   req: NextRequest,
@@ -29,6 +30,13 @@ export async function DELETE(
 
     await prisma.post.delete({
       where: { id: id },
+    });
+
+    await logAdminAction({
+      actor: adminCheck.session,
+      action: "post.delete",
+      targetType: "Post",
+      targetId: id,
     });
 
     await deleteUploadThingFiles([

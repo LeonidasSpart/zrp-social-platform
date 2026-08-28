@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { prisma } from "@/lib/db";
+import { jsonWithDecimals } from "@/lib/serialize-decimal";
 
 // ─── GET: full details + stats for one campaign (owner only) ────────
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -37,7 +38,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    return NextResponse.json({ campaign });
+    return jsonWithDecimals({ campaign });
   } catch (error) {
     console.error("Error fetching ad campaign:", error);
     return NextResponse.json({ error: "Failed to fetch campaign" }, { status: 500 });
@@ -90,7 +91,7 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
 
     if (budgetTotal !== undefined) {
       const numericBudget = Number(budgetTotal);
-      if (!Number.isFinite(numericBudget) || numericBudget < existing.budgetSpent) {
+      if (!Number.isFinite(numericBudget) || numericBudget < existing.budgetSpent.toNumber()) {
         return NextResponse.json(
           { error: "New budget can't be less than what's already been spent." },
           { status: 400 }
@@ -108,7 +109,7 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
       data,
     });
 
-    return NextResponse.json({ campaign });
+    return jsonWithDecimals({ campaign });
   } catch (error) {
     console.error("Error updating ad campaign:", error);
     return NextResponse.json({ error: "Failed to update campaign" }, { status: 500 });

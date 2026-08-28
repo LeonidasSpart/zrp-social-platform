@@ -64,13 +64,16 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
 
     const ctr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
 
+    const budgetSpent = campaign.budgetSpent.toNumber();
+    const budgetTotal = campaign.budgetTotal.toNumber();
+
     return NextResponse.json({
       totalImpressions,
       totalClicks,
       ctr: Math.round(ctr * 100) / 100,
-      budgetSpent: campaign.budgetSpent,
-      budgetTotal: campaign.budgetTotal,
-      budgetRemaining: Math.max(0, campaign.budgetTotal - campaign.budgetSpent),
+      budgetSpent,
+      budgetTotal,
+      budgetRemaining: Math.max(0, budgetTotal - budgetSpent),
       status: campaign.status,
       dailyImpressions,
       dailyClicks,

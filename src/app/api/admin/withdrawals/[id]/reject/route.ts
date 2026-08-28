@@ -48,7 +48,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     action: "withdrawal.reject",
     targetType: "WithdrawalRequest",
     targetId: id,
-    metadata: { amount: withdrawal.amount },
+    metadata: { amount: withdrawal.amount.toString() },
   });
 
   return NextResponse.json({ success: true });

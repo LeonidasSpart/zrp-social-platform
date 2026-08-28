@@ -704,7 +704,7 @@ model PaymentRequest {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   plan     String
-  amount   Float
+  amount   Decimal @db.Decimal(18, 6)
   currency String @default("USDC")
 
   transactionId String?
@@ -867,11 +867,11 @@ model CreatorProfile {
 
   premiumPostsEnabled Boolean @default(true)
 
-  totalTips           Float @default(0)
-  totalPremiumRevenue Float @default(0)
-  totalEarnings       Float @default(0)
-  totalWithdrawn      Float @default(0)
-  balance             Float @default(0)
+  totalTips           Decimal @default(0) @db.Decimal(18, 6)
+  totalPremiumRevenue Decimal @default(0) @db.Decimal(18, 6)
+  totalEarnings       Decimal @default(0) @db.Decimal(18, 6)
+  totalWithdrawn      Decimal @default(0) @db.Decimal(18, 6)
+  balance             Decimal @default(0) @db.Decimal(18, 6)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -893,7 +893,7 @@ model Tip {
   creatorProfileId String
   creatorProfile   CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
 
-  amount   Float
+  amount   Decimal @db.Decimal(18, 6)
   currency String @default("USDC")
 
   message String? @db.Text
@@ -902,9 +902,9 @@ model Tip {
 
   status TransactionStatus @default(PENDING)
 
-  platformFee   Float @default(0)
-  charityAmount Float @default(0)
-  creatorAmount Float @default(0)
+  platformFee   Decimal @default(0) @db.Decimal(18, 6)
+  charityAmount Decimal @default(0) @db.Decimal(18, 6)
+  creatorAmount Decimal @default(0) @db.Decimal(18, 6)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -925,13 +925,13 @@ model PremiumPost {
   creatorProfileId String
   creatorProfile   CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
 
-  price    Float  @default(1.0)
+  price    Decimal @default(1.0) @db.Decimal(18, 6)
   currency String @default("USDC")
 
   previewContent String? @db.Text
 
-  totalPurchases Int   @default(0)
-  totalRevenue   Float @default(0)
+  totalPurchases Int     @default(0)
+  totalRevenue   Decimal @default(0) @db.Decimal(18, 6)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -952,16 +952,16 @@ model PremiumPurchase {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  amount   Float
+  amount   Decimal @db.Decimal(18, 6)
   currency String @default("USDC")
 
   transactionId String? @unique
 
   status TransactionStatus @default(PENDING)
 
-  platformFee   Float @default(0)
-  charityAmount Float @default(0)
-  creatorAmount Float @default(0)
+  platformFee   Decimal @default(0) @db.Decimal(18, 6)
+  charityAmount Decimal @default(0) @db.Decimal(18, 6)
+  creatorAmount Decimal @default(0) @db.Decimal(18, 6)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -981,7 +981,7 @@ model WithdrawalRequest {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  amount   Float
+  amount   Decimal @db.Decimal(18, 6)
   currency String @default("USDC")
 
   walletAddress String
@@ -1013,10 +1013,10 @@ model AdCampaign {
   status AdCampaignStatus @default(DRAFT)
 
   bidType   AdBidType
-  bidAmount Float
+  bidAmount Decimal @db.Decimal(18, 6)
 
-  budgetTotal Float
-  budgetSpent Float @default(0)
+  budgetTotal Decimal @db.Decimal(18, 6)
+  budgetSpent Decimal @default(0) @db.Decimal(18, 6)
 
   targetUrl String?
 

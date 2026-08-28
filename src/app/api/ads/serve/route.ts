@@ -58,7 +58,13 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    const withBudget = eligible.filter((c) => c.budgetSpent < c.budgetTotal);
+    // ⚠️ Decimal instances must never be compared with plain `<`/`>` -
+    // Decimal's valueOf() returns a string, so JS falls back to
+    // lexicographic string comparison (e.g. "9.5" < "10.0" is FALSE,
+    // since '9' > '1' as characters), not numeric comparison. This
+    // silently mis-serves ads whose spend/budget happen to differ in
+    // digit count. Always use the Decimal comparison methods instead.
+    const withBudget = eligible.filter((c) => c.budgetSpent.lessThan(c.budgetTotal));
 
     if (withBudget.length === 0) {
       return NextResponse.json({ ad: null });

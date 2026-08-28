@@ -1,23 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { requireAdmin } from "@/lib/admin";
+import { logAdminAction } from "@/lib/audit-log";
 
 export async function PUT(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  // Verify admin
-  const admin = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { role: true },
-  });
-  if (admin?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const adminCheck = await requireAdmin();
+  if (!adminCheck.authorized) return adminCheck.response;
+  const session = adminCheck.session;
 
   const { action } = await req.json(); // "approve" or "deny"
   const requestId = params.id;
@@ -57,6 +47,14 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
 
     // ─── Optionally send notification to user ──────────────────────
 
+    await logAdminAction({
+      actor: session,
+      action: "upgrade_request.approve",
+      targetType: "UpgradeRequest",
+      targetId: requestId,
+      metadata: { userId: request.userId, plan: request.requestedPlan },
+    });
+
     return NextResponse.json({ success: true, message: "Plan upgraded." });
   } else if (action === "deny") {
     await prisma.upgradeRequest.update({
@@ -66,6 +64,14 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
         approvedBy: session.user.id,
         approvedAt: new Date(),
       },
+    });
+
+    await logAdminAction({
+      actor: session,
+      action: "upgrade_request.deny",
+      targetType: "UpgradeRequest",
+      targetId: requestId,
+      metadata: { userId: request.userId, plan: request.requestedPlan },
     });
 
     return NextResponse.json({ success: true, message: "Request denied." });
