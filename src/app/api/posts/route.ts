@@ -323,6 +323,28 @@ export async function GET(req: NextRequest) {
             },
           },
 
+          // Include the original post so quote posts render with
+          // the source content attached instead of appearing standalone.
+          quotePost: {
+            select: {
+              id: true,
+              content: true,
+              imageUrl: true,
+              imageUrls: true,
+              mediaType: true,
+              createdAt: true,
+              author: {
+                select: {
+                  id: true,
+                  username: true,
+                  name: true,
+                  avatarUrl: true,
+                  badgeType: true,
+                },
+              },
+            },
+          },
+
           poll: {
             include: {
               votes_user: {
