@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/db';
 import { authOptions } from '@/lib/auth';
+import { isSessionAdmin } from '@/lib/admin';
 
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
     }
 
     // Security: ensure user owns the ticket or is admin
-    if (ticket.userId !== session.user.id && session.user.role !== 'ADMIN') {
+    if (ticket.userId !== session.user.id && !(await isSessionAdmin(session))) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -61,7 +62,7 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
     }
 
-    const isAdmin = session.user.role === 'ADMIN';
+    const isAdmin = await isSessionAdmin(session);
     const isOwner = ticket.userId === session.user.id;
 
     // Only owner or admin can delete

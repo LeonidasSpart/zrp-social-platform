@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { logAdminAction } from "@/lib/audit-log";
 
 // Rejects a pending withdrawal and releases the reserved funds back to
 // the creator's available balance.
@@ -40,6 +41,14 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
   await prisma.creatorProfile.update({
     where: { id: withdrawal.creatorProfileId },
     data: { balance: { increment: withdrawal.amount } },
+  });
+
+  await logAdminAction({
+    actor: adminCheck.session,
+    action: "withdrawal.reject",
+    targetType: "WithdrawalRequest",
+    targetId: id,
+    metadata: { amount: withdrawal.amount },
   });
 
   return NextResponse.json({ success: true });

@@ -39,6 +39,28 @@ export async function requireAdmin(): Promise<AdminCheckResult> {
   return { authorized: false, response: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
 }
 
+/**
+ * Non-throwing admin check for routes that mix "owner OR admin" logic
+ * (e.g. support tickets) rather than gating the whole route on admin
+ * access. Applies the same role/isAdmin/DB-fallback checks as
+ * requireAdmin(), so a route using this can't silently disagree with
+ * the rest of the app about who counts as an admin - e.g. a session
+ * whose JWT hasn't refreshed yet after a role change.
+ */
+export async function isSessionAdmin(session: Session | null | undefined): Promise<boolean> {
+  if (!session?.user) return false;
+
+  if (session.user.role === "ADMIN") return true;
+  if (session.user.isAdmin) return true;
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+
+  return user?.role === "ADMIN";
+}
+
 export async function requireStaff(): Promise<AdminCheckResult> {
   const session = await getServerSession(authOptions);
   if (!session?.user) {

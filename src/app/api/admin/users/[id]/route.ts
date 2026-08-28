@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { Role } from "@prisma/client";
 import { deleteUploadThingFiles } from "@/lib/uploadthing";
+import { logAdminAction } from "@/lib/audit-log";
 
 const VALID_BADGE_TYPES = ["verified", "organization", "government", "team", "journalist", null];
 // JOURNALIST is deliberately NOT settable here. It's only ever granted
@@ -56,6 +57,14 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
       },
     });
 
+    await logAdminAction({
+      actor: adminCheck.session,
+      action: "user.update_permissions",
+      targetType: "User",
+      targetId: params.id,
+      metadata: data,
+    });
+
     return NextResponse.json(updated);
   } catch (error) {
     console.error("Update user error:", error);
@@ -97,6 +106,13 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
 
     await prisma.user.delete({
       where: { id: params.id },
+    });
+
+    await logAdminAction({
+      actor: adminCheck.session,
+      action: "user.delete",
+      targetType: "User",
+      targetId: params.id,
     });
 
     await deleteUploadThingFiles([

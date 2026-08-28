@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { io } from "@/lib/socket-server"; // ✅ import the socket server instance
 
 // ─── POST – Block a user ────────────────────────────────────────────
 export async function POST(req: NextRequest, props: { params: Promise<{ username: string }> }) {
@@ -47,8 +46,6 @@ export async function POST(req: NextRequest, props: { params: Promise<{ username
           },
         },
       });
-      // ✅ Emit socket event for real‑time update
-      io?.emit("block-updated", { blockerId, blockedId: userToBlock.id });
       return NextResponse.json({ blocked: false });
     } else {
       // Block
@@ -58,7 +55,6 @@ export async function POST(req: NextRequest, props: { params: Promise<{ username
           blockedId: userToBlock.id,
         },
       });
-      io?.emit("block-updated", { blockerId, blockedId: userToBlock.id });
       return NextResponse.json({ blocked: true });
     }
   } catch (error) {
@@ -109,7 +105,6 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ userna
       },
     });
 
-    io?.emit("block-updated", { blockerId, blockedId: userToUnblock.id });
     return NextResponse.json({ blocked: false });
   } catch (error) {
     console.error("Unblock error:", error);

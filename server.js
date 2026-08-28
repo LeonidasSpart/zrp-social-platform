@@ -64,7 +64,42 @@ app.prepare().then(() => {
       methods: ["GET", "POST"],
       credentials: true,
     },
+    // Messages/signals here are small text/JSON payloads, never file
+    // transfers (those go through UploadThing) - capping this well
+    // below the 1MB default limits how much a single frame can be used
+    // to bloat memory/bandwidth.
+    maxHttpBufferSize: 64 * 1024,
   });
+
+  // ─── Per-user connection cap ──────────────────────────────────────
+  // Without this, one account could open unbounded sockets (a script,
+  // a buggy client stuck in a reconnect loop) and hold that many
+  // concurrent connections indefinitely.
+  const MAX_CONNECTIONS_PER_USER = 8;
+  const connectionCounts = new Map(); // userId -> count
+
+  // ─── Simple in-memory sliding-window limiter for the most abuse-
+  // prone events (message send, call signaling) ─────────────────────
+  const eventBuckets = new Map(); // `${userId}:${event}` -> { count, resetAt }
+  function checkEventRateLimit(userId, event, limit, windowMs) {
+    const key = `${userId}:${event}`;
+    const now = Date.now();
+    let bucket = eventBuckets.get(key);
+    if (!bucket || bucket.resetAt <= now) {
+      bucket = { count: 0, resetAt: now + windowMs };
+      eventBuckets.set(key, bucket);
+    }
+    bucket.count += 1;
+    return bucket.count <= limit;
+  }
+  // Periodic sweep so eventBuckets/connectionCounts can't grow
+  // unbounded from users who connect once and never come back.
+  setInterval(() => {
+    const now = Date.now();
+    eventBuckets.forEach((bucket, key) => {
+      if (bucket.resetAt <= now) eventBuckets.delete(key);
+    });
+  }, 5 * 60 * 1000).unref();
 
   // ─── Handshake authentication ────────────────────────────────────
   // Previously every event handler below trusted whatever userId /
@@ -132,7 +167,13 @@ app.prepare().then(() => {
         return next(new Error("Account banned"));
       }
 
-      socket.data.userId = String(token.id);
+      const userId = String(token.id);
+      const currentCount = connectionCounts.get(userId) || 0;
+      if (currentCount >= MAX_CONNECTIONS_PER_USER) {
+        return next(new Error("Too many active connections"));
+      }
+
+      socket.data.userId = userId;
       next();
     } catch (err) {
       console.error("Socket auth error:", err);
@@ -142,6 +183,7 @@ app.prepare().then(() => {
 
   io.on("connection", (socket) => {
     const userId = socket.data.userId;
+    connectionCounts.set(userId, (connectionCounts.get(userId) || 0) + 1);
     console.log(`🔌 Socket connected: ${socket.id} (user ${userId})`);
 
     // ─── Join own room automatically ───────────────────────────────
@@ -172,6 +214,7 @@ app.prepare().then(() => {
     // to come from anyone but themselves.
     socket.on("send-message", async ({ receiverId, content, messageId }) => {
       if (!receiverId || typeof receiverId !== "string") return;
+      if (!checkEventRateLimit(userId, "send-message", 30, 10_000)) return;
 
       const message = {
         id: messageId,
@@ -237,6 +280,7 @@ app.prepare().then(() => {
     // longer place a call that appears to originate from another user.
     socket.on("call-user", ({ receiverId, signal, callerName, isVideo }) => {
       if (!receiverId || typeof receiverId !== "string") return;
+      if (!checkEventRateLimit(userId, "call-user", 10, 30_000)) return;
       console.log(`📞 call-user from ${userId} to ${receiverId}`);
       io.to(receiverId).emit("incoming-call", {
         callerId: userId,
@@ -266,8 +310,14 @@ app.prepare().then(() => {
 
     // ─── Disconnect ──────────────────────────────────────────────
     socket.on("disconnect", () => {
-      userStatus.delete(userId);
-      socket.broadcast.emit("user-status", { userId, status: "offline" });
+      const remaining = (connectionCounts.get(userId) || 1) - 1;
+      if (remaining <= 0) {
+        connectionCounts.delete(userId);
+        userStatus.delete(userId);
+        socket.broadcast.emit("user-status", { userId, status: "offline" });
+      } else {
+        connectionCounts.set(userId, remaining);
+      }
       console.log(`🔌 User ${userId} disconnected (socket ${socket.id})`);
     });
   });

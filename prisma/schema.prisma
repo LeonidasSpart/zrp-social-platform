@@ -1253,3 +1253,29 @@ model NewsArticle {
   @@index([category, publishedAt])
   @@index([reviewedById])
 }
+
+// ─── Admin Audit Log ────────────────────────────────────────────────
+// Immutable record of sensitive administrator actions (moderation,
+// role changes, payment/withdrawal decisions, account security
+// events). Deliberately has no relation/FK to User: an audit trail
+// must survive the actor or target account being deleted later, so it
+// is never cascade-deleted along with them.
+model AuditLog {
+  id String @id @default(cuid())
+
+  actorId       String
+  actorUsername String?
+
+  action     String // e.g. "user.ban", "user.role_change", "withdrawal.approve"
+  targetType String? // e.g. "User", "WithdrawalRequest"
+  targetId   String?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([actorId])
+  @@index([targetType, targetId])
+  @@index([action])
+  @@index([createdAt])
+}

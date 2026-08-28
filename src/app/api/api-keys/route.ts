@@ -11,6 +11,11 @@ function generateApiKey(): { plain: string; hash: string } {
   return { plain, hash };
 }
 
+// Unbounded key issuance was an open door to silently accumulating
+// long-lived credentials - cap how many a single account can hold at
+// once (revoked keys don't count against this).
+const MAX_ACTIVE_KEYS_PER_USER = 10;
+
 // ─── GET: List all API keys for the user ──────────────────────────
 export async function GET(req: NextRequest) {
   try {
@@ -83,6 +88,16 @@ export async function POST(req: NextRequest) {
     if (!name || typeof name !== "string" || name.trim().length === 0) {
       return NextResponse.json(
         { error: "Name is required." },
+        { status: 400 }
+      );
+    }
+
+    const activeKeyCount = await prisma.apiKey.count({
+      where: { userId, revoked: false },
+    });
+    if (activeKeyCount >= MAX_ACTIVE_KEYS_PER_USER) {
+      return NextResponse.json(
+        { error: `You can have at most ${MAX_ACTIVE_KEYS_PER_USER} active API keys. Revoke one before creating another.` },
         { status: 400 }
       );
     }

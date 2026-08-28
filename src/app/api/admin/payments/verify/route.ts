@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { logAdminAction } from "@/lib/audit-log";
 
 export async function POST(req: NextRequest) {
   const adminCheck = await requireAdmin();
@@ -30,6 +31,14 @@ export async function POST(req: NextRequest) {
   await prisma.paymentRequest.update({
     where: { id: paymentId },
     data: { status: "verified" },
+  });
+
+  await logAdminAction({
+    actor: adminCheck.session,
+    action: "payment.verify",
+    targetType: "PaymentRequest",
+    targetId: paymentId,
+    metadata: { userId: payment.userId, plan: payment.plan },
   });
 
   return NextResponse.json({ success: true, message: `User upgraded to ${payment.plan}` });

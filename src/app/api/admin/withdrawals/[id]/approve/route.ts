@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { sendUsdc } from "@/lib/solana";
+import { logAdminAction } from "@/lib/audit-log";
 
 // Finalizes a withdrawal: executes the on-chain USDC transfer, records
 // the transaction hash, and marks the request COMPLETED. The funds
@@ -62,6 +63,14 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
       }),
     ]);
 
+    await logAdminAction({
+      actor: adminCheck.session,
+      action: "withdrawal.approve",
+      targetType: "WithdrawalRequest",
+      targetId: id,
+      metadata: { amount: withdrawal.amount, walletAddress: withdrawal.walletAddress, transactionHash: signature },
+    });
+
     return NextResponse.json({ success: true, transactionHash: signature });
   } catch (error) {
     console.error("Withdrawal transfer failed:", error);
@@ -79,6 +88,14 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
         data: { balance: { increment: withdrawal.amount } },
       }),
     ]);
+
+    await logAdminAction({
+      actor: adminCheck.session,
+      action: "withdrawal.approve_failed",
+      targetType: "WithdrawalRequest",
+      targetId: id,
+      metadata: { amount: withdrawal.amount, error: error instanceof Error ? error.message : String(error) },
+    });
 
     return NextResponse.json(
       { error: "Transfer failed. The withdrawal amount has been returned to the creator's balance." },

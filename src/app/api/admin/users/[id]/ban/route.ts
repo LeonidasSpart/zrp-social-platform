@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 // stay on requireAdmin.
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { logAdminAction } from "@/lib/audit-log";
 
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -24,6 +25,13 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     const updated = await prisma.user.update({
       where: { id: userId },
       data: { banned: !user.banned },
+    });
+
+    await logAdminAction({
+      actor: adminCheck.session,
+      action: updated.banned ? "user.ban" : "user.unban",
+      targetType: "User",
+      targetId: userId,
     });
 
     return NextResponse.json({ banned: updated.banned });

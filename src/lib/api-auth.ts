@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "./db";
 import crypto from "crypto";
+import { checkRateLimitKey } from "./rate-limit";
+
+// Per-key limit, independent of the per-IP limits elsewhere - a single
+// leaked or scripted-too-aggressively key shouldn't be able to hammer
+// the API indefinitely just because its calls come from many IPs.
+const API_KEY_RATE_LIMIT = 120;
+const API_KEY_RATE_WINDOW_SECONDS = 60;
 
 export async function validateApiKey(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
@@ -37,6 +44,15 @@ export async function validateApiKey(req: NextRequest) {
 
   if (!apiKey) {
     return { error: "Invalid or expired API key", status: 401 };
+  }
+
+  const limit = await checkRateLimitKey(
+    `api-key:${apiKey.id}`,
+    API_KEY_RATE_LIMIT,
+    API_KEY_RATE_WINDOW_SECONDS
+  );
+  if (!limit.success) {
+    return { error: "Too many requests for this API key. Please slow down.", status: 429 };
   }
 
   // Update lastUsed timestamp

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/db';
 import { authOptions } from '@/lib/auth';
 import { notifyTicketReply } from '@/lib/notifications';
+import { isSessionAdmin } from '@/lib/admin';
 
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -11,6 +12,8 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const isAdminReply = await isSessionAdmin(session);
 
     const { message } = await req.json();
     if (!message?.trim()) {
@@ -36,13 +39,13 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     }
 
     // Only ticket owner or admin can reply
-    if (ticket.userId !== session.user.id && session.user.role !== 'ADMIN') {
+    if (ticket.userId !== session.user.id && !isAdminReply) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // Don't allow replies to closed/resolved tickets (unless admin)
     if (ticket.status === 'CLOSED' || ticket.status === 'RESOLVED') {
-      if (session.user.role !== 'ADMIN') {
+      if (!isAdminReply) {
         return NextResponse.json(
           { error: 'This ticket is closed and cannot be replied to' },
           { status: 400 }
@@ -55,7 +58,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
         ticketId: params.id,
         userId: session.user.id,
         message: message.trim(),
-        isInternal: session.user.role === 'ADMIN' ? false : false, // users can't send internal notes
+        isInternal: false, // users can't send internal notes
       },
       include: {
         user: { select: { username: true, avatarUrl: true, role: true } },
@@ -64,15 +67,13 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 
     // If ticket was OPEN and user replies, update to AWAITING_REPLY (admin needs to respond)
     // If admin replies, update to IN_PROGRESS
-    const newStatus = session.user.role === 'ADMIN' ? 'IN_PROGRESS' : 'AWAITING_REPLY';
+    const newStatus = isAdminReply ? 'IN_PROGRESS' : 'AWAITING_REPLY';
     await prisma.supportTicket.update({
       where: { id: params.id },
       data: { status: newStatus },
     });
 
     // ─── 🆕 Notify the other party ──────────────────────────────────
-    const isAdminReply = session.user.role === 'ADMIN';
-    
     // If admin replies → notify the ticket owner (user)
     // If user replies → notify the assigned admin (or fallback to first admin)
     let recipientId: string | null = null;
