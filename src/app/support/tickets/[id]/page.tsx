@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useLanguage } from '@/contexts/LanguageContext';
+import type { TranslationKey } from '@/lib/translations';
 
 interface Reply {
   id: string;
@@ -39,10 +41,45 @@ export default function TicketDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const { data: session, status } = useSession();
+  const { t } = useLanguage();
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState(true);
   const [replyMessage, setReplyMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const statusLabels: Record<string, string> = {
+    OPEN: t('support.tickets.statusOpen'),
+    IN_PROGRESS: t('support.tickets.statusInProgress'),
+    AWAITING_REPLY: t('support.tickets.statusAwaitingReply'),
+    RESOLVED: t('support.tickets.statusResolved'),
+    CLOSED: t('support.tickets.statusClosed'),
+  };
+
+  const priorityLabels: Record<string, string> = {
+    LOW: t('support.ticketDetail.priorityLow'),
+    NORMAL: t('support.ticketDetail.priorityNormal'),
+    HIGH: t('support.ticketDetail.priorityHigh'),
+    URGENT: t('support.ticketDetail.priorityUrgent'),
+  };
+
+  const categoryLabelKeys: Record<string, TranslationKey> = {
+    GENERAL: 'support.categoryGeneral',
+    ACCOUNT: 'support.categoryAccount',
+    PRIVACY: 'support.categoryPrivacy',
+    CONTENT: 'support.categoryContent',
+    MODERATION: 'support.categoryModeration',
+    PAYMENT: 'support.categoryPayment',
+    MONETISATION: 'support.categoryMonetisation',
+    BUG: 'support.categoryBug',
+    FEATURE_REQUEST: 'support.categoryFeatureRequest',
+    SECURITY: 'support.categorySecurity',
+    OTHER: 'support.categoryOther',
+  };
+
+  const categoryLabel = (category: string) => {
+    const key = categoryLabelKeys[category.toUpperCase()];
+    return key ? t(key) : category;
+  };
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -79,7 +116,7 @@ export default function TicketDetailPage() {
         fetchTicket();
       } else {
         const data = await res.json();
-        alert(data.error || 'Failed to send reply');
+        alert(data.error || t('support.ticketDetail.errReplyFailed'));
       }
     } catch (error) {
       console.error('Error sending reply', error);
@@ -88,8 +125,8 @@ export default function TicketDetailPage() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center">Loading...</div>;
-  if (!ticket) return <div className="p-8 text-center">Ticket not found</div>;
+  if (loading) return <div className="p-8 text-center">{t('support.loading')}</div>;
+  if (!ticket) return <div className="p-8 text-center">{t('support.ticketDetail.notFound')}</div>;
 
   // ✅ fix: use ticket.userId (the direct foreign key) instead of ticket.user?.id
   const isOwner = session?.user?.id === ticket.userId;
@@ -99,7 +136,7 @@ export default function TicketDetailPage() {
       <div className="max-w-4xl mx-auto">
         {/* Back link */}
         <Link href="/support/tickets" className="text-zrp-red hover:underline mb-4 inline-block">
-          ← Back to my tickets
+          ← {t('support.ticketDetail.backToTickets')}
         </Link>
 
         {/* Ticket header */}
@@ -109,10 +146,10 @@ export default function TicketDetailPage() {
               {ticket.subject}
             </h1>
             <div className="flex flex-wrap gap-3 mt-2 text-sm text-zrp-charcoal/60 dark:text-white/60">
-              <span>Status: <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${statusColors[ticket.status]}`}>{ticket.status}</span></span>
-              <span>Priority: {ticket.priority}</span>
-              <span>Category: {ticket.category}</span>
-              <span>Created: {new Date(ticket.createdAt).toLocaleString()}</span>
+              <span>{t('support.ticketDetail.statusLabel')} <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${statusColors[ticket.status]}`}>{statusLabels[ticket.status] || ticket.status}</span></span>
+              <span>{t('support.ticketDetail.priorityLabel')} {priorityLabels[ticket.priority] || ticket.priority}</span>
+              <span>{t('support.ticketDetail.categoryLabel')} {categoryLabel(ticket.category)}</span>
+              <span>{t('support.ticketDetail.createdLabel')} {new Date(ticket.createdAt).toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -141,8 +178,8 @@ export default function TicketDetailPage() {
                   {reply.user.username[0].toUpperCase()}
                 </div>
                 <span className="font-medium">{reply.user.username}</span>
-                {reply.user.role === 'ADMIN' && <span className="text-xs text-zrp-red font-medium">(Support)</span>}
-                {reply.isInternal && <span className="text-xs bg-yellow-200 dark:bg-yellow-800 px-2 py-0.5 rounded">Internal Note</span>}
+                {reply.user.role === 'ADMIN' && <span className="text-xs text-zrp-red font-medium">({t('support.ticketDetail.supportBadge')})</span>}
+                {reply.isInternal && <span className="text-xs bg-yellow-200 dark:bg-yellow-800 px-2 py-0.5 rounded">{t('support.ticketDetail.internalNote')}</span>}
                 <span className="text-xs text-zrp-charcoal/50 dark:text-white/50">{new Date(reply.createdAt).toLocaleString()}</span>
               </div>
               <p className="text-zrp-charcoal/80 dark:text-white/80 whitespace-pre-wrap">{reply.message}</p>
@@ -156,7 +193,7 @@ export default function TicketDetailPage() {
             <textarea
               value={replyMessage}
               onChange={(e) => setReplyMessage(e.target.value)}
-              placeholder="Type your reply..."
+              placeholder={t('support.ticketDetail.replyPlaceholder')}
               className="w-full p-3 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal bg-white dark:bg-zrp-charcoal/50 text-zrp-charcoal dark:text-white resize-none min-h-[100px]"
             />
             <div className="flex justify-end mt-3">
@@ -165,7 +202,7 @@ export default function TicketDetailPage() {
                 disabled={!replyMessage.trim() || submitting}
                 className="px-6 py-2 bg-zrp-red text-white rounded-lg hover:bg-zrp-darkRed transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {submitting ? 'Sending...' : 'Send Reply'}
+                {submitting ? t('support.ticketDetail.sending') : t('support.ticketDetail.sendReply')}
               </button>
             </div>
           </div>
@@ -173,12 +210,12 @@ export default function TicketDetailPage() {
 
         {ticket.status === 'RESOLVED' && (
           <div className="text-center text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
-            ✅ This ticket has been resolved. If you still need help, you can create a new ticket.
+            ✅ {t('support.ticketDetail.resolvedNotice')}
           </div>
         )}
         {ticket.status === 'CLOSED' && (
           <div className="text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
-            🔒 This ticket is closed and can no longer be replied to.
+            🔒 {t('support.ticketDetail.closedNotice')}
           </div>
         )}
       </div>
