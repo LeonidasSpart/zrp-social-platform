@@ -3,8 +3,10 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function VerifyEmailPage() {
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
@@ -13,7 +15,7 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     if (!token) {
       setStatus("error");
-      setMessage("No verification token provided.");
+      setMessage(t("verifyEmail.noToken"));
       return;
     }
 
@@ -25,14 +27,14 @@ export default function VerifyEmailPage() {
           setMessage(data.error);
         } else {
           setStatus("success");
-          setMessage("Email verified! You can now log in.");
+          setMessage(t("verifyEmail.successMessage"));
         }
       })
       .catch(() => {
         setStatus("error");
-        setMessage("Failed to verify email. Please try again.");
+        setMessage(t("verifyEmail.failedMessage"));
       });
-  }, [token]);
+  }, [token, t]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zrp-deepBlack px-4">
@@ -40,7 +42,7 @@ export default function VerifyEmailPage() {
         {status === "loading" && (
           <>
             <div className="w-12 h-12 border-4 border-zrp-red border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">Verifying your email...</p>
+            <p className="text-gray-600 dark:text-gray-400">{t("verifyEmail.verifying")}</p>
           </>
         )}
         {status === "success" && (
@@ -50,10 +52,10 @@ export default function VerifyEmailPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Email Verified</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("verifyEmail.verifiedTitle")}</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">{message}</p>
             <Link href="/login" className="mt-4 inline-block bg-zrp-red text-white px-6 py-2 rounded-lg hover:bg-zrp-darkRed transition">
-              Log in
+              {t("verifyEmail.logIn")}
             </Link>
           </>
         )}
@@ -64,10 +66,10 @@ export default function VerifyEmailPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Verification Failed</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("verifyEmail.failedTitle")}</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">{message}</p>
             <Link href="/login" className="mt-4 inline-block bg-zrp-red text-white px-6 py-2 rounded-lg hover:bg-zrp-darkRed transition">
-              Go to login
+              {t("verifyEmail.goToLogin")}
             </Link>
           </>
         )}

@@ -4,9 +4,11 @@ import { useState, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ResetPasswordPage(props: { params: Promise<{ token: string }> }) {
   const params = use(props.params);
+  const { t } = useLanguage();
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -19,13 +21,13 @@ export default function ResetPasswordPage(props: { params: Promise<{ token: stri
     setMessage(null);
 
     if (password !== confirmPassword) {
-      setMessage({ type: "error", text: "Passwords do not match" });
+      setMessage({ type: "error", text: t("resetPassword.errPasswordMismatch") });
       setLoading(false);
       return;
     }
 
     if (password.length < 6) {
-      setMessage({ type: "error", text: "Password must be at least 6 characters" });
+      setMessage({ type: "error", text: t("resetPassword.errPasswordTooShort") });
       setLoading(false);
       return;
     }
@@ -40,13 +42,13 @@ export default function ResetPasswordPage(props: { params: Promise<{ token: stri
       const data = await res.json();
 
       if (res.ok) {
-        setMessage({ type: "success", text: "Password reset successfully!" });
+        setMessage({ type: "success", text: t("resetPassword.successMessage") });
         setTimeout(() => router.push("/login"), 2000);
       } else {
-        setMessage({ type: "error", text: data.error || "Something went wrong" });
+        setMessage({ type: "error", text: data.error || t("resetPassword.errGeneric") });
       }
     } catch (error) {
-      setMessage({ type: "error", text: "Something went wrong. Please try again." });
+      setMessage({ type: "error", text: t("auth.errTryAgain") });
     } finally {
       setLoading(false);
     }
@@ -67,10 +69,10 @@ export default function ResetPasswordPage(props: { params: Promise<{ token: stri
             />
           </Link>
           <h1 className="text-4xl sm:text-5xl font-orbitron font-bold text-gray-900 dark:text-white leading-[1.05]">
-            ZRP Social
+            {t("auth.welcomeTitle")}
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-3 text-base sm:text-lg">
-            Create new password
+            {t("resetPassword.subtitle")}
           </p>
         </div>
 
@@ -87,7 +89,7 @@ export default function ResetPasswordPage(props: { params: Promise<{ token: stri
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              New Password
+              {t("resetPassword.newPassword")}
             </label>
             <input
               type="password"
@@ -98,12 +100,12 @@ export default function ResetPasswordPage(props: { params: Promise<{ token: stri
               required
               minLength={6}
             />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Must be at least 6 characters</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t("auth.passwordMinLength")}</p>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Confirm Password
+              {t("resetPassword.confirmPassword")}
             </label>
             <input
               type="password"
@@ -120,14 +122,14 @@ export default function ResetPasswordPage(props: { params: Promise<{ token: stri
             disabled={loading}
             className="w-full bg-zrp-red hover:bg-zrp-darkRed text-white py-3.5 sm:py-3 rounded-full font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm text-base"
           >
-            {loading ? "Resetting..." : "Reset Password"}
+            {loading ? t("resetPassword.resetting") : t("resetPassword.resetButton")}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
-          Remember your password?{" "}
+          {t("forgotPassword.rememberPassword")}{" "}
           <Link href="/login" className="text-zrp-red dark:text-zrp-red hover:underline font-medium">
-            Sign in
+            {t("auth.signIn")}
           </Link>
         </p>
       </div>

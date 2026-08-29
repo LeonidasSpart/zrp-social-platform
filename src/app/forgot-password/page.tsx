@@ -3,8 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ForgotPasswordPage() {
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -24,10 +26,10 @@ export default function ForgotPasswordPage() {
       const data = await res.json();
       setMessage({
         type: "success",
-        text: data.message || "Check your email for reset instructions",
+        text: data.message || t("forgotPassword.successDefault"),
       });
     } catch (error) {
-      setMessage({ type: "error", text: "Something went wrong. Please try again." });
+      setMessage({ type: "error", text: t("auth.errTryAgain") });
     } finally {
       setLoading(false);
     }
@@ -48,10 +50,10 @@ export default function ForgotPasswordPage() {
             />
           </Link>
           <h1 className="text-4xl sm:text-5xl font-orbitron font-bold text-gray-900 dark:text-white leading-[1.05]">
-            ZRP Social
+            {t("auth.welcomeTitle")}
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-3 text-base sm:text-lg">
-            Reset your password
+            {t("forgotPassword.subtitle")}
           </p>
         </div>
 
@@ -68,7 +70,7 @@ export default function ForgotPasswordPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Email Address
+              {t("forgotPassword.emailAddress")}
             </label>
             <input
               type="email"
@@ -85,14 +87,14 @@ export default function ForgotPasswordPage() {
             disabled={loading}
             className="w-full bg-zrp-red hover:bg-zrp-darkRed text-white py-3.5 sm:py-3 rounded-full font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm text-base"
           >
-            {loading ? "Sending..." : "Send Reset Link"}
+            {loading ? t("forgotPassword.sending") : t("forgotPassword.sendResetLink")}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
-          Remember your password?{" "}
+          {t("forgotPassword.rememberPassword")}{" "}
           <Link href="/login" className="text-zrp-red dark:text-zrp-red hover:underline font-medium">
-            Sign in
+            {t("auth.signIn")}
           </Link>
         </p>
       </div>
