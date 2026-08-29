@@ -1,40 +1,18 @@
-// app/charity/page.tsx
-import type { Metadata } from 'next';
-import Link from 'next/link';
+"use client";
 
-export const metadata: Metadata = {
-  title: 'Charity – ZRP Social',
-  description: 'ZRP Social donates 35% of profits to orphans, schools, hospitals, and climate relief. Quarterly transparency reports coming soon.',
-};
-
-const CAUSES = [
-  {
-    title: 'Orphans & Vulnerable Children',
-    description: 'Supporting orphanages, foster care programs, and educational scholarships for children without parents.',
-    icon: '👶',
-    percentage: 35,
-  },
-  {
-    title: 'Schools & Education',
-    description: 'Building classrooms, providing learning materials, and funding teacher training in underserved communities.',
-    icon: '📚',
-    percentage: 25,
-  },
-  {
-    title: 'Hospitals & Healthcare',
-    description: 'Equipping clinics, funding medical supplies, and supporting maternal and child health initiatives.',
-    icon: '🏥',
-    percentage: 20,
-  },
-  {
-    title: 'Climate Relief',
-    description: 'Reforestation projects, renewable energy adoption, and disaster response for climate-affected regions.',
-    icon: '🌍',
-    percentage: 20,
-  },
-];
+import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function CharityPage() {
+  const { t } = useLanguage();
+
+  const CAUSES = [
+    { title: t("charity.cause1Title"), description: t("charity.cause1Desc"), icon: "👶", percentage: 35 },
+    { title: t("charity.cause2Title"), description: t("charity.cause2Desc"), icon: "📚", percentage: 25 },
+    { title: t("charity.cause3Title"), description: t("charity.cause3Desc"), icon: "🏥", percentage: 20 },
+    { title: t("charity.cause4Title"), description: t("charity.cause4Desc"), icon: "🌍", percentage: 20 },
+  ];
+
   return (
     <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter">
       {/* Header removed – no navigation menu */}
@@ -45,17 +23,15 @@ export default function CharityPage() {
         <section className="relative bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack py-20 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl font-extrabold font-orbitron text-white leading-tight">
-              Giving Back, <br />
-              <span className="text-white/90">35% of Our Profits</span>
+              {t("charity.heroTitle1")} <br />
+              <span className="text-white/90">{t("charity.heroTitle2")}</span>
             </h1>
             <p className="mt-6 text-xl text-white/90 max-w-2xl mx-auto font-inter">
-              At ZRP Social, we believe social media should have a social impact.
-              That's why <strong className="text-white">35% of our platform profits</strong> are dedicated to
-              charities supporting orphans, schools, hospitals, and climate relief.
+              {t("charity.heroSubtitleP1")} <strong className="text-white">{t("charity.heroSubtitleBold")}</strong> {t("charity.heroSubtitleP2")}
             </p>
             <p className="mt-4 text-lg text-white/80 max-w-2xl mx-auto">
               <span className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
-                📅 Quarterly transparency reports
+                {t("charity.quarterlyBadge")}
               </span>
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
@@ -63,13 +39,13 @@ export default function CharityPage() {
                 href="#how-it-works"
                 className="px-6 py-3 bg-white text-zrp-darkRed font-semibold rounded-full shadow-lg hover:bg-gray-200 transition font-inter"
               >
-                Learn How It Works
+                {t("charity.learnHowItWorks")}
               </Link>
               <Link
                 href="#transparency"
                 className="px-6 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-full shadow-lg hover:bg-white/10 transition font-inter"
               >
-                See Transparency
+                {t("charity.seeTransparency")}
               </Link>
             </div>
           </div>
@@ -78,33 +54,30 @@ export default function CharityPage() {
         {/* How It Works */}
         <section id="how-it-works" className="py-16 px-4 max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-zrp-charcoal dark:text-white font-orbitron mb-12">
-            How ZRP Gives to Charity
+            {t("charity.howItWorksHeading")}
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center p-6 bg-zrp-silver/20 dark:bg-zrp-charcoal/50 rounded-xl shadow-sm border border-zrp-silver/30 dark:border-zrp-charcoal">
               <div className="text-4xl mb-4">💰</div>
-              <h3 className="text-xl font-semibold text-zrp-charcoal dark:text-white font-orbitron">1. Platform Profits</h3>
+              <h3 className="text-xl font-semibold text-zrp-charcoal dark:text-white font-orbitron">{t("charity.step1Title")}</h3>
               <p className="mt-2 text-zrp-charcoal/80 dark:text-white/70 font-inter">
-                Revenue comes from premium subscriptions, tips, and business plans.
-                After operational costs, <strong className="text-zrp-red">35% of net profits</strong> are set aside for charity.
+                {t("charity.step1Desc")} <strong className="text-zrp-red">{t("charity.step1Bold")}</strong> {t("charity.step1DescEnd")}
               </p>
             </div>
             <div className="text-center p-6 bg-zrp-silver/20 dark:bg-zrp-charcoal/50 rounded-xl shadow-sm border border-zrp-silver/30 dark:border-zrp-charcoal">
               <div className="text-4xl mb-4">⚖️</div>
-              <h3 className="text-xl font-semibold text-zrp-charcoal dark:text-white font-orbitron">2. Transparent Allocation</h3>
+              <h3 className="text-xl font-semibold text-zrp-charcoal dark:text-white font-orbitron">{t("charity.step2Title")}</h3>
               <p className="mt-2 text-zrp-charcoal/80 dark:text-white/70 font-inter">
-                Funds are split across our four pillars: orphans, education,
-                healthcare, and climate. We publish detailed reports <strong className="text-zrp-red">every three months</strong>.
+                {t("charity.step2Desc")} <strong className="text-zrp-red">{t("charity.step2Bold")}</strong>.
               </p>
             </div>
             <div className="text-center p-6 bg-zrp-silver/20 dark:bg-zrp-charcoal/50 rounded-xl shadow-sm border border-zrp-silver/30 dark:border-zrp-charcoal">
               <div className="text-4xl mb-4">🤝</div>
-              <h3 className="text-xl font-semibold text-zrp-charcoal dark:text-white font-orbitron">3. Direct Impact</h3>
+              <h3 className="text-xl font-semibold text-zrp-charcoal dark:text-white font-orbitron">{t("charity.step3Title")}</h3>
               <p className="mt-2 text-zrp-charcoal/80 dark:text-white/70 font-inter">
-                We partner with vetted NGOs and local organisations to ensure
-                your contributions reach those who need them most.
+                {t("charity.step3Desc")}
                 <br />
-                <span className="text-sm text-zrp-red font-medium">First official donation report: Q3 2026</span>
+                <span className="text-sm text-zrp-red font-medium">{t("charity.step3Note")}</span>
               </p>
             </div>
           </div>
@@ -114,12 +87,10 @@ export default function CharityPage() {
         <section className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 py-16 px-4">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold text-center text-zrp-charcoal dark:text-white font-orbitron mb-4">
-              Where the 35% Goes
+              {t("charity.whereGoesHeading")}
             </h2>
             <p className="text-center text-zrp-charcoal/70 dark:text-white/70 mb-12 max-w-2xl mx-auto font-inter">
-              The charity budget is distributed across these four causes. We believe in
-              holistic impact – from a child's first classroom to a community's
-              clean water.
+              {t("charity.whereGoesDesc")}
             </p>
             <div className="grid md:grid-cols-2 gap-8">
               {CAUSES.map((cause) => (
@@ -140,7 +111,7 @@ export default function CharityPage() {
                       ></div>
                     </div>
                     <span className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">
-                      {cause.percentage}% of charity budget
+                      {cause.percentage}% {t("charity.budgetPercent")}
                     </span>
                   </div>
                 </div>
@@ -152,14 +123,13 @@ export default function CharityPage() {
         {/* Transparency & Impact – No data shared yet */}
         <section id="transparency" className="py-16 px-4 max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-zrp-charcoal dark:text-white font-orbitron mb-4">
-            Transparency & Impact
+            {t("charity.transparencyHeading")}
           </h2>
           <p className="text-center text-zrp-charcoal/70 dark:text-white/70 mb-12 max-w-2xl mx-auto font-inter">
-            We believe in full transparency. <strong className="text-zrp-red">No donation data has been shared yet</strong> – 
-            we will publish our first official report <strong className="text-zrp-red">every three months</strong>.
+            {t("charity.transparencyDescP1")} <strong className="text-zrp-red">{t("charity.transparencyDescBold")}</strong> {t("charity.transparencyDescP2")} <strong className="text-zrp-red">{t("charity.transparencyDescBold2")}</strong>.
             <br />
             <span className="text-sm text-zrp-red font-medium">
-              📅 First report: Q3 2026
+              {t("charity.firstReportNote")}
             </span>
           </p>
 
@@ -167,15 +137,15 @@ export default function CharityPage() {
           <div className="grid md:grid-cols-3 gap-6 text-center">
             <div className="bg-zrp-silver/20 dark:bg-zrp-charcoal/50 p-6 rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal">
               <div className="text-4xl font-bold text-zrp-red font-orbitron">—</div>
-              <p className="text-zrp-charcoal/70 dark:text-white/70 mt-2 font-inter">Total Donated (coming soon)</p>
+              <p className="text-zrp-charcoal/70 dark:text-white/70 mt-2 font-inter">{t("charity.totalDonatedLabel")}</p>
             </div>
             <div className="bg-zrp-silver/20 dark:bg-zrp-charcoal/50 p-6 rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal">
               <div className="text-4xl font-bold text-zrp-red font-orbitron">—</div>
-              <p className="text-zrp-charcoal/70 dark:text-white/70 mt-2 font-inter">Lives Impacted (coming soon)</p>
+              <p className="text-zrp-charcoal/70 dark:text-white/70 mt-2 font-inter">{t("charity.livesImpactedLabel")}</p>
             </div>
             <div className="bg-zrp-silver/20 dark:bg-zrp-charcoal/50 p-6 rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal">
               <div className="text-4xl font-bold text-zrp-red font-orbitron">—</div>
-              <p className="text-zrp-charcoal/70 dark:text-white/70 mt-2 font-inter">Projects Supported (coming soon)</p>
+              <p className="text-zrp-charcoal/70 dark:text-white/70 mt-2 font-inter">{t("charity.projectsSupportedLabel")}</p>
             </div>
           </div>
 
@@ -183,49 +153,47 @@ export default function CharityPage() {
           <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal">
               <p className="text-2xl font-bold text-zrp-charcoal dark:text-white font-orbitron">—</p>
-              <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">Orphanages</p>
+              <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">{t("charity.orphanagesLabel")}</p>
             </div>
             <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal">
               <p className="text-2xl font-bold text-zrp-charcoal dark:text-white font-orbitron">—</p>
-              <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">Schools</p>
+              <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">{t("charity.schoolsLabel")}</p>
             </div>
             <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal">
               <p className="text-2xl font-bold text-zrp-charcoal dark:text-white font-orbitron">—</p>
-              <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">Hospitals</p>
+              <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">{t("charity.hospitalsLabel")}</p>
             </div>
             <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal">
               <p className="text-2xl font-bold text-zrp-charcoal dark:text-white font-orbitron">—</p>
-              <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">Climate Projects</p>
+              <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">{t("charity.climateProjectsLabel")}</p>
             </div>
           </div>
 
           <div className="mt-8 text-center text-zrp-charcoal/50 dark:text-white/50 text-sm border-t border-zrp-silver/30 dark:border-zrp-charcoal pt-6 font-inter">
-            ⏳ We are currently accumulating funds. The first quarterly report will include verified donation amounts and project details.
+            {t("charity.accumulatingNote")}
           </div>
         </section>
 
         {/* Call to Action – dark red background */}
         <section className="bg-gradient-to-r from-zrp-darkRed to-zrp-deepBlack py-16 px-4">
           <div className="max-w-4xl mx-auto text-center text-white">
-            <h2 className="text-3xl font-bold font-orbitron">Be Part of Something Bigger</h2>
+            <h2 className="text-3xl font-bold font-orbitron">{t("charity.ctaHeading")}</h2>
             <p className="mt-4 text-lg opacity-90 font-inter">
-              Every time you post, like, or subscribe on ZRP Social, you're
-              contributing to real change – because <strong className="text-white">35% of our profits</strong>
-              go to those who need it most. Join us in making social media a
-              force for good.
+              {t("charity.ctaDescP1")} <strong className="text-white">{t("charity.ctaDescBold")}</strong>{' '}
+              {t("charity.ctaDescP2")}
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <Link
                 href="/signup"
                 className="px-8 py-3 bg-white text-zrp-darkRed font-semibold rounded-full shadow-lg hover:bg-gray-200 transition font-inter"
               >
-                Create Your Account
+                {t("charity.createAccount")}
               </Link>
               <Link
                 href="/about"
                 className="px-8 py-3 border-2 border-white text-white font-semibold rounded-full hover:bg-white/10 transition font-inter"
               >
-                Learn About ZRP
+                {t("charity.learnAboutZrp")}
               </Link>
             </div>
           </div>
