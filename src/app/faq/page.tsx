@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/translations";
 
 import {
   ChevronDown,
@@ -46,12 +48,33 @@ interface FaqItem {
   icon?: React.ElementType;
 }
 
+// Category is kept as a stable English identifier for grouping and
+// anchor-slug generation (so links to #category-... stay the same
+// across languages) - this maps it to the translated display label.
+const CATEGORY_KEYS: Record<string, TranslationKey> = {
+  "Getting Started": "faq.cat.gettingStarted",
+  "Profile & Media": "faq.cat.profileMedia",
+  "Posts & Interactions": "faq.cat.postsInteractions",
+  "Messaging & Calls": "faq.cat.messagingCalls",
+  "Privacy & Safety": "faq.cat.privacySafety",
+  "ZRP Trust Passport": "faq.cat.trustPassport",
+  "Charity & Impact": "faq.cat.charityImpact",
+  "Web3 & Digital": "faq.cat.web3Digital",
+  "Administration": "faq.cat.administration",
+  "Support & Tickets": "faq.cat.supportTickets",
+  "Legal & Account": "faq.cat.legalAccount",
+};
+
 export default function FAQPage() {
+  const { t } = useLanguage();
   const [openId, setOpenId] = useState<string | null>(null);
 
   const toggleFaq = (id: string) => {
     setOpenId(openId === id ? null : id);
   };
+
+  const categoryLabel = (category: string) =>
+    CATEGORY_KEYS[category] ? t(CATEGORY_KEYS[category]) : category;
 
   const faqs: FaqItem[] = [
     // ============================================================
@@ -60,31 +83,25 @@ export default function FAQPage() {
     {
       id: "what-is-zrp",
       category: "Getting Started",
-      question: "What is ZRP Social?",
+      question: t("faq.whatIsZrp.q"),
       icon: HelpCircle,
       answer: (
         <div className="space-y-3">
           <p>
-            <strong>ZRP Social</strong> is a Swiss-based social platform built
-            around freedom of expression, privacy, digital independence,
-            community, and social impact.
+            <strong>{t("faq.whatIsZrp.p1Bold")}</strong> {t("faq.whatIsZrp.p1")}
           </p>
 
           <p>
-            ZRP is designed to give individuals, creators, organisations,
-            businesses, and communities a modern platform for communication,
-            publishing, networking, and digital interaction.
+            {t("faq.whatIsZrp.p2")}
           </p>
 
           <p>
-            The platform is built with a strong focus on privacy, security,
-            transparent moderation, and user ownership of content.
+            {t("faq.whatIsZrp.p3")}
           </p>
 
           <div className="p-3 rounded-lg bg-zrp-red/5 border border-zrp-red/20 text-sm">
-            <strong className="text-zrp-red">ZRP principle:</strong>{" "}
-            open conversation, responsible technology, privacy, and meaningful
-            social impact.
+            <strong className="text-zrp-red">{t("faq.whatIsZrp.noteBold")}</strong>{" "}
+            {t("faq.whatIsZrp.noteText")}
           </div>
         </div>
       ),
@@ -93,32 +110,32 @@ export default function FAQPage() {
     {
       id: "how-to-register",
       category: "Getting Started",
-      question: "How do I register an account?",
+      question: t("faq.howToRegister.q"),
       icon: UserPlus,
       answer: (
         <div className="space-y-3">
-          <p>Creating a ZRP Social account is quick and free.</p>
+          <p>{t("faq.howToRegister.intro")}</p>
 
           <ol className="list-decimal list-inside space-y-2 text-sm">
             <li>
-              Go to the{" "}
+              {t("faq.howToRegister.step1Prefix")}{" "}
               <Link
                 href="/signup"
                 className="text-zrp-red hover:underline"
               >
-                Sign Up
+                {t("faq.howToRegister.step1Link")}
               </Link>{" "}
-              page.
+              {t("faq.howToRegister.step1Rest")}
             </li>
-            <li>Enter the requested account information.</li>
-            <li>Create a secure password.</li>
-            <li>Accept the Terms of Service and Privacy Policy.</li>
-            <li>Complete email verification if requested.</li>
-            <li>Complete your profile and onboarding.</li>
+            <li>{t("faq.howToRegister.step2")}</li>
+            <li>{t("faq.howToRegister.step3")}</li>
+            <li>{t("faq.howToRegister.step4")}</li>
+            <li>{t("faq.howToRegister.step5")}</li>
+            <li>{t("faq.howToRegister.step6")}</li>
           </ol>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            🔐 Use a unique password that you do not use on other services.
+            {t("faq.howToRegister.note")}
           </p>
         </div>
       ),
@@ -127,31 +144,30 @@ export default function FAQPage() {
     {
       id: "how-to-login",
       category: "Getting Started",
-      question: "How do I log in?",
+      question: t("faq.howToLogin.q"),
       icon: LogIn,
       answer: (
         <div className="space-y-3">
-          <p>To access your ZRP Social account:</p>
+          <p>{t("faq.howToLogin.intro")}</p>
 
           <ol className="list-decimal list-inside space-y-2 text-sm">
             <li>
-              Go to the{" "}
+              {t("faq.howToLogin.step1Prefix")}{" "}
               <Link
                 href="/login"
                 className="text-zrp-red hover:underline"
               >
-                Login
+                {t("faq.howToLogin.step1Link")}
               </Link>{" "}
-              page.
+              {t("faq.howToLogin.step1Rest")}
             </li>
-            <li>Enter your registered email address.</li>
-            <li>Enter your password.</li>
-            <li>Click or tap Sign In.</li>
+            <li>{t("faq.howToLogin.step2")}</li>
+            <li>{t("faq.howToLogin.step3")}</li>
+            <li>{t("faq.howToLogin.step4")}</li>
           </ol>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            If you cannot remember your password, use the password recovery
-            option on the login page.
+            {t("faq.howToLogin.note")}
           </p>
         </div>
       ),
@@ -160,32 +176,32 @@ export default function FAQPage() {
     {
       id: "password-reset",
       category: "Getting Started",
-      question: "How do I reset my password?",
+      question: t("faq.passwordReset.q"),
       icon: Key,
       answer: (
         <div className="space-y-3">
-          <p>To reset your password:</p>
+          <p>{t("faq.passwordReset.intro")}</p>
 
           <ol className="list-decimal list-inside space-y-2 text-sm">
             <li>
-              Open the{" "}
+              {t("faq.passwordReset.step1Prefix")}{" "}
               <Link
                 href="/login"
                 className="text-zrp-red hover:underline"
               >
-                Login
+                {t("faq.passwordReset.step1Link")}
               </Link>{" "}
-              page.
+              {t("faq.passwordReset.step1Rest")}
             </li>
-            <li>Select Forgot Password.</li>
-            <li>Enter the email associated with your account.</li>
-            <li>Check your inbox for the recovery email.</li>
-            <li>Follow the secure reset link.</li>
-            <li>Create a new password.</li>
+            <li>{t("faq.passwordReset.step2")}</li>
+            <li>{t("faq.passwordReset.step3")}</li>
+            <li>{t("faq.passwordReset.step4")}</li>
+            <li>{t("faq.passwordReset.step5")}</li>
+            <li>{t("faq.passwordReset.step6")}</li>
           </ol>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            ⏳ Password reset links may expire for security reasons.
+            {t("faq.passwordReset.note")}
           </p>
         </div>
       ),
@@ -197,30 +213,29 @@ export default function FAQPage() {
     {
       id: "avatar-size",
       category: "Profile & Media",
-      question: "What are the avatar requirements?",
+      question: t("faq.avatarSize.q"),
       icon: Image,
       answer: (
         <div className="space-y-3">
-          <p>For the best profile image quality, we recommend:</p>
+          <p>{t("faq.avatarSize.intro")}</p>
 
           <ul className="list-disc list-inside space-y-2 text-sm">
             <li>
-              <strong>Maximum file size:</strong> 2 MB
+              <strong>{t("faq.mediaLabel.maxFileSize")}</strong> {t("faq.avatarSize.maxFileSizeVal")}
             </li>
             <li>
-              <strong>Supported formats:</strong> JPEG, PNG, GIF, WebP
+              <strong>{t("faq.mediaLabel.supportedFormats")}</strong> {t("faq.avatarSize.formatsVal")}
             </li>
             <li>
-              <strong>Recommended resolution:</strong> 400 × 400 px
+              <strong>{t("faq.mediaLabel.recommendedResolution")}</strong> {t("faq.avatarSize.resolutionVal")}
             </li>
             <li>
-              <strong>Recommended ratio:</strong> 1:1
+              <strong>{t("faq.mediaLabel.recommendedRatio")}</strong> {t("faq.avatarSize.ratioVal")}
             </li>
           </ul>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Your avatar is displayed as a circular image throughout the
-            platform.
+            {t("faq.avatarSize.note")}
           </p>
         </div>
       ),
@@ -229,24 +244,24 @@ export default function FAQPage() {
     {
       id: "banner-size",
       category: "Profile & Media",
-      question: "What are the banner image requirements?",
+      question: t("faq.bannerSize.q"),
       icon: Camera,
       answer: (
         <div className="space-y-3">
-          <p>Recommended profile banner specifications:</p>
+          <p>{t("faq.bannerSize.intro")}</p>
 
           <ul className="list-disc list-inside space-y-2 text-sm">
             <li>
-              <strong>Maximum file size:</strong> 4 MB
+              <strong>{t("faq.mediaLabel.maxFileSize")}</strong> {t("faq.bannerSize.maxFileSizeVal")}
             </li>
             <li>
-              <strong>Supported formats:</strong> JPEG, PNG, GIF, WebP
+              <strong>{t("faq.mediaLabel.supportedFormats")}</strong> {t("faq.bannerSize.formatsVal")}
             </li>
             <li>
-              <strong>Recommended resolution:</strong> 1200 × 400 px
+              <strong>{t("faq.mediaLabel.recommendedResolution")}</strong> {t("faq.bannerSize.resolutionVal")}
             </li>
             <li>
-              <strong>Recommended ratio:</strong> 3:1
+              <strong>{t("faq.mediaLabel.recommendedRatio")}</strong> {t("faq.bannerSize.ratioVal")}
             </li>
           </ul>
         </div>
@@ -256,24 +271,24 @@ export default function FAQPage() {
     {
       id: "post-image-size",
       category: "Profile & Media",
-      question: "What are the post image requirements?",
+      question: t("faq.postImageSize.q"),
       icon: Upload,
       answer: (
         <div className="space-y-3">
-          <p>For images attached to posts:</p>
+          <p>{t("faq.postImageSize.intro")}</p>
 
           <ul className="list-disc list-inside space-y-2 text-sm">
             <li>
-              <strong>Maximum file size:</strong> 4 MB
+              <strong>{t("faq.mediaLabel.maxFileSize")}</strong> {t("faq.postImageSize.maxFileSizeVal")}
             </li>
             <li>
-              <strong>Supported formats:</strong> JPEG, PNG, GIF, WebP
+              <strong>{t("faq.mediaLabel.supportedFormats")}</strong> {t("faq.postImageSize.formatsVal")}
             </li>
             <li>
-              <strong>Recommended resolution:</strong> 1200 × 800 px
+              <strong>{t("faq.mediaLabel.recommendedResolution")}</strong> {t("faq.postImageSize.resolutionVal")}
             </li>
             <li>
-              <strong>Recommended ratio:</strong> 3:2
+              <strong>{t("faq.mediaLabel.recommendedRatio")}</strong> {t("faq.postImageSize.ratioVal")}
             </li>
           </ul>
         </div>
@@ -283,33 +298,32 @@ export default function FAQPage() {
     {
       id: "post-video-size",
       category: "Profile & Media",
-      question: "What are the post video requirements?",
+      question: t("faq.postVideoSize.q"),
       icon: Video,
       answer: (
         <div className="space-y-3">
-          <p>Supported video specifications include:</p>
+          <p>{t("faq.postVideoSize.intro")}</p>
 
           <ul className="list-disc list-inside space-y-2 text-sm">
             <li>
-              <strong>Maximum file size:</strong> 32 MB
+              <strong>{t("faq.mediaLabel.maxFileSize")}</strong> {t("faq.postVideoSize.maxFileSizeVal")}
             </li>
             <li>
-              <strong>Supported formats:</strong> MP4, MOV, AVI, WebM
+              <strong>{t("faq.mediaLabel.supportedFormats")}</strong> {t("faq.postVideoSize.formatsVal")}
             </li>
             <li>
-              <strong>Recommended resolution:</strong> 1280 × 720 px or higher
+              <strong>{t("faq.mediaLabel.recommendedResolution")}</strong> {t("faq.postVideoSize.resolutionVal")}
             </li>
             <li>
-              <strong>Recommended encoding:</strong> H.264
+              <strong>{t("faq.mediaLabel.recommendedEncoding")}</strong> {t("faq.postVideoSize.encodingVal")}
             </li>
             <li>
-              <strong>Recommended duration:</strong> 5 minutes or less
+              <strong>{t("faq.mediaLabel.recommendedDuration")}</strong> {t("faq.postVideoSize.durationVal")}
             </li>
           </ul>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Actual limits may vary depending on your account plan and current
-            platform configuration.
+            {t("faq.postVideoSize.note")}
           </p>
         </div>
       ),
@@ -318,25 +332,24 @@ export default function FAQPage() {
     {
       id: "chat-image-size",
       category: "Profile & Media",
-      question: "What are the chat image requirements?",
+      question: t("faq.chatImageSize.q"),
       icon: MessageSquare,
       answer: (
         <div className="space-y-3">
           <ul className="list-disc list-inside space-y-2 text-sm">
             <li>
-              <strong>Maximum file size:</strong> 4 MB
+              <strong>{t("faq.mediaLabel.maxFileSize")}</strong> {t("faq.chatImageSize.maxFileSizeVal")}
             </li>
             <li>
-              <strong>Supported formats:</strong> JPEG, PNG, GIF, WebP
+              <strong>{t("faq.mediaLabel.supportedFormats")}</strong> {t("faq.chatImageSize.formatsVal")}
             </li>
             <li>
-              <strong>Recommended resolution:</strong> 800 × 800 px
+              <strong>{t("faq.mediaLabel.recommendedResolution")}</strong> {t("faq.chatImageSize.resolutionVal")}
             </li>
           </ul>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Images shared through direct messages are handled according to
-            the ZRP Privacy Policy.
+            {t("faq.chatImageSize.note")}
           </p>
         </div>
       ),
@@ -1715,26 +1728,24 @@ export default function FAQPage() {
         </p>
 
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
-          Frequently Asked Questions
+          {t("faq.pageTitle")}
         </h1>
 
         <p className="mt-3 text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-          Find answers about ZRP Social, account management, publishing,
-          privacy, security, the ZRP Trust Passport, Web3 infrastructure,
-          support, and our social impact mission.
+          {t("faq.pageSubtitle")}
         </p>
 
         <div className="flex flex-wrap justify-center gap-2 mt-5">
           <span className="px-3 py-1 rounded-full text-xs bg-zrp-red/10 text-zrp-red border border-zrp-red/20">
-            {faqs.length} Questions
+            {faqs.length} {t("faq.questionsCount")}
           </span>
 
           <span className="px-3 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-            {categoryCount} Categories
+            {categoryCount} {t("faq.categoriesCount")}
           </span>
 
           <span className="px-3 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-            Swiss Platform
+            {t("faq.swissPlatform")}
           </span>
         </div>
       </div>
@@ -1753,7 +1764,7 @@ export default function FAQPage() {
                 .toLowerCase()}`}
               className="px-3 py-1.5 text-xs font-medium rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-zrp-red hover:text-white hover:border-zrp-red transition"
             >
-              {category}
+              {categoryLabel(category)}
             </a>
           ))}
         </div>
@@ -1775,7 +1786,7 @@ export default function FAQPage() {
                 <div className="h-px flex-1 bg-gray-200 dark:bg-gray-800" />
 
                 <h2 className="text-sm sm:text-base font-semibold uppercase tracking-wider text-gray-900 dark:text-white whitespace-nowrap">
-                  {category}
+                  {categoryLabel(category)}
                 </h2>
 
                 <div className="h-px flex-1 bg-gray-200 dark:bg-gray-800" />
@@ -1859,11 +1870,11 @@ export default function FAQPage() {
 
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white">
-                Terms of Service
+                {t("faq.legalTermsTitle")}
               </h3>
 
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Read the rules governing use of ZRP Social.
+                {t("faq.legalTermsDesc")}
               </p>
             </div>
           </div>
@@ -1878,11 +1889,11 @@ export default function FAQPage() {
 
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white">
-                Privacy Policy
+                {t("faq.legalPrivacyTitle")}
               </h3>
 
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Learn how ZRP handles personal data and privacy.
+                {t("faq.legalPrivacyDesc")}
               </p>
             </div>
           </div>
@@ -1898,13 +1909,11 @@ export default function FAQPage() {
         </div>
 
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Still have questions?
+          {t("faq.ctaTitle")}
         </h3>
 
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-lg mx-auto">
-          Our support team can help with account issues, technical problems,
-          moderation questions, privacy requests, Trust Passport questions,
-          and other ZRP Social enquiries.
+          {t("faq.ctaDesc")}
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 mt-5">
@@ -1912,14 +1921,14 @@ export default function FAQPage() {
             href="/support"
             className="px-5 py-2.5 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed transition"
           >
-            Submit a Ticket
+            {t("faq.ctaSubmitTicket")}
           </Link>
 
           <Link
             href="/about"
             className="px-5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
           >
-            About ZRP
+            {t("faq.ctaAboutZrp")}
           </Link>
         </div>
       </div>
@@ -1929,9 +1938,7 @@ export default function FAQPage() {
       ======================================================== */}
       <div className="mt-8 text-center">
         <p className="text-xs text-gray-400 dark:text-gray-500">
-          Information on this page is provided for general guidance. Features,
-          limits, pricing, availability, scoring methods, and technical
-          implementations may change as ZRP Social evolves.
+          {t("faq.footerNote")}
         </p>
       </div>
     </div>
