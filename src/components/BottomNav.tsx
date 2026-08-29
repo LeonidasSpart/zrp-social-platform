@@ -43,7 +43,7 @@ export default function BottomNav() {
     {
       href: "/shorts",
       icon: Film,
-      label: "Shorts",
+      label: t("nav.shorts"),
     },
     {
       href: "/notifications",
@@ -70,7 +70,7 @@ export default function BottomNav() {
     <nav
       className="lg:hidden fixed inset-x-0 bottom-0 z-50 bg-white/95 dark:bg-zrp-deepBlack/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-      aria-label="Primary"
+      aria-label={t("nav.primary")}
     >
       <div className="flex items-center h-14">
         {items.map((item) => {

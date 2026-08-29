@@ -87,9 +87,9 @@ export default function Sidebar() {
 
   const navItems: NavItem[] = [
     { href: "/", icon: Home, label: t("nav.home") },
-    { href: "/shorts", icon: Film, label: "Shorts" },
+    { href: "/shorts", icon: Film, label: t("nav.shorts") },
     { href: "/explore", icon: Compass, label: t("nav.explore") },
-    { href: "/news", icon: Newspaper, label: "News" },
+    { href: "/news", icon: Newspaper, label: t("nav.news") },
     { href: "/search", icon: Search, label: t("nav.search") },
     {
       href: "/messages",
@@ -227,7 +227,7 @@ export default function Sidebar() {
               }`}
             />
 
-            <span>Journalist</span>
+            <span>{t("nav.journalist")}</span>
           </Link>
         )}
 
@@ -305,7 +305,7 @@ export default function Sidebar() {
           >
             <MoreHorizontal className="w-6 h-6" />
 
-            <span>More</span>
+            <span>{t("nav.more")}</span>
           </button>
 
           {moreMenuOpen && (
@@ -322,7 +322,7 @@ export default function Sidebar() {
                   className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                 >
                   <Settings className="w-4 h-4" />
-                  <span>Settings</span>
+                  <span>{t("nav.settings")}</span>
                 </Link>
 
                 {features?.teamManagement && (
@@ -332,7 +332,7 @@ export default function Sidebar() {
                     className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                   >
                     <Users className="w-4 h-4" />
-                    <span>Team Management</span>
+                    <span>{t("nav.teamManagement")}</span>
                   </Link>
                 )}
 
@@ -343,7 +343,7 @@ export default function Sidebar() {
                     className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                   >
                     <Key className="w-4 h-4" />
-                    <span>API Keys</span>
+                    <span>{t("nav.apiKeys")}</span>
                   </Link>
                 )}
 

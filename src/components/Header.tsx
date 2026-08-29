@@ -150,7 +150,7 @@ export default function Header() {
     {
       href: "/shorts",
       icon: Film,
-      label: "Shorts",
+      label: t("nav.shorts"),
     },
     {
       href: "/explore",
@@ -160,7 +160,7 @@ export default function Header() {
     {
       href: "/news",
       icon: Newspaper,
-      label: "News",
+      label: t("nav.news"),
     },
     {
       href: "/search",
@@ -298,7 +298,7 @@ export default function Header() {
                   <Newspaper className="w-5 h-5" />
 
                   <span>
-                    Journalist
+                    {t("nav.journalist")}
                   </span>
                 </Link>
               )}
@@ -513,8 +513,8 @@ export default function Header() {
                       >
                         <Settings className="w-5 h-5" />
 
-                                                <span>
-                          Settings
+                        <span>
+                          {t("nav.settings")}
                         </span>
                       </Link>
 
@@ -531,7 +531,7 @@ export default function Header() {
                           <Users className="w-5 h-5" />
 
                           <span>
-                            Team Management
+                            {t("nav.teamManagement")}
                           </span>
                         </Link>
                       )}
@@ -549,7 +549,7 @@ export default function Header() {
                           <Key className="w-5 h-5" />
 
                           <span>
-                            API Keys
+                            {t("nav.apiKeys")}
                           </span>
                         </Link>
                       )}
@@ -636,7 +636,11 @@ export default function Header() {
                   setLangMenuOpen(false);
                 }}
                 className="flex items-center justify-center w-10 h-10 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-zrp-red transition"
-                aria-label="Open menu"
+                aria-label={
+                  mobileMenuOpen
+                    ? t("nav.closeMenu")
+                    : t("nav.openMenu")
+                }
                 aria-expanded={
                   mobileMenuOpen
                 }
@@ -662,7 +666,7 @@ export default function Header() {
 
           <button
             type="button"
-            aria-label="Close menu"
+            aria-label={t("nav.closeMenu")}
             onClick={closeMobileMenu}
             className="lg:hidden fixed inset-0 top-[64px] z-40 bg-black/30 backdrop-blur-[2px]"
           />
@@ -756,7 +760,7 @@ export default function Header() {
               {isStaff && (
                 <div className="mt-5 pt-5 border-t border-gray-200 dark:border-gray-800">
                   <p className="px-4 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                    Administration
+                    {t("nav.administration")}
                   </p>
 
                   <Link
@@ -782,7 +786,7 @@ export default function Header() {
               {isJournalist && (
                 <div className="mt-5 pt-5 border-t border-gray-200 dark:border-gray-800">
                   <p className="px-4 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                    Journalist
+                    {t("nav.journalist")}
                   </p>
 
                   <Link
@@ -793,7 +797,7 @@ export default function Header() {
                     <Newspaper className="w-5 h-5 text-zrp-red" />
 
                     <span className="flex-1 font-medium">
-                      Journalist Dashboard
+                      {t("nav.journalistDashboard")}
                     </span>
 
                     <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -808,7 +812,7 @@ export default function Header() {
               {isAuthenticated && (
                 <div className="mt-5 pt-5 border-t border-gray-200 dark:border-gray-800">
                   <p className="px-4 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                    Account
+                    {t("nav.account")}
                   </p>
 
                   <Link
@@ -833,7 +837,7 @@ export default function Header() {
                     <Settings className="w-5 h-5 text-gray-500" />
 
                     <span className="flex-1 font-medium">
-                      Settings
+                      {t("nav.settings")}
                     </span>
 
                     <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -848,7 +852,7 @@ export default function Header() {
                       <Users className="w-5 h-5 text-gray-500" />
 
                       <span className="flex-1 font-medium">
-                        Team Management
+                        {t("nav.teamManagement")}
                       </span>
 
                       <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -864,7 +868,7 @@ export default function Header() {
                       <Key className="w-5 h-5 text-gray-500" />
 
                       <span className="flex-1 font-medium">
-                        API Keys
+                        {t("nav.apiKeys")}
                       </span>
 
                       <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -879,7 +883,7 @@ export default function Header() {
 
               <div className="mt-5 pt-5 border-t border-gray-200 dark:border-gray-800">
                 <p className="px-4 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                  Preferences
+                  {t("nav.preferences")}
                 </p>
 
                 {/* LANGUAGE */}
