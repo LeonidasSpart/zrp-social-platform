@@ -361,23 +361,23 @@ export default function FAQPage() {
     {
       id: "how-to-post",
       category: "Posts & Interactions",
-      question: "How do I create a post?",
+      question: t("faq.howToPost.q"),
       icon: FileText,
       answer: (
         <div className="space-y-3">
-          <p>To publish a post:</p>
+          <p>{t("faq.howToPost.intro")}</p>
 
           <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Open your home feed.</li>
-            <li>Open the post composer.</li>
-            <li>Write your message.</li>
-            <li>Add hashtags or mentions if desired.</li>
-            <li>Optionally attach supported media or a poll.</li>
-            <li>Select Post to publish.</li>
+            <li>{t("faq.howToPost.step1")}</li>
+            <li>{t("faq.howToPost.step2")}</li>
+            <li>{t("faq.howToPost.step3")}</li>
+            <li>{t("faq.howToPost.step4")}</li>
+            <li>{t("faq.howToPost.step5")}</li>
+            <li>{t("faq.howToPost.step6")}</li>
           </ol>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Available post limits may depend on your account plan.
+            {t("faq.howToPost.note")}
           </p>
         </div>
       ),
@@ -386,22 +386,21 @@ export default function FAQPage() {
     {
       id: "how-to-schedule-post",
       category: "Posts & Interactions",
-      question: "How do I schedule a post?",
+      question: t("faq.schedulePost.q"),
       icon: Clock,
       answer: (
         <div className="space-y-3">
-          <p>Scheduling allows eligible accounts to publish content later.</p>
+          <p>{t("faq.schedulePost.intro")}</p>
 
           <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Create your post.</li>
-            <li>Select the scheduling option.</li>
-            <li>Choose the desired date and time.</li>
-            <li>Confirm the scheduled publication.</li>
+            <li>{t("faq.schedulePost.step1")}</li>
+            <li>{t("faq.schedulePost.step2")}</li>
+            <li>{t("faq.schedulePost.step3")}</li>
+            <li>{t("faq.schedulePost.step4")}</li>
           </ol>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Scheduled posts are subject to account limits and platform
-            availability.
+            {t("faq.schedulePost.note")}
           </p>
         </div>
       ),
@@ -410,22 +409,21 @@ export default function FAQPage() {
     {
       id: "how-to-comment",
       category: "Posts & Interactions",
-      question: "How do I comment or reply?",
+      question: t("faq.howToComment.q"),
       icon: MessageSquare,
       answer: (
         <div className="space-y-3">
-          <p>Open a post and select the comment or reply option.</p>
+          <p>{t("faq.howToComment.intro")}</p>
 
           <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Open the post.</li>
-            <li>Select the comment icon.</li>
-            <li>Write your response.</li>
-            <li>Select Reply or Post.</li>
+            <li>{t("faq.howToComment.step1")}</li>
+            <li>{t("faq.howToComment.step2")}</li>
+            <li>{t("faq.howToComment.step3")}</li>
+            <li>{t("faq.howToComment.step4")}</li>
           </ol>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            You can manage your own comments in accordance with the platform's
-            available controls.
+            {t("faq.howToComment.note")}
           </p>
         </div>
       ),
@@ -434,33 +432,31 @@ export default function FAQPage() {
     {
       id: "hashtags-mentions",
       category: "Posts & Interactions",
-      question: "How do hashtags and mentions work?",
+      question: t("faq.hashtagsMentions.q"),
       icon: Users,
       answer: (
         <div className="space-y-3">
           <p>
-            <strong>Hashtags</strong> use the # symbol to categorise content.
+            <strong>{t("faq.hashtagsMentions.hashtagsBold")}</strong> {t("faq.hashtagsMentions.hashtagsText")}
           </p>
 
           <p className="text-sm">
-            Example:{" "}
+            {t("faq.hashtagsMentions.exampleLabel")}{" "}
             <span className="text-zrp-red font-medium">#ZRP</span> or{" "}
             <span className="text-zrp-red font-medium">#Web3</span>
           </p>
 
           <p>
-            <strong>Mentions</strong> use the @ symbol to reference another
-            account.
+            <strong>{t("faq.hashtagsMentions.mentionsBold")}</strong> {t("faq.hashtagsMentions.mentionsText")}
           </p>
 
           <p className="text-sm">
-            Example:{" "}
+            {t("faq.hashtagsMentions.exampleLabel")}{" "}
             <span className="text-zrp-red font-medium">@username</span>
           </p>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Depending on notification settings, mentioned users may receive a
-            notification.
+            {t("faq.hashtagsMentions.note")}
           </p>
         </div>
       ),
@@ -469,19 +465,19 @@ export default function FAQPage() {
     {
       id: "how-to-pin-post",
       category: "Posts & Interactions",
-      question: "How do I pin a post to my profile?",
+      question: t("faq.pinPost.q"),
       icon: CheckCircle,
       answer: (
         <div className="space-y-3">
           <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Open your profile.</li>
-            <li>Find the post you want to highlight.</li>
-            <li>Select the post options menu.</li>
-            <li>Select Pin.</li>
+            <li>{t("faq.pinPost.step1")}</li>
+            <li>{t("faq.pinPost.step2")}</li>
+            <li>{t("faq.pinPost.step3")}</li>
+            <li>{t("faq.pinPost.step4")}</li>
           </ol>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            You can unpin the post later using the same controls.
+            {t("faq.pinPost.note")}
           </p>
         </div>
       ),
@@ -493,20 +489,19 @@ export default function FAQPage() {
     {
       id: "how-to-message",
       category: "Messaging & Calls",
-      question: "How do I send a direct message?",
+      question: t("faq.howToMessage.q"),
       icon: MessageSquare,
       answer: (
         <div className="space-y-3">
           <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Open the user's profile or your messaging area.</li>
-            <li>Select Message.</li>
-            <li>Write your message.</li>
-            <li>Select Send.</li>
+            <li>{t("faq.howToMessage.step1")}</li>
+            <li>{t("faq.howToMessage.step2")}</li>
+            <li>{t("faq.howToMessage.step3")}</li>
+            <li>{t("faq.howToMessage.step4")}</li>
           </ol>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Messaging functionality may depend on account settings and
-            platform availability.
+            {t("faq.howToMessage.note")}
           </p>
         </div>
       ),
@@ -515,20 +510,19 @@ export default function FAQPage() {
     {
       id: "how-to-call",
       category: "Messaging & Calls",
-      question: "How do I make a voice or video call?",
+      question: t("faq.howToCall.q"),
       icon: Phone,
       answer: (
         <div className="space-y-3">
           <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Open an eligible direct-message conversation.</li>
-            <li>Select the voice or video call button.</li>
-            <li>Allow microphone or camera permissions when requested.</li>
-            <li>Wait for the recipient to accept the call.</li>
+            <li>{t("faq.howToCall.step1")}</li>
+            <li>{t("faq.howToCall.step2")}</li>
+            <li>{t("faq.howToCall.step3")}</li>
+            <li>{t("faq.howToCall.step4")}</li>
           </ol>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Calls may use browser-based real-time communication technologies
-            such as WebRTC.
+            {t("faq.howToCall.note")}
           </p>
         </div>
       ),
@@ -537,22 +531,20 @@ export default function FAQPage() {
     {
       id: "read-receipts",
       category: "Messaging & Calls",
-      question: "What are read receipts?",
+      question: t("faq.readReceipts.q"),
       icon: CheckCircle,
       answer: (
         <div className="space-y-3">
           <p>
-            Read receipts provide an indication of whether a message has been
-            delivered or viewed.
+            {t("faq.readReceipts.intro")}
           </p>
 
           <ul className="list-disc list-inside space-y-2 text-sm">
             <li>
-              <strong>Single check:</strong> message delivered or sent.
+              <strong>{t("faq.readReceipts.singleBold")}</strong> {t("faq.readReceipts.singleText")}
             </li>
             <li>
-              <strong>Double check:</strong> message has been read, where
-              read receipts are supported.
+              <strong>{t("faq.readReceipts.doubleBold")}</strong> {t("faq.readReceipts.doubleText")}
             </li>
           </ul>
         </div>
@@ -565,27 +557,27 @@ export default function FAQPage() {
     {
       id: "privacy-policy",
       category: "Privacy & Safety",
-      question: "How is my data protected?",
+      question: t("faq.privacyPolicyFaq.q"),
       icon: Lock,
       answer: (
         <div className="space-y-3">
-          <p>ZRP Social takes privacy and security seriously.</p>
+          <p>{t("faq.privacyPolicyFaq.intro")}</p>
 
           <ul className="list-disc list-inside space-y-2 text-sm">
-            <li>Encrypted connections using HTTPS/TLS.</li>
-            <li>Security controls designed to protect account information.</li>
-            <li>Access controls for platform systems.</li>
-            <li>Processes for identifying and responding to abuse.</li>
-            <li>Account deletion and privacy rights.</li>
+            <li>{t("faq.privacyPolicyFaq.item1")}</li>
+            <li>{t("faq.privacyPolicyFaq.item2")}</li>
+            <li>{t("faq.privacyPolicyFaq.item3")}</li>
+            <li>{t("faq.privacyPolicyFaq.item4")}</li>
+            <li>{t("faq.privacyPolicyFaq.item5")}</li>
           </ul>
 
           <p>
-            For complete information, read our{" "}
+            {t("faq.privacyPolicyFaq.readMore")}{" "}
             <Link
               href="/privacy"
               className="text-zrp-red hover:underline"
             >
-              Privacy Policy
+              {t("faq.privacyPolicyFaq.readMoreLink")}
             </Link>
             .
           </p>
@@ -596,22 +588,21 @@ export default function FAQPage() {
     {
       id: "how-to-report",
       category: "Privacy & Safety",
-      question: "How do I report inappropriate content?",
+      question: t("faq.howToReport.q"),
       icon: Shield,
       answer: (
         <div className="space-y-3">
           <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Open the post, comment, or relevant content.</li>
-            <li>Select the More or reporting menu.</li>
-            <li>Select Report.</li>
-            <li>Choose the appropriate reason.</li>
-            <li>Add additional information if necessary.</li>
-            <li>Submit the report.</li>
+            <li>{t("faq.howToReport.step1")}</li>
+            <li>{t("faq.howToReport.step2")}</li>
+            <li>{t("faq.howToReport.step3")}</li>
+            <li>{t("faq.howToReport.step4")}</li>
+            <li>{t("faq.howToReport.step5")}</li>
+            <li>{t("faq.howToReport.step6")}</li>
           </ol>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Reports are reviewed according to applicable policies and
-            moderation procedures.
+            {t("faq.howToReport.note")}
           </p>
         </div>
       ),
@@ -620,20 +611,19 @@ export default function FAQPage() {
     {
       id: "how-to-block",
       category: "Privacy & Safety",
-      question: "How do I block a user?",
+      question: t("faq.howToBlock.q"),
       icon: Shield,
       answer: (
         <div className="space-y-3">
           <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Open the user's profile.</li>
-            <li>Open the More menu.</li>
-            <li>Select Block.</li>
-            <li>Confirm the action.</li>
+            <li>{t("faq.howToBlock.step1")}</li>
+            <li>{t("faq.howToBlock.step2")}</li>
+            <li>{t("faq.howToBlock.step3")}</li>
+            <li>{t("faq.howToBlock.step4")}</li>
           </ol>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Blocking limits interactions between the accounts according to
-            ZRP's current platform controls.
+            {t("faq.howToBlock.note")}
           </p>
         </div>
       ),
@@ -642,46 +632,44 @@ export default function FAQPage() {
     {
       id: "delete-account",
       category: "Privacy & Safety",
-      question: "How do I delete my account?",
+      question: t("faq.deleteAccountFaq.q"),
       icon: Trash2,
       answer: (
         <div className="space-y-3">
           <p>
-            You can request permanent deletion of your ZRP Social account.
+            {t("faq.deleteAccountFaq.intro")}
           </p>
 
           <ol className="list-decimal list-inside space-y-2 text-sm">
             <li>
-              Go to{" "}
+              {t("faq.deleteAccountFaq.step1Prefix")}{" "}
               <Link
                 href="/settings"
                 className="text-zrp-red hover:underline"
               >
-                Settings
+                {t("faq.deleteAccountFaq.step1Link")}
               </Link>
               .
             </li>
-            <li>Open the Account section.</li>
-            <li>Select Delete Account.</li>
-            <li>Review the warning and confirmation information.</li>
-            <li>Confirm the deletion request.</li>
+            <li>{t("faq.deleteAccountFaq.step2")}</li>
+            <li>{t("faq.deleteAccountFaq.step3")}</li>
+            <li>{t("faq.deleteAccountFaq.step4")}</li>
+            <li>{t("faq.deleteAccountFaq.step5")}</li>
           </ol>
 
           <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 text-sm">
-            <strong>Important:</strong> Account deletion is intended to be
-            permanent. Some information may need to be retained where required
-            by applicable law or legitimate security obligations.
+            <strong>{t("faq.deleteAccountFaq.warningBold")}</strong> {t("faq.deleteAccountFaq.warningText")}
           </div>
 
           <p>
-            See our{" "}
+            {t("faq.deleteAccountFaq.seeMorePrefix")}{" "}
             <Link
               href="/privacy"
               className="text-zrp-red hover:underline"
             >
-              Privacy Policy
+              {t("faq.deleteAccountFaq.seeMoreLink")}
             </Link>{" "}
-            for more information.
+            {t("faq.deleteAccountFaq.seeMoreSuffix")}
           </p>
         </div>
       ),
