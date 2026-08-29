@@ -1,6 +1,7 @@
 "use client";
 
 import { Users, UserPlus } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface AudienceDay {
   date: string;
@@ -15,6 +16,7 @@ interface AudienceGrowthTabProps {
 }
 
 export default function AudienceGrowthTab({ totalFollowers, newFollowersInWindow, trend }: AudienceGrowthTabProps) {
+  const { t } = useLanguage();
   const minTotal = Math.min(...trend.map((d) => d.totalFollowers));
   const maxTotal = Math.max(1, ...trend.map((d) => d.totalFollowers));
   const range = Math.max(1, maxTotal - minTotal);
@@ -25,13 +27,13 @@ export default function AudienceGrowthTab({ totalFollowers, newFollowersInWindow
       <div className="grid grid-cols-2 gap-4">
         <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <Users className="w-4 h-4" /> Total followers
+            <Users className="w-4 h-4" /> {t("audienceGrowth.totalFollowers")}
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{totalFollowers.toLocaleString()}</p>
         </div>
         <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <UserPlus className="w-4 h-4" /> New, last 30 days
+            <UserPlus className="w-4 h-4" /> {t("audienceGrowth.newLast30Days")}
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
             {newFollowersInWindow > 0 ? "+" : ""}{newFollowersInWindow.toLocaleString()}
@@ -41,8 +43,8 @@ export default function AudienceGrowthTab({ totalFollowers, newFollowersInWindow
 
       {/* ─── Growth chart ───────────────────────────────────────────── */}
       <div>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Follower growth</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Total followers over the last 30 days.</p>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{t("audienceGrowth.followerGrowthTitle")}</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t("audienceGrowth.followerGrowthSubtitle")}</p>
         <div className="relative h-32 border-b border-gray-200 dark:border-gray-700">
           <svg viewBox={`0 0 ${trend.length} 100`} preserveAspectRatio="none" className="w-full h-full overflow-visible">
             <polyline
@@ -68,7 +70,7 @@ export default function AudienceGrowthTab({ totalFollowers, newFollowersInWindow
 
       {/* ─── Daily breakdown ────────────────────────────────────────── */}
       <div>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">New followers per day</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("audienceGrowth.newFollowersPerDayTitle")}</h2>
         <div className="flex items-end gap-[2px] h-24">
           {trend.map((d) => {
             const maxNew = Math.max(1, ...trend.map((t) => t.newFollowers));

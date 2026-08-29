@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import ContentPerformanceTab from "@/components/ContentPerformanceTab";
 import AudienceGrowthTab from "@/components/AudienceGrowthTab";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // ─── Inline components ──────────────────────────────────────────────
 const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -107,6 +108,7 @@ const Badge = ({ children, className = "" }: { children: React.ReactNode; classN
 export default function CreatorDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
@@ -162,11 +164,11 @@ export default function CreatorDashboard() {
       const res = await fetch("/api/creator/dashboard");
       if (!res.ok) {
         if (res.status === 404) {
-          setError("Creator profile not found. Please enable creator monetisation.");
+          setError(t("creatorDash.errProfileNotFound"));
         } else if (res.status === 403) {
-          setError("Creator monetisation requires a Business or Enterprise plan.");
+          setError(t("creatorDash.errRequiresPlan"));
         } else {
-          throw new Error("Failed to load dashboard");
+          throw new Error(t("creatorDash.errFailedLoadDashboard"));
         }
         return;
       }
@@ -178,7 +180,7 @@ export default function CreatorDashboard() {
       setRecentPurchases(data.recentPurchases);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Failed to load dashboard");
+      setError(err.message || t("creatorDash.errFailedLoadDashboard"));
     } finally {
       setLoading(false);
     }
@@ -188,15 +190,15 @@ export default function CreatorDashboard() {
     e.preventDefault();
     const amount = parseFloat(withdrawAmount);
     if (!amount || amount <= 0) {
-      setWithdrawMessage({ type: "error", text: "Please enter a valid amount." });
+      setWithdrawMessage({ type: "error", text: t("creatorDash.errInvalidAmount") });
       return;
     }
     if (!walletAddress || walletAddress.length < 32) {
-      setWithdrawMessage({ type: "error", text: "Please enter a valid Solana wallet address." });
+      setWithdrawMessage({ type: "error", text: t("creatorDash.errInvalidWallet") });
       return;
     }
     if (amount > (profile?.balance || 0)) {
-      setWithdrawMessage({ type: "error", text: "Insufficient balance." });
+      setWithdrawMessage({ type: "error", text: t("creatorDash.errInsufficientBalance") });
       return;
     }
 
@@ -210,7 +212,7 @@ export default function CreatorDashboard() {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Failed to submit withdrawal");
+        throw new Error(data.error || t("creatorDash.errFailedWithdrawal"));
       }
       setWithdrawMessage({ type: "success", text: data.message });
       setShowWithdrawModal(false);
@@ -242,14 +244,14 @@ export default function CreatorDashboard() {
     return (
       <div className="max-w-4xl mx-auto py-12 px-4 text-center">
         <div className="text-6xl mb-4">💰</div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Creator Monetisation</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("creatorDash.monetisationTitle")}</h1>
         <p className="text-gray-500 dark:text-gray-400 mt-2">{error}</p>
         <div className="mt-6 space-x-3">
           <Button onClick={() => router.push("/pricing")}>
-            Upgrade Plan
+            {t("creatorDash.upgradePlan")}
           </Button>
           <Button variant="outline" onClick={() => router.push("/settings")}>
-            Go to Settings
+            {t("creatorDash.goToSettings")}
           </Button>
         </div>
       </div>
@@ -260,9 +262,9 @@ export default function CreatorDashboard() {
     return (
       <div className="max-w-4xl mx-auto py-12 px-4 text-center">
         <div className="text-6xl mb-4">🚀</div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Enable Creator Monetisation</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("creatorDash.enableTitle")}</h1>
         <p className="text-gray-500 dark:text-gray-400 mt-2">
-          You need to enable creator monetisation to start earning from tips and premium posts.
+          {t("creatorDash.enableDesc")}
         </p>
         <Button
           onClick={async () => {
@@ -275,7 +277,7 @@ export default function CreatorDashboard() {
           }}
           className="mt-4"
         >
-          Enable Now
+          {t("creatorDash.enableNow")}
         </Button>
       </div>
     );
@@ -286,19 +288,19 @@ export default function CreatorDashboard() {
       {/* ─── Header ──────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Creator Studio</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Earnings, content performance, and audience growth.</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t("creatorDash.studioTitle")}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t("creatorDash.studioSubtitle")}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => router.push("/settings")}>
-            Settings
+            {t("creatorDash.settingsButton")}
           </Button>
           <Button
             onClick={() => setShowWithdrawModal(true)}
             disabled={!profile.balance || profile.balance <= 0}
           >
             <Wallet className="w-4 h-4 mr-2" />
-            Withdraw
+            {t("creatorDash.withdrawButton")}
           </Button>
         </div>
       </div>
@@ -306,9 +308,9 @@ export default function CreatorDashboard() {
       {/* ─── Tab navigation ──────────────────────────────────────────── */}
       <div className="flex gap-1 border-b border-gray-200 dark:border-gray-700">
         {[
-          { id: "overview" as const, label: "Overview", icon: Wallet },
-          { id: "content" as const, label: "Content", icon: BarChart3 },
-          { id: "audience" as const, label: "Audience", icon: Users },
+          { id: "overview" as const, label: t("creatorDash.tabOverview"), icon: Wallet },
+          { id: "content" as const, label: t("creatorDash.tabContent"), icon: BarChart3 },
+          { id: "audience" as const, label: t("creatorDash.tabAudience"), icon: Users },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -329,18 +331,18 @@ export default function CreatorDashboard() {
         <>
       {/* ─── Stats Row ───────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Balance" value={profile.balance || 0} icon={Wallet} color="green" />
-        <StatCard label="Total Tips" value={profile.totalTips || 0} icon={Heart} color="red" />
-        <StatCard label="Premium Revenue" value={profile.totalPremiumRevenue || 0} icon={ShoppingBag} color="purple" />
-        <StatCard label="Withdrawn" value={profile.totalWithdrawn || 0} icon={TrendingUp} color="orange" />
+        <StatCard label={t("creatorDash.statBalance")} value={profile.balance || 0} icon={Wallet} color="green" />
+        <StatCard label={t("creatorDash.statTotalTips")} value={profile.totalTips || 0} icon={Heart} color="red" />
+        <StatCard label={t("creatorDash.statPremiumRevenue")} value={profile.totalPremiumRevenue || 0} icon={ShoppingBag} color="purple" />
+        <StatCard label={t("creatorDash.statWithdrawn")} value={profile.totalWithdrawn || 0} icon={TrendingUp} color="orange" />
       </div>
 
       {/* ─── Settings Toggle ─────────────────────────────────────────── */}
       <Card>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">Monetisation Settings</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Control how you earn from your content.</p>
+            <h3 className="font-semibold text-gray-900 dark:text-white">{t("creatorDash.monetisationSettingsTitle")}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t("creatorDash.monetisationSettingsDesc")}</p>
           </div>
           <div className="flex flex-wrap gap-4">
             <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
@@ -357,7 +359,7 @@ export default function CreatorDashboard() {
                 }}
                 className="w-4 h-4 text-zrp-red focus:ring-zrp-red"
               />
-              Tips
+              {t("creatorDash.tipsLabel")}
             </label>
             <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
               <input
@@ -373,7 +375,7 @@ export default function CreatorDashboard() {
                 }}
                 className="w-4 h-4 text-zrp-red focus:ring-zrp-red"
               />
-              Premium Posts
+              {t("creatorDash.premiumPostsLabel")}
             </label>
           </div>
         </div>
@@ -381,18 +383,18 @@ export default function CreatorDashboard() {
 
       {/* ─── Recent Tips ─────────────────────────────────────────────── */}
       <div>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Recent Tips</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("creatorDash.recentTipsTitle")}</h2>
         {recentTips.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">No tips received yet.</div>
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">{t("creatorDash.noTipsYet")}</div>
         ) : (
           <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
                 <tr>
-                  <th className="text-left p-3 font-medium">From</th>
-                  <th className="text-left p-3 font-medium">Amount</th>
-                  <th className="text-left p-3 font-medium">Message</th>
-                  <th className="text-left p-3 font-medium">Date</th>
+                  <th className="text-left p-3 font-medium">{t("creatorDash.tableFrom")}</th>
+                  <th className="text-left p-3 font-medium">{t("creatorDash.tableAmount")}</th>
+                  <th className="text-left p-3 font-medium">{t("creatorDash.tableMessage")}</th>
+                  <th className="text-left p-3 font-medium">{t("creatorDash.tableDate")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -427,10 +429,10 @@ export default function CreatorDashboard() {
 
       {/* ─── Premium Posts ───────────────────────────────────────────── */}
       <div>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Premium Posts</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("creatorDash.premiumPostsLabel")}</h2>
         {premiumPosts.length === 0 ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            No premium posts yet. Create a post and mark it as premium.
+            {t("creatorDash.noPremiumPostsYet")}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -444,7 +446,7 @@ export default function CreatorDashboard() {
                     ${pp.price.toFixed(2)}
                   </Badge>
                   <span className="text-gray-500 dark:text-gray-400">
-                    {pp.totalPurchases} purchase{pp.totalPurchases !== 1 ? "s" : ""}
+                    {t(pp.totalPurchases === 1 ? "creatorDash.purchaseCountSingular" : "creatorDash.purchaseCountPlural", { n: pp.totalPurchases })}
                   </span>
                 </div>
                 <div className="mt-2 text-xs text-gray-400 dark:text-gray-500">
@@ -470,7 +472,7 @@ export default function CreatorDashboard() {
             totals={studioData.content.totals}
           />
         ) : (
-          <div className="text-center py-16 text-gray-500 dark:text-gray-400">Failed to load content data.</div>
+          <div className="text-center py-16 text-gray-500 dark:text-gray-400">{t("creatorDash.failedLoadContent")}</div>
         )
       )}
 
@@ -486,7 +488,7 @@ export default function CreatorDashboard() {
             trend={studioData.audience.trend}
           />
         ) : (
-          <div className="text-center py-16 text-gray-500 dark:text-gray-400">Failed to load audience data.</div>
+          <div className="text-center py-16 text-gray-500 dark:text-gray-400">{t("creatorDash.failedLoadAudience")}</div>
         )
       )}
 
@@ -495,7 +497,7 @@ export default function CreatorDashboard() {
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
           <div className="bg-white dark:bg-gray-900 rounded-lg max-w-md w-full p-6 shadow-xl">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Withdraw Funds</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t("creatorDash.withdrawFundsTitle")}</h2>
               <button
                 onClick={() => setShowWithdrawModal(false)}
                 className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
@@ -506,7 +508,7 @@ export default function CreatorDashboard() {
             <form onSubmit={handleWithdraw} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Amount (USDC)
+                  {t("creatorDash.amountUsdcLabel")}
                 </label>
                 <Input
                   type="number"
@@ -514,22 +516,22 @@ export default function CreatorDashboard() {
                   min="1"
                   value={withdrawAmount}
                   onChange={(e) => setWithdrawAmount(e.target.value)}
-                  placeholder="Enter amount"
+                  placeholder={t("creatorDash.enterAmountPlaceholder")}
                   disabled={withdrawLoading}
                 />
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                  Available balance: ${(profile?.balance || 0).toFixed(2)}
+                  {t("creatorDash.availableBalance", { amount: (profile?.balance || 0).toFixed(2) })}
                 </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Solana Wallet Address
+                  {t("creatorDash.solanaWalletLabel")}
                 </label>
                 <Input
                   type="text"
                   value={walletAddress}
                   onChange={(e) => setWalletAddress(e.target.value)}
-                  placeholder="Enter your Solana wallet address"
+                  placeholder={t("creatorDash.enterWalletPlaceholder")}
                   disabled={withdrawLoading}
                 />
               </div>
@@ -545,21 +547,21 @@ export default function CreatorDashboard() {
                   onClick={() => setShowWithdrawModal(false)}
                   disabled={withdrawLoading}
                 >
-                  Cancel
+                  {t("action.cancel")}
                 </Button>
                 <Button type="submit" disabled={withdrawLoading}>
                   {withdrawLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Processing...
+                      {t("creatorDash.processing")}
                     </>
                   ) : (
-                    "Withdraw"
+                    t("creatorDash.withdrawButton")
                   )}
                 </Button>
               </div>
               <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
-                Withdrawals are processed within 24-48 hours.
+                {t("creatorDash.withdrawalsProcessedHint")}
               </p>
             </form>
           </div>

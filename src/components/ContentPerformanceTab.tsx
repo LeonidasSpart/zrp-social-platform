@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Eye, Heart, MessageCircle, Repeat } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface TopPost {
   id: string;
@@ -34,6 +35,7 @@ function formatCount(n: number) {
 }
 
 export default function ContentPerformanceTab({ topPosts, engagementTrend, totals }: ContentPerformanceTabProps) {
+  const { t } = useLanguage();
   const maxDay = Math.max(1, ...engagementTrend.map((d) => d.total));
 
   return (
@@ -42,25 +44,25 @@ export default function ContentPerformanceTab({ topPosts, engagementTrend, total
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <Eye className="w-4 h-4" /> Views
+            <Eye className="w-4 h-4" /> {t("contentPerf.views")}
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{formatCount(totals.views)}</p>
         </div>
         <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <Heart className="w-4 h-4" /> Likes
+            <Heart className="w-4 h-4" /> {t("contentPerf.likes")}
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{formatCount(totals.likes)}</p>
         </div>
         <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <MessageCircle className="w-4 h-4" /> Comments
+            <MessageCircle className="w-4 h-4" /> {t("contentPerf.comments")}
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{formatCount(totals.comments)}</p>
         </div>
         <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <Repeat className="w-4 h-4" /> Reposts
+            <Repeat className="w-4 h-4" /> {t("contentPerf.reposts")}
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{formatCount(totals.reposts)}</p>
         </div>
@@ -68,15 +70,15 @@ export default function ContentPerformanceTab({ topPosts, engagementTrend, total
 
       {/* ─── Engagement trend (last 30 days) ────────────────────────── */}
       <div>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Engagement, last 30 days</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Likes, comments, and reposts across all your posts.</p>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{t("contentPerf.engagementTitle")}</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t("contentPerf.engagementSubtitle")}</p>
         <div className="flex items-end gap-[2px] h-32 border-b border-gray-200 dark:border-gray-700 pb-1">
           {engagementTrend.map((d) => (
             <div
               key={d.date}
               className="flex-1 bg-zrp-red/70 hover:bg-zrp-red rounded-t transition"
               style={{ height: `${Math.max(2, (d.total / maxDay) * 100)}%` }}
-              title={`${d.date}: ${d.total} engagement${d.total === 1 ? "" : "s"}`}
+              title={t(d.total === 1 ? "contentPerf.engagementTooltipSingular" : "contentPerf.engagementTooltipPlural", { date: d.date, count: d.total })}
             />
           ))}
         </div>
@@ -88,9 +90,9 @@ export default function ContentPerformanceTab({ topPosts, engagementTrend, total
 
       {/* ─── Top posts ──────────────────────────────────────────────── */}
       <div>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Top posts</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("contentPerf.topPostsTitle")}</h2>
         {topPosts.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">No posts yet.</div>
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">{t("contentPerf.noPostsYet")}</div>
         ) : (
           <div className="space-y-3">
             {topPosts.map((post, i) => (
@@ -108,7 +110,7 @@ export default function ContentPerformanceTab({ topPosts, engagementTrend, total
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-800 dark:text-gray-200 line-clamp-2">{post.content || "(media post)"}</p>
+                  <p className="text-sm text-gray-800 dark:text-gray-200 line-clamp-2">{post.content || t("contentPerf.mediaPostFallback")}</p>
                   <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
                     <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> {formatCount(post.views)}</span>
                     <span className="flex items-center gap-1"><Heart className="w-3 h-3" /> {formatCount(post._count.likes)}</span>
