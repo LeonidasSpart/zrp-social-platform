@@ -50,6 +50,13 @@ interface TrustData {
 
   signals: TrustSignal[];
 
+  additionalSignals: {
+    key: string;
+    title: string;
+    description: string;
+    verified: boolean;
+  }[];
+
   counts: {
     posts: number;
     followers: number;
@@ -670,6 +677,53 @@ export default function TrustPassportPage(
             })}
           </div>
         </section>
+
+        {data.additionalSignals.length > 0 && (
+          <section className="mt-8">
+            <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
+              {t("trust.additionalSignalsHeading")}
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              {t("trust.additionalSignalsNote")}
+            </p>
+            <div className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+              {data.additionalSignals.map((signal, index) => (
+                <div
+                  key={signal.key}
+                  className={`p-4 flex items-start gap-3 ${
+                    index !== data.additionalSignals.length - 1
+                      ? "border-b border-gray-200 dark:border-gray-800"
+                      : ""
+                  }`}
+                >
+                  {signal.verified ? (
+                    <CheckCircle2 className="w-5 h-5 text-zrp-red flex-shrink-0 mt-0.5" />
+                  ) : (
+                    <Circle className="w-5 h-5 text-gray-300 dark:text-gray-600 flex-shrink-0 mt-0.5" />
+                  )}
+                  <div className="min-w-0">
+                    <div
+                      className={`font-medium text-sm ${
+                        signal.verified
+                          ? "text-gray-900 dark:text-white"
+                          : "text-gray-500 dark:text-gray-400"
+                      }`}
+                    >
+                      {signal.key === "walletVerified"
+                        ? t("trust.signalWalletVerifiedTitle")
+                        : signal.title}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {signal.key === "walletVerified"
+                        ? t("trust.signalWalletVerifiedDesc")
+                        : signal.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* =========================================================
             COMMUNITY INFORMATION

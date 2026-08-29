@@ -33,6 +33,7 @@ export async function GET(_request: Request, props: RouteContext) {
         banned: true,
         isPrivate: true,
         plan: true,
+        verifiedSolanaWallet: true,
 
         _count: {
           select: {
@@ -604,6 +605,28 @@ export async function GET(_request: Request, props: RouteContext) {
 
     /*
      * ---------------------------------------------------------------
+     * ADDITIONAL SIGNALS (do not affect the score)
+     * ---------------------------------------------------------------
+     *
+     * The scoring formula above is intentionally unchanged - these are
+     * shown separately rather than folded into it. Wallet verification
+     * uses the cryptographically verified wallet field only (proof of
+     * on-chain ownership), never the unverified payout address, and
+     * never the wallet address itself - only whether one is verified.
+     */
+
+    const additionalSignals = [
+      {
+        key: "walletVerified",
+        title: "Wallet verified",
+        description:
+          "This account has a cryptographically verified crypto wallet linked to it.",
+        verified: Boolean(user.verifiedSolanaWallet),
+      },
+    ];
+
+    /*
+     * ---------------------------------------------------------------
      * PRIVACY
      * ---------------------------------------------------------------
      *
@@ -615,6 +638,7 @@ export async function GET(_request: Request, props: RouteContext) {
      * - internal security signals
      * - private messages
      * - private account information
+     * - the wallet address itself (only whether it is verified)
      */
 
     return NextResponse.json({
@@ -647,6 +671,8 @@ export async function GET(_request: Request, props: RouteContext) {
       },
 
       signals,
+
+      additionalSignals,
 
       counts: {
         posts: user._count.posts,

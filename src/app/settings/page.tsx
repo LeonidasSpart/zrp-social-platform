@@ -7,7 +7,7 @@ import Link from "next/link";
 import {
   Check, X, Globe, MapPin, User, Key, Calendar, Camera, Trash2, Loader2,
   BellOff, ChevronRight, Ban, Mail, DollarSign, TrendingUp, Wallet, Lock,
-  Ticket, Shield, Bell, UserCircle, CreditCard, LifeBuoy,
+  Ticket, Shield, Bell, UserCircle, CreditCard, LifeBuoy, Download,
 } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import EmailPreferences from "@/components/EmailPreferences";
@@ -752,6 +752,31 @@ export default function SettingsPage() {
                     update();
                   }}
                 />
+              </div>
+
+              {/* ─── Export My Data ─────────────────────────────────────────── */}
+              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.exportDataHeading")}</h2>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">{t("settings.exportData")}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {t("settings.exportDataDesc")}
+                    </p>
+                  </div>
+                  {/* Plain <a>, not <Link>: this triggers a real file
+                      download (Content-Disposition: attachment), which
+                      needs an actual browser navigation rather than
+                      Next.js client-side routing. */}
+                  {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+                  <a
+                    href="/api/settings/export-data"
+                    className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition flex-shrink-0"
+                  >
+                    <Download className="w-4 h-4 inline mr-1" />
+                    {t("settings.exportData")}
+                  </a>
+                </div>
               </div>
 
               {/* ─── Delete Account Section ──────────────────────────────────── */}
