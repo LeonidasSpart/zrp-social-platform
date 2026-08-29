@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { PublicKey } from "@solana/web3.js";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
@@ -11,7 +12,7 @@ export async function PUT(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { name, bio, location, country, website, category, showCategory } = body;
+    const { name, bio, location, country, website, category, showCategory, solanaWallet } = body;
 
     // Only touch a field if the request actually included it. The main
     // profile-edit form sends name/bio/location/country/website together,
@@ -28,6 +29,23 @@ export async function PUT(req: NextRequest) {
     if ("category" in body) data.category = category || null;
     if ("showCategory" in body) data.showCategory = !!showCategory;
 
+    if ("solanaWallet" in body) {
+      const trimmed = typeof solanaWallet === "string" ? solanaWallet.trim() : "";
+
+      if (trimmed) {
+        try {
+          new PublicKey(trimmed);
+        } catch {
+          return NextResponse.json(
+            { error: "Invalid Solana wallet address" },
+            { status: 400 }
+          );
+        }
+      }
+
+      data.solanaWallet = trimmed || null;
+    }
+
     const user = await prisma.user.update({
       where: { id: session.user.id },
       data,
@@ -43,6 +61,7 @@ export async function PUT(req: NextRequest) {
       website: user.website,
       category: user.category,
       showCategory: user.showCategory,
+      solanaWallet: user.solanaWallet,
     });
   } catch (error) {
     console.error("Error updating user:", error);
