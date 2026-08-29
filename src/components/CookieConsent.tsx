@@ -38,10 +38,9 @@ export default function CookieConsent() {
             We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.{" "}
             <Link
               href="/privacy"
-              className="text-zrp-red hover:underline"
-              aria-label="Learn more about our privacy policy"
+              className="text-zrp-darkRed dark:text-zrp-red hover:underline"
             >
-              Learn more
+              Learn more about our privacy policy
             </Link>
             .
           </p>
@@ -55,7 +54,7 @@ export default function CookieConsent() {
           </button>
           <button
             onClick={acceptCookies}
-            className="px-4 py-2 text-sm bg-zrp-red text-white rounded-lg hover:bg-zrp-darkRed transition"
+            className="px-4 py-2 text-sm bg-zrp-darkRed text-white rounded-lg hover:bg-zrp-red transition"
           >
             Accept All
           </button>

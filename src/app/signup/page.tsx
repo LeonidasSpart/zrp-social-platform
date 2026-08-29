@@ -307,7 +307,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading || usernameStatus === "checking"}
-              className="w-full bg-zrp-red hover:bg-zrp-darkRed text-white py-3.5 sm:py-3 rounded-full font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm text-base"
+              className="w-full bg-zrp-darkRed hover:bg-zrp-red text-white py-3.5 sm:py-3 rounded-full font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm text-base"
             >
               {loading ? t("auth.creatingAccount") : t("auth.createAccount")}
             </button>
@@ -315,7 +315,7 @@ export default function SignupPage() {
 
           <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
             {t("auth.alreadyHaveAccount")}{" "}
-            <Link href="/login" className="text-zrp-red dark:text-zrp-red hover:underline font-medium">
+            <Link href="/login" className="text-zrp-darkRed dark:text-zrp-red hover:underline font-medium">
               {t("auth.signIn")}
             </Link>
           </p>

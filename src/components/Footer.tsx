@@ -32,7 +32,7 @@ export default function Footer() {
               {t("footer.tagline")}
             </p>
 
-            <div className="mt-4 inline-flex items-center gap-1.5 bg-zrp-red/10 text-zrp-red text-xs font-medium font-inter px-3 py-1.5 rounded-full">
+            <div className="mt-4 inline-flex items-center gap-1.5 bg-zrp-red/10 text-zrp-darkRed dark:text-zrp-red text-xs font-medium font-inter px-3 py-1.5 rounded-full">
               {t("footer.charityBadge")}
             </div>
           </div>
