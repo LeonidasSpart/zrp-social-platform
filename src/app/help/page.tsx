@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   ChevronDown,
   ChevronUp,
@@ -64,108 +65,9 @@ interface PlanFeature {
   enterprise: boolean | string;
 }
 
-const planFeatures: PlanFeature[] = [
-  {
-    name: "Post length",
-    free: "280 chars",
-    pro: "1,000 chars",
-    business: "5,000 chars",
-    enterprise: "Unlimited",
-  },
-  {
-    name: "Images per post",
-    free: "1",
-    pro: "4",
-    business: "10",
-    enterprise: "Unlimited",
-  },
-  {
-    name: "Video upload",
-    free: "32 MB",
-    pro: "100 MB",
-    business: "500 MB",
-    enterprise: "2 GB",
-  },
-  {
-    name: "Polls",
-    free: "✓",
-    pro: "✓",
-    business: "✓",
-    enterprise: "✓",
-  },
-  {
-    name: "Scheduled posts",
-    free: "5/month",
-    pro: "50/month",
-    business: "500/month",
-    enterprise: "Unlimited",
-  },
-  {
-    name: "Analytics",
-    free: "Basic",
-    pro: "Advanced",
-    business: "Full",
-    enterprise: "Custom",
-  },
-  {
-    name: "Verified badge",
-    free: "—",
-    pro: "✓",
-    business: "✓",
-    enterprise: "✓",
-  },
-  {
-    name: "Custom profile URL",
-    free: "—",
-    pro: "✓",
-    business: "✓",
-    enterprise: "✓",
-  },
-  {
-    name: "Recruitment profiles",
-    free: "—",
-    pro: "—",
-    business: "✓",
-    enterprise: "✓",
-  },
-  {
-    name: "Article publishing",
-    free: "—",
-    pro: "—",
-    business: "✓",
-    enterprise: "✓",
-  },
-  {
-    name: "Team management",
-    free: "—",
-    pro: "—",
-    business: "✓",
-    enterprise: "✓",
-  },
-  {
-    name: "API access",
-    free: "—",
-    pro: "—",
-    business: "✓",
-    enterprise: "✓",
-  },
-  {
-    name: "Priority support",
-    free: "—",
-    pro: "✓",
-    business: "✓",
-    enterprise: "24/7",
-  },
-  {
-    name: "Charity contribution",
-    free: "35%",
-    pro: "35%",
-    business: "35%",
-    enterprise: "35%",
-  },
-];
-
 export default function HelpPage() {
+  const { t } = useLanguage();
+
   const [openSection, setOpenSection] = useState<string | null>(
     "account-types"
   );
@@ -176,20 +78,118 @@ export default function HelpPage() {
     setOpenSection(openSection === id ? null : id);
   };
 
+  const planFeatures: PlanFeature[] = [
+    {
+      name: t("help.planFeature.name.postLength"),
+      free: t("help.planFeature.postLength.free"),
+      pro: t("help.planFeature.postLength.pro"),
+      business: t("help.planFeature.postLength.business"),
+      enterprise: t("help.plan.unlimited"),
+    },
+    {
+      name: t("help.planFeature.name.imagesPerPost"),
+      free: "1",
+      pro: "4",
+      business: "10",
+      enterprise: t("help.plan.unlimited"),
+    },
+    {
+      name: t("help.planFeature.name.videoUpload"),
+      free: "32 MB",
+      pro: "100 MB",
+      business: "500 MB",
+      enterprise: "2 GB",
+    },
+    {
+      name: t("help.planFeature.name.polls"),
+      free: "✓",
+      pro: "✓",
+      business: "✓",
+      enterprise: "✓",
+    },
+    {
+      name: t("help.planFeature.name.scheduledPosts"),
+      free: t("help.planFeature.scheduledPosts.free"),
+      pro: t("help.planFeature.scheduledPosts.pro"),
+      business: t("help.planFeature.scheduledPosts.business"),
+      enterprise: t("help.plan.unlimited"),
+    },
+    {
+      name: t("help.planFeature.name.analytics"),
+      free: t("help.planFeature.analytics.free"),
+      pro: t("help.planFeature.analytics.pro"),
+      business: t("help.planFeature.analytics.business"),
+      enterprise: t("help.planFeature.analytics.enterprise"),
+    },
+    {
+      name: t("help.planFeature.name.verifiedBadge"),
+      free: "—",
+      pro: "✓",
+      business: "✓",
+      enterprise: "✓",
+    },
+    {
+      name: t("help.planFeature.name.customProfileUrl"),
+      free: "—",
+      pro: "✓",
+      business: "✓",
+      enterprise: "✓",
+    },
+    {
+      name: t("help.planFeature.name.recruitmentProfiles"),
+      free: "—",
+      pro: "—",
+      business: "✓",
+      enterprise: "✓",
+    },
+    {
+      name: t("help.planFeature.name.articlePublishing"),
+      free: "—",
+      pro: "—",
+      business: "✓",
+      enterprise: "✓",
+    },
+    {
+      name: t("help.planFeature.name.teamManagement"),
+      free: "—",
+      pro: "—",
+      business: "✓",
+      enterprise: "✓",
+    },
+    {
+      name: t("help.planFeature.name.apiAccess"),
+      free: "—",
+      pro: "—",
+      business: "✓",
+      enterprise: "✓",
+    },
+    {
+      name: t("help.planFeature.name.prioritySupport"),
+      free: "—",
+      pro: "✓",
+      business: "✓",
+      enterprise: "24/7",
+    },
+    {
+      name: t("help.planFeature.name.charityContribution"),
+      free: "35%",
+      pro: "35%",
+      business: "35%",
+      enterprise: "35%",
+    },
+  ];
+
   const sections: HelpSection[] = [
     {
       id: "account-types",
       number: "01",
-      title: "Account Types & Plans",
-      subtitle: "Choose the ZRP experience that fits you",
+      title: t("help.section.accountTypes.title"),
+      subtitle: t("help.section.accountTypes.subtitle"),
       icon: Users,
       content: (
         <div className="space-y-6">
           <p className="help-text">
-            ZRP Social offers flexible plans for individuals, creators,
-            businesses, teams, and larger organisations. Every plan is part of
-            the same ZRP ecosystem and contributes to our social-impact
-            commitment.
+            {t("help.accountTypes.intro")}
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -197,14 +197,14 @@ export default function HelpPage() {
               icon={User}
               iconClass="text-zrp-charcoal dark:text-white"
               accent="border-white/10"
-              title="Free"
+              title={t("help.plan.free")}
               price="$0"
-              period="/ month"
-              description="For everyday users"
+              period={t("help.plan.perMonth")}
+              description={t("help.plan.free.desc")}
               features={[
-                "Core social features",
-                "280 character posts",
-                "5 scheduled posts/month",
+                t("help.plan.free.feature1"),
+                t("help.plan.free.feature2"),
+                t("help.plan.free.feature3"),
               ]}
             />
 
@@ -213,14 +213,14 @@ export default function HelpPage() {
               iconClass="text-zrp-red"
               accent="border-zrp-red/50"
               featured
-              title="Pro"
+              title={t("help.plan.pro")}
               price="$9.99"
-              period="/ month"
-              description="For creators"
+              period={t("help.plan.perMonth")}
+              description={t("help.plan.pro.desc")}
               features={[
-                "1,000 character posts",
-                "Verified badge",
-                "Advanced analytics",
+                t("help.plan.pro.feature1"),
+                t("help.plan.pro.feature2"),
+                t("help.plan.pro.feature3"),
               ]}
             />
 
@@ -228,14 +228,14 @@ export default function HelpPage() {
               icon={Building2}
               iconClass="text-zrp-charcoal dark:text-white"
               accent="border-zrp-red/20"
-              title="Business"
+              title={t("help.plan.business")}
               price="$49.99"
-              period="/ month"
-              description="For teams & companies"
+              period={t("help.plan.perMonth")}
+              description={t("help.plan.business.desc")}
               features={[
-                "5,000 character posts",
-                "Article publishing",
-                "Recruitment profiles",
+                t("help.plan.business.feature1"),
+                t("help.plan.business.feature2"),
+                t("help.plan.business.feature3"),
               ]}
             />
 
@@ -243,14 +243,14 @@ export default function HelpPage() {
               icon={Crown}
               iconClass="text-zrp-red"
               accent="border-zrp-red/20"
-              title="Enterprise"
-              price="Custom"
+              title={t("help.plan.enterprise")}
+              price={t("help.plan.enterprisePrice")}
               period=""
-              description="For larger organisations"
+              description={t("help.plan.enterprise.desc")}
               features={[
-                "Unlimited content",
-                "API access",
-                "Dedicated support",
+                t("help.plan.enterprise.feature1"),
+                t("help.plan.enterprise.feature2"),
+                t("help.plan.enterprise.feature3"),
               ]}
             />
           </div>
@@ -263,13 +263,11 @@ export default function HelpPage() {
 
               <div>
                 <h3 className="font-orbitron font-bold text-lg">
-                  Built for impact
+                  {t("help.accountTypes.impactTitle")}
                 </h3>
 
                 <p className="mt-1 text-sm text-white/85 leading-6">
-                  ZRP is committed to directing 35% of platform profits toward
-                  charitable causes supporting orphans, schools, hospitals, and
-                  climate relief.
+                  {t("help.accountTypes.impactDesc")}
                 </p>
               </div>
             </div>
@@ -281,51 +279,50 @@ export default function HelpPage() {
     {
       id: "business-features",
       number: "02",
-      title: "Business & Enterprise",
-      subtitle: "Professional tools for organisations",
+      title: t("help.section.businessFeatures.title"),
+      subtitle: t("help.section.businessFeatures.subtitle"),
       icon: Briefcase,
       content: (
         <div className="space-y-6">
           <p className="help-text">
-            Business and Enterprise accounts extend ZRP from a social network
-            into a professional communication and publishing platform.
+            {t("help.businessFeatures.intro")}
           </p>
 
           <div className="grid md:grid-cols-2 gap-4">
             <FeatureCard
               icon={PenTool}
-              title="Article Publishing"
-              description="Publish long-form content with rich media for thought leadership, company updates, research, and industry analysis."
+              title={t("help.businessFeatures.f1Title")}
+              description={t("help.businessFeatures.f1Desc")}
             />
 
             <FeatureCard
               icon={Briefcase}
-              title="Recruitment Profiles"
-              description="Present your organisation, publish opportunities, and build a professional presence for candidates."
+              title={t("help.businessFeatures.f2Title")}
+              description={t("help.businessFeatures.f2Desc")}
             />
 
             <FeatureCard
               icon={Users}
-              title="Team Management"
-              description="Add team members, assign roles, and manage permissions across your organisation."
+              title={t("help.businessFeatures.f3Title")}
+              description={t("help.businessFeatures.f3Desc")}
             />
 
             <FeatureCard
               icon={FileText}
-              title="Long-Form Content"
-              description="Business accounts can publish substantially longer posts for detailed insights and professional communication."
+              title={t("help.businessFeatures.f4Title")}
+              description={t("help.businessFeatures.f4Desc")}
             />
 
             <FeatureCard
               icon={Megaphone}
-              title="Promoted Content"
-              description="Business-oriented promotional tools can help organisations increase the reach of their content."
+              title={t("help.businessFeatures.f5Title")}
+              description={t("help.businessFeatures.f5Desc")}
             />
 
             <FeatureCard
               icon={Shield}
-              title="Enhanced Support"
-              description="Higher-tier accounts receive priority support and additional assistance depending on their plan."
+              title={t("help.businessFeatures.f6Title")}
+              description={t("help.businessFeatures.f6Desc")}
             />
           </div>
         </div>
@@ -335,14 +332,13 @@ export default function HelpPage() {
     {
       id: "account-limits",
       number: "03",
-      title: "Account Limits",
-      subtitle: "Compare features and usage limits",
+      title: t("help.section.accountLimits.title"),
+      subtitle: t("help.section.accountLimits.subtitle"),
       icon: Lock,
       content: (
         <div className="space-y-5">
           <p className="help-text">
-            ZRP uses plan-based limits to help maintain platform performance,
-            reduce abuse, and give users predictable access to features.
+            {t("help.accountLimits.intro")}
           </p>
 
           <div className="overflow-x-auto rounded-2xl border border-white/10 dark:border-zrp-charcoal">
@@ -350,23 +346,23 @@ export default function HelpPage() {
               <thead>
                 <tr className="bg-zrp-charcoal text-white">
                   <th className="px-4 py-4 text-left font-orbitron">
-                    Feature
+                    {t("help.accountLimits.tableFeature")}
                   </th>
 
                   <th className="px-4 py-4 text-center font-orbitron">
-                    Free
+                    {t("help.plan.free")}
                   </th>
 
                   <th className="px-4 py-4 text-center font-orbitron text-zrp-red">
-                    Pro
+                    {t("help.plan.pro")}
                   </th>
 
                   <th className="px-4 py-4 text-center font-orbitron">
-                    Business
+                    {t("help.plan.business")}
                   </th>
 
                   <th className="px-4 py-4 text-center font-orbitron">
-                    Enterprise
+                    {t("help.plan.enterprise")}
                   </th>
                 </tr>
               </thead>
@@ -403,8 +399,7 @@ export default function HelpPage() {
               <Zap className="w-5 h-5 text-zrp-red flex-shrink-0" />
 
               <p className="text-sm text-zrp-charcoal/75 dark:text-white/70">
-                Limits may change as ZRP evolves. Current limits displayed on
-                the platform take precedence over this informational page.
+                {t("help.accountLimits.note")}
               </p>
             </div>
           </div>
@@ -415,39 +410,38 @@ export default function HelpPage() {
     {
       id: "upgrade",
       number: "04",
-      title: "Subscriptions & Upgrades",
-      subtitle: "Manage your ZRP plan",
+      title: t("help.section.upgrade.title"),
+      subtitle: t("help.section.upgrade.subtitle"),
       icon: CreditCard,
       content: (
         <div className="space-y-5">
           <p className="help-text">
-            Paid plans unlock additional publishing, analytics, business, and
-            support capabilities.
+            {t("help.upgrade.intro")}
           </p>
 
           <div className="grid md:grid-cols-4 gap-3">
             <StepCard
               number="01"
-              title="Open Settings"
-              text="Go to your ZRP account settings."
+              title={t("help.upgrade.step1Title")}
+              text={t("help.upgrade.step1Text")}
             />
 
             <StepCard
               number="02"
-              title="Choose Plan"
-              text="Open the subscription section."
+              title={t("help.upgrade.step2Title")}
+              text={t("help.upgrade.step2Text")}
             />
 
             <StepCard
               number="03"
-              title="Review"
-              text="Review the plan and available features."
+              title={t("help.upgrade.step3Title")}
+              text={t("help.upgrade.step3Text")}
             />
 
             <StepCard
               number="04"
-              title="Activate"
-              text="Complete the available payment flow."
+              title={t("help.upgrade.step4Title")}
+              text={t("help.upgrade.step4Text")}
             />
           </div>
 
@@ -457,20 +451,18 @@ export default function HelpPage() {
 
               <div>
                 <h3 className="font-orbitron font-bold">
-                  Billing & payments
+                  {t("help.upgrade.billingTitle")}
                 </h3>
 
                 <p className="mt-2 text-sm text-white/65 leading-6">
-                  Payment methods, pricing, taxes, renewal terms, and
-                  cancellation options are presented during the applicable
-                  checkout process.
+                  {t("help.upgrade.billingDesc")}
                 </p>
 
                 <Link
                   href="/contact"
                   className="inline-flex items-center gap-2 mt-4 text-sm text-zrp-red hover:text-white transition"
                 >
-                  Contact support
+                  {t("help.upgrade.contactSupport")}
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -483,40 +475,38 @@ export default function HelpPage() {
     {
       id: "creator-economy",
       number: "05",
-      title: "Creators & Digital Economy",
-      subtitle: "Build an audience and participate in the ZRP ecosystem",
+      title: t("help.section.creatorEconomy.title"),
+      subtitle: t("help.section.creatorEconomy.subtitle"),
       icon: Sparkles,
       content: (
         <div className="space-y-6">
           <p className="help-text">
-            ZRP gives creators tools to publish, build an audience, understand
-            engagement, and participate in platform monetisation features where
-            available.
+            {t("help.creatorEconomy.intro")}
           </p>
 
           <div className="grid md:grid-cols-2 gap-4">
             <FeatureCard
               icon={BarChart3}
-              title="Creator Analytics"
-              description="Understand audience engagement, reach, and content performance with the analytics available on your plan."
+              title={t("help.creatorEconomy.f1Title")}
+              description={t("help.creatorEconomy.f1Desc")}
             />
 
             <FeatureCard
               icon={BadgeCheck}
-              title="Verified Identity"
-              description="Eligible paid and professional accounts may have access to verification features according to ZRP's current policies."
+              title={t("help.creatorEconomy.f2Title")}
+              description={t("help.creatorEconomy.f2Desc")}
             />
 
             <FeatureCard
               icon={CircleDollarSign}
-              title="Creator Monetisation"
-              description="Where enabled, creators can participate in monetisation features such as tips and premium content."
+              title={t("help.creatorEconomy.f3Title")}
+              description={t("help.creatorEconomy.f3Desc")}
             />
 
             <FeatureCard
               icon={Wallet}
-              title="Digital Payments"
-              description="Certain creator features may support digital payments or blockchain-based payment infrastructure where enabled by ZRP."
+              title={t("help.creatorEconomy.f4Title")}
+              description={t("help.creatorEconomy.f4Desc")}
             />
           </div>
 
@@ -526,14 +516,11 @@ export default function HelpPage() {
 
               <div>
                 <h3 className="font-orbitron font-bold text-zrp-charcoal dark:text-white">
-                  Web3-ready by design
+                  {t("help.creatorEconomy.web3Title")}
                 </h3>
 
                 <p className="mt-2 text-sm leading-6 text-zrp-charcoal/70 dark:text-white/65">
-                  ZRP can integrate modern digital ownership and payment
-                  technologies without making them a requirement for ordinary
-                  users. The goal is simple: powerful technology underneath,
-                  familiar social experiences on top.
+                  {t("help.creatorEconomy.web3Desc")}
                 </p>
               </div>
             </div>
@@ -545,37 +532,36 @@ export default function HelpPage() {
     {
       id: "corporate-accounts",
       number: "06",
-      title: "Corporate Accounts",
-      subtitle: "Professional identity for organisations",
+      title: t("help.section.corporateAccounts.title"),
+      subtitle: t("help.section.corporateAccounts.subtitle"),
       icon: Building2,
       content: (
         <div className="space-y-5">
           <p className="help-text">
-            Corporate accounts are designed for organisations, brands,
-            companies, and professional teams.
+            {t("help.corporateAccounts.intro")}
           </p>
 
           <div className="grid md:grid-cols-2 gap-3">
-            <ChecklistItem text="Verified organisation identity" />
-            <ChecklistItem text="Custom profile branding" />
-            <ChecklistItem text="Multiple team members" />
-            <ChecklistItem text="Role-based permissions" />
-            <ChecklistItem text="Advanced analytics" />
-            <ChecklistItem text="Recruitment tools" />
-            <ChecklistItem text="Article publishing" />
-            <ChecklistItem text="Priority support" />
+            <ChecklistItem text={t("help.corporateAccounts.c1")} />
+            <ChecklistItem text={t("help.corporateAccounts.c2")} />
+            <ChecklistItem text={t("help.corporateAccounts.c3")} />
+            <ChecklistItem text={t("help.corporateAccounts.c4")} />
+            <ChecklistItem text={t("help.corporateAccounts.c5")} />
+            <ChecklistItem text={t("help.corporateAccounts.c6")} />
+            <ChecklistItem text={t("help.corporateAccounts.c7")} />
+            <ChecklistItem text={t("help.corporateAccounts.c8")} />
           </div>
 
           <div className="rounded-xl bg-zrp-red/5 border border-zrp-red/20 p-5">
             <p className="text-sm text-zrp-charcoal/75 dark:text-white/70">
-              Looking for an Enterprise configuration?
+              {t("help.corporateAccounts.enterpriseQuestion")}
             </p>
 
             <Link
               href="/contact"
               className="inline-flex items-center gap-2 mt-2 text-zrp-red font-semibold text-sm hover:underline"
             >
-              Talk to ZRP
+              {t("help.corporateAccounts.talkToZrp")}
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -1198,7 +1184,7 @@ export default function HelpPage() {
             href="/"
             className="inline-flex items-center gap-2 text-white/65 hover:text-white text-sm transition mb-10"
           >
-            ← Back to ZRP
+            ← {t("help.backToZrp")}
           </Link>
 
           <div className="grid lg:grid-cols-[1.4fr_0.6fr] gap-12 items-center">
@@ -1209,16 +1195,14 @@ export default function HelpPage() {
               </div>
 
               <h1 className="font-orbitron text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.05]">
-                Your gateway to
+                {t("help.hero.titleLine1")}
                 <span className="block text-zrp-red mt-2">
                   ZRP Social.
                 </span>
               </h1>
 
               <p className="mt-6 max-w-2xl text-base sm:text-lg text-white/65 leading-8">
-                Learn how ZRP works, manage your account, understand our
-                plans, protect your privacy, and get the most from the
-                platform.
+                {t("help.hero.subtitle")}
               </p>
 
               <div className="mt-8 max-w-2xl relative">
@@ -1228,19 +1212,19 @@ export default function HelpPage() {
                   type="search"
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Search help topics..."
+                  placeholder={t("help.hero.searchPlaceholder")}
                   className="w-full rounded-2xl border border-white/10 bg-white/10 backdrop-blur-xl pl-14 pr-5 py-4 text-white placeholder:text-white/40 outline-none focus:border-zrp-red/70 focus:ring-2 focus:ring-zrp-red/20 transition"
                 />
               </div>
 
               <div className="mt-5 flex flex-wrap gap-2">
                 {[
-                  "Plans",
-                  "Privacy",
-                  "Support",
-                  "Moderation",
-                  "Creators",
-                  "Trust Passport",
+                  t("help.hero.tagPlans"),
+                  t("help.hero.tagPrivacy"),
+                  t("help.hero.tagSupport"),
+                  t("help.hero.tagModeration"),
+                  t("help.hero.tagCreators"),
+                  t("help.hero.tagTrustPassport"),
                 ].map((tag) => (
                   <button
                     key={tag}
@@ -1270,50 +1254,50 @@ export default function HelpPage() {
                         </div>
 
                         <div className="text-white/40 text-xs">
-                          Social ecosystem
+                          {t("help.hero.cardSubtitle")}
                         </div>
                       </div>
                     </div>
 
                     <div className="text-xs text-zrp-red font-mono">
-                      ONLINE
+                      {t("help.hero.cardStatus")}
                     </div>
                   </div>
 
                   <div className="space-y-3">
                     <GlassStat
                       icon={Shield}
-                      label="Privacy"
-                      value="Protected"
+                      label={t("help.hero.statPrivacyLabel")}
+                      value={t("help.hero.statPrivacyValue")}
                     />
 
                     <GlassStat
                       icon={Globe}
-                      label="Network"
-                      value="Global"
+                      label={t("help.hero.statNetworkLabel")}
+                      value={t("help.hero.statNetworkValue")}
                     />
 
                     <GlassStat
                       icon={Zap}
-                      label="Experience"
-                      value="Real-time"
+                      label={t("help.hero.statExperienceLabel")}
+                      value={t("help.hero.statExperienceValue")}
                     />
 
                     <GlassStat
                       icon={Heart}
-                      label="Impact"
+                      label={t("help.hero.statImpactLabel")}
                       value="35%"
                     />
 
                     <GlassStat
                       icon={ShieldCheck}
-                      label="Trust"
-                      value="Transparent"
+                      label={t("help.hero.statTrustLabel")}
+                      value={t("help.hero.statTrustValue")}
                     />
                   </div>
 
                   <div className="mt-6 pt-5 border-t border-white/10 text-xs text-white/35 font-mono">
-                    SWISS · EUROPE · PRIVACY · FREEDOM
+                    {t("help.hero.footerTag")}
                   </div>
                 </div>
               </div>
@@ -1328,7 +1312,7 @@ export default function HelpPage() {
         <div className="max-w-6xl mx-auto px-4 py-5">
           <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
             <span className="flex-shrink-0 text-xs font-orbitron uppercase tracking-wider text-zrp-charcoal/40 dark:text-white/40">
-              Explore
+              {t("help.nav.explore")}
             </span>
 
             {sections.slice(0, 12).map((section) => (
@@ -1350,30 +1334,33 @@ export default function HelpPage() {
         <div className="grid md:grid-cols-3 gap-4 mb-12">
           <QuickCard
             icon={BookOpen}
-            title="Learn"
-            description="Understand ZRP features, plans, privacy, account controls, and Trust Passport."
+            title={t("help.quickCard.learnTitle")}
+            description={t("help.quickCard.learnDesc")}
           />
 
           <QuickCard
             icon={Shield}
-            title="Stay protected"
-            description="Learn about security, Trust Passport, reporting, moderation, and privacy."
+            title={t("help.quickCard.protectedTitle")}
+            description={t("help.quickCard.protectedDesc")}
           />
 
           <QuickCard
             icon={LifeBuoy}
-            title="Get support"
-            description="Open a support ticket when you need help from the ZRP team."
+            title={t("help.quickCard.supportTitle")}
+            description={t("help.quickCard.supportDesc")}
           />
         </div>
 
         {searchQuery && (
           <div className="mb-6 text-sm text-zrp-charcoal/50 dark:text-white/50">
-            Showing{" "}
+            {t("help.search.showingPrefix")}{" "}
             <strong className="text-zrp-charcoal dark:text-white">
               {filteredSections.length}
             </strong>{" "}
-            help topic{filteredSections.length === 1 ? "" : "s"} for "
+            {filteredSections.length === 1
+              ? t("help.search.topicWord")
+              : t("help.search.topicsWord")}{" "}
+            {t("help.search.forQuery")} "
             {searchQuery}"
           </div>
         )}
@@ -1450,18 +1437,18 @@ export default function HelpPage() {
               <Search className="w-10 h-10 mx-auto text-zrp-red/50" />
 
               <h3 className="mt-4 font-orbitron font-bold text-lg">
-                No matching help topics
+                {t("help.noResults.title")}
               </h3>
 
               <p className="mt-2 text-sm text-zrp-charcoal/50 dark:text-white/50">
-                Try another search term or contact ZRP support.
+                {t("help.noResults.desc")}
               </p>
 
               <button
                 onClick={() => setSearchQuery("")}
                 className="mt-5 text-sm font-semibold text-zrp-red hover:underline"
               >
-                Clear search
+                {t("help.noResults.clear")}
               </button>
             </div>
           )}
@@ -1585,6 +1572,8 @@ function PlanCard({
   features: string[];
   featured?: boolean;
 }) {
+  const { t } = useLanguage();
+
   return (
     <div
       className={`relative rounded-2xl border ${accent} ${
@@ -1595,7 +1584,7 @@ function PlanCard({
     >
       {featured && (
         <div className="absolute -top-3 right-4 rounded-full bg-zrp-red px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider">
-          Popular
+          {t("help.plan.popular")}
         </div>
       )}
 
