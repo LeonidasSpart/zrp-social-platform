@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import AIChat from "@/components/AI/AIChat";
+import AIPageSubtitle from "@/components/AI/AIPageSubtitle";
 
 export const metadata: Metadata = {
   title: "ZRP AI – ZRP Social",
@@ -13,12 +14,7 @@ export default function AIPage() {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           🤖 ZRP AI
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">
-          Ask anything. Get help with posts, learn about ZRP, or just chat.
-        </p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-          Powered by DeepSeek · Open-source · Transparent
-        </p>
+        <AIPageSubtitle />
       </div>
       <div className="h-[600px]">
         <AIChat />
