@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import GoogleIcon from "@/components/icons/GoogleIcon";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Check, X, Loader2 } from "lucide-react";
+import { isNativeApp, nativeGoogleSignIn } from "@/lib/nativeAuth";
 
 type UsernameStatus = "idle" | "checking" | "available" | "taken" | "invalid";
 
@@ -106,6 +107,18 @@ export default function SignupPage() {
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
+    if (isNativeApp()) {
+      // Google blocks OAuth from embedded WebViews, so inside the
+      // native app this opens the system browser instead of navigating
+      // the app's own WebView to accounts.google.com.
+      try {
+        await nativeGoogleSignIn("/");
+      } catch {
+        setError(t("auth.errSomethingWrong"));
+        setGoogleLoading(false);
+      }
+      return;
+    }
     await signIn("google", { callbackUrl: "/" });
   };
 

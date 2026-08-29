@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ZRP Social</string>
+    <string name="title_activity_main">ZRP Social</string>
+    <string name="package_name">one.zrp.social</string>
+    <string name="custom_url_scheme">one.zrp.social</string>
+</resources>

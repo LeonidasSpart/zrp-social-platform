@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import PushNotificationManager from "@/components/PushNotificationManager";
+import NativeAppBridge from "@/components/NativeAppBridge";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { UnreadCountProvider } from "@/contexts/UnreadCountContext";
@@ -332,6 +333,7 @@ export default function RootLayout({
                   <AuthProvider>
                     <UnreadCountProvider>
                       <GoogleAnalytics />
+                      <NativeAppBridge />
 
                       <Header />
 
