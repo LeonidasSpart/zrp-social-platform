@@ -73,6 +73,15 @@ export default function Footer() {
 
               <li>
                 <Link
+                  href="/transparency"
+                  className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
+                >
+                  {t("footer.transparency")}
+                </Link>
+              </li>
+
+              <li>
+                <Link
                   href="/press"
                   className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
                 >

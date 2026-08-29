@@ -1279,3 +1279,31 @@ model AuditLog {
   @@index([action])
   @@index([createdAt])
 }
+
+// A real, admin-recorded record of a charity disbursement ZRP actually
+// made - never auto-generated, never estimated. This is deliberately
+// separate from the automatically-computed "committed" figure (the sum
+// of Tip.charityAmount / PremiumPurchase.charityAmount on completed
+// transactions): committed is what the 35% policy owes so far, disbursed
+// is proof money actually left ZRP and reached a real beneficiary.
+model CharityDisbursement {
+  id String @id @default(cuid())
+
+  beneficiaryName String
+  cause           String // matches one of the four /charity page categories
+  amount          Decimal @db.Decimal(18, 2)
+  currency        String  @default("USD")
+
+  disbursedAt DateTime
+  note        String? @db.Text
+  proofUrl    String? // link to a receipt/confirmation the admin can point to
+
+  recordedById       String
+  recordedByUsername String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([disbursedAt])
+  @@index([cause])
+}

@@ -56,6 +56,7 @@ const PUBLIC_PATHS = [
   "/privacy",
   "/terms",
   "/news",
+  "/transparency",
 ];
 
 // ─── PUBLIC STATIC ASSETS ──────────────────────────────────────────

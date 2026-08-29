@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import CharityLedger from "@/components/CharityLedger";
 
 export default function CharityPage() {
   const { t } = useLanguage();
@@ -133,45 +134,7 @@ export default function CharityPage() {
             </span>
           </p>
 
-          {/* Placeholder stats */}
-          <div className="grid md:grid-cols-3 gap-6 text-center">
-            <div className="bg-zrp-silver/20 dark:bg-zrp-charcoal/50 p-6 rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal">
-              <div className="text-4xl font-bold text-zrp-red font-orbitron">—</div>
-              <p className="text-zrp-charcoal/70 dark:text-white/70 mt-2 font-inter">{t("charity.totalDonatedLabel")}</p>
-            </div>
-            <div className="bg-zrp-silver/20 dark:bg-zrp-charcoal/50 p-6 rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal">
-              <div className="text-4xl font-bold text-zrp-red font-orbitron">—</div>
-              <p className="text-zrp-charcoal/70 dark:text-white/70 mt-2 font-inter">{t("charity.livesImpactedLabel")}</p>
-            </div>
-            <div className="bg-zrp-silver/20 dark:bg-zrp-charcoal/50 p-6 rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal">
-              <div className="text-4xl font-bold text-zrp-red font-orbitron">—</div>
-              <p className="text-zrp-charcoal/70 dark:text-white/70 mt-2 font-inter">{t("charity.projectsSupportedLabel")}</p>
-            </div>
-          </div>
-
-          {/* Cause breakdown – placeholder */}
-          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal">
-              <p className="text-2xl font-bold text-zrp-charcoal dark:text-white font-orbitron">—</p>
-              <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">{t("charity.orphanagesLabel")}</p>
-            </div>
-            <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal">
-              <p className="text-2xl font-bold text-zrp-charcoal dark:text-white font-orbitron">—</p>
-              <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">{t("charity.schoolsLabel")}</p>
-            </div>
-            <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal">
-              <p className="text-2xl font-bold text-zrp-charcoal dark:text-white font-orbitron">—</p>
-              <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">{t("charity.hospitalsLabel")}</p>
-            </div>
-            <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal">
-              <p className="text-2xl font-bold text-zrp-charcoal dark:text-white font-orbitron">—</p>
-              <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter">{t("charity.climateProjectsLabel")}</p>
-            </div>
-          </div>
-
-          <div className="mt-8 text-center text-zrp-charcoal/50 dark:text-white/50 text-sm border-t border-zrp-silver/30 dark:border-zrp-charcoal pt-6 font-inter">
-            {t("charity.accumulatingNote")}
-          </div>
+          <CharityLedger />
         </section>
 
         {/* Call to Action – dark red background */}

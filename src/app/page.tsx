@@ -1192,6 +1192,12 @@ export default function HomePage() {
 
                 <div className="border-t border-gray-200 dark:border-gray-700" />
 
+                <p className="px-4 py-3 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                  {t("feed.chronologicalNote")}
+                </p>
+
+                <div className="border-t border-gray-200 dark:border-gray-700" />
+
                 <button
                   type="button"
                   onClick={() => {

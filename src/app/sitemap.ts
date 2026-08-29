@@ -34,6 +34,7 @@ const STATIC_PAGES: Array<{
   { path: "/pricing", changeFrequency: "monthly", priority: 0.6 },
   { path: "/careers", changeFrequency: "weekly", priority: 0.5 },
   { path: "/charity", changeFrequency: "monthly", priority: 0.6 },
+  { path: "/transparency", changeFrequency: "weekly", priority: 0.6 },
   { path: "/contact", changeFrequency: "monthly", priority: 0.5 },
   { path: "/investors", changeFrequency: "monthly", priority: 0.4 },
   { path: "/press", changeFrequency: "monthly", priority: 0.4 },
