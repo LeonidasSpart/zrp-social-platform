@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ShortUploadModal from "@/components/ShortUploadModal";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ShortPost {
   id: string;
@@ -266,6 +267,8 @@ export default function ShortsPage() {
 
   const router =
     useRouter();
+
+  const { t } = useLanguage();
 
   const [videos, setVideos] =
     useState<ShortPost[]>(
@@ -731,7 +734,7 @@ export default function ShortsPage() {
       if (
         minutes < 1
       ) {
-        return "Just now";
+        return t("notifications.justNow");
       }
 
       if (
@@ -941,14 +944,15 @@ export default function ShortsPage() {
           await navigator.share(
             {
               title:
-                `Post by ${
-                  post
-                    .author
-                    .name ||
-                  post
-                    .author
-                    .username
-                }`,
+                t("shorts.sharePostBy", {
+                  name:
+                    post
+                      .author
+                      .name ||
+                    post
+                      .author
+                      .username,
+                }),
               url,
             }
           );
@@ -1058,7 +1062,7 @@ export default function ShortsPage() {
           router.push("/")
         }
         className="absolute top-4 left-4 z-30 text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
-        aria-label="Back"
+        aria-label={t("shorts.back")}
       >
         <ArrowLeft className="w-6 h-6" />
       </button>
@@ -1078,7 +1082,7 @@ export default function ShortsPage() {
             )
           }
           className="text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
-          title="Post a Short"
+          title={t("shorts.postAShort")}
         >
           <Plus className="w-6 h-6" />
         </button>
@@ -1094,8 +1098,8 @@ export default function ShortsPage() {
             className="text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
             aria-label={
               muted
-                ? "Unmute"
-                : "Mute"
+                ? t("shorts.unmute")
+                : t("shorts.mute")
             }
           >
             {muted ? (
@@ -1112,9 +1116,7 @@ export default function ShortsPage() {
       0 ? (
         <div className="h-full w-full flex flex-col items-center justify-center gap-4 px-6 text-center">
           <p className="text-white">
-            No Shorts yet.
-            Be the first
-            to post one.
+            {t("shorts.noShortsYet")}
           </p>
 
           <button
@@ -1126,7 +1128,7 @@ export default function ShortsPage() {
             className="text-white bg-zrp-red rounded-full px-4 py-2 hover:bg-zrp-darkRed transition flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
-            Post a Short
+            {t("shorts.postAShort")}
           </button>
         </div>
       ) : (
@@ -1432,7 +1434,7 @@ export default function ShortsPage() {
                             )
                           }
                           className="flex flex-col items-center gap-1"
-                          aria-label="Like"
+                          aria-label={t("shorts.like")}
                         >
                           <Heart
                             className={`w-7 h-7 ${
@@ -1475,7 +1477,7 @@ export default function ShortsPage() {
                             )
                           }
                           className="flex flex-col items-center gap-1"
-                          aria-label="Repost"
+                          aria-label={t("shorts.repost")}
                         >
                           <Repeat
                             className={`w-7 h-7 ${
@@ -1502,7 +1504,7 @@ export default function ShortsPage() {
                             )
                           }
                           className="flex flex-col items-center gap-1"
-                          aria-label="Share"
+                          aria-label={t("shorts.share")}
                         >
                           <Share2 className="w-7 h-7" />
                         </button>

@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react";
 import { X, Upload, Loader2 } from "lucide-react";
 import { uploadFiles } from "@/lib/uploadthing-client";
 import { getPlanLimits } from "@/lib/limits";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/translations";
 
 interface ShortUploadModalProps {
   onClose: () => void;
@@ -107,36 +109,32 @@ function isRealVideoFile(
 // which read as a cryptic error to users. Map the codes we can
 // realistically hit here to a message that names a likely cause,
 // per user feedback asking for more specific upload errors.
-const UPLOAD_ERROR_MESSAGES: Record<string, string> = {
-  UPLOAD_FAILED:
-    "The upload didn't complete, likely due to a connection issue or the file being too large for your plan. Check your connection and try again.",
-  TOO_LARGE:
-    "This video is too large for your plan. Try a smaller file or upgrade your plan.",
-  FILE_LIMIT_EXCEEDED:
-    "This video is too large for your plan. Try a smaller file or upgrade your plan.",
-  URL_GENERATION_FAILED:
-    "Couldn't start the upload - this is usually a temporary connection issue. Please try again.",
-  INTERNAL_SERVER_ERROR:
-    "Something went wrong on our end while uploading. Please try again in a moment.",
+const UPLOAD_ERROR_KEYS: Record<string, TranslationKey> = {
+  UPLOAD_FAILED: "shorts.upload.errUploadFailedDetailed",
+  TOO_LARGE: "shorts.upload.errTooLargePlan",
+  FILE_LIMIT_EXCEEDED: "shorts.upload.errTooLargePlan",
+  URL_GENERATION_FAILED: "shorts.upload.errUrlGenFailed",
+  INTERNAL_SERVER_ERROR: "shorts.upload.errInternalServer",
 };
 
 function describeUploadError(
-  err: unknown
+  err: unknown,
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string
 ): string {
   if (err instanceof Error) {
-    const mapped =
-      UPLOAD_ERROR_MESSAGES[
+    const mappedKey =
+      UPLOAD_ERROR_KEYS[
         err.message
       ];
 
-    if (mapped) {
-      return mapped;
+    if (mappedKey) {
+      return t(mappedKey);
     }
 
     return err.message;
   }
 
-  return "Something went wrong while uploading. Please check your connection and try again.";
+  return t("shorts.upload.errGeneric");
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -150,6 +148,8 @@ export default function ShortUploadModal({
   const {
     data: session,
   } = useSession();
+
+  const { t } = useLanguage();
 
   const plan =
     (session?.user?.plan as any) ||
@@ -241,7 +241,7 @@ export default function ShortUploadModal({
         isGifFile(selected)
       ) {
         setError(
-          "GIF files cannot be posted as Shorts. Please choose a video file."
+          t("shorts.upload.errGifNotAllowed")
         );
 
         e.target.value =
@@ -259,7 +259,7 @@ export default function ShortUploadModal({
         )
       ) {
         setError(
-          "Please choose a real video file such as MP4 or WebM."
+          t("shorts.upload.errNotVideo")
         );
 
         e.target.value =
@@ -278,7 +278,7 @@ export default function ShortUploadModal({
         maxBytes
       ) {
         setError(
-          `Video must be under ${limits.videoUploadMB}MB on your plan.`
+          t("shorts.upload.errTooLarge", { mb: limits.videoUploadMB })
         );
 
         e.target.value =
@@ -315,7 +315,7 @@ export default function ShortUploadModal({
     async () => {
       if (!file) {
         setError(
-          "Choose a video first."
+          t("shorts.upload.errChooseVideoFirst")
         );
 
         return;
@@ -332,7 +332,7 @@ export default function ShortUploadModal({
         isGifFile(file)
       ) {
         setError(
-          "GIF files cannot be posted as Shorts."
+          t("shorts.upload.errGifSimple")
         );
 
         return;
@@ -342,7 +342,7 @@ export default function ShortUploadModal({
         !isRealVideoFile(file)
       ) {
         setError(
-          "Only real video files can be posted as Shorts."
+          t("shorts.upload.errOnlyRealVideo")
         );
 
         return;
@@ -372,7 +372,7 @@ export default function ShortUploadModal({
           result.length === 0
         ) {
           throw new Error(
-            "Upload failed. No file was returned."
+            t("shorts.upload.errUploadFailedNoFile")
           );
         }
 
@@ -384,7 +384,7 @@ export default function ShortUploadModal({
 
         if (!ufsUrl) {
           throw new Error(
-            "Upload failed. No media URL was returned."
+            t("shorts.upload.errUploadFailedNoUrl")
           );
         }
 
@@ -408,7 +408,7 @@ export default function ShortUploadModal({
           )
         ) {
           throw new Error(
-            "The uploaded file was detected as a GIF and cannot be posted as a Short."
+            t("shorts.upload.errUploadedGif")
           );
         }
 
@@ -454,7 +454,7 @@ export default function ShortUploadModal({
 
           throw new Error(
             err.error ||
-              "Failed to publish Short."
+              t("shorts.upload.errFailedPublish")
           );
         }
 
@@ -481,7 +481,7 @@ export default function ShortUploadModal({
             .endsWith(".gif")
         ) {
           throw new Error(
-            "The published media was detected as a GIF and was not added to Shorts."
+            t("shorts.upload.errPublishedGif")
           );
         }
 
@@ -491,7 +491,8 @@ export default function ShortUploadModal({
       } catch (err) {
         setError(
           describeUploadError(
-            err
+            err,
+            t
           )
         );
       } finally {
@@ -533,7 +534,7 @@ export default function ShortUploadModal({
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
 
           <h2 className="font-semibold text-gray-900 dark:text-white">
-            Post a Short
+            {t("shorts.postAShort")}
           </h2>
 
           <button
@@ -544,7 +545,7 @@ export default function ShortUploadModal({
               uploading
             }
             className="p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
-            aria-label="Close"
+            aria-label={t("shorts.upload.close")}
           >
             <X className="w-5 h-5" />
           </button>
@@ -575,7 +576,7 @@ export default function ShortUploadModal({
                   uploading
                 }
                 className="absolute top-2 right-2 bg-black/60 rounded-full p-1.5 text-white disabled:opacity-50"
-                aria-label="Remove video"
+                aria-label={t("shorts.upload.removeVideo")}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -596,19 +597,15 @@ export default function ShortUploadModal({
               <Upload className="w-8 h-8" />
 
               <span className="text-sm">
-                Choose a video
+                {t("shorts.upload.chooseVideo")}
               </span>
 
               <span className="text-xs text-gray-400">
-                MP4, WebM, MOV and other video formats
+                {t("shorts.upload.formatsHint")}
               </span>
 
               <span className="text-xs text-gray-400">
-                Up to{" "}
-                {
-                  limits.videoUploadMB
-                }
-                MB
+                {t("shorts.upload.upToMB", { mb: limits.videoUploadMB })}
               </span>
 
             </button>
@@ -639,7 +636,7 @@ export default function ShortUploadModal({
                 e.target.value
               )
             }
-            placeholder="Write a caption..."
+            placeholder={t("shorts.upload.captionPlaceholder")}
             rows={2}
             maxLength={
               limits.postLength
@@ -674,10 +671,10 @@ export default function ShortUploadModal({
             {uploading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Posting...
+                {t("shorts.upload.posting")}
               </>
             ) : (
-              "Post Short"
+              t("shorts.upload.postShort")
             )}
 
           </button>
