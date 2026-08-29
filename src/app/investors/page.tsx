@@ -1,103 +1,42 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
+"use client";
 
-export const metadata: Metadata = {
-  title: 'Investors – ZRP Social',
-  description:
-    'Investor information for ZRP Social. Discover our vision, platform, growth, business opportunities, and plans for building a global social platform from Switzerland.',
-};
-
-const WHY_ZRP = [
-  {
-    icon: '🇨🇭',
-    title: 'Swiss European Foundation',
-    description:
-      'ZRP is built from Switzerland with a European approach to privacy, security, freedom of expression, and responsible technology.',
-  },
-  {
-    icon: '🌍',
-    title: 'Global Ambition',
-    description:
-      'ZRP is designed to serve users and communities worldwide while building strong local communities through our global expansion.',
-  },
-  {
-    icon: '⚡',
-    title: 'Rapid Product Development',
-    description:
-      'Our platform is evolving quickly with new products, features, and improvements being introduced continuously.',
-  },
-];
-
-const PLATFORM = [
-  {
-    title: 'Social Platform',
-    description:
-      'Posts, comments, replies, likes, reposts, bookmarks, media, hashtags, discovery, and personalized feeds.',
-  },
-  {
-    title: 'ZRP Shorts',
-    description:
-      'A dedicated short video experience for discovering, creating, and sharing engaging content.',
-  },
-  {
-    title: 'Private Messaging',
-    description:
-      'Real time private communication that allows members to connect directly within ZRP.',
-  },
-  {
-    title: 'Creator Ecosystem',
-    description:
-      'Tools designed to help creators publish content, build audiences, and develop their communities.',
-  },
-  {
-    title: 'Global Communities',
-    description:
-      'A growing country and community structure designed to connect local communities to one global platform.',
-  },
-  {
-    title: 'Security & Moderation',
-    description:
-      'Continuous investment in security, spam protection, abuse prevention, reporting, and responsible moderation.',
-  },
-];
-
-const OPPORTUNITIES = [
-  {
-    icon: '💻',
-    title: 'Technology',
-    description:
-      'Accelerating infrastructure, scalability, security, artificial intelligence, and product development.',
-  },
-  {
-    icon: '🌍',
-    title: 'Global Expansion',
-    description:
-      'Supporting the growth of ZRP communities and local operations around the world.',
-  },
-  {
-    icon: '👥',
-    title: 'Community Growth',
-    description:
-      'Growing the user, creator, business, and community ecosystem around ZRP.',
-  },
-  {
-    icon: '🚀',
-    title: 'New Products',
-    description:
-      'Developing new products and services that expand the ZRP ecosystem and create additional opportunities.',
-  },
-];
-
-const INVESTOR_TYPES = [
-  'Individual investors',
-  'Angel investors',
-  'Strategic investors',
-  'Family offices',
-  'Venture capital',
-  'Corporate partners',
-];
+import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function InvestorsPage() {
+  const { t } = useLanguage();
+
+  const WHY_ZRP = [
+    { icon: "🇨🇭", title: t("investors.why1Title"), description: t("investors.why1Desc") },
+    { icon: "🌍", title: t("investors.why2Title"), description: t("investors.why2Desc") },
+    { icon: "⚡", title: t("investors.why3Title"), description: t("investors.why3Desc") },
+  ];
+
+  const PLATFORM = [
+    { title: t("investors.platform1Title"), description: t("investors.platform1Desc") },
+    { title: t("investors.platform2Title"), description: t("investors.platform2Desc") },
+    { title: t("investors.platform3Title"), description: t("investors.platform3Desc") },
+    { title: t("investors.platform4Title"), description: t("investors.platform4Desc") },
+    { title: t("investors.platform5Title"), description: t("investors.platform5Desc") },
+    { title: t("investors.platform6Title"), description: t("investors.platform6Desc") },
+  ];
+
+  const OPPORTUNITIES = [
+    { icon: "💻", title: t("investors.opp1Title"), description: t("investors.opp1Desc") },
+    { icon: "🌍", title: t("investors.opp2Title"), description: t("investors.opp2Desc") },
+    { icon: "👥", title: t("investors.opp3Title"), description: t("investors.opp3Desc") },
+    { icon: "🚀", title: t("investors.opp4Title"), description: t("investors.opp4Desc") },
+  ];
+
+  const INVESTOR_TYPES = [
+    t("investors.type1"),
+    t("investors.type2"),
+    t("investors.type3"),
+    t("investors.type4"),
+    t("investors.type5"),
+    t("investors.type6"),
+  ];
+
   return (
     <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter">
       <main>
@@ -107,7 +46,7 @@ export default function InvestorsPage() {
           <div className="max-w-4xl mx-auto text-center">
 
             <span className="inline-block bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium text-white/90 mb-6">
-              🇨🇭 Swiss European Technology
+              {t("investors.badge")}
             </span>
 
             <img
@@ -117,13 +56,11 @@ export default function InvestorsPage() {
             />
 
             <h1 className="text-4xl sm:text-5xl font-extrabold font-orbitron text-white leading-tight">
-              Invest in the Future of Social
+              {t("investors.heroTitle")}
             </h1>
 
             <p className="mt-6 text-xl text-white/90 max-w-2xl mx-auto font-inter">
-              ZRP Social is building a global social platform from Switzerland,
-              focused on people, privacy, security, freedom of expression, and
-              real communities.
+              {t("investors.heroSubtitle")}
             </p>
 
             <div className="mt-8 flex flex-wrap justify-center gap-4">
@@ -132,14 +69,14 @@ export default function InvestorsPage() {
                 href="mailto:investors@zrp.one"
                 className="px-6 py-3 bg-white text-zrp-darkRed font-semibold rounded-full shadow-lg hover:bg-gray-200 transition font-inter"
               >
-                Contact Investor Relations
+                {t("investors.contactIR")}
               </a>
 
               <Link
                 href="/about"
                 className="px-6 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-full shadow-lg hover:bg-white/10 transition font-inter"
               >
-                Learn About ZRP
+                {t("investors.learnAboutZrp")}
               </Link>
 
             </div>
@@ -152,18 +89,15 @@ export default function InvestorsPage() {
           <div className="max-w-3xl mx-auto text-center">
 
             <h2 className="text-3xl font-bold text-zrp-charcoal dark:text-white font-orbitron">
-              Building a New Generation of Social Media
+              {t("investors.visionHeading")}
             </h2>
 
             <p className="mt-5 text-zrp-charcoal/80 dark:text-white/70 font-inter leading-relaxed">
-              ZRP was created with a simple vision: build a social platform
-              where people can connect, communicate, create, and build
-              communities while keeping privacy, security, and freedom of
-              expression at the center.
+              {t("investors.visionP1")}
             </p>
 
             <p className="mt-4 text-zrp-charcoal/80 dark:text-white/70 font-inter leading-relaxed">
-              We are building from Europe with a global ambition.
+              {t("investors.visionP2")}
             </p>
 
           </div>
@@ -200,12 +134,11 @@ export default function InvestorsPage() {
             <div className="max-w-3xl mx-auto text-center">
 
               <h2 className="text-3xl font-bold text-zrp-charcoal dark:text-white font-orbitron">
-                The ZRP Platform
+                {t("investors.platformHeading")}
               </h2>
 
               <p className="mt-4 text-zrp-charcoal/70 dark:text-white/70 font-inter">
-                ZRP is developing a complete social ecosystem rather than a
-                single social feed.
+                {t("investors.platformSubtitle")}
               </p>
 
             </div>
@@ -241,13 +174,11 @@ export default function InvestorsPage() {
           <div className="max-w-3xl mx-auto text-center">
 
             <h2 className="text-3xl font-bold text-zrp-charcoal dark:text-white font-orbitron">
-              ZRP Is Growing
+              {t("investors.growthHeading")}
             </h2>
 
             <p className="mt-4 text-zrp-charcoal/70 dark:text-white/70 font-inter">
-              ZRP is live and developing rapidly. Our focus is on continuously
-              improving the product while building a strong and engaged global
-              community.
+              {t("investors.growthDesc")}
             </p>
 
           </div>
@@ -260,35 +191,34 @@ export default function InvestorsPage() {
               </div>
 
               <p className="mt-2 text-sm text-zrp-charcoal/70 dark:text-white/70 font-inter">
-                Registered users
+                {t("investors.statUsersLabel")}
               </p>
             </div>
 
             <div className="text-center p-7 bg-zrp-silver/20 dark:bg-zrp-charcoal/50 rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal">
               <div className="text-4xl font-bold font-orbitron text-zrp-red">
-                Live
+                {t("investors.statLiveValue")}
               </div>
 
               <p className="mt-2 text-sm text-zrp-charcoal/70 dark:text-white/70 font-inter">
-                Platform available worldwide
+                {t("investors.statLiveLabel")}
               </p>
             </div>
 
             <div className="text-center p-7 bg-zrp-silver/20 dark:bg-zrp-charcoal/50 rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal">
               <div className="text-4xl font-bold font-orbitron text-zrp-red">
-                Growing
+                {t("investors.statGrowingValue")}
               </div>
 
               <p className="mt-2 text-sm text-zrp-charcoal/70 dark:text-white/70 font-inter">
-                New products and features continuously added
+                {t("investors.statGrowingLabel")}
               </p>
             </div>
 
           </div>
 
           <p className="mt-6 text-center text-xs text-zrp-charcoal/50 dark:text-white/50 font-inter">
-            Platform figures are provided for informational purposes and may
-            change as ZRP continues to grow.
+            {t("investors.figuresNote")}
           </p>
 
         </section>
@@ -301,12 +231,11 @@ export default function InvestorsPage() {
             <div className="max-w-3xl mx-auto text-center">
 
               <h2 className="text-3xl font-bold text-zrp-charcoal dark:text-white font-orbitron">
-                Where We Want to Grow
+                {t("investors.opportunitiesHeading")}
               </h2>
 
               <p className="mt-4 text-zrp-charcoal/70 dark:text-white/70 font-inter">
-                Strategic investment and partnerships can help accelerate the
-                next stage of ZRP.
+                {t("investors.opportunitiesSubtitle")}
               </p>
 
             </div>
@@ -343,7 +272,7 @@ export default function InvestorsPage() {
         <section className="py-16 px-4 max-w-4xl mx-auto">
 
           <h2 className="text-3xl font-bold text-center text-zrp-charcoal dark:text-white font-orbitron mb-10">
-            Who We Are Looking For
+            {t("investors.typesHeading")}
           </h2>
 
           <div className="grid sm:grid-cols-2 gap-4">
@@ -377,13 +306,11 @@ export default function InvestorsPage() {
               <div>
 
                 <h2 className="text-3xl font-bold font-orbitron">
-                  Growth With a Purpose
+                  {t("investors.charityHeading")}
                 </h2>
 
                 <p className="mt-4 text-white/90 font-inter leading-relaxed">
-                  ZRP has committed 35% of platform profits to charitable
-                  causes, including support for orphans, schools, hospitals,
-                  and climate relief.
+                  {t("investors.charityDesc")}
                 </p>
 
               </div>
@@ -395,7 +322,7 @@ export default function InvestorsPage() {
                 </div>
 
                 <p className="mt-2 text-white/80 font-inter">
-                  of platform profits committed to charity
+                  {t("investors.charityStatLabel")}
                 </p>
 
                 <div className="mt-5 text-3xl">
@@ -416,13 +343,11 @@ export default function InvestorsPage() {
           <div className="max-w-2xl mx-auto text-center">
 
             <h2 className="text-2xl sm:text-3xl font-bold text-white font-orbitron">
-              Interested in ZRP?
+              {t("investors.contactHeading")}
             </h2>
 
             <p className="mt-3 text-white/80 font-inter">
-              We would like to hear from investors and strategic partners who
-              believe in the long term opportunity of building a global social
-              platform from Europe.
+              {t("investors.contactDesc")}
             </p>
 
             <div className="mt-6 flex flex-wrap justify-center gap-4">
@@ -438,17 +363,13 @@ export default function InvestorsPage() {
                 href="/about"
                 className="inline-block px-6 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-full hover:bg-white/10 transition font-inter"
               >
-                Learn More About ZRP
+                {t("investors.learnMoreAboutZrp")}
               </Link>
 
             </div>
 
             <p className="mt-7 text-xs text-white/50 font-inter leading-relaxed">
-              Information on this page is provided for general informational
-              purposes only and does not constitute an offer, solicitation,
-              investment recommendation, or guarantee of financial returns.
-              Any investment opportunity will be subject to applicable legal
-              and regulatory requirements.
+              {t("investors.disclaimer")}
             </p>
 
           </div>
@@ -459,7 +380,7 @@ export default function InvestorsPage() {
         <section className="py-16 px-4 max-w-4xl mx-auto text-center">
 
           <blockquote className="text-2xl font-orbitron text-zrp-charcoal dark:text-white italic">
-            “One world. One community. One ZRP.”
+            {t("investors.closingQuote")}
           </blockquote>
 
           <div className="mt-6 text-zrp-charcoal/50 dark:text-white/50 font-inter text-sm">
