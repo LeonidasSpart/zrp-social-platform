@@ -13,6 +13,8 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/translations";
 
 type NewsCategory =
   | "WORLD"
@@ -69,34 +71,59 @@ type Pagination = {
 
 const categories: Array<{
   value: NewsCategory;
-  label: string;
+  labelKey: TranslationKey;
 }> = [
-  { value: "WORLD", label: "World" },
-  { value: "EUROPE", label: "Europe" },
-  { value: "SWITZERLAND", label: "Switzerland" },
-  { value: "POLITICS", label: "Politics" },
-  { value: "BUSINESS", label: "Business" },
-  { value: "TECHNOLOGY", label: "Technology" },
-  { value: "CRYPTO", label: "Crypto" },
-  { value: "SCIENCE", label: "Science" },
-  { value: "SPORTS", label: "Sports" },
-  { value: "CULTURE", label: "Culture" },
-  { value: "COMMUNITY", label: "Community" },
+  { value: "WORLD", labelKey: "newsCategory.world" },
+  { value: "EUROPE", labelKey: "newsCategory.europe" },
+  { value: "SWITZERLAND", labelKey: "newsCategory.switzerland" },
+  { value: "POLITICS", labelKey: "newsCategory.politics" },
+  { value: "BUSINESS", labelKey: "newsCategory.business" },
+  { value: "TECHNOLOGY", labelKey: "newsCategory.technology" },
+  { value: "CRYPTO", labelKey: "newsCategory.crypto" },
+  { value: "SCIENCE", labelKey: "newsCategory.science" },
+  { value: "SPORTS", labelKey: "newsCategory.sports" },
+  { value: "CULTURE", labelKey: "newsCategory.culture" },
+  { value: "COMMUNITY", labelKey: "newsCategory.community" },
 ];
 
 const statuses: Array<{
   value: NewsStatus;
-  label: string;
+  labelKey: TranslationKey;
 }> = [
-  { value: "DRAFT", label: "Draft" },
-  { value: "PENDING_REVIEW", label: "Pending Review" },
-  { value: "PUBLISHED", label: "Published" },
-  { value: "REJECTED", label: "Rejected" },
-  { value: "ARCHIVED", label: "Archived" },
+  { value: "DRAFT", labelKey: "journalistDash.statusDraft" },
+  { value: "PENDING_REVIEW", labelKey: "journalistDash.statPendingReview" },
+  { value: "PUBLISHED", labelKey: "journalistDash.statPublished" },
+  { value: "REJECTED", labelKey: "journalistDash.statRejected" },
+  { value: "ARCHIVED", labelKey: "journalistDash.statusArchived" },
 ];
 
-function formatDate(date: string | null) {
-  if (!date) return "Not published";
+const STATUS_LABEL_KEYS: Record<NewsStatus, TranslationKey> = {
+  DRAFT: "journalistDash.statusDraft",
+  PENDING_REVIEW: "journalistDash.statPendingReview",
+  PUBLISHED: "journalistDash.statPublished",
+  REJECTED: "journalistDash.statRejected",
+  ARCHIVED: "journalistDash.statusArchived",
+};
+
+const CATEGORY_LABEL_KEYS: Record<NewsCategory, TranslationKey> = {
+  WORLD: "newsCategory.world",
+  EUROPE: "newsCategory.europe",
+  SWITZERLAND: "newsCategory.switzerland",
+  POLITICS: "newsCategory.politics",
+  BUSINESS: "newsCategory.business",
+  TECHNOLOGY: "newsCategory.technology",
+  CRYPTO: "newsCategory.crypto",
+  SCIENCE: "newsCategory.science",
+  SPORTS: "newsCategory.sports",
+  CULTURE: "newsCategory.culture",
+  COMMUNITY: "newsCategory.community",
+};
+
+function formatDate(
+  date: string | null,
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string
+) {
+  if (!date) return t("adminNews.notPublished");
 
   try {
     return new Intl.DateTimeFormat(undefined, {
@@ -107,7 +134,7 @@ function formatDate(date: string | null) {
       minute: "2-digit",
     }).format(new Date(date));
   } catch {
-    return "Unknown";
+    return t("adminNews.unknownDate");
   }
 }
 
@@ -138,6 +165,7 @@ function emptyForm() {
 }
 
 export default function AdminNewsPage() {
+  const { t } = useLanguage();
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
 
@@ -199,7 +227,7 @@ export default function AdminNewsPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || "Failed to load news");
+        throw new Error(data.error || t("adminNews.errFailedLoad"));
       }
 
       setArticles(data.articles || []);
@@ -211,7 +239,7 @@ export default function AdminNewsPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to load news articles."
+          : t("adminNews.errFailedLoadArticles")
       );
     } finally {
       setLoading(false);
@@ -283,19 +311,19 @@ export default function AdminNewsPage() {
       setSuccess(null);
 
       if (!form.title.trim()) {
-        throw new Error("Title is required.");
+        throw new Error(t("journalist.editor.errTitleRequired"));
       }
 
       if (!form.slug.trim()) {
-        throw new Error("Slug is required.");
+        throw new Error(t("journalist.editor.errSlugRequired"));
       }
 
       if (!form.content.trim()) {
-        throw new Error("Content is required.");
+        throw new Error(t("adminNews.errContentRequired"));
       }
 
       if (!form.authorId.trim()) {
-        throw new Error("Author ID is required.");
+        throw new Error(t("adminNews.errAuthorIdRequired"));
       }
 
       const payload = {
@@ -332,14 +360,16 @@ export default function AdminNewsPage() {
       if (!response.ok || !data.success) {
         throw new Error(
           data.error ||
-            `Failed to ${editingArticle ? "update" : "create"} article`
+            (editingArticle
+              ? t("adminNews.errFailedUpdate")
+              : t("adminNews.errFailedCreate"))
         );
       }
 
       setSuccess(
         editingArticle
-          ? "News article updated successfully."
-          : "News article created successfully."
+          ? t("adminNews.successUpdated")
+          : t("adminNews.successCreated")
       );
 
       setShowEditor(false);
@@ -353,7 +383,7 @@ export default function AdminNewsPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to save news article."
+          : t("adminNews.errFailedSave")
       );
     } finally {
       setSaving(false);
@@ -362,7 +392,7 @@ export default function AdminNewsPage() {
 
   async function deleteArticle(article: NewsArticle) {
     const confirmed = window.confirm(
-      `Delete "${article.title}"?\n\nThis action cannot be undone.`
+      t("adminNews.confirmDelete", { title: article.title })
     );
 
     if (!confirmed) return;
@@ -379,10 +409,10 @@ export default function AdminNewsPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || "Failed to delete article");
+        throw new Error(data.error || t("adminNews.errFailedDeleteArticle"));
       }
 
-      setSuccess("News article deleted successfully.");
+      setSuccess(t("adminNews.successDeleted"));
 
       const shouldGoBack = articles.length === 1 && page > 1;
 
@@ -393,7 +423,7 @@ export default function AdminNewsPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to delete news article."
+          : t("adminNews.errFailedDeleteNews")
       );
     } finally {
       setDeleting(null);
@@ -404,9 +434,7 @@ export default function AdminNewsPage() {
     let reviewNote: string | null = null;
 
     if (decision === "reject") {
-      reviewNote = window.prompt(
-        "Feedback for the journalist (shown to them, optional):"
-      );
+      reviewNote = window.prompt(t("adminNews.promptRejectFeedback"));
       if (reviewNote === null) return; // cancelled
     }
 
@@ -427,18 +455,29 @@ export default function AdminNewsPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || `Failed to ${decision} article`);
+        throw new Error(
+          data.error ||
+            (decision === "approve"
+              ? t("adminNews.errFailedApproveArticle")
+              : t("adminNews.errFailedRejectArticle"))
+        );
       }
 
       setSuccess(
         decision === "approve"
-          ? "Article approved and published."
-          : "Article sent back to the journalist."
+          ? t("adminNews.successApprovedPublished")
+          : t("adminNews.successSentBack")
       );
 
       await loadArticles(page);
     } catch (err) {
-      setError(err instanceof Error ? err.message : `Failed to ${decision} article`);
+      setError(
+        err instanceof Error
+          ? err.message
+          : decision === "approve"
+            ? t("adminNews.errFailedApproveArticle")
+            : t("adminNews.errFailedRejectArticle")
+      );
     } finally {
       setDeleting(null);
     }
@@ -460,15 +499,15 @@ export default function AdminNewsPage() {
               className="mb-3 inline-flex items-center gap-2 text-sm text-gray-500 transition hover:text-red-600 dark:text-gray-400"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Admin
+              {t("adminNews.backToAdmin")}
             </Link>
 
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              ZRP News
+              {t("footer.zrpNews")}
             </h1>
 
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Create, edit and manage ZRP News articles.
+              {t("adminNews.subtitle")}
             </p>
           </div>
 
@@ -478,7 +517,7 @@ export default function AdminNewsPage() {
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700"
           >
             <Plus className="h-5 w-5" />
-            New Article
+            {t("adminNews.newArticle")}
           </button>
         </div>
 
@@ -517,7 +556,7 @@ export default function AdminNewsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Total Articles
+                  {t("adminNews.statTotalArticles")}
                 </p>
                 <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
                   {pagination?.total ?? 0}
@@ -534,7 +573,7 @@ export default function AdminNewsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Published on Page
+                  {t("adminNews.statPublishedOnPage")}
                 </p>
                 <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
                   {totalPublished}
@@ -551,7 +590,7 @@ export default function AdminNewsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Drafts on Page
+                  {t("adminNews.statDraftsOnPage")}
                 </p>
                 <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
                   {totalDrafts}
@@ -578,7 +617,7 @@ export default function AdminNewsPage() {
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search title, slug or content..."
+                placeholder={t("adminNews.searchPlaceholder")}
                 className="w-full rounded-xl border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
               />
             </div>
@@ -590,11 +629,11 @@ export default function AdminNewsPage() {
               }
               className="rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-red-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
             >
-              <option value="">All Statuses</option>
+              <option value="">{t("adminNews.allStatuses")}</option>
 
               {statuses.map((item) => (
                 <option key={item.value} value={item.value}>
-                  {item.label}
+                  {t(item.labelKey)}
                 </option>
               ))}
             </select>
@@ -606,11 +645,11 @@ export default function AdminNewsPage() {
               }
               className="rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-red-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
             >
-              <option value="">All Categories</option>
+              <option value="">{t("adminNews.allCategories")}</option>
 
               {categories.map((item) => (
                 <option key={item.value} value={item.value}>
-                  {item.label}
+                  {t(item.labelKey)}
                 </option>
               ))}
             </select>
@@ -619,7 +658,7 @@ export default function AdminNewsPage() {
               type="submit"
               className="rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
             >
-              Search
+              {t("adminNews.searchButton")}
             </button>
           </form>
         </div>
@@ -645,11 +684,11 @@ export default function AdminNewsPage() {
               </div>
 
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                No articles found
+                {t("adminNews.noArticlesFound")}
               </h2>
 
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Create your first ZRP News article.
+                {t("adminNews.createFirstArticle")}
               </p>
 
               <button
@@ -657,7 +696,7 @@ export default function AdminNewsPage() {
                 onClick={openCreate}
                 className="mt-5 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
               >
-                Create Article
+                {t("adminNews.createArticleButton")}
               </button>
             </div>
           ) : (
@@ -667,27 +706,27 @@ export default function AdminNewsPage() {
                   <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-950">
                     <tr>
                       <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                        Article
+                        {t("adminNews.colArticle")}
                       </th>
 
                       <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                        Category
+                        {t("support.categoryLabel")}
                       </th>
 
                       <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                        Status
+                        {t("adminTicket.statusFieldLabel")}
                       </th>
 
                       <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                        Views
+                        {t("adminNews.colViews")}
                       </th>
 
                       <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                        Date
+                        {t("adminNews.colDate")}
                       </th>
 
                       <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
-                        Actions
+                        {t("adminNews.colActions")}
                       </th>
                     </tr>
                   </thead>
@@ -728,9 +767,11 @@ export default function AdminNewsPage() {
                               </p>
 
                               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                by{" "}
-                                {article.author.name ||
-                                  `@${article.author.username}`}
+                                {t("adminNews.byAuthor", {
+                                  author:
+                                    article.author.name ||
+                                    `@${article.author.username}`,
+                                })}
                               </p>
                             </div>
                           </div>
@@ -738,12 +779,12 @@ export default function AdminNewsPage() {
 
                         <td className="px-6 py-4">
                           <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 dark:bg-red-950/30 dark:text-red-400">
-                            {article.category}
+                            {t(CATEGORY_LABEL_KEYS[article.category])}
                           </span>
                         </td>
 
                         <td className="px-6 py-4">
-                          <StatusBadge status={article.status} />
+                          <StatusBadge status={article.status} t={t} />
                           {article.status === "REJECTED" && article.reviewNote && (
                             <p className="mt-1 max-w-[14rem] truncate text-xs text-gray-500 dark:text-gray-400" title={article.reviewNote}>
                               {article.reviewNote}
@@ -757,7 +798,8 @@ export default function AdminNewsPage() {
 
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                           {formatDate(
-                            article.publishedAt || article.createdAt
+                            article.publishedAt || article.createdAt,
+                            t
                           )}
                         </td>
 
@@ -770,18 +812,18 @@ export default function AdminNewsPage() {
                                   disabled={deleting === article.id}
                                   onClick={() => reviewArticle(article, "approve")}
                                   className="rounded-lg border border-green-300 px-2 py-1 text-xs font-medium text-green-700 transition hover:bg-green-50 disabled:opacity-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-950/30"
-                                  title="Approve & publish"
+                                  title={t("adminNews.approveTitle")}
                                 >
-                                  Approve
+                                  {t("adminNews.approveButton")}
                                 </button>
                                 <button
                                   type="button"
                                   disabled={deleting === article.id}
                                   onClick={() => reviewArticle(article, "reject")}
                                   className="rounded-lg border border-red-300 px-2 py-1 text-xs font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30"
-                                  title="Reject submission"
+                                  title={t("adminNews.rejectTitle")}
                                 >
-                                  Reject
+                                  {t("adminNews.rejectButton")}
                                 </button>
                               </>
                             )}
@@ -790,7 +832,7 @@ export default function AdminNewsPage() {
                               href={`/news/${article.slug}`}
                               target="_blank"
                               className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:border-blue-500 hover:text-blue-600 dark:border-gray-700"
-                              title="View article"
+                              title={t("adminNews.viewArticleTitle")}
                             >
                               <Eye className="h-4 w-4" />
                             </Link>
@@ -799,7 +841,7 @@ export default function AdminNewsPage() {
                               type="button"
                               onClick={() => openEdit(article)}
                               className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:border-red-500 hover:text-red-600 dark:border-gray-700"
-                              title="Edit article"
+                              title={t("adminNews.editArticleTitle")}
                             >
                               <Edit3 className="h-4 w-4" />
                             </button>
@@ -809,7 +851,7 @@ export default function AdminNewsPage() {
                               disabled={deleting === article.id}
                               onClick={() => deleteArticle(article)}
                               className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:border-red-500 hover:text-red-600 disabled:opacity-50 dark:border-gray-700"
-                              title="Delete article"
+                              title={t("adminNews.deleteArticleTitle")}
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -850,16 +892,16 @@ export default function AdminNewsPage() {
                         </div>
 
                         <div className="mt-2 flex flex-wrap gap-2">
-                          <StatusBadge status={article.status} />
+                          <StatusBadge status={article.status} t={t} />
 
                           <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-                            {article.category}
+                            {t(CATEGORY_LABEL_KEYS[article.category])}
                           </span>
                         </div>
 
                         {article.status === "REJECTED" && article.reviewNote && (
                           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Feedback: {article.reviewNote}
+                            {t("adminNews.feedbackPrefix", { note: article.reviewNote })}
                           </p>
                         )}
                       </div>
@@ -873,7 +915,7 @@ export default function AdminNewsPage() {
                           onClick={() => reviewArticle(article, "approve")}
                           className="flex-1 rounded-lg border border-green-300 px-3 py-1.5 text-xs font-medium text-green-700 disabled:opacity-50 dark:border-green-800 dark:text-green-400"
                         >
-                          Approve
+                          {t("adminNews.approveButton")}
                         </button>
                         <button
                           type="button"
@@ -881,14 +923,14 @@ export default function AdminNewsPage() {
                           onClick={() => reviewArticle(article, "reject")}
                           className="flex-1 rounded-lg border border-red-300 px-3 py-1.5 text-xs font-medium text-red-700 disabled:opacity-50 dark:border-red-800 dark:text-red-400"
                         >
-                          Reject
+                          {t("adminNews.rejectButton")}
                         </button>
                       </div>
                     )}
 
                     <div className="mt-4 flex items-center justify-between">
                       <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {article.views.toLocaleString()} views
+                        {t("adminNews.viewsCount", { count: article.views.toLocaleString() })}
                       </div>
 
                       <div className="flex gap-2">
@@ -926,7 +968,7 @@ export default function AdminNewsPage() {
               {pagination && pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-800">
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Page {pagination.page} of {pagination.totalPages}
+                    {t("adminNews.pageOf", { page: pagination.page, total: pagination.totalPages })}
                   </p>
 
                   <div className="flex gap-2">
@@ -936,7 +978,7 @@ export default function AdminNewsPage() {
                       onClick={() => loadArticles(page - 1)}
                       className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700"
                     >
-                      Previous
+                      {t("adminNews.previous")}
                     </button>
 
                     <button
@@ -945,7 +987,7 @@ export default function AdminNewsPage() {
                       onClick={() => loadArticles(page + 1)}
                       className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700"
                     >
-                      Next
+                      {t("adminNews.next")}
                     </button>
                   </div>
                 </div>
@@ -963,14 +1005,14 @@ export default function AdminNewsPage() {
               <div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                   {editingArticle
-                    ? "Edit News Article"
-                    : "Create News Article"}
+                    ? t("adminNews.editTitle")
+                    : t("adminNews.createTitle")}
                 </h2>
 
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   {editingArticle
-                    ? `Editing ${editingArticle.slug}`
-                    : "Publish a new article to ZRP News."}
+                    ? t("adminNews.editingSlug", { slug: editingArticle.slug })
+                    : t("adminNews.publishNewDesc")}
                 </p>
               </div>
 
@@ -988,7 +1030,7 @@ export default function AdminNewsPage() {
               {/* Title */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-900 dark:text-white">
-                  Title
+                  {t("adminNews.titleLabel")}
                 </label>
 
                 <input
@@ -1003,7 +1045,7 @@ export default function AdminNewsPage() {
                       updateForm("slug", slugify(value));
                     }
                   }}
-                  placeholder="Article title"
+                  placeholder={t("journalist.editor.titlePlaceholder")}
                   className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
                   required
                 />
@@ -1012,7 +1054,7 @@ export default function AdminNewsPage() {
               {/* Slug */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-900 dark:text-white">
-                  Slug
+                  {t("adminNews.slugLabel")}
                 </label>
 
                 <input
@@ -1021,7 +1063,7 @@ export default function AdminNewsPage() {
                   onChange={(event) =>
                     updateForm("slug", slugify(event.target.value))
                   }
-                  placeholder="article-slug"
+                  placeholder={t("journalist.editor.slugPlaceholder")}
                   className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
                   required
                 />
@@ -1031,7 +1073,7 @@ export default function AdminNewsPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-900 dark:text-white">
-                    Category
+                    {t("journalist.editor.category")}
                   </label>
 
                   <select
@@ -1046,7 +1088,7 @@ export default function AdminNewsPage() {
                   >
                     {categories.map((item) => (
                       <option key={item.value} value={item.value}>
-                        {item.label}
+                        {t(item.labelKey)}
                       </option>
                     ))}
                   </select>
@@ -1054,7 +1096,7 @@ export default function AdminNewsPage() {
 
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-900 dark:text-white">
-                    Status
+                    {t("adminTicket.statusFieldLabel")}
                   </label>
 
                   <select
@@ -1069,7 +1111,7 @@ export default function AdminNewsPage() {
                   >
                     {statuses.map((item) => (
                       <option key={item.value} value={item.value}>
-                        {item.label}
+                        {t(item.labelKey)}
                       </option>
                     ))}
                   </select>
@@ -1079,7 +1121,7 @@ export default function AdminNewsPage() {
               {/* Excerpt */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-900 dark:text-white">
-                  Excerpt
+                  {t("journalist.editor.excerpt")}
                 </label>
 
                 <textarea
@@ -1088,7 +1130,7 @@ export default function AdminNewsPage() {
                     updateForm("excerpt", event.target.value)
                   }
                   rows={3}
-                  placeholder="Short article summary..."
+                  placeholder={t("adminNews.excerptPlaceholder")}
                   className="w-full resize-y rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
                 />
               </div>
@@ -1096,7 +1138,7 @@ export default function AdminNewsPage() {
               {/* Content */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-900 dark:text-white">
-                  Content
+                  {t("journalist.editor.content")}
                 </label>
 
                 <textarea
@@ -1105,7 +1147,7 @@ export default function AdminNewsPage() {
                     updateForm("content", event.target.value)
                   }
                   rows={14}
-                  placeholder="Write the complete news article..."
+                  placeholder={t("adminNews.contentPlaceholder")}
                   className="w-full resize-y rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm leading-6 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
                   required
                 />
@@ -1114,7 +1156,7 @@ export default function AdminNewsPage() {
               {/* Cover image */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-900 dark:text-white">
-                  Cover Image URL
+                  {t("adminNews.coverImageUrlLabel")}
                 </label>
 
                 <input
@@ -1123,7 +1165,7 @@ export default function AdminNewsPage() {
                   onChange={(event) =>
                     updateForm("coverImage", event.target.value)
                   }
-                  placeholder="https://..."
+                  placeholder={t("adminNews.urlPlaceholder")}
                   className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
                 />
               </div>
@@ -1132,7 +1174,7 @@ export default function AdminNewsPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-900 dark:text-white">
-                    Source Name
+                    {t("adminNews.sourceNameLabel")}
                   </label>
 
                   <input
@@ -1141,14 +1183,14 @@ export default function AdminNewsPage() {
                     onChange={(event) =>
                       updateForm("sourceName", event.target.value)
                     }
-                    placeholder="Source name"
+                    placeholder={t("adminNews.sourceNamePlaceholder")}
                     className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
                   />
                 </div>
 
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-900 dark:text-white">
-                    Source URL
+                    {t("adminNews.sourceUrlLabel")}
                   </label>
 
                   <input
@@ -1157,7 +1199,7 @@ export default function AdminNewsPage() {
                     onChange={(event) =>
                       updateForm("sourceUrl", event.target.value)
                     }
-                    placeholder="https://..."
+                    placeholder={t("adminNews.urlPlaceholder")}
                     className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
                   />
                 </div>
@@ -1166,7 +1208,7 @@ export default function AdminNewsPage() {
               {/* Author */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-900 dark:text-white">
-                  Author ID
+                  {t("adminNews.authorIdLabel")}
                 </label>
 
                 <input
@@ -1175,20 +1217,20 @@ export default function AdminNewsPage() {
                   onChange={(event) =>
                     updateForm("authorId", event.target.value)
                   }
-                  placeholder="User ID of the article author"
+                  placeholder={t("adminNews.authorIdPlaceholder")}
                   className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
                   required
                 />
 
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Use the existing ZRP user ID for the editorial author.
+                  {t("adminNews.authorIdHint")}
                 </p>
               </div>
 
               {/* Publish date */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-900 dark:text-white">
-                  Published At
+                  {t("adminNews.publishedAtLabel")}
                 </label>
 
                 <input
@@ -1214,11 +1256,11 @@ export default function AdminNewsPage() {
 
                 <div>
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Featured article
+                    {t("adminNews.featuredTitle")}
                   </p>
 
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Show this article as the featured story on ZRP News.
+                    {t("adminNews.featuredDesc")}
                   </p>
                 </div>
               </label>
@@ -1231,7 +1273,7 @@ export default function AdminNewsPage() {
                   disabled={saving}
                   className="rounded-xl border border-gray-300 px-5 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                 >
-                  Cancel
+                  {t("action.cancel")}
                 </button>
 
                 <button
@@ -1240,10 +1282,10 @@ export default function AdminNewsPage() {
                   className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {saving
-                    ? "Saving..."
+                    ? t("adminNews.saving")
                     : editingArticle
-                      ? "Update Article"
-                      : "Create Article"}
+                      ? t("adminNews.updateArticle")
+                      : t("adminNews.createArticleButton")}
                 </button>
               </div>
             </form>
@@ -1254,7 +1296,13 @@ export default function AdminNewsPage() {
   );
 }
 
-function StatusBadge({ status }: { status: NewsStatus }) {
+function StatusBadge({
+  status,
+  t,
+}: {
+  status: NewsStatus;
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string;
+}) {
   const styles: Record<NewsStatus, string> = {
     DRAFT:
       "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
@@ -1272,7 +1320,7 @@ function StatusBadge({ status }: { status: NewsStatus }) {
     <span
       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${styles[status]}`}
     >
-      {status.replace("_", " ")}
+      {t(STATUS_LABEL_KEYS[status])}
     </span>
   );
 }
