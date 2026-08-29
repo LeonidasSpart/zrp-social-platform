@@ -572,33 +572,32 @@ export default function HelpPage() {
     {
       id: "support",
       number: "07",
-      title: "Support Tickets",
-      subtitle: "Get help when you need it",
+      title: t("help.section.support.title"),
+      subtitle: t("help.section.support.subtitle"),
       icon: Ticket,
       content: (
         <div className="space-y-6">
           <p className="help-text">
-            If you need assistance with your account, billing, moderation, or
-            another platform issue, use the ZRP support system.
+            {t("help.support.intro")}
           </p>
 
           <div className="grid md:grid-cols-3 gap-4">
             <StepCard
               number="01"
-              title="Open Support"
-              text="Visit the ZRP Support page."
+              title={t("help.support.step1Title")}
+              text={t("help.support.step1Text")}
             />
 
             <StepCard
               number="02"
-              title="Describe Issue"
-              text="Select the relevant category and provide details."
+              title={t("help.support.step2Title")}
+              text={t("help.support.step2Text")}
             />
 
             <StepCard
               number="03"
-              title="Track Ticket"
-              text="Follow the conversation and respond to updates."
+              title={t("help.support.step3Title")}
+              text={t("help.support.step3Text")}
             />
           </div>
 
@@ -608,7 +607,7 @@ export default function HelpPage() {
               className="inline-flex items-center gap-2 rounded-full bg-zrp-red px-5 py-2.5 text-sm font-semibold text-white hover:bg-zrp-darkRed transition"
             >
               <Ticket className="w-4 h-4" />
-              Open Support
+              {t("help.support.openSupportBtn")}
             </Link>
 
             <a
@@ -626,39 +625,37 @@ export default function HelpPage() {
     {
       id: "reporting",
       number: "08",
-      title: "Reporting & Blocking",
-      subtitle: "Protect your experience on ZRP",
+      title: t("help.section.reporting.title"),
+      subtitle: t("help.section.reporting.subtitle"),
       icon: Flag,
       content: (
         <div className="space-y-5">
           <p className="help-text">
-            ZRP supports open discussion while maintaining rules against
-            illegal, harmful, abusive, fraudulent, or otherwise prohibited
-            activity.
+            {t("help.reporting.intro")}
           </p>
 
           <div className="grid md:grid-cols-2 gap-5">
             <ActionGuide
               icon={Flag}
-              title="Report content"
+              title={t("help.reporting.reportTitle")}
               steps={[
-                "Open the post or comment menu.",
-                "Select Report.",
-                "Choose the appropriate reason.",
-                "Add relevant details if necessary.",
-                "Submit the report.",
+                t("help.reporting.reportStep1"),
+                t("help.reporting.reportStep2"),
+                t("help.reporting.reportStep3"),
+                t("help.reporting.reportStep4"),
+                t("help.reporting.reportStep5"),
               ]}
             />
 
             <ActionGuide
               icon={Lock}
-              title="Block a user"
+              title={t("help.reporting.blockTitle")}
               steps={[
-                "Open the user's profile.",
-                "Open the profile menu.",
-                "Select Block.",
-                "Confirm the action.",
-                "Manage blocked users from Settings.",
+                t("help.reporting.blockStep1"),
+                t("help.reporting.blockStep2"),
+                t("help.reporting.blockStep3"),
+                t("help.reporting.blockStep4"),
+                t("help.reporting.blockStep5"),
               ]}
             />
           </div>
@@ -668,9 +665,7 @@ export default function HelpPage() {
               <Shield className="w-5 h-5 text-zrp-red flex-shrink-0" />
 
               <p className="text-sm leading-6 text-zrp-charcoal/75 dark:text-white/70">
-                Reporting does not automatically mean content will be removed.
-                Reports are reviewed according to applicable law, ZRP's Terms,
-                and Community Guidelines.
+                {t("help.reporting.note")}
               </p>
             </div>
           </div>
@@ -681,39 +676,38 @@ export default function HelpPage() {
     {
       id: "deletion",
       number: "09",
-      title: "Account Deletion",
-      subtitle: "Leave ZRP and manage your personal data",
+      title: t("help.section.deletion.title"),
+      subtitle: t("help.section.deletion.subtitle"),
       icon: Trash2,
       content: (
         <div className="space-y-5">
           <p className="help-text">
-            You can request deletion of your ZRP account and associated
-            personal data through the available account controls.
+            {t("help.deletion.intro")}
           </p>
 
           <div className="grid md:grid-cols-4 gap-3">
             <StepCard
               number="01"
-              title="Settings"
-              text="Open your account Settings."
+              title={t("help.deletion.step1Title")}
+              text={t("help.deletion.step1Text")}
             />
 
             <StepCard
               number="02"
-              title="Account"
-              text="Open the account management area."
+              title={t("help.deletion.step2Title")}
+              text={t("help.deletion.step2Text")}
             />
 
             <StepCard
               number="03"
-              title="Delete"
-              text="Select the account deletion option."
+              title={t("help.deletion.step3Title")}
+              text={t("help.deletion.step3Text")}
             />
 
             <StepCard
               number="04"
-              title="Confirm"
-              text="Review the consequences and confirm."
+              title={t("help.deletion.step4Title")}
+              text={t("help.deletion.step4Text")}
             />
           </div>
 
@@ -723,21 +717,18 @@ export default function HelpPage() {
 
               <div>
                 <h3 className="font-semibold text-zrp-charcoal dark:text-white">
-                  Important
+                  {t("help.deletion.importantTitle")}
                 </h3>
 
                 <p className="mt-1 text-sm leading-6 text-zrp-charcoal/70 dark:text-white/65">
-                  Account deletion may be irreversible. Certain information
-                  may need to be retained where required by law or for
-                  legitimate security, fraud-prevention, backup, or dispute
-                  resolution purposes. See the{" "}
+                  {t("help.deletion.importantPrefix")}{" "}
                   <Link
                     href="/privacy"
                     className="text-zrp-red hover:underline"
                   >
-                    Privacy Policy
+                    {t("help.deletion.importantLink")}
                   </Link>{" "}
-                  for details.
+                  {t("help.deletion.importantSuffix")}
                 </p>
               </div>
             </div>
@@ -749,39 +740,38 @@ export default function HelpPage() {
     {
       id: "moderation",
       number: "10",
-      title: "Moderation & Appeals",
-      subtitle: "Fair enforcement and user appeals",
+      title: t("help.section.moderation.title"),
+      subtitle: t("help.section.moderation.subtitle"),
       icon: Scale,
       content: (
         <div className="space-y-5">
           <p className="help-text">
-            ZRP combines automated systems and human review to help enforce
-            platform rules and respond to reports.
+            {t("help.moderation.intro")}
           </p>
 
           <div className="grid md:grid-cols-2 gap-4">
             <FeatureCard
               icon={Shield}
-              title="Platform Safety"
-              description="Systems are used to detect abuse, spam, malicious activity, and violations of platform rules."
+              title={t("help.moderation.f1Title")}
+              description={t("help.moderation.f1Desc")}
             />
 
             <FeatureCard
               icon={Eye}
-              title="Human Review"
-              description="Certain reports and moderation decisions may require human review."
+              title={t("help.moderation.f2Title")}
+              description={t("help.moderation.f2Desc")}
             />
 
             <FeatureCard
               icon={Scale}
-              title="Appeals"
-              description="Where an appeal process is available, users can challenge applicable moderation actions."
+              title={t("help.moderation.f3Title")}
+              description={t("help.moderation.f3Desc")}
             />
 
             <FeatureCard
               icon={MessageSquare}
-              title="Clear Communication"
-              description="Where appropriate, users may receive information about moderation actions and available next steps."
+              title={t("help.moderation.f4Title")}
+              description={t("help.moderation.f4Desc")}
             />
           </div>
 
@@ -791,14 +781,11 @@ export default function HelpPage() {
 
               <div>
                 <h3 className="font-orbitron font-bold text-lg">
-                  Freedom with responsibility
+                  {t("help.moderation.bannerTitle")}
                 </h3>
 
                 <p className="mt-2 text-sm leading-6 text-white/70">
-                  ZRP does not aim to remove content simply because it is
-                  unpopular or politically controversial. Content and conduct
-                  may nevertheless be restricted where they violate applicable
-                  law, platform rules, or safety requirements.
+                  {t("help.moderation.bannerDesc")}
                 </p>
               </div>
             </div>
@@ -810,39 +797,38 @@ export default function HelpPage() {
     {
       id: "privacy",
       number: "11",
-      title: "Privacy & Your Data",
-      subtitle: "Understand your data rights",
+      title: t("help.section.privacy.title"),
+      subtitle: t("help.section.privacy.subtitle"),
       icon: Shield,
       content: (
         <div className="space-y-5">
           <p className="help-text">
-            Privacy is a core part of the ZRP product philosophy. The complete
-            legal details are available in our Privacy Policy.
+            {t("help.privacySection.intro")}
           </p>
 
           <div className="grid md:grid-cols-2 gap-4">
             <InfoCard
               icon={User}
-              title="Account data"
-              text="Information such as account and profile information needed to operate your account."
+              title={t("help.privacySection.c1Title")}
+              text={t("help.privacySection.c1Text")}
             />
 
             <InfoCard
               icon={MessageSquare}
-              title="User content"
-              text="Posts, comments, messages, media, and other information you choose to publish."
+              title={t("help.privacySection.c2Title")}
+              text={t("help.privacySection.c2Text")}
             />
 
             <InfoCard
               icon={Shield}
-              title="Security data"
-              text="Information used to protect the platform, prevent abuse, and secure accounts."
+              title={t("help.privacySection.c3Title")}
+              text={t("help.privacySection.c3Text")}
             />
 
             <InfoCard
               icon={Lock}
-              title="Privacy controls"
-              text="You have rights and controls over personal information subject to applicable law."
+              title={t("help.privacySection.c4Title")}
+              text={t("help.privacySection.c4Text")}
             />
           </div>
 
@@ -850,7 +836,7 @@ export default function HelpPage() {
             href="/privacy"
             className="inline-flex items-center gap-2 text-sm font-semibold text-zrp-red hover:underline"
           >
-            Read the full Privacy Policy
+            {t("help.privacySection.readFullPolicy")}
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -860,8 +846,8 @@ export default function HelpPage() {
     {
       id: "trust-passport",
       number: "12",
-      title: "ZRP Trust Passport",
-      subtitle: "Understand account trust signals and transparency",
+      title: t("help.section.trustPassport.title"),
+      subtitle: t("help.section.trustPassport.subtitle"),
       icon: ShieldCheck,
       content: (
         <div className="space-y-6">
@@ -873,96 +859,92 @@ export default function HelpPage() {
 
               <div>
                 <h3 className="font-orbitron font-bold text-lg text-zrp-charcoal dark:text-white">
-                  What is the ZRP Trust Passport?
+                  {t("help.trustPassport.introTitle")}
                 </h3>
 
                 <p className="mt-2 text-sm leading-6 text-zrp-charcoal/70 dark:text-white/65">
-                  The ZRP Trust Passport is a transparency feature designed to
-                  help the ZRP community understand positive trust signals
-                  associated with an account.
+                  {t("help.trustPassport.introDesc")}
                 </p>
               </div>
             </div>
           </div>
 
           <p className="help-text">
-            Each account can receive a Trust Score from{" "}
-            <strong>0 to 100</strong>. The score is calculated from positive
-            account and community signals already available on ZRP. It is
-            designed to provide transparency without exposing private or
-            sensitive account information.
+            {t("help.trustPassport.scorePrefix")}{" "}
+            <strong>{t("help.trustPassport.scoreBold")}</strong>
+            {t("help.trustPassport.scoreSuffix")}
           </p>
 
           <div>
             <h3 className="font-orbitron font-bold text-base text-zrp-charcoal dark:text-white mb-4">
-              What can contribute to the Trust Passport?
+              {t("help.trustPassport.contributeHeading")}
             </h3>
 
             <div className="grid md:grid-cols-2 gap-4">
               <InfoCard
                 icon={ShieldCheck}
-                title="Email verification"
-                text="A verified email address can contribute to an account's positive trust signals."
+                title={t("help.trustPassport.emailTitle")}
+                text={t("help.trustPassport.emailText")}
               />
 
               <InfoCard
                 icon={User}
-                title="Profile completeness"
-                text="Profile information such as a photo, name, bio, location, and website can contribute to the score."
+                title={t("help.trustPassport.profileTitle")}
+                text={t("help.trustPassport.profileText")}
               />
 
               <InfoCard
                 icon={Calendar}
-                title="Account history"
-                text="Established account history can contribute additional trust signals over time."
+                title={t("help.trustPassport.historyTitle")}
+                text={t("help.trustPassport.historyText")}
               />
 
               <InfoCard
                 icon={Users}
-                title="Community activity"
-                text="Positive participation such as posts, comments, likes, reposts, and community connections can contribute to the score."
+                title={t("help.trustPassport.communityTitle")}
+                text={t("help.trustPassport.communityText")}
               />
 
               <InfoCard
                 icon={BadgeCheck}
-                title="ZRP verification"
-                text="An account with an active ZRP verification badge can receive an additional verification signal."
+                title={t("help.trustPassport.verificationTitle")}
+                text={t("help.trustPassport.verificationText")}
               />
 
               <InfoCard
                 icon={Eye}
-                title="Transparency"
-                text="The Trust Passport shows public-facing signals without exposing private security or personal information."
+                title={t("help.trustPassport.transparencyTitle")}
+                text={t("help.trustPassport.transparencyText")}
               />
             </div>
           </div>
 
           <div>
             <h3 className="font-orbitron font-bold text-base text-zrp-charcoal dark:text-white mb-4">
-              Trust levels
+              {t("help.trustPassport.levelsHeading")}
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
               {[
                 {
                   score: "0–34",
-                  label: "Building Trust",
+                  label: t("help.trustPassport.levelBuilding"),
                 },
                 {
                   score: "35–54",
-                  label: "Moderate Trust",
+                  label: t("help.trustPassport.levelModerate"),
                 },
                 {
                   score: "55–74",
-                  label: "Good Trust",
+                  label: t("help.trustPassport.levelGood"),
                 },
                 {
                   score: "75–89",
-                  label: "High Trust",
+                  label: t("help.trustPassport.levelHigh"),
                 },
                 {
                   score: "90–100",
-                  label: "Excellent Trust",
+                  label: t("help.trustPassport.levelExcellent"),
                 },
               ].map((level) => (
                 <div
@@ -987,18 +969,17 @@ export default function HelpPage() {
 
               <div>
                 <h3 className="font-orbitron font-bold">
-                  What the Trust Passport does not mean
+                  {t("help.trustPassport.notMeanTitle")}
                 </h3>
 
                 <ul className="mt-3 space-y-2 text-sm leading-6 text-white/65">
-                  <li>• It is not government or identity verification.</li>
-                  <li>• It is not a popularity ranking.</li>
-                  <li>• It is not a financial or credit score.</li>
-                  <li>• It is not a moderation punishment score.</li>
-                  <li>• It does not guarantee that a person is trustworthy.</li>
+                  <li>• {t("help.trustPassport.notMean1")}</li>
+                  <li>• {t("help.trustPassport.notMean2")}</li>
+                  <li>• {t("help.trustPassport.notMean3")}</li>
+                  <li>• {t("help.trustPassport.notMean4")}</li>
+                  <li>• {t("help.trustPassport.notMean5")}</li>
                   <li>
-                    • It does not guarantee someone's intentions or future
-                    behavior.
+                    • {t("help.trustPassport.notMean6")}
                   </li>
                 </ul>
               </div>
@@ -1011,14 +992,11 @@ export default function HelpPage() {
 
               <div>
                 <h3 className="font-semibold text-sm text-zrp-charcoal dark:text-white">
-                  Privacy by design
+                  {t("help.trustPassport.privacyByDesignTitle")}
                 </h3>
 
                 <p className="mt-1 text-sm leading-6 text-zrp-charcoal/70 dark:text-white/65">
-                  The Trust Passport does not publicly expose sensitive
-                  information such as email addresses, IP addresses, private
-                  messages, private moderation reports, or internal security
-                  information.
+                  {t("help.trustPassport.privacyByDesignText")}
                 </p>
               </div>
             </div>
@@ -1030,13 +1008,11 @@ export default function HelpPage() {
 
               <div>
                 <h3 className="font-orbitron font-bold text-sm text-zrp-charcoal dark:text-white">
-                  Your score can change
+                  {t("help.trustPassport.scoreCanChangeTitle")}
                 </h3>
 
                 <p className="mt-1 text-sm leading-6 text-zrp-charcoal/65 dark:text-white/60">
-                  Trust Passport information is generated from current account
-                  information and activity. As your account develops, the
-                  available trust signals and score may change automatically.
+                  {t("help.trustPassport.scoreCanChangeText")}
                 </p>
               </div>
             </div>
@@ -1048,18 +1024,17 @@ export default function HelpPage() {
 
               <div>
                 <h3 className="font-orbitron font-bold text-sm text-zrp-charcoal dark:text-white">
-                  Where can I find it?
+                  {t("help.trustPassport.whereFindTitle")}
                 </h3>
 
                 <p className="mt-1 text-sm leading-6 text-zrp-charcoal/70 dark:text-white/65">
-                  Open a user's ZRP profile and select{" "}
-                  <strong>ZRP Trust Passport</strong> to view the account's
-                  available trust signals and Trust Score.
+                  {t("help.trustPassport.whereFindPrefix")}{" "}
+                  <strong>{t("help.trustPassport.whereFindBold")}</strong>{" "}
+                  {t("help.trustPassport.whereFindSuffix")}
                 </p>
 
                 <p className="mt-2 text-xs text-zrp-charcoal/50 dark:text-white/45">
-                  The Trust Passport is available directly from supported ZRP
-                  profile pages.
+                  {t("help.trustPassport.whereFindNote")}
                 </p>
               </div>
             </div>
@@ -1071,74 +1046,74 @@ export default function HelpPage() {
     {
       id: "faq",
       number: "13",
-      title: "Frequently Asked Questions",
-      subtitle: "Quick answers to common questions",
+      title: t("help.section.faq.title"),
+      subtitle: t("help.section.faq.subtitle"),
       icon: HelpCircle,
       content: (
         <div className="space-y-4">
           <FaqItem
-            question="What is the ZRP Trust Passport?"
-            answer="The ZRP Trust Passport is a transparency feature that displays positive account and community trust signals. It provides a Trust Score from 0 to 100 based on information and activity available on ZRP."
+            question={t("help.faqSection.q1")}
+            answer={t("help.faqSection.a1")}
           />
 
           <FaqItem
-            question="How is the Trust Score calculated?"
-            answer="The score can consider signals such as email verification, profile completeness, account history, community activity, community connections, and ZRP verification."
+            question={t("help.faqSection.q2")}
+            answer={t("help.faqSection.a2")}
           />
 
           <FaqItem
-            question="Does a high Trust Score mean that someone is trustworthy?"
-            answer="No. The Trust Passport does not guarantee someone's identity, intentions, character, or future behavior. It is a transparency tool based on available ZRP account signals."
+            question={t("help.faqSection.q3")}
+            answer={t("help.faqSection.a3")}
           />
 
           <FaqItem
-            question="Can my Trust Score change?"
-            answer="Yes. The Trust Passport is based on current account information and activity. As your account develops or information changes, your available trust signals and score may change."
+            question={t("help.faqSection.q4")}
+            answer={t("help.faqSection.a4")}
           />
 
           <FaqItem
-            question="Does the Trust Passport expose private information?"
-            answer="No. The public Trust Passport is designed not to expose sensitive information such as email addresses, IP addresses, private messages, private moderation reports, or internal security information."
+            question={t("help.faqSection.q5")}
+            answer={t("help.faqSection.a5")}
           />
 
           <FaqItem
-            question="Where can I see a user's Trust Passport?"
-            answer="Open a user's ZRP profile and select ZRP Trust Passport to view the available trust signals and Trust Score."
+            question={t("help.faqSection.q6")}
+            answer={t("help.faqSection.a6")}
           />
 
           <FaqItem
-            question="Can I switch plans?"
-            answer="Plan changes depend on the subscription options currently available in your account. Check Settings for the current options."
+            question={t("help.faqSection.q7")}
+            answer={t("help.faqSection.a7")}
           />
 
           <FaqItem
-            question="What happens if I downgrade?"
-            answer="Features and limits associated with your previous plan may no longer be available. Existing content is handled according to the applicable ZRP policies."
+            question={t("help.faqSection.q8")}
+            answer={t("help.faqSection.a8")}
           />
 
           <FaqItem
-            question="Does ZRP require cryptocurrency?"
-            answer="No. ZRP is designed to be usable as a social platform without requiring users to understand or use blockchain technology."
+            question={t("help.faqSection.q9")}
+            answer={t("help.faqSection.a9")}
           />
 
           <FaqItem
-            question="Is ZRP a Web3 platform?"
-            answer="ZRP can incorporate blockchain and digital-payment technologies where appropriate, while keeping the core social experience accessible to ordinary users."
+            question={t("help.faqSection.q10")}
+            answer={t("help.faqSection.a10")}
           />
 
           <FaqItem
-            question="Does ZRP sell user data?"
-            answer="ZRP's stated policy is not to sell or rent personal data. See the Privacy Policy for the complete description of data processing."
+            question={t("help.faqSection.q11")}
+            answer={t("help.faqSection.a11")}
           />
 
           <FaqItem
-            question="Where is ZRP based?"
-            answer="ZRP is positioned as a Swiss platform, with a focus on Swiss and European values including privacy, security, and freedom of expression."
+            question={t("help.faqSection.q12")}
+            answer={t("help.faqSection.a12")}
           />
 
           <FaqItem
-            question="How does the charity commitment work?"
-            answer="ZRP is committed to allocating 35% of platform profits to charitable causes. This is a platform-level profit commitment rather than a deduction from an individual user's subscription."
+            question={t("help.faqSection.q13")}
+            answer={t("help.faqSection.a13")}
           />
         </div>
       ),
@@ -1474,17 +1449,15 @@ export default function HelpPage() {
             <div>
               <div className="inline-flex items-center gap-2 text-xs text-white/50 font-mono mb-4">
                 <span className="w-2 h-2 rounded-full bg-zrp-red" />
-                ZRP SUPPORT
+                {t("help.cta.badge")}
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-orbitron font-bold">
-                Still need help?
+                {t("help.cta.title")}
               </h2>
 
               <p className="mt-3 max-w-xl text-white/60 leading-7">
-                Our support team can help with account issues, payments,
-                moderation questions, privacy requests, Trust Passport
-                questions, and other platform problems.
+                {t("help.cta.desc")}
               </p>
             </div>
 
@@ -1494,7 +1467,7 @@ export default function HelpPage() {
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-zrp-darkRed hover:bg-gray-100 transition"
               >
                 <Ticket className="w-4 h-4" />
-                Open Ticket
+                {t("help.cta.openTicket")}
               </Link>
 
               <a
@@ -1502,7 +1475,7 @@ export default function HelpPage() {
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition"
               >
                 <Mail className="w-4 h-4" />
-                Email Support
+                {t("help.cta.emailSupport")}
               </a>
             </div>
           </div>
@@ -1513,28 +1486,28 @@ export default function HelpPage() {
             href="/privacy"
             className="hover:text-zrp-red transition"
           >
-            Privacy Policy
+            {t("footer.privacyPolicy")}
           </Link>
 
           <Link
             href="/terms"
             className="hover:text-zrp-red transition"
           >
-            Terms of Service
+            {t("footer.termsOfService")}
           </Link>
 
           <Link
             href="/guidelines"
             className="hover:text-zrp-red transition"
           >
-            Community Guidelines
+            {t("help.footer.guidelines")}
           </Link>
 
           <Link
             href="/contact"
             className="hover:text-zrp-red transition"
           >
-            Contact
+            {t("footer.contact")}
           </Link>
 
           <Link
