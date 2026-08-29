@@ -45,8 +45,8 @@ export default function AboutPage() {
         </p>
 
         <p>
-          {t("about.p5Em")} <em className="text-gray-900 dark:text-white font-medium">“enough”</em>{" "}
-          to the silencing of dissent, to the manipulation of public discourse, and to the erosion of fundamental rights.
+          {t("about.p5Em")} <em className="text-gray-900 dark:text-white font-medium">"{t("about.p5EmQuote")}"</em>{" "}
+          {t("about.p5Rest")}
         </p>
 
         <p>{t("about.p6")}</p>
