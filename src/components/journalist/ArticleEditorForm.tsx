@@ -4,6 +4,8 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ImagePlus, Loader2, Send, Save, Eye, X, AlertTriangle } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/translations";
 
 export type JournalistArticleCategory =
   | "WORLD"
@@ -18,18 +20,32 @@ export type JournalistArticleCategory =
   | "CULTURE"
   | "COMMUNITY";
 
-const CATEGORIES: Array<{ value: JournalistArticleCategory; label: string }> = [
-  { value: "WORLD", label: "World" },
-  { value: "EUROPE", label: "Europe" },
-  { value: "SWITZERLAND", label: "Switzerland" },
-  { value: "POLITICS", label: "Politics" },
-  { value: "BUSINESS", label: "Business" },
-  { value: "TECHNOLOGY", label: "Technology" },
-  { value: "CRYPTO", label: "Crypto" },
-  { value: "SCIENCE", label: "Science" },
-  { value: "SPORTS", label: "Sports" },
-  { value: "CULTURE", label: "Culture" },
-  { value: "COMMUNITY", label: "Community" },
+const CATEGORY_KEYS: Record<JournalistArticleCategory, TranslationKey> = {
+  WORLD: "newsCategory.world",
+  EUROPE: "newsCategory.europe",
+  SWITZERLAND: "newsCategory.switzerland",
+  POLITICS: "newsCategory.politics",
+  BUSINESS: "newsCategory.business",
+  TECHNOLOGY: "newsCategory.technology",
+  CRYPTO: "newsCategory.crypto",
+  SCIENCE: "newsCategory.science",
+  SPORTS: "newsCategory.sports",
+  CULTURE: "newsCategory.culture",
+  COMMUNITY: "newsCategory.community",
+};
+
+const CATEGORY_VALUES: JournalistArticleCategory[] = [
+  "WORLD",
+  "EUROPE",
+  "SWITZERLAND",
+  "POLITICS",
+  "BUSINESS",
+  "TECHNOLOGY",
+  "CRYPTO",
+  "SCIENCE",
+  "SPORTS",
+  "CULTURE",
+  "COMMUNITY",
 ];
 
 function slugify(value: string) {
@@ -64,6 +80,7 @@ interface ArticleEditorFormProps {
 
 export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleEditorFormProps) {
   const router = useRouter();
+  const { t } = useLanguage();
 
   const [title, setTitle] = useState(article?.title ?? "");
   const [slug, setSlug] = useState(article?.slug ?? "");
@@ -87,7 +104,7 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
     },
     onUploadError: (err) => {
       setUploading(false);
-      setError(`Cover image upload failed: ${err.message}`);
+      setError(t("journalist.editor.errCoverUploadFailed", { message: err.message }));
     },
   });
 
@@ -119,9 +136,9 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
   }
 
   function validate(): string | null {
-    if (!title.trim()) return "Title is required.";
-    if (!(slugTouched ? slug : slugify(title)).trim()) return "Slug is required.";
-    if (!content.trim()) return "Article content is required.";
+    if (!title.trim()) return t("journalist.editor.errTitleRequired");
+    if (!(slugTouched ? slug : slugify(title)).trim()) return t("journalist.editor.errSlugRequired");
+    if (!content.trim()) return t("journalist.editor.errContentRequired");
     return null;
   }
 
@@ -135,7 +152,7 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
     }
 
     if (submit && !canSubmit) {
-      setError("Only verified journalists can submit articles for review.");
+      setError(t("journalist.editor.errSubmitRestricted"));
       return;
     }
 
@@ -162,13 +179,13 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || "Failed to save article");
+        throw new Error(data.error || t("journalist.editor.errSaveFailed"));
       }
 
       router.push("/journalist");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save article");
+      setError(err instanceof Error ? err.message : t("journalist.editor.errSaveFailed"));
     } finally {
       setSaving(null);
     }
@@ -176,6 +193,12 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
 
   const isRejected = article?.status === "REJECTED";
   const isLocked = article && article.status !== "DRAFT" && article.status !== "REJECTED";
+  const lockedStatusLabel =
+    article?.status === "PENDING_REVIEW"
+      ? t("journalist.editor.statusPendingReview")
+      : article?.status === "PUBLISHED"
+        ? t("journalist.editor.statusPublished")
+        : t("journalist.editor.statusArchived");
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -183,16 +206,16 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
         <div className="mb-5 flex gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
           <AlertTriangle className="h-5 w-5 shrink-0" />
           <div>
-            <p className="font-semibold">This article was rejected</p>
+            <p className="font-semibold">{t("journalist.editor.rejectedTitle")}</p>
             <p className="mt-1">{article.reviewNote}</p>
-            <p className="mt-1 text-xs opacity-80">Edit and resubmit below to send it back for review.</p>
+            <p className="mt-1 text-xs opacity-80">{t("journalist.editor.rejectedHint")}</p>
           </div>
         </div>
       )}
 
       {isLocked && (
         <div className="mb-5 rounded-xl border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800 dark:border-yellow-900/50 dark:bg-yellow-950/30 dark:text-yellow-300">
-          This article is {article!.status === "PENDING_REVIEW" ? "pending review" : article!.status.toLowerCase()} and can no longer be edited here.
+          {t("journalist.editor.lockedNotice", { status: lockedStatusLabel })}
         </div>
       )}
 
@@ -212,7 +235,7 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
             onClick={() => setPreview(false)}
             className="mb-4 text-sm font-medium text-zrp-red hover:underline"
           >
-            ← Back to editor
+            ← {t("journalist.editor.backToEditor")}
           </button>
 
           {coverImage && (
@@ -220,16 +243,16 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
           )}
 
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zrp-red">
-            {CATEGORIES.find((c) => c.value === category)?.label}
+            {t(CATEGORY_KEYS[category])}
           </p>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{title || "Untitled article"}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{title || t("journalist.editor.untitledArticle")}</h1>
           {excerpt && <p className="mt-3 text-lg text-gray-600 dark:text-gray-300">{excerpt}</p>}
           <div className="prose prose-neutral mt-6 max-w-none whitespace-pre-wrap dark:prose-invert">
-            {content || "Nothing written yet."}
+            {content || t("journalist.editor.nothingWrittenYet")}
           </div>
           {(sourceName || sourceUrl) && (
             <p className="mt-6 text-sm text-gray-500 dark:text-gray-400">
-              Source: {sourceName || sourceUrl}
+              {t("journalist.editor.sourceLabel")} {sourceName || sourceUrl}
             </p>
           )}
         </div>
@@ -239,7 +262,7 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
             {/* Cover image */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Cover image
+                {t("journalist.editor.coverImage")}
               </label>
               <div className="flex items-center gap-4">
                 {coverImage ? (
@@ -250,7 +273,7 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
                   </div>
                 )}
                 <label className="cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
-                  {uploading ? "Uploading…" : "Upload image"}
+                  {uploading ? t("journalist.editor.uploading") : t("journalist.editor.uploadImage")}
                   <input
                     type="file"
                     accept="image/*"
@@ -264,19 +287,19 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
 
             {/* Title */}
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("journalist.editor.title")}</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => handleTitleChange(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-                placeholder="Article title"
+                placeholder={t("journalist.editor.titlePlaceholder")}
               />
             </div>
 
             {/* Slug */}
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Slug</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("journalist.editor.slug")}</label>
               <input
                 type="text"
                 value={slugTouched ? slug : slugify(title)}
@@ -285,21 +308,21 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
                   setSlug(slugify(e.target.value));
                 }}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-                placeholder="article-slug"
+                placeholder={t("journalist.editor.slugPlaceholder")}
               />
             </div>
 
             {/* Category */}
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("journalist.editor.category")}</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as JournalistArticleCategory)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
               >
-                {CATEGORIES.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
+                {CATEGORY_VALUES.map((c) => (
+                  <option key={c} value={c}>
+                    {t(CATEGORY_KEYS[c])}
                   </option>
                 ))}
               </select>
@@ -307,25 +330,25 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
 
             {/* Excerpt */}
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Excerpt</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("journalist.editor.excerpt")}</label>
               <textarea
                 value={excerpt}
                 onChange={(e) => setExcerpt(e.target.value)}
                 rows={2}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-                placeholder="Short summary shown in article lists"
+                placeholder={t("journalist.editor.excerptPlaceholder")}
               />
             </div>
 
             {/* Content */}
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Content</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("journalist.editor.content")}</label>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows={16}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-                placeholder="Write the full article here…"
+                placeholder={t("journalist.editor.contentPlaceholder")}
               />
             </div>
 
@@ -333,7 +356,7 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Source name (optional)
+                  {t("journalist.editor.sourceName")}
                 </label>
                 <input
                   type="text"
@@ -344,7 +367,7 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Source URL (optional)
+                  {t("journalist.editor.sourceUrl")}
                 </label>
                 <input
                   type="url"
@@ -364,7 +387,7 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
               className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
             >
               <Eye className="h-4 w-4" />
-              Preview
+              {t("journalist.editor.preview")}
             </button>
 
             {!isLocked && (
@@ -375,14 +398,14 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
                   className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                 >
                   {saving === "draft" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                  Save draft
+                  {t("journalist.editor.saveDraft")}
                 </button>
 
                 <button
                   type="button"
                   onClick={() => handleSave(true)}
                   disabled={saving !== null || !canSubmit}
-                  title={canSubmit ? undefined : "Only verified journalists can submit for review"}
+                  title={canSubmit ? undefined : t("journalist.editor.submitTooltip")}
                   className="inline-flex items-center gap-2 rounded-lg bg-zrp-red px-4 py-2 text-sm font-semibold text-white hover:bg-zrp-darkRed disabled:opacity-60"
                 >
                   {saving === "submit" ? (
@@ -390,7 +413,7 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
                   ) : (
                     <Send className="h-4 w-4" />
                   )}
-                  {isRejected ? "Resubmit for review" : "Submit for review"}
+                  {isRejected ? t("journalist.editor.resubmitForReview") : t("journalist.editor.submitForReview")}
                 </button>
               </>
             )}
