@@ -8,6 +8,7 @@ import Sidebar from "@/components/Sidebar";
 import RightPanel from "@/components/RightPanel";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import PushNotificationManager from "@/components/PushNotificationManager";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -42,6 +43,8 @@ export const metadata: Metadata = {
 
   description:
     "ZRP Social is a Swiss-European social media platform built in Switzerland around privacy, freedom of expression, security, and people-first communities.",
+
+  alternates: { canonical: "/" },
 
   applicationName: SITE_NAME,
 
@@ -329,6 +332,8 @@ export default function RootLayout({
                 >
                   <AuthProvider>
                     <UnreadCountProvider>
+                      <GoogleAnalytics />
+
                       <Header />
 
                       <EmailVerificationBanner />

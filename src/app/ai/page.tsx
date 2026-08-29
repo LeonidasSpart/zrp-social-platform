@@ -3,8 +3,20 @@ import AIChat from "@/components/AI/AIChat";
 import AIPageSubtitle from "@/components/AI/AIPageSubtitle";
 
 export const metadata: Metadata = {
-  title: "ZRP AI – ZRP Social",
+  title: "ZRP AI",
   description: "Chat with ZRP AI, powered by DeepSeek.",
+  alternates: { canonical: "/ai" },
+  openGraph: {
+    title: "ZRP AI | ZRP Social",
+    description: "Chat with ZRP AI, powered by DeepSeek.",
+    url: "/ai",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "ZRP AI | ZRP Social",
+    description: "Chat with ZRP AI, powered by DeepSeek.",
+  },
 };
 
 export default function AIPage() {

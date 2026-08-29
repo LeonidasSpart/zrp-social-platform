@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import T from "@/components/i18n/T";
 import type { TranslationKey } from "@/lib/translations";
+
+const SITE_URL = "https://zrp.one";
 
 const CATEGORY_KEYS: Record<string, TranslationKey> = {
   WORLD: "newsCategory.world",
@@ -25,6 +28,64 @@ type NewsArticlePageProps = {
     slug: string;
   }>;
 };
+
+export async function generateMetadata({
+  params,
+}: NewsArticlePageProps): Promise<Metadata> {
+  const { slug } = await params;
+
+  const article = await prisma.newsArticle.findUnique({
+    where: { slug },
+    select: {
+      title: true,
+      excerpt: true,
+      coverImage: true,
+      category: true,
+      publishedAt: true,
+      updatedAt: true,
+      status: true,
+      author: { select: { name: true, username: true } },
+    },
+  });
+
+  if (!article || article.status !== "PUBLISHED" || !article.publishedAt) {
+    return {
+      title: "Article Not Found",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const description =
+    article.excerpt || "Read the latest from ZRP News.";
+  const url = `${SITE_URL}/news/${slug}`;
+
+  return {
+    title: article.title,
+    description,
+    alternates: { canonical: `/news/${slug}` },
+    authors: article.author.name
+      ? [{ name: article.author.name }]
+      : undefined,
+    openGraph: {
+      type: "article",
+      title: article.title,
+      description,
+      url,
+      publishedTime: article.publishedAt.toISOString(),
+      modifiedTime: article.updatedAt.toISOString(),
+      authors: article.author.name ? [article.author.name] : undefined,
+      images: article.coverImage
+        ? [{ url: article.coverImage, alt: article.title }]
+        : undefined,
+    },
+    twitter: {
+      card: article.coverImage ? "summary_large_image" : "summary",
+      title: article.title,
+      description,
+      images: article.coverImage ? [article.coverImage] : undefined,
+    },
+  };
+}
 
 export default async function NewsArticlePage({
   params,
@@ -78,8 +139,44 @@ export default async function NewsArticlePage({
     minute: "2-digit",
   });
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: article.title,
+    description: article.excerpt || undefined,
+    image: article.coverImage ? [article.coverImage] : undefined,
+    datePublished: article.publishedAt.toISOString(),
+    dateModified: article.updatedAt.toISOString(),
+    author: {
+      "@type": "Person",
+      name: article.author.name || article.author.username,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "ZRP Social",
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/logo.png`,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${SITE_URL}/news/${slug}`,
+    },
+  };
+
   return (
     <main className="min-h-screen bg-background">
+      <script
+        type="application/ld+json"
+        // "</" is escaped so a title/excerpt containing "</script>" can't
+        // break out of this tag - JSON.stringify alone doesn't guard
+        // against that.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(articleJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+
       <article className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
           <Link

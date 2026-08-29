@@ -18,12 +18,14 @@ export default function CookieConsent() {
     setShowBanner(false);
     // Optionally set a cookie for server-side reading
     document.cookie = "cookieConsent=accepted; path=/; max-age=31536000";
+    window.dispatchEvent(new Event("cookieConsentChanged"));
   };
 
   const rejectCookies = () => {
     localStorage.setItem("cookieConsent", "rejected");
     setShowBanner(false);
     document.cookie = "cookieConsent=rejected; path=/; max-age=31536000";
+    window.dispatchEvent(new Event("cookieConsentChanged"));
   };
 
   if (!showBanner) return null;
