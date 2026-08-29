@@ -14,6 +14,8 @@ import {
   UserPlus,
 } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/translations";
 
 type JournalistStatus = "PENDING" | "VERIFIED" | "REJECTED" | "SUSPENDED";
 
@@ -38,13 +40,20 @@ interface JournalistProfile {
   reviewedBy: { id: string; username: string; name: string | null } | null;
 }
 
-const STATUS_TABS: Array<{ value: JournalistStatus | ""; label: string }> = [
-  { value: "PENDING", label: "Pending" },
-  { value: "VERIFIED", label: "Verified" },
-  { value: "SUSPENDED", label: "Suspended" },
-  { value: "REJECTED", label: "Rejected" },
-  { value: "", label: "All" },
+const STATUS_TABS: Array<{ value: JournalistStatus | ""; labelKey: TranslationKey }> = [
+  { value: "PENDING", labelKey: "adminJournalists.tabPending" },
+  { value: "VERIFIED", labelKey: "adminJournalists.tabVerified" },
+  { value: "SUSPENDED", labelKey: "adminJournalists.tabSuspended" },
+  { value: "REJECTED", labelKey: "adminJournalists.tabRejected" },
+  { value: "", labelKey: "adminJournalists.tabAll" },
 ];
+
+const STATUS_LABEL_KEYS: Record<JournalistStatus, TranslationKey> = {
+  PENDING: "adminJournalists.tabPending",
+  VERIFIED: "adminJournalists.tabVerified",
+  REJECTED: "adminJournalists.tabRejected",
+  SUSPENDED: "adminJournalists.tabSuspended",
+};
 
 const STATUS_STYLES: Record<JournalistStatus, string> = {
   PENDING: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
@@ -53,7 +62,24 @@ const STATUS_STYLES: Record<JournalistStatus, string> = {
   SUSPENDED: "bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
 };
 
+const ACTION_SUCCESS_KEYS: Record<string, TranslationKey> = {
+  approve: "adminJournalists.successApprove",
+  reject: "adminJournalists.successReject",
+  suspend: "adminJournalists.successSuspend",
+  restore: "adminJournalists.successRestore",
+  remove: "adminJournalists.successRemove",
+};
+
+const ACTION_ERROR_KEYS: Record<string, TranslationKey> = {
+  approve: "adminJournalists.errFailedApprove",
+  reject: "adminJournalists.errFailedReject",
+  suspend: "adminJournalists.errFailedSuspend",
+  restore: "adminJournalists.errFailedRestore",
+  remove: "adminJournalists.errFailedRemove",
+};
+
 export default function AdminJournalistsPage() {
+  const { t } = useLanguage();
   const [profiles, setProfiles] = useState<JournalistProfile[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -76,13 +102,13 @@ export default function AdminJournalistsPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || "Failed to load journalists");
+        throw new Error(data.error || t("adminJournalists.errFailedLoad"));
       }
 
       setProfiles(data.profiles || []);
       setCounts(data.counts || {});
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load journalists");
+      setError(err instanceof Error ? err.message : t("adminJournalists.errFailedLoad"));
     } finally {
       setLoading(false);
     }
@@ -99,14 +125,16 @@ export default function AdminJournalistsPage() {
     if (action === "reject" || action === "suspend" || action === "remove") {
       reason = window.prompt(
         action === "reject"
-          ? "Reason for rejecting this application (optional):"
+          ? t("adminJournalists.promptRejectReason")
           : action === "suspend"
-            ? "Reason for suspending this journalist (optional):"
-            : "Reason for removing journalist status (optional):"
+            ? t("adminJournalists.promptSuspendReason")
+            : t("adminJournalists.promptRemoveReason")
       );
       if (reason === null) return; // cancelled
     } else {
-      const confirmed = window.confirm(`Are you sure you want to ${action} this journalist?`);
+      const confirmed = window.confirm(
+        action === "approve" ? t("adminJournalists.confirmApprove") : t("adminJournalists.confirmRestore")
+      );
       if (!confirmed) return;
     }
 
@@ -124,13 +152,13 @@ export default function AdminJournalistsPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || `Failed to ${action}`);
+        throw new Error(data.error || t(ACTION_ERROR_KEYS[action]));
       }
 
-      setSuccess(`Journalist ${action}d successfully.`);
+      setSuccess(t(ACTION_SUCCESS_KEYS[action]));
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : `Failed to ${action}`);
+      setError(err instanceof Error ? err.message : t(ACTION_ERROR_KEYS[action]));
     } finally {
       setActingOn(null);
     }
@@ -160,14 +188,14 @@ export default function AdminJournalistsPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || "Failed to grant journalist status");
+        throw new Error(data.error || t("adminJournalists.errFailedGrant"));
       }
 
-      setSuccess(`@${username} is now a verified journalist.`);
+      setSuccess(t("adminJournalists.grantSuccess", { username }));
       setGrantUsername("");
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to grant journalist status");
+      setError(err instanceof Error ? err.message : t("adminJournalists.errFailedGrant"));
     } finally {
       setGranting(false);
     }
@@ -181,14 +209,14 @@ export default function AdminJournalistsPage() {
           className="mb-3 inline-flex items-center gap-2 text-sm text-gray-500 transition hover:text-red-600 dark:text-gray-400"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Admin
+          {t("adminJournalists.backToAdmin")}
         </Link>
 
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Journalists</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t("adminJournalists.title")}</h1>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Review journalist applications and manage verification status.
+              {t("adminJournalists.subtitle")}
             </p>
           </div>
 
@@ -205,7 +233,7 @@ export default function AdminJournalistsPage() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search username, name, email…"
+                placeholder={t("adminJournalists.searchPlaceholder")}
                 className="rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
               />
             </div>
@@ -218,9 +246,9 @@ export default function AdminJournalistsPage() {
           className="mb-5 flex flex-col gap-2 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:flex-row sm:items-center"
         >
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-900 dark:text-white">Grant journalist status</p>
+            <p className="text-sm font-medium text-gray-900 dark:text-white">{t("adminJournalists.grantTitle")}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Skip the application - verify a known reporter directly by username.
+              {t("adminJournalists.grantDesc")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -228,7 +256,7 @@ export default function AdminJournalistsPage() {
               type="text"
               value={grantUsername}
               onChange={(e) => setGrantUsername(e.target.value)}
-              placeholder="username"
+              placeholder={t("adminJournalists.usernamePlaceholder")}
               className="w-48 rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             />
             <button
@@ -237,7 +265,7 @@ export default function AdminJournalistsPage() {
               className="inline-flex items-center gap-1.5 rounded-lg bg-zrp-red px-3 py-2 text-xs font-medium text-white transition hover:bg-zrp-darkRed disabled:opacity-50"
             >
               <UserPlus className="h-3.5 w-3.5" />
-              {granting ? "Granting…" : "Grant"}
+              {granting ? t("adminJournalists.granting") : t("adminJournalists.grant")}
             </button>
           </div>
         </form>
@@ -266,7 +294,7 @@ export default function AdminJournalistsPage() {
                   : "bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
               }`}
             >
-              {tab.label}
+              {t(tab.labelKey)}
               {tab.value && counts[tab.value] !== undefined ? ` (${counts[tab.value]})` : ""}
             </button>
           ))}
@@ -275,10 +303,10 @@ export default function AdminJournalistsPage() {
         {/* List */}
         <div className="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
           {loading ? (
-            <p className="px-5 py-10 text-center text-sm text-gray-500 dark:text-gray-400">Loading…</p>
+            <p className="px-5 py-10 text-center text-sm text-gray-500 dark:text-gray-400">{t("adminJournalists.loading")}</p>
           ) : profiles.length === 0 ? (
             <p className="px-5 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
-              No journalist applications found.
+              {t("adminJournalists.noApplicationsFound")}
             </p>
           ) : (
             <ul className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -292,7 +320,7 @@ export default function AdminJournalistsPage() {
                       <span className="text-sm text-gray-500 dark:text-gray-400">@{profile.user.username}</span>
                       {profile.user.badgeType && <VerifiedBadge badgeType={profile.user.badgeType} />}
                       <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[profile.status]}`}>
-                        {profile.status}
+                        {t(STATUS_LABEL_KEYS[profile.status])}
                       </span>
                     </div>
 
@@ -300,7 +328,7 @@ export default function AdminJournalistsPage() {
 
                     {profile.outlet && (
                       <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">
-                        <span className="font-medium">Outlet:</span> {profile.outlet}
+                        <span className="font-medium">{t("adminJournalists.outletLabel")}</span> {profile.outlet}
                       </p>
                     )}
                     {profile.pitch && (
@@ -313,17 +341,17 @@ export default function AdminJournalistsPage() {
                         rel="noreferrer"
                         className="mt-1 inline-flex items-center gap-1 text-sm text-zrp-red hover:underline"
                       >
-                        Portfolio <ExternalLink className="h-3 w-3" />
+                        {t("adminJournalists.portfolio")} <ExternalLink className="h-3 w-3" />
                       </a>
                     )}
                     {profile.status === "REJECTED" && profile.rejectionReason && (
                       <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                        Rejected: {profile.rejectionReason}
+                        {t("adminJournalists.rejectedPrefix", { reason: profile.rejectionReason })}
                       </p>
                     )}
                     {profile.status === "SUSPENDED" && profile.suspensionReason && (
                       <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                        Suspended: {profile.suspensionReason}
+                        {t("adminJournalists.suspendedPrefix", { reason: profile.suspensionReason })}
                       </p>
                     )}
                   </div>
@@ -332,14 +360,14 @@ export default function AdminJournalistsPage() {
                     {profile.status === "PENDING" && (
                       <>
                         <ActionButton
-                          label="Approve"
+                          label={t("adminJournalists.approve")}
                           icon={CheckCircle2}
                           className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-950/30"
                           disabled={actingOn === profile.user.id}
                           onClick={() => act(profile.user.id, "approve")}
                         />
                         <ActionButton
-                          label="Reject"
+                          label={t("adminJournalists.reject")}
                           icon={XCircle}
                           className="border-red-300 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30"
                           disabled={actingOn === profile.user.id}
@@ -351,14 +379,14 @@ export default function AdminJournalistsPage() {
                     {profile.status === "VERIFIED" && (
                       <>
                         <ActionButton
-                          label="Suspend"
+                          label={t("adminJournalists.suspend")}
                           icon={Ban}
                           className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                           disabled={actingOn === profile.user.id}
                           onClick={() => act(profile.user.id, "suspend")}
                         />
                         <ActionButton
-                          label="Remove"
+                          label={t("adminJournalists.remove")}
                           icon={Trash2}
                           className="border-red-300 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30"
                           disabled={actingOn === profile.user.id}
@@ -370,14 +398,14 @@ export default function AdminJournalistsPage() {
                     {profile.status === "SUSPENDED" && (
                       <>
                         <ActionButton
-                          label="Restore"
+                          label={t("adminJournalists.restore")}
                           icon={RotateCcw}
                           className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-950/30"
                           disabled={actingOn === profile.user.id}
                           onClick={() => act(profile.user.id, "restore")}
                         />
                         <ActionButton
-                          label="Remove"
+                          label={t("adminJournalists.remove")}
                           icon={Trash2}
                           className="border-red-300 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30"
                           disabled={actingOn === profile.user.id}
