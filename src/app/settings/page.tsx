@@ -7,7 +7,7 @@ import Link from "next/link";
 import {
   Check, X, Globe, MapPin, User, Key, Calendar, Camera, Trash2, Loader2,
   BellOff, ChevronRight, Ban, Mail, DollarSign, TrendingUp, Wallet, Lock,
-  Ticket, Shield, Bell, UserCircle, CreditCard, LifeBuoy, Download,
+  Ticket, Shield, Bell, UserCircle, CreditCard, LifeBuoy, Download, Scale,
 } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import EmailPreferences from "@/components/EmailPreferences";
@@ -776,6 +776,25 @@ export default function SettingsPage() {
                     <Download className="w-4 h-4 inline mr-1" />
                     {t("settings.exportData")}
                   </a>
+                </div>
+              </div>
+
+              {/* ─── Moderation Appeals ─────────────────────────────────────── */}
+              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">{t("settings.appeals")}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {t("settings.appealsDesc")}
+                    </p>
+                  </div>
+                  <Link
+                    href="/settings/appeals"
+                    className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition flex-shrink-0"
+                  >
+                    <Scale className="w-4 h-4 inline mr-1" />
+                    {t("settings.appeals")}
+                  </Link>
                 </div>
               </div>
 

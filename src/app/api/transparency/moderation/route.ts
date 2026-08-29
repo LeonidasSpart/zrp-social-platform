@@ -53,6 +53,7 @@ export async function GET() {
       byActionTypeRaw,
       actionedForResolution,
       seriesRaw,
+      appealsByStatusRaw,
     ] = await Promise.all([
       prisma.report.count(),
       prisma.report.count({ where: { createdAt: { gte: since30 } } }),
@@ -77,6 +78,10 @@ export async function GET() {
       prisma.report.findMany({
         where: { createdAt: { gte: seriesStart } },
         select: { createdAt: true, status: true },
+      }),
+      prisma.appeal.groupBy({
+        by: ["status"],
+        _count: { _all: true },
       }),
     ]);
 
@@ -150,6 +155,13 @@ export async function GET() {
       ...counts,
     }));
 
+    const appealCounts = new Map(appealsByStatusRaw.map((a) => [a.status, a._count._all]));
+    const appeals = {
+      pending: appealCounts.get("pending") ?? 0,
+      upheld: appealCounts.get("upheld") ?? 0,
+      overturned: appealCounts.get("overturned") ?? 0,
+    };
+
     return NextResponse.json({
       generatedAt: now.toISOString(),
       totals: {
@@ -162,6 +174,7 @@ export async function GET() {
       byActionType,
       medianResolutionHours,
       series,
+      appeals,
     });
   } catch (error) {
     console.error("Moderation transparency error:", error);

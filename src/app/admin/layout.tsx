@@ -14,6 +14,7 @@ import {
   Newspaper,
   BadgeCheck,
   HardDrive,
+  Scale,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
@@ -91,6 +92,11 @@ export default function AdminLayout({
       href: "/admin/reports",
       labelKey: "adminReports.title",
       icon: Flag,
+    },
+    {
+      href: "/admin/appeals",
+      labelKey: "adminAppeals.title",
+      icon: Scale,
     },
     {
       href: "/admin/ads",

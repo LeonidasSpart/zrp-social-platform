@@ -215,7 +215,9 @@ model User {
   blockedUsers Blocked[] @relation("Blocker")
   blockedBy    Blocked[] @relation("Blocked")
 
-  reports Report[] @relation("Reporter")
+  reports         Report[] @relation("Reporter")
+  reportsAgainstMe Report[] @relation("ReportTarget")
+  appeals         Appeal[]
 
   teamAccount TeamMember[] @relation("TeamAccount")
   teamMembers TeamMember[] @relation("TeamMemberUser")
@@ -621,11 +623,16 @@ model Report {
   reporterId String
   reporter   User   @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
 
+  // SetNull rather than Cascade: a moderation action that deletes the
+  // reported post/comment must NOT also delete the Report row recording
+  // why - that would erase the moderation-transparency audit trail (and
+  // any appeal referencing it) at the exact moment the action it
+  // describes is carried out.
   postId String?
-  post   Post?  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post   Post?  @relation(fields: [postId], references: [id], onDelete: SetNull)
 
   commentId String?
-  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: SetNull)
 
   reason  String
   details String? @db.Text
@@ -639,10 +646,50 @@ model Report {
   actionNote String? @db.Text
   actionedAt DateTime?
 
+  // Denormalized at the moment an action is taken (see PUT
+  // /api/admin/reports/[id]): the post/comment author may become
+  // unreachable later (content deleted, SetNull above), but the person
+  // an action was actually taken against must still be identifiable so
+  // they can be shown - and file - an appeal.
+  targetUserId String?
+  targetUser   User?   @relation("ReportTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+
+  appeals Appeal[]
+
   @@index([postId])
   @@index([commentId])
   @@index([status])
   @@index([reporterId])
+  @@index([targetUserId])
+}
+
+model Appeal {
+  id String @id @default(cuid())
+
+  reportId String
+  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  message String @db.Text
+
+  status String @default("pending") // pending | upheld | overturned
+
+  resolutionNote     String?   @db.Text
+  resolvedById       String?
+  resolvedByUsername String?
+  resolvedAt         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // One appeal per user per actioned report - resubmission isn't how
+  // this is meant to work; a denied appeal is final unless staff reopen
+  // the underlying report.
+  @@unique([reportId, userId])
+  @@index([userId])
+  @@index([status])
 }
 
 model Bookmark {

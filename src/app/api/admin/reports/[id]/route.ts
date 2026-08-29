@@ -22,6 +22,21 @@ export async function PUT(
       data.actionType = actionType || null;
       data.actionNote = actionNote || null;
       data.actionedAt = new Date();
+
+      // Denormalize who this action was actually taken against, read
+      // from the post/comment author now while it's still resolvable -
+      // the content itself may be deleted moments later as part of
+      // carrying out this same action, and the report must still be
+      // able to identify its target afterward (for the appeals flow
+      // and for the moderation transparency dashboard).
+      const current = await prisma.report.findUnique({
+        where: { id },
+        select: {
+          post: { select: { authorId: true } },
+          comment: { select: { authorId: true } },
+        },
+      });
+      data.targetUserId = current?.post?.authorId ?? current?.comment?.authorId ?? null;
     } else {
       // Optionally clear action fields when status changes away from actioned
       data.actionType = null;

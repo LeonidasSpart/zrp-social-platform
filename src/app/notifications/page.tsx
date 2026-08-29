@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { Heart, MessageCircle, Repeat, UserPlus, BadgeCheck, Loader2, Mail } from "lucide-react";
+import { Heart, MessageCircle, Repeat, UserPlus, BadgeCheck, Loader2, Mail, Scale } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUnreadCount } from "@/contexts/UnreadCountContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -185,6 +185,8 @@ export default function NotificationsPage() {
         return <Repeat className="w-4 h-4 text-green-500" />;
       case "message":
         return <Mail className="w-4 h-4 text-zrp-red" />;
+      case "appeal_resolved":
+        return <Scale className="w-4 h-4 text-zrp-red" />;
       default:
         return null;
     }
@@ -204,6 +206,8 @@ export default function NotificationsPage() {
         return plural ? "reposted your post" : t("notifications.repostedPostSuffix");
       case "message":
         return "sent you a message";
+      case "appeal_resolved":
+        return t("notifications.appealResolvedSuffix");
       default:
         return "";
     }
@@ -287,9 +291,11 @@ export default function NotificationsPage() {
 
             const linkHref = g.type === "message"
               ? `/messages/${primaryUser.username}`
-              : g.postId
-                ? `/post/${g.postId}`
-                : `/profile/${primaryUser.username}`;
+              : (g.type as string) === "appeal_resolved"
+                ? "/settings/appeals"
+                : g.postId
+                  ? `/post/${g.postId}`
+                  : `/profile/${primaryUser.username}`;
 
             return (
               <div

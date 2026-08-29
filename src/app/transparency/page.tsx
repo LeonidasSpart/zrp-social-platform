@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Loader2,
   Info,
+  Scale,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -33,6 +34,7 @@ interface ModerationData {
   byActionType: { actionType: string; count: number }[];
   medianResolutionHours: number | null;
   series: { month: string; received: number; actioned: number }[];
+  appeals: { pending: number; upheld: number; overturned: number };
 }
 
 const REASON_KEYS: Record<string, TranslationKey> = {
@@ -270,6 +272,45 @@ export default function TransparencyPage() {
                       <Bar dataKey="count" fill="#FF2D2D" />
                     </BarChart>
                   </ResponsiveContainer>
+                </div>
+              </div>
+            </section>
+
+            {/* Appeals */}
+            <section className="py-8 px-4 max-w-4xl mx-auto">
+              <h2 className="text-2xl font-bold text-center text-zrp-charcoal dark:text-white font-orbitron mb-2">
+                {t("transparency.appealsHeading")}
+              </h2>
+              <p className="text-center text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter mb-8 max-w-2xl mx-auto">
+                {t("transparency.appealsNote")}
+              </p>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal text-center">
+                  <Scale className="w-5 h-5 text-zrp-red mx-auto mb-1" aria-hidden="true" />
+                  <p className="text-2xl font-bold text-zrp-charcoal dark:text-white font-orbitron">
+                    {data.appeals.pending.toLocaleString(locale)}
+                  </p>
+                  <p className="text-xs text-zrp-charcoal/60 dark:text-white/60 font-inter mt-1">
+                    {t("appeals.statusPending")}
+                  </p>
+                </div>
+                <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal text-center">
+                  <Scale className="w-5 h-5 text-zrp-red mx-auto mb-1" aria-hidden="true" />
+                  <p className="text-2xl font-bold text-zrp-charcoal dark:text-white font-orbitron">
+                    {data.appeals.upheld.toLocaleString(locale)}
+                  </p>
+                  <p className="text-xs text-zrp-charcoal/60 dark:text-white/60 font-inter mt-1">
+                    {t("appeals.statusUpheld")}
+                  </p>
+                </div>
+                <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal text-center">
+                  <Scale className="w-5 h-5 text-zrp-red mx-auto mb-1" aria-hidden="true" />
+                  <p className="text-2xl font-bold text-zrp-charcoal dark:text-white font-orbitron">
+                    {data.appeals.overturned.toLocaleString(locale)}
+                  </p>
+                  <p className="text-xs text-zrp-charcoal/60 dark:text-white/60 font-inter mt-1">
+                    {t("appeals.statusOverturned")}
+                  </p>
                 </div>
               </div>
             </section>

@@ -14,7 +14,8 @@ interface CreateNotificationParams {
     | "ticket_reply"
     | "ticket_resolved"
     | "ticket_closed"
-    | "ticket_created";
+    | "ticket_created"
+    | "appeal_resolved";
   fromUserId: string;
   postId?: string;
   ticketId?: string; // ✅ added for ticket links
@@ -97,8 +98,14 @@ export async function createNotification({
       ticket_closed: "supportTickets", // ✅ added
       ticket_created: "supportTickets", // ✅ added
     };
+    // A moderation-appeal outcome is rare and consequential enough that
+    // it should always reach the user by email - there's no preference
+    // toggle for it (nor for support tickets above), so it isn't gated
+    // on one. This only changes behavior for that one new type: every
+    // other type already has a typeMap entry today, so the gate below
+    // is unchanged for all of them.
     const prefKey = typeMap[type];
-    if (!prefKey || prefs[prefKey] === false) return;
+    if (prefKey && prefs[prefKey] === false) return;
 
     // ─── 3. Fetch actor info ──────────────────────────────────────
     const fromUser = await prisma.user.findUnique({
@@ -122,6 +129,7 @@ export async function createNotification({
       ticket_resolved: { action: "resolved your support ticket", emoji: "✅" },
       ticket_closed: { action: "closed your support ticket", emoji: "🔒" },
       ticket_created: { action: "created a new support ticket", emoji: "🎫" }, // for admins
+      appeal_resolved: { action: "resolved your moderation appeal", emoji: "⚖️" },
     };
     const { action, emoji } = actionMap[type] || { action: "interacted with you", emoji: "🔔" };
 
@@ -197,6 +205,27 @@ export async function createNotification({
       `;
     }
 
+    // Appeal resolutions link to the user's own appeals list, not a
+    // ticket or post - a dedicated block same as tickets above, rather
+    // than forcing it through the "actor liked/commented" engagement
+    // template.
+    if (type === "appeal_resolved") {
+      const appealsUrl = `${process.env.NEXTAUTH_URL}/settings/appeals`;
+      customHtml = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 12px; border: 1px solid #e5e7eb;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <img src="https://zrp.one/logo.png" alt="ZRP" style="height: 40px;" />
+          </div>
+          <div style="font-size: 48px; text-align: center; margin-bottom: 16px;">${emoji}</div>
+          <h1 style="font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 8px 0; text-align: center;">A moderation appeal you filed has been resolved</h1>
+          <p style="font-size: 14px; color: #6b7280; text-align: center; margin: 0 0 24px 0;">See the outcome and any staff note on your appeals page.</p>
+          <a href="${appealsUrl}" style="display: inline-block; background-color: #FF2D2D; color: #ffffff; font-weight: 600; padding: 12px 24px; border-radius: 8px; text-decoration: none; text-align: center; margin: 0 auto; display: table;">
+            View Appeal
+          </a>
+        </div>
+      `;
+    }
+
     // ─── 7. Subject ──────────────────────────────────────────────────
     const subjectMap: Record<string, string> = {
       like: `${actorName} liked your post`,
@@ -210,6 +239,7 @@ export async function createNotification({
       ticket_resolved: `Your support ticket has been resolved`,
       ticket_closed: `Your support ticket has been closed`,
       ticket_created: `New support ticket from ${actorName}`,
+      appeal_resolved: "Your moderation appeal has been resolved",
     };
     const subject = subjectMap[type] || "New notification from ZRP";
 
