@@ -1026,30 +1026,29 @@ export default function FAQPage() {
     {
       id: "charity-model",
       category: "Charity & Impact",
-      question: "How does the 35% charity model work?",
+      question: t("faq.charityModel.q"),
       icon: Heart,
       answer: (
         <div className="space-y-3">
           <p>
-            ZRP has stated a commitment to dedicate{" "}
-            <strong>35% of platform profits</strong> to charitable causes.
+            {t("faq.charityModel.p1Prefix")}{" "}
+            <strong>{t("faq.charityModel.p1Bold")}</strong> {t("faq.charityModel.p1Suffix")}
           </p>
 
-          <p>Areas of intended support include:</p>
+          <p>{t("faq.charityModel.p2")}</p>
 
           <ul className="list-disc list-inside space-y-2 text-sm">
-            <li>Support for orphans and children in need.</li>
-            <li>Education and schools.</li>
-            <li>Healthcare and hospitals.</li>
-            <li>Climate and environmental relief initiatives.</li>
+            <li>{t("faq.charityModel.item1")}</li>
+            <li>{t("faq.charityModel.item2")}</li>
+            <li>{t("faq.charityModel.item3")}</li>
+            <li>{t("faq.charityModel.item4")}</li>
           </ul>
 
           <div className="p-3 rounded-lg bg-zrp-red/5 border border-zrp-red/20 text-sm">
             <strong className="text-zrp-red">
-              Social impact:
+              {t("faq.charityModel.calloutBold")}
             </strong>{" "}
-            the objective is to connect the growth of the platform with
-            measurable positive impact.
+            {t("faq.charityModel.calloutText")}
           </div>
         </div>
       ),
@@ -1058,18 +1057,16 @@ export default function FAQPage() {
     {
       id: "impact-badge",
       category: "Charity & Impact",
-      question: "What is the impact badge on my profile?",
+      question: t("faq.impactBadge.q"),
       icon: Heart,
       answer: (
         <div className="space-y-3">
           <p>
-            An impact indicator may be used to communicate participation in
-            ZRP's broader social-impact ecosystem.
+            {t("faq.impactBadge.p1")}
           </p>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Specific impact calculations and displayed metrics may change as
-            the platform's charity reporting system develops.
+            {t("faq.impactBadge.note")}
           </p>
         </div>
       ),
@@ -1081,33 +1078,27 @@ export default function FAQPage() {
     {
       id: "web3-zrp",
       category: "Web3 & Digital",
-      question: "Is ZRP a Web3 platform?",
+      question: t("faq.web3Zrp.q"),
       icon: Wallet,
       answer: (
         <div className="space-y-3">
           <p>
-            ZRP is designed as a modern digital social platform and may
-            integrate Web3-compatible technologies where they provide useful
-            functionality to users.
+            {t("faq.web3Zrp.p1")}
           </p>
 
           <p>
-            Web3 infrastructure can include areas such as digital identity,
-            blockchain-based payments, wallet connectivity, digital assets,
-            decentralised infrastructure, and user-controlled technology.
+            {t("faq.web3Zrp.p2")}
           </p>
 
           <p>
-            However, users do not need to hold cryptocurrency or operate a
-            blockchain wallet simply to use the core ZRP Social experience.
+            {t("faq.web3Zrp.p3")}
           </p>
 
           <div className="p-3 rounded-lg bg-zrp-red/5 border border-zrp-red/20 text-sm">
             <strong className="text-zrp-red">
-              Important:
+              {t("faq.web3Zrp.calloutBold")}
             </strong>{" "}
-            Web3 features may be introduced, expanded, modified, or discontinued
-            independently of the core social-networking functionality.
+            {t("faq.web3Zrp.calloutText")}
           </div>
         </div>
       ),
@@ -1116,29 +1107,24 @@ export default function FAQPage() {
     {
       id: "digital-payments",
       category: "Web3 & Digital",
-      question: "Will ZRP support digital or blockchain payments?",
+      question: t("faq.digitalPayments.q"),
       icon: CreditCard,
       answer: (
         <div className="space-y-3">
           <p>
-            ZRP can support modern digital-payment infrastructure where it is
-            technically, commercially, and legally appropriate.
+            {t("faq.digitalPayments.p1")}
           </p>
 
           <p>
-            Future payment options could include traditional payment methods
-            and, where supported, blockchain-based payment infrastructure.
+            {t("faq.digitalPayments.p2")}
           </p>
 
           <p>
-            Availability will depend on the relevant product, jurisdiction,
-            payment provider, compliance requirements, and technical
-            implementation.
+            {t("faq.digitalPayments.p3")}
           </p>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            ZRP does not guarantee that any specific cryptocurrency,
-            blockchain, token, or payment network will be supported.
+            {t("faq.digitalPayments.note")}
           </p>
         </div>
       ),
@@ -1147,29 +1133,27 @@ export default function FAQPage() {
     {
       id: "wallets",
       category: "Web3 & Digital",
-      question: "Will ZRP support cryptocurrency wallets?",
+      question: t("faq.wallets.q"),
       icon: Wallet,
       answer: (
         <div className="space-y-3">
           <p>
-            Wallet connectivity may be supported for eligible Web3 features.
+            {t("faq.wallets.p1")}
           </p>
 
           <p>
-            A cryptocurrency wallet is generally a user-controlled system
-            used to manage blockchain credentials and digital assets.
+            {t("faq.wallets.p2")}
           </p>
 
           <ul className="list-disc list-inside space-y-2 text-sm">
-            <li>Wallet connection may be optional.</li>
-            <li>ZRP will not automatically have access to private keys.</li>
-            <li>Users should never share seed phrases or private keys.</li>
-            <li>Blockchain transactions can be irreversible.</li>
+            <li>{t("faq.wallets.item1")}</li>
+            <li>{t("faq.wallets.item2")}</li>
+            <li>{t("faq.wallets.item3")}</li>
+            <li>{t("faq.wallets.item4")}</li>
           </ul>
 
           <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 text-sm">
-            <strong>Security warning:</strong> ZRP will never legitimately ask
-            you to send your private key or wallet recovery phrase.
+            <strong>{t("faq.wallets.warningBold")}</strong> {t("faq.wallets.warningText")}
           </div>
         </div>
       ),
@@ -1178,24 +1162,20 @@ export default function FAQPage() {
     {
       id: "blockchain-transactions",
       category: "Web3 & Digital",
-      question: "Are blockchain transactions reversible?",
+      question: t("faq.blockchainTx.q"),
       icon: Database,
       answer: (
         <div className="space-y-3">
           <p>
-            Generally, blockchain transactions are designed to be irreversible
-            once confirmed by the relevant network.
+            {t("faq.blockchainTx.p1")}
           </p>
 
           <p>
-            This means users should carefully verify wallet addresses,
-            transaction details, networks, and amounts before confirming a
-            blockchain transaction.
+            {t("faq.blockchainTx.p2")}
           </p>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            ZRP cannot guarantee recovery of assets sent to an incorrect
-            address or through an unsupported network.
+            {t("faq.blockchainTx.note")}
           </p>
         </div>
       ),
@@ -1204,24 +1184,20 @@ export default function FAQPage() {
     {
       id: "crypto-risk",
       category: "Web3 & Digital",
-      question: "Does ZRP provide cryptocurrency investment advice?",
+      question: t("faq.cryptoRisk.q"),
       icon: Shield,
       answer: (
         <div className="space-y-3">
           <p>
-            No. Information concerning blockchain technology, digital assets,
-            tokens, or cryptocurrencies should not be interpreted as financial,
-            investment, legal, or tax advice.
+            {t("faq.cryptoRisk.p1")}
           </p>
 
           <p>
-            Digital assets can be highly volatile and may involve substantial
-            financial risk.
+            {t("faq.cryptoRisk.p2")}
           </p>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Always perform your own research and seek qualified professional
-            advice where appropriate.
+            {t("faq.cryptoRisk.note")}
           </p>
         </div>
       ),
@@ -1230,24 +1206,20 @@ export default function FAQPage() {
     {
       id: "digital-identity",
       category: "Web3 & Digital",
-      question: "Could ZRP support decentralised identity?",
+      question: t("faq.digitalIdentity.q"),
       icon: Globe,
       answer: (
         <div className="space-y-3">
           <p>
-            Decentralised identity technologies may provide new ways for users
-            to control digital credentials and verify information without
-            relying exclusively on traditional identity systems.
+            {t("faq.digitalIdentity.p1")}
           </p>
 
           <p>
-            ZRP may evaluate such technologies where they improve privacy,
-            security, authenticity, or user control.
+            {t("faq.digitalIdentity.p2")}
           </p>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Any future identity system would remain subject to applicable
-            privacy, security, and legal requirements.
+            {t("faq.digitalIdentity.note")}
           </p>
         </div>
       ),
@@ -1256,27 +1228,23 @@ export default function FAQPage() {
     {
       id: "zrp-token",
       category: "Web3 & Digital",
-      question: "Does using ZRP Social require a ZRP token?",
+      question: t("faq.zrpToken.q"),
       icon: Zap,
       answer: (
         <div className="space-y-3">
           <p>
-            No. Core ZRP Social functionality does not require users to own
-            cryptocurrency or a token.
+            {t("faq.zrpToken.p1")}
           </p>
 
           <p>
-            If ZRP introduces token-based or blockchain-enabled products in the
-            future, those products may have their own terms, eligibility
-            requirements, risks, and technical requirements.
+            {t("faq.zrpToken.p2")}
           </p>
 
           <div className="p-3 rounded-lg bg-zrp-red/5 border border-zrp-red/20 text-sm">
             <strong className="text-zrp-red">
-              Never send funds:
+              {t("faq.zrpToken.calloutBold")}
             </strong>{" "}
-            Always verify official ZRP announcements before interacting with
-            any token, wallet, or blockchain address claiming to represent ZRP.
+            {t("faq.zrpToken.calloutText")}
           </div>
         </div>
       ),
