@@ -681,20 +681,16 @@ export default function FAQPage() {
     {
       id: "what-is-trust-passport",
       category: "ZRP Trust Passport",
-      question: "What is the ZRP Trust Passport?",
+      question: t("faq.whatIsTrustPassport.q"),
       icon: ShieldCheck,
       answer: (
         <div className="space-y-4">
           <p>
-            The <strong>ZRP Trust Passport</strong> is a transparency feature
-            designed to help the ZRP community understand positive trust signals
-            associated with an account.
+            The <strong>{t("faq.whatIsTrustPassport.p1Bold")}</strong> {t("faq.whatIsTrustPassport.p1")}
           </p>
 
           <p>
-            It provides a <strong>Trust Score from 0 to 100</strong> together
-            with selected account and community signals that can help users
-            better understand the public history and activity of an account.
+            {t("faq.whatIsTrustPassport.p2Prefix")} <strong>{t("faq.whatIsTrustPassport.p2Bold")}</strong> {t("faq.whatIsTrustPassport.p2")}
           </p>
 
           <div className="p-4 rounded-xl bg-zrp-red/5 border border-zrp-red/20">
@@ -703,13 +699,11 @@ export default function FAQPage() {
 
               <div>
                 <strong className="text-zrp-red">
-                  Transparency, not a guarantee
+                  {t("faq.whatIsTrustPassport.calloutBold")}
                 </strong>
 
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                  The Trust Passport is designed to provide useful account
-                  signals. It does not guarantee a person's identity,
-                  intentions, character, or future behaviour.
+                  {t("faq.whatIsTrustPassport.calloutText")}
                 </p>
               </div>
             </div>
@@ -721,33 +715,31 @@ export default function FAQPage() {
     {
       id: "trust-score-calculation",
       category: "ZRP Trust Passport",
-      question: "How is the ZRP Trust Score calculated?",
+      question: t("faq.trustScoreCalc.q"),
       icon: Sparkles,
       answer: (
         <div className="space-y-4">
           <p>
-            The Trust Score is generated from positive account and community
-            signals available to the ZRP platform.
+            {t("faq.trustScoreCalc.p1")}
           </p>
 
           <p>
-            Depending on the current implementation, signals can include:
+            {t("faq.trustScoreCalc.p2")}
           </p>
 
           <ul className="list-disc list-inside space-y-2 text-sm">
-            <li>Email verification.</li>
-            <li>Profile completeness.</li>
-            <li>Account age and history.</li>
-            <li>Posts and community participation.</li>
-            <li>Comments and interactions.</li>
-            <li>Likes and repost activity.</li>
-            <li>Community connections.</li>
-            <li>ZRP verification status.</li>
+            <li>{t("faq.trustScoreCalc.item1")}</li>
+            <li>{t("faq.trustScoreCalc.item2")}</li>
+            <li>{t("faq.trustScoreCalc.item3")}</li>
+            <li>{t("faq.trustScoreCalc.item4")}</li>
+            <li>{t("faq.trustScoreCalc.item5")}</li>
+            <li>{t("faq.trustScoreCalc.item6")}</li>
+            <li>{t("faq.trustScoreCalc.item7")}</li>
+            <li>{t("faq.trustScoreCalc.item8")}</li>
           </ul>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            The exact weighting of individual signals is controlled by ZRP's
-            Trust Passport system and may evolve over time.
+            {t("faq.trustScoreCalc.note")}
           </p>
         </div>
       ),
@@ -756,64 +748,62 @@ export default function FAQPage() {
     {
       id: "trust-levels",
       category: "ZRP Trust Passport",
-      question: "What do the different Trust Score levels mean?",
+      question: t("faq.trustLevels.q"),
       icon: BadgeCheck,
       answer: (
         <div className="space-y-4">
           <p>
-            The Trust Passport currently groups scores into broad trust levels
-            to make the score easier to understand.
+            {t("faq.trustLevels.intro")}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700">
               <strong className="text-zrp-red">0–34</strong>
               <p className="mt-1 text-sm font-medium">
-                Building Trust
+                {t("faq.trustLevels.level1Name")}
               </p>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                The account is developing its public trust signals.
+                {t("faq.trustLevels.level1Desc")}
               </p>
             </div>
 
             <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700">
               <strong className="text-zrp-red">35–54</strong>
               <p className="mt-1 text-sm font-medium">
-                Moderate Trust
+                {t("faq.trustLevels.level2Name")}
               </p>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                The account has established some positive signals.
+                {t("faq.trustLevels.level2Desc")}
               </p>
             </div>
 
             <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700">
               <strong className="text-zrp-red">55–74</strong>
               <p className="mt-1 text-sm font-medium">
-                Good Trust
+                {t("faq.trustLevels.level3Name")}
               </p>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                The account demonstrates a broader set of positive signals.
+                {t("faq.trustLevels.level3Desc")}
               </p>
             </div>
 
             <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700">
               <strong className="text-zrp-red">75–89</strong>
               <p className="mt-1 text-sm font-medium">
-                High Trust
+                {t("faq.trustLevels.level4Name")}
               </p>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                The account has a strong collection of available trust signals.
+                {t("faq.trustLevels.level4Desc")}
               </p>
             </div>
 
             <div className="p-4 rounded-xl border border-zrp-red/30 bg-zrp-red/5 sm:col-span-2">
               <strong className="text-zrp-red">90–100</strong>
               <p className="mt-1 text-sm font-medium">
-                Excellent Trust
+                {t("faq.trustLevels.level5Name")}
               </p>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                The account has a very strong set of available positive trust
-                signals.
+                {t("faq.trustLevels.level5Desc")}
               </p>
             </div>
           </div>
@@ -824,25 +814,20 @@ export default function FAQPage() {
     {
       id: "trust-score-change",
       category: "ZRP Trust Passport",
-      question: "Can my Trust Score change?",
+      question: t("faq.trustScoreChange.q"),
       icon: Zap,
       answer: (
         <div className="space-y-3">
           <p>
-            Yes. The Trust Passport is dynamic and can change as the account's
-            available trust signals change.
+            {t("faq.trustScoreChange.p1")}
           </p>
 
           <p>
-            For example, completing your profile, verifying your email,
-            developing account history, participating positively in the
-            community, or receiving an applicable verification status may
-            affect available trust signals.
+            {t("faq.trustScoreChange.p2")}
           </p>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Trust Scores are not intended to be permanent rankings and may
-            change as ZRP's systems evolve.
+            {t("faq.trustScoreChange.note")}
           </p>
         </div>
       ),
@@ -851,23 +836,20 @@ export default function FAQPage() {
     {
       id: "trust-score-not-popularity",
       category: "ZRP Trust Passport",
-      question: "Is the Trust Score a popularity score?",
+      question: t("faq.trustNotPopularity.q"),
       icon: Heart,
       answer: (
         <div className="space-y-3">
           <p>
-            <strong>No.</strong> The Trust Score is not intended to rank users
-            according to popularity.
+            <strong>{t("faq.trustNotPopularity.noBold")}</strong> {t("faq.trustNotPopularity.p1")}
           </p>
 
           <p>
-            A large following, many likes, or high engagement should not by
-            itself be interpreted as proof that someone is trustworthy.
+            {t("faq.trustNotPopularity.p2")}
           </p>
 
           <p>
-            The Trust Passport is designed around a broader set of account and
-            community signals rather than simply measuring popularity.
+            {t("faq.trustNotPopularity.p3")}
           </p>
         </div>
       ),
@@ -876,26 +858,20 @@ export default function FAQPage() {
     {
       id: "trust-score-not-identity",
       category: "ZRP Trust Passport",
-      question: "Does a high Trust Score prove someone's identity?",
+      question: t("faq.trustNotIdentity.q"),
       icon: Lock,
       answer: (
         <div className="space-y-3">
           <p>
-            No. A Trust Score is <strong>not government identity
-            verification</strong> and should not be treated as proof that a
-            person is who they claim to be.
+            {t("faq.trustNotIdentity.p1Prefix")} <strong>{t("faq.trustNotIdentity.p1Bold")}</strong> {t("faq.trustNotIdentity.p1Suffix")}
           </p>
 
           <p>
-            Verification badges and the Trust Passport are separate concepts.
-            The Trust Passport provides account trust signals, while a
-            verification badge represents the applicable verification status
-            granted by ZRP.
+            {t("faq.trustNotIdentity.p2")}
           </p>
 
           <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 text-sm">
-            <strong>Important:</strong> Always exercise normal caution when
-            communicating with people online, regardless of their Trust Score.
+            <strong>{t("faq.trustNotIdentity.warningBold")}</strong> {t("faq.trustNotIdentity.warningText")}
           </div>
         </div>
       ),
@@ -904,30 +880,28 @@ export default function FAQPage() {
     {
       id: "trust-passport-private-data",
       category: "ZRP Trust Passport",
-      question: "Does the Trust Passport expose private information?",
+      question: t("faq.trustPrivateData.q"),
       icon: Shield,
       answer: (
         <div className="space-y-3">
           <p>
-            The public Trust Passport is designed to display useful trust
-            signals without exposing sensitive private information.
+            {t("faq.trustPrivateData.p1")}
           </p>
 
-          <p>It should not publicly expose information such as:</p>
+          <p>{t("faq.trustPrivateData.p2")}</p>
 
           <ul className="list-disc list-inside space-y-2 text-sm">
-            <li>Private email addresses.</li>
-            <li>Passwords.</li>
-            <li>Private messages.</li>
-            <li>IP addresses.</li>
-            <li>Private moderation reports.</li>
-            <li>Internal security information.</li>
-            <li>Private account credentials.</li>
+            <li>{t("faq.trustPrivateData.item1")}</li>
+            <li>{t("faq.trustPrivateData.item2")}</li>
+            <li>{t("faq.trustPrivateData.item3")}</li>
+            <li>{t("faq.trustPrivateData.item4")}</li>
+            <li>{t("faq.trustPrivateData.item5")}</li>
+            <li>{t("faq.trustPrivateData.item6")}</li>
+            <li>{t("faq.trustPrivateData.item7")}</li>
           </ul>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            The handling of personal information is governed by the ZRP Privacy
-            Policy.
+            {t("faq.trustPrivateData.note")}
           </p>
         </div>
       ),
@@ -936,23 +910,21 @@ export default function FAQPage() {
     {
       id: "trust-passport-location",
       category: "ZRP Trust Passport",
-      question: "Where can I see a user's Trust Passport?",
+      question: t("faq.trustLocation.q"),
       icon: Eye,
       answer: (
         <div className="space-y-3">
           <p>
-            Open a supported ZRP user profile and select{" "}
-            <strong>ZRP Trust Passport</strong>.
+            {t("faq.trustLocation.p1Prefix")}{" "}
+            <strong>{t("faq.trustLocation.p1Bold")}</strong>.
           </p>
 
           <p>
-            The Trust Passport can display the account's available Trust Score
-            and relevant public trust signals.
+            {t("faq.trustLocation.p2")}
           </p>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            The exact placement of the Trust Passport may vary as the ZRP
-            profile experience develops.
+            {t("faq.trustLocation.note")}
           </p>
         </div>
       ),
@@ -961,18 +933,16 @@ export default function FAQPage() {
     {
       id: "trust-passport-verification",
       category: "ZRP Trust Passport",
-      question: "Does ZRP verification affect the Trust Passport?",
+      question: t("faq.trustVerification.q"),
       icon: BadgeCheck,
       answer: (
         <div className="space-y-4">
           <p>
-            An active ZRP verification status may contribute a positive
-            verification signal to the Trust Passport.
+            {t("faq.trustVerification.p1")}
           </p>
 
           <p>
-            However, <strong>verification and the Trust Passport are not the
-            same thing</strong>.
+            {t("faq.trustVerification.p2Prefix")} <strong>{t("faq.trustVerification.p2Bold")}</strong>.
           </p>
 
           <div className="grid sm:grid-cols-2 gap-3">
@@ -980,11 +950,11 @@ export default function FAQPage() {
               <VerifiedBadge badgeType="verified" />
 
               <h3 className="mt-3 font-semibold">
-                Verification
+                {t("faq.trustVerification.verifCardTitle")}
               </h3>
 
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Represents the applicable verification status of an account.
+                {t("faq.trustVerification.verifCardDesc")}
               </p>
             </div>
 
@@ -992,12 +962,11 @@ export default function FAQPage() {
               <ShieldCheck className="w-5 h-5 text-zrp-red" />
 
               <h3 className="mt-3 font-semibold">
-                Trust Passport
+                {t("faq.trustVerification.passportCardTitle")}
               </h3>
 
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Combines multiple account and community signals into a
-                transparency-oriented Trust Score.
+                {t("faq.trustVerification.passportCardDesc")}
               </p>
             </div>
           </div>
@@ -1008,23 +977,20 @@ export default function FAQPage() {
     {
       id: "trust-passport-not-moderation",
       category: "ZRP Trust Passport",
-      question: "Is the Trust Score a moderation or punishment score?",
+      question: t("faq.trustNotModeration.q"),
       icon: ShieldCheck,
       answer: (
         <div className="space-y-3">
           <p>
-            No. The Trust Passport is not intended to function as a public
-            punishment or moderation score.
+            {t("faq.trustNotModeration.p1")}
           </p>
 
           <p>
-            Moderation decisions are handled separately through ZRP's
-            moderation and safety systems.
+            {t("faq.trustNotModeration.p2")}
           </p>
 
           <p>
-            A Trust Score should therefore not be interpreted as a public
-            record of someone's moderation history.
+            {t("faq.trustNotModeration.p3")}
           </p>
         </div>
       ),
@@ -1033,23 +999,21 @@ export default function FAQPage() {
     {
       id: "trust-passport-guarantee",
       category: "ZRP Trust Passport",
-      question: "Does an Excellent Trust Score guarantee that someone is safe?",
+      question: t("faq.trustGuarantee.q"),
       icon: Shield,
       answer: (
         <div className="space-y-3">
           <p>
-            No. Even an Excellent Trust Score does not guarantee that a person
-            is safe, honest, legitimate, or trustworthy in every situation.
+            {t("faq.trustGuarantee.p1")}
           </p>
 
           <p>
-            The Trust Passport is an additional transparency tool. Users should
-            always apply their own judgment and appropriate caution.
+            {t("faq.trustGuarantee.p2")}
           </p>
 
           <div className="p-3 rounded-lg bg-zrp-red/5 border border-zrp-red/20 text-sm">
             <strong className="text-zrp-red">
-              Think of it as a signal, not a guarantee.
+              {t("faq.trustGuarantee.calloutText")}
             </strong>
           </div>
         </div>
