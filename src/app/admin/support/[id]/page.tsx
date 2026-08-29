@@ -4,6 +4,37 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
+import type { TranslationKey } from '@/lib/translations';
+
+const STATUS_LABEL_KEYS: Record<string, TranslationKey> = {
+  OPEN: 'support.tickets.statusOpen',
+  IN_PROGRESS: 'support.tickets.statusInProgress',
+  AWAITING_REPLY: 'support.tickets.statusAwaitingReply',
+  RESOLVED: 'support.tickets.statusResolved',
+  CLOSED: 'support.tickets.statusClosed',
+};
+
+const PRIORITY_LABEL_KEYS: Record<string, TranslationKey> = {
+  LOW: 'support.ticketDetail.priorityLow',
+  NORMAL: 'support.ticketDetail.priorityNormal',
+  HIGH: 'support.ticketDetail.priorityHigh',
+  URGENT: 'support.ticketDetail.priorityUrgent',
+};
+
+const CATEGORY_LABEL_KEYS: Record<string, TranslationKey> = {
+  GENERAL: 'support.categoryGeneral',
+  ACCOUNT: 'support.categoryAccount',
+  PRIVACY: 'support.categoryPrivacy',
+  CONTENT: 'support.categoryContent',
+  MODERATION: 'support.categoryModeration',
+  PAYMENT: 'support.categoryPayment',
+  MONETISATION: 'support.categoryMonetisation',
+  BUG: 'support.categoryBug',
+  FEATURE_REQUEST: 'support.categoryFeatureRequest',
+  SECURITY: 'support.categorySecurity',
+  OTHER: 'support.categoryOther',
+};
 
 interface Reply {
   id: string;
@@ -30,6 +61,7 @@ export default function AdminTicketDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const { data: session } = useSession();
+  const { t } = useLanguage();
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState(true);
   const [replyMessage, setReplyMessage] = useState('');
@@ -75,7 +107,7 @@ export default function AdminTicketDetailPage() {
   };
 
   const resolveTicket = async () => {
-    const resolution = prompt('Resolution notes:');
+    const resolution = prompt(t('adminTicket.resolutionPrompt'));
     if (resolution === null) return;
     const res = await fetch(`/api/admin/support/tickets/${id}/resolve`, {
       method: 'POST',
@@ -86,26 +118,26 @@ export default function AdminTicketDetailPage() {
   };
 
   if (!session || session.user.role !== 'ADMIN') {
-    return <div className="p-8 text-center">Access denied. Admin only.</div>;
+    return <div className="p-8 text-center">{t('admin.accessDenied')}</div>;
   }
 
-  if (loading) return <div className="p-8 text-center">Loading...</div>;
-  if (!ticket) return <div className="p-8 text-center">Ticket not found</div>;
+  if (loading) return <div className="p-8 text-center">{t('support.loading')}</div>;
+  if (!ticket) return <div className="p-8 text-center">{t('adminTicket.ticketNotFound')}</div>;
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <button onClick={() => router.back()} className="text-zrp-red hover:underline mb-4">
-        ← Back to tickets
+        ← {t('adminTicket.backToTickets')}
       </button>
 
       <div className="flex justify-between items-start mb-6">
         <div>
           <h1 className="text-2xl font-orbitron text-zrp-charcoal dark:text-white">{ticket.subject}</h1>
           <div className="flex gap-4 mt-2 text-sm text-zrp-charcoal/60 dark:text-white/60">
-            <span>From: @{ticket.user.username}</span>
-            <span>Plan: {ticket.user.plan}</span>
-            <span>Category: {ticket.category}</span>
-            <span>Created: {new Date(ticket.createdAt).toLocaleString()}</span>
+            <span>{t('adminTicket.fromLabel', { username: ticket.user.username })}</span>
+            <span>{t('adminTicket.planLabel', { plan: ticket.user.plan })}</span>
+            <span>{t('support.ticketDetail.categoryLabel')} {t(CATEGORY_LABEL_KEYS[ticket.category] ?? 'support.categoryOther')}</span>
+            <span>{t('support.ticketDetail.createdLabel')} {new Date(ticket.createdAt).toLocaleString()}</span>
           </div>
         </div>
         <div className="flex gap-2">
@@ -113,7 +145,7 @@ export default function AdminTicketDetailPage() {
             onClick={resolveTicket}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
           >
-            Resolve
+            {t('adminTicket.resolve')}
           </button>
         </div>
       </div>
@@ -122,39 +154,39 @@ export default function AdminTicketDetailPage() {
       <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-xl mb-6 border border-zrp-silver/30 dark:border-zrp-charcoal">
         <div className="flex flex-wrap gap-4">
           <div>
-            <label className="text-xs text-zrp-charcoal/50 dark:text-white/50 block mb-1">Status</label>
+            <label className="text-xs text-zrp-charcoal/50 dark:text-white/50 block mb-1">{t('adminTicket.statusFieldLabel')}</label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
               className="px-3 py-1 border border-zrp-silver/30 dark:border-zrp-charcoal rounded-lg bg-white dark:bg-zrp-charcoal/50 text-sm"
             >
-              <option value="OPEN">Open</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="AWAITING_REPLY">Awaiting Reply</option>
-              <option value="RESOLVED">Resolved</option>
-              <option value="CLOSED">Closed</option>
+              <option value="OPEN">{t('support.tickets.statusOpen')}</option>
+              <option value="IN_PROGRESS">{t('support.tickets.statusInProgress')}</option>
+              <option value="AWAITING_REPLY">{t('support.tickets.statusAwaitingReply')}</option>
+              <option value="RESOLVED">{t('support.tickets.statusResolved')}</option>
+              <option value="CLOSED">{t('support.tickets.statusClosed')}</option>
             </select>
           </div>
           <div>
-            <label className="text-xs text-zrp-charcoal/50 dark:text-white/50 block mb-1">Priority</label>
+            <label className="text-xs text-zrp-charcoal/50 dark:text-white/50 block mb-1">{t('adminTicket.priorityFieldLabel')}</label>
             <select
               value={priority}
               onChange={(e) => setPriority(e.target.value)}
               className="px-3 py-1 border border-zrp-silver/30 dark:border-zrp-charcoal rounded-lg bg-white dark:bg-zrp-charcoal/50 text-sm"
             >
-              <option value="LOW">Low</option>
-              <option value="NORMAL">Normal</option>
-              <option value="HIGH">High</option>
-              <option value="URGENT">Urgent</option>
+              <option value="LOW">{t('support.ticketDetail.priorityLow')}</option>
+              <option value="NORMAL">{t('support.ticketDetail.priorityNormal')}</option>
+              <option value="HIGH">{t('support.ticketDetail.priorityHigh')}</option>
+              <option value="URGENT">{t('support.ticketDetail.priorityUrgent')}</option>
             </select>
           </div>
           <div>
-            <label className="text-xs text-zrp-charcoal/50 dark:text-white/50 block mb-1">Assign to</label>
+            <label className="text-xs text-zrp-charcoal/50 dark:text-white/50 block mb-1">{t('adminTicket.assignTo')}</label>
             <input
               type="text"
               value={assignedTo}
               onChange={(e) => setAssignedTo(e.target.value)}
-              placeholder="Admin ID"
+              placeholder={t('adminTicket.adminIdPlaceholder')}
               className="px-3 py-1 border border-zrp-silver/30 dark:border-zrp-charcoal rounded-lg bg-white dark:bg-zrp-charcoal/50 text-sm"
             />
           </div>
@@ -162,7 +194,7 @@ export default function AdminTicketDetailPage() {
             onClick={updateTicket}
             className="self-end px-4 py-1 bg-zrp-red text-white rounded-lg hover:bg-zrp-darkRed transition"
           >
-            Update
+            {t('adminTicket.update')}
           </button>
         </div>
       </div>
@@ -191,8 +223,8 @@ export default function AdminTicketDetailPage() {
                 {reply.user.username[0].toUpperCase()}
               </div>
               <span className="font-medium">{reply.user.username}</span>
-              {reply.user.role === 'ADMIN' && <span className="text-xs text-zrp-red font-medium">(Admin)</span>}
-              {reply.isInternal && <span className="text-xs bg-yellow-200 dark:bg-yellow-800 px-2 py-0.5 rounded">Internal Note</span>}
+              {reply.user.role === 'ADMIN' && <span className="text-xs text-zrp-red font-medium">{t('adminTicket.adminBadge')}</span>}
+              {reply.isInternal && <span className="text-xs bg-yellow-200 dark:bg-yellow-800 px-2 py-0.5 rounded">{t('support.ticketDetail.internalNote')}</span>}
               <span className="text-xs text-zrp-charcoal/50 dark:text-white/50">{new Date(reply.createdAt).toLocaleString()}</span>
             </div>
             <p className="text-zrp-charcoal/80 dark:text-white/80 whitespace-pre-wrap">{reply.message}</p>
@@ -205,7 +237,7 @@ export default function AdminTicketDetailPage() {
         <textarea
           value={replyMessage}
           onChange={(e) => setReplyMessage(e.target.value)}
-          placeholder="Type your reply..."
+          placeholder={t('support.ticketDetail.replyPlaceholder')}
           className="w-full p-3 rounded-lg border border-zrp-silver/30 dark:border-zrp-charcoal bg-white dark:bg-zrp-charcoal/50 text-zrp-charcoal dark:text-white resize-none min-h-[100px]"
         />
         <div className="flex justify-between items-center mt-3">
@@ -215,14 +247,14 @@ export default function AdminTicketDetailPage() {
               checked={isInternal}
               onChange={(e) => setIsInternal(e.target.checked)}
             />
-            Internal note (admins only)
+            {t('adminTicket.internalNoteCheckbox')}
           </label>
           <button
             onClick={sendReply}
             disabled={!replyMessage.trim()}
             className="px-6 py-2 bg-zrp-red text-white rounded-lg hover:bg-zrp-darkRed transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Send Reply
+            {t('support.ticketDetail.sendReply')}
           </button>
         </div>
       </div>
