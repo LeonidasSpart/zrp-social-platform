@@ -90,6 +90,8 @@ const PUBLIC_INFRA_PATHS = [
   "/manifest.json",
   "/manifest.webmanifest",
   "/offline.html",
+  "/sitemap.xml",
+  "/robots.txt",
 ];
 
 function pathMatches(path: string, list: string[]) {
