@@ -2,27 +2,30 @@
 
 import Link from "next/link";
 import Image from "next/image";
-
-const SECTIONS = [
-  { id: "introduction", number: "01", title: "Introduction" },
-  { id: "controller", number: "02", title: "Data Controller" },
-  { id: "data-collected", number: "03", title: "Data We Collect" },
-  { id: "data-use", number: "04", title: "How We Use Your Data" },
-  { id: "legal-basis", number: "05", title: "Legal Basis" },
-  { id: "cookies", number: "06", title: "Cookies & Tracking" },
-  { id: "sharing", number: "07", title: "Data Sharing" },
-  { id: "retention", number: "08", title: "Data Retention" },
-  { id: "transfers", number: "09", title: "International Transfers" },
-  { id: "rights", number: "10", title: "Your Rights" },
-  { id: "security", number: "11", title: "Data Security" },
-  { id: "children", number: "12", title: "Children's Privacy" },
-  { id: "moderation", number: "13", title: "Speech & Moderation" },
-  { id: "charity", number: "14", title: "Charity Commitment" },
-  { id: "changes", number: "15", title: "Changes to This Policy" },
-  { id: "contact", number: "16", title: "Contact Us" },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function PrivacyPage() {
+  const { t } = useLanguage();
+
+  const SECTIONS = [
+    { id: "introduction", number: "01", title: t("privacy.nav.introduction") },
+    { id: "controller", number: "02", title: t("privacy.nav.controller") },
+    { id: "data-collected", number: "03", title: t("privacy.nav.dataCollected") },
+    { id: "data-use", number: "04", title: t("privacy.nav.dataUse") },
+    { id: "legal-basis", number: "05", title: t("privacy.nav.legalBasis") },
+    { id: "cookies", number: "06", title: t("privacy.nav.cookies") },
+    { id: "sharing", number: "07", title: t("privacy.nav.sharing") },
+    { id: "retention", number: "08", title: t("privacy.nav.retention") },
+    { id: "transfers", number: "09", title: t("privacy.nav.transfers") },
+    { id: "rights", number: "10", title: t("privacy.nav.rights") },
+    { id: "security", number: "11", title: t("privacy.nav.security") },
+    { id: "children", number: "12", title: t("privacy.nav.children") },
+    { id: "moderation", number: "13", title: t("privacy.nav.moderation") },
+    { id: "charity", number: "14", title: t("privacy.nav.charity") },
+    { id: "changes", number: "15", title: t("privacy.nav.changes") },
+    { id: "contact", number: "16", title: t("privacy.nav.contact") },
+  ];
+
   const lastUpdated = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -48,7 +51,7 @@ export default function PrivacyPage() {
               href="/"
               className="inline-flex items-center gap-2 text-white/80 hover:text-white transition font-inter text-sm mb-10"
             >
-              ← Back to ZRP
+              ← {t("help.backToZrp")}
             </Link>
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
@@ -66,16 +69,15 @@ export default function PrivacyPage() {
               <div>
 
                 <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/10 px-3 py-1.5 rounded-full text-xs text-white/90 font-medium mb-4">
-                  🇨🇭 ZRP Social · Privacy
+                  🇨🇭 ZRP Social · {t("privacy.badgeSuffix")}
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl font-extrabold font-orbitron text-white leading-tight">
-                  Privacy Policy
+                  {t("privacy.title")}
                 </h1>
 
                 <p className="mt-4 text-white/80 max-w-2xl text-base sm:text-lg leading-relaxed">
-                  How ZRP Social collects, uses, protects, and manages your
-                  personal data.
+                  {t("privacy.subtitle")}
                 </p>
 
               </div>
@@ -85,15 +87,15 @@ export default function PrivacyPage() {
             <div className="mt-8 flex flex-wrap gap-3">
 
               <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2 text-sm text-white/90">
-                Last updated: {lastUpdated}
+                {t("privacy.lastUpdated")} {lastUpdated}
               </div>
 
               <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2 text-sm text-white/90">
-                🇨🇭 Swiss data protection
+                🇨🇭 {t("privacy.swissBadge")}
               </div>
 
               <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2 text-sm text-white/90">
-                🔒 Privacy focused
+                🔒 {t("privacy.focusedBadge")}
               </div>
 
             </div>
@@ -119,14 +121,11 @@ export default function PrivacyPage() {
                 <div>
 
                   <h2 className="font-orbitron font-bold text-zrp-charcoal dark:text-white">
-                    Your privacy matters
+                    {t("privacy.promiseTitle")}
                   </h2>
 
                   <p className="mt-2 text-sm sm:text-base leading-relaxed text-zrp-charcoal/70 dark:text-white/70">
-                    ZRP Social is built with privacy and user control in mind.
-                    This policy explains what information we collect, why we
-                    use it, how it may be shared, and the choices and rights
-                    available to you.
+                    {t("privacy.promiseDesc")}
                   </p>
 
                   <div className="mt-3">
@@ -134,7 +133,7 @@ export default function PrivacyPage() {
                       href="/terms"
                       className="text-sm font-semibold text-zrp-red hover:underline"
                     >
-                      Read our Terms of Service →
+                      {t("privacy.readTerms")}
                     </Link>
                   </div>
 
@@ -163,7 +162,7 @@ export default function PrivacyPage() {
                 <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/40 border border-zrp-silver/30 dark:border-zrp-charcoal rounded-2xl p-5">
 
                   <h2 className="font-orbitron font-bold text-sm uppercase tracking-wider text-zrp-charcoal dark:text-white mb-4">
-                    Privacy Guide
+                    {t("privacy.guideHeading")}
                   </h2>
 
                   <nav className="space-y-1">
@@ -200,33 +199,28 @@ export default function PrivacyPage() {
                   id="introduction"
                   className="privacy-section"
                 >
-                  <SectionHeader number="01" title="Introduction" />
+                  <SectionHeader number="01" title={t("privacy.h.introduction")} />
 
                   <Text>
-                    Welcome to <strong>ZRP Social</strong>. We are a
-                    Swiss-based social media platform dedicated to protecting
-                    your privacy and supporting your right to freedom of
-                    expression.
+                    {t("privacy.intro.p1Prefix")} <strong>{t("privacy.intro.p1Bold")}</strong>
+                    {t("privacy.intro.p1Suffix")}
                   </Text>
 
                   <Text>
-                    This Privacy Policy explains how we collect, use, store,
-                    protect, and otherwise process personal data when you use
-                    ZRP Social, including our website, applications, and
-                    related services.
+                    {t("privacy.intro.p2")}
                   </Text>
 
                   <Text>
-                    We seek to process personal data in accordance with
-                    applicable Swiss data protection law and, where applicable,
-                    the European Union General Data Protection Regulation
-                    (GDPR).
+                    {t("privacy.intro.p3")}
                   </Text>
 
                   <Callout variant="red">
-                    <strong>Our principle:</strong> We aim to collect only the
-                    information reasonably necessary to operate, secure, and
-                    improve ZRP Social.
+                    <strong>{t("privacy.intro.calloutBold")}</strong> {t("privacy.intro.calloutText")}
+                  </Callout>
+
+                  <Callout>
+                    <strong>{t("privacy.governingVersionBold")}</strong>{" "}
+                    {t("privacy.governingVersionText")}
                   </Callout>
                 </section>
 
@@ -237,33 +231,29 @@ export default function PrivacyPage() {
                 >
                   <SectionHeader
                     number="02"
-                    title="Data Controller"
+                    title={t("privacy.h.controller")}
                   />
 
                   <Text>
-                    <strong>ZRP Social</strong> is responsible for the
-                    processing of personal data described in this Privacy
-                    Policy, subject to the applicable legal framework.
+                    <strong>{t("privacy.controller.p1Bold")}</strong> {t("privacy.controller.p1Suffix")}
                   </Text>
 
                   <div className="grid sm:grid-cols-2 gap-4 mt-6">
 
                     <ContactCard
-                      title="Privacy inquiries"
+                      title={t("privacy.controller.privacyInquiries")}
                       email="privacy@zrp.one"
                     />
 
                     <ContactCard
-                      title="General support"
+                      title={t("privacy.controller.generalSupport")}
                       email="support@zrp.one"
                     />
 
                   </div>
 
                   <Callout>
-                    <strong>Registered address:</strong> ZRP, Switzerland.
-                    The full legal entity and postal address should be added
-                    here once officially confirmed.
+                    <strong>{t("privacy.controller.calloutBold")}</strong> {t("privacy.controller.calloutText")}
                   </Callout>
                 </section>
 
@@ -274,60 +264,55 @@ export default function PrivacyPage() {
                 >
                   <SectionHeader
                     number="03"
-                    title="What Data We Collect"
+                    title={t("privacy.h.dataCollected")}
                   />
 
                   <Text>
-                    We collect information that is necessary to provide our
-                    services, keep the platform secure, and improve the user
-                    experience.
+                    {t("privacy.dataCollected.intro")}
                   </Text>
 
                   <div className="grid md:grid-cols-2 gap-4">
 
                     <DataCard
                       icon="👤"
-                      title="Account Information"
-                      text="Username, email address, display name, and account credentials such as a securely hashed password."
+                      title={t("privacy.dataCollected.accountTitle")}
+                      text={t("privacy.dataCollected.accountText")}
                     />
 
                     <DataCard
                       icon="📝"
-                      title="Profile Information"
-                      text="Bio, profile picture, location, country, website, and other information you voluntarily add to your profile."
+                      title={t("privacy.dataCollected.profileTitle")}
+                      text={t("privacy.dataCollected.profileText")}
                     />
 
                     <DataCard
                       icon="📱"
-                      title="Content"
-                      text="Posts, comments, images, videos, GIFs, polls, and other content you create or share."
+                      title={t("privacy.dataCollected.contentTitle")}
+                      text={t("privacy.dataCollected.contentText")}
                     />
 
                     <DataCard
                       icon="💬"
-                      title="Interactions"
-                      text="Likes, reposts, follows, bookmarks, shares, messages, and other interactions with the platform."
+                      title={t("privacy.dataCollected.interactionsTitle")}
+                      text={t("privacy.dataCollected.interactionsText")}
                     />
 
                     <DataCard
                       icon="🛡️"
-                      title="Device & Security Data"
-                      text="Information such as IP address, browser type, operating system, and relevant device information used for security and platform operations."
+                      title={t("privacy.dataCollected.deviceTitle")}
+                      text={t("privacy.dataCollected.deviceText")}
                     />
 
                     <DataCard
                       icon="🍪"
-                      title="Cookies"
-                      text="Essential and functional cookies and, where enabled, analytics technologies used to improve the service."
+                      title={t("privacy.dataCollected.cookiesTitle")}
+                      text={t("privacy.dataCollected.cookiesText")}
                     />
 
                   </div>
 
                   <Callout>
-                    We do not intentionally request sensitive information such
-                    as government identification or financial information
-                    unless it is necessary for a specific service and handled
-                    under an appropriate legal basis.
+                    {t("privacy.dataCollected.calloutText")}
                   </Callout>
                 </section>
 
@@ -338,30 +323,29 @@ export default function PrivacyPage() {
                 >
                   <SectionHeader
                     number="04"
-                    title="How We Use Your Data"
+                    title={t("privacy.h.dataUse")}
                   />
 
                   <Text>
-                    Depending on the circumstances, we may use personal data to:
+                    {t("privacy.dataUse.intro")}
                   </Text>
 
                   <BulletList
                     items={[
-                      <>Provide, operate, maintain, and secure ZRP Social.</>,
-                      <>Create and manage your account.</>,
-                      <>Enable social features such as posts, messaging, follows, and interactions.</>,
-                      <>Improve the user experience and develop new features.</>,
-                      <>Communicate with you about your account, service updates, and security matters.</>,
-                      <>Detect and prevent fraud, abuse, spam, bots, and other harmful activity.</>,
-                      <>Enforce our Terms of Service and Community Guidelines.</>,
-                      <>Comply with applicable legal obligations.</>,
+                      <>{t("privacy.dataUse.item1")}</>,
+                      <>{t("privacy.dataUse.item2")}</>,
+                      <>{t("privacy.dataUse.item3")}</>,
+                      <>{t("privacy.dataUse.item4")}</>,
+                      <>{t("privacy.dataUse.item5")}</>,
+                      <>{t("privacy.dataUse.item6")}</>,
+                      <>{t("privacy.dataUse.item7")}</>,
+                      <>{t("privacy.dataUse.item8")}</>,
                     ]}
                   />
 
                   <Callout variant="red">
-                    <strong>We do not sell or rent your personal data.</strong>{" "}
-                    We do not use personal data for political manipulation or
-                    sell personal profiles to advertisers.
+                    <strong>{t("privacy.dataUse.calloutBold")}</strong>{" "}
+                    {t("privacy.dataUse.calloutText")}
                   </Callout>
                 </section>
 
@@ -372,35 +356,33 @@ export default function PrivacyPage() {
                 >
                   <SectionHeader
                     number="05"
-                    title="Legal Basis for Processing"
+                    title={t("privacy.h.legalBasis")}
                   />
 
                   <Text>
-                    Where the GDPR applies, we rely on appropriate legal bases
-                    for processing personal data. Depending on the processing,
-                    these may include:
+                    {t("privacy.legalBasis.intro")}
                   </Text>
 
                   <div className="space-y-4">
 
                     <LegalBasisCard
-                      title="Contractual necessity"
-                      text="Processing necessary to provide the services you request and perform our agreement with you."
+                      title={t("privacy.legalBasis.contractualTitle")}
+                      text={t("privacy.legalBasis.contractualText")}
                     />
 
                     <LegalBasisCard
-                      title="Legitimate interests"
-                      text="Processing necessary for security, fraud prevention, platform improvement, and the responsible operation of our services, where those interests are not overridden by your rights."
+                      title={t("privacy.legalBasis.legitimateTitle")}
+                      text={t("privacy.legalBasis.legitimateText")}
                     />
 
                     <LegalBasisCard
-                      title="Consent"
-                      text="Processing based on your consent, such as certain optional cookies or other optional features."
+                      title={t("privacy.legalBasis.consentTitle")}
+                      text={t("privacy.legalBasis.consentText")}
                     />
 
                     <LegalBasisCard
-                      title="Legal obligation"
-                      text="Processing required to comply with applicable laws, regulations, or lawful requests."
+                      title={t("privacy.legalBasis.obligationTitle")}
+                      text={t("privacy.legalBasis.obligationText")}
                     />
 
                   </div>
@@ -413,42 +395,39 @@ export default function PrivacyPage() {
                 >
                   <SectionHeader
                     number="06"
-                    title="Cookies and Tracking"
+                    title={t("privacy.h.cookies")}
                   />
 
                   <Text>
-                    We may use cookies and similar technologies to provide
-                    essential functionality, remember preferences, maintain
-                    security, and understand how the platform is used.
+                    {t("privacy.cookies.intro")}
                   </Text>
 
                   <div className="grid sm:grid-cols-2 gap-4 mt-6">
 
                     <InfoCard
-                      title="Essential cookies"
-                      text="Necessary for core functionality, authentication, security, and other essential platform operations."
+                      title={t("privacy.cookies.essentialTitle")}
+                      text={t("privacy.cookies.essentialText")}
                     />
 
                     <InfoCard
-                      title="Functional cookies"
-                      text="Used to remember preferences and improve your experience."
+                      title={t("privacy.cookies.functionalTitle")}
+                      text={t("privacy.cookies.functionalText")}
                     />
 
                     <InfoCard
-                      title="Analytics"
-                      text="Where enabled, analytics may help us understand platform usage and improve our services."
+                      title={t("privacy.cookies.analyticsTitle")}
+                      text={t("privacy.cookies.analyticsText")}
                     />
 
                     <InfoCard
-                      title="Advertising"
-                      text="ZRP does not use personal data for targeted advertising or sell personal data to advertisers."
+                      title={t("privacy.cookies.advertisingTitle")}
+                      text={t("privacy.cookies.advertisingText")}
                     />
 
                   </div>
 
                   <Text>
-                    Where required by law, non-essential cookies will only be
-                    used after the appropriate consent has been obtained.
+                    {t("privacy.cookies.outro")}
                   </Text>
                 </section>
 
@@ -459,32 +438,23 @@ export default function PrivacyPage() {
                 >
                   <SectionHeader
                     number="07"
-                    title="Data Sharing and Third Parties"
+                    title={t("privacy.h.sharing")}
                   />
 
                   <Text>
-                    We may work with trusted service providers that process
-                    information on our behalf. These providers may support
-                    functions such as hosting, infrastructure, security,
-                    communications, email delivery, analytics, or other
-                    services necessary to operate ZRP Social.
+                    {t("privacy.sharing.p1")}
                   </Text>
 
                   <Text>
-                    Where required, we seek to ensure that relevant service
-                    providers are contractually required to protect personal
-                    data and process it only for authorized purposes.
+                    {t("privacy.sharing.p2")}
                   </Text>
 
                   <Callout variant="red">
-                    We do not sell your personal data to advertisers, data
-                    brokers, or political organizations.
+                    {t("privacy.sharing.calloutText")}
                   </Callout>
 
                   <Text>
-                    We may also disclose information where required by law, to
-                    protect users or the platform, to prevent fraud or abuse,
-                    or in connection with legal proceedings.
+                    {t("privacy.sharing.p3")}
                   </Text>
                 </section>
 
@@ -495,29 +465,19 @@ export default function PrivacyPage() {
                 >
                   <SectionHeader
                     number="08"
-                    title="Data Retention"
+                    title={t("privacy.h.retention")}
                   />
 
                   <Text>
-                    We retain personal data for as long as reasonably necessary
-                    for the purposes described in this Privacy Policy,
-                    including maintaining your account, providing services,
-                    maintaining security, resolving disputes, and complying
-                    with legal obligations.
+                    {t("privacy.retention.p1")}
                   </Text>
 
                   <Text>
-                    When you request account deletion, we will delete or
-                    anonymize personal data where appropriate, subject to
-                    information that we are required or permitted to retain by
-                    law or that is reasonably necessary for legitimate
-                    operational purposes such as security, fraud prevention,
-                    backups, or dispute resolution.
+                    {t("privacy.retention.p2")}
                   </Text>
 
                   <Callout>
-                    Retention periods can differ depending on the type of data
-                    and the purpose for which it was collected.
+                    {t("privacy.retention.calloutText")}
                   </Callout>
                 </section>
 
@@ -528,27 +488,19 @@ export default function PrivacyPage() {
                 >
                   <SectionHeader
                     number="09"
-                    title="International Data Transfers"
+                    title={t("privacy.h.transfers")}
                   />
 
                   <Text>
-                    ZRP Social may use infrastructure and service providers
-                    located in Switzerland, the European Union, or other
-                    jurisdictions depending on the services used.
+                    {t("privacy.transfers.p1")}
                   </Text>
 
                   <Text>
-                    Where personal data is transferred internationally, we seek
-                    to use appropriate safeguards required by applicable data
-                    protection law, which may include adequacy decisions,
-                    contractual safeguards, or other recognized mechanisms.
+                    {t("privacy.transfers.p2")}
                   </Text>
 
                   <Callout>
-                    The exact locations of data processing may change as our
-                    infrastructure and service providers evolve. We will
-                    update this policy where material changes require
-                    disclosure.
+                    {t("privacy.transfers.calloutText")}
                   </Callout>
                 </section>
 
@@ -559,68 +511,66 @@ export default function PrivacyPage() {
                 >
                   <SectionHeader
                     number="10"
-                    title="Your Rights"
+                    title={t("privacy.h.rights")}
                   />
 
                   <Text>
-                    Depending on your location and the applicable law, you may
-                    have rights regarding your personal data, including:
+                    {t("privacy.rights.intro")}
                   </Text>
 
                   <div className="grid sm:grid-cols-2 gap-4">
 
                     <RightCard
-                      title="Access"
-                      text="Request access to personal data we hold about you."
+                      title={t("privacy.rights.accessTitle")}
+                      text={t("privacy.rights.accessText")}
                     />
 
                     <RightCard
-                      title="Rectification"
-                      text="Ask us to correct inaccurate or incomplete information."
+                      title={t("privacy.rights.rectificationTitle")}
+                      text={t("privacy.rights.rectificationText")}
                     />
 
                     <RightCard
-                      title="Erasure"
-                      text="Request deletion of personal data where applicable."
+                      title={t("privacy.rights.erasureTitle")}
+                      text={t("privacy.rights.erasureText")}
                     />
 
                     <RightCard
-                      title="Restriction"
-                      text="Request that certain processing of your data be restricted."
+                      title={t("privacy.rights.restrictionTitle")}
+                      text={t("privacy.rights.restrictionText")}
                     />
 
                     <RightCard
-                      title="Portability"
-                      text="Where applicable, receive certain data in a structured format."
+                      title={t("privacy.rights.portabilityTitle")}
+                      text={t("privacy.rights.portabilityText")}
                     />
 
                     <RightCard
-                      title="Objection"
-                      text="Object to certain processing, including processing based on legitimate interests."
+                      title={t("privacy.rights.objectionTitle")}
+                      text={t("privacy.rights.objectionText")}
                     />
 
                     <RightCard
-                      title="Withdraw consent"
-                      text="Withdraw consent where processing is based on your consent."
+                      title={t("privacy.rights.withdrawTitle")}
+                      text={t("privacy.rights.withdrawText")}
                     />
 
                     <RightCard
-                      title="Complaint"
-                      text="You may have the right to lodge a complaint with a competent data protection authority."
+                      title={t("privacy.rights.complaintTitle")}
+                      text={t("privacy.rights.complaintText")}
                     />
 
                   </div>
 
                   <Text>
-                    To exercise your rights, contact us at{" "}
+                    {t("privacy.rights.contactPrefix")}{" "}
                     <a
                       href="mailto:privacy@zrp.one"
                       className="legal-link"
                     >
                       privacy@zrp.one
                     </a>
-                    . We may need to verify your identity before completing
-                    certain requests.
+                    {t("privacy.rights.contactSuffix")}
                   </Text>
                 </section>
 
@@ -631,47 +581,43 @@ export default function PrivacyPage() {
                 >
                   <SectionHeader
                     number="11"
-                    title="Data Security"
+                    title={t("privacy.h.security")}
                   />
 
                   <Text>
-                    We take reasonable technical and organizational measures
-                    designed to protect personal data against unauthorized
-                    access, alteration, disclosure, loss, or destruction.
+                    {t("privacy.security.intro")}
                   </Text>
 
                   <div className="grid sm:grid-cols-2 gap-4">
 
                     <SecurityCard
                       icon="🔐"
-                      title="Encryption"
-                      text="Encryption in transit and appropriate protection of stored information."
+                      title={t("privacy.security.encryptionTitle")}
+                      text={t("privacy.security.encryptionText")}
                     />
 
                     <SecurityCard
                       icon="🛡️"
-                      title="Access controls"
-                      text="Access to systems and data is restricted according to operational requirements."
+                      title={t("privacy.security.accessTitle")}
+                      text={t("privacy.security.accessText")}
                     />
 
                     <SecurityCard
                       icon="🔎"
-                      title="Security monitoring"
-                      text="Measures designed to detect suspicious activity and security threats."
+                      title={t("privacy.security.monitoringTitle")}
+                      text={t("privacy.security.monitoringText")}
                     />
 
                     <SecurityCard
                       icon="⚙️"
-                      title="Security improvements"
-                      text="We continuously work to improve our security practices as the platform develops."
+                      title={t("privacy.security.improvementsTitle")}
+                      text={t("privacy.security.improvementsText")}
                     />
 
                   </div>
 
                   <Callout>
-                    No internet service can guarantee absolute security. We
-                    encourage you to use a strong, unique password and enable
-                    additional security features where available.
+                    {t("privacy.security.calloutText")}
                   </Callout>
                 </section>
 
@@ -682,20 +628,15 @@ export default function PrivacyPage() {
                 >
                   <SectionHeader
                     number="12"
-                    title="Children's Privacy"
+                    title={t("privacy.h.children")}
                   />
 
                   <Text>
-                    ZRP Social is not intended for children below the minimum
-                    age required under our Terms of Service and applicable law.
+                    {t("privacy.children.p1")}
                   </Text>
 
                   <Text>
-                    We do not knowingly collect personal data from children in
-                    circumstances where such collection is prohibited. If you
-                    believe that a child has provided personal information to
-                    us in violation of applicable requirements, please contact
-                    us at{" "}
+                    {t("privacy.children.p2Prefix")}{" "}
                     <a
                       href="mailto:privacy@zrp.one"
                       className="legal-link"
@@ -713,20 +654,15 @@ export default function PrivacyPage() {
                 >
                   <SectionHeader
                     number="13"
-                    title="Freedom of Speech and Content Moderation"
+                    title={t("privacy.h.moderation")}
                   />
 
                   <Text>
-                    ZRP Social is built around freedom of expression. We aim to
-                    provide users with a platform where they can express
-                    opinions, discuss ideas, and participate in public
-                    conversation.
+                    {t("privacy.moderation.p1")}
                   </Text>
 
                   <Text>
-                    This commitment does not prevent us from taking action
-                    where content or conduct violates applicable law, our Terms
-                    of Service, or our Community Guidelines.
+                    {t("privacy.moderation.p2")}
                   </Text>
 
                   <div className="rounded-2xl bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack p-6 sm:p-8 text-white">
@@ -740,15 +676,11 @@ export default function PrivacyPage() {
                       <div>
 
                         <h3 className="font-orbitron font-bold text-xl">
-                          Freedom of expression
+                          {t("privacy.moderation.bannerTitle")}
                         </h3>
 
                         <p className="mt-2 text-white/75 leading-relaxed">
-                          Political criticism, unpopular opinions, and
-                          disagreement with institutions are not, by
-                          themselves, reasons to remove content. Moderation is
-                          focused on applicable law, platform rules, and user
-                          safety.
+                          {t("privacy.moderation.bannerText")}
                         </p>
 
                       </div>
@@ -766,7 +698,7 @@ export default function PrivacyPage() {
                 >
                   <SectionHeader
                     number="14"
-                    title="Charity Commitment"
+                    title={t("privacy.h.charity")}
                   />
 
                   <div className="rounded-2xl border border-zrp-red/20 bg-zrp-red/5 dark:bg-zrp-red/10 p-6 sm:p-8">
@@ -780,7 +712,7 @@ export default function PrivacyPage() {
                         </div>
 
                         <div className="text-xs uppercase tracking-wider text-zrp-charcoal/50 dark:text-white/50 mt-1">
-                          Profit commitment
+                          {t("privacy.charity.profitLabel")}
                         </div>
 
                       </div>
@@ -788,19 +720,15 @@ export default function PrivacyPage() {
                       <div>
 
                         <h3 className="text-xl font-orbitron font-bold text-zrp-charcoal dark:text-white">
-                          Social impact
+                          {t("privacy.charity.title")}
                         </h3>
 
                         <p className="mt-2 text-zrp-charcoal/70 dark:text-white/70 leading-relaxed">
-                          ZRP is committed to dedicating 35% of its profits to
-                          charitable causes supporting orphans, schools,
-                          hospitals, and climate relief.
+                          {t("privacy.charity.p1")}
                         </p>
 
                         <p className="mt-3 text-sm text-zrp-charcoal/60 dark:text-white/55">
-                          This commitment does not affect how your personal data
-                          is processed, and we do not use your personal
-                          information to target you for charity campaigns.
+                          {t("privacy.charity.p2")}
                         </p>
 
                       </div>
@@ -817,24 +745,19 @@ export default function PrivacyPage() {
                 >
                   <SectionHeader
                     number="15"
-                    title="Changes to This Policy"
+                    title={t("privacy.h.changes")}
                   />
 
                   <Text>
-                    We may update this Privacy Policy from time to time to
-                    reflect changes in our services, technology, legal
-                    requirements, or data processing practices.
+                    {t("privacy.changes.p1")}
                   </Text>
 
                   <Text>
-                    Where appropriate, we will notify users of material changes
-                    through email, an in-platform notice, or another prominent
-                    communication method.
+                    {t("privacy.changes.p2")}
                   </Text>
 
                   <Callout>
-                    The latest version of this Privacy Policy will always be
-                    available at{" "}
+                    {t("privacy.changes.calloutPrefix")}{" "}
                     <Link
                       href="/privacy"
                       className="legal-link"
@@ -852,31 +775,29 @@ export default function PrivacyPage() {
                 >
                   <SectionHeader
                     number="16"
-                    title="Contact Us"
+                    title={t("privacy.h.contact")}
                   />
 
                   <Text>
-                    If you have questions, concerns, or requests regarding your
-                    privacy or personal data, please contact our team.
+                    {t("privacy.contact.p1")}
                   </Text>
 
                   <div className="grid sm:grid-cols-2 gap-4 mt-6">
 
                     <ContactCard
-                      title="Privacy"
+                      title={t("privacy.contact.privacyLabel")}
                       email="privacy@zrp.one"
                     />
 
                     <ContactCard
-                      title="Support"
+                      title={t("privacy.contact.supportLabel")}
                       email="support@zrp.one"
                     />
 
                   </div>
 
                   <Text>
-                    We are committed to handling privacy requests responsibly
-                    and transparently.
+                    {t("privacy.contact.p2")}
                   </Text>
                 </section>
 
@@ -892,11 +813,11 @@ export default function PrivacyPage() {
                     <div>
 
                       <h2 className="text-2xl font-orbitron font-bold text-zrp-charcoal dark:text-white">
-                        Our Privacy Principles
+                        {t("privacy.summary.title")}
                       </h2>
 
                       <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 mt-1">
-                        The principles behind how ZRP approaches personal data.
+                        {t("privacy.summary.subtitle")}
                       </p>
 
                     </div>
@@ -906,33 +827,33 @@ export default function PrivacyPage() {
                   <div className="grid sm:grid-cols-2 gap-4">
 
                     <PrincipleCard
-                      title="Privacy by design"
-                      text="Privacy should be considered when we build and improve our platform."
+                      title={t("privacy.summary.byDesignTitle")}
+                      text={t("privacy.summary.byDesignText")}
                     />
 
                     <PrincipleCard
-                      title="Data minimisation"
-                      text="We aim to collect information that is relevant to providing and securing our services."
+                      title={t("privacy.summary.minimisationTitle")}
+                      text={t("privacy.summary.minimisationText")}
                     />
 
                     <PrincipleCard
-                      title="No data selling"
-                      text="We do not sell or rent personal data to advertisers or data brokers."
+                      title={t("privacy.summary.noSellingTitle")}
+                      text={t("privacy.summary.noSellingText")}
                     />
 
                     <PrincipleCard
-                      title="User control"
-                      text="We aim to provide meaningful controls over your account and personal information."
+                      title={t("privacy.summary.userControlTitle")}
+                      text={t("privacy.summary.userControlText")}
                     />
 
                     <PrincipleCard
-                      title="Security"
-                      text="We use reasonable technical and organizational safeguards to protect information."
+                      title={t("privacy.summary.securityTitle")}
+                      text={t("privacy.summary.securityText")}
                     />
 
                     <PrincipleCard
-                      title="Transparency"
-                      text="We explain our data practices and update this policy when material practices change."
+                      title={t("privacy.summary.transparencyTitle")}
+                      text={t("privacy.summary.transparencyText")}
                     />
 
                   </div>
@@ -963,19 +884,18 @@ export default function PrivacyPage() {
             />
 
             <h2 className="text-2xl sm:text-3xl font-bold font-orbitron text-white">
-              Have a privacy question?
+              {t("privacy.cta.title")}
             </h2>
 
             <p className="mt-3 text-white/75 font-inter">
-              Contact the ZRP team if you have a question about your personal
-              data or your privacy rights.
+              {t("privacy.cta.desc")}
             </p>
 
             <a
               href="mailto:privacy@zrp.one"
               className="inline-flex items-center justify-center mt-6 px-7 py-3 bg-white text-zrp-darkRed font-semibold rounded-full shadow-lg hover:bg-gray-100 transition font-inter"
             >
-              Contact Privacy Team
+              {t("privacy.cta.button")}
             </a>
 
           </div>
