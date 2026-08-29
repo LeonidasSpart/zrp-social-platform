@@ -503,6 +503,10 @@ export default function PrivacyPage() {
                     {t("privacy.transfers.p3")}
                   </Text>
 
+                  <Text>
+                    {t("privacy.transfers.p4")}
+                  </Text>
+
                   <Callout>
                     {t("privacy.transfers.calloutText")}
                   </Callout>
