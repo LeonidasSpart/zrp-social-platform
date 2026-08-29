@@ -36,7 +36,11 @@ export default function CookieConsent() {
         <div className="text-sm text-gray-700 dark:text-gray-300 text-center md:text-left">
           <p>
             We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.{" "}
-            <Link href="/privacy" className="text-zrp-red hover:underline">
+            <Link
+              href="/privacy"
+              className="text-zrp-red hover:underline"
+              aria-label="Learn more about our privacy policy"
+            >
               Learn more
             </Link>
             .

@@ -169,9 +169,9 @@ export default function SignupPage() {
                 priority
               />
             </Link>
-            <h1 className="text-4xl sm:text-5xl font-orbitron font-bold text-gray-900 dark:text-white leading-[1.05]">
+            <h2 className="text-4xl sm:text-5xl font-orbitron font-bold text-gray-900 dark:text-white leading-[1.05]">
               {t("auth.welcomeTitle")}
-            </h1>
+            </h2>
             <p className="text-gray-500 dark:text-gray-400 mt-3 text-base sm:text-lg max-w-sm mx-auto">
               {t("about.subtitle")}
             </p>

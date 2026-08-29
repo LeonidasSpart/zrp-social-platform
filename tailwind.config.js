@@ -63,8 +63,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        orbitron: ["Orbitron", "sans-serif"],
-        inter: ["Inter", "sans-serif"],
+        orbitron: ["var(--font-orbitron)", "sans-serif"],
+        inter: ["var(--font-inter)", "sans-serif"],
       },
       // ─── SHIMMER ANIMATION FOR LOADING SKELETONS ──────
       animation: {
