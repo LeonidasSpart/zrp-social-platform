@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Search, Trash2, AlertTriangle, Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface OrphanFile {
   key: string;
@@ -27,6 +28,7 @@ function formatBytes(bytes: number) {
 }
 
 export default function AdminStoragePage() {
+  const { t } = useLanguage();
   const [scanning, setScanning] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,12 +45,12 @@ export default function AdminStoragePage() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || "Scan failed");
+        throw new Error(data.error || t("adminStorage.errScanFailed"));
       }
 
       setResult(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Scan failed");
+      setError(err instanceof Error ? err.message : t("adminStorage.errScanFailed"));
     } finally {
       setScanning(false);
     }
@@ -58,7 +60,7 @@ export default function AdminStoragePage() {
     if (!result) return;
 
     const confirmed = window.confirm(
-      `Permanently delete ${result.orphanedCount} orphaned file(s) (~${result.orphanedSizeMB} MB) from UploadThing? This cannot be undone.`
+      t("adminStorage.confirmDelete", { count: result.orphanedCount, sizeMB: result.orphanedSizeMB })
     );
     if (!confirmed) return;
 
@@ -70,13 +72,13 @@ export default function AdminStoragePage() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || "Delete failed");
+        throw new Error(data.error || t("adminStorage.errDeleteFailed"));
       }
 
-      setDeletedMessage(`Deleted ${data.deleted} of ${data.orphanedCount} orphaned file(s).`);
+      setDeletedMessage(t("adminStorage.deletedMessage", { deleted: data.deleted, total: data.orphanedCount }));
       setResult(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Delete failed");
+      setError(err instanceof Error ? err.message : t("adminStorage.errDeleteFailed"));
     } finally {
       setDeleting(false);
     }
@@ -90,14 +92,13 @@ export default function AdminStoragePage() {
           className="mb-3 inline-flex items-center gap-2 text-sm text-gray-500 transition hover:text-red-600 dark:text-gray-400"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Admin
+          {t("adminStorage.backToAdmin")}
         </Link>
 
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Storage Cleanup</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t("adminStorage.title")}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Finds files still sitting in UploadThing that nothing in the database points to
-            anymore, and lets you delete them. Scanning never changes anything - it only reports.
+            {t("adminStorage.subtitle")}
           </p>
         </div>
 
@@ -121,7 +122,7 @@ export default function AdminStoragePage() {
             className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800 disabled:opacity-50 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
           >
             {scanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-            {scanning ? "Scanning…" : "Scan for orphaned files"}
+            {scanning ? t("adminStorage.scanning") : t("adminStorage.scanButton")}
           </button>
 
           {result && result.orphanedCount > 0 && (
@@ -132,7 +133,7 @@ export default function AdminStoragePage() {
               className="inline-flex items-center gap-2 rounded-lg bg-zrp-red px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zrp-darkRed disabled:opacity-50"
             >
               {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-              {deleting ? "Deleting…" : `Delete ${result.orphanedCount} orphaned file(s)`}
+              {deleting ? t("adminStorage.deleting") : t("adminStorage.deleteButton", { count: result.orphanedCount })}
             </button>
           )}
         </div>
@@ -141,30 +142,30 @@ export default function AdminStoragePage() {
           <div className="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
             <div className="grid grid-cols-2 gap-4 border-b border-gray-200 p-5 sm:grid-cols-4 dark:border-gray-800">
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">In UploadThing</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t("adminStorage.statInUploadThing")}</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-white">
                   {result.totalFilesInUploadThing}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Referenced in DB</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t("adminStorage.statReferencedInDb")}</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-white">
                   {result.totalReferencedInDb}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Orphaned</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t("adminStorage.statOrphaned")}</p>
                 <p className="text-xl font-bold text-zrp-red">{result.orphanedCount}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Orphaned size</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t("adminStorage.statOrphanedSize")}</p>
                 <p className="text-xl font-bold text-zrp-red">{result.orphanedSizeMB} MB</p>
               </div>
             </div>
 
             {result.orphanedCount === 0 ? (
               <p className="px-5 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                Nothing orphaned - UploadThing storage matches the database.
+                {t("adminStorage.nothingOrphaned")}
               </p>
             ) : (
               <>
@@ -181,8 +182,7 @@ export default function AdminStoragePage() {
                 </ul>
                 {result.orphanedCount > result.sample.length && (
                   <p className="px-5 py-3 text-xs text-gray-400">
-                    Showing {result.sample.length} of {result.orphanedCount} - deleting removes all of
-                    them, not just what's listed here.
+                    {t("adminStorage.showingSample", { shown: result.sample.length, total: result.orphanedCount })}
                   </p>
                 )}
               </>
