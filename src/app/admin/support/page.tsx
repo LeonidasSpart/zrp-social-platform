@@ -4,6 +4,8 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { useLanguage } from '@/contexts/LanguageContext';
+import type { TranslationKey } from '@/lib/translations';
 
 interface Ticket {
   id: string;
@@ -32,8 +34,38 @@ const priorityColors = {
   URGENT: 'text-zrp-red font-bold',
 };
 
+const STATUS_LABEL_KEYS: Record<string, TranslationKey> = {
+  OPEN: 'support.tickets.statusOpen',
+  IN_PROGRESS: 'support.tickets.statusInProgress',
+  AWAITING_REPLY: 'support.tickets.statusAwaitingReply',
+  RESOLVED: 'support.tickets.statusResolved',
+  CLOSED: 'support.tickets.statusClosed',
+};
+
+const PRIORITY_LABEL_KEYS: Record<string, TranslationKey> = {
+  LOW: 'support.ticketDetail.priorityLow',
+  NORMAL: 'support.ticketDetail.priorityNormal',
+  HIGH: 'support.ticketDetail.priorityHigh',
+  URGENT: 'support.ticketDetail.priorityUrgent',
+};
+
+const CATEGORY_LABEL_KEYS: Record<string, TranslationKey> = {
+  GENERAL: 'support.categoryGeneral',
+  ACCOUNT: 'support.categoryAccount',
+  PRIVACY: 'support.categoryPrivacy',
+  CONTENT: 'support.categoryContent',
+  MODERATION: 'support.categoryModeration',
+  PAYMENT: 'support.categoryPayment',
+  MONETISATION: 'support.categoryMonetisation',
+  BUG: 'support.categoryBug',
+  FEATURE_REQUEST: 'support.categoryFeatureRequest',
+  SECURITY: 'support.categorySecurity',
+  OTHER: 'support.categoryOther',
+};
+
 export default function AdminSupportPage() {
   const { data: session } = useSession();
+  const { t } = useLanguage();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ status: '', priority: '', category: '' });
@@ -52,57 +84,57 @@ export default function AdminSupportPage() {
   };
 
   if (!session || session.user.role !== 'ADMIN') {
-    return <div className="p-8 text-center">Access denied. Admin only.</div>;
+    return <div className="p-8 text-center">{t('admin.accessDenied')}</div>;
   }
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-orbitron text-zrp-charcoal dark:text-white">Support Tickets</h1>
+        <h1 className="text-3xl font-orbitron text-zrp-charcoal dark:text-white">{t('adminSupport.title')}</h1>
         <div className="flex gap-2">
           <select
             className="px-3 py-2 border border-zrp-silver/30 dark:border-zrp-charcoal rounded-lg bg-white dark:bg-zrp-charcoal/50 text-sm"
             value={filters.status}
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
           >
-            <option value="">All Status</option>
-            <option value="OPEN">Open</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="AWAITING_REPLY">Awaiting Reply</option>
-            <option value="RESOLVED">Resolved</option>
-            <option value="CLOSED">Closed</option>
+            <option value="">{t('adminSupport.allStatus')}</option>
+            <option value="OPEN">{t('support.tickets.statusOpen')}</option>
+            <option value="IN_PROGRESS">{t('support.tickets.statusInProgress')}</option>
+            <option value="AWAITING_REPLY">{t('support.tickets.statusAwaitingReply')}</option>
+            <option value="RESOLVED">{t('support.tickets.statusResolved')}</option>
+            <option value="CLOSED">{t('support.tickets.statusClosed')}</option>
           </select>
           <select
             className="px-3 py-2 border border-zrp-silver/30 dark:border-zrp-charcoal rounded-lg bg-white dark:bg-zrp-charcoal/50 text-sm"
             value={filters.priority}
             onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
           >
-            <option value="">All Priority</option>
-            <option value="LOW">Low</option>
-            <option value="NORMAL">Normal</option>
-            <option value="HIGH">High</option>
-            <option value="URGENT">Urgent</option>
+            <option value="">{t('adminSupport.allPriority')}</option>
+            <option value="LOW">{t('support.ticketDetail.priorityLow')}</option>
+            <option value="NORMAL">{t('support.ticketDetail.priorityNormal')}</option>
+            <option value="HIGH">{t('support.ticketDetail.priorityHigh')}</option>
+            <option value="URGENT">{t('support.ticketDetail.priorityUrgent')}</option>
           </select>
         </div>
       </div>
 
       {loading ? (
-        <div className="text-center py-12">Loading...</div>
+        <div className="text-center py-12">{t('support.loading')}</div>
       ) : tickets.length === 0 ? (
-        <div className="text-center py-12 text-zrp-charcoal/50 dark:text-white/50">No tickets found</div>
+        <div className="text-center py-12 text-zrp-charcoal/50 dark:text-white/50">{t('adminSupport.noTicketsFound')}</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="text-left text-zrp-charcoal/60 dark:text-white/60 border-b border-zrp-silver/30 dark:border-zrp-charcoal">
               <tr>
-                <th className="py-3 px-4">Ticket</th>
-                <th className="py-3 px-4">User</th>
-                <th className="py-3 px-4">Category</th>
-                <th className="py-3 px-4">Priority</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Replies</th>
-                <th className="py-3 px-4">Assigned</th>
-                <th className="py-3 px-4">Created</th>
+                <th className="py-3 px-4">{t('adminSupport.colTicket')}</th>
+                <th className="py-3 px-4">{t('adminSupport.colUser')}</th>
+                <th className="py-3 px-4">{t('support.categoryLabel')}</th>
+                <th className="py-3 px-4">{t('adminSupport.colPriority')}</th>
+                <th className="py-3 px-4">{t('adminSupport.colStatus')}</th>
+                <th className="py-3 px-4">{t('adminSupport.colReplies')}</th>
+                <th className="py-3 px-4">{t('adminSupport.colAssigned')}</th>
+                <th className="py-3 px-4">{t('adminSupport.colCreated')}</th>
               </tr>
             </thead>
             <tbody>
@@ -117,13 +149,13 @@ export default function AdminSupportPage() {
                     <div className="font-medium">{ticket.user.username}</div>
                     <div className="text-xs text-zrp-charcoal/50 dark:text-white/50">{ticket.user.plan}</div>
                   </td>
-                  <td className="py-3 px-4 capitalize">{ticket.category.toLowerCase()}</td>
+                  <td className="py-3 px-4">{t(CATEGORY_LABEL_KEYS[ticket.category] ?? 'support.categoryOther')}</td>
                   <td className={`py-3 px-4 ${priorityColors[ticket.priority as keyof typeof priorityColors]}`}>
-                    {ticket.priority}
+                    {t(PRIORITY_LABEL_KEYS[ticket.priority] ?? 'support.ticketDetail.priorityNormal')}
                   </td>
                   <td className="py-3 px-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium border ${statusColors[ticket.status as keyof typeof statusColors]}`}>
-                      {ticket.status.replace('_', ' ')}
+                      {t(STATUS_LABEL_KEYS[ticket.status] ?? 'support.tickets.statusOpen')}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-center">{ticket._count.replies}</td>
