@@ -2,26 +2,29 @@
 
 import Link from "next/link";
 import Image from "next/image";
-
-const SECTIONS = [
-  { id: "introduction", number: "01", title: "Introduction" },
-  { id: "eligibility", number: "02", title: "Eligibility" },
-  { id: "registration", number: "03", title: "Account Registration" },
-  { id: "freedom-of-speech", number: "04", title: "Freedom of Speech" },
-  { id: "user-conduct", number: "05", title: "User Conduct" },
-  { id: "content", number: "06", title: "Content Ownership" },
-  { id: "intellectual-property", number: "07", title: "Intellectual Property" },
-  { id: "privacy", number: "08", title: "Privacy & Data Protection" },
-  { id: "moderation", number: "09", title: "Moderation & Enforcement" },
-  { id: "disputes", number: "10", title: "Dispute Resolution" },
-  { id: "termination", number: "11", title: "Termination" },
-  { id: "liability", number: "12", title: "Disclaimers & Liability" },
-  { id: "charity", number: "13", title: "Charity Commitment" },
-  { id: "changes", number: "14", title: "Changes to These Terms" },
-  { id: "contact", number: "15", title: "Contact Us" },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function TermsPage() {
+  const { t } = useLanguage();
+
+  const SECTIONS = [
+    { id: "introduction", number: "01", title: t("terms.nav.introduction") },
+    { id: "eligibility", number: "02", title: t("terms.nav.eligibility") },
+    { id: "registration", number: "03", title: t("terms.nav.registration") },
+    { id: "freedom-of-speech", number: "04", title: t("terms.nav.freedomOfSpeech") },
+    { id: "user-conduct", number: "05", title: t("terms.nav.userConduct") },
+    { id: "content", number: "06", title: t("terms.nav.content") },
+    { id: "intellectual-property", number: "07", title: t("terms.nav.intellectualProperty") },
+    { id: "privacy", number: "08", title: t("terms.nav.privacy") },
+    { id: "moderation", number: "09", title: t("terms.nav.moderation") },
+    { id: "disputes", number: "10", title: t("terms.nav.disputes") },
+    { id: "termination", number: "11", title: t("terms.nav.termination") },
+    { id: "liability", number: "12", title: t("terms.nav.liability") },
+    { id: "charity", number: "13", title: t("terms.nav.charity") },
+    { id: "changes", number: "14", title: t("terms.nav.changes") },
+    { id: "contact", number: "15", title: t("terms.nav.contact") },
+  ];
+
   const lastUpdated = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -45,7 +48,7 @@ export default function TermsPage() {
               href="/"
               className="inline-flex items-center gap-2 text-white/80 hover:text-white transition font-inter text-sm mb-10"
             >
-              ← Back to ZRP
+              ← {t("help.backToZrp")}
             </Link>
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
@@ -62,16 +65,15 @@ export default function TermsPage() {
 
               <div>
                 <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/10 px-3 py-1.5 rounded-full text-xs text-white/90 font-medium mb-4">
-                  🇨🇭 ZRP Social · Legal
+                  🇨🇭 ZRP Social · {t("terms.badgeSuffix")}
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl font-extrabold font-orbitron text-white leading-tight">
-                  Terms of Service
+                  {t("terms.title")}
                 </h1>
 
                 <p className="mt-4 text-white/80 max-w-2xl text-base sm:text-lg leading-relaxed">
-                  The rules, responsibilities, and conditions that govern your
-                  use of ZRP Social.
+                  {t("terms.subtitle")}
                 </p>
               </div>
 
@@ -80,15 +82,15 @@ export default function TermsPage() {
             <div className="mt-8 flex flex-wrap gap-3">
 
               <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2 text-sm text-white/90">
-                Last updated: {lastUpdated}
+                {t("terms.lastUpdated")} {lastUpdated}
               </div>
 
               <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2 text-sm text-white/90">
-                🇨🇭 Swiss law
+                🇨🇭 {t("terms.swissLawBadge")}
               </div>
 
               <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2 text-sm text-white/90">
-                Privacy focused
+                {t("terms.privacyFocusedBadge")}
               </div>
 
             </div>
@@ -110,26 +112,23 @@ export default function TermsPage() {
 
                 <div>
                   <h2 className="font-orbitron font-bold text-zrp-charcoal dark:text-white">
-                    Please read these Terms carefully
+                    {t("terms.noticeTitle")}
                   </h2>
 
                   <p className="mt-2 text-sm sm:text-base leading-relaxed text-zrp-charcoal/70 dark:text-white/70">
-                    These Terms explain your rights and responsibilities when
-                    using ZRP Social. By accessing or using the platform, you
-                    acknowledge that you have read and agree to these Terms,
-                    together with our{" "}
+                    {t("terms.noticeTextPrefix")}{" "}
                     <Link
                       href="/privacy"
                       className="text-zrp-red font-semibold hover:underline"
                     >
-                      Privacy Policy
+                      {t("footer.privacyPolicy")}
                     </Link>{" "}
-                    and{" "}
+                    {t("terms.noticeTextAnd")}{" "}
                     <Link
                       href="/guidelines"
                       className="text-zrp-red font-semibold hover:underline"
                     >
-                      Community Guidelines
+                      {t("help.footer.guidelines")}
                     </Link>
                     .
                   </p>
@@ -155,7 +154,7 @@ export default function TermsPage() {
                 <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/40 border border-zrp-silver/30 dark:border-zrp-charcoal rounded-2xl p-5">
 
                   <h2 className="font-orbitron font-bold text-sm uppercase tracking-wider text-zrp-charcoal dark:text-white mb-4">
-                    Contents
+                    {t("terms.contentsHeading")}
                   </h2>
 
                   <nav className="space-y-1">
@@ -192,41 +191,36 @@ export default function TermsPage() {
                   id="introduction"
                   className="scroll-mt-24 bg-white dark:bg-zrp-charcoal/30 rounded-2xl border border-zrp-silver/30 dark:border-zrp-charcoal p-6 sm:p-8"
                 >
-                  <SectionHeader number="01" title="Introduction" />
+                  <SectionHeader number="01" title={t("terms.h.introduction")} />
 
                   <Text>
-                    Welcome to <strong>ZRP Social</strong>, a social media
-                    platform operated by ZRP ("we," "us," or "our"). These
-                    Terms of Service ("Terms") constitute a legally binding
-                    agreement between you and ZRP regarding your use of our
-                    platform, including all features, content, and services
-                    offered through our website and applications.
+                    {t("terms.intro.p1Prefix")} <strong>{t("terms.intro.p1Bold")}</strong>
+                    {t("terms.intro.p1Suffix")}
                   </Text>
 
                   <Text>
-                    By creating an account or accessing our platform, you
-                    acknowledge that you have read, understood, and agree to be
-                    bound by these Terms, our{" "}
+                    {t("terms.intro.p2Prefix")}{" "}
                     <Link href="/privacy" className="legal-link">
-                      Privacy Policy
+                      {t("footer.privacyPolicy")}
                     </Link>
-                    , and our{" "}
+                    {t("terms.intro.p2And")}{" "}
                     <Link href="/guidelines" className="legal-link">
-                      Community Guidelines
+                      {t("help.footer.guidelines")}
                     </Link>
                     .
                   </Text>
 
                   <Text>
-                    If you do not agree with any part of these Terms, you must
-                    not use our platform.
+                    {t("terms.intro.p3")}
                   </Text>
 
                   <Callout>
-                    <strong>Applicable Law:</strong> These Terms are governed
-                    by the laws of Switzerland, and any disputes shall be
-                    resolved in accordance with the applicable jurisdictional
-                    rules.
+                    <strong>{t("terms.intro.calloutBold")}</strong> {t("terms.intro.calloutText")}
+                  </Callout>
+
+                  <Callout>
+                    <strong>{t("terms.governingVersionBold")}</strong>{" "}
+                    {t("terms.governingVersionText")}
                   </Callout>
                 </section>
 
@@ -235,31 +229,25 @@ export default function TermsPage() {
                   id="eligibility"
                   className="legal-section"
                 >
-                  <SectionHeader number="02" title="Eligibility" />
+                  <SectionHeader number="02" title={t("terms.h.eligibility")} />
 
-                  <Text>To use ZRP Social, you must:</Text>
+                  <Text>{t("terms.eligibility.intro")}</Text>
 
                   <BulletList
                     items={[
                       <>
-                        Be at least <strong>16 years old</strong> (or the age
-                        of digital consent in your jurisdiction).
+                        {t("terms.eligibility.item1Prefix")} <strong>{t("terms.eligibility.item1Bold")}</strong>{" "}
+                        {t("terms.eligibility.item1Suffix")}
                       </>,
-                      <>
-                        Provide accurate and truthful information during
-                        registration.
-                      </>,
-                      <>Not be located in a country subject to sanctions or embargoes.</>,
-                      <>Not have been previously banned or suspended from our platform.</>,
-                      <>Agree to use the platform solely for lawful purposes.</>,
+                      <>{t("terms.eligibility.item2")}</>,
+                      <>{t("terms.eligibility.item3")}</>,
+                      <>{t("terms.eligibility.item4")}</>,
+                      <>{t("terms.eligibility.item5")}</>,
                     ]}
                   />
 
                   <Text>
-                    By using our platform, you represent and warrant that you
-                    meet all eligibility requirements. We reserve the right to
-                    refuse or terminate access to any user who does not meet
-                    these criteria.
+                    {t("terms.eligibility.outro")}
                   </Text>
                 </section>
 
@@ -268,33 +256,28 @@ export default function TermsPage() {
                   id="registration"
                   className="legal-section"
                 >
-                  <SectionHeader number="03" title="Account Registration" />
+                  <SectionHeader number="03" title={t("terms.h.registration")} />
 
                   <Text>
-                    To access certain features, you must create an account. You
-                    agree to:
+                    {t("terms.registration.intro")}
                   </Text>
 
                   <BulletList
                     items={[
-                      <>Provide accurate, current, and complete information during registration.</>,
-                      <>Maintain and update your account information as necessary.</>,
-                      <>Keep your password secure and confidential.</>,
-                      <>Notify us immediately of any unauthorized access to your account.</>,
-                      <>Be responsible for all activities that occur under your account.</>,
+                      <>{t("terms.registration.item1")}</>,
+                      <>{t("terms.registration.item2")}</>,
+                      <>{t("terms.registration.item3")}</>,
+                      <>{t("terms.registration.item4")}</>,
+                      <>{t("terms.registration.item5")}</>,
                     ]}
                   />
 
                   <Text>
-                    You may not create multiple accounts, impersonate others, or
-                    use automated means to create accounts. We reserve the
-                    right to verify your identity and request additional
-                    information.
+                    {t("terms.registration.outro")}
                   </Text>
 
                   <Callout>
-                    <strong>Email Verification:</strong> Your email address
-                    must be verified before you can fully use the platform.
+                    <strong>{t("terms.registration.calloutBold")}</strong> {t("terms.registration.calloutText")}
                   </Callout>
                 </section>
 
@@ -303,46 +286,37 @@ export default function TermsPage() {
                   id="freedom-of-speech"
                   className="legal-section"
                 >
-                  <SectionHeader number="04" title="Freedom of Speech" />
+                  <SectionHeader number="04" title={t("terms.h.freedomOfSpeech")} />
 
                   <Text>
                     <strong>
-                      ZRP Social is built on the principle of freedom of
-                      speech.
+                      {t("terms.freedomOfSpeech.p1Bold")}
                     </strong>{" "}
-                    We believe that every person has the right to express their
-                    opinions and ideas without fear of censorship or
-                    retaliation.
+                    {t("terms.freedomOfSpeech.p1Suffix")}
                   </Text>
 
                   <Text>
-                    As a Swiss platform, we operate under the framework of
-                    Swiss law. We do not moderate or remove content solely
-                    because it expresses a political opinion, ideology,
-                    religious belief, or unpopular viewpoint.
+                    {t("terms.freedomOfSpeech.p2")}
                   </Text>
 
                   <Text>
-                    However, freedom of speech is not absolute. We reserve the
-                    right to moderate or remove content that:
+                    {t("terms.freedomOfSpeech.p3")}
                   </Text>
 
                   <BulletList
                     items={[
-                      <>Violates applicable laws, including applicable restrictions concerning threats, harassment, hate speech, or defamation.</>,
-                      <>Incites violence, terrorism, or illegal activities.</>,
-                      <>Contains child sexual abuse material or other illegal content.</>,
-                      <>Infringes on the intellectual property rights of others.</>,
-                      <>Is spam, misleading, or fraudulent.</>,
-                      <>Violates our Community Guidelines.</>,
+                      <>{t("terms.freedomOfSpeech.item1")}</>,
+                      <>{t("terms.freedomOfSpeech.item2")}</>,
+                      <>{t("terms.freedomOfSpeech.item3")}</>,
+                      <>{t("terms.freedomOfSpeech.item4")}</>,
+                      <>{t("terms.freedomOfSpeech.item5")}</>,
+                      <>{t("terms.freedomOfSpeech.item6")}</>,
                     ]}
                   />
 
                   <Callout variant="red">
-                    <strong>Our principle:</strong> Criticism of governments
-                    or institutions, unpopular opinions, political dissent,
-                    and challenging mainstream narratives are not, by
-                    themselves, grounds for content removal.
+                    <strong>{t("terms.freedomOfSpeech.calloutBold")}</strong>{" "}
+                    {t("terms.freedomOfSpeech.calloutText")}
                   </Callout>
                 </section>
 
@@ -351,30 +325,27 @@ export default function TermsPage() {
                   id="user-conduct"
                   className="legal-section"
                 >
-                  <SectionHeader number="05" title="User Conduct" />
+                  <SectionHeader number="05" title={t("terms.h.userConduct")} />
 
                   <Text>
-                    You agree to use ZRP Social responsibly and lawfully. You
-                    shall not:
+                    {t("terms.userConduct.intro")}
                   </Text>
 
                   <BulletList
                     items={[
-                      <>Post, share, or distribute content that is illegal, harmful, obscene, defamatory, or threatening.</>,
-                      <>Harass, bully, intimidate, or threaten others.</>,
-                      <>Impersonate any person or entity, or falsely claim affiliation with any person or entity.</>,
-                      <>Engage in deceptive, fraudulent, or manipulative behavior.</>,
-                      <>Share malicious code, viruses, or other harmful software.</>,
-                      <>Use automated means, including bots or scrapers, to access or collect data from our platform.</>,
-                      <>Interfere with the proper functioning of our platform.</>,
-                      <>Violate applicable laws, regulations, or third-party rights.</>,
+                      <>{t("terms.userConduct.item1")}</>,
+                      <>{t("terms.userConduct.item2")}</>,
+                      <>{t("terms.userConduct.item3")}</>,
+                      <>{t("terms.userConduct.item4")}</>,
+                      <>{t("terms.userConduct.item5")}</>,
+                      <>{t("terms.userConduct.item6")}</>,
+                      <>{t("terms.userConduct.item7")}</>,
+                      <>{t("terms.userConduct.item8")}</>,
                     ]}
                   />
 
                   <Text>
-                    We encourage open and respectful debate. Disagreement is
-                    welcome; hostility is not. We reserve the right to take
-                    action against users who violate these rules.
+                    {t("terms.userConduct.outro")}
                   </Text>
                 </section>
 
@@ -385,37 +356,26 @@ export default function TermsPage() {
                 >
                   <SectionHeader
                     number="06"
-                    title="Content Ownership and License"
+                    title={t("terms.h.content")}
                   />
 
                   <Text>
                     <strong>
-                      You retain full ownership of the content you create and
-                      share on ZRP Social.
+                      {t("terms.content.p1Bold")}
                     </strong>{" "}
-                    This includes text, images, videos, audio, and any other
-                    content you post.
+                    {t("terms.content.p1Suffix")}
                   </Text>
 
                   <Text>
-                    By posting content on our platform, you grant us a
-                    worldwide, non-exclusive, royalty-free license to display,
-                    store, and distribute your content on the platform and
-                    through our services. This license is limited to the
-                    purpose of operating, improving, and promoting the
-                    platform. We do not claim ownership of your content.
+                    {t("terms.content.p2")}
                   </Text>
 
                   <Text>
-                    You retain the right to delete your content at any time.
-                    When you delete your content, the license we have to use it
-                    ends, except where we need it for legal or operational
-                    reasons, such as backups or archiving.
+                    {t("terms.content.p3")}
                   </Text>
 
                   <Text>
-                    We do not sell or license your content to third parties for
-                    advertising or commercial exploitation.
+                    {t("terms.content.p4")}
                   </Text>
                 </section>
 
@@ -426,19 +386,15 @@ export default function TermsPage() {
                 >
                   <SectionHeader
                     number="07"
-                    title="Intellectual Property"
+                    title={t("terms.h.intellectualProperty")}
                   />
 
                   <Text>
-                    The platform, including its design, logos, trademarks, and
-                    software, is the intellectual property of ZRP. You may not
-                    copy, modify, reproduce, or distribute any part of the
-                    platform without our written consent.
+                    {t("terms.ip.p1")}
                   </Text>
 
                   <Text>
-                    You may not use our trademarks or branding without
-                    permission. All rights not expressly granted are reserved.
+                    {t("terms.ip.p2")}
                   </Text>
                 </section>
 
@@ -449,29 +405,23 @@ export default function TermsPage() {
                 >
                   <SectionHeader
                     number="08"
-                    title="Privacy and Data Protection"
+                    title={t("terms.h.privacy")}
                   />
 
                   <Text>
-                    Your privacy is a top priority. We collect and process your
-                    data in accordance with our{" "}
+                    {t("terms.privacySection.p1Prefix")}{" "}
                     <Link href="/privacy" className="legal-link">
-                      Privacy Policy
+                      {t("footer.privacyPolicy")}
                     </Link>{" "}
-                    and applicable laws, including the Swiss Federal Act on
-                    Data Protection (FADP) and, where applicable, the GDPR.
+                    {t("terms.privacySection.p1Suffix")}
                   </Text>
 
                   <Text>
-                    We do not sell or rent your personal data. We do not use
-                    your data for targeted advertising. Your data is stored
-                    securely in Switzerland and the European Union.
+                    {t("terms.privacySection.p2")}
                   </Text>
 
                   <Text>
-                    You have the right to access, correct, or delete your data
-                    at any time. Please see our Privacy Policy for details on
-                    how to exercise your rights.
+                    {t("terms.privacySection.p3")}
                   </Text>
                 </section>
 
@@ -482,38 +432,31 @@ export default function TermsPage() {
                 >
                   <SectionHeader
                     number="09"
-                    title="Moderation and Enforcement"
+                    title={t("terms.h.moderation")}
                   />
 
                   <Text>
-                    We strive to maintain a safe and respectful environment. We
-                    use a combination of automated tools and human review to
-                    enforce these Terms and our Community Guidelines.
+                    {t("terms.moderation.p1")}
                   </Text>
 
                   <Text>
-                    <strong>Our moderation is transparent and fair.</strong>{" "}
-                    If we take action against your account or content, such as
-                    removal, suspension, or a ban, you will be notified of the
-                    reason and have the right to appeal, subject to applicable
-                    procedures.
+                    <strong>{t("terms.moderation.p2Bold")}</strong>{" "}
+                    {t("terms.moderation.p2Suffix")}
                   </Text>
 
-                  <Text>Actions we may take include:</Text>
+                  <Text>{t("terms.moderation.p3")}</Text>
 
                   <BulletList
                     items={[
-                      <>Removing content that violates our policies.</>,
-                      <>Issuing warnings to users who violate our policies.</>,
-                      <>Suspending or banning accounts for serious or repeated violations.</>,
-                      <>Reporting illegal activity to law enforcement authorities where legally required or appropriate.</>,
+                      <>{t("terms.moderation.item1")}</>,
+                      <>{t("terms.moderation.item2")}</>,
+                      <>{t("terms.moderation.item3")}</>,
+                      <>{t("terms.moderation.item4")}</>,
                     ]}
                   />
 
                   <Text>
-                    We reserve the right to moderate content in accordance with
-                    these Terms and our Community Guidelines and will strive to
-                    be fair, consistent, and transparent in our enforcement.
+                    {t("terms.moderation.outro")}
                   </Text>
                 </section>
 
@@ -524,38 +467,35 @@ export default function TermsPage() {
                 >
                   <SectionHeader
                     number="10"
-                    title="Dispute Resolution"
+                    title={t("terms.h.disputes")}
                   />
 
                   <Text>
-                    These Terms are governed by the laws of{" "}
-                    <strong>Switzerland</strong>, subject to any mandatory
-                    rights or protections that may apply to you under
-                    applicable law.
+                    {t("terms.disputes.p1Prefix")}{" "}
+                    <strong>{t("terms.disputes.p1Bold")}</strong>{t("terms.disputes.p1Suffix")}
                   </Text>
 
                   <Text>
-                    We encourage users to first contact us so that concerns can
-                    be addressed directly and amicably.
+                    {t("terms.disputes.p2")}
                   </Text>
 
                   <BulletList
                     items={[
-                      <>First, through informal communication between you and us.</>,
-                      <>If appropriate, through mediation or another agreed dispute-resolution process.</>,
-                      <>Where necessary, before a competent court having jurisdiction.</>,
+                      <>{t("terms.disputes.item1")}</>,
+                      <>{t("terms.disputes.item2")}</>,
+                      <>{t("terms.disputes.item3")}</>,
                     ]}
                   />
 
                   <Text>
-                    Contact us at{" "}
+                    {t("terms.disputes.contactPrefix")}{" "}
                     <a
                       href="mailto:support@zrp.one"
                       className="legal-link"
                     >
                       support@zrp.one
                     </a>{" "}
-                    before pursuing a formal dispute whenever possible.
+                    {t("terms.disputes.contactSuffix")}
                   </Text>
                 </section>
 
@@ -564,26 +504,18 @@ export default function TermsPage() {
                   id="termination"
                   className="legal-section"
                 >
-                  <SectionHeader number="11" title="Termination" />
+                  <SectionHeader number="11" title={t("terms.h.termination")} />
 
                   <Text>
-                    You may terminate your account at any time by contacting us
-                    or using the account deletion feature, if available. Upon
-                    termination, we will handle your data in accordance with
-                    our Privacy Policy and applicable legal retention
-                    obligations.
+                    {t("terms.termination.p1")}
                   </Text>
 
                   <Text>
-                    We may suspend or terminate your account if we determine
-                    that you have violated these Terms or if we are required to
-                    do so by law. Where appropriate, we will notify you of the
-                    reason.
+                    {t("terms.termination.p2")}
                   </Text>
 
                   <Text>
-                    Upon termination, you may lose access to your account and
-                    content.
+                    {t("terms.termination.p3")}
                   </Text>
                 </section>
 
@@ -594,39 +526,34 @@ export default function TermsPage() {
                 >
                   <SectionHeader
                     number="12"
-                    title="Disclaimers and Limitation of Liability"
+                    title={t("terms.h.liability")}
                   />
 
                   <div className="grid gap-4">
 
                     <InfoCard
-                      title="As-Is and As-Available"
-                      text="The platform is provided on an as-is and as-available basis. We do not warrant that the platform will be uninterrupted, error-free, or free of harmful components."
+                      title={t("terms.liability.asIsTitle")}
+                      text={t("terms.liability.asIsText")}
                     />
 
                     <InfoCard
-                      title="Content Accuracy"
-                      text="We do not endorse or guarantee the accuracy, completeness, or reliability of content posted by users."
+                      title={t("terms.liability.accuracyTitle")}
+                      text={t("terms.liability.accuracyText")}
                     />
 
                     <InfoCard
-                      title="Limitation of Liability"
-                      text="To the fullest extent permitted by applicable law, ZRP and its affiliates, employees, and agents shall not be liable for indirect, incidental, special, consequential, or punitive damages arising from your use of the platform."
+                      title={t("terms.liability.limitationTitle")}
+                      text={t("terms.liability.limitationText")}
                     />
 
                   </div>
 
                   <Text>
-                    In no event shall our total liability exceed the amount
-                    you have paid to us, if any, during the preceding 12
-                    months, to the extent such limitation is permitted by
-                    applicable law.
+                    {t("terms.liability.p1")}
                   </Text>
 
                   <Text>
-                    <strong>User Responsibility:</strong> You are responsible
-                    for your interactions with other users and for the content
-                    you post.
+                    <strong>{t("terms.liability.p2Bold")}</strong> {t("terms.liability.p2Suffix")}
                   </Text>
                 </section>
 
@@ -637,7 +564,7 @@ export default function TermsPage() {
                 >
                   <SectionHeader
                     number="13"
-                    title="Charity Commitment"
+                    title={t("terms.h.charity")}
                   />
 
                   <div className="rounded-2xl bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack p-6 sm:p-8 text-white">
@@ -650,21 +577,18 @@ export default function TermsPage() {
 
                       <div>
                         <h3 className="font-orbitron font-bold text-xl">
-                          Social Impact
+                          {t("terms.charity.title")}
                         </h3>
 
                         <p className="mt-2 text-white/80 leading-relaxed">
-                          ZRP is committed to dedicating 35% of its profits to
-                          charitable causes supporting orphans, schools,
-                          hospitals, and climate relief.
+                          {t("terms.charity.p1")}
                         </p>
                       </div>
 
                     </div>
 
                     <div className="mt-6 pt-5 border-t border-white/15 text-sm text-white/70">
-                      We publish transparency information concerning our
-                      charitable contributions.
+                      {t("terms.charity.p2")}
                     </div>
 
                   </div>
@@ -677,31 +601,27 @@ export default function TermsPage() {
                 >
                   <SectionHeader
                     number="14"
-                    title="Changes to These Terms"
+                    title={t("terms.h.changes")}
                   />
 
                   <Text>
-                    We may update these Terms from time to time to reflect
-                    changes in our services, legal requirements, or industry
-                    standards.
+                    {t("terms.changes.p1")}
                   </Text>
 
                   <Text>
-                    We may notify users of significant changes through:
+                    {t("terms.changes.p2")}
                   </Text>
 
                   <BulletList
                     items={[
-                      <>Email, where an email address has been provided.</>,
-                      <>A notice on the platform.</>,
-                      <>An updated "Last updated" date at the top of this page.</>,
+                      <>{t("terms.changes.item1")}</>,
+                      <>{t("terms.changes.item2")}</>,
+                      <>{t("terms.changes.item3Prefix")}</>,
                     ]}
                   />
 
                   <Text>
-                    If you continue to use the platform after changes take
-                    effect, you accept the updated Terms. If you do not agree,
-                    you must discontinue use of the platform.
+                    {t("terms.changes.outro")}
                   </Text>
                 </section>
 
@@ -710,30 +630,28 @@ export default function TermsPage() {
                   id="contact"
                   className="legal-section"
                 >
-                  <SectionHeader number="15" title="Contact Us" />
+                  <SectionHeader number="15" title={t("terms.h.contact")} />
 
                   <Text>
-                    If you have questions, concerns, or feedback regarding
-                    these Terms, please contact us.
+                    {t("terms.contact.p1")}
                   </Text>
 
                   <div className="grid sm:grid-cols-2 gap-4 mt-6">
 
                     <ContactCard
-                      title="General Support"
+                      title={t("terms.contact.generalSupport")}
                       email="support@zrp.one"
                     />
 
                     <ContactCard
-                      title="Privacy Inquiries"
+                      title={t("terms.contact.privacyInquiries")}
                       email="privacy@zrp.one"
                     />
 
                   </div>
 
                   <Text>
-                    We are committed to addressing concerns as quickly and
-                    transparently as reasonably possible.
+                    {t("terms.contact.p2")}
                   </Text>
                 </section>
 
@@ -748,11 +666,11 @@ export default function TermsPage() {
 
                     <div>
                       <h2 className="text-2xl font-orbitron font-bold text-zrp-charcoal dark:text-white">
-                        Summary of Your Rights
+                        {t("terms.summary.title")}
                       </h2>
 
                       <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 mt-1">
-                        A quick overview of important user rights.
+                        {t("terms.summary.subtitle")}
                       </p>
                     </div>
 
@@ -761,33 +679,33 @@ export default function TermsPage() {
                   <div className="grid sm:grid-cols-2 gap-4">
 
                     <RightCard
-                      title="Post freely"
-                      text="Express your opinions within applicable law and our platform rules."
+                      title={t("terms.summary.postFreelyTitle")}
+                      text={t("terms.summary.postFreelyText")}
                     />
 
                     <RightCard
-                      title="Own your content"
-                      text="You retain ownership of the content you create."
+                      title={t("terms.summary.ownContentTitle")}
+                      text={t("terms.summary.ownContentText")}
                     />
 
                     <RightCard
-                      title="Delete your data"
-                      text="Request deletion of your account and personal data, subject to applicable law."
+                      title={t("terms.summary.deleteDataTitle")}
+                      text={t("terms.summary.deleteDataText")}
                     />
 
                     <RightCard
-                      title="Appeal moderation"
-                      text="Challenge applicable content or account actions through our appeal process."
+                      title={t("terms.summary.appealTitle")}
+                      text={t("terms.summary.appealText")}
                     />
 
                     <RightCard
-                      title="Privacy"
-                      text="Your personal data is handled according to our Privacy Policy and applicable law."
+                      title={t("terms.summary.privacyTitle")}
+                      text={t("terms.summary.privacyText")}
                     />
 
                     <RightCard
-                      title="Social impact"
-                      text="ZRP is committed to directing 35% of profits toward charitable causes."
+                      title={t("terms.summary.socialImpactTitle")}
+                      text={t("terms.summary.socialImpactText")}
                     />
 
                   </div>
@@ -816,19 +734,18 @@ export default function TermsPage() {
             />
 
             <h2 className="text-2xl sm:text-3xl font-bold font-orbitron text-white">
-              Questions about our Terms?
+              {t("terms.cta.title")}
             </h2>
 
             <p className="mt-3 text-white/75 font-inter">
-              Our support team is available to help clarify questions about
-              your account or use of ZRP Social.
+              {t("terms.cta.desc")}
             </p>
 
             <a
               href="mailto:support@zrp.one"
               className="inline-flex items-center justify-center mt-6 px-7 py-3 bg-white text-zrp-darkRed font-semibold rounded-full shadow-lg hover:bg-gray-100 transition font-inter"
             >
-              Contact Support
+              {t("terms.cta.button")}
             </a>
 
           </div>
