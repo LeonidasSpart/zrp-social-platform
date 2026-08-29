@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Megaphone, Plus, Pause, Play } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/translations";
 
 interface Campaign {
   id: string;
@@ -27,8 +29,18 @@ const STATUS_STYLES: Record<string, string> = {
   REJECTED: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
 };
 
+const STATUS_LABEL_KEYS: Record<string, TranslationKey> = {
+  DRAFT: "ads.status.draft",
+  PENDING_REVIEW: "ads.status.pendingReview",
+  ACTIVE: "ads.status.active",
+  PAUSED: "ads.status.paused",
+  COMPLETED: "ads.status.completed",
+  REJECTED: "ads.status.rejected",
+};
+
 export default function AdsDashboard() {
   const { data: session, status } = useSession();
+  const { t } = useLanguage();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [togglingId, setTogglingId] = useState<string | null>(null);
@@ -85,26 +97,26 @@ export default function AdsDashboard() {
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <Megaphone className="w-5 h-5 text-zrp-red" />
-          Your ad campaigns
+          {t("ads.dashboard.title")}
         </h1>
         <Link
           href="/ads/new"
           className="inline-flex items-center gap-1.5 bg-zrp-red text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-zrp-darkRed transition"
         >
           <Plus className="w-4 h-4" />
-          New campaign
+          {t("ads.dashboard.newCampaign")}
         </Link>
       </div>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Promote your own posts into other people's feeds.
+        {t("ads.dashboard.subtitle")}
       </p>
 
       {campaigns.length === 0 ? (
         <div className="text-center py-12 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
           <Megaphone className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-          <p className="text-gray-500 dark:text-gray-400">No campaigns yet.</p>
+          <p className="text-gray-500 dark:text-gray-400">{t("ads.dashboard.noCampaigns")}</p>
           <Link href="/ads/new" className="text-zrp-red hover:underline text-sm">
-            Create your first one
+            {t("ads.dashboard.createFirst")}
           </Link>
         </div>
       ) : (
@@ -126,34 +138,36 @@ export default function AdsDashboard() {
                     </p>
                   </div>
                   <span className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${STATUS_STYLES[c.status] || ""}`}>
-                    {c.status.replace("_", " ")}
+                    {t(STATUS_LABEL_KEYS[c.status] ?? "ads.status.draft")}
                   </span>
                 </div>
 
                 {c.status === "REJECTED" && c.rejectionReason && (
                   <p className="text-xs text-red-600 dark:text-red-400 mt-2">
-                    Rejected: {c.rejectionReason}
+                    {t("ads.dashboard.rejectedPrefix", { reason: c.rejectionReason })}
                   </p>
                 )}
 
                 <div className="grid grid-cols-4 gap-2 mt-3 text-center text-xs">
                   <div className="p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                     <p className="font-bold text-gray-900 dark:text-white">{c._count.impressions}</p>
-                    <p className="text-gray-500 dark:text-gray-400">Views</p>
+                    <p className="text-gray-500 dark:text-gray-400">{t("ads.dashboard.views")}</p>
                   </div>
                   <div className="p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                     <p className="font-bold text-gray-900 dark:text-white">{c._count.clicks}</p>
-                    <p className="text-gray-500 dark:text-gray-400">Clicks</p>
+                    <p className="text-gray-500 dark:text-gray-400">{t("ads.dashboard.clicks")}</p>
                   </div>
                   <div className="p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                     <p className="font-bold text-gray-900 dark:text-white">{ctr}%</p>
-                    <p className="text-gray-500 dark:text-gray-400">CTR</p>
+                    <p className="text-gray-500 dark:text-gray-400">{t("ads.dashboard.ctr")}</p>
                   </div>
                   <div className="p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                     <p className="font-bold text-gray-900 dark:text-white">
                       ${c.budgetSpent.toFixed(2)}
                     </p>
-                    <p className="text-gray-500 dark:text-gray-400">of ${c.budgetTotal}</p>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      {t("ads.dashboard.ofBudget", { amount: c.budgetTotal })}
+                    </p>
                   </div>
                 </div>
 
@@ -165,11 +179,11 @@ export default function AdsDashboard() {
                   >
                     {c.status === "ACTIVE" ? (
                       <>
-                        <Pause className="w-3.5 h-3.5" /> Pause campaign
+                        <Pause className="w-3.5 h-3.5" /> {t("ads.dashboard.pauseCampaign")}
                       </>
                     ) : (
                       <>
-                        <Play className="w-3.5 h-3.5" /> Resume campaign
+                        <Play className="w-3.5 h-3.5" /> {t("ads.dashboard.resumeCampaign")}
                       </>
                     )}
                   </button>

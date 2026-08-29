@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Megaphone, ArrowLeft } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface OwnPost {
   id: string;
@@ -16,6 +17,7 @@ interface OwnPost {
 export default function NewAdCampaign() {
   const { data: session } = useSession();
   const router = useRouter();
+  const { t } = useLanguage();
   const [posts, setPosts] = useState<OwnPost[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [selectedPostId, setSelectedPostId] = useState("");
@@ -41,11 +43,11 @@ export default function NewAdCampaign() {
     setError(null);
 
     if (!selectedPostId) {
-      setError("Choose a post to promote.");
+      setError(t("ads.new.errChoosePost"));
       return;
     }
     if (!name.trim()) {
-      setError("Give this campaign a name.");
+      setError(t("ads.new.errCampaignName"));
       return;
     }
 
@@ -67,10 +69,10 @@ export default function NewAdCampaign() {
       if (res.ok) {
         router.push("/ads");
       } else {
-        setError(data.error || "Failed to create campaign.");
+        setError(data.error || t("ads.new.errFailedCreate"));
       }
     } catch {
-      setError("Something went wrong.");
+      setError(t("ads.new.errGeneric"));
     } finally {
       setSubmitting(false);
     }
@@ -80,15 +82,15 @@ export default function NewAdCampaign() {
     <div className="max-w-2xl mx-auto py-4 px-4">
       <Link href="/ads" className="inline-flex items-center gap-1 text-sm text-zrp-red hover:underline mb-4">
         <ArrowLeft className="w-4 h-4" />
-        Back to campaigns
+        {t("ads.new.backToCampaigns")}
       </Link>
 
       <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
         <Megaphone className="w-5 h-5 text-zrp-red" />
-        New ad campaign
+        {t("ads.new.title")}
       </h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Campaigns go through a quick review before they start serving.
+        {t("ads.new.subtitle")}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -100,13 +102,13 @@ export default function NewAdCampaign() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Campaign name
+            {t("ads.new.campaignName")}
           </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Internal name, not shown publicly"
+            placeholder={t("ads.new.campaignNamePlaceholder")}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             maxLength={80}
           />
@@ -114,13 +116,13 @@ export default function NewAdCampaign() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Post to promote
+            {t("ads.new.postToPromote")}
           </label>
           {loadingPosts ? (
-            <p className="text-sm text-gray-400">Loading your posts...</p>
+            <p className="text-sm text-gray-400">{t("ads.new.loadingPosts")}</p>
           ) : posts.length === 0 ? (
             <p className="text-sm text-gray-400">
-              You don't have any posts yet - create one first, then come back here to promote it.
+              {t("ads.new.noPosts")}
             </p>
           ) : (
             <div className="space-y-2 max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-2">
@@ -152,20 +154,20 @@ export default function NewAdCampaign() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Bid type
+              {t("ads.new.bidType")}
             </label>
             <select
               value={bidType}
               onChange={(e) => setBidType(e.target.value as "CPC" | "CPM")}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
-              <option value="CPC">Cost per click (CPC)</option>
-              <option value="CPM">Cost per 1,000 views (CPM)</option>
+              <option value="CPC">{t("ads.new.bidTypeCpc")}</option>
+              <option value="CPM">{t("ads.new.bidTypeCpm")}</option>
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {bidType === "CPC" ? "Cost per click ($)" : "Cost per 1,000 views ($)"}
+              {bidType === "CPC" ? t("ads.new.costPerClick") : t("ads.new.costPer1000Views")}
             </label>
             <input
               type="number"
@@ -180,7 +182,7 @@ export default function NewAdCampaign() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Total budget ($)
+            {t("ads.new.totalBudget")}
           </label>
           <input
             type="number"
@@ -191,19 +193,19 @@ export default function NewAdCampaign() {
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
           <p className="text-xs text-gray-400 mt-1">
-            The campaign automatically stops serving once this is spent.
+            {t("ads.new.budgetHint")}
           </p>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Link when clicked (optional)
+            {t("ads.new.linkWhenClicked")}
           </label>
           <input
             type="url"
             value={targetUrl}
             onChange={(e) => setTargetUrl(e.target.value)}
-            placeholder="https://your-site.com - leave blank to just open the post"
+            placeholder={t("ads.new.linkPlaceholder")}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
         </div>
@@ -213,7 +215,7 @@ export default function NewAdCampaign() {
           disabled={submitting || !selectedPostId}
           className="w-full bg-zrp-red text-white py-2.5 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
         >
-          {submitting ? "Submitting..." : "Submit for review"}
+          {submitting ? t("ads.new.submitting") : t("ads.new.submitForReview")}
         </button>
       </form>
     </div>
