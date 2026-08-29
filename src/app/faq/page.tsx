@@ -1256,31 +1256,28 @@ export default function FAQPage() {
     {
       id: "admin-roles",
       category: "Administration",
-      question: "What are the different user roles?",
+      question: t("faq.adminRoles.q"),
       icon: Users,
       answer: (
         <div className="space-y-3">
           <p>
-            ZRP may use different roles to operate and moderate the platform.
+            {t("faq.adminRoles.p1")}
           </p>
 
           <p>
-            <strong>User</strong> – standard platform account.
+            <strong>{t("faq.adminRoles.userLabel")}</strong> – {t("faq.adminRoles.userDesc")}
           </p>
 
           <p>
-            <strong>Moderator</strong> – authorised personnel who may review
-            reports and enforce applicable platform rules.
+            <strong>{t("faq.adminRoles.modLabel")}</strong> – {t("faq.adminRoles.modDesc")}
           </p>
 
           <p>
-            <strong>Admin</strong> – authorised personnel with broader
-            administrative capabilities.
+            <strong>{t("faq.adminRoles.adminLabel")}</strong> – {t("faq.adminRoles.adminDesc")}
           </p>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Administrative permissions are restricted according to internal
-            access-control policies.
+            {t("faq.adminRoles.note")}
           </p>
         </div>
       ),
@@ -1289,7 +1286,7 @@ export default function FAQPage() {
     {
       id: "verified-badge",
       category: "Administration",
-      question: "What do the verified badges mean?",
+      question: t("faq.verifiedBadge.q"),
       icon: CheckCircle,
       answer: (
         <div className="space-y-3">
@@ -1297,47 +1294,41 @@ export default function FAQPage() {
             <li className="flex items-center gap-3">
               <VerifiedBadge badgeType="verified" />
               <span>
-                <strong>Verified</strong> – indicates an account that has
-                received the applicable verification status.
+                <strong>{t("faq.verifiedBadge.verifiedLabel")}</strong> – {t("faq.verifiedBadge.verifiedDesc")}
               </span>
             </li>
 
             <li className="flex items-center gap-3">
               <VerifiedBadge badgeType="organization" />
               <span>
-                <strong>Organization</strong> – indicates an official
-                organisation or company account.
+                <strong>{t("faq.verifiedBadge.orgLabel")}</strong> – {t("faq.verifiedBadge.orgDesc")}
               </span>
             </li>
 
             <li className="flex items-center gap-3">
               <VerifiedBadge badgeType="government" />
               <span>
-                <strong>Government</strong> – indicates an official government
-                account.
+                <strong>{t("faq.verifiedBadge.govLabel")}</strong> – {t("faq.verifiedBadge.govDesc")}
               </span>
             </li>
 
             <li className="flex items-center gap-3">
               <VerifiedBadge badgeType="team" />
               <span>
-                <strong>ZRP Team</strong> – indicates an official ZRP account.
+                <strong>{t("faq.verifiedBadge.teamLabel")}</strong> – {t("faq.verifiedBadge.teamDesc")}
               </span>
             </li>
           </ul>
 
           <div className="p-3 rounded-lg bg-zrp-red/5 border border-zrp-red/20 text-sm">
             <strong className="text-zrp-red">
-              Verification ≠ Trust Passport:
+              {t("faq.verifiedBadge.calloutBold")}
             </strong>{" "}
-            A verification badge is one possible trust signal. The ZRP Trust
-            Passport combines multiple account and community signals into a
-            separate transparency system.
+            {t("faq.verifiedBadge.calloutText")}
           </div>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Verification does not necessarily represent endorsement of an
-            account's opinions or content.
+            {t("faq.verifiedBadge.note")}
           </p>
         </div>
       ),
@@ -1346,26 +1337,25 @@ export default function FAQPage() {
     {
       id: "enterprise-plan",
       category: "Administration",
-      question: "What is the Enterprise plan?",
+      question: t("faq.enterprisePlan.q"),
       icon: Crown,
       answer: (
         <div className="space-y-3">
           <p>
-            Enterprise services are designed for larger organisations,
-            institutions, teams, and professional use cases.
+            {t("faq.enterprisePlan.p1")}
           </p>
 
           <ul className="list-disc list-inside space-y-2 text-sm">
-            <li>Advanced organisational features.</li>
-            <li>Higher usage limits where applicable.</li>
-            <li>Advanced analytics and administration.</li>
-            <li>Potential API and integration access.</li>
-            <li>Priority support options.</li>
-            <li>Custom commercial arrangements where available.</li>
+            <li>{t("faq.enterprisePlan.item1")}</li>
+            <li>{t("faq.enterprisePlan.item2")}</li>
+            <li>{t("faq.enterprisePlan.item3")}</li>
+            <li>{t("faq.enterprisePlan.item4")}</li>
+            <li>{t("faq.enterprisePlan.item5")}</li>
+            <li>{t("faq.enterprisePlan.item6")}</li>
           </ul>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Enterprise availability and pricing may vary.
+            {t("faq.enterprisePlan.note")}
           </p>
         </div>
       ),
@@ -1377,31 +1367,29 @@ export default function FAQPage() {
     {
       id: "support-tickets",
       category: "Support & Tickets",
-      question: "How do I submit a support ticket?",
+      question: t("faq.supportTickets.q"),
       icon: Ticket,
       answer: (
         <div className="space-y-3">
           <ol className="list-decimal list-inside space-y-2 text-sm">
             <li>
-              Open the{" "}
+              {t("faq.supportTickets.step1Prefix")}{" "}
               <Link
                 href="/support"
                 className="text-zrp-red hover:underline"
               >
-                Support
+                {t("faq.supportTickets.step1Link")}
               </Link>{" "}
-              page.
+              {t("faq.supportTickets.step1Suffix")}
             </li>
-            <li>Choose the appropriate category.</li>
-            <li>Enter a clear subject.</li>
-            <li>Describe the issue in detail.</li>
-            <li>Submit the ticket.</li>
+            <li>{t("faq.supportTickets.step2")}</li>
+            <li>{t("faq.supportTickets.step3")}</li>
+            <li>{t("faq.supportTickets.step4")}</li>
+            <li>{t("faq.supportTickets.step5")}</li>
           </ol>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Providing screenshots, error messages, timestamps, and relevant
-            account information can help support resolve technical problems
-            faster.
+            {t("faq.supportTickets.note")}
           </p>
         </div>
       ),
@@ -1410,24 +1398,24 @@ export default function FAQPage() {
     {
       id: "track-support-tickets",
       category: "Support & Tickets",
-      question: "How do I track my support tickets?",
+      question: t("faq.trackTickets.q"),
       icon: MessageSquare,
       answer: (
         <div className="space-y-3">
           <ol className="list-decimal list-inside space-y-2 text-sm">
             <li>
-              Open{" "}
+              {t("faq.trackTickets.step1Prefix")}{" "}
               <Link
                 href="/support/tickets"
                 className="text-zrp-red hover:underline"
               >
-                My Tickets
+                {t("faq.trackTickets.step1Link")}
               </Link>
               .
             </li>
-            <li>Review your existing support requests.</li>
-            <li>Open a ticket to view its conversation.</li>
-            <li>Reply when additional information is requested.</li>
+            <li>{t("faq.trackTickets.step2")}</li>
+            <li>{t("faq.trackTickets.step3")}</li>
+            <li>{t("faq.trackTickets.step4")}</li>
           </ol>
         </div>
       ),
@@ -1436,26 +1424,25 @@ export default function FAQPage() {
     {
       id: "admin-ticket-management",
       category: "Support & Tickets",
-      question: "How do admins manage support tickets?",
+      question: t("faq.adminTicketMgmt.q"),
       icon: Shield,
       answer: (
         <div className="space-y-3">
           <p>
-            Authorised administrators can manage support requests through the
-            administrative support interface.
+            {t("faq.adminTicketMgmt.p1")}
           </p>
 
           <ul className="list-disc list-inside space-y-2 text-sm">
-            <li>Review incoming tickets.</li>
-            <li>Filter tickets by status or priority.</li>
-            <li>Assign tickets to authorised staff.</li>
-            <li>Respond to users.</li>
-            <li>Update ticket status.</li>
-            <li>Resolve or close completed requests.</li>
+            <li>{t("faq.adminTicketMgmt.item1")}</li>
+            <li>{t("faq.adminTicketMgmt.item2")}</li>
+            <li>{t("faq.adminTicketMgmt.item3")}</li>
+            <li>{t("faq.adminTicketMgmt.item4")}</li>
+            <li>{t("faq.adminTicketMgmt.item5")}</li>
+            <li>{t("faq.adminTicketMgmt.item6")}</li>
           </ul>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Administrative interfaces are restricted to authorised personnel.
+            {t("faq.adminTicketMgmt.note")}
           </p>
         </div>
       ),
@@ -1464,42 +1451,41 @@ export default function FAQPage() {
     {
       id: "ticket-statuses",
       category: "Support & Tickets",
-      question: "What do support ticket statuses mean?",
+      question: t("faq.ticketStatuses.q"),
       icon: CheckCircle,
       answer: (
         <div className="space-y-3">
           <ul className="list-disc list-inside space-y-2 text-sm">
             <li>
-              <strong className="text-zrp-red">OPEN</strong> – request has
-              been submitted and requires attention.
+              <strong className="text-zrp-red">OPEN</strong> – {t("faq.ticketStatuses.openDesc")}
             </li>
 
             <li>
               <strong className="text-blue-500">
                 IN_PROGRESS
               </strong>{" "}
-              – the support team is working on the request.
+              – {t("faq.ticketStatuses.inProgressDesc")}
             </li>
 
             <li>
               <strong className="text-yellow-500">
                 AWAITING_REPLY
               </strong>{" "}
-              – additional information or a response is required.
+              – {t("faq.ticketStatuses.awaitingReplyDesc")}
             </li>
 
             <li>
               <strong className="text-green-500">
                 RESOLVED
               </strong>{" "}
-              – the issue has been addressed.
+              – {t("faq.ticketStatuses.resolvedDesc")}
             </li>
 
             <li>
               <strong className="text-gray-500">
                 CLOSED
               </strong>{" "}
-              – the ticket has been closed.
+              – {t("faq.ticketStatuses.closedDesc")}
             </li>
           </ul>
         </div>
@@ -1512,25 +1498,23 @@ export default function FAQPage() {
     {
       id: "terms",
       category: "Legal & Account",
-      question: "Where can I read the ZRP Terms of Service?",
+      question: t("faq.termsFaq.q"),
       icon: FileText,
       answer: (
         <div className="space-y-3">
           <p>
-            The complete rules governing your use of ZRP Social are available
-            in our{" "}
+            {t("faq.termsFaq.p1Prefix")}{" "}
             <Link
               href="/terms"
               className="text-zrp-red hover:underline"
             >
-              Terms of Service
+              {t("faq.termsFaq.p1Link")}
             </Link>
             .
           </p>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            By using ZRP Social, you agree to comply with the applicable terms,
-            policies, and community rules.
+            {t("faq.termsFaq.note")}
           </p>
         </div>
       ),
@@ -1539,18 +1523,16 @@ export default function FAQPage() {
     {
       id: "community-guidelines",
       category: "Legal & Account",
-      question: "Where can I read the Community Guidelines?",
+      question: t("faq.communityGuidelines.q"),
       icon: Shield,
       answer: (
         <div className="space-y-3">
           <p>
-            Our Community Guidelines explain the types of behaviour and content
-            permitted on ZRP Social.
+            {t("faq.communityGuidelines.p1")}
           </p>
 
           <p>
-            You can review the current guidelines through the platform's
-            Community Guidelines page.
+            {t("faq.communityGuidelines.p2")}
           </p>
         </div>
       ),
@@ -1559,28 +1541,26 @@ export default function FAQPage() {
     {
       id: "account-suspension",
       category: "Legal & Account",
-      question: "Why might my account be suspended?",
+      question: t("faq.accountSuspension.q"),
       icon: Shield,
       answer: (
         <div className="space-y-3">
           <p>
-            Accounts may be restricted or suspended when necessary to enforce
-            the Terms of Service, Community Guidelines, security requirements,
-            or applicable law.
+            {t("faq.accountSuspension.p1")}
           </p>
 
-          <p>Examples may include:</p>
+          <p>{t("faq.accountSuspension.p2")}</p>
 
           <ul className="list-disc list-inside space-y-2 text-sm">
-            <li>Serious or repeated policy violations.</li>
-            <li>Fraudulent or deceptive activity.</li>
-            <li>Platform abuse or automated abuse.</li>
-            <li>Threats or illegal activity.</li>
-            <li>Compromised-account or security concerns.</li>
+            <li>{t("faq.accountSuspension.item1")}</li>
+            <li>{t("faq.accountSuspension.item2")}</li>
+            <li>{t("faq.accountSuspension.item3")}</li>
+            <li>{t("faq.accountSuspension.item4")}</li>
+            <li>{t("faq.accountSuspension.item5")}</li>
           </ul>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Where applicable, users may have access to an appeal process.
+            {t("faq.accountSuspension.note")}
           </p>
         </div>
       ),
@@ -1589,26 +1569,24 @@ export default function FAQPage() {
     {
       id: "appeal-moderation",
       category: "Legal & Account",
-      question: "Can I appeal a moderation decision?",
+      question: t("faq.appealModeration.q"),
       icon: Shield,
       answer: (
         <div className="space-y-3">
           <p>
-            Where an appeal process is available, users may challenge certain
-            moderation decisions.
+            {t("faq.appealModeration.p1")}
           </p>
 
           <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Review the moderation notification.</li>
-            <li>Follow the appeal instructions provided.</li>
-            <li>Explain why you believe the decision should be reviewed.</li>
-            <li>Provide relevant context or evidence.</li>
-            <li>Submit the appeal for review.</li>
+            <li>{t("faq.appealModeration.step1")}</li>
+            <li>{t("faq.appealModeration.step2")}</li>
+            <li>{t("faq.appealModeration.step3")}</li>
+            <li>{t("faq.appealModeration.step4")}</li>
+            <li>{t("faq.appealModeration.step5")}</li>
           </ol>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Appeals are reviewed according to applicable policies and
-            operational procedures.
+            {t("faq.appealModeration.note")}
           </p>
         </div>
       ),
