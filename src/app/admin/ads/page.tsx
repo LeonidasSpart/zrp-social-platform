@@ -3,6 +3,17 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Megaphone, CheckCircle, XCircle, DollarSign } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/translations";
+
+const STATUS_LABEL_KEYS: Record<string, TranslationKey> = {
+  DRAFT: "ads.status.draft",
+  PENDING_REVIEW: "ads.status.pendingReview",
+  ACTIVE: "ads.status.active",
+  PAUSED: "ads.status.paused",
+  COMPLETED: "ads.status.completed",
+  REJECTED: "ads.status.rejected",
+};
 
 interface Campaign {
   id: string;
@@ -17,6 +28,7 @@ interface Campaign {
 }
 
 export default function AdminAdsReview() {
+  const { t } = useLanguage();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("PENDING_REVIEW");
@@ -71,10 +83,10 @@ export default function AdminAdsReview() {
     <div>
       <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
         <Megaphone className="w-5 h-5 text-zrp-red" />
-        Ad Review Queue
+        {t("adminAds.title")}
       </h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-        Review campaigns before they can start serving to real feeds.
+        {t("adminAds.subtitle")}
       </p>
 
       <div className="flex gap-2 mb-4">
@@ -88,7 +100,7 @@ export default function AdminAdsReview() {
                 : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300"
             }`}
           >
-            {s === "all" ? "All" : s.replace("_", " ")}
+            {s === "all" ? t("adminAds.filterAll") : t(STATUS_LABEL_KEYS[s] ?? "ads.status.draft")}
           </button>
         ))}
       </div>
@@ -98,7 +110,7 @@ export default function AdminAdsReview() {
           <div className="w-6 h-6 border-2 border-zrp-red border-t-transparent rounded-full animate-spin" />
         </div>
       ) : campaigns.length === 0 ? (
-        <p className="text-gray-400 text-center py-8">No campaigns here.</p>
+        <p className="text-gray-400 text-center py-8">{t("adminAds.noCampaignsHere")}</p>
       ) : (
         <div className="space-y-3">
           {campaigns.map((c) => (
@@ -127,11 +139,11 @@ export default function AdminAdsReview() {
                   )}
                   <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-2">
                     <DollarSign className="w-3.5 h-3.5" />
-                    {c.bidType} · ${c.bidAmount} · Budget ${c.budgetTotal}
+                    {t("adminAds.budgetSummary", { bidType: c.bidType, bidAmount: c.bidAmount, budgetTotal: c.budgetTotal })}
                   </div>
                 </div>
 
-                <span className="text-xs text-gray-400 flex-shrink-0">{c.status}</span>
+                <span className="text-xs text-gray-400 flex-shrink-0">{t(STATUS_LABEL_KEYS[c.status] ?? "ads.status.draft")}</span>
               </div>
 
               {statusFilter === "PENDING_REVIEW" && (
@@ -141,7 +153,7 @@ export default function AdminAdsReview() {
                       <textarea
                         value={rejectionReason}
                         onChange={(e) => setRejectionReason(e.target.value)}
-                        placeholder="Reason for rejection (shown to the advertiser)"
+                        placeholder={t("adminAds.rejectionPlaceholder")}
                         rows={2}
                         className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                       />
@@ -151,7 +163,7 @@ export default function AdminAdsReview() {
                           disabled={processingId === c.id}
                           className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-full hover:bg-red-700 disabled:opacity-50"
                         >
-                          Confirm reject
+                          {t("adminAds.confirmReject")}
                         </button>
                         <button
                           onClick={() => {
@@ -160,7 +172,7 @@ export default function AdminAdsReview() {
                           }}
                           className="px-3 py-1.5 text-sm text-gray-500"
                         >
-                          Cancel
+                          {t("action.cancel")}
                         </button>
                       </div>
                     </div>
@@ -172,7 +184,7 @@ export default function AdminAdsReview() {
                         className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white text-sm rounded-full hover:bg-green-700 disabled:opacity-50"
                       >
                         <CheckCircle className="w-4 h-4" />
-                        Approve
+                        {t("adminAds.approve")}
                       </button>
                       <button
                         onClick={() => setRejectingId(c.id)}
@@ -180,7 +192,7 @@ export default function AdminAdsReview() {
                         className="inline-flex items-center gap-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded-full disabled:opacity-50"
                       >
                         <XCircle className="w-4 h-4" />
-                        Reject
+                        {t("adminAds.reject")}
                       </button>
                     </div>
                   )}
