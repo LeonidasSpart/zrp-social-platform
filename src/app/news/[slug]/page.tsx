@@ -1,6 +1,22 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import T from "@/components/i18n/T";
+import type { TranslationKey } from "@/lib/translations";
+
+const CATEGORY_KEYS: Record<string, TranslationKey> = {
+  WORLD: "newsCategory.world",
+  EUROPE: "newsCategory.europe",
+  SWITZERLAND: "newsCategory.switzerland",
+  POLITICS: "newsCategory.politics",
+  BUSINESS: "newsCategory.business",
+  TECHNOLOGY: "newsCategory.technology",
+  CRYPTO: "newsCategory.crypto",
+  SCIENCE: "newsCategory.science",
+  SPORTS: "newsCategory.sports",
+  CULTURE: "newsCategory.culture",
+  COMMUNITY: "newsCategory.community",
+};
 
 export const dynamic = "force-dynamic";
 
@@ -70,19 +86,19 @@ export default async function NewsArticlePage({
             href="/news"
             className="inline-flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
-            ← Back to ZRP News
+            ← <T k="news.backToList" />
           </Link>
         </div>
 
         <header className="mb-8">
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-red-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-              {article.category}
+              <T k={CATEGORY_KEYS[article.category] ?? "newsCategory.world"} />
             </span>
 
             {article.featured && (
               <span className="rounded-full border border-red-600/30 bg-red-600/10 px-3 py-1 text-xs font-semibold text-red-600">
-                Featured
+                <T k="news.featured" />
               </span>
             )}
           </div>
@@ -133,7 +149,7 @@ export default async function NewsArticlePage({
 
             <span className="hidden sm:inline">•</span>
 
-            <span>{article.views + 1} views</span>
+            <span><T k="news.viewsCount" params={{ count: article.views + 1 }} /></span>
           </div>
         </header>
 
@@ -150,7 +166,7 @@ export default async function NewsArticlePage({
         {article.sourceName && (
           <div className="mb-8 rounded-xl border bg-muted/30 p-4">
             <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Source
+              <T k="news.source" />
             </div>
 
             {article.sourceUrl ? (
@@ -183,7 +199,7 @@ export default async function NewsArticlePage({
             href="/news"
             className="inline-flex items-center rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
           >
-            ← More ZRP News
+            ← <T k="news.moreNews" />
           </Link>
         </footer>
       </article>

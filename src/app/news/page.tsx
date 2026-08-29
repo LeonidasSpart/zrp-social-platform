@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/translations";
 
 type NewsCategory =
   | "WORLD"
@@ -42,21 +44,35 @@ type NewsArticle = {
 
 const categories: Array<{
   value: NewsCategory | "ALL";
-  label: string;
+  labelKey: TranslationKey;
 }> = [
-  { value: "ALL", label: "All" },
-  { value: "WORLD", label: "World" },
-  { value: "EUROPE", label: "Europe" },
-  { value: "SWITZERLAND", label: "Switzerland" },
-  { value: "POLITICS", label: "Politics" },
-  { value: "BUSINESS", label: "Business" },
-  { value: "TECHNOLOGY", label: "Technology" },
-  { value: "CRYPTO", label: "Crypto" },
-  { value: "SCIENCE", label: "Science" },
-  { value: "SPORTS", label: "Sports" },
-  { value: "CULTURE", label: "Culture" },
-  { value: "COMMUNITY", label: "Community" },
+  { value: "ALL", labelKey: "news.categoryAll" },
+  { value: "WORLD", labelKey: "newsCategory.world" },
+  { value: "EUROPE", labelKey: "newsCategory.europe" },
+  { value: "SWITZERLAND", labelKey: "newsCategory.switzerland" },
+  { value: "POLITICS", labelKey: "newsCategory.politics" },
+  { value: "BUSINESS", labelKey: "newsCategory.business" },
+  { value: "TECHNOLOGY", labelKey: "newsCategory.technology" },
+  { value: "CRYPTO", labelKey: "newsCategory.crypto" },
+  { value: "SCIENCE", labelKey: "newsCategory.science" },
+  { value: "SPORTS", labelKey: "newsCategory.sports" },
+  { value: "CULTURE", labelKey: "newsCategory.culture" },
+  { value: "COMMUNITY", labelKey: "newsCategory.community" },
 ];
+
+const CATEGORY_KEYS: Record<NewsCategory, TranslationKey> = {
+  WORLD: "newsCategory.world",
+  EUROPE: "newsCategory.europe",
+  SWITZERLAND: "newsCategory.switzerland",
+  POLITICS: "newsCategory.politics",
+  BUSINESS: "newsCategory.business",
+  TECHNOLOGY: "newsCategory.technology",
+  CRYPTO: "newsCategory.crypto",
+  SCIENCE: "newsCategory.science",
+  SPORTS: "newsCategory.sports",
+  CULTURE: "newsCategory.culture",
+  COMMUNITY: "newsCategory.community",
+};
 
 function formatDate(date: string | null) {
   if (!date) return "";
@@ -83,6 +99,7 @@ function formatViews(views: number) {
 }
 
 export default function NewsPage() {
+  const { t } = useLanguage();
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [selectedCategory, setSelectedCategory] =
     useState<NewsCategory | "ALL">("ALL");
@@ -124,7 +141,7 @@ export default function NewsPage() {
         const data = await response.json();
 
         if (!response.ok || !data.success) {
-          throw new Error(data.error || "Failed to load news");
+          throw new Error(data.error || t("news.errFailedLoad"));
         }
 
         if (loadMore) {
@@ -139,14 +156,14 @@ export default function NewsPage() {
         console.error("ZRP News page error:", err);
 
         if (!loadMore) {
-          setError("Unable to load ZRP News right now.");
+          setError(t("news.errUnableToLoad"));
         }
       } finally {
         setLoading(false);
         setLoadingMore(false);
       }
     },
-    [selectedCategory, nextCursor]
+    [selectedCategory, nextCursor, t]
   );
 
   useEffect(() => {
@@ -175,7 +192,7 @@ export default function NewsPage() {
         const data = await response.json();
 
         if (!response.ok || !data.success) {
-          throw new Error(data.error || "Failed to load news");
+          throw new Error(data.error || t("news.errFailedLoad"));
         }
 
         setArticles(data.articles || []);
@@ -183,7 +200,7 @@ export default function NewsPage() {
         setNextCursor(data.pagination?.nextCursor || null);
       } catch (err) {
         console.error("ZRP News initial load error:", err);
-        setError("Unable to load ZRP News right now.");
+        setError(t("news.errUnableToLoad"));
       } finally {
         setLoading(false);
       }
@@ -217,12 +234,11 @@ export default function NewsPage() {
               </div>
 
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                News
+                {t("footer.zrpNews")}
               </h1>
 
               <p className="mt-1 max-w-2xl text-sm text-muted-foreground sm:text-base">
-                Independent news and stories from Switzerland, Europe and the
-                world.
+                {t("news.subtitle")}
               </p>
             </div>
           </div>
@@ -252,7 +268,7 @@ export default function NewsPage() {
                       : "border-border bg-background text-muted-foreground hover:border-red-500 hover:text-foreground",
                   ].join(" ")}
                 >
-                  {category.label}
+                  {t(category.labelKey)}
                 </button>
               );
             })}
@@ -269,7 +285,7 @@ export default function NewsPage() {
               onClick={() => loadNews(false)}
               className="mt-3 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
             >
-              Retry
+              {t("news.retry")}
             </button>
           </div>
         )}
@@ -302,10 +318,10 @@ export default function NewsPage() {
               📰
             </div>
 
-            <h2 className="text-xl font-semibold">No news yet</h2>
+            <h2 className="text-xl font-semibold">{t("news.noNewsTitle")}</h2>
 
             <p className="mt-2 text-sm text-muted-foreground">
-              There are no published articles in this category yet.
+              {t("news.noNewsDesc")}
             </p>
           </div>
         )}
@@ -334,14 +350,14 @@ export default function NewsPage() {
                   )}
 
                   <div className="absolute left-4 top-4 rounded-full bg-red-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
-                    Featured
+                    {t("news.featured")}
                   </div>
                 </div>
 
                 <div className="flex flex-col justify-center p-6 sm:p-8">
                   <div className="mb-3 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide">
                     <span className="rounded-full bg-red-600/10 px-3 py-1 text-red-600">
-                      {featuredArticle.category}
+                      {t(CATEGORY_KEYS[featuredArticle.category])}
                     </span>
 
                     {featuredArticle.sourceName && (
@@ -376,7 +392,7 @@ export default function NewsPage() {
                     <span>•</span>
 
                     <span>
-                      {formatViews(featuredArticle.views)} views
+                      {t("news.viewsCount", { count: formatViews(featuredArticle.views) })}
                     </span>
                   </div>
                 </div>
@@ -389,7 +405,7 @@ export default function NewsPage() {
         {!loading && regularArticles.length > 0 && (
           <section>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold">Latest News</h2>
+              <h2 className="text-xl font-bold">{t("news.latestNews")}</h2>
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -415,7 +431,7 @@ export default function NewsPage() {
                     )}
 
                     <div className="absolute bottom-3 left-3 rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
-                      {article.category}
+                      {t(CATEGORY_KEYS[article.category])}
                     </div>
                   </div>
 
@@ -442,7 +458,7 @@ export default function NewsPage() {
                     </div>
 
                     <div className="mt-2 text-xs text-muted-foreground">
-                      {formatViews(article.views)} views
+                      {t("news.viewsCount", { count: formatViews(article.views) })}
                     </div>
                   </div>
                 </Link>
@@ -460,7 +476,7 @@ export default function NewsPage() {
               onClick={() => loadNews(true)}
               className="rounded-full border border-border bg-background px-6 py-3 text-sm font-semibold transition hover:border-red-500 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loadingMore ? "Loading..." : "Load more"}
+              {loadingMore ? t("news.loadingMore") : t("news.loadMore")}
             </button>
           </div>
         )}
