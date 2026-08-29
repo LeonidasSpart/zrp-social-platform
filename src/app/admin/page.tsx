@@ -17,6 +17,13 @@ import {
   Newspaper,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/translations";
+
+const ROLE_LABEL_KEYS: Record<string, TranslationKey> = {
+  ADMIN: "adminUsers.roleAdmin",
+  MODERATOR: "adminUsers.roleModerator",
+  USER: "adminUsers.roleUser",
+};
 
 interface Stats {
   users: number;
@@ -154,7 +161,7 @@ export default function AdminDashboard() {
       textColor: "text-teal-600 dark:text-teal-400",
     },
     {
-      label: "Open Support Tickets",
+      label: t("adminDash.openSupportTickets"),
       value: ticketStats.open,
       icon: Ticket,
       bgColor: "bg-indigo-100 dark:bg-indigo-900/30",
@@ -225,7 +232,7 @@ export default function AdminDashboard() {
                   className="flex items-center justify-between border-b border-gray-100 pb-2 last:border-0 dark:border-gray-700"
                 >
                   <span className="text-sm capitalize text-gray-700 dark:text-gray-300">
-                    {role}
+                    {t(ROLE_LABEL_KEYS[role] ?? "adminUsers.roleUser")}
                   </span>
 
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
@@ -275,7 +282,7 @@ export default function AdminDashboard() {
             >
               <Newspaper className="h-5 w-5 text-red-500" />
 
-              <span>Manage News</span>
+              <span>{t("adminDash.manageNews")}</span>
             </Link>
 
             {/* Reports */}
@@ -321,7 +328,7 @@ export default function AdminDashboard() {
               <Ticket className="h-5 w-5 text-indigo-500" />
 
               <span>
-                Support Tickets
+                {t("adminDash.supportTickets")}
 
                 {ticketStats.open > 0 && (
                   <span className="ml-2 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">

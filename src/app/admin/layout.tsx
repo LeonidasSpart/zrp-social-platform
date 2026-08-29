@@ -15,12 +15,15 @@ import {
   BadgeCheck,
   HardDrive,
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/translations";
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { t } = useLanguage();
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
@@ -54,40 +57,44 @@ export default function AdminLayout({
   const isFullAdmin =
     session?.user?.isAdmin || session?.user?.role === "ADMIN";
 
-  const navItems = [
+  const navItems: Array<{
+    href: string;
+    labelKey: TranslationKey;
+    icon: typeof LayoutDashboard;
+  }> = [
     {
       href: "/admin",
-      label: "Dashboard",
+      labelKey: "adminDash.title",
       icon: LayoutDashboard,
     },
     {
       href: "/admin/users",
-      label: "Users",
+      labelKey: "adminUsers.title",
       icon: Users,
     },
     {
       href: "/admin/posts",
-      label: "Posts",
+      labelKey: "adminPosts.title",
       icon: FileText,
     },
     {
       href: "/admin/news",
-      label: "News",
+      labelKey: "nav.news",
       icon: Newspaper,
     },
     {
       href: "/admin/journalists",
-      label: "Journalists",
+      labelKey: "adminJournalists.title",
       icon: BadgeCheck,
     },
     {
       href: "/admin/reports",
-      label: "Reports",
+      labelKey: "adminReports.title",
       icon: Flag,
     },
     {
       href: "/admin/ads",
-      label: "Ad Review",
+      labelKey: "adminNav.adReview",
       icon: Megaphone,
     },
 
@@ -96,12 +103,12 @@ export default function AdminLayout({
       ? [
           {
             href: "/admin/upgrade-requests",
-            label: "Upgrade Requests",
+            labelKey: "upgradeReq.title" as TranslationKey,
             icon: DollarSign,
           },
           {
             href: "/admin/storage",
-            label: "Storage Cleanup",
+            labelKey: "adminStorage.title" as TranslationKey,
             icon: HardDrive,
           },
         ]
@@ -115,7 +122,7 @@ export default function AdminLayout({
         <aside className="flex-shrink-0 md:w-64">
           <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-zrp-deepBlack">
             <h2 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">
-              Admin
+              {t("nav.admin")}
             </h2>
 
             <nav className="space-y-1">
@@ -137,7 +144,7 @@ export default function AdminLayout({
                   >
                     <item.icon className="h-5 w-5" />
 
-                    <span>{item.label}</span>
+                    <span>{t(item.labelKey)}</span>
                   </Link>
                 );
               })}
