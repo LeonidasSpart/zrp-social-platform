@@ -1,0 +1,24 @@
+# ZRP Social
+
+> ZRP Social is the first Swiss-European social media platform, built around free speech, privacy, and security. 35% of platform profits go to charities supporting orphans, schools, hospitals, and climate relief.
+
+## Docs
+
+- [About](https://zrp.one/about): Mission and background of ZRP Social
+- [FAQ](https://zrp.one/faq): Frequently asked questions about accounts, posting, messaging, privacy, and plans
+- [Help Center](https://zrp.one/help): Guides for using ZRP Social
+- [Pricing](https://zrp.one/pricing): Free, Pro, and Business plan details
+- [Privacy Policy](https://zrp.one/privacy): How ZRP Social collects, uses, and protects data
+- [Terms of Service](https://zrp.one/terms): Terms governing use of the platform
+
+## News
+
+- [ZRP News](https://zrp.one/news): Latest stories from Switzerland, Europe, and around the world
+
+## Company
+
+- [Careers](https://zrp.one/careers): Open roles at ZRP Social
+- [Charity Commitment](https://zrp.one/charity): 35% of platform profits go to charity
+- [Investors](https://zrp.one/investors): Investment information
+- [Press Kit](https://zrp.one/press): Media resources and brand assets
+- [Contact](https://zrp.one/contact): Get in touch with the ZRP Social team
