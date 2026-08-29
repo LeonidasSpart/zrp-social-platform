@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react";
 import { PLANS } from "@/lib/limits";
 import { Check, X, Copy } from "lucide-react";
 import CryptoPaymentModal from "./CryptoPaymentModal";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/translations";
 
 interface PricingCardProps {
   plan: string;
@@ -14,24 +16,85 @@ interface PricingCardProps {
   onUpgrade: (plan: string) => void;
 }
 
-function PricingCard({ plan, limits, isCurrent, isAdmin, onUpgrade }: PricingCardProps) {
-  const [showCryptoModal, setShowCryptoModal] = useState(false);
-  const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
+const PLAN_LABEL_KEYS: Record<string, TranslationKey> = {
+  free: "pricing.planFree",
+  pro: "pricing.planPro",
+  business: "pricing.planBusiness",
+  enterprise: "pricing.planEnterprise",
+};
 
-  const features = [
-    `Posts up to ${limits.postLength === 999999 ? "Unlimited" : limits.postLength} characters`,
-    `${limits.imagesPerPost === 999999 ? "Unlimited" : limits.imagesPerPost} images per post`,
-    `Video upload up to ${limits.videoUploadMB}MB`,
-    `${limits.scheduledPostsPerMonth === 999999 ? "Unlimited" : limits.scheduledPostsPerMonth} scheduled posts/month`,
-    `${limits.analytics.charAt(0).toUpperCase() + limits.analytics.slice(1)} analytics`,
-    limits.verifiedBadge ? "✅ Verified badge" : "❌ No verified badge",
-    limits.customProfileUrl ? "✅ Custom profile URL" : "❌ No custom URL",
-    limits.recruitmentProfiles ? "✅ Recruitment profiles" : "❌ No recruitment",
-    limits.articlePublishing ? "✅ Article publishing" : "❌ No articles",
-    limits.teamManagement ? "✅ Team management" : "❌ No team management",
-    limits.apiAccess ? "✅ API access" : "❌ No API",
-    `Support: ${limits.prioritySupport}`,
-    `${limits.charityContribution}% to charity`,
+const ANALYTICS_KEYS: Record<string, TranslationKey> = {
+  basic: "pricing.analyticsBasic",
+  advanced: "pricing.analyticsAdvanced",
+  full: "pricing.analyticsFull",
+  custom: "pricing.analyticsCustom",
+};
+
+const SUPPORT_KEYS: Record<string, TranslationKey> = {
+  none: "pricing.supportNone",
+  standard: "pricing.supportStandard",
+  priority: "pricing.supportPriority",
+  "24/7": "pricing.support247",
+};
+
+function PricingCard({ plan, limits, isCurrent, isAdmin, onUpgrade }: PricingCardProps) {
+  const { t } = useLanguage();
+  const [showCryptoModal, setShowCryptoModal] = useState(false);
+  const planLabel = t(PLAN_LABEL_KEYS[plan] ?? "pricing.planFree");
+
+  const features: Array<{ icon: "check" | "cross" | "bullet"; text: string }> = [
+    {
+      icon: "bullet",
+      text: t("pricing.featurePostLength", {
+        n: limits.postLength === 999999 ? t("pricing.unlimited") : limits.postLength,
+      }),
+    },
+    {
+      icon: "bullet",
+      text: t("pricing.featureImagesPerPost", {
+        n: limits.imagesPerPost === 999999 ? t("pricing.unlimited") : limits.imagesPerPost,
+      }),
+    },
+    { icon: "bullet", text: t("pricing.featureVideoUpload", { n: limits.videoUploadMB }) },
+    {
+      icon: "bullet",
+      text: t("pricing.featureScheduledPosts", {
+        n: limits.scheduledPostsPerMonth === 999999 ? t("pricing.unlimited") : limits.scheduledPostsPerMonth,
+      }),
+    },
+    {
+      icon: "bullet",
+      text: t("pricing.featureAnalytics", { tier: t(ANALYTICS_KEYS[limits.analytics] ?? "pricing.analyticsBasic") }),
+    },
+    {
+      icon: limits.verifiedBadge ? "check" : "cross",
+      text: limits.verifiedBadge ? t("pricing.featureVerifiedBadge") : t("pricing.featureNoVerifiedBadge"),
+    },
+    {
+      icon: limits.customProfileUrl ? "check" : "cross",
+      text: limits.customProfileUrl ? t("pricing.featureCustomUrl") : t("pricing.featureNoCustomUrl"),
+    },
+    {
+      icon: limits.recruitmentProfiles ? "check" : "cross",
+      text: limits.recruitmentProfiles ? t("pricing.featureRecruitment") : t("pricing.featureNoRecruitment"),
+    },
+    {
+      icon: limits.articlePublishing ? "check" : "cross",
+      text: limits.articlePublishing ? t("pricing.featureArticles") : t("pricing.featureNoArticles"),
+    },
+    {
+      icon: limits.teamManagement ? "check" : "cross",
+      text: limits.teamManagement ? t("pricing.featureTeamManagement") : t("pricing.featureNoTeamManagement"),
+    },
+    {
+      icon: limits.apiAccess ? "check" : "cross",
+      text: limits.apiAccess ? t("pricing.featureApiAccess") : t("pricing.featureNoApiAccess"),
+    },
+    {
+      icon: "bullet",
+      text: t("pricing.featureSupport", { tier: t(SUPPORT_KEYS[limits.prioritySupport] ?? "pricing.supportNone") }),
+    },
+    { icon: "bullet", text: t("pricing.featureCharity", { n: limits.charityContribution }) },
   ];
 
   const getPrice = () => {
@@ -51,15 +114,15 @@ function PricingCard({ plan, limits, isCurrent, isAdmin, onUpgrade }: PricingCar
       <h3 className="text-lg font-bold text-gray-900 dark:text-white">{planLabel}</h3>
       <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
         {plan === "free" ? "$0" : `$${getPrice()}`}
-        {plan !== "free" && <span className="text-sm font-normal text-gray-500"> / month</span>}
+        {plan !== "free" && <span className="text-sm font-normal text-gray-500"> {t("pricing.perMonth")}</span>}
       </p>
       <ul className="mt-4 space-y-2 text-sm">
         {features.map((feat, i) => (
           <li key={i} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
             <span className="flex-shrink-0 mt-0.5">
-              {feat.includes("✅") ? "✅" : feat.includes("❌") ? "❌" : "•"}
+              {feat.icon === "check" ? "✅" : feat.icon === "cross" ? "❌" : "•"}
             </span>
-            <span>{feat.replace(/[✅❌]\s*/, "")}</span>
+            <span>{feat.text}</span>
           </li>
         ))}
       </ul>
@@ -74,13 +137,13 @@ function PricingCard({ plan, limits, isCurrent, isAdmin, onUpgrade }: PricingCar
               : "bg-zrp-red text-white hover:bg-zrp-darkRed"
           }`}
         >
-          {isCurrent ? "Current Plan" : `Upgrade to ${planLabel}`}
+          {isCurrent ? t("pricing.currentPlan") : t("pricing.upgradeTo", { plan: planLabel })}
         </button>
       ) : (
         <div className="mt-4 space-y-2">
           {isCurrent ? (
             <div className="w-full text-center py-2 text-sm font-medium text-gray-500 bg-gray-100 dark:bg-gray-700 rounded-lg">
-              Current Plan
+              {t("pricing.currentPlan")}
             </div>
           ) : plan !== "free" ? (
             <>
@@ -88,9 +151,9 @@ function PricingCard({ plan, limits, isCurrent, isAdmin, onUpgrade }: PricingCar
                 onClick={() => setShowCryptoModal(true)}
                 className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed transition"
               >
-                Subscribe with Crypto
+                {t("pricing.subscribeWithCrypto")}
               </button>
-              <p className="text-xs text-gray-400 text-center">Pay with USDC (Solana)</p>
+              <p className="text-xs text-gray-400 text-center">{t("pricing.payWithUsdc")}</p>
             </>
           ) : (
             <button
@@ -98,7 +161,7 @@ function PricingCard({ plan, limits, isCurrent, isAdmin, onUpgrade }: PricingCar
               className="w-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition cursor-not-allowed opacity-50"
               disabled
             >
-              Already Free
+              {t("pricing.alreadyFree")}
             </button>
           )}
         </div>
@@ -121,6 +184,7 @@ function PricingCard({ plan, limits, isCurrent, isAdmin, onUpgrade }: PricingCar
 
 export default function PricingCards() {
   const { data: session } = useSession();
+  const { t } = useLanguage();
   const isAdmin = session?.user?.role === "ADMIN";
 
   // For non‑admins, we show the crypto modal; for admins, we just call the upgrade API
@@ -133,28 +197,28 @@ export default function PricingCards() {
         body: JSON.stringify({ plan }),
       });
       if (res.ok) {
-        alert(`Plan upgraded to ${plan}!`);
+        alert(t("pricing.upgradeSuccessAlert", { plan }));
         window.location.reload();
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to upgrade.");
+        alert(err.error || t("pricing.upgradeFailedAlert"));
       }
     } catch {
-      alert("Something went wrong.");
+      alert(t("pricing.somethingWentWrongAlert"));
     }
   };
 
   return (
     <div>
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Choose Your Plan</h2>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t("pricing.chooseYourPlan")}</h2>
         <p className="text-gray-500 dark:text-gray-400 mt-2">
-          All plans contribute 35% of profits to charity.
+          {t("pricing.charityTagline")}
         </p>
         {!isAdmin && (
           <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
             <p className="text-sm text-yellow-800 dark:text-yellow-300">
-              Subscribe with USDC (Solana). After payment, admins will verify and upgrade your plan.
+              {t("pricing.cryptoNotice")}
             </p>
           </div>
         )}
