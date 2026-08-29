@@ -2,6 +2,7 @@ import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth";
+import { checkVideoSize } from "./limits";
 
 const f = createUploadthing();
 
@@ -74,12 +75,22 @@ export const ourFileRouter = {
       maxFileCount: 4,
     },
 
+    /*
+     * The router-level cap has to cover every plan (the highest is
+     * enterprise at 2048MB) - the actual per-plan limit is enforced
+     * below in the middleware via checkVideoSize(), using each
+     * user's real plan instead of a single flat number. Without
+     * this, a pro/business/enterprise user uploading a video above
+     * 32MB but within their plan's advertised limit would have
+     * passed the client-side check yet still be rejected here with
+     * a generic UploadThing error.
+     */
     video: {
-      maxFileSize: "32MB",
+      maxFileSize: "2GB",
       maxFileCount: 1,
     },
   })
-    .middleware(async ({ req }) => {
+    .middleware(async ({ req, files }) => {
       const session =
         await getServerSession(authOptions);
 
@@ -87,6 +98,34 @@ export const ourFileRouter = {
         throw new UploadThingError(
           "Unauthorized"
         );
+      }
+
+      const plan =
+        session.user.plan || "free";
+
+      for (const file of files) {
+        if (
+          file.type
+            .toLowerCase()
+            .startsWith("video/") ||
+          isVideoFile(file)
+        ) {
+          const sizeMB =
+            file.size / (1024 * 1024);
+
+          const check =
+            checkVideoSize(
+              sizeMB,
+              plan
+            );
+
+          if (!check.allowed) {
+            throw new UploadThingError(
+              check.message ||
+                "Video exceeds your plan's size limit."
+            );
+          }
+        }
       }
 
       return {

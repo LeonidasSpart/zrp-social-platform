@@ -98,6 +98,48 @@ function isRealVideoFile(
 }
 
 // ─────────────────────────────────────────────────────────────
+// ERROR MESSAGES
+// ─────────────────────────────────────────────────────────────
+//
+// The UploadThing client throws with .message set to the raw
+// error code (e.g. "UPLOAD_FAILED") when the underlying storage
+// transfer itself fails rather than a specific validation check,
+// which read as a cryptic error to users. Map the codes we can
+// realistically hit here to a message that names a likely cause,
+// per user feedback asking for more specific upload errors.
+const UPLOAD_ERROR_MESSAGES: Record<string, string> = {
+  UPLOAD_FAILED:
+    "The upload didn't complete, likely due to a connection issue or the file being too large for your plan. Check your connection and try again.",
+  TOO_LARGE:
+    "This video is too large for your plan. Try a smaller file or upgrade your plan.",
+  FILE_LIMIT_EXCEEDED:
+    "This video is too large for your plan. Try a smaller file or upgrade your plan.",
+  URL_GENERATION_FAILED:
+    "Couldn't start the upload - this is usually a temporary connection issue. Please try again.",
+  INTERNAL_SERVER_ERROR:
+    "Something went wrong on our end while uploading. Please try again in a moment.",
+};
+
+function describeUploadError(
+  err: unknown
+): string {
+  if (err instanceof Error) {
+    const mapped =
+      UPLOAD_ERROR_MESSAGES[
+        err.message
+      ];
+
+    if (mapped) {
+      return mapped;
+    }
+
+    return err.message;
+  }
+
+  return "Something went wrong while uploading. Please check your connection and try again.";
+}
+
+// ─────────────────────────────────────────────────────────────
 // COMPONENT
 // ─────────────────────────────────────────────────────────────
 
@@ -448,10 +490,9 @@ export default function ShortUploadModal({
         );
       } catch (err) {
         setError(
-          err instanceof
-            Error
-            ? err.message
-            : "Something went wrong."
+          describeUploadError(
+            err
+          )
         );
       } finally {
         setUploading(
