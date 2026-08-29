@@ -193,11 +193,11 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-10 pt-6 border-t border-zrp-silver/20 dark:border-zrp-charcoal/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          <p className="text-xs text-zrp-charcoal/40 dark:text-white/40 font-inter">
+          <p className="text-xs text-zrp-charcoal/70 dark:text-white/60 font-inter">
             {t("footer.copyright", { year: String(year) })}
           </p>
 
-          <p className="text-xs text-zrp-charcoal/40 dark:text-white/40 font-inter flex items-center gap-1.5">
+          <p className="text-xs text-zrp-charcoal/70 dark:text-white/60 font-inter flex items-center gap-1.5">
             {t("footer.madeInSwitzerland")}
           </p>
         </div>
