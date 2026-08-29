@@ -17,6 +17,8 @@ import {
   Award,
 } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/translations";
 
 interface TrustSignal {
   key: string;
@@ -61,27 +63,42 @@ interface TrustData {
  * ---------------------------------------------------------------
  */
 
-function getLevelDescription(
-  level: TrustData["passport"]["level"]
-) {
-  switch (level) {
-    case "EXCELLENT":
-      return "This account has a strong collection of positive ZRP trust signals.";
+const LEVEL_DESC_KEYS: Record<TrustData["passport"]["level"], TranslationKey> = {
+  EXCELLENT: "trust.levelDescExcellent",
+  HIGH: "trust.levelDescHigh",
+  GOOD: "trust.levelDescGood",
+  MODERATE: "trust.levelDescModerate",
+  LOW: "trust.levelDescLow",
+};
 
-    case "HIGH":
-      return "This account has a strong history of positive ZRP trust signals.";
+const LEVEL_LABEL_KEYS: Record<TrustData["passport"]["level"], TranslationKey> = {
+  EXCELLENT: "trust.levelExcellent",
+  HIGH: "trust.levelHigh",
+  GOOD: "trust.levelGood",
+  MODERATE: "trust.levelModerate",
+  LOW: "trust.levelLow",
+};
 
-    case "GOOD":
-      return "This account has established several positive trust signals.";
+const CATEGORY_LABEL_KEYS: Record<string, TranslationKey> = {
+  SECURITY: "trust.categorySecurity",
+  PROFILE: "trust.categoryProfile",
+  HISTORY: "trust.categoryHistory",
+  COMMUNITY: "trust.categoryCommunity",
+  ZRP: "trust.categoryZrp",
+};
 
-    case "MODERATE":
-      return "This account is building a history on ZRP.";
-
-    case "LOW":
-    default:
-      return "This account is still building its ZRP trust history.";
-  }
-}
+const SIGNAL_LABEL_KEYS: Record<string, { titleKey: TranslationKey; descKey: TranslationKey }> = {
+  email: { titleKey: "trust.signalEmailTitle", descKey: "trust.signalEmailDesc" },
+  avatar: { titleKey: "trust.signalAvatarTitle", descKey: "trust.signalAvatarDesc" },
+  cover: { titleKey: "trust.signalCoverTitle", descKey: "trust.signalCoverDesc" },
+  name: { titleKey: "trust.signalNameTitle", descKey: "trust.signalNameDesc" },
+  bio: { titleKey: "trust.signalBioTitle", descKey: "trust.signalBioDesc" },
+  location: { titleKey: "trust.signalLocationTitle", descKey: "trust.signalLocationDesc" },
+  website: { titleKey: "trust.signalWebsiteTitle", descKey: "trust.signalWebsiteDesc" },
+  community: { titleKey: "trust.signalCommunityTitle", descKey: "trust.signalCommunityDesc" },
+  followers: { titleKey: "trust.signalFollowersTitle", descKey: "trust.signalFollowersDesc" },
+  verified: { titleKey: "trust.signalVerifiedTitle", descKey: "trust.signalVerifiedDesc" },
+};
 
 /*
  * ---------------------------------------------------------------
@@ -159,6 +176,7 @@ export default function TrustPassportPage(
   }
 ) {
   const params = use(props.params);
+  const { t } = useLanguage();
   const [data, setData] = useState<TrustData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -200,7 +218,7 @@ export default function TrustPassportPage(
         console.error("Trust Passport loading error:", err);
 
         if (!cancelled) {
-          setError("Unable to load this Trust Passport.");
+          setError(t("trust.errUnableToLoad"));
         }
       } finally {
         if (!cancelled) {
@@ -242,11 +260,11 @@ export default function TrustPassportPage(
         <ShieldCheck className="w-14 h-14 text-gray-400 mb-4" />
 
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-          Trust Passport unavailable
+          {t("trust.unavailableTitle")}
         </h1>
 
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-sm">
-          {error || "This account could not be found."}
+          {error || t("trust.notFoundFallback")}
         </p>
 
         <Link
@@ -255,7 +273,7 @@ export default function TrustPassportPage(
           )}`}
           className="mt-6 px-5 py-2 rounded-full bg-zrp-red text-white text-sm font-medium hover:bg-zrp-darkRed transition"
         >
-          Back to profile
+          {t("trust.backToProfile")}
         </Link>
       </div>
     );
@@ -308,22 +326,12 @@ export default function TrustPassportPage(
    * The API calculates these values automatically from createdAt.
    */
 
+  const accountAgeYears = Math.floor(data.user.accountAgeMonths / 12);
+
   const accountAgeText =
     data.user.accountAgeMonths >= 12
-      ? `${Math.floor(
-          data.user.accountAgeMonths / 12
-        )} year${
-          Math.floor(
-            data.user.accountAgeMonths / 12
-          ) === 1
-            ? ""
-            : "s"
-        }`
-      : `${data.user.accountAgeMonths} month${
-          data.user.accountAgeMonths === 1
-            ? ""
-            : "s"
-        }`;
+      ? t(accountAgeYears === 1 ? "trust.yearsSingular" : "trust.yearsPlural", { n: accountAgeYears })
+      : t(data.user.accountAgeMonths === 1 ? "trust.monthsSingular" : "trust.monthsPlural", { n: data.user.accountAgeMonths });
 
   /*
    * -------------------------------------------------------------
@@ -343,18 +351,18 @@ export default function TrustPassportPage(
             <Link
               href={`/profile/${data.user.username}`}
               className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-              aria-label="Back to profile"
+              aria-label={t("trust.backToProfile")}
             >
               <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-gray-200" />
             </Link>
 
             <div className="min-w-0">
               <h1 className="font-bold text-gray-900 dark:text-white">
-                ZRP Trust Passport
+                {t("trust.headerTitle")}
               </h1>
 
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Transparent trust signals
+                {t("trust.headerSubtitle")}
               </p>
             </div>
           </div>
@@ -419,7 +427,7 @@ export default function TrustPassportPage(
               )}`}
             >
               <ShieldCheck className="w-3.5 h-3.5" />
-              {data.passport.levelLabel}
+              {t(LEVEL_LABEL_KEYS[data.passport.level])}
             </span>
           </div>
         </section>
@@ -442,20 +450,18 @@ export default function TrustPassportPage(
                   </div>
 
                   <div className="text-[10px] uppercase tracking-wider font-bold text-gray-500 dark:text-gray-400">
-                    / 100
+                    {t("trust.outOf100")}
                   </div>
                 </div>
               </div>
             </div>
 
             <h3 className="mt-4 text-lg font-bold text-gray-900 dark:text-white">
-              {data.passport.levelLabel}
+              {t(LEVEL_LABEL_KEYS[data.passport.level])}
             </h3>
 
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-              {getLevelDescription(
-                data.passport.level
-              )}
+              {t(LEVEL_DESC_KEYS[data.passport.level])}
             </p>
 
             <div className="mt-4 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden">
@@ -468,8 +474,7 @@ export default function TrustPassportPage(
             </div>
 
             <p className="mt-2 text-[11px] text-gray-400 dark:text-gray-500">
-              Score is automatically calculated from
-              available ZRP trust signals.
+              {t("trust.scoreFootnote")}
             </p>
           </div>
         </section>
@@ -492,7 +497,7 @@ export default function TrustPassportPage(
               </div>
 
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                Posts
+                {t("trust.statPosts")}
               </div>
             </div>
 
@@ -508,7 +513,7 @@ export default function TrustPassportPage(
               </div>
 
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                Followers
+                {t("trust.statFollowers")}
               </div>
             </div>
 
@@ -522,7 +527,7 @@ export default function TrustPassportPage(
               </div>
 
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                On ZRP
+                {t("trust.statOnZrp")}
               </div>
             </div>
           </div>
@@ -539,26 +544,24 @@ export default function TrustPassportPage(
 
               <div className="min-w-0">
                 <h4 className="font-semibold text-sm text-gray-900 dark:text-white">
-                  Account history
+                  {t("trust.accountHistoryTitle")}
                 </h4>
 
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Joined ZRP in {formattedDate}.
+                  {t("trust.joinedIn", { date: formattedDate })}
                 </p>
 
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Account age:{" "}
+                  {t("trust.accountAgeLabel")}{" "}
                   <span className="font-medium text-gray-700 dark:text-gray-300">
                     {accountAgeText}
                   </span>
                   {" · "}
-                  {data.user.accountAgeDays} days.
+                  {t("trust.daysSuffix", { days: data.user.accountAgeDays })}
                 </p>
 
                 <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-2">
-                  Account age is automatically
-                  calculated from the original account
-                  creation date.
+                  {t("trust.accountAgeFootnote")}
                 </p>
               </div>
             </div>
@@ -575,12 +578,11 @@ export default function TrustPassportPage(
 
             <div>
               <h3 className="font-bold text-gray-900 dark:text-white">
-                Trust signals
+                {t("trust.trustSignalsTitle")}
               </h3>
 
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Public signals used to calculate this
-                passport.
+                {t("trust.trustSignalsSubtitle")}
               </p>
             </div>
           </div>
@@ -596,47 +598,71 @@ export default function TrustPassportPage(
               return (
                 <div key={group.category}>
                   <h4 className="text-xs font-bold tracking-wider text-gray-400 dark:text-gray-500 mb-2">
-                    {group.category}
+                    {t(CATEGORY_LABEL_KEYS[group.category] ?? "trust.categoryZrp")}
                   </h4>
 
                   <div className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
                     {group.signals.map(
-                      (signal, index) => (
-                        <div
-                          key={signal.key}
-                          className={`p-4 flex items-start gap-3 ${
-                            index !==
-                            group.signals.length -
-                              1
-                              ? "border-b border-gray-200 dark:border-gray-800"
-                              : ""
-                          }`}
-                        >
-                          {signal.verified ? (
-                            <CheckCircle2 className="w-5 h-5 text-zrp-red flex-shrink-0 mt-0.5" />
-                          ) : (
-                            <Circle className="w-5 h-5 text-gray-300 dark:text-gray-600 flex-shrink-0 mt-0.5" />
-                          )}
+                      (signal, index) => {
+                        let title: string;
+                        let description: string;
 
-                          <div className="min-w-0">
-                            <div
-                              className={`font-medium text-sm ${
-                                signal.verified
-                                  ? "text-gray-900 dark:text-white"
-                                  : "text-gray-500 dark:text-gray-400"
-                              }`}
-                            >
-                              {signal.title}
+                        if (signal.key === "account-age") {
+                          const established = data.user.accountAgeMonths >= 12;
+                          title = t(
+                            established
+                              ? "trust.signalAccountAgeTitleEstablished"
+                              : "trust.signalAccountAgeTitleHistory"
+                          );
+                          description = established
+                            ? t("trust.signalAccountAgeDescEstablished")
+                            : t(
+                                data.user.accountAgeMonths === 1
+                                  ? "trust.signalAccountAgeDescHistorySingular"
+                                  : "trust.signalAccountAgeDescHistoryPlural",
+                                { months: data.user.accountAgeMonths }
+                              );
+                        } else {
+                          const labelKeys = SIGNAL_LABEL_KEYS[signal.key];
+                          title = labelKeys ? t(labelKeys.titleKey) : signal.title;
+                          description = labelKeys ? t(labelKeys.descKey) : signal.description;
+                        }
+
+                        return (
+                          <div
+                            key={signal.key}
+                            className={`p-4 flex items-start gap-3 ${
+                              index !==
+                              group.signals.length -
+                                1
+                                ? "border-b border-gray-200 dark:border-gray-800"
+                                : ""
+                            }`}
+                          >
+                            {signal.verified ? (
+                              <CheckCircle2 className="w-5 h-5 text-zrp-red flex-shrink-0 mt-0.5" />
+                            ) : (
+                              <Circle className="w-5 h-5 text-gray-300 dark:text-gray-600 flex-shrink-0 mt-0.5" />
+                            )}
+
+                            <div className="min-w-0">
+                              <div
+                                className={`font-medium text-sm ${
+                                  signal.verified
+                                    ? "text-gray-900 dark:text-white"
+                                    : "text-gray-500 dark:text-gray-400"
+                                }`}
+                              >
+                                {title}
+                              </div>
+
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                {description}
+                              </p>
                             </div>
-
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                              {
-                                signal.description
-                              }
-                            </p>
                           </div>
-                        </div>
-                      )
+                        );
+                      }
                     )}
                   </div>
                 </div>
@@ -656,19 +682,14 @@ export default function TrustPassportPage(
 
               <div>
                 <h4 className="font-semibold text-sm text-gray-900 dark:text-white">
-                  Community participation
+                  {t("trust.communityParticipationTitle")}
                 </h4>
 
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {formatCount(
-                    data.counts.posts
-                  )}{" "}
-                  posts and{" "}
-                  {formatCount(
-                    data.counts.followers
-                  )}{" "}
-                  followers are currently associated
-                  with this public account.
+                  {t("trust.communityParticipationDesc", {
+                    posts: formatCount(data.counts.posts),
+                    followers: formatCount(data.counts.followers),
+                  })}
                 </p>
               </div>
             </div>
@@ -687,14 +708,11 @@ export default function TrustPassportPage(
 
                 <div>
                   <h4 className="font-medium text-sm text-gray-900 dark:text-white">
-                    Private account
+                    {t("trust.privateAccountTitle")}
                   </h4>
 
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Some profile activity is
-                    intentionally private. The Trust
-                    Passport does not expose private
-                    account information.
+                    {t("trust.privateAccountDesc")}
                   </p>
                 </div>
               </div>
@@ -713,16 +731,11 @@ export default function TrustPassportPage(
 
               <div>
                 <h4 className="font-semibold text-sm text-gray-900 dark:text-white">
-                  What the Trust Passport means
+                  {t("trust.whatItMeansTitle")}
                 </h4>
 
                 <p className="text-xs leading-5 text-gray-600 dark:text-gray-400 mt-1">
-                  The Trust Passport provides a
-                  transparent view of positive account
-                  signals available on ZRP. It is not an
-                  identity verification system and does
-                  not guarantee a person's identity,
-                  intentions, or future behavior.
+                  {t("trust.whatItMeansDesc")}
                 </p>
               </div>
             </div>
@@ -738,14 +751,7 @@ export default function TrustPassportPage(
             <Info className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
 
             <p className="text-xs leading-5 text-gray-500 dark:text-gray-400">
-              The ZRP Trust Passport is based on
-              account and community signals available on
-              ZRP. Scores are automatically recalculated
-              when the underlying account information or
-              activity changes. The passport does not
-              expose email addresses, IP addresses,
-              private messages, moderation reports, or
-              other private account information.
+              {t("trust.transparencyNotice")}
             </p>
           </div>
         </section>
@@ -759,7 +765,7 @@ export default function TrustPassportPage(
             href={`/profile/${data.user.username}`}
             className="block text-center w-full py-3 rounded-full border border-gray-300 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
           >
-            Back to @{data.user.username}
+            {t("trust.backToUsername", { username: data.user.username })}
           </Link>
         </div>
       </div>
