@@ -1,38 +1,24 @@
-// app/careers/page.tsx
-import type { Metadata } from 'next';
-import Link from 'next/link';
+"use client";
 
-export const metadata: Metadata = {
-  title: 'Careers – ZRP Social',
-  description: 'Join ZRP Social. Help build the first Swiss European social media platform, built on free speech, privacy, and security.',
-};
-
-const VALUES = [
-  {
-    icon: '🗽',
-    title: 'Freedom of Speech',
-    description: 'We protect the right to express yourself without fear, and we build with that principle first.',
-  },
-  {
-    icon: '🔒',
-    title: 'Privacy & Security',
-    description: 'Built in Switzerland, under Swiss law, with strong data protection baked into everything we ship.',
-  },
-  {
-    icon: '🧡',
-    title: 'People First',
-    description: '35% of profits go to charity. We believe a platform can be profitable and still make a real difference.',
-  },
-];
-
-const WHAT_WE_LOOK_FOR = [
-  'Genuine care about privacy, free expression, and building things the right way',
-  'Comfort working in a small, fast-moving team where you own real outcomes',
-  'Strong communication — most of our work happens async and remote',
-  'A builder\'s mindset: you\'d rather ship something real than talk about it',
-];
+import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function CareersPage() {
+  const { t } = useLanguage();
+
+  const VALUES = [
+    { icon: "🗽", title: t("careers.value1Title"), description: t("careers.value1Desc") },
+    { icon: "🔒", title: t("careers.value2Title"), description: t("careers.value2Desc") },
+    { icon: "🧡", title: t("careers.value3Title"), description: t("careers.value3Desc") },
+  ];
+
+  const WHAT_WE_LOOK_FOR = [
+    t("careers.lookFor1"),
+    t("careers.lookFor2"),
+    t("careers.lookFor3"),
+    t("careers.lookFor4"),
+  ];
+
   return (
     <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter">
       <main>
@@ -40,28 +26,27 @@ export default function CareersPage() {
         <section className="relative bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack py-20 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <span className="inline-block bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium text-white/90 mb-6">
-              🇨🇭 Zürich, Switzerland · Remote-friendly
+              {t("careers.badge")}
             </span>
             <h1 className="text-4xl sm:text-5xl font-extrabold font-orbitron text-white leading-tight">
-              Help Build the <br />
-              <span className="text-white/90">First Swiss European Social Platform</span>
+              {t("careers.heroTitle1")} <br />
+              <span className="text-white/90">{t("careers.heroTitle2")}</span>
             </h1>
             <p className="mt-6 text-xl text-white/90 max-w-2xl mx-auto font-inter">
-              ZRP Social is built on free speech, privacy, and security. If that mission
-              means something to you, we'd like to hear from you.
+              {t("careers.heroSubtitle")}
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <a
                 href="mailto:careers@zrp.one"
                 className="px-6 py-3 bg-white text-zrp-darkRed font-semibold rounded-full shadow-lg hover:bg-gray-200 transition font-inter"
               >
-                Get in Touch
+                {t("careers.getInTouch")}
               </a>
               <Link
                 href="/about"
                 className="px-6 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-full shadow-lg hover:bg-white/10 transition font-inter"
               >
-                Learn About ZRP
+                {t("careers.learnAboutZrp")}
               </Link>
             </div>
           </div>
@@ -70,7 +55,7 @@ export default function CareersPage() {
         {/* Values */}
         <section className="py-16 px-4 max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-zrp-charcoal dark:text-white font-orbitron mb-12">
-            What We Stand For
+            {t("careers.valuesHeading")}
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             {VALUES.map((value) => (
@@ -94,23 +79,21 @@ export default function CareersPage() {
         <section className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 py-16 px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl font-bold text-zrp-charcoal dark:text-white font-orbitron mb-4">
-              Open Positions
+              {t("careers.openPositionsHeading")}
             </h2>
             <div className="mt-8 p-8 bg-white dark:bg-zrp-deepBlack rounded-xl shadow-sm border border-zrp-silver/30 dark:border-zrp-charcoal">
               <div className="text-4xl mb-4">🌱</div>
               <h3 className="text-xl font-semibold text-zrp-charcoal dark:text-white font-orbitron">
-                No open roles right now
+                {t("careers.noOpenRolesTitle")}
               </h3>
               <p className="mt-3 text-zrp-charcoal/80 dark:text-white/70 font-inter">
-                ZRP is a small, growing team, and we're not actively hiring at the moment.
-                That said, we're always glad to hear from people who care about our mission —
-                if that's you, send us a note and tell us how you'd want to contribute.
+                {t("careers.noOpenRolesDesc")}
               </p>
               <a
                 href="mailto:careers@zrp.one"
                 className="inline-block mt-6 px-6 py-3 bg-zrp-red text-white font-semibold rounded-full shadow-lg hover:bg-zrp-darkRed transition font-inter"
               >
-                Reach Out to Us
+                {t("careers.reachOut")}
               </a>
             </div>
           </div>
@@ -119,7 +102,7 @@ export default function CareersPage() {
         {/* What we look for */}
         <section className="py-16 px-4 max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-zrp-charcoal dark:text-white font-orbitron mb-10">
-            What We Look For
+            {t("careers.lookingForHeading")}
           </h2>
           <ul className="space-y-4">
             {WHAT_WE_LOOK_FOR.map((item) => (
@@ -138,10 +121,10 @@ export default function CareersPage() {
         <section className="bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack py-16 px-4">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl font-bold text-white font-orbitron">
-              Interested in ZRP's mission?
+              {t("careers.closingTitle")}
             </h2>
             <p className="mt-3 text-white/80 font-inter">
-              We'd love to hear from you, even if there's no open role right now.
+              {t("careers.closingDesc")}
             </p>
             <a
               href="mailto:careers@zrp.one"

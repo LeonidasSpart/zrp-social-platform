@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Footer() {
+  const { t } = useLanguage();
   const year = new Date().getFullYear();
 
   return (
@@ -27,18 +29,18 @@ export default function Footer() {
             </Link>
 
             <p className="text-sm text-zrp-charcoal/60 dark:text-white/60 font-inter max-w-xs">
-              The first Swiss European social media platform. Free speech, privacy, and security built for the people.
+              {t("footer.tagline")}
             </p>
 
             <div className="mt-4 inline-flex items-center gap-1.5 bg-zrp-red/10 text-zrp-red text-xs font-medium font-inter px-3 py-1.5 rounded-full">
-              🧡 35% of profits go to charity
+              {t("footer.charityBadge")}
             </div>
           </div>
 
           {/* Company */}
           <div className="text-center sm:text-left">
             <h3 className="font-orbitron text-sm font-semibold text-zrp-charcoal dark:text-white mb-3 uppercase tracking-wide">
-              Company
+              {t("footer.companyHeading")}
             </h3>
 
             <ul className="space-y-2 text-sm font-inter">
@@ -47,7 +49,7 @@ export default function Footer() {
                   href="/about"
                   className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
                 >
-                  About
+                  {t("footer.about")}
                 </Link>
               </li>
 
@@ -56,7 +58,7 @@ export default function Footer() {
                   href="/careers"
                   className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
                 >
-                  Careers
+                  {t("footer.careers")}
                 </Link>
               </li>
 
@@ -65,7 +67,7 @@ export default function Footer() {
                   href="/charity"
                   className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
                 >
-                  Charity
+                  {t("footer.charity")}
                 </Link>
               </li>
 
@@ -74,7 +76,7 @@ export default function Footer() {
                   href="/press"
                   className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
                 >
-                  Press Kit
+                  {t("footer.pressKit")}
                 </Link>
               </li>
 
@@ -83,7 +85,7 @@ export default function Footer() {
                   href="/news"
                   className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
                 >
-                  ZRP News
+                  {t("footer.zrpNews")}
                 </Link>
               </li>
 
@@ -92,7 +94,7 @@ export default function Footer() {
                   href="/journalist"
                   className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
                 >
-                  Become a Journalist
+                  {t("footer.becomeJournalist")}
                 </Link>
               </li>
 
@@ -101,7 +103,7 @@ export default function Footer() {
                   href="/investors"
                   className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
                 >
-                  Investors
+                  {t("footer.investors")}
                 </Link>
               </li>
 
@@ -110,7 +112,7 @@ export default function Footer() {
                   href="/contact"
                   className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
                 >
-                  Contact
+                  {t("footer.contact")}
                 </Link>
               </li>
             </ul>
@@ -119,7 +121,7 @@ export default function Footer() {
           {/* Support */}
           <div className="text-center sm:text-left">
             <h3 className="font-orbitron text-sm font-semibold text-zrp-charcoal dark:text-white mb-3 uppercase tracking-wide">
-              Support
+              {t("footer.supportHeading")}
             </h3>
 
             <ul className="space-y-2 text-sm font-inter">
@@ -128,7 +130,7 @@ export default function Footer() {
                   href="/faq"
                   className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
                 >
-                  FAQ
+                  {t("footer.faq")}
                 </Link>
               </li>
 
@@ -137,7 +139,7 @@ export default function Footer() {
                   href="/help"
                   className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
                 >
-                  Help Center
+                  {t("footer.helpCenter")}
                 </Link>
               </li>
 
@@ -146,7 +148,7 @@ export default function Footer() {
                   href="/contact"
                   className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
                 >
-                  Contact Support
+                  {t("footer.contactSupport")}
                 </Link>
               </li>
 
@@ -155,7 +157,7 @@ export default function Footer() {
                   href="/support/tickets"
                   className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
                 >
-                  My Tickets
+                  {t("footer.myTickets")}
                 </Link>
               </li>
             </ul>
@@ -164,7 +166,7 @@ export default function Footer() {
           {/* Legal */}
           <div className="text-center sm:text-left">
             <h3 className="font-orbitron text-sm font-semibold text-zrp-charcoal dark:text-white mb-3 uppercase tracking-wide">
-              Legal
+              {t("footer.legalHeading")}
             </h3>
 
             <ul className="space-y-2 text-sm font-inter">
@@ -173,7 +175,7 @@ export default function Footer() {
                   href="/privacy"
                   className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
                 >
-                  Privacy Policy
+                  {t("footer.privacyPolicy")}
                 </Link>
               </li>
 
@@ -182,7 +184,7 @@ export default function Footer() {
                   href="/terms"
                   className="text-zrp-charcoal/70 dark:text-white/70 hover:text-zrp-red transition"
                 >
-                  Terms of Service
+                  {t("footer.termsOfService")}
                 </Link>
               </li>
             </ul>
@@ -192,11 +194,11 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-10 pt-6 border-t border-zrp-silver/20 dark:border-zrp-charcoal/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
           <p className="text-xs text-zrp-charcoal/40 dark:text-white/40 font-inter">
-            &copy; {year} ZRP. All rights reserved.
+            {t("footer.copyright", { year: String(year) })}
           </p>
 
           <p className="text-xs text-zrp-charcoal/40 dark:text-white/40 font-inter flex items-center gap-1.5">
-            🇨🇭 Made in Switzerland
+            {t("footer.madeInSwitzerland")}
           </p>
         </div>
       </div>
