@@ -1230,9 +1230,19 @@ export default function PostCard({
           onUpdate(post.id);
           setShowDeleteConfirm(false);
         } else {
-          alert(
-            "Failed to delete post"
-          );
+          // Surface the server's actual error text (Unauthorized, Post
+          // not found, etc.) instead of always showing the same generic
+          // message regardless of what actually went wrong - that was
+          // making a 401/403/404 indistinguishable from a real 500 from
+          // this UI alone.
+          let message = "Failed to delete post";
+          try {
+            const data = await res.json();
+            if (data?.error) message = `Failed to delete post: ${data.error}`;
+          } catch {
+            // Body wasn't JSON - fall back to the generic message.
+          }
+          alert(message);
         }
       } catch (error) {
         console.error(

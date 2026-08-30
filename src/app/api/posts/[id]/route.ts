@@ -260,7 +260,14 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting post:", error);
+    // Explicitly surface Prisma's .code/.meta (e.g. P2003 foreign key
+    // violation naming the actual constraint) - relying on default
+    // Error serialization here previously made "Failed to delete post"
+    // reports undiagnosable from the Railway log alone.
+    console.error("Error deleting post:", error, {
+      code: (error as any)?.code,
+      meta: (error as any)?.meta,
+    });
     return NextResponse.json({ error: "Failed to delete post" }, { status: 500 });
   }
 }
