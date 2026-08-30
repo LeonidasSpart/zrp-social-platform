@@ -13,6 +13,7 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
   const [gifs, setGifs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [trending, setTrending] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Load trending GIFs on mount
@@ -35,9 +36,14 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
     try {
       const res = await fetch("/api/gifs/trending");
       const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Couldn't load GIFs. Try again later.");
+        return;
+      }
       setTrending(data.results || []);
-    } catch (error) {
-      console.error("Error fetching trending GIFs:", error);
+    } catch (err) {
+      console.error("Error fetching trending GIFs:", err);
+      setError("Couldn't load GIFs. Try again later.");
     }
   };
 
@@ -45,12 +51,18 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
     if (query.length < 2) return;
 
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch(`/api/gifs/search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Couldn't search GIFs. Try again later.");
+        return;
+      }
       setGifs(data.results || []);
-    } catch (error) {
-      console.error("Error searching GIFs:", error);
+    } catch (err) {
+      console.error("Error searching GIFs:", err);
+      setError("Couldn't search GIFs. Try again later.");
     } finally {
       setLoading(false);
     }
@@ -103,6 +115,8 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
         <div className="p-4 overflow-y-auto max-h-[50vh]">
           {loading ? (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading...</div>
+          ) : error ? (
+            <div className="text-center py-8 text-red-500 dark:text-red-400">{error}</div>
           ) : displayGifs.length === 0 ? (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               {query.length >= 2 ? "No GIFs found" : "Type to search GIFs"}
