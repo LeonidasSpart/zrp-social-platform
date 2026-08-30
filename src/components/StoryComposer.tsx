@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { X, Image, Video, Send } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Props {
   onClose: () => void;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function StoryComposer({ onClose, onSuccess }: Props) {
+  const { t } = useLanguage();
   const [content, setContent] = useState("");
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
@@ -33,7 +35,7 @@ export default function StoryComposer({ onClose, onSuccess }: Props) {
 
     // Validate size
     if (file.size > 16 * 1024 * 1024) {
-      alert("File too large. Max 16MB.");
+      alert(t("stories.errFileTooLarge"));
       return;
     }
 
@@ -41,7 +43,7 @@ export default function StoryComposer({ onClose, onSuccess }: Props) {
     const isImage = file.type.startsWith("image/");
     const isVideo = file.type.startsWith("video/");
     if (!isImage && !isVideo) {
-      alert("Only images and videos are supported.");
+      alert(t("stories.errUnsupportedType"));
       return;
     }
 
@@ -52,7 +54,7 @@ export default function StoryComposer({ onClose, onSuccess }: Props) {
 
   const handleSubmit = async () => {
     if (!content && !mediaFile) {
-      alert("Please add some content or a media file.");
+      alert(t("stories.errEmptyContent"));
       return;
     }
 
@@ -90,7 +92,7 @@ export default function StoryComposer({ onClose, onSuccess }: Props) {
       onClose();
     } catch (error) {
       console.error("Error creating story:", error);
-      alert("Failed to create story. Please try again.");
+      alert(t("stories.errCreateFailed"));
     } finally {
       setUploading(false);
     }
@@ -107,7 +109,7 @@ export default function StoryComposer({ onClose, onSuccess }: Props) {
         </button>
 
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-          Add Story
+          {t("stories.addStory")}
         </h2>
 
         <div className="space-y-4">
@@ -115,7 +117,7 @@ export default function StoryComposer({ onClose, onSuccess }: Props) {
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="What's on your mind?"
+            placeholder={t("stories.whatsOnYourMind")}
             className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none focus:ring-2 focus:ring-zrp-red focus:border-transparent"
             rows={3}
             maxLength={200}
@@ -157,7 +159,7 @@ export default function StoryComposer({ onClose, onSuccess }: Props) {
               className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
             >
               <Image className="w-4 h-4" />
-              Image
+              {t("stories.image")}
             </button>
             <button
               onClick={() => {
@@ -169,7 +171,7 @@ export default function StoryComposer({ onClose, onSuccess }: Props) {
               className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
             >
               <Video className="w-4 h-4" />
-              Video
+              {t("stories.video")}
             </button>
             <input
               ref={fileInputRef}
@@ -188,18 +190,18 @@ export default function StoryComposer({ onClose, onSuccess }: Props) {
             {uploading ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Uploading...
+                {t("stories.uploading")}
               </>
             ) : (
               <>
                 <Send className="w-4 h-4" />
-                Share Story
+                {t("stories.shareStory")}
               </>
             )}
           </button>
 
           <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
-            Stories disappear after 24 hours. Max file size: 16MB.
+            {t("stories.expiryNote")}
           </p>
         </div>
       </div>

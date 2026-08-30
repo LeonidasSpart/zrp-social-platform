@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import StoryCircle from "./StoryCircle";
 import StoryViewer from "./StoryViewer";
 import StoryComposer from "./StoryComposer";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface StoryGroup {
   user: {
@@ -25,6 +26,7 @@ interface StoryGroup {
 }
 
 export default function StoriesBar() {
+  const { t } = useLanguage();
   const { data: session } = useSession();
   const [groups, setGroups] = useState<StoryGroup[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<StoryGroup | null>(null);
@@ -75,7 +77,7 @@ export default function StoriesBar() {
               {session?.user?.avatarUrl ? (
                 <img
                   src={session.user.avatarUrl}
-                  alt="Your story"
+                  alt={t("stories.yourStory")}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -89,7 +91,7 @@ export default function StoriesBar() {
             </div>
           </div>
           <span className="text-xs text-gray-600 dark:text-gray-400 truncate max-w-[64px]">
-            Your Story
+            {t("stories.yourStory")}
           </span>
         </button>
 

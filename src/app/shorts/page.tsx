@@ -1069,7 +1069,7 @@ export default function ShortsPage() {
 
       {/* TITLE */}
       <h1 className="absolute top-4 left-1/2 -translate-x-1/2 z-30 text-white font-semibold text-lg">
-        Shorts
+        {t("nav.shorts")}
       </h1>
 
       {/* TOP RIGHT */}
