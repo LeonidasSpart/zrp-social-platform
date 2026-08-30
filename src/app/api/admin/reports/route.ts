@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { Prisma } from "@prisma/client";
+import { jsonWithDecimals } from "@/lib/serialize-decimal";
 
 export async function GET(req: NextRequest) {
   const adminCheck = await requireStaff();
@@ -41,12 +42,20 @@ export async function GET(req: NextRequest) {
               author: { select: { id: true, username: true, name: true } },
             },
           },
+          listing: {
+            select: {
+              id: true,
+              title: true,
+              category: true,
+              seller: { select: { id: true, username: true, name: true } },
+            },
+          },
         },
       }),
       prisma.report.count({ where }),
     ]);
 
-    return NextResponse.json({ reports, total, page, totalPages: Math.ceil(total / limit) });
+    return jsonWithDecimals({ reports, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error) {
     console.error("Error fetching reports:", error);
     return NextResponse.json({ error: "Failed to fetch reports" }, { status: 500 });

@@ -18,14 +18,17 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { postId, commentId, reason, details } = await req.json();
+    const { postId, commentId, listingId, reason, details } = await req.json();
 
     if (!reason) {
       return NextResponse.json({ error: "Reason is required" }, { status: 400 });
     }
 
-    if (!postId && !commentId) {
-      return NextResponse.json({ error: "Either postId or commentId is required" }, { status: 400 });
+    if (!postId && !commentId && !listingId) {
+      return NextResponse.json(
+        { error: "One of postId, commentId, or listingId is required" },
+        { status: 400 }
+      );
     }
 
     // ─── Prevent duplicate reports ────────────────────────────────────
@@ -40,7 +43,7 @@ export async function POST(req: NextRequest) {
       where: {
         reporterId: session.user.id,
         status: "pending",
-        ...(postId ? { postId } : { commentId }),
+        ...(postId ? { postId } : commentId ? { commentId } : { listingId }),
       },
     });
 
@@ -56,6 +59,7 @@ export async function POST(req: NextRequest) {
         reporterId: session.user.id,
         postId: postId || null,
         commentId: commentId || null,
+        listingId: listingId || null,
         reason,
         details: details || null,
         status: "pending",

@@ -15,11 +15,14 @@ interface CreateNotificationParams {
     | "ticket_resolved"
     | "ticket_closed"
     | "ticket_created"
-    | "appeal_resolved";
+    | "appeal_resolved"
+    | "listing_approved"
+    | "listing_rejected";
   fromUserId: string;
   postId?: string;
   ticketId?: string; // ✅ added for ticket links
   ticketSubject?: string; // ✅ added for ticket subject in email
+  listingId?: string; // ZRP Market Plus - links a listing approval/rejection email to the listing
 }
 
 const defaultPreferences = {
@@ -42,6 +45,7 @@ export async function createNotification({
   postId,
   ticketId,
   ticketSubject,
+  listingId,
 }: CreateNotificationParams) {
   if (userId === fromUserId) return;
 
@@ -130,6 +134,8 @@ export async function createNotification({
       ticket_closed: { action: "closed your support ticket", emoji: "🔒" },
       ticket_created: { action: "created a new support ticket", emoji: "🎫" }, // for admins
       appeal_resolved: { action: "resolved your moderation appeal", emoji: "⚖️" },
+      listing_approved: { action: "approved your marketplace listing", emoji: "✅" },
+      listing_rejected: { action: "didn't approve your marketplace listing", emoji: "🚫" },
     };
     const { action, emoji } = actionMap[type] || { action: "interacted with you", emoji: "🔔" };
 
@@ -226,6 +232,36 @@ export async function createNotification({
       `;
     }
 
+    // Listing approval/rejection - same dedicated-block pattern as
+    // appeals above. Links straight to the listing when approved (it's
+    // live and shareable); back to the seller's own dashboard when
+    // rejected (the listing itself isn't publicly visible yet).
+    if (type === "listing_approved" || type === "listing_rejected") {
+      const isApproved = type === "listing_approved";
+      const listingUrl = isApproved && listingId
+        ? `${process.env.NEXTAUTH_URL}/marketplace/listing/${listingId}`
+        : `${process.env.NEXTAUTH_URL}/marketplace/my-listings`;
+      customHtml = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 12px; border: 1px solid #e5e7eb;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <img src="https://zrp.one/logo.png" alt="ZRP" style="height: 40px;" />
+          </div>
+          <div style="font-size: 48px; text-align: center; margin-bottom: 16px;">${emoji}</div>
+          <h1 style="font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 8px 0; text-align: center;">
+            ${isApproved ? "Your marketplace listing is live" : "Your marketplace listing needs changes"}
+          </h1>
+          <p style="font-size: 14px; color: #6b7280; text-align: center; margin: 0 0 24px 0;">
+            ${isApproved
+              ? "It's now visible to the ZRP Market Plus community."
+              : "Check your seller dashboard for the reviewer's note, then resubmit."}
+          </p>
+          <a href="${listingUrl}" style="display: inline-block; background-color: #FF2D2D; color: #ffffff; font-weight: 600; padding: 12px 24px; border-radius: 8px; text-decoration: none; text-align: center; margin: 0 auto; display: table;">
+            ${isApproved ? "View Listing" : "View My Listings"}
+          </a>
+        </div>
+      `;
+    }
+
     // ─── 7. Subject ──────────────────────────────────────────────────
     const subjectMap: Record<string, string> = {
       like: `${actorName} liked your post`,
@@ -240,6 +276,8 @@ export async function createNotification({
       ticket_closed: `Your support ticket has been closed`,
       ticket_created: `New support ticket from ${actorName}`,
       appeal_resolved: "Your moderation appeal has been resolved",
+      listing_approved: "Your marketplace listing is live",
+      listing_rejected: "Your marketplace listing needs changes",
     };
     const subject = subjectMap[type] || "New notification from ZRP";
 

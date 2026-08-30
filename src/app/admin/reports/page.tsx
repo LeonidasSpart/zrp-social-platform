@@ -17,6 +17,7 @@ interface Report {
   reporter: { username: string; name: string };
   post: { id: string; content: string; author: { username: string } } | null;
   comment: { id: string; content: string; postId: string; author: { username: string } } | null;
+  listing: { id: string; title: string; category: string; seller: { username: string } } | null;
 }
 
 export default function AdminReports() {
@@ -212,8 +213,8 @@ export default function AdminReports() {
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">{t("adminReports.noReports")}</div>
         ) : (
           reports.map((report) => {
-            const content = report.post || report.comment;
-            const author = content?.author;
+            const content = report.post || report.comment || report.listing;
+            const author = report.post?.author || report.comment?.author || report.listing?.seller;
             // Comments deep-link to their parent post + scroll into view
             // via #comment-<id> (already supported by the post detail
             // page) - previously this was never actually constructed for
@@ -223,9 +224,15 @@ export default function AdminReports() {
               ? `/post/${report.post.id}`
               : report.comment
                 ? `/post/${report.comment.postId}#comment-${report.comment.id}`
-                : null;
+                : report.listing
+                  ? `/marketplace/listing/${report.listing.id}`
+                  : null;
             const viewAuthorLink = author ? `/profile/${author.username}` : null;
-            const contentLabel = report.post ? t("adminReports.viewPost") : t("adminReports.viewComment");
+            const contentLabel = report.post
+              ? t("adminReports.viewPost")
+              : report.comment
+                ? t("adminReports.viewComment")
+                : t("adminMarketplace.viewListing");
 
             return (
               <div
@@ -253,7 +260,7 @@ export default function AdminReports() {
                     {content && (
                       <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg border-l-4 border-zrp-red">
                         <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
-                          {content.content}
+                          {"content" in content ? content.content : content.title}
                         </p>
                         <div className="flex flex-wrap items-center gap-3 mt-2">
                           {viewContentLink && (

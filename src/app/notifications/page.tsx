@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { Heart, MessageCircle, Repeat, UserPlus, BadgeCheck, Loader2, Mail, Scale } from "lucide-react";
+import { Heart, MessageCircle, Repeat, UserPlus, BadgeCheck, Loader2, Mail, Scale, Store } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUnreadCount } from "@/contexts/UnreadCountContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -187,6 +187,9 @@ export default function NotificationsPage() {
         return <Mail className="w-4 h-4 text-zrp-red" />;
       case "appeal_resolved":
         return <Scale className="w-4 h-4 text-zrp-red" />;
+      case "listing_approved":
+      case "listing_rejected":
+        return <Store className="w-4 h-4 text-zrp-red" />;
       default:
         return null;
     }
@@ -208,6 +211,10 @@ export default function NotificationsPage() {
         return "sent you a message";
       case "appeal_resolved":
         return t("notifications.appealResolvedSuffix");
+      case "listing_approved":
+        return t("notifications.listingApprovedSuffix");
+      case "listing_rejected":
+        return t("notifications.listingRejectedSuffix");
       default:
         return "";
     }
@@ -293,9 +300,11 @@ export default function NotificationsPage() {
               ? `/messages/${primaryUser.username}`
               : (g.type as string) === "appeal_resolved"
                 ? "/settings/appeals"
-                : g.postId
-                  ? `/post/${g.postId}`
-                  : `/profile/${primaryUser.username}`;
+                : (g.type as string) === "listing_approved" || (g.type as string) === "listing_rejected"
+                  ? "/marketplace/my-listings"
+                  : g.postId
+                    ? `/post/${g.postId}`
+                    : `/profile/${primaryUser.username}`;
 
             return (
               <div

@@ -2,7 +2,7 @@ import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth";
-import { checkVideoSize } from "./limits";
+import { checkVideoSize, checkImagesPerListing } from "./limits";
 
 const f = createUploadthing();
 
@@ -184,6 +184,68 @@ export const ourFileRouter = {
         };
       }
     ),
+
+  // ───────────────────────────────────────────────────────────
+  // LISTING MEDIA (ZRP Market Plus - marketplace listings)
+  // ───────────────────────────────────────────────────────────
+  listingMedia: f({
+    // Router-level cap covers the highest plan (enterprise, effectively
+    // unlimited) - the real per-plan cap is enforced below via
+    // checkImagesPerListing(), same split as postMedia's video-size
+    // check above.
+    image: {
+      maxFileSize: "4MB",
+      maxFileCount: 15,
+    },
+    video: {
+      maxFileSize: "2GB",
+      maxFileCount: 1,
+    },
+  })
+    .middleware(async ({ files }) => {
+      const session = await getServerSession(authOptions);
+
+      if (!session?.user) {
+        throw new UploadThingError("Unauthorized");
+      }
+
+      const plan = session.user.plan || "free";
+
+      const imageCount = files.filter(
+        (file) => !file.type.toLowerCase().startsWith("video/") && !isVideoFile(file)
+      ).length;
+      if (imageCount > 0) {
+        const imagesCheck = checkImagesPerListing(imageCount, plan);
+        if (!imagesCheck.allowed) {
+          throw new UploadThingError(imagesCheck.message || "Too many images for your plan.");
+        }
+      }
+
+      for (const file of files) {
+        if (file.type.toLowerCase().startsWith("video/") || isVideoFile(file)) {
+          const sizeMB = file.size / (1024 * 1024);
+          const check = checkVideoSize(sizeMB, plan);
+          if (!check.allowed) {
+            throw new UploadThingError(check.message || "Video exceeds your plan's size limit.");
+          }
+        }
+      }
+
+      return {
+        userId: session.user.id,
+      };
+    })
+    .onUploadComplete(async ({ file }) => {
+      const fileInfo = { name: file.name, type: file.type };
+
+      if (isVideoFile(fileInfo)) {
+        console.log("Listing video uploaded:", file.ufsUrl);
+        return { url: file.ufsUrl, type: "video" };
+      }
+
+      console.log("Listing image uploaded:", file.ufsUrl);
+      return { url: file.ufsUrl, type: "image" };
+    }),
 
   // ───────────────────────────────────────────────────────────
   // NEWS COVER IMAGE (ZRP News / Journalist article editor)

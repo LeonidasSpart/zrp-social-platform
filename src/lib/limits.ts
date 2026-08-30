@@ -18,6 +18,8 @@ export interface PlanLimits {
   charityContribution: number;
   priceMonthly: number | null;
   priceYearly?: number | null;
+  imagesPerListing: number;
+  activeListingsCap: number;
 }
 
 export const PLANS: Record<Plan, PlanLimits> = {
@@ -37,6 +39,8 @@ export const PLANS: Record<Plan, PlanLimits> = {
     charityContribution: 35,
     priceMonthly: 0,
     priceYearly: 0,
+    imagesPerListing: 4,
+    activeListingsCap: 1,
   },
   pro: {
     postLength: 1000,
@@ -54,6 +58,8 @@ export const PLANS: Record<Plan, PlanLimits> = {
     charityContribution: 35,
     priceMonthly: 9.99,
     priceYearly: 99.99,
+    imagesPerListing: 8,
+    activeListingsCap: 5,
   },
   business: {
     postLength: 5000,
@@ -71,6 +77,8 @@ export const PLANS: Record<Plan, PlanLimits> = {
     charityContribution: 35,
     priceMonthly: 49.99,
     priceYearly: 499.99,
+    imagesPerListing: 15,
+    activeListingsCap: 25,
   },
   enterprise: {
     postLength: 999999,
@@ -88,6 +96,8 @@ export const PLANS: Record<Plan, PlanLimits> = {
     charityContribution: 35,
     priceMonthly: 99.99,
     priceYearly: 999.99,
+    imagesPerListing: 999999,
+    activeListingsCap: 999999,
   },
 };
 
@@ -159,6 +169,30 @@ export function checkScheduledPostsCount(currentCount: number, plan: string): Li
       allowed: false,
       message: `You've reached your monthly limit of ${limits.scheduledPostsPerMonth} scheduled posts. Upgrade for more.`,
       limit: limits.scheduledPostsPerMonth,
+    };
+  }
+  return { allowed: true };
+}
+
+export function checkImagesPerListing(count: number, plan: string): LimitCheckResult {
+  const limits = getPlanLimits(plan);
+  if (count > limits.imagesPerListing) {
+    return {
+      allowed: false,
+      message: `Maximum ${limits.imagesPerListing} image(s) per listing. Upgrade for more.`,
+      limit: limits.imagesPerListing,
+    };
+  }
+  return { allowed: true };
+}
+
+export function checkActiveListingsCount(currentCount: number, plan: string): LimitCheckResult {
+  const limits = getPlanLimits(plan);
+  if (currentCount >= limits.activeListingsCap) {
+    return {
+      allowed: false,
+      message: `You've reached your limit of ${limits.activeListingsCap} active listing(s). Upgrade for more.`,
+      limit: limits.activeListingsCap,
     };
   }
   return { allowed: true };

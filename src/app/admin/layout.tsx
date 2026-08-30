@@ -15,6 +15,7 @@ import {
   BadgeCheck,
   HardDrive,
   Scale,
+  Store,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
@@ -102,6 +103,11 @@ export default function AdminLayout({
       href: "/admin/ads",
       labelKey: "adminNav.adReview",
       icon: Megaphone,
+    },
+    {
+      href: "/admin/marketplace",
+      labelKey: "adminMarketplace.title",
+      icon: Store,
     },
 
     // Upgrade Requests and Storage Cleanup require full admin access.

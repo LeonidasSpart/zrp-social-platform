@@ -72,9 +72,13 @@ async function getIceServers(): Promise<any[]> {
 }
 
 export default function ChatPage(
-  props: { params: Promise<{ username: string }> }
+  props: {
+    params: Promise<{ username: string }>;
+    searchParams: Promise<{ listing?: string }>;
+  }
 ) {
   const params = use(props.params);
+  const searchParams = use(props.searchParams);
 
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -880,6 +884,11 @@ export default function ChatPage(
               }
               receiverBadgeType={
                 receiver.badgeType
+              }
+              initialMessage={
+                searchParams.listing
+                  ? `${t("marketplace.contactSellerPrefill")} ${typeof window !== "undefined" ? window.location.origin : ""}/marketplace/listing/${searchParams.listing}`
+                  : undefined
               }
               onVoiceCall={() =>
                 startCall(false)

@@ -112,6 +112,30 @@ enum NewsArticleCategory {
   COMMUNITY
 }
 
+enum ListingCategory {
+  LUXURY_CARS
+  YACHTS_BOATS
+  PRIVATE_AIRCRAFT
+  LUXURY_HOTELS_RESORTS
+  LUXURY_REAL_ESTATE
+  WATCHES_JEWELRY
+  OTHER_LUXURY
+}
+
+// DRAFT is unused today (creation always goes straight to
+// PENDING_REVIEW, same as AdCampaign) but kept for a future
+// save-without-submitting flow, matching AdCampaignStatus's own
+// unused-DRAFT precedent.
+enum ListingStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACTIVE
+  REJECTED
+  SOLD
+  EXPIRED
+  REMOVED
+}
+
 model User {
   id       String  @id @default(cuid())
   email    String  @unique
@@ -218,6 +242,9 @@ model User {
   reports         Report[] @relation("Reporter")
   reportsAgainstMe Report[] @relation("ReportTarget")
   appeals         Appeal[]
+
+  listings         Listing[]         @relation("ListingSeller")
+  listingFavorites ListingFavorite[]
 
   teamAccount TeamMember[] @relation("TeamAccount")
   teamMembers TeamMember[] @relation("TeamMemberUser")
@@ -654,10 +681,17 @@ model Report {
   targetUserId String?
   targetUser   User?   @relation("ReportTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
 
+  // Third optional polymorphic target, same pattern as postId/commentId
+  // above - reuses this entire reporting/moderation/appeals/transparency
+  // system for marketplace listings instead of building a parallel one.
+  listingId String?
+  listing   Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+
   appeals Appeal[]
 
   @@index([postId])
   @@index([commentId])
+  @@index([listingId])
   @@index([status])
   @@index([reporterId])
   @@index([targetUserId])
@@ -1045,6 +1079,78 @@ model WithdrawalRequest {
   @@index([userId])
   @@index([status])
   @@index([creatorProfileId])
+}
+
+// ZRP Market Plus: luxury-only listings marketplace. Deliberately NOT
+// a payments/escrow system - price is informational, a deal is closed
+// off-platform between buyer and seller after they connect via the
+// existing messaging system. Mirrors AdCampaign's moderation shape
+// (PENDING_REVIEW by default, staff approve/reject, rejectionReason +
+// reviewedBy/reviewedAt) since that's the closest existing analog to
+// "user-submitted content that must pass moderation before going
+// live" for something other than a Post.
+model Listing {
+  id String @id @default(cuid())
+
+  sellerId String
+  seller   User   @relation("ListingSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+
+  category    ListingCategory
+  title       String
+  description String          @db.Text
+
+  // Either a real price or priceOnRequest - validated together at the
+  // API layer, not enforceable as a DB constraint with Prisma alone.
+  price          Decimal? @db.Decimal(18, 2)
+  currency       String   @default("USD")
+  priceOnRequest Boolean  @default(false)
+
+  location String?
+
+  imageUrls String[] @default([])
+  videoUrl  String?
+
+  status          ListingStatus @default(PENDING_REVIEW)
+  rejectionReason String?       @db.Text
+  reviewedBy      String?
+  reviewedAt      DateTime?
+
+  views Int @default(0)
+
+  // Listings aren't meant to sit forever - a stale "for sale" luxury
+  // asset is exactly the kind of thing that erodes trust in a
+  // marketplace. Set on approval (90 days out); expired listings stop
+  // showing in browse/search but aren't deleted.
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  favorites ListingFavorite[]
+  reports   Report[]
+
+  @@index([sellerId])
+  @@index([status])
+  @@index([category])
+  @@index([status, category])
+  @@index([status, expiresAt])
+  @@index([createdAt])
+}
+
+model ListingFavorite {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, listingId])
+  @@index([userId])
+  @@index([listingId])
 }
 
 model AdCampaign {

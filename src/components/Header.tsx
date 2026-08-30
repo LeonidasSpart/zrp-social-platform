@@ -24,6 +24,7 @@ import {
   Users,
   Key,
   Newspaper,
+  Store,
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
@@ -161,6 +162,11 @@ export default function Header() {
       href: "/news",
       icon: Newspaper,
       label: t("nav.news"),
+    },
+    {
+      href: "/marketplace",
+      icon: Store,
+      label: t("nav.marketplace"),
     },
     {
       href: "/search",

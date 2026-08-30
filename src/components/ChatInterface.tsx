@@ -79,6 +79,10 @@ interface ChatInterfaceProps {
   receiverUsername: string;
   receiverAvatar?: string;
   receiverBadgeType?: string | null;
+  // Seeds the composer on mount only (e.g. "Contact Seller" from a
+  // marketplace listing) - deliberately not re-applied on prop changes,
+  // so it never overwrites something the person is already typing.
+  initialMessage?: string;
   onVoiceCall?: () => void;
   onVideoCall?: () => void;
 }
@@ -89,6 +93,7 @@ export default function ChatInterface({
   receiverUsername,
   receiverAvatar,
   receiverBadgeType,
+  initialMessage,
   onVoiceCall,
   onVideoCall,
 }: ChatInterfaceProps) {
@@ -97,7 +102,7 @@ export default function ChatInterface({
   const { t, language } = useLanguage();
 
   const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState("");
+  const [newMessage, setNewMessage] = useState(() => initialMessage || "");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [isTyping, setIsTyping] = useState(false);

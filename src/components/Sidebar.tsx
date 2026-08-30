@@ -8,7 +8,7 @@ import { useSession, signOut } from "next-auth/react";
 import {
   Home, Compass, Search, MessageSquare, Bell, Bookmark, User,
   LayoutDashboard, Settings, Users, Key, LogOut, MoreHorizontal,
-  PenSquare, Sun, Moon, Globe, Film, Newspaper,
+  PenSquare, Sun, Moon, Globe, Film, Newspaper, Store,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -90,6 +90,7 @@ export default function Sidebar() {
     { href: "/shorts", icon: Film, label: t("nav.shorts") },
     { href: "/explore", icon: Compass, label: t("nav.explore") },
     { href: "/news", icon: Newspaper, label: t("nav.news") },
+    { href: "/marketplace", icon: Store, label: t("nav.marketplace") },
     { href: "/search", icon: Search, label: t("nav.search") },
     {
       href: "/messages",
