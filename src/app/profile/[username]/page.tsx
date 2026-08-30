@@ -43,6 +43,7 @@ import AnalyticsTab from "@/components/AnalyticsTab";
 import PostComposer from "@/components/PostComposer";
 import TipModal from "@/components/TipModal";
 import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/translations";
 
 function formatProfileCount(n: number) {
   if (n >= 1_000_000) {
@@ -137,7 +138,10 @@ interface Milestone {
   label: string;
 }
 
-function getMilestones(profile: UserProfile): Milestone[] {
+function getMilestones(
+  profile: UserProfile,
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string
+): Milestone[] {
   const badges: Milestone[] = [];
 
   const joined = new Date(profile.createdAt);
@@ -149,17 +153,17 @@ function getMilestones(profile: UserProfile): Milestone[] {
   if (monthsSinceJoin >= 12) {
     badges.push({
       icon: "🎂",
-      label: `${Math.floor(monthsSinceJoin / 12)}yr on ZRP`,
+      label: t("profile.milestoneYearsOnZRP", { n: Math.floor(monthsSinceJoin / 12) }),
     });
   } else if (monthsSinceJoin >= 6) {
     badges.push({
       icon: "🎉",
-      label: "6 months on ZRP",
+      label: t("profile.milestoneSixMonths"),
     });
   } else if (monthsSinceJoin >= 1) {
     badges.push({
       icon: "🌱",
-      label: "New member",
+      label: t("profile.milestoneNewMember"),
     });
   }
 
@@ -168,17 +172,17 @@ function getMilestones(profile: UserProfile): Milestone[] {
   if (posts >= 500) {
     badges.push({
       icon: "🏆",
-      label: "500+ posts",
+      label: t("profile.milestonePosts500"),
     });
   } else if (posts >= 100) {
     badges.push({
       icon: "📝",
-      label: "100+ posts",
+      label: t("profile.milestonePosts100"),
     });
   } else if (posts >= 10) {
     badges.push({
       icon: "✍️",
-      label: "10+ posts",
+      label: t("profile.milestonePosts10"),
     });
   }
 
@@ -187,12 +191,12 @@ function getMilestones(profile: UserProfile): Milestone[] {
   if (followers >= 1000) {
     badges.push({
       icon: "⭐",
-      label: "1K+ followers",
+      label: t("profile.milestoneFollowers1k"),
     });
   } else if (followers >= 100) {
     badges.push({
       icon: "👥",
-      label: "100+ followers",
+      label: t("profile.milestoneFollowers100"),
     });
   }
 
@@ -375,10 +379,8 @@ export default function ProfilePage(
     session?.user?.id === profile?.id;
 
   const localeMap: Record<string, string> = {
-    en: "en-US",
-    fr: "fr-FR",
-    de: "de-DE",
-    it: "it-IT",
+    en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT", sq: "sq-AL",
+    es: "es-ES", ru: "ru-RU", ar: "ar-SA", zh: "zh-CN", tr: "tr-TR", id: "id-ID",
   };
 
   // ─── Click outside to close dropdown ───────────────────────────
@@ -1044,7 +1046,7 @@ export default function ProfilePage(
     ) + 5;
 
   const milestones =
-    getMilestones(profile);
+    getMilestones(profile, t);
 
   // ─── Plan badge color ──────────────────────────────────────────
 
@@ -2015,22 +2017,22 @@ export default function ProfilePage(
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-semibold text-gray-900 dark:text-white">
-                    ZRP Trust Passport
+                    {t("profile.trustPassportTitle")}
                   </span>
 
                   <span className="text-[10px] font-bold uppercase tracking-wide text-zrp-red bg-zrp-red/10 px-1.5 py-0.5 rounded-full">
-                    Trust
+                    {t("profile.trustPassportBadge")}
                   </span>
                 </div>
 
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  View this account&apos;s ZRP trust signals
+                  {t("profile.trustPassportDesc")}
                 </p>
               </div>
             </div>
 
             <span className="flex-shrink-0 text-zrp-red text-sm font-semibold group-hover:translate-x-0.5 transition-transform">
-              View →
+              {t("profile.trustPassportView")} →
             </span>
           </Link>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ActivityHeatmapProps {
   username: string;
@@ -13,7 +14,11 @@ interface DayCell {
 }
 
 const WEEKS = 53;
-const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+const LOCALE_MAP: Record<string, string> = {
+  en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT", sq: "sq-AL",
+  es: "es-ES", ru: "ru-RU", ar: "ar-SA", zh: "zh-CN", tr: "tr-TR", id: "id-ID",
+};
 
 function buildGrid(counts: Record<string, number>): DayCell[][] {
   const today = new Date();
@@ -64,6 +69,8 @@ function getColorClass(count: number) {
 }
 
 export default function ActivityHeatmap({ username }: ActivityHeatmapProps) {
+  const { t, language } = useLanguage();
+  const locale = LOCALE_MAP[language] || "en-US";
   const [weeks, setWeeks] = useState<DayCell[][]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -110,7 +117,7 @@ export default function ActivityHeatmap({ username }: ActivityHeatmapProps) {
     const d = new Date(week[0].date);
     const month = d.getMonth();
     if (month !== lastMonth) {
-      monthLabels.push({ index: i, label: MONTH_LABELS[month] });
+      monthLabels.push({ index: i, label: d.toLocaleDateString(locale, { month: "short" }) });
       lastMonth = month;
     }
   });
@@ -118,9 +125,9 @@ export default function ActivityHeatmap({ username }: ActivityHeatmapProps) {
   return (
     <div className="mt-4">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Activity</h3>
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("activity.heading")}</h3>
         <span className="text-xs text-gray-400 dark:text-gray-500">
-          {total} post{total === 1 ? "" : "s"} in the last year
+          {t("activity.postsInLastYear", { n: total })}
         </span>
       </div>
 
@@ -147,7 +154,7 @@ export default function ActivityHeatmap({ username }: ActivityHeatmapProps) {
                     className={`w-[10px] h-[10px] rounded-sm ${
                       day.inRange ? getColorClass(day.count) : "bg-transparent"
                     }`}
-                    title={day.inRange ? `${day.count} post${day.count === 1 ? "" : "s"} on ${day.date}` : undefined}
+                    title={day.inRange ? t("activity.dayTooltip", { n: day.count, date: day.date }) : undefined}
                   />
                 ))}
               </div>
@@ -157,13 +164,13 @@ export default function ActivityHeatmap({ username }: ActivityHeatmapProps) {
       </div>
 
       <div className="flex items-center gap-1.5 mt-2 justify-end">
-        <span className="text-[10px] text-gray-400 dark:text-gray-500">Less</span>
+        <span className="text-[10px] text-gray-400 dark:text-gray-500">{t("activity.less")}</span>
         <div className="w-[10px] h-[10px] rounded-sm bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600" />
         <div className="w-[10px] h-[10px] rounded-sm bg-zrp-red/25" />
         <div className="w-[10px] h-[10px] rounded-sm bg-zrp-red/50" />
         <div className="w-[10px] h-[10px] rounded-sm bg-zrp-red/75" />
         <div className="w-[10px] h-[10px] rounded-sm bg-zrp-red" />
-        <span className="text-[10px] text-gray-400 dark:text-gray-500">More</span>
+        <span className="text-[10px] text-gray-400 dark:text-gray-500">{t("activity.more")}</span>
       </div>
     </div>
   );
