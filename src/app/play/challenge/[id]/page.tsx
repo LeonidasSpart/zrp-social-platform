@@ -40,6 +40,7 @@ export default function PlayChallengePage() {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<SubmitResult | null>(null);
   const [shared, setShared] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const [showDuelPanel, setShowDuelPanel] = useState(false);
   const [opponent, setOpponent] = useState<PlayUserSummary | null>(null);
   const [sendingDuel, setSendingDuel] = useState(false);
@@ -97,17 +98,23 @@ export default function PlayChallengePage() {
 
   const shareResult = async () => {
     if (!challenge || !result) return;
+    setSharing(true);
+    setError(null);
     try {
-      await fetch("/api/posts", {
+      const res = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: `I just scored ${result.score}/${result.maxScore} on "${challenge.title}" in ZRP PLAY! 🎮`,
         }),
       });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to share");
       setShared(true);
     } catch (err) {
-      console.error("Error sharing PLAY result:", err);
+      setError(err instanceof Error ? err.message : t("play.errShareFailed"));
+    } finally {
+      setSharing(false);
     }
   };
 
@@ -248,15 +255,17 @@ export default function PlayChallengePage() {
               </div>
             )}
 
+            {error && <p className="text-sm text-red-500 mt-4">{error}</p>}
+
             <div className="flex flex-wrap justify-center gap-3 mt-6">
               <button
                 type="button"
                 onClick={shareResult}
-                disabled={shared}
+                disabled={shared || sharing}
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-zrp-red text-white font-semibold hover:bg-red-600 transition text-sm disabled:opacity-50"
               >
                 <Share2 className="w-4 h-4" />
-                {t("play.shareResult")}
+                {shared ? t("play.shareSuccess") : sharing ? t("play.sharing") : t("play.shareResult")}
               </button>
               <button
                 type="button"
