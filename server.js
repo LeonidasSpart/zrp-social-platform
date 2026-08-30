@@ -64,11 +64,24 @@ app.prepare().then(() => {
       methods: ["GET", "POST"],
       credentials: true,
     },
-    // Messages/signals here are small text/JSON payloads, never file
-    // transfers (those go through UploadThing) - capping this well
-    // below the 1MB default limits how much a single frame can be used
-    // to bloat memory/bandwidth.
-    maxHttpBufferSize: 64 * 1024,
+    // Chat events (send-message, typing, reactions) are small JSON and
+    // would be fine well under 64KB - but call-user/accept-call carry a
+    // WebRTC "signal" payload from simple-peer, and peers are created
+    // with trickle: false, so that's not a small JSON blob: it's a full
+    // SDP offer/answer with every gathered ICE candidate embedded
+    // (host + server-reflexive + TURN relay, across every iceServer
+    // entry returned by /api/turn-credentials, on every network
+    // interface). That routinely exceeds 64KB, especially for video
+    // calls or a device with multiple interfaces (wifi + cellular).
+    // Socket.IO enforces this limit on the websocket transport too
+    // (this client uses websocket-only, see socket-client.ts), so an
+    // oversized signal doesn't just fail to send - it gets the whole
+    // socket connection dropped by the server, which is exactly what
+    // "I can't make calls" reports from this app would look like.
+    // 1MB (Socket.IO's own default) comfortably fits even a
+    // candidate-heavy offer while staying far too small to serve as a
+    // file-transfer channel.
+    maxHttpBufferSize: 1024 * 1024,
   });
 
   // ─── Per-user connection cap ──────────────────────────────────────
