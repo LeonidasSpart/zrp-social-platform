@@ -6,7 +6,7 @@ function isValidFormat(u: string) {
 }
 
 function randomSuffix() {
-  return Math.floor(Math.random() * 900 + 100); // 100–999
+  return Math.floor(Math.random() * 900 + 100); // 100-999
 }
 
 export async function GET(req: NextRequest) {

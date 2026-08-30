@@ -50,7 +50,7 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ memberI
     }
 
     // Owner cannot be modified (they are not in the TeamMember table anyway)
-    // But we check if the member is the owner (accountId === userId) – impossible because owner is not in table.
+    // But we check if the member is the owner (accountId === userId): impossible because owner is not in table.
 
     const body = await req.json();
     const { role } = body;

@@ -87,7 +87,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
             },
           },
         },
-        // ✅ QUOTE REPOST – include the quoted post
+        // ✅ QUOTE REPOST: include the quoted post
         quotePost: {
           include: {
             author: {

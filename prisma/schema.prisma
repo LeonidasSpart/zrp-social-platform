@@ -1387,7 +1387,7 @@ model NewsArticle {
   submittedAt DateTime?
 
   // Feedback left by the admin/moderator who reviewed the
-  // submission — shown to the journalist, especially on rejection.
+  // submission: shown to the journalist, especially on rejection.
   reviewNote String? @db.Text
 
   reviewedAt   DateTime?

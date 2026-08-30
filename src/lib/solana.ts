@@ -261,7 +261,7 @@ export async function verifyUsdcTransaction(txHash: string) {
     const postAmt = post.uiTokenAmount.uiAmount ?? 0;
 
     if (preAmt - postAmt > 0) {
-      // This account's balance decreased — treat it as the sender's token account owner.
+      // This account's balance decreased: treat it as the sender's token account owner.
       fromAddress = post.owner ?? "";
       break;
     }

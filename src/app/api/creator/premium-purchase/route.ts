@@ -184,7 +184,7 @@ export async function POST(req: NextRequest) {
         userId: premiumPost.creatorProfile.userId,
         fromUserId: userId,
         type: "PURCHASE",
-        // No 'content' field – the frontend will display based on type and fromUserId
+        // No 'content' field: the frontend will display based on type and fromUserId
       },
     });
 

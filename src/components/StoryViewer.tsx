@@ -178,7 +178,7 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
                   className="max-h-full max-w-full object-contain"
                 />
               )}
-              {/* Text overlay – bottom aligned */}
+              {/* Text overlay, bottom aligned */}
               {story.content && (
                 <div className="absolute bottom-12 left-0 right-0 text-center text-white p-4 bg-gradient-to-t from-black/70 to-transparent">
                   <p className="text-sm font-light tracking-wide drop-shadow-md">
@@ -221,13 +221,13 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
           <span className="font-medium text-sm">{group.user.name || group.user.username}</span>
         </div>
 
-        {/* View count – top right */}
+        {/* View count, top right */}
         <div className="absolute top-12 right-4 flex items-center gap-1 text-white/70 text-xs z-10 bg-black/30 px-2 py-1 rounded-full">
           <Eye className="w-3 h-3" />
           <span>{story.viewCount ?? 0}</span>
         </div>
 
-        {/* Like button – bottom right, TikTok-style vertical action rail */}
+        {/* Like button, bottom right, TikTok-style vertical action rail */}
         <button
           type="button"
           onClick={(e) => {

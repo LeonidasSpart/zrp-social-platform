@@ -12,7 +12,7 @@ const BADGE_STYLES: Record<
   verified: { color: "#3B82F6", label: "Verified account", icon: BadgeCheck }, // blue
   organization: { color: "#FFD700", label: "Verified organization", icon: BadgeCheck }, // gold ✅
   government: { color: "#9CA3AF", label: "Government official", icon: BadgeCheck }, // gray
-  team: { color: "#EF4444", label: "ZRP Team", icon: BadgeCheck }, // red — ZRP staff only
+  team: { color: "#EF4444", label: "ZRP Team", icon: BadgeCheck }, // red, ZRP staff only
   // ZRP Journalist badge. Uses ZRP brand red (#FF2D2D) but a distinct
   // Newspaper glyph so it is never visually confused with the "team"
   // staff badge, even though both lean on ZRP red branding.

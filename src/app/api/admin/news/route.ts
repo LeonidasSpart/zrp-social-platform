@@ -4,7 +4,7 @@ import {
   NewsArticleStatus,
 } from "@prisma/client";
 // SECURITY FIX: these routes previously had no server-side auth check
-// at all — any signed-in (or signed-out) request could list, create,
+// at all: any signed-in (or signed-out) request could list, create,
 // or edit ZRP News articles. requireStaff (ADMIN or MODERATOR) matches
 // the guard already used on the other admin content-moderation routes
 // (e.g. /api/admin/users, /api/admin/posts).

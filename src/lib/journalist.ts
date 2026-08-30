@@ -17,7 +17,7 @@ type JournalistCheckResult =
 
 /**
  * Require the caller to be signed in and hold the JOURNALIST role.
- * Does NOT require verification — used for endpoints a pending/rejected
+ * Does NOT require verification: used for endpoints a pending/rejected
  * applicant should still be able to reach (e.g. viewing their own
  * application status, editing an already-created draft).
  */

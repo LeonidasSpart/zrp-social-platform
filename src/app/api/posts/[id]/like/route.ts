@@ -43,7 +43,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
       });
       return NextResponse.json({ liked: false });
     } else {
-      // Like – create like and notification
+      // Like: create like and notification
       await prisma.like.create({
         data: {
           postId,

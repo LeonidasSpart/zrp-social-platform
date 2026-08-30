@@ -9,7 +9,7 @@ declare module "next-auth" {
       onboardingCompleted: boolean;
       banned: boolean;
       emailVerified: boolean;
-      plan: string; // ✅ added – "free", "pro", "business", "enterprise"
+      plan: string; // ✅ added: "free", "pro", "business", "enterprise"
       name?: string | null;
       email?: string | null;
       image?: string | null;

@@ -330,8 +330,8 @@ export default function ApiKeysPage() {
         <div className="bg-zrp-red/5 dark:bg-zrp-red/10 border border-zrp-red/20 dark:border-zrp-red/30 rounded-lg p-4">
           <h4 className="text-sm font-medium text-zrp-red dark:text-zrp-red">{t("apiKeys.availableEndpoints")}</h4>
           <ul className="mt-2 text-xs space-y-1 text-gray-700 dark:text-gray-300">
-            <li><code className="bg-zrp-red/10 dark:bg-zrp-red/20 px-1.5 py-0.5 rounded">GET /api/external/me</code> – {t("apiKeys.endpointMe")}</li>
-            <li><code className="bg-zrp-red/10 dark:bg-zrp-red/20 px-1.5 py-0.5 rounded">GET /api/external/me/posts</code> – {t("apiKeys.endpointPosts")}</li>
+            <li><code className="bg-zrp-red/10 dark:bg-zrp-red/20 px-1.5 py-0.5 rounded">GET /api/external/me</code>: {t("apiKeys.endpointMe")}</li>
+            <li><code className="bg-zrp-red/10 dark:bg-zrp-red/20 px-1.5 py-0.5 rounded">GET /api/external/me/posts</code>: {t("apiKeys.endpointPosts")}</li>
           </ul>
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
             {t("apiKeys.moreEndpoints")}

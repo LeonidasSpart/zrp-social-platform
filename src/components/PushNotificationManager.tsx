@@ -36,7 +36,7 @@ export default function PushNotificationManager() {
           applicationServerKey: publicKey,
         });
 
-        // No need to send userId – the server uses getServerSession
+        // No need to send userId: the server uses getServerSession
         await fetch("/api/push/subscribe", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

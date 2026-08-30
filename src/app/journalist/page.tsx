@@ -102,7 +102,7 @@ export default function JournalistDashboardPage() {
       setCounts(data.counts);
       setArticles(data.recentArticles || []);
     } catch {
-      // Non-fatal — the apply form still renders.
+      // Non-fatal: the apply form still renders.
     } finally {
       setLoading(false);
     }

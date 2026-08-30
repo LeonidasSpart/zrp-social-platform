@@ -159,7 +159,7 @@ export default function AdminSupportPage() {
                     </span>
                   </td>
                   <td className="py-3 px-4 text-center">{ticket._count.replies}</td>
-                  <td className="py-3 px-4">{ticket.assignedAdmin?.username || '—'}</td>
+                  <td className="py-3 px-4">{ticket.assignedAdmin?.username || '-'}</td>
                   <td className="py-3 px-4 text-zrp-charcoal/50 dark:text-white/50 text-xs">
                     {new Date(ticket.createdAt).toLocaleDateString()}
                   </td>

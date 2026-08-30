@@ -83,7 +83,7 @@ export function getFeatureStatus(user: UserWithPlan): FeatureStatus {
 }
 
 // ─── Team Membership Helpers ─────────────────────────────────────
-// (These require database queries – call them from API routes or server components)
+// (These require database queries: call them from API routes or server components)
 
 import { prisma } from './db';
 

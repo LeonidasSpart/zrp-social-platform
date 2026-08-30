@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
  * POST /api/journalist/articles
  *
  * Create a new article as the signed-in journalist. authorId is never
- * accepted from the request body — it is always the current session
+ * accepted from the request body: it is always the current session
  * user, to prevent journalists from attributing articles to someone
  * else.
  *

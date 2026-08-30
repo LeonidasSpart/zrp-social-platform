@@ -8,7 +8,7 @@ function hasFeature(
   token: any,
   feature: keyof ReturnType<typeof getFeatureStatus>
 ): boolean {
-  // Token may not have features yet – compute on the fly
+  // Token may not have features yet: compute on the fly
   if (!token) return false;
 
   const features =

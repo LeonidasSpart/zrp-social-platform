@@ -16,11 +16,11 @@ export default function CharityPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter">
-      {/* Header removed – no navigation menu */}
+      {/* Header removed: no navigation menu */}
 
       {/* Main content */}
       <main>
-        {/* Hero – dark red to black gradient */}
+        {/* Hero: dark red to black gradient */}
         <section className="relative bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack py-20 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl font-extrabold font-orbitron text-white leading-tight">
@@ -84,7 +84,7 @@ export default function CharityPage() {
           </div>
         </section>
 
-        {/* Causes – Where the 35% Goes */}
+        {/* Causes: Where the 35% Goes */}
         <section className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 py-16 px-4">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold text-center text-zrp-charcoal dark:text-white font-orbitron mb-4">
@@ -121,7 +121,7 @@ export default function CharityPage() {
           </div>
         </section>
 
-        {/* Transparency & Impact – No data shared yet */}
+        {/* Transparency & Impact: No data shared yet */}
         <section id="transparency" className="py-16 px-4 max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-zrp-charcoal dark:text-white font-orbitron mb-4">
             {t("charity.transparencyHeading")}
@@ -137,7 +137,7 @@ export default function CharityPage() {
           <CharityLedger />
         </section>
 
-        {/* Call to Action – dark red background */}
+        {/* Call to Action: dark red background */}
         <section className="bg-gradient-to-r from-zrp-darkRed to-zrp-deepBlack py-16 px-4">
           <div className="max-w-4xl mx-auto text-center text-white">
             <h2 className="text-3xl font-bold font-orbitron">{t("charity.ctaHeading")}</h2>
@@ -163,7 +163,7 @@ export default function CharityPage() {
         </section>
       </main>
 
-      {/* Footer removed – global footer will render via layout */}
+      {/* Footer removed: global footer will render via layout */}
     </div>
   );
 }

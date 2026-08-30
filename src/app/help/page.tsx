@@ -124,49 +124,49 @@ export default function HelpPage() {
     },
     {
       name: t("help.planFeature.name.verifiedBadge"),
-      free: "—",
+      free: "-",
       pro: "✓",
       business: "✓",
       enterprise: "✓",
     },
     {
       name: t("help.planFeature.name.customProfileUrl"),
-      free: "—",
+      free: "-",
       pro: "✓",
       business: "✓",
       enterprise: "✓",
     },
     {
       name: t("help.planFeature.name.recruitmentProfiles"),
-      free: "—",
-      pro: "—",
+      free: "-",
+      pro: "-",
       business: "✓",
       enterprise: "✓",
     },
     {
       name: t("help.planFeature.name.articlePublishing"),
-      free: "—",
-      pro: "—",
+      free: "-",
+      pro: "-",
       business: "✓",
       enterprise: "✓",
     },
     {
       name: t("help.planFeature.name.teamManagement"),
-      free: "—",
-      pro: "—",
+      free: "-",
+      pro: "-",
       business: "✓",
       enterprise: "✓",
     },
     {
       name: t("help.planFeature.name.apiAccess"),
-      free: "—",
-      pro: "—",
+      free: "-",
+      pro: "-",
       business: "✓",
       enterprise: "✓",
     },
     {
       name: t("help.planFeature.name.prioritySupport"),
-      free: "—",
+      free: "-",
       pro: "✓",
       business: "✓",
       enterprise: "24/7",
@@ -928,23 +928,23 @@ export default function HelpPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
               {[
                 {
-                  score: "0–34",
+                  score: "0-34",
                   label: t("help.trustPassport.levelBuilding"),
                 },
                 {
-                  score: "35–54",
+                  score: "35-54",
                   label: t("help.trustPassport.levelModerate"),
                 },
                 {
-                  score: "55–74",
+                  score: "55-74",
                   label: t("help.trustPassport.levelGood"),
                 },
                 {
-                  score: "75–89",
+                  score: "75-89",
                   label: t("help.trustPassport.levelHigh"),
                 },
                 {
-                  score: "90–100",
+                  score: "90-100",
                   label: t("help.trustPassport.levelExcellent"),
                 },
               ].map((level) => (
@@ -1711,7 +1711,7 @@ function PlanValue({
   value: boolean | string;
   highlighted?: boolean;
 }) {
-  const isDash = value === "—" || value === "❌";
+  const isDash = value === "-" || value === "❌";
 
   return (
     <td

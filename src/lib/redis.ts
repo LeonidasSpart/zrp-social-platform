@@ -28,7 +28,7 @@ export async function getRedisClient() {
     process.env.REDIS_URL || process.env.REDIS_PUBLIC_URL;
 
   if (!redisUrl) {
-    console.warn("⚠️ REDIS_URL not set – caching disabled");
+    console.warn("⚠️ REDIS_URL not set: caching disabled");
     return null;
   }
 

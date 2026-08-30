@@ -23,7 +23,7 @@ interface Ticket {
   status: string;
   priority: string;
   createdAt: string;
-  userId: string; // ✅ added – the foreign key to the user
+  userId: string; // ✅ added: the foreign key to the user
   user: { username: string; email: string; avatarUrl: string | null; plan: string };
   assignedAdmin: { username: string; avatarUrl: string | null } | null;
   replies: Reply[];
@@ -187,7 +187,7 @@ export default function TicketDetailPage() {
           ))}
         </div>
 
-        {/* Reply form – only if ticket is not closed/resolved (or always for admins) */}
+        {/* Reply form, only if ticket is not closed/resolved (or always for admins) */}
         {ticket.status !== 'CLOSED' && ticket.status !== 'RESOLVED' && (
           <div className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 p-4 rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal">
             <textarea

@@ -25,7 +25,7 @@ export async function sendEmail({
 }) {
   const client = getResendClient();
   if (!client) {
-    console.warn('RESEND_API_KEY not set – email not sent');
+    console.warn('RESEND_API_KEY not set: email not sent');
     return;
   }
 
@@ -261,7 +261,7 @@ export async function sendVerificationEmail(
 ) {
   const client = getResendClient();
   if (!client) {
-    console.warn('RESEND_API_KEY not set – verification email not sent');
+    console.warn('RESEND_API_KEY not set: verification email not sent');
     return;
   }
 
@@ -293,7 +293,7 @@ export async function sendPasswordResetEmail(
 ) {
   const client = getResendClient();
   if (!client) {
-    console.warn('RESEND_API_KEY not set – password reset email not sent');
+    console.warn('RESEND_API_KEY not set: password reset email not sent');
     return;
   }
 
@@ -301,7 +301,7 @@ export async function sendPasswordResetEmail(
     const { data, error } = await client.emails.send({
       from: process.env.EMAIL_FROM || 'noreply@zrp.one',
       to,
-      subject: 'Reset Your Password – ZRP Social',
+      subject: 'Reset Your Password: ZRP Social',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
           <h1 style="color: #FF2D2D; text-align: center;">Reset Your Password</h1>
@@ -322,7 +322,7 @@ export async function sendPasswordResetEmail(
           </p>
           <hr style="border: 1px solid #ddd;" />
           <p style="font-size: 12px; color: #999; text-align: center;">
-            ZRP Social – Freedom of speech. 35% of profits to charity.
+            ZRP Social: Freedom of speech. 35% of profits to charity.
           </p>
         </div>
       `,
@@ -354,7 +354,7 @@ export async function sendTeamInvitation({
 }) {
   const client = getResendClient();
   if (!client) {
-    console.warn('RESEND_API_KEY not set – team invitation email not sent');
+    console.warn('RESEND_API_KEY not set: team invitation email not sent');
     return;
   }
 
@@ -385,7 +385,7 @@ export async function sendTeamInvitation({
           </p>
           <hr style="border: 1px solid #ddd;" />
           <p style="font-size: 12px; color: #999; text-align: center;">
-            ZRP Social – Freedom of speech. 35% of profits to charity.
+            ZRP Social: Freedom of speech. 35% of profits to charity.
           </p>
         </div>
       `,

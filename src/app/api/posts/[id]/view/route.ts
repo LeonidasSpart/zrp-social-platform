@@ -11,7 +11,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     });
     return NextResponse.json({ views: post.views });
   } catch (error) {
-    // Post may not exist or was deleted — fail silently, views aren't critical
+    // Post may not exist or was deleted: fail silently, views aren't critical
     return NextResponse.json({ views: null }, { status: 200 });
   }
 }

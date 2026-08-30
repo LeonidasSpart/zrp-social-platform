@@ -174,7 +174,7 @@ export async function POST(req: NextRequest) {
         );
       } catch (notifErr) {
         console.error("Push notification failed:", notifErr);
-        // Fail silently – message still delivered
+        // Fail silently: message still delivered
       }
     }
 

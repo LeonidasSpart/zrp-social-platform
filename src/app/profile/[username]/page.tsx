@@ -1910,7 +1910,7 @@ export default function ProfilePage(
             ) : (
               <span className="text-sm text-gray-500 dark:text-gray-400">
                 <span className="font-semibold text-gray-900 dark:text-white">
-                  —
+                  -
                 </span>{" "}
                 {t(
                   "profile.following"

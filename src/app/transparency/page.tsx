@@ -172,7 +172,7 @@ export default function TransparencyPage() {
                   <Clock className="w-6 h-6 text-zrp-red mx-auto mb-2" aria-hidden="true" />
                   <div className="text-3xl font-bold text-zrp-charcoal dark:text-white font-orbitron">
                     {data.medianResolutionHours === null
-                      ? "—"
+                      ? "-"
                       : data.medianResolutionHours < 24
                       ? t("transparency.hoursValue", { n: Math.round(data.medianResolutionHours) })
                       : t("transparency.daysValue", { n: Math.round(data.medianResolutionHours / 24) })}

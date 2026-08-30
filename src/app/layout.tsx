@@ -95,7 +95,7 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
 
     title:
-      "ZRP Social — The First Swiss-European Social Media Platform",
+      "ZRP Social: The First Swiss-European Social Media Platform",
 
     description:
       "A Swiss-European social media platform built around privacy, freedom of expression, security, and people-first communities.",
@@ -106,7 +106,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt:
-          "ZRP Social — The First Swiss-European Social Media Platform",
+          "ZRP Social: The First Swiss-European Social Media Platform",
       },
     ],
   },
@@ -115,7 +115,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
 
     title:
-      "ZRP Social — The First Swiss-European Social Media Platform",
+      "ZRP Social: The First Swiss-European Social Media Platform",
 
     description:
       "Swiss-built social media for Europe. Privacy, freedom of expression, security, and people-first communities.",
@@ -198,7 +198,7 @@ const structuredData = {
       "@id": `${SITE_URL}/#webpage`,
       url: SITE_URL,
       name:
-        "ZRP Social — The First Swiss-European Social Media Platform",
+        "ZRP Social: The First Swiss-European Social Media Platform",
       description:
         "ZRP Social is a Swiss-European social media platform built in Switzerland around privacy, freedom of expression, security, and people-first communities.",
       isPartOf: {

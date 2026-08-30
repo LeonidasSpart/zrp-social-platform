@@ -295,7 +295,7 @@ export async function createNotification({
       html: customHtml,
     });
   } catch (error) {
-    // Log but don't fail – the in‑app notification already exists.
+    // Log but don't fail: the in‑app notification already exists.
     console.error("Error sending email notification:", error);
   }
 }

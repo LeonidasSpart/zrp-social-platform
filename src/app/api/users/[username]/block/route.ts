@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
-// ─── POST – Block a user ────────────────────────────────────────────
+// ─── POST: Block a user ────────────────────────────────────────────
 export async function POST(req: NextRequest, props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
   const session = await getServerSession(authOptions);
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ username
   }
 }
 
-// ─── DELETE – Unblock a user ────────────────────────────────────────
+// ─── DELETE: Unblock a user ────────────────────────────────────────
 export async function DELETE(req: NextRequest, props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
   const session = await getServerSession(authOptions);

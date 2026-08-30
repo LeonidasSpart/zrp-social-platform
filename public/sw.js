@@ -9,7 +9,7 @@ const STATIC_ASSETS = [
   '/offline.html',
 ];
 
-// ─── Install event – cache static assets and the root page ──────
+// ─── Install event: cache static assets and the root page ──────
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
@@ -29,7 +29,7 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// ─── Activate event – clean old caches ────────────────────────────
+// ─── Activate event: clean old caches ────────────────────────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -41,11 +41,11 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(clients.claim());
 });
 
-// ─── Fetch event – smart caching ──────────────────────────────────
+// ─── Fetch event: smart caching ──────────────────────────────────
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // 1. Skip API calls and non-GET requests — let the browser handle
+  // 1. Skip API calls and non-GET requests: let the browser handle
   // these natively. Calling event.respondWith(fetch(event.request))
   // here is known to corrupt multipart/form-data bodies (e.g. image
   // uploads) on Safari/WebKit, since it re-issues the request through
@@ -90,7 +90,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. For other assets – cache first, fallback to network
+  // 3. For other assets: cache first, fallback to network
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {

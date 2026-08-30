@@ -25,7 +25,7 @@ export async function FeedContent() {
     orderBy: { createdAt: "desc" },
     take: 10,
     include: {
-      author: true, // ✅ fetches all fields – no field-name errors
+      author: true, // ✅ fetches all fields: no field-name errors
       likes: {
         where: { userId: session.user.id },
         select: { id: true },

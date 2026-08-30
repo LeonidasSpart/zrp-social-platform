@@ -69,7 +69,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
             username: true,
             name: true,
             avatarUrl: true,
-            badgeType: true, // ✅ included – frontend uses this for VerifiedBadge
+            badgeType: true, // ✅ included: frontend uses this for VerifiedBadge
           },
         },
         post: {

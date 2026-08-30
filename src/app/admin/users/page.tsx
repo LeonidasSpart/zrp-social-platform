@@ -403,7 +403,7 @@ export default function AdminUsers() {
                               {badgeInfo?.label}
                             </span>
                           ) : (
-                            <span className="text-xs text-gray-400">—</span>
+                            <span className="text-xs text-gray-400">-</span>
                           )}
                           <select
                             value={user.badgeType || ""}

@@ -382,7 +382,7 @@ export default function TeamSettingsPage() {
                   </td>
                   <td className="p-3">{owner.email}</td>
                   <td className="p-3">{getRoleBadge("OWNER")}</td>
-                  <td className="p-3">—</td>
+                  <td className="p-3">-</td>
                   <td className="p-3 text-right text-gray-500 text-sm">{t("team.accountOwner")}</td>
                 </tr>
               )}

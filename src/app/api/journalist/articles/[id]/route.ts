@@ -42,7 +42,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
  * Edit one of the signed-in journalist's own articles. Only editable
  * while it is a DRAFT or was REJECTED (resubmission flow). Articles
  * that are PENDING_REVIEW, PUBLISHED, or ARCHIVED cannot be edited
- * through this route — those states are admin-managed.
+ * through this route: those states are admin-managed.
  *
  * Body may include `submit: true` to move a DRAFT/REJECTED article to
  * PENDING_REVIEW (requires the journalist to be VERIFIED). authorId is
@@ -171,7 +171,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
  *
  * Journalists may only delete their own DRAFT articles. Anything that
  * has ever been submitted (PENDING_REVIEW, REJECTED, PUBLISHED,
- * ARCHIVED) must stay for the editorial record — an admin can delete
+ * ARCHIVED) must stay for the editorial record: an admin can delete
  * it from /admin/news if truly necessary.
  */
 export async function DELETE(_request: NextRequest, context: RouteContext) {

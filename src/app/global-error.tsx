@@ -15,7 +15,7 @@ export default function GlobalError({
             Something went wrong
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-md">
-            We're sorry – an unexpected error occurred.
+            We're sorry, an unexpected error occurred.
           </p>
 
           {/* ─── TEMPORARY: show the real error for debugging ─── */}

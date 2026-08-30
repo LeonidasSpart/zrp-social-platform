@@ -140,7 +140,7 @@ export default function MutedUsersPage() {
               key={user.id}
               className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition group"
             >
-              {/* Avatar – using <img> with fallback */}
+              {/* Avatar, using <img> with fallback */}
               <Link href={`/profile/${user.username}`} className="flex-shrink-0">
                 <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
                   <img

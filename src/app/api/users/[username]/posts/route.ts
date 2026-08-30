@@ -57,7 +57,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
     }
 
     // ─── Fetch ONLY original posts by this user ─────────────────────
-    // (No reposts – we only want posts authored by the user)
+    // (No reposts: we only want posts authored by the user)
     const rawPosts = await prisma.post.findMany({
       where: {
         authorId: profileOwner.id,

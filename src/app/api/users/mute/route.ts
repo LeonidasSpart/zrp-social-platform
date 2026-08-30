@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
-// ─── POST /api/users/mute – Toggle mute ──────────────────────────
+// ─── POST /api/users/mute: Toggle mute ──────────────────────────
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ─── GET /api/users/mute?userId=xxx – Check mute status ──────────
+// ─── GET /api/users/mute?userId=xxx: Check mute status ──────────
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {

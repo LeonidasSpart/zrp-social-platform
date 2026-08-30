@@ -22,7 +22,7 @@ export default function CareersPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter">
       <main>
-        {/* Hero — dark red to black gradient, matching Charity page */}
+        {/* Hero: dark red to black gradient, matching Charity page */}
         <section className="relative bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack py-20 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <span className="inline-block bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium text-white/90 mb-6">
@@ -75,7 +75,7 @@ export default function CareersPage() {
           </div>
         </section>
 
-        {/* Open Positions — honest current state */}
+        {/* Open Positions: honest current state */}
         <section className="bg-zrp-silver/10 dark:bg-zrp-charcoal/30 py-16 px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl font-bold text-zrp-charcoal dark:text-white font-orbitron mb-4">

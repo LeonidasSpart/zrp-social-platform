@@ -33,7 +33,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
             },
           },
         },
-        // ✅ QUOTE REPOST – include the quoted post
+        // ✅ QUOTE REPOST: include the quoted post
         quotePost: {
           include: {
             author: {

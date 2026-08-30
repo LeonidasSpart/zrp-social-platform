@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
 
-// MyMemory Translation API — free, no API key required.
+// MyMemory Translation API: free, no API key required.
 // Rate limit: ~5,000 words/day per IP (10,000/day if MYMEMORY_EMAIL is set,
 // per their fair-use policy for identifying good-faith usage).
 const MYMEMORY_URL = "https://api.mymemory.translated.net/get";

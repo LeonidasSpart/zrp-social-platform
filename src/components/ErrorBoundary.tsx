@@ -42,7 +42,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             Something went wrong
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-md">
-            We're sorry – an unexpected error occurred. Please try refreshing the page.
+            We're sorry, an unexpected error occurred. Please try refreshing the page.
           </p>
           <button
             onClick={this.handleReload}

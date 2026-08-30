@@ -72,7 +72,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex bg-white dark:bg-zrp-deepBlack">
-      {/* ─── Left brand panel — desktop only ─────────────────────────── */}
+      {/* ─── Left brand panel, desktop only ─────────────────────────── */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-zrp-darkRed via-zrp-red to-zrp-darkRed">
         <div
           className="absolute inset-0 opacity-[0.08]"
@@ -111,7 +111,7 @@ export default function LoginPage() {
       {/* ─── Right / mobile form panel ───────────────────────────────── */}
       <div className="flex-1 flex items-center justify-center px-4 py-12 sm:py-16">
         <div className="w-full max-w-md">
-          {/* ─── Mobile & tablet hero — big and bold, like a native app ─── */}
+          {/* ─── Mobile & tablet hero, big and bold, like a native app ─── */}
           <div className="lg:hidden text-center mb-10 sm:mb-14">
             <Link href="/" className="inline-block mb-6 sm:mb-8">
               <Image

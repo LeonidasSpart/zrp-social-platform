@@ -59,7 +59,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
         type: "like",
         fromUserId: userId,
         postId: comment.postId,
-        // commentId removed – we don't have the field in Notification yet
+        // commentId removed: we don't have the field in Notification yet
       });
     }
     return NextResponse.json({ liked: true });

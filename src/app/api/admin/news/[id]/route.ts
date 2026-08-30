@@ -3,7 +3,7 @@ import {
   NewsArticleCategory,
   NewsArticleStatus,
 } from "@prisma/client";
-// SECURITY FIX: see /api/admin/news/route.ts — these routes had no
+// SECURITY FIX: see /api/admin/news/route.ts. These routes had no
 // server-side auth check at all.
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
@@ -462,7 +462,7 @@ export async function PATCH(
 
 // BUG FIX: the admin News editor's "Update Article" button sends
 // PUT (see src/app/admin/news/page.tsx handleSubmit), but only PATCH
-// was ever exported here — every edit was silently failing with a 405.
+// was ever exported here: every edit was silently failing with a 405.
 // PUT is aliased straight to the same handler as PATCH.
 export { PATCH as PUT };
 

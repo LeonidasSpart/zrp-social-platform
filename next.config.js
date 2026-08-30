@@ -80,7 +80,7 @@ const nextConfig = {
 
 // ─── Wrap with Sentry configuration ──────────────────────────────
 module.exports = withSentryConfig(nextConfig, {
-  // Additional Sentry options (optional – these are defaults)
+  // Additional Sentry options (optional, these are defaults)
   silent: true, // Suppress logs
   hideSourceMaps: false,
   widenClientFileUpload: true,

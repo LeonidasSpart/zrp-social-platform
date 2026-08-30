@@ -415,7 +415,7 @@ export default function CreatorDashboard() {
                       </span>
                     </td>
                     <td className="p-3 font-semibold text-green-600 dark:text-green-400">${tip.amount.toFixed(2)}</td>
-                    <td className="p-3 text-gray-600 dark:text-gray-400">{tip.message || "—"}</td>
+                    <td className="p-3 text-gray-600 dark:text-gray-400">{tip.message || "-"}</td>
                     <td className="p-3 text-gray-500 dark:text-gray-400 text-xs">
                       {new Date(tip.createdAt).toLocaleDateString()}
                     </td>

@@ -131,7 +131,7 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen flex bg-white dark:bg-zrp-deepBlack">
-      {/* ─── Left brand panel — desktop only ─────────────────────────── */}
+      {/* ─── Left brand panel, desktop only ─────────────────────────── */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-zrp-darkRed via-zrp-red to-zrp-darkRed">
         <div
           className="absolute inset-0 opacity-[0.08]"
@@ -263,7 +263,7 @@ export default function SignupPage() {
 
               {usernameStatus === "invalid" && username.trim().length > 0 && (
                 <p className="text-xs text-red-500 mt-1">
-                  3–20 characters, letters/numbers/underscores only
+                  3-20 characters, letters/numbers/underscores only
                 </p>
               )}
 

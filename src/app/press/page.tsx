@@ -29,7 +29,7 @@ export default function PressKitPage() {
     <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter">
       <main>
 
-        {/* Hero — same visual style as Careers */}
+        {/* Hero: same visual style as Careers */}
         <section className="relative bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack py-20 px-4">
           <div className="max-w-4xl mx-auto text-center">
 
@@ -83,8 +83,8 @@ export default function PressKitPage() {
                   <span className="text-zrp-charcoal/80 dark:text-white/70">
                     <strong className="text-zrp-charcoal dark:text-white">
                       {t("press.pillar1Title")}
-                    </strong>{' '}
-                    – {t("press.pillar1Desc")}
+                    </strong>{': '}
+                    {t("press.pillar1Desc")}
                   </span>
                 </li>
 
@@ -94,8 +94,8 @@ export default function PressKitPage() {
                   <span className="text-zrp-charcoal/80 dark:text-white/70">
                     <strong className="text-zrp-charcoal dark:text-white">
                       {t("press.pillar2Title")}
-                    </strong>{' '}
-                    – {t("press.pillar2Desc")}
+                    </strong>{': '}
+                    {t("press.pillar2Desc")}
                   </span>
                 </li>
 
@@ -105,8 +105,7 @@ export default function PressKitPage() {
                   <span className="text-zrp-charcoal/80 dark:text-white/70">
                     <strong className="text-zrp-charcoal dark:text-white">
                       {t("press.pillar3Title")}
-                    </strong>{' '}
-                    –{' '}
+                    </strong>{': '}
                     <span className="text-zrp-red font-semibold">
                       {t("press.pillar3Bold")}
                     </span>{' '}
@@ -193,7 +192,7 @@ export default function PressKitPage() {
 
             <p className="text-xl font-inter mb-6">
               ZRP Social {t("press.notJustAnotherNetwork")}{' '}
-              <strong>{t("press.notJustAnotherNetworkBold")}</strong> – {t("press.notJustAnotherNetworkRest")}
+              <strong>{t("press.notJustAnotherNetworkBold")}</strong>{t("press.notJustAnotherNetworkRest")}
             </p>
 
             <div className="grid sm:grid-cols-2 gap-6">
@@ -471,7 +470,7 @@ export default function PressKitPage() {
 
         </section>
 
-        {/* Press Contact — same Careers color treatment */}
+        {/* Press Contact: same Careers color treatment */}
         <section className="bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack py-16 px-4">
 
           <div className="max-w-4xl mx-auto text-center text-white">

@@ -760,7 +760,7 @@ export default function FAQPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700">
-              <strong className="text-zrp-red">0–34</strong>
+              <strong className="text-zrp-red">0-34</strong>
               <p className="mt-1 text-sm font-medium">
                 {t("faq.trustLevels.level1Name")}
               </p>
@@ -770,7 +770,7 @@ export default function FAQPage() {
             </div>
 
             <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700">
-              <strong className="text-zrp-red">35–54</strong>
+              <strong className="text-zrp-red">35-54</strong>
               <p className="mt-1 text-sm font-medium">
                 {t("faq.trustLevels.level2Name")}
               </p>
@@ -780,7 +780,7 @@ export default function FAQPage() {
             </div>
 
             <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700">
-              <strong className="text-zrp-red">55–74</strong>
+              <strong className="text-zrp-red">55-74</strong>
               <p className="mt-1 text-sm font-medium">
                 {t("faq.trustLevels.level3Name")}
               </p>
@@ -790,7 +790,7 @@ export default function FAQPage() {
             </div>
 
             <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700">
-              <strong className="text-zrp-red">75–89</strong>
+              <strong className="text-zrp-red">75-89</strong>
               <p className="mt-1 text-sm font-medium">
                 {t("faq.trustLevels.level4Name")}
               </p>
@@ -800,7 +800,7 @@ export default function FAQPage() {
             </div>
 
             <div className="p-4 rounded-xl border border-zrp-red/30 bg-zrp-red/5 sm:col-span-2">
-              <strong className="text-zrp-red">90–100</strong>
+              <strong className="text-zrp-red">90-100</strong>
               <p className="mt-1 text-sm font-medium">
                 {t("faq.trustLevels.level5Name")}
               </p>
@@ -1132,16 +1132,16 @@ export default function FAQPage() {
 
           <ul className="list-disc list-inside space-y-2 text-sm">
             <li>
-              <strong>{t("faq.marketLimits.freeLabel")}</strong> – {t("faq.marketLimits.freeDesc")}
+              <strong>{t("faq.marketLimits.freeLabel")}</strong>: {t("faq.marketLimits.freeDesc")}
             </li>
             <li>
-              <strong>{t("faq.marketLimits.proLabel")}</strong> – {t("faq.marketLimits.proDesc")}
+              <strong>{t("faq.marketLimits.proLabel")}</strong>: {t("faq.marketLimits.proDesc")}
             </li>
             <li>
-              <strong>{t("faq.marketLimits.businessLabel")}</strong> – {t("faq.marketLimits.businessDesc")}
+              <strong>{t("faq.marketLimits.businessLabel")}</strong>: {t("faq.marketLimits.businessDesc")}
             </li>
             <li>
-              <strong>{t("faq.marketLimits.enterpriseLabel")}</strong> – {t("faq.marketLimits.enterpriseDesc")}
+              <strong>{t("faq.marketLimits.enterpriseLabel")}</strong>: {t("faq.marketLimits.enterpriseDesc")}
             </li>
           </ul>
 
@@ -1377,15 +1377,15 @@ export default function FAQPage() {
           </p>
 
           <p>
-            <strong>{t("faq.adminRoles.userLabel")}</strong> – {t("faq.adminRoles.userDesc")}
+            <strong>{t("faq.adminRoles.userLabel")}</strong>: {t("faq.adminRoles.userDesc")}
           </p>
 
           <p>
-            <strong>{t("faq.adminRoles.modLabel")}</strong> – {t("faq.adminRoles.modDesc")}
+            <strong>{t("faq.adminRoles.modLabel")}</strong>: {t("faq.adminRoles.modDesc")}
           </p>
 
           <p>
-            <strong>{t("faq.adminRoles.adminLabel")}</strong> – {t("faq.adminRoles.adminDesc")}
+            <strong>{t("faq.adminRoles.adminLabel")}</strong>: {t("faq.adminRoles.adminDesc")}
           </p>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -1406,28 +1406,28 @@ export default function FAQPage() {
             <li className="flex items-center gap-3">
               <VerifiedBadge badgeType="verified" />
               <span>
-                <strong>{t("faq.verifiedBadge.verifiedLabel")}</strong> – {t("faq.verifiedBadge.verifiedDesc")}
+                <strong>{t("faq.verifiedBadge.verifiedLabel")}</strong>: {t("faq.verifiedBadge.verifiedDesc")}
               </span>
             </li>
 
             <li className="flex items-center gap-3">
               <VerifiedBadge badgeType="organization" />
               <span>
-                <strong>{t("faq.verifiedBadge.orgLabel")}</strong> – {t("faq.verifiedBadge.orgDesc")}
+                <strong>{t("faq.verifiedBadge.orgLabel")}</strong>: {t("faq.verifiedBadge.orgDesc")}
               </span>
             </li>
 
             <li className="flex items-center gap-3">
               <VerifiedBadge badgeType="government" />
               <span>
-                <strong>{t("faq.verifiedBadge.govLabel")}</strong> – {t("faq.verifiedBadge.govDesc")}
+                <strong>{t("faq.verifiedBadge.govLabel")}</strong>: {t("faq.verifiedBadge.govDesc")}
               </span>
             </li>
 
             <li className="flex items-center gap-3">
               <VerifiedBadge badgeType="team" />
               <span>
-                <strong>{t("faq.verifiedBadge.teamLabel")}</strong> – {t("faq.verifiedBadge.teamDesc")}
+                <strong>{t("faq.verifiedBadge.teamLabel")}</strong>: {t("faq.verifiedBadge.teamDesc")}
               </span>
             </li>
           </ul>
@@ -1569,35 +1569,35 @@ export default function FAQPage() {
         <div className="space-y-3">
           <ul className="list-disc list-inside space-y-2 text-sm">
             <li>
-              <strong className="text-zrp-red">OPEN</strong> – {t("faq.ticketStatuses.openDesc")}
+              <strong className="text-zrp-red">OPEN</strong>: {t("faq.ticketStatuses.openDesc")}
             </li>
 
             <li>
               <strong className="text-blue-500">
                 IN_PROGRESS
-              </strong>{" "}
-              – {t("faq.ticketStatuses.inProgressDesc")}
+              </strong>
+              : {t("faq.ticketStatuses.inProgressDesc")}
             </li>
 
             <li>
               <strong className="text-yellow-500">
                 AWAITING_REPLY
-              </strong>{" "}
-              – {t("faq.ticketStatuses.awaitingReplyDesc")}
+              </strong>
+              : {t("faq.ticketStatuses.awaitingReplyDesc")}
             </li>
 
             <li>
               <strong className="text-green-500">
                 RESOLVED
-              </strong>{" "}
-              – {t("faq.ticketStatuses.resolvedDesc")}
+              </strong>
+              : {t("faq.ticketStatuses.resolvedDesc")}
             </li>
 
             <li>
               <strong className="text-gray-500">
                 CLOSED
-              </strong>{" "}
-              – {t("faq.ticketStatuses.closedDesc")}
+              </strong>
+              : {t("faq.ticketStatuses.closedDesc")}
             </li>
           </ul>
         </div>

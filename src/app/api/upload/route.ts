@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    // Validate file type – support images and videos
+    // Validate file type: support images and videos
     const isImage = validImageTypes.includes(file.type);
     const isVideo = validVideoTypes.includes(file.type);
 

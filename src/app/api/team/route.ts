@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
 
     const userId = token.id as string;
 
-    // Check permission – include name for the owner
+    // Check permission: include name for the owner
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { plan: true, id: true, email: true, name: true }, // ✅ added name
