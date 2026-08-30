@@ -1,4 +1,12 @@
 import sanitizeHtml from "sanitize-html";
+import { marked } from "marked";
+
+marked.setOptions({
+  // A single Enter in the composer's plain textarea should produce a
+  // line break, not be silently swallowed like strict CommonMark does.
+  breaks: true,
+  gfm: true,
+});
 
 /**
  * Strict allowlist for user/journalist-authored article HTML. Used
@@ -37,4 +45,16 @@ const ARTICLE_HTML_OPTIONS: sanitizeHtml.IOptions = {
 export function sanitizeArticleHtml(html: string): string {
   if (typeof html !== "string") return "";
   return sanitizeHtml(html, ARTICLE_HTML_OPTIONS);
+}
+
+/**
+ * Renders Markdown (and any raw HTML mixed into it) typed into an
+ * article composer, then runs the result through the same allowlist
+ * as sanitizeArticleHtml() so the stored body is safe regardless of
+ * which syntax the author used.
+ */
+export function renderArticleBody(raw: string): string {
+  if (typeof raw !== "string" || !raw.trim()) return "";
+  const html = marked.parse(raw, { async: false });
+  return sanitizeArticleHtml(html);
 }

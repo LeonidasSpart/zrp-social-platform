@@ -444,6 +444,18 @@ export default function PostCard({
   const postType =
     post.type || "POST";
 
+  // Plain-text rendering of the article body's sanitized HTML, used
+  // only for the collapsed preview so truncation can't cut a tag in
+  // half and leave broken markup on the page.
+  const articlePreviewText =
+    postType === "ARTICLE" &&
+    post.body
+      ? post.body
+          .replace(/<[^>]*>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+      : "";
+
   // ─────────────────────────────────────────────────────────────
   // IMAGE GALLERY
   // ─────────────────────────────────────────────────────────────
@@ -2077,25 +2089,20 @@ export default function PostCard({
                             className="text-gray-800 dark:text-gray-200"
                           />
                         ) : (
-                          <div
-                            dangerouslySetInnerHTML={{
-                              __html:
-                                post.body.slice(
-                                  0,
-                                  300
-                                ) +
-                                (post.body
-                                  .length >
-                                300
-                                  ? "..."
-                                  : ""),
-                            }}
-                            className="text-gray-800 dark:text-gray-200"
-                          />
+                          <p className="text-gray-800 dark:text-gray-200">
+                            {articlePreviewText.slice(
+                              0,
+                              300
+                            ) +
+                              (articlePreviewText.length >
+                              300
+                                ? "..."
+                                : "")}
+                          </p>
                         )}
                       </div>
 
-                      {post.body.length >
+                      {articlePreviewText.length >
                         300 && (
                         <button
                           onClick={(e) => {
