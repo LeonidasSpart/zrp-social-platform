@@ -38,6 +38,7 @@ import {
   BadgeCheck,
   Eye,
   Sparkles,
+  Store,
 } from "lucide-react";
 
 interface FaqItem {
@@ -59,6 +60,7 @@ const CATEGORY_KEYS: Record<string, TranslationKey> = {
   "Privacy & Safety": "faq.cat.privacySafety",
   "ZRP Trust Passport": "faq.cat.trustPassport",
   "Charity & Impact": "faq.cat.charityImpact",
+  "ZRP Market Plus": "faq.cat.marketPlus",
   "Web3 & Digital": "faq.cat.web3Digital",
   "Administration": "faq.cat.administration",
   "Support & Tickets": "faq.cat.supportTickets",
@@ -1068,6 +1070,116 @@ export default function FAQPage() {
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {t("faq.impactBadge.note")}
           </p>
+        </div>
+      ),
+    },
+
+    // ============================================================
+    // ZRP MARKET PLUS
+    // ============================================================
+    {
+      id: "what-is-market-plus",
+      category: "ZRP Market Plus",
+      question: t("faq.whatIsMarketPlus.q"),
+      icon: Store,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            <strong>{t("faq.whatIsMarketPlus.p1Bold")}</strong> {t("faq.whatIsMarketPlus.p1")}
+          </p>
+
+          <p>{t("faq.whatIsMarketPlus.p2")}</p>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {t("faq.whatIsMarketPlus.note")}
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "how-to-list-market",
+      category: "ZRP Market Plus",
+      question: t("faq.howToListMarket.q"),
+      icon: Upload,
+      answer: (
+        <div className="space-y-3">
+          <p>{t("faq.howToListMarket.intro")}</p>
+
+          <ol className="list-decimal list-inside space-y-2 text-sm">
+            <li>{t("faq.howToListMarket.step1")}</li>
+            <li>{t("faq.howToListMarket.step2")}</li>
+            <li>{t("faq.howToListMarket.step3")}</li>
+            <li>{t("faq.howToListMarket.step4")}</li>
+            <li>{t("faq.howToListMarket.step5")}</li>
+          </ol>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {t("faq.howToListMarket.note")}
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "market-plus-limits",
+      category: "ZRP Market Plus",
+      question: t("faq.marketLimits.q"),
+      icon: Lock,
+      answer: (
+        <div className="space-y-3">
+          <p>{t("faq.marketLimits.intro")}</p>
+
+          <ul className="list-disc list-inside space-y-2 text-sm">
+            <li>
+              <strong>{t("faq.marketLimits.freeLabel")}</strong> – {t("faq.marketLimits.freeDesc")}
+            </li>
+            <li>
+              <strong>{t("faq.marketLimits.proLabel")}</strong> – {t("faq.marketLimits.proDesc")}
+            </li>
+            <li>
+              <strong>{t("faq.marketLimits.businessLabel")}</strong> – {t("faq.marketLimits.businessDesc")}
+            </li>
+            <li>
+              <strong>{t("faq.marketLimits.enterpriseLabel")}</strong> – {t("faq.marketLimits.enterpriseDesc")}
+            </li>
+          </ul>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {t("faq.marketLimits.note")}
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "market-plus-moderation",
+      category: "ZRP Market Plus",
+      question: t("faq.marketModeration.q"),
+      icon: ShieldCheck,
+      answer: (
+        <div className="space-y-3">
+          <p>{t("faq.marketModeration.p1")}</p>
+
+          <p>{t("faq.marketModeration.p2")}</p>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {t("faq.marketModeration.note")}
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "contact-seller-market",
+      category: "ZRP Market Plus",
+      question: t("faq.contactSeller.q"),
+      icon: MessageSquare,
+      answer: (
+        <div className="space-y-3">
+          <p>{t("faq.contactSeller.p1")}</p>
+
+          <p>{t("faq.contactSeller.p2")}</p>
         </div>
       ),
     },

@@ -46,6 +46,7 @@ import {
   BookOpen,
   AlertTriangle,
   Calendar,
+  Store,
 } from "lucide-react";
 
 interface HelpSection {
@@ -1044,8 +1045,67 @@ export default function HelpPage() {
     },
 
     {
-      id: "faq",
+      id: "marketplace",
       number: "13",
+      title: t("help.section.marketplace.title"),
+      subtitle: t("help.section.marketplace.subtitle"),
+      icon: Store,
+      content: (
+        <div className="space-y-6">
+          <p className="help-text">
+            {t("help.marketplace.intro")}
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <FeatureCard
+              icon={Store}
+              title={t("help.marketplace.f1Title")}
+              description={t("help.marketplace.f1Desc")}
+            />
+
+            <FeatureCard
+              icon={PenTool}
+              title={t("help.marketplace.f2Title")}
+              description={t("help.marketplace.f2Desc")}
+            />
+
+            <FeatureCard
+              icon={ShieldCheck}
+              title={t("help.marketplace.f3Title")}
+              description={t("help.marketplace.f3Desc")}
+            />
+
+            <FeatureCard
+              icon={MessageSquare}
+              title={t("help.marketplace.f4Title")}
+              description={t("help.marketplace.f4Desc")}
+            />
+          </div>
+
+          <div className="rounded-xl border border-zrp-red/20 bg-zrp-red/5 p-4">
+            <div className="flex items-start gap-3">
+              <Shield className="w-5 h-5 text-zrp-red flex-shrink-0" />
+
+              <p className="text-sm leading-6 text-zrp-charcoal/75 dark:text-white/70">
+                {t("help.marketplace.note")}
+              </p>
+            </div>
+          </div>
+
+          <Link
+            href="/marketplace"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-zrp-red hover:underline"
+          >
+            {t("help.marketplace.browseLink")}
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      ),
+    },
+
+    {
+      id: "faq",
+      number: "14",
       title: t("help.section.faq.title"),
       subtitle: t("help.section.faq.subtitle"),
       icon: HelpCircle,
