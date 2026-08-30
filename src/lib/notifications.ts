@@ -17,7 +17,8 @@ interface CreateNotificationParams {
     | "ticket_created"
     | "appeal_resolved"
     | "listing_approved"
-    | "listing_rejected";
+    | "listing_rejected"
+    | "listing_removed";
   fromUserId: string;
   postId?: string;
   ticketId?: string; // ✅ added for ticket links
@@ -136,6 +137,7 @@ export async function createNotification({
       appeal_resolved: { action: "resolved your moderation appeal", emoji: "⚖️" },
       listing_approved: { action: "approved your marketplace listing", emoji: "✅" },
       listing_rejected: { action: "didn't approve your marketplace listing", emoji: "🚫" },
+      listing_removed: { action: "removed your marketplace listing", emoji: "⚠️" },
     };
     const { action, emoji } = actionMap[type] || { action: "interacted with you", emoji: "🔔" };
 
@@ -236,25 +238,29 @@ export async function createNotification({
     // appeals above. Links straight to the listing when approved (it's
     // live and shareable); back to the seller's own dashboard when
     // rejected (the listing itself isn't publicly visible yet).
-    if (type === "listing_approved" || type === "listing_rejected") {
+    if (type === "listing_approved" || type === "listing_rejected" || type === "listing_removed") {
       const isApproved = type === "listing_approved";
       const listingUrl = isApproved && listingId
         ? `${process.env.NEXTAUTH_URL}/marketplace/listing/${listingId}`
         : `${process.env.NEXTAUTH_URL}/marketplace/my-listings`;
+      const heading = isApproved
+        ? "Your marketplace listing is live"
+        : type === "listing_removed"
+          ? "Your marketplace listing was removed"
+          : "Your marketplace listing needs changes";
+      const body = isApproved
+        ? "It's now visible to the ZRP Market Plus community."
+        : type === "listing_removed"
+          ? "It was taken down by our moderation team for violating marketplace guidelines. Check your seller dashboard for details."
+          : "Check your seller dashboard for the reviewer's note, then resubmit.";
       customHtml = `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 12px; border: 1px solid #e5e7eb;">
           <div style="text-align: center; margin-bottom: 24px;">
             <img src="https://zrp.one/logo.png" alt="ZRP" style="height: 40px;" />
           </div>
           <div style="font-size: 48px; text-align: center; margin-bottom: 16px;">${emoji}</div>
-          <h1 style="font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 8px 0; text-align: center;">
-            ${isApproved ? "Your marketplace listing is live" : "Your marketplace listing needs changes"}
-          </h1>
-          <p style="font-size: 14px; color: #6b7280; text-align: center; margin: 0 0 24px 0;">
-            ${isApproved
-              ? "It's now visible to the ZRP Market Plus community."
-              : "Check your seller dashboard for the reviewer's note, then resubmit."}
-          </p>
+          <h1 style="font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 8px 0; text-align: center;">${heading}</h1>
+          <p style="font-size: 14px; color: #6b7280; text-align: center; margin: 0 0 24px 0;">${body}</p>
           <a href="${listingUrl}" style="display: inline-block; background-color: #FF2D2D; color: #ffffff; font-weight: 600; padding: 12px 24px; border-radius: 8px; text-decoration: none; text-align: center; margin: 0 auto; display: table;">
             ${isApproved ? "View Listing" : "View My Listings"}
           </a>
@@ -278,6 +284,7 @@ export async function createNotification({
       appeal_resolved: "Your moderation appeal has been resolved",
       listing_approved: "Your marketplace listing is live",
       listing_rejected: "Your marketplace listing needs changes",
+      listing_removed: "Your marketplace listing was removed",
     };
     const subject = subjectMap[type] || "New notification from ZRP";
 

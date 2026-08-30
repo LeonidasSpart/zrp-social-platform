@@ -189,6 +189,7 @@ export default function NotificationsPage() {
         return <Scale className="w-4 h-4 text-zrp-red" />;
       case "listing_approved":
       case "listing_rejected":
+      case "listing_removed":
         return <Store className="w-4 h-4 text-zrp-red" />;
       default:
         return null;
@@ -215,6 +216,8 @@ export default function NotificationsPage() {
         return t("notifications.listingApprovedSuffix");
       case "listing_rejected":
         return t("notifications.listingRejectedSuffix");
+      case "listing_removed":
+        return t("notifications.listingRemovedSuffix");
       default:
         return "";
     }
@@ -300,7 +303,7 @@ export default function NotificationsPage() {
               ? `/messages/${primaryUser.username}`
               : (g.type as string) === "appeal_resolved"
                 ? "/settings/appeals"
-                : (g.type as string) === "listing_approved" || (g.type as string) === "listing_rejected"
+                : (g.type as string) === "listing_approved" || (g.type as string) === "listing_rejected" || (g.type as string) === "listing_removed"
                   ? "/marketplace/my-listings"
                   : g.postId
                     ? `/post/${g.postId}`

@@ -72,14 +72,17 @@ export async function PUT(
       metadata: { rejectionReason: rejectionReason || null },
     });
 
-    if (action === "approve" || action === "reject") {
-      await createNotification({
-        userId: listing.sellerId,
-        type: action === "approve" ? "listing_approved" : "listing_rejected",
-        fromUserId: adminCheck.session.user.id,
-        listingId: id,
-      });
-    }
+    await createNotification({
+      userId: listing.sellerId,
+      type:
+        action === "approve"
+          ? "listing_approved"
+          : action === "reject"
+            ? "listing_rejected"
+            : "listing_removed",
+      fromUserId: adminCheck.session.user.id,
+      listingId: id,
+    });
 
     return jsonWithDecimals({ listing: updated });
   } catch (error) {
