@@ -136,6 +136,31 @@ enum ListingStatus {
   REMOVED
 }
 
+// ─── ZRP PLAY ──────────────────────────────────────────────────────
+
+enum PlayChallengeType {
+  TRIVIA
+  MEMORY
+  LOGIC
+}
+
+// Same live-immediately, reportable-after-the-fact model as Post
+// (not the PENDING_REVIEW admin-approval gate used by Listing/AdCampaign) -
+// challenge content is low-risk text/puzzle content, not a real-world
+// commerce or ad-spend surface.
+enum PlayChallengeStatus {
+  ACTIVE
+  REMOVED
+}
+
+enum PlayDuelStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  COMPLETED
+  EXPIRED
+}
+
 model User {
   id       String  @id @default(cuid())
   email    String  @unique
@@ -245,6 +270,14 @@ model User {
 
   listings         Listing[]         @relation("ListingSeller")
   listingFavorites ListingFavorite[]
+
+  // ─── ZRP PLAY ──────────────────────────────────────────────
+  playProfile        PlayProfile?
+  playChallenges     PlayChallenge[]       @relation("PlayChallengeCreator")
+  playAttempts       PlayAttempt[]
+  playUserAchievements PlayUserAchievement[]
+  duelsChallenged    PlayDuel[]            @relation("DuelChallenger")
+  duelsReceived      PlayDuel[]            @relation("DuelOpponent")
 
   teamAccount TeamMember[] @relation("TeamAccount")
   teamMembers TeamMember[] @relation("TeamMemberUser")
@@ -687,11 +720,17 @@ model Report {
   listingId String?
   listing   Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
 
+  // Fourth polymorphic target, same pattern again - reuses the same
+  // reporting/moderation system for ZRP PLAY user-created challenges.
+  challengeId String?
+  challenge   PlayChallenge? @relation(fields: [challengeId], references: [id], onDelete: SetNull)
+
   appeals Appeal[]
 
   @@index([postId])
   @@index([commentId])
   @@index([listingId])
+  @@index([challengeId])
   @@index([status])
   @@index([reporterId])
   @@index([targetUserId])
@@ -1459,4 +1498,155 @@ model CharityDisbursement {
 
   @@index([disbursedAt])
   @@index([cause])
+}
+
+// ─── ZRP PLAY ────────────────────────────────────────────────────────
+// Social entertainment/gaming hub: quick challenges (trivia, memory,
+// logic), 1v1 duels, XP/levels/streaks, achievements and leaderboards.
+// Reuses User, Follow, Notification, Report/Appeal, Message and Post
+// rather than building parallel systems for any of those.
+
+model PlayChallenge {
+  id String @id @default(cuid())
+
+  // Null for system/daily challenges (including AI-generated ones with
+  // no specific human author); SetNull rather than Cascade so a
+  // deleted account doesn't take other players' history/leaderboard
+  // entries with it - same reasoning as Post.author-adjacent deletes
+  // elsewhere in this schema.
+  creatorId String?
+  creator   User?   @relation("PlayChallengeCreator", fields: [creatorId], references: [id], onDelete: SetNull)
+
+  type        PlayChallengeType
+  title       String
+  description String?           @db.Text
+  difficulty  String            @default("medium") // easy | medium | hard
+
+  // Shape depends on `type` instead of one table per mini-game:
+  // TRIVIA: { questions: [{ q, options: string[], correctIndex }] }
+  // MEMORY: { pairs: string[] } (each value appears twice, shuffled client-side)
+  // LOGIC:  { prompt, options: string[], correctIndex } or { prompt, answer } for free text
+  content Json
+
+  maxScore      Int     @default(100)
+  isDaily       Boolean @default(false)
+  activeDate    DateTime? // date-only marker (UTC midnight) for the daily-challenge slot
+  isAiGenerated Boolean @default(false)
+
+  status        PlayChallengeStatus @default(ACTIVE)
+  removedReason String?             @db.Text
+
+  playCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attempts PlayAttempt[]
+  duels    PlayDuel[]
+  reports  Report[]
+
+  @@index([type])
+  @@index([status])
+  @@index([isDaily, activeDate])
+  @@index([creatorId])
+  @@index([createdAt])
+  @@index([playCount])
+}
+
+model PlayAttempt {
+  id String @id @default(cuid())
+
+  challengeId String
+  challenge   PlayChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  score    Int
+  timeMs   Int
+  xpEarned Int @default(0)
+
+  // Set when this attempt is one side of a duel rather than a solo play.
+  duelId String?
+  duel   PlayDuel? @relation(fields: [duelId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([challengeId])
+  @@index([userId])
+  @@index([duelId])
+  @@index([userId, createdAt])
+}
+
+model PlayDuel {
+  id String @id @default(cuid())
+
+  challengeId String
+  challenge   PlayChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  challengerId String
+  challenger   User   @relation("DuelChallenger", fields: [challengerId], references: [id], onDelete: Cascade)
+
+  opponentId String
+  opponent   User   @relation("DuelOpponent", fields: [opponentId], references: [id], onDelete: Cascade)
+
+  status PlayDuelStatus @default(PENDING)
+
+  challengerScore Int?
+  opponentScore   Int?
+  winnerId        String?
+
+  createdAt   DateTime  @default(now())
+  respondedAt DateTime?
+  completedAt DateTime?
+  expiresAt   DateTime
+
+  attempts PlayAttempt[]
+
+  @@index([challengerId])
+  @@index([opponentId])
+  @@index([status])
+  @@index([challengeId])
+}
+
+// One row per user - their overall PLAY stats. Kept separate from User
+// itself (like CreatorProfile) so the core User model doesn't grow a
+// gamification-specific column set.
+model PlayProfile {
+  id String @id @default(cuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  totalXp Int @default(0)
+  level   Int @default(1)
+
+  currentStreak Int       @default(0)
+  longestStreak Int       @default(0)
+  lastPlayedAt  DateTime?
+
+  challengesCompleted Int @default(0)
+  duelsWon            Int @default(0)
+  duelsPlayed         Int @default(0)
+
+  updatedAt DateTime @updatedAt
+
+  @@index([totalXp])
+}
+
+// Unlocked achievements only - the achievement catalog itself (name,
+// description, icon, XP reward, unlock criteria) is small, static and
+// versioned in code (src/lib/play/achievements.ts), not the database,
+// so shipping a new achievement never needs a data migration.
+model PlayUserAchievement {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  achievementKey String
+  unlockedAt     DateTime @default(now())
+
+  @@unique([userId, achievementKey])
+  @@index([userId])
 }

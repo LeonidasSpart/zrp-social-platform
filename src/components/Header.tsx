@@ -25,6 +25,7 @@ import {
   Key,
   Newspaper,
   Store,
+  Gamepad2,
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
@@ -167,6 +168,11 @@ export default function Header() {
       href: "/marketplace",
       icon: Store,
       label: t("nav.marketplace"),
+    },
+    {
+      href: "/play",
+      icon: Gamepad2,
+      label: t("nav.play"),
     },
     {
       href: "/search",

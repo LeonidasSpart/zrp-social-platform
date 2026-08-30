@@ -18,12 +18,16 @@ interface CreateNotificationParams {
     | "appeal_resolved"
     | "listing_approved"
     | "listing_rejected"
-    | "listing_removed";
+    | "listing_removed"
+    | "play_duel_challenge"
+    | "play_duel_accepted"
+    | "play_duel_result";
   fromUserId: string;
   postId?: string;
   ticketId?: string; // ✅ added for ticket links
   ticketSubject?: string; // ✅ added for ticket subject in email
   listingId?: string; // ZRP Market Plus - links a listing approval/rejection email to the listing
+  duelId?: string; // ZRP PLAY - links a duel notification email to the duel
 }
 
 const defaultPreferences = {
@@ -47,6 +51,7 @@ export async function createNotification({
   ticketId,
   ticketSubject,
   listingId,
+  duelId,
 }: CreateNotificationParams) {
   if (userId === fromUserId) return;
 
@@ -79,7 +84,16 @@ export async function createNotification({
     // emails are handled by a completely separate function
     // (sendVerificationEmail in email.ts, not this one) and are
     // untouched by this change.
-    const NEVER_EMAIL_TYPES = new Set(["like", "comment", "repost", "message", "mention", "follow"]);
+    const NEVER_EMAIL_TYPES = new Set([
+      "like",
+      "comment",
+      "repost",
+      "message",
+      "mention",
+      "follow",
+      "play_duel_challenge",
+      "play_duel_accepted",
+    ]);
     if (NEVER_EMAIL_TYPES.has(type)) return;
 
     const user = await prisma.user.findUnique({
@@ -138,6 +152,9 @@ export async function createNotification({
       listing_approved: { action: "approved your marketplace listing", emoji: "✅" },
       listing_rejected: { action: "didn't approve your marketplace listing", emoji: "🚫" },
       listing_removed: { action: "removed your marketplace listing", emoji: "⚠️" },
+      play_duel_challenge: { action: "challenged you to a ZRP PLAY duel", emoji: "⚔️" },
+      play_duel_accepted: { action: "accepted your ZRP PLAY duel", emoji: "🎮" },
+      play_duel_result: { action: "finished your ZRP PLAY duel", emoji: "🏆" },
     };
     const { action, emoji } = actionMap[type] || { action: "interacted with you", emoji: "🔔" };
 
@@ -268,6 +285,39 @@ export async function createNotification({
       `;
     }
 
+    // Duel challenge/accepted/result - same dedicated-block pattern as
+    // listings above. Always links straight to the duel itself.
+    if (type === "play_duel_challenge" || type === "play_duel_accepted" || type === "play_duel_result") {
+      const duelUrl = duelId
+        ? `${process.env.NEXTAUTH_URL}/play/duel/${duelId}`
+        : `${process.env.NEXTAUTH_URL}/play/duels`;
+      const heading =
+        type === "play_duel_challenge"
+          ? `${actorName} challenged you to a duel!`
+          : type === "play_duel_accepted"
+            ? `${actorName} accepted your duel challenge`
+            : "Your duel has finished";
+      const body =
+        type === "play_duel_challenge"
+          ? "Play the same challenge and see who scores higher."
+          : type === "play_duel_accepted"
+            ? "It's on. Play the challenge to lock in your score."
+            : "See who won on the duel page.";
+      customHtml = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 12px; border: 1px solid #e5e7eb;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <img src="https://zrp.one/logo.png" alt="ZRP" style="height: 40px;" />
+          </div>
+          <div style="font-size: 48px; text-align: center; margin-bottom: 16px;">${emoji}</div>
+          <h1 style="font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 8px 0; text-align: center;">${heading}</h1>
+          <p style="font-size: 14px; color: #6b7280; text-align: center; margin: 0 0 24px 0;">${body}</p>
+          <a href="${duelUrl}" style="display: inline-block; background-color: #FF2D2D; color: #ffffff; font-weight: 600; padding: 12px 24px; border-radius: 8px; text-decoration: none; text-align: center; margin: 0 auto; display: table;">
+            View Duel
+          </a>
+        </div>
+      `;
+    }
+
     // ─── 7. Subject ──────────────────────────────────────────────────
     const subjectMap: Record<string, string> = {
       like: `${actorName} liked your post`,
@@ -285,6 +335,9 @@ export async function createNotification({
       listing_approved: "Your marketplace listing is live",
       listing_rejected: "Your marketplace listing needs changes",
       listing_removed: "Your marketplace listing was removed",
+      play_duel_challenge: `${actorName} challenged you to a ZRP PLAY duel`,
+      play_duel_accepted: `${actorName} accepted your ZRP PLAY duel`,
+      play_duel_result: "Your ZRP PLAY duel has finished",
     };
     const subject = subjectMap[type] || "New notification from ZRP";
 
