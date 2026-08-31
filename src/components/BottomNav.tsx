@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { createPortal } from "react-dom";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Home, Search, Film, Bell, MessageSquare, User } from "lucide-react";
 import { useUnreadCount } from "@/contexts/UnreadCountContext";
@@ -20,12 +22,22 @@ import { useLanguage } from "@/contexts/LanguageContext";
  * takes over.
  */
 export default function BottomNav() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // Render the mobile navigation directly under <body>. This prevents
+    // transformed/overflow-clipped application wrappers from becoming the
+    // containing block for position: fixed on mobile browsers (especially
+    // iOS Safari), which can make the bottom bar scroll with the feed.
+    setMounted(true);
+  }, []);
+
   const { data: session } = useSession();
   const pathname = usePathname();
   const { unreadCount, unreadMessageCount } = useUnreadCount();
   const { t } = useLanguage();
 
-  if (!session) return null;
+  if (!mounted || !session) return null;
 
   const profileHref = `/profile/${session.user.username}`;
 
@@ -66,10 +78,19 @@ export default function BottomNav() {
     pathname === profileHref ||
     pathname.startsWith(`${profileHref}/`);
 
-  return (
+  return createPortal(
     <nav
-      className="lg:hidden fixed inset-x-0 bottom-0 z-50 bg-white/95 dark:bg-zrp-deepBlack/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      className="lg:hidden fixed left-0 right-0 bottom-0 z-[9999] w-full bg-white/95 dark:bg-zrp-deepBlack/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800"
+      style={{
+        paddingBottom: "env(safe-area-inset-bottom)",
+        position: "fixed",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        transform: "translate3d(0, 0, 0)",
+        WebkitTransform: "translate3d(0, 0, 0)",
+        WebkitBackfaceVisibility: "hidden",
+      }}
       aria-label={t("nav.primary")}
     >
       <div className="flex items-center h-14">
@@ -139,6 +160,7 @@ export default function BottomNav() {
           </div>
         </Link>
       </div>
-    </nav>
+    </nav>,
+    document.body
   );
 }
