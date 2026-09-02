@@ -75,7 +75,7 @@ export default function MusicShell() {
               <input value={artistName} onChange={e=>setArtistName(e.target.value)} placeholder="Artist name" className="p-3 rounded-xl bg-gray-100 dark:bg-gray-900"/>
               <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Song title" className="p-3 rounded-xl bg-gray-100 dark:bg-gray-900"/>
               <input value={genre} onChange={e=>setGenre(e.target.value)} placeholder="Genre" className="p-3 rounded-xl bg-gray-100 dark:bg-gray-900"/>
-              <label className="p-3 rounded-xl bg-gray-100 dark:bg-gray-900 cursor-pointer">Audio (MP3/WAV/etc.)<input type="file" accept="audio/*" className="block mt-2 w-full" onChange={e=>setAudio(e.target.files?.[0]||null)}/></label>
+              <label className="p-3 rounded-xl bg-gray-100 dark:bg-gray-900 cursor-pointer">Audio (MP3/WAV/etc.)<input type="file" accept=".mp3,.wav,.m4a,.aac,.aiff,.flac,.ogg,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/aac,audio/aiff,audio/flac,audio/ogg" className="block mt-2 w-full" onChange={e=>setAudio(e.target.files?.[0]||null)}/></label>
               <label className="p-3 rounded-xl bg-gray-100 dark:bg-gray-900 cursor-pointer">Cover<input type="file" accept="image/*" className="block mt-2 w-full" onChange={e=>setCover(e.target.files?.[0]||null)}/></label>
             </div>
             <button disabled={busy || !audio || !title} onClick={submit} className="mt-4 px-5 py-3 rounded-full bg-zrp-red text-white font-bold disabled:opacity-50">{busy ? "Uploading..." : "Publish song"}</button>
