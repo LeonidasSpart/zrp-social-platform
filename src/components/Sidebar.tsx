@@ -9,7 +9,7 @@ import {
   Home, Compass, Search, MessageSquare, Bell, Bookmark, User,
   LayoutDashboard, Settings, Users, Key, LogOut, MoreHorizontal,
   PenSquare, Sun, Moon, Globe, Film, Newspaper, Store, Gamepad2,
-  Briefcase, HeartHandshake,
+  Briefcase, HeartHandshake, Music2,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -92,6 +92,7 @@ export default function Sidebar() {
     { href: "/explore", icon: Compass, label: t("nav.explore") },
     { href: "/news", icon: Newspaper, label: t("nav.news") },
     { href: "/marketplace", icon: Store, label: t("nav.marketplace") },
+    { href: "/music", icon: Music2, label: "Music" },
     { href: "/play", icon: Gamepad2, label: t("nav.play") },
     { href: "/opportunity", icon: Briefcase, label: t("nav.opportunity") },
     { href: "/aid", icon: HeartHandshake, label: t("nav.help") },

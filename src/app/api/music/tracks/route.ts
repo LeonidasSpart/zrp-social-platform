@@ -2,12 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { getMusicPublishAccess, MUSIC_PUBLISH_DENIED_MESSAGE } from "@/lib/music/permissions";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Same publish gate as the UploadThing middleware: derived only from
+  // the authenticated session, never from the request body. A user
+  // could otherwise reuse a previously-uploaded audioUrl to call this
+  // route directly and publish without ever having permission.
+  const access = await getMusicPublishAccess(session.user.id);
+  if (!access.allowed) {
+    return NextResponse.json({ error: MUSIC_PUBLISH_DENIED_MESSAGE }, { status: 403 });
+  }
+
   const body = await req.json();
   const title = String(body.title || "").trim().slice(0, 200);
   const audioUrl = String(body.audioUrl || "");

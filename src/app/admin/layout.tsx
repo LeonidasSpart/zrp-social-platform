@@ -19,6 +19,7 @@ import {
   Briefcase,
   HeartHandshake,
   Wallet,
+  Music2,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
@@ -121,6 +122,11 @@ export default function AdminLayout({
       href: "/admin/help",
       labelKey: "adminHelp.title",
       icon: HeartHandshake,
+    },
+    {
+      href: "/admin/music",
+      labelKey: "adminMusic.title",
+      icon: Music2,
     },
 
     // Upgrade Requests, Storage Cleanup and HELP fund withdrawals

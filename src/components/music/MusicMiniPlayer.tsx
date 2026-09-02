@@ -36,6 +36,8 @@ export default function MusicMiniPlayer() {
     muted,
     shuffle,
     repeat,
+    buffering,
+    error,
     play,
     pause,
     next,
@@ -123,6 +125,12 @@ export default function MusicMiniPlayer() {
                         : ""}
                     </p>
 
+                    {error && (
+                      <p role="alert" className="text-red-400 text-sm mt-2">
+                        {error}
+                      </p>
+                    )}
+
                     {current.genre && (
                       <span className="inline-flex mt-3 px-3 py-1 rounded-full bg-white/10 text-xs text-white/60">
                         {current.genre}
@@ -181,9 +189,13 @@ export default function MusicMiniPlayer() {
                     onClick={() =>
                       playing ? pause() : play()
                     }
-                    className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-zrp-red flex items-center justify-center shadow-[0_0_45px_rgba(220,38,38,0.35)] active:scale-95 transition"
+                    className="relative w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-zrp-red flex items-center justify-center shadow-[0_0_45px_rgba(220,38,38,0.35)] active:scale-95 transition"
                     aria-label={playing ? "Pause" : "Play"}
+                    aria-busy={buffering}
                   >
+                    {buffering && playing && (
+                      <span className="absolute inset-0 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    )}
                     {playing ? (
                       <Pause className="w-8 h-8 fill-white" />
                     ) : (
@@ -353,7 +365,7 @@ export default function MusicMiniPlayer() {
                   </div>
 
                   <div className="text-xs text-white/50 truncate">
-                    {current.artist.displayName}
+                    {error || (buffering ? "Buffering..." : current.artist.displayName)}
                   </div>
                 </button>
 
@@ -387,9 +399,13 @@ export default function MusicMiniPlayer() {
                   onClick={() =>
                     playing ? pause() : play()
                   }
-                  className="shrink-0 w-11 h-11 rounded-full bg-zrp-red text-white flex items-center justify-center active:scale-95 transition"
+                  className="relative shrink-0 w-11 h-11 rounded-full bg-zrp-red text-white flex items-center justify-center active:scale-95 transition"
                   aria-label={playing ? "Pause" : "Play"}
+                  aria-busy={buffering}
                 >
+                  {buffering && playing && (
+                    <span className="absolute inset-0 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  )}
                   {playing ? (
                     <Pause className="w-5 h-5 fill-white" />
                   ) : (

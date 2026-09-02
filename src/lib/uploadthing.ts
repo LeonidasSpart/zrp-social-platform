@@ -3,6 +3,7 @@ import { UploadThingError } from "uploadthing/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth";
 import { checkVideoSize, checkImagesPerListing } from "./limits";
+import { getMusicPublishAccess, MUSIC_PUBLISH_DENIED_MESSAGE } from "./music/permissions";
 
 const f = createUploadthing();
 
@@ -588,6 +589,17 @@ export const ourFileRouter = {
     .middleware(async () => {
       const session = await getServerSession(authOptions);
       if (!session?.user) throw new UploadThingError("Unauthorized");
+
+      // Listening/browsing stays open to everyone, but publishing a
+      // track requires an approved Creator status or a verified Music
+      // Artist profile. This is derived only from the authenticated
+      // session's userId - never from anything the client sends - so
+      // it can't be bypassed by a crafted upload request.
+      const access = await getMusicPublishAccess(session.user.id);
+      if (!access.allowed) {
+        throw new UploadThingError(MUSIC_PUBLISH_DENIED_MESSAGE);
+      }
+
       return { userId: session.user.id };
     })
     .onUploadComplete(async ({ file }) => ({

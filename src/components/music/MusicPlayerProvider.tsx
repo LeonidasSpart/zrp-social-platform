@@ -42,6 +42,8 @@ type MusicContextType = {
   muted: boolean;
   shuffle: boolean;
   repeat: RepeatMode;
+  buffering: boolean;
+  error: string | null;
 
   play: (track?: MusicTrack) => void;
   pause: () => void;
@@ -57,6 +59,7 @@ type MusicContextType = {
   cycleRepeat: () => void;
 
   addToQueue: (track: MusicTrack) => void;
+  playNext: (track: MusicTrack) => void;
   removeFromQueue: (trackId: string) => void;
   clearQueue: () => void;
 };
@@ -83,6 +86,8 @@ export function MusicPlayerProvider({
 
   const [shuffle, setShuffle] = useState(false);
   const [repeat, setRepeat] = useState<RepeatMode>("off");
+  const [buffering, setBuffering] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const lastReported = useRef(0);
   const currentRef = useRef<MusicTrack | null>(null);
@@ -127,6 +132,46 @@ export function MusicPlayerProvider({
 
     const handlePause = () => {
       setPlaying(false);
+    };
+
+    const handleWaiting = () => {
+      setBuffering(true);
+    };
+
+    const handleCanPlay = () => {
+      setBuffering(false);
+    };
+
+    // A broken/unreachable audio file shouldn't strand playback - skip
+    // to the next queued track the same way a natural "ended" event
+    // does, just without reporting a completed play for a track that
+    // never actually played.
+    const handleError = () => {
+      setBuffering(false);
+      setPlaying(false);
+      setError("This track couldn't be played. Skipping to the next one.");
+
+      const activeShuffle = shuffleRef.current;
+
+      setQueue((previousQueue) => {
+        if (!previousQueue.length) {
+          setCurrent(null);
+          return previousQueue;
+        }
+
+        let nextIndex = 0;
+        if (activeShuffle && previousQueue.length > 1) {
+          nextIndex = Math.floor(Math.random() * previousQueue.length);
+        }
+
+        const nextTrack = previousQueue[nextIndex];
+        const remaining = previousQueue.filter((_, index) => index !== nextIndex);
+
+        setCurrent(nextTrack);
+        setPlaying(true);
+
+        return remaining;
+      });
     };
 
     const handleEnded = () => {
@@ -198,6 +243,10 @@ export function MusicPlayerProvider({
     audio.addEventListener("play", handlePlay);
     audio.addEventListener("pause", handlePause);
     audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("waiting", handleWaiting);
+    audio.addEventListener("canplay", handleCanPlay);
+    audio.addEventListener("playing", handleCanPlay);
+    audio.addEventListener("error", handleError);
 
     return () => {
       audio.pause();
@@ -210,6 +259,10 @@ export function MusicPlayerProvider({
       audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("pause", handlePause);
       audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("waiting", handleWaiting);
+      audio.removeEventListener("canplay", handleCanPlay);
+      audio.removeEventListener("playing", handleCanPlay);
+      audio.removeEventListener("error", handleError);
     };
   }, []);
 
@@ -226,6 +279,7 @@ export function MusicPlayerProvider({
 
     setProgress(0);
     setDuration(current.durationSec || 0);
+    setError(null);
 
     lastReported.current = 0;
 
@@ -482,6 +536,10 @@ export function MusicPlayerProvider({
     setQueue((previous) => [...previous, track]);
   }, []);
 
+  const playNext = useCallback((track: MusicTrack) => {
+    setQueue((previous) => [track, ...previous.filter((t) => t.id !== track.id)]);
+  }, []);
+
   const removeFromQueue = useCallback((trackId: string) => {
     setQueue((previous) =>
       previous.filter((track) => track.id !== trackId)
@@ -531,6 +589,8 @@ export function MusicPlayerProvider({
         muted,
         shuffle,
         repeat,
+        buffering,
+        error,
 
         play,
         pause,
@@ -546,6 +606,7 @@ export function MusicPlayerProvider({
         cycleRepeat,
 
         addToQueue,
+        playNext,
         removeFromQueue,
         clearQueue,
       }}

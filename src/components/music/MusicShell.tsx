@@ -1,11 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Heart, ListPlus, Play, Search, UploadCloud, Disc3, Music2, Sparkles, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import {
+  Heart, ListPlus, Play, Search, UploadCloud, Disc3, Music2, Sparkles,
+  ChevronRight, Lock, Compass, Users, ListMusic, History,
+} from "lucide-react";
 import { useMusicPlayer, type MusicTrack } from "./MusicPlayerProvider";
 import { useUploadThing } from "@/lib/uploadthing-client";
 
+type MusicAccess = {
+  allowed: boolean;
+  isCreator: boolean;
+  isVerifiedArtist: boolean;
+  hasArtistProfile: boolean;
+  reason?: string;
+};
+
 export default function MusicShell() {
+  const { data: session } = useSession();
   const [tracks, setTracks] = useState<MusicTrack[]>([]);
   const [q, setQ] = useState("");
   const [studio, setStudio] = useState(false);
@@ -15,6 +29,11 @@ export default function MusicShell() {
   const [audio, setAudio] = useState<File | null>(null);
   const [cover, setCover] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [access, setAccess] = useState<MusicAccess | null>(null);
+  const [accessLoading, setAccessLoading] = useState(true);
+  const [applyName, setApplyName] = useState("");
+  const [applyBusy, setApplyBusy] = useState(false);
   const { play, addToQueue } = useMusicPlayer();
   const { startUpload: uploadMusic } = useUploadThing("musicTrack", {
     onClientUploadComplete: async (files) => {
@@ -26,14 +45,23 @@ export default function MusicShell() {
         body: JSON.stringify({ displayName: artistName || undefined }),
       });
       const artist = await artistRes.json();
-      await fetch("/api/music/tracks", {
+      const trackRes = await fetch("/api/music/tracks", {
         method: "POST", headers: {"Content-Type":"application/json"},
         body: JSON.stringify({ title, genre, audioUrl: audioFile.ufsUrl, audioKey: audioFile.key, coverUrl: imageFile?.ufsUrl || null, artistId: artist.id }),
       });
+      if (!trackRes.ok) {
+        const data = await trackRes.json().catch(() => ({}));
+        setUploadError(data.error || "Publishing failed. Please try again.");
+        setBusy(false);
+        return;
+      }
       setBusy(false); setAudio(null); setCover(null); setTitle(""); setStudio(false);
       load();
     },
-    onUploadError: () => setBusy(false),
+    onUploadError: (err) => {
+      setUploadError(err.message || "Upload failed. Please try again.");
+      setBusy(false);
+    },
   });
 
   async function load() {
@@ -42,11 +70,44 @@ export default function MusicShell() {
   }
   useEffect(() => { load(); }, [q]);
 
+  async function loadAccess() {
+    setAccessLoading(true);
+    try {
+      const res = await fetch("/api/music/access", { cache: "no-store" });
+      if (res.ok) setAccess(await res.json());
+    } finally {
+      setAccessLoading(false);
+    }
+  }
+  useEffect(() => {
+    if (session?.user) loadAccess();
+    else {
+      setAccess(null);
+      setAccessLoading(false);
+    }
+  }, [session?.user]);
+
   const submit = async () => {
     if (!audio || !title) return;
+    setUploadError(null);
     setBusy(true);
     const files = cover ? [audio, cover] : [audio];
     await uploadMusic(files);
+  };
+
+  const applyForArtist = async () => {
+    if (!applyName.trim()) return;
+    setApplyBusy(true);
+    const res = await fetch("/api/music/artists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ displayName: applyName.trim() }),
+    });
+    setApplyBusy(false);
+    if (res.ok) {
+      setApplyName("");
+      loadAccess();
+    }
   };
 
   const like = async (id: string) => {
@@ -181,82 +242,154 @@ export default function MusicShell() {
               </button>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-3">
-              <input
-                value={artistName}
-                onChange={(e) => setArtistName(e.target.value)}
-                placeholder="Artist name"
-                className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
-              />
+            {!session?.user ? (
+              <div className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-black/30 p-6 text-center">
+                <Lock className="w-8 h-8 mx-auto text-gray-400" />
+                <div className="font-bold mt-3">Sign in to publish music</div>
+                <p className="text-sm text-gray-500 mt-1">
+                  Listening to ZRP Music is open to everyone. You&apos;ll need to sign in to apply for publishing access.
+                </p>
+              </div>
+            ) : accessLoading ? (
+              <div className="py-10 flex justify-center">
+                <div className="animate-spin rounded-full h-7 w-7 border-2 border-zrp-red border-t-transparent" />
+              </div>
+            ) : !access?.allowed ? (
+              <div className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-black/30 p-6">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center shrink-0">
+                    <Lock className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <div>
+                    <div className="font-bold">Music Studio - Artist or Creator status required</div>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Listening to ZRP Music is open to everyone. Publishing music requires
+                      an approved Creator status or a verified Music Artist profile.
+                    </p>
+                  </div>
+                </div>
 
-              <input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Song title"
-                className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
-              />
+                {access?.hasArtistProfile ? (
+                  <div className="mt-5 text-sm rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/40 p-3.5">
+                    Your artist profile has been submitted and is awaiting verification from ZRP staff.
+                  </div>
+                ) : (
+                  <div className="mt-5">
+                    <p className="text-sm text-gray-500 mb-2">
+                      Create an artist profile to apply for Music Artist verification, or
+                      <Link href="/settings" className="text-zrp-red hover:underline"> apply for Creator status</Link> from your settings.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        value={applyName}
+                        onChange={(e) => setApplyName(e.target.value)}
+                        placeholder="Artist name"
+                        className="flex-1 p-3 rounded-xl bg-gray-50 dark:bg-white/[0.05] border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
+                      />
+                      <button
+                        type="button"
+                        disabled={applyBusy || !applyName.trim()}
+                        onClick={applyForArtist}
+                        className="h-11 px-5 rounded-xl bg-zrp-red text-white font-bold disabled:opacity-40 shrink-0"
+                      >
+                        {applyBusy ? "Submitting..." : "Apply as Artist"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <input
+                    value={artistName}
+                    onChange={(e) => setArtistName(e.target.value)}
+                    placeholder="Artist name"
+                    className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
+                  />
 
-              <input
-                value={genre}
-                onChange={(e) => setGenre(e.target.value)}
-                placeholder="Genre"
-                className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
-              />
+                  <input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Song title"
+                    className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
+                  />
 
-              <label className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 cursor-pointer text-sm text-gray-500">
-                Audio file
-                <input
-                  type="file"
-                  accept=".mp3,.wav,.m4a,.aac,.aiff,.flac,.ogg,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/aac,audio/aiff,audio/flac,audio/ogg"
-                  className="block mt-2 w-full text-xs"
-                  onChange={(e) => setAudio(e.target.files?.[0] || null)}
-                />
-              </label>
+                  <input
+                    value={genre}
+                    onChange={(e) => setGenre(e.target.value)}
+                    placeholder="Genre"
+                    className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
+                  />
 
-              <label className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 cursor-pointer text-sm text-gray-500">
-                Cover artwork
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="block mt-2 w-full text-xs"
-                  onChange={(e) => setCover(e.target.files?.[0] || null)}
-                />
-              </label>
+                  <label className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 cursor-pointer text-sm text-gray-500">
+                    Audio file
+                    <input
+                      type="file"
+                      accept=".mp3,.wav,.m4a,.aac,.aiff,.flac,.ogg,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/aac,audio/aiff,audio/flac,audio/ogg"
+                      className="block mt-2 w-full text-xs"
+                      onChange={(e) => setAudio(e.target.files?.[0] || null)}
+                    />
+                  </label>
 
-              <button
-                disabled={busy || !audio || !title}
-                onClick={submit}
-                className="sm:col-span-2 h-12 rounded-xl bg-zrp-red text-white font-bold disabled:opacity-40"
-              >
-                {busy ? "Publishing..." : "Publish track"}
-              </button>
-            </div>
+                  <label className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 cursor-pointer text-sm text-gray-500">
+                    Cover artwork
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="block mt-2 w-full text-xs"
+                      onChange={(e) => setCover(e.target.files?.[0] || null)}
+                    />
+                  </label>
 
-            <p className="text-xs text-gray-500 mt-3">
-              Audio and artwork are uploaded directly to your existing ZRP storage.
-            </p>
+                  <button
+                    disabled={busy || !audio || !title}
+                    onClick={submit}
+                    className="sm:col-span-2 h-12 rounded-xl bg-zrp-red text-white font-bold disabled:opacity-40"
+                  >
+                    {busy ? "Publishing..." : "Publish track"}
+                  </button>
+                </div>
+
+                {uploadError && (
+                  <p role="alert" className="text-sm text-red-600 dark:text-red-400 mt-3">
+                    {uploadError}
+                  </p>
+                )}
+
+                <p className="text-xs text-gray-500 mt-3">
+                  Audio and artwork are uploaded directly to your existing ZRP storage.
+                </p>
+              </>
+            )}
           </section>
         )}
 
         {/* Quick navigation */}
         <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            ["Discover", "Fresh music for you", Music2],
-            ["Albums", "Full releases", Disc3],
-            ["Artists", "Find new voices", Sparkles],
-            ["Your Queue", "What plays next", ListPlus],
-          ].map(([name, description, Icon]) => (
-            <button
+            ["Discover", "Fresh music for you", Compass, "/music/discover"],
+            ["Albums", "Full releases", Disc3, "/music/albums"],
+            ["Artists", "Find new voices", Users, "/music/artists"],
+            ["Your Queue", "What plays next", ListPlus, "/music/queue"],
+            ["Liked Music", "Tracks you saved", Heart, "/music/liked"],
+            ["Playlists", "Your collections", ListMusic, "/music/playlists"],
+            ["Recently Played", "Pick up where you left off", History, "/music/history"],
+          ].map(([name, description, Icon, href]) => (
+            <Link
               key={String(name)}
-              type="button"
+              href={String(href)}
               className="group text-left rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.035] p-4 hover:border-zrp-red/30 hover:bg-zrp-red/[0.03] transition"
             >
               <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-white/10 flex items-center justify-center group-hover:bg-zrp-red group-hover:text-white transition">
-                <Icon className="w-5 h-5" />
+                {(() => {
+                  const IconComponent = Icon as React.ElementType;
+                  return <IconComponent className="w-5 h-5" />;
+                })()}
               </div>
               <div className="font-bold mt-3">{String(name)}</div>
               <div className="text-xs text-gray-500 mt-1">{String(description)}</div>
-            </button>
+            </Link>
           ))}
         </section>
 

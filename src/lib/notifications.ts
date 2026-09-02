@@ -31,7 +31,8 @@ interface CreateNotificationParams {
     | "help_campaign_approved"
     | "help_campaign_rejected"
     | "help_campaign_removed"
-    | "help_new_offer";
+    | "help_new_offer"
+    | "music_artist_verified";
   fromUserId: string;
   postId?: string;
   ticketId?: string; // ✅ added for ticket links
@@ -181,6 +182,7 @@ export async function createNotification({
       help_campaign_rejected: { action: "didn't approve your ZRP HELP campaign", emoji: "🚫" },
       help_campaign_removed: { action: "removed your ZRP HELP campaign", emoji: "⚠️" },
       help_new_offer: { action: "offered to help with your ZRP HELP campaign", emoji: "🤝" },
+      music_artist_verified: { action: "verified your ZRP Music Artist profile", emoji: "🎵" },
     };
     const { action, emoji } = actionMap[type] || { action: "interacted with you", emoji: "🔔" };
 
