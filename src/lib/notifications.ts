@@ -21,13 +21,25 @@ interface CreateNotificationParams {
     | "listing_removed"
     | "play_duel_challenge"
     | "play_duel_accepted"
-    | "play_duel_result";
+    | "play_duel_result"
+    | "opportunity_listing_approved"
+    | "opportunity_listing_rejected"
+    | "opportunity_listing_removed"
+    | "opportunity_new_application"
+    | "opportunity_application_accepted"
+    | "opportunity_application_rejected"
+    | "help_campaign_approved"
+    | "help_campaign_rejected"
+    | "help_campaign_removed"
+    | "help_new_offer";
   fromUserId: string;
   postId?: string;
   ticketId?: string; // ✅ added for ticket links
   ticketSubject?: string; // ✅ added for ticket subject in email
   listingId?: string; // ZRP Market Plus - links a listing approval/rejection email to the listing
   duelId?: string; // ZRP PLAY - links a duel notification email to the duel
+  opportunityId?: string; // ZRP OPPORTUNITY - links a listing/application email to the listing
+  campaignId?: string; // ZRP HELP - links a campaign/offer email to the campaign
 }
 
 const defaultPreferences = {
@@ -52,6 +64,8 @@ export async function createNotification({
   ticketSubject,
   listingId,
   duelId,
+  opportunityId,
+  campaignId,
 }: CreateNotificationParams) {
   if (userId === fromUserId) return;
 
@@ -93,6 +107,8 @@ export async function createNotification({
       "follow",
       "play_duel_challenge",
       "play_duel_accepted",
+      "opportunity_new_application",
+      "help_new_offer",
     ]);
     if (NEVER_EMAIL_TYPES.has(type)) return;
 
@@ -155,6 +171,16 @@ export async function createNotification({
       play_duel_challenge: { action: "challenged you to a ZRP PLAY duel", emoji: "⚔️" },
       play_duel_accepted: { action: "accepted your ZRP PLAY duel", emoji: "🎮" },
       play_duel_result: { action: "finished your ZRP PLAY duel", emoji: "🏆" },
+      opportunity_listing_approved: { action: "approved your ZRP OPPORTUNITY listing", emoji: "✅" },
+      opportunity_listing_rejected: { action: "didn't approve your ZRP OPPORTUNITY listing", emoji: "🚫" },
+      opportunity_listing_removed: { action: "removed your ZRP OPPORTUNITY listing", emoji: "⚠️" },
+      opportunity_new_application: { action: "applied to your ZRP OPPORTUNITY listing", emoji: "📄" },
+      opportunity_application_accepted: { action: "accepted your ZRP OPPORTUNITY application", emoji: "🎉" },
+      opportunity_application_rejected: { action: "didn't move forward with your ZRP OPPORTUNITY application", emoji: "📭" },
+      help_campaign_approved: { action: "approved your ZRP HELP campaign", emoji: "✅" },
+      help_campaign_rejected: { action: "didn't approve your ZRP HELP campaign", emoji: "🚫" },
+      help_campaign_removed: { action: "removed your ZRP HELP campaign", emoji: "⚠️" },
+      help_new_offer: { action: "offered to help with your ZRP HELP campaign", emoji: "🤝" },
     };
     const { action, emoji } = actionMap[type] || { action: "interacted with you", emoji: "🔔" };
 
@@ -318,6 +344,108 @@ export async function createNotification({
       `;
     }
 
+    // Opportunity listing approval/rejection/removal and application
+    // status - same dedicated-block pattern as listings above.
+    if (
+      type === "opportunity_listing_approved" ||
+      type === "opportunity_listing_rejected" ||
+      type === "opportunity_listing_removed" ||
+      type === "opportunity_new_application" ||
+      type === "opportunity_application_accepted" ||
+      type === "opportunity_application_rejected"
+    ) {
+      const isListingOutcome =
+        type === "opportunity_listing_approved" ||
+        type === "opportunity_listing_rejected" ||
+        type === "opportunity_listing_removed";
+      const opportunityUrl =
+        (type === "opportunity_listing_approved" || type === "opportunity_new_application") && opportunityId
+          ? `${process.env.NEXTAUTH_URL}/opportunity/listing/${opportunityId}`
+          : isListingOutcome
+            ? `${process.env.NEXTAUTH_URL}/opportunity/my-listings`
+            : `${process.env.NEXTAUTH_URL}/opportunity/my-applications`;
+      const heading =
+        type === "opportunity_listing_approved"
+          ? "Your OPPORTUNITY listing is live"
+          : type === "opportunity_listing_rejected"
+            ? "Your OPPORTUNITY listing needs changes"
+            : type === "opportunity_listing_removed"
+              ? "Your OPPORTUNITY listing was removed"
+              : type === "opportunity_new_application"
+                ? `${actorName} applied to your listing`
+                : type === "opportunity_application_accepted"
+                  ? "Your application was accepted"
+                  : "An update on your application";
+      const body =
+        type === "opportunity_listing_approved"
+          ? "It's now visible to the ZRP OPPORTUNITY community."
+          : type === "opportunity_listing_rejected"
+            ? "Check your listings dashboard for the reviewer's note, then resubmit."
+            : type === "opportunity_listing_removed"
+              ? "It was taken down by our moderation team for violating community guidelines."
+              : type === "opportunity_new_application"
+                ? "Review their application from your listing dashboard."
+                : type === "opportunity_application_accepted"
+                  ? "Congratulations! Check your applications for next steps."
+                  : "The poster has moved forward with other candidates this time.";
+      customHtml = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 12px; border: 1px solid #e5e7eb;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <img src="https://zrp.one/logo.png" alt="ZRP" style="height: 40px;" />
+          </div>
+          <div style="font-size: 48px; text-align: center; margin-bottom: 16px;">${emoji}</div>
+          <h1 style="font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 8px 0; text-align: center;">${heading}</h1>
+          <p style="font-size: 14px; color: #6b7280; text-align: center; margin: 0 0 24px 0;">${body}</p>
+          <a href="${opportunityUrl}" style="display: inline-block; background-color: #FF2D2D; color: #ffffff; font-weight: 600; padding: 12px 24px; border-radius: 8px; text-decoration: none; text-align: center; margin: 0 auto; display: table;">
+            View
+          </a>
+        </div>
+      `;
+    }
+
+    // HELP campaign approval/rejection/removal and new-offer - same
+    // dedicated-block pattern as opportunities above.
+    if (
+      type === "help_campaign_approved" ||
+      type === "help_campaign_rejected" ||
+      type === "help_campaign_removed" ||
+      type === "help_new_offer"
+    ) {
+      const campaignUrl =
+        (type === "help_campaign_approved" || type === "help_new_offer") && campaignId
+          ? `${process.env.NEXTAUTH_URL}/help/campaign/${campaignId}`
+          : `${process.env.NEXTAUTH_URL}/help/my-campaigns`;
+      const heading =
+        type === "help_campaign_approved"
+          ? "Your HELP campaign is live"
+          : type === "help_campaign_rejected"
+            ? "Your HELP campaign needs changes"
+            : type === "help_campaign_removed"
+              ? "Your HELP campaign was removed"
+              : `${actorName} offered to help with your campaign`;
+      const body =
+        type === "help_campaign_approved"
+          ? "It's now visible to the ZRP HELP community."
+          : type === "help_campaign_rejected"
+            ? "Check your campaigns dashboard for the reviewer's note, then resubmit."
+            : type === "help_campaign_removed"
+              ? "It was taken down by our moderation team for violating community guidelines."
+              : "Review their offer from your campaign dashboard.";
+      customHtml = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 12px; border: 1px solid #e5e7eb;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <img src="https://zrp.one/logo.png" alt="ZRP" style="height: 40px;" />
+          </div>
+          <div style="font-size: 48px; text-align: center; margin-bottom: 16px;">${emoji}</div>
+          <h1 style="font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 8px 0; text-align: center;">${heading}</h1>
+          <p style="font-size: 14px; color: #6b7280; text-align: center; margin: 0 0 24px 0;">${body}</p>
+          <a href="${campaignUrl}" style="display: inline-block; background-color: #FF2D2D; color: #ffffff; font-weight: 600; padding: 12px 24px; border-radius: 8px; text-decoration: none; text-align: center; margin: 0 auto; display: table;">
+            View
+          </a>
+        </div>
+      `;
+    }
+
     // ─── 7. Subject ──────────────────────────────────────────────────
     const subjectMap: Record<string, string> = {
       like: `${actorName} liked your post`,
@@ -338,6 +466,16 @@ export async function createNotification({
       play_duel_challenge: `${actorName} challenged you to a ZRP PLAY duel`,
       play_duel_accepted: `${actorName} accepted your ZRP PLAY duel`,
       play_duel_result: "Your ZRP PLAY duel has finished",
+      opportunity_listing_approved: "Your ZRP OPPORTUNITY listing is live",
+      opportunity_listing_rejected: "Your ZRP OPPORTUNITY listing needs changes",
+      opportunity_listing_removed: "Your ZRP OPPORTUNITY listing was removed",
+      opportunity_new_application: `${actorName} applied to your ZRP OPPORTUNITY listing`,
+      opportunity_application_accepted: "Your ZRP OPPORTUNITY application was accepted",
+      opportunity_application_rejected: "An update on your ZRP OPPORTUNITY application",
+      help_campaign_approved: "Your ZRP HELP campaign is live",
+      help_campaign_rejected: "Your ZRP HELP campaign needs changes",
+      help_campaign_removed: "Your ZRP HELP campaign was removed",
+      help_new_offer: `${actorName} offered to help with your ZRP HELP campaign`,
     };
     const subject = subjectMap[type] || "New notification from ZRP";
 

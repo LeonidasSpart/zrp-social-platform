@@ -26,6 +26,8 @@ import {
   Newspaper,
   Store,
   Gamepad2,
+  Briefcase,
+  HeartHandshake,
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
@@ -173,6 +175,16 @@ export default function Header() {
       href: "/play",
       icon: Gamepad2,
       label: t("nav.play"),
+    },
+    {
+      href: "/opportunity",
+      icon: Briefcase,
+      label: t("nav.opportunity"),
+    },
+    {
+      href: "/aid",
+      icon: HeartHandshake,
+      label: t("nav.help"),
     },
     {
       href: "/search",

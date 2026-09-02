@@ -161,6 +161,74 @@ enum PlayDuelStatus {
   EXPIRED
 }
 
+// ─── ZRP OPPORTUNITY ────────────────────────────────────────────────
+enum OpportunityType {
+  JOB
+  REMOTE
+  INTERNSHIP
+  SCHOLARSHIP
+  MENTORSHIP
+  FREELANCE
+  PARTNERSHIP
+  SPONSORSHIP
+  HACKATHON
+  TRAINING
+  COLLABORATION
+}
+
+// Same PENDING_REVIEW -> staff approve/reject -> live shape as Listing
+// (see the comment on Listing below) - a fake job/scholarship posting
+// is exactly the kind of thing that needs a human review gate before
+// it's visible to the community.
+enum OpportunityStatus {
+  PENDING_REVIEW
+  ACTIVE
+  REJECTED
+  EXPIRED
+  CLOSED
+  REMOVED
+}
+
+enum OpportunityApplicationStatus {
+  PENDING
+  REVIEWED
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+// ─── ZRP HELP ───────────────────────────────────────────────────────
+enum HelpCategory {
+  WAR
+  DISASTER
+  POVERTY
+  EMERGENCY
+  OTHER
+}
+
+enum HelpNeedType {
+  MONEY
+  SUPPLIES
+  SKILLS
+  VOLUNTEERS
+}
+
+enum HelpCampaignStatus {
+  PENDING_REVIEW
+  ACTIVE
+  REJECTED
+  COMPLETED
+  CLOSED
+  REMOVED
+}
+
+enum HelpOfferStatus {
+  PENDING
+  ACKNOWLEDGED
+  FULFILLED
+  DECLINED
+}
+
 model User {
   id       String  @id @default(cuid())
   email    String  @unique
@@ -320,6 +388,17 @@ model User {
   // News articles this user (an admin/moderator) has reviewed
   // (approved/rejected) as part of the journalist submission workflow.
   newsReviewsGiven NewsArticle[] @relation("NewsReviewedBy")
+
+  // ─── ZRP OPPORTUNITY ─────────────────────────────────────────
+  opportunityListings     OpportunityListing[]     @relation("OpportunityPoster")
+  opportunityApplications OpportunityApplication[] @relation("OpportunityApplicant")
+  opportunitySaved        OpportunitySavedListing[] @relation("OpportunitySaver")
+
+  // ─── ZRP HELP ────────────────────────────────────────────────
+  helpCampaigns          HelpCampaign[]           @relation("HelpOrganizer")
+  helpContributions      HelpContribution[]       @relation("HelpContributor")
+  helpOffers             HelpOffer[]              @relation("HelpOfferer")
+  helpWithdrawalRequests HelpWithdrawalRequest[]  @relation("HelpWithdrawalOrganizer")
 }
 
 model JournalistProfile {
@@ -725,12 +804,22 @@ model Report {
   challengeId String?
   challenge   PlayChallenge? @relation(fields: [challengeId], references: [id], onDelete: SetNull)
 
+  // Fifth polymorphic target - ZRP OPPORTUNITY listings.
+  opportunityId String?
+  opportunity   OpportunityListing? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+
+  // Sixth polymorphic target - ZRP HELP campaigns.
+  campaignId String?
+  campaign   HelpCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
   appeals Appeal[]
 
   @@index([postId])
   @@index([commentId])
   @@index([listingId])
   @@index([challengeId])
+  @@index([opportunityId])
+  @@index([campaignId])
   @@index([status])
   @@index([reporterId])
   @@index([targetUserId])
@@ -1649,4 +1738,241 @@ model PlayUserAchievement {
 
   @@unique([userId, achievementKey])
   @@index([userId])
+}
+
+// ─── ZRP OPPORTUNITY ──────────────────────────────────────────────
+// Connects creators, developers, students, employees, businesses,
+// universities, hotels, hospitals and organizations with real
+// opportunities: jobs, remote work, internships, scholarships,
+// mentorship, freelance projects, partnerships, sponsorships,
+// hackathons, training and collaboration. Same PENDING_REVIEW ->
+// staff approve/reject -> live, reportable-after-the-fact shape as
+// Listing (see the comment on Listing above) - not a payments system,
+// applying happens on-platform (OpportunityApplication) or via an
+// external link (externalUrl); no money changes hands here.
+model OpportunityListing {
+  id String @id @default(cuid())
+
+  posterId String
+  poster   User   @relation("OpportunityPoster", fields: [posterId], references: [id], onDelete: Cascade)
+
+  type OpportunityType
+
+  title            String
+  description      String  @db.Text
+  organizationName String?
+
+  skills   String[] @default([])
+  location String?
+  remote   Boolean  @default(false)
+
+  // Compensation is informational only, same reasoning as
+  // Listing.price/priceOnRequest - ZRP never verifies or escrows pay.
+  isPaid           Boolean @default(true)
+  compensationInfo String?
+
+  // If set, "Apply" sends the applicant to the poster's own site/ATS
+  // instead of creating an OpportunityApplication row.
+  externalUrl String?
+
+  deadline DateTime?
+
+  status          OpportunityStatus @default(PENDING_REVIEW)
+  rejectionReason String?           @db.Text
+  reviewedBy      String?
+  reviewedAt      DateTime?
+
+  views     Int       @default(0)
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applications OpportunityApplication[]
+  savedBy      OpportunitySavedListing[]
+  reports      Report[]
+
+  @@index([posterId])
+  @@index([status])
+  @@index([type])
+  @@index([status, type])
+  @@index([status, expiresAt])
+  @@index([createdAt])
+}
+
+model OpportunityApplication {
+  id String @id @default(cuid())
+
+  listingId String
+  listing   OpportunityListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  applicantId String
+  applicant   User   @relation("OpportunityApplicant", fields: [applicantId], references: [id], onDelete: Cascade)
+
+  coverNote String? @db.Text
+  resumeUrl String? // uploaded via the chatFile-shaped {pdf,text,blob} route
+
+  status OpportunityApplicationStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([listingId, applicantId])
+  @@index([listingId])
+  @@index([applicantId])
+  @@index([status])
+}
+
+model OpportunitySavedListing {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation("OpportunitySaver", fields: [userId], references: [id], onDelete: Cascade)
+
+  listingId String
+  listing   OpportunityListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, listingId])
+  @@index([userId])
+}
+
+// ─── ZRP HELP ─────────────────────────────────────────────────────
+// A verified humanitarian space: only accounts with badgeType
+// "organization" (the same verification signal already surfaced on
+// Trust Passport, granted by a full admin via PUT /api/admin/users/[id]
+// - deliberately no new verification system) may publish a campaign.
+// Same PENDING_REVIEW -> staff approve/reject -> live shape as
+// Listing. Money movement reuses the exact same on-chain USDC rail as
+// Tip/PremiumPurchase (see CreatorProfile/Tip/WithdrawalRequest above)
+// instead of a new payment system - HelpContribution is a pooled
+// version of Tip (many contributors -> one campaign balance instead
+// of one sender -> one CreatorProfile), and HelpWithdrawalRequest
+// mirrors WithdrawalRequest's atomic reserve-on-request /
+// release-on-failure-or-rejection shape exactly. Unlike creator tips,
+// contributions here carry NO platform fee (100% passthrough) - this
+// is deliberately not a revenue feature.
+model HelpCampaign {
+  id String @id @default(cuid())
+
+  organizerId String
+  organizer   User   @relation("HelpOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
+
+  category  HelpCategory
+  needTypes HelpNeedType[] @default([])
+
+  title       String
+  description String  @db.Text
+  location    String?
+
+  // Only meaningful when needTypes includes MONEY - enforced in the
+  // API route, not the schema (a campaign asking purely for supplies
+  // or volunteers has no goal amount at all).
+  goalAmount     Decimal? @db.Decimal(18, 2)
+  currency       String   @default("USDC")
+  raisedAmount   Decimal  @default(0) @db.Decimal(18, 6)
+  balance        Decimal  @default(0) @db.Decimal(18, 6)
+  totalWithdrawn Decimal  @default(0) @db.Decimal(18, 6)
+
+  imageUrls String[] @default([])
+  proofUrls String[] @default([]) // optional evidence/documentation links, for transparency
+
+  status          HelpCampaignStatus @default(PENDING_REVIEW)
+  rejectionReason String?            @db.Text
+  reviewedBy      String?
+  reviewedAt      DateTime?
+
+  views Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contributions      HelpContribution[]
+  offers             HelpOffer[]
+  withdrawalRequests HelpWithdrawalRequest[]
+  reports            Report[]
+
+  @@index([organizerId])
+  @@index([status])
+  @@index([category])
+  @@index([status, category])
+  @@index([createdAt])
+}
+
+model HelpContribution {
+  id String @id @default(cuid())
+
+  campaignId String
+  campaign   HelpCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  contributorId String
+  contributor   User   @relation("HelpContributor", fields: [contributorId], references: [id], onDelete: Cascade)
+
+  amount   Decimal @db.Decimal(18, 6)
+  currency String  @default("USDC")
+
+  message     String? @db.Text
+  isAnonymous Boolean @default(false)
+
+  transactionId String?           @unique
+  status        TransactionStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+
+  @@index([campaignId])
+  @@index([contributorId])
+}
+
+// Non-monetary help pledges (supplies/skills/volunteers) - money goes
+// through HelpContribution instead. No separate contact-info field:
+// the organizer reaches an offerer through the existing messaging
+// system once they decide to follow up.
+model HelpOffer {
+  id String @id @default(cuid())
+
+  campaignId String
+  campaign   HelpCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  offererId String
+  offerer   User   @relation("HelpOfferer", fields: [offererId], references: [id], onDelete: Cascade)
+
+  needType HelpNeedType
+  message  String       @db.Text
+
+  status HelpOfferStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([campaignId])
+  @@index([offererId])
+  @@index([status])
+}
+
+model HelpWithdrawalRequest {
+  id String @id @default(cuid())
+
+  campaignId String
+  campaign   HelpCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  organizerId String
+  organizer   User   @relation("HelpWithdrawalOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
+
+  amount   Decimal @db.Decimal(18, 6)
+  currency String  @default("USDC")
+
+  walletAddress String
+
+  status WithdrawalStatus @default(PENDING)
+
+  transactionHash String?
+  processedAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([campaignId])
+  @@index([organizerId])
+  @@index([status])
 }

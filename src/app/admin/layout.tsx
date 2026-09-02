@@ -16,6 +16,9 @@ import {
   HardDrive,
   Scale,
   Store,
+  Briefcase,
+  HeartHandshake,
+  Wallet,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
@@ -109,8 +112,20 @@ export default function AdminLayout({
       labelKey: "adminMarketplace.title",
       icon: Store,
     },
+    {
+      href: "/admin/opportunity",
+      labelKey: "adminOpportunity.title",
+      icon: Briefcase,
+    },
+    {
+      href: "/admin/help",
+      labelKey: "adminHelp.title",
+      icon: HeartHandshake,
+    },
 
-    // Upgrade Requests and Storage Cleanup require full admin access.
+    // Upgrade Requests, Storage Cleanup and HELP fund withdrawals
+    // require full admin access - approving a payout is a sensitive,
+    // financial action, same bar as the existing creator withdrawals.
     ...(isFullAdmin
       ? [
           {
@@ -122,6 +137,11 @@ export default function AdminLayout({
             href: "/admin/storage",
             labelKey: "adminStorage.title" as TranslationKey,
             icon: HardDrive,
+          },
+          {
+            href: "/admin/help-withdrawals",
+            labelKey: "adminHelpWithdrawals.title" as TranslationKey,
+            icon: Wallet,
           },
         ]
       : []),
