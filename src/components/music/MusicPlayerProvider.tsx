@@ -1,6 +1,15 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+export type RepeatMode = "off" | "all" | "one";
 
 export type MusicTrack = {
   id: string;
@@ -8,8 +17,16 @@ export type MusicTrack = {
   audioUrl: string;
   coverUrl?: string | null;
   durationSec?: number | null;
-  artist: { id: string; displayName: string; avatarUrl?: string | null };
-  album?: { id: string; title: string; coverUrl?: string | null } | null;
+  artist: {
+    id: string;
+    displayName: string;
+    avatarUrl?: string | null;
+  };
+  album?: {
+    id: string;
+    title: string;
+    coverUrl?: string | null;
+  } | null;
   genre?: string | null;
   playCount?: number;
   liked?: boolean;
@@ -22,126 +39,504 @@ type MusicContextType = {
   progress: number;
   duration: number;
   volume: number;
+  muted: boolean;
+  shuffle: boolean;
+  repeat: RepeatMode;
+
   play: (track?: MusicTrack) => void;
   pause: () => void;
+  togglePlay: () => void;
   next: () => void;
   previous: () => void;
   seek: (seconds: number) => void;
-  setVolume: (v: number) => void;
+
+  setVolume: (volume: number) => void;
+  toggleMute: () => void;
+
+  toggleShuffle: () => void;
+  cycleRepeat: () => void;
+
   addToQueue: (track: MusicTrack) => void;
+  removeFromQueue: (trackId: string) => void;
+  clearQueue: () => void;
 };
 
 const MusicContext = createContext<MusicContextType | null>(null);
 
-export function MusicPlayerProvider({ children }: { children: React.ReactNode }) {
+export function MusicPlayerProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
   const [current, setCurrent] = useState<MusicTrack | null>(null);
   const [queue, setQueue] = useState<MusicTrack[]>([]);
+  const [history, setHistory] = useState<MusicTrack[]>([]);
+
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+
   const [volume, setVolumeState] = useState(1);
+  const [muted, setMuted] = useState(false);
+
+  const [shuffle, setShuffle] = useState(false);
+  const [repeat, setRepeat] = useState<RepeatMode>("off");
+
   const lastReported = useRef(0);
 
+  /*
+   * Create one persistent audio element.
+   * This allows playback to continue while navigating around ZRP.
+   */
   useEffect(() => {
     const audio = new Audio();
+
     audio.preload = "metadata";
-    audio.volume = volume;
+    audio.volume = 1;
+    audio.muted = false;
+
     audioRef.current = audio;
-    const time = () => setProgress(audio.currentTime);
-    const meta = () => setDuration(audio.duration || current?.durationSec || 0);
-    const ended = () => {
+
+    const handleTimeUpdate = () => {
+      setProgress(audio.currentTime);
+    };
+
+    const handleLoadedMetadata = () => {
+      const nextDuration =
+        Number.isFinite(audio.duration) && audio.duration > 0
+          ? audio.duration
+          : current?.durationSec || 0;
+
+      setDuration(nextDuration);
+    };
+
+    const handlePlay = () => {
+      setPlaying(true);
+    };
+
+    const handlePause = () => {
+      setPlaying(false);
+    };
+
+    const handleEnded = () => {
       if (current) {
         fetch("/api/music/tracks/play", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ trackId: current.id, secondsPlayed: Math.round(audio.currentTime), completed: true }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            trackId: current.id,
+            secondsPlayed: Math.round(audio.currentTime),
+            completed: true,
+          }),
         }).catch(() => {});
       }
-      setPlaying(false);
-      setQueue(q => {
-        if (!q.length) return q;
-        const [next, ...rest] = q;
-        setCurrent(next);
-        return rest;
+
+      if (repeat === "one") {
+        audio.currentTime = 0;
+        audio.play().catch(() => setPlaying(false));
+        return;
+      }
+
+      setHistory((previous) =>
+        current
+          ? [...previous, current].slice(-50)
+          : previous
+      );
+
+      setQueue((previousQueue) => {
+        if (!previousQueue.length) {
+          if (repeat === "all" && current) {
+            audio.currentTime = 0;
+            audio.play().catch(() => setPlaying(false));
+            return previousQueue;
+          }
+
+          setPlaying(false);
+          return previousQueue;
+        }
+
+        let nextIndex = 0;
+
+        if (shuffle && previousQueue.length > 1) {
+          nextIndex = Math.floor(
+            Math.random() * previousQueue.length
+          );
+        }
+
+        const nextTrack = previousQueue[nextIndex];
+
+        const remaining = previousQueue.filter(
+          (_, index) => index !== nextIndex
+        );
+
+        setCurrent(nextTrack);
+        setPlaying(true);
+
+        return remaining;
       });
     };
-    audio.addEventListener("timeupdate", time);
-    audio.addEventListener("loadedmetadata", meta);
-    audio.addEventListener("ended", ended);
+
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("ended", handleEnded);
+
     return () => {
       audio.pause();
-      audio.removeEventListener("timeupdate", time);
-      audio.removeEventListener("loadedmetadata", meta);
-      audio.removeEventListener("ended", ended);
-    };
-  }, []);
 
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener(
+        "loadedmetadata",
+        handleLoadedMetadata
+      );
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("ended", handleEnded);
+    };
+  }, [current, repeat, shuffle]);
+
+  /*
+   * Load the selected track.
+   */
   useEffect(() => {
     const audio = audioRef.current;
+
     if (!audio || !current) return;
+
     audio.src = current.audioUrl;
     audio.load();
+
+    setProgress(0);
+    setDuration(current.durationSec || 0);
+
     lastReported.current = 0;
-    if (playing) audio.play().catch(() => setPlaying(false));
+
+    if (playing) {
+      audio.play().catch(() => {
+        setPlaying(false);
+      });
+    }
   }, [current]);
 
+  /*
+   * Play / pause state.
+   */
   useEffect(() => {
-    if (playing) audioRef.current?.play().catch(() => setPlaying(false));
-    else audioRef.current?.pause();
+    const audio = audioRef.current;
+
+    if (!audio) return;
+
+    if (playing) {
+      audio.play().catch(() => {
+        setPlaying(false);
+      });
+    } else {
+      audio.pause();
+    }
   }, [playing]);
 
+  /*
+   * Volume.
+   */
   useEffect(() => {
-    if (audioRef.current) audioRef.current.volume = volume;
-  }, [volume]);
+    const audio = audioRef.current;
 
-  const play = (track?: MusicTrack) => {
-    if (track && track.id !== current?.id) {
-      setCurrent(track);
-      setPlaying(true);
+    if (!audio) return;
+
+    audio.volume = volume;
+    audio.muted = muted;
+  }, [volume, muted]);
+
+  /*
+   * Media Session API.
+   * Gives supported browsers/devices information for
+   * lock-screen and hardware media controls.
+   */
+  useEffect(() => {
+    if (
+      typeof navigator === "undefined" ||
+      !("mediaSession" in navigator) ||
+      !current
+    ) {
       return;
     }
-    setPlaying(true);
-  };
 
-  const pause = () => setPlaying(false);
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: current.title,
+        artist: current.artist.displayName,
+        album: current.album?.title || "ZRP Music",
+        artwork: current.coverUrl
+          ? [
+              {
+                src: current.coverUrl,
+                sizes: "512x512",
+                type: "image/jpeg",
+              },
+            ]
+          : [],
+      });
 
-  const next = () => {
-    setQueue(q => {
-      if (!q.length) { setPlaying(false); return q; }
-      const [n, ...rest] = q;
-      setCurrent(n);
+      navigator.mediaSession.playbackState = playing
+        ? "playing"
+        : "paused";
+
+      navigator.mediaSession.setActionHandler("play", () => {
+        setPlaying(true);
+      });
+
+      navigator.mediaSession.setActionHandler("pause", () => {
+        setPlaying(false);
+      });
+
+      navigator.mediaSession.setActionHandler("previoustrack", () => {
+        previous();
+      });
+
+      navigator.mediaSession.setActionHandler("nexttrack", () => {
+        next();
+      });
+
+      navigator.mediaSession.setActionHandler("seekbackward", () => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        audio.currentTime = Math.max(
+          0,
+          audio.currentTime - 10
+        );
+      });
+
+      navigator.mediaSession.setActionHandler("seekforward", () => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        audio.currentTime = Math.min(
+          audio.duration || Infinity,
+          audio.currentTime + 10
+        );
+      });
+    } catch {
+      // Media Session is optional.
+    }
+  }, [current, playing]);
+
+  const play = useCallback(
+    (track?: MusicTrack) => {
+      if (track && track.id !== current?.id) {
+        if (current) {
+          setHistory((previous) =>
+            [...previous, current].slice(-50)
+          );
+        }
+
+        setCurrent(track);
+        setPlaying(true);
+        return;
+      }
+
       setPlaying(true);
-      return rest;
+    },
+    [current]
+  );
+
+  const pause = useCallback(() => {
+    setPlaying(false);
+  }, []);
+
+  const togglePlay = useCallback(() => {
+    setPlaying((value) => !value);
+  }, []);
+
+  const next = useCallback(() => {
+    setQueue((previousQueue) => {
+      if (!previousQueue.length) {
+        setPlaying(false);
+        return previousQueue;
+      }
+
+      let index = 0;
+
+      if (shuffle && previousQueue.length > 1) {
+        index = Math.floor(
+          Math.random() * previousQueue.length
+        );
+      }
+
+      const nextTrack = previousQueue[index];
+
+      if (current) {
+        setHistory((previous) =>
+          [...previous, current].slice(-50)
+        );
+      }
+
+      setCurrent(nextTrack);
+      setPlaying(true);
+
+      return previousQueue.filter(
+        (_, queueIndex) => queueIndex !== index
+      );
     });
-  };
+  }, [current, shuffle]);
 
-  const previous = () => {
-    const a = audioRef.current;
-    if (a && a.currentTime > 5) { a.currentTime = 0; return; }
-  };
+  const previous = useCallback(() => {
+    const audio = audioRef.current;
 
-  const seek = (seconds: number) => {
-    if (audioRef.current) audioRef.current.currentTime = seconds;
-    setProgress(seconds);
-  };
+    if (!audio) return;
 
-  const setVolume = (v: number) => setVolumeState(Math.max(0, Math.min(1, v)));
+    /*
+     * Spotify-style behavior:
+     * If we're more than 5 seconds into the song,
+     * go back to the beginning.
+     */
+    if (audio.currentTime > 5) {
+      audio.currentTime = 0;
+      setProgress(0);
+      return;
+    }
 
-  const addToQueue = (track: MusicTrack) => setQueue(q => [...q, track]);
+    setHistory((previousHistory) => {
+      if (!previousHistory.length) {
+        audio.currentTime = 0;
+        return previousHistory;
+      }
 
+      const previousTrack =
+        previousHistory[previousHistory.length - 1];
+
+      setCurrent(previousTrack);
+      setPlaying(true);
+
+      return previousHistory.slice(0, -1);
+    });
+  }, []);
+
+  const seek = useCallback((seconds: number) => {
+    const audio = audioRef.current;
+
+    if (!audio) return;
+
+    const safeSeconds = Math.max(
+      0,
+      Math.min(
+        seconds,
+        Number.isFinite(audio.duration)
+          ? audio.duration
+          : seconds
+      )
+    );
+
+    audio.currentTime = safeSeconds;
+    setProgress(safeSeconds);
+  }, []);
+
+  const setVolume = useCallback((nextVolume: number) => {
+    const safeVolume = Math.max(
+      0,
+      Math.min(1, nextVolume)
+    );
+
+    setVolumeState(safeVolume);
+
+    if (safeVolume > 0) {
+      setMuted(false);
+    }
+  }, []);
+
+  const toggleMute = useCallback(() => {
+    setMuted((value) => !value);
+  }, []);
+
+  const toggleShuffle = useCallback(() => {
+    setShuffle((value) => !value);
+  }, []);
+
+  const cycleRepeat = useCallback(() => {
+    setRepeat((value) => {
+      if (value === "off") return "all";
+      if (value === "all") return "one";
+      return "off";
+    });
+  }, []);
+
+  const addToQueue = useCallback((track: MusicTrack) => {
+    setQueue((previous) => [...previous, track]);
+  }, []);
+
+  const removeFromQueue = useCallback((trackId: string) => {
+    setQueue((previous) =>
+      previous.filter((track) => track.id !== trackId)
+    );
+  }, []);
+
+  const clearQueue = useCallback(() => {
+    setQueue([]);
+  }, []);
+
+  /*
+   * Periodically report listening progress.
+   */
   useEffect(() => {
-    if (!current || progress < 15 || progress - lastReported.current < 15) return;
+    if (
+      !current ||
+      progress < 15 ||
+      progress - lastReported.current < 15
+    ) {
+      return;
+    }
+
     lastReported.current = progress;
+
     fetch("/api/music/tracks/play", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ trackId: current.id, secondsPlayed: Math.round(progress), completed: false }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        trackId: current.id,
+        secondsPlayed: Math.round(progress),
+        completed: false,
+      }),
     }).catch(() => {});
   }, [progress, current]);
 
   return (
-    <MusicContext.Provider value={{ current, queue, playing, progress, duration, volume, play, pause, next, previous, seek, setVolume, addToQueue }}>
+    <MusicContext.Provider
+      value={{
+        current,
+        queue,
+        playing,
+        progress,
+        duration,
+        volume,
+        muted,
+        shuffle,
+        repeat,
+
+        play,
+        pause,
+        togglePlay,
+        next,
+        previous,
+        seek,
+
+        setVolume,
+        toggleMute,
+
+        toggleShuffle,
+        cycleRepeat,
+
+        addToQueue,
+        removeFromQueue,
+        clearQueue,
+      }}
+    >
       {children}
     </MusicContext.Provider>
   );
@@ -149,6 +544,12 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
 
 export function useMusicPlayer() {
   const value = useContext(MusicContext);
-  if (!value) throw new Error("useMusicPlayer must be used inside MusicPlayerProvider");
+
+  if (!value) {
+    throw new Error(
+      "useMusicPlayer must be used inside MusicPlayerProvider"
+    );
+  }
+
   return value;
 }
