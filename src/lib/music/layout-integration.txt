@@ -1,0 +1,17 @@
+In `src/app/layout.tsx`:
+
+1. Import:
+import MusicProviderMount from "@/components/music/MusicProviderMount";
+
+2. Wrap the existing application content inside:
+<MusicProviderMount>
+  ...existing children...
+</MusicProviderMount>
+
+Recommended placement is inside the existing AuthProvider/UnreadCountProvider tree so the persistent player is part of the authenticated ZRP shell.
+
+In `src/components/Sidebar.tsx`, add `Music2` to the lucide-react import and add:
+{ href: "/music", icon: Music2, label: "Music" },
+to `navItems`.
+
+In `src/components/BottomNav.tsx`, do NOT add a seventh item if you want to preserve the existing mobile layout. Put Music in your existing header/more menu or use a dedicated Music button in the page header.

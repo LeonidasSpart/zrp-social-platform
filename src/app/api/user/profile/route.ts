@@ -6,8 +6,27 @@ import { prisma } from "@/lib/db";
 export async function PUT(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    // Verify that the session user still exists.
+    const existingUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { id: true },
+    });
+
+    if (!existingUser) {
+      return NextResponse.json(
+        {
+          error: "User account no longer exists. Please sign in again.",
+        },
+        { status: 401 }
+      );
     }
 
     const { name, bio, location, website } = await req.json();
@@ -15,10 +34,22 @@ export async function PUT(req: NextRequest) {
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: {
-        name: name || null,
-        bio: bio || null,
-        location: location || null,
-        website: website || null,
+        name:
+          typeof name === "string" && name.trim()
+            ? name.trim()
+            : null,
+        bio:
+          typeof bio === "string" && bio.trim()
+            ? bio.trim()
+            : null,
+        location:
+          typeof location === "string" && location.trim()
+            ? location.trim()
+            : null,
+        website:
+          typeof website === "string" && website.trim()
+            ? website.trim()
+            : null,
       },
       select: {
         id: true,
@@ -45,6 +76,7 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json(updatedUser);
   } catch (error) {
     console.error("Profile update error:", error);
+
     return NextResponse.json(
       { error: "Failed to update profile" },
       { status: 500 }
