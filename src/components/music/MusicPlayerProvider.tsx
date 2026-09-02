@@ -85,6 +85,15 @@ export function MusicPlayerProvider({
   const [repeat, setRepeat] = useState<RepeatMode>("off");
 
   const lastReported = useRef(0);
+  const currentRef = useRef<MusicTrack | null>(null);
+  const repeatRef = useRef<RepeatMode>("off");
+  const shuffleRef = useRef(false);
+
+  useEffect(() => {
+    currentRef.current = current;
+    repeatRef.current = repeat;
+    shuffleRef.current = shuffle;
+  }, [current, repeat, shuffle]);
 
   /*
    * Create one persistent audio element.
@@ -121,35 +130,39 @@ export function MusicPlayerProvider({
     };
 
     const handleEnded = () => {
-      if (current) {
+      const activeTrack = currentRef.current;
+      const activeRepeat = repeatRef.current;
+      const activeShuffle = shuffleRef.current;
+
+      if (activeTrack) {
         fetch("/api/music/tracks/play", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            trackId: current.id,
+            trackId: activeTrack.id,
             secondsPlayed: Math.round(audio.currentTime),
             completed: true,
           }),
         }).catch(() => {});
       }
 
-      if (repeat === "one") {
+      if (activeRepeat === "one") {
         audio.currentTime = 0;
         audio.play().catch(() => setPlaying(false));
         return;
       }
 
       setHistory((previous) =>
-        current
-          ? [...previous, current].slice(-50)
+        activeTrack
+          ? [...previous, activeTrack].slice(-50)
           : previous
       );
 
       setQueue((previousQueue) => {
         if (!previousQueue.length) {
-          if (repeat === "all" && current) {
+          if (activeRepeat === "all" && activeTrack) {
             audio.currentTime = 0;
             audio.play().catch(() => setPlaying(false));
             return previousQueue;
@@ -161,7 +174,7 @@ export function MusicPlayerProvider({
 
         let nextIndex = 0;
 
-        if (shuffle && previousQueue.length > 1) {
+        if (activeShuffle && previousQueue.length > 1) {
           nextIndex = Math.floor(
             Math.random() * previousQueue.length
           );
@@ -198,7 +211,7 @@ export function MusicPlayerProvider({
       audio.removeEventListener("pause", handlePause);
       audio.removeEventListener("ended", handleEnded);
     };
-  }, [current, repeat, shuffle]);
+  }, []);
 
   /*
    * Load the selected track.
