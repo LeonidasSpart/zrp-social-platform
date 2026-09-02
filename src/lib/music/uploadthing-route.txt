@@ -1,0 +1,24 @@
+Add this property inside the existing `ourFileRouter` object in `src/lib/uploadthing.ts`, immediately before the final `} satisfies FileRouter;`:
+
+  musicTrack: f({
+    audio: {
+      maxFileSize: "500MB",
+      maxFileCount: 1,
+    },
+    image: {
+      maxFileSize: "8MB",
+      maxFileCount: 1,
+    },
+  })
+    .middleware(async () => {
+      const session = await getServerSession(authOptions);
+      if (!session?.user) throw new UploadThingError("Unauthorized");
+      return { userId: session.user.id };
+    })
+    .onUploadComplete(async ({ file }) => {
+      return {
+        url: file.ufsUrl,
+        key: file.key,
+        type: file.type.startsWith("audio/") ? "audio" : "image",
+      };
+    }),

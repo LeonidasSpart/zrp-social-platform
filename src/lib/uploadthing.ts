@@ -580,6 +580,22 @@ export const ourFileRouter = {
         };
       }
     ),
+  // ─── ZRP MUSIC ─────────────────────────────────────────────
+  musicTrack: f({
+    audio: { maxFileSize: "512MB", maxFileCount: 1 },
+    image: { maxFileSize: "8MB", maxFileCount: 1 },
+  })
+    .middleware(async () => {
+      const session = await getServerSession(authOptions);
+      if (!session?.user) throw new UploadThingError("Unauthorized");
+      return { userId: session.user.id };
+    })
+    .onUploadComplete(async ({ file }) => ({
+      url: file.ufsUrl,
+      key: file.key,
+      type: file.type.startsWith("audio/") ? "audio" : "image",
+    })),
+
 } satisfies FileRouter;
 
 export type OurFileRouter =

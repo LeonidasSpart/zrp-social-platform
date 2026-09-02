@@ -175,7 +175,7 @@ model User {
   verificationTokenExpiry DateTime?
   pendingEmail            String?   @unique
 
-  deletionRequestedAt DateTime?
+  deletionRequestedAt  DateTime?
   deletionScheduledFor DateTime?
 
   name      String?
@@ -215,9 +215,9 @@ model User {
   // `solanaWallet` above, which is just an unverified payout address a
   // creator types into settings. Set only via the sign-a-nonce flow in
   // /api/wallet/link (see src/lib/wallet-link.ts).
-  verifiedSolanaWallet   String?   @unique
-  walletLinkNonce        String?
-  walletLinkNonceExpiry  DateTime?
+  verifiedSolanaWallet  String?   @unique
+  walletLinkNonce       String?
+  walletLinkNonceExpiry DateTime?
 
   emailPreferences Json?
 
@@ -264,20 +264,20 @@ model User {
   blockedUsers Blocked[] @relation("Blocker")
   blockedBy    Blocked[] @relation("Blocked")
 
-  reports         Report[] @relation("Reporter")
+  reports          Report[] @relation("Reporter")
   reportsAgainstMe Report[] @relation("ReportTarget")
-  appeals         Appeal[]
+  appeals          Appeal[]
 
   listings         Listing[]         @relation("ListingSeller")
   listingFavorites ListingFavorite[]
 
   // ─── ZRP PLAY ──────────────────────────────────────────────
-  playProfile        PlayProfile?
-  playChallenges     PlayChallenge[]       @relation("PlayChallengeCreator")
-  playAttempts       PlayAttempt[]
+  playProfile          PlayProfile?
+  playChallenges       PlayChallenge[]       @relation("PlayChallengeCreator")
+  playAttempts         PlayAttempt[]
   playUserAchievements PlayUserAchievement[]
-  duelsChallenged    PlayDuel[]            @relation("DuelChallenger")
-  duelsReceived      PlayDuel[]            @relation("DuelOpponent")
+  duelsChallenged      PlayDuel[]            @relation("DuelChallenger")
+  duelsReceived        PlayDuel[]            @relation("DuelOpponent")
 
   teamAccount TeamMember[] @relation("TeamAccount")
   teamMembers TeamMember[] @relation("TeamMemberUser")
@@ -320,6 +320,13 @@ model User {
   // News articles this user (an admin/moderator) has reviewed
   // (approved/rejected) as part of the journalist submission workflow.
   newsReviewsGiven NewsArticle[] @relation("NewsReviewedBy")
+
+  // ─── ZRP MUSIC ─────────────────────────────────────────────
+  musicArtist    MusicArtist?
+  musicPlaylists MusicPlaylist[]
+  musicLikes     MusicLike[]
+  musicFollows   MusicFollow[]
+  musicHistory   MusicHistory[]
 }
 
 model JournalistProfile {
@@ -352,20 +359,20 @@ model JournalistProfile {
 }
 
 model Post {
-  id          String   @id @default(cuid())
-  content     String   @db.Text
-  imageUrl    String?
-  imageUrls   String[] @default([])
-  mediaType   String?
-  linkUrl     String?
-  authorId    String
-  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  imageUrl  String?
+  imageUrls String[] @default([])
+  mediaType String?
+  linkUrl   String?
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   quotePostId String?
-  quotePost   Post?  @relation("QuotePost", fields: [quotePostId], references: [id], onDelete: SetNull)
-  quotedBy    Post[] @relation("QuotePost")
+  quotePost   Post?   @relation("QuotePost", fields: [quotePostId], references: [id], onDelete: SetNull)
+  quotedBy    Post[]  @relation("QuotePost")
 
   views       Int       @default(0)
   scheduledAt DateTime?
@@ -388,9 +395,9 @@ model Post {
 
   pinnedBy User? @relation("PinnedPost")
 
-  comments Comment[]
-  likes    Like[]
-  reposts  Repost[]
+  comments  Comment[]
+  likes     Like[]
+  reposts   Repost[]
   reactions Reaction[]
 
   notifications Notification[] @relation("Notification_post")
@@ -410,8 +417,8 @@ model Post {
 }
 
 model Comment {
-  id       String @id @default(cuid())
-  content  String @db.Text
+  id       String  @id @default(cuid())
+  content  String  @db.Text
   imageUrl String?
 
   postId String
@@ -554,7 +561,7 @@ model Notification {
   fromUser   User   @relation("Notification_fromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
 
   postId String?
-  post   Post?  @relation("Notification_post", fields: [postId], references: [id], onDelete: Cascade)
+  post   Post?   @relation("Notification_post", fields: [postId], references: [id], onDelete: Cascade)
 
   read Boolean @default(false)
 
@@ -569,7 +576,7 @@ model Notification {
 model Message {
   id String @id @default(cuid())
 
-  content  String @db.Text
+  content  String  @db.Text
   imageUrl String?
 
   senderId String
@@ -689,7 +696,7 @@ model Report {
   // any appeal referencing it) at the exact moment the action it
   // describes is carried out.
   postId String?
-  post   Post?  @relation(fields: [postId], references: [id], onDelete: SetNull)
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: SetNull)
 
   commentId String?
   comment   Comment? @relation(fields: [commentId], references: [id], onDelete: SetNull)
@@ -703,7 +710,7 @@ model Report {
   updatedAt DateTime @updatedAt
 
   actionType String?
-  actionNote String? @db.Text
+  actionNote String?   @db.Text
   actionedAt DateTime?
 
   // Denormalized at the moment an action is taken (see PUT
@@ -825,7 +832,7 @@ model PaymentRequest {
 
   plan     String
   amount   Decimal @db.Decimal(18, 6)
-  currency String @default("USDC")
+  currency String  @default("USDC")
 
   transactionId String?
 
@@ -982,7 +989,7 @@ model CreatorProfile {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  tipsEnabled Boolean  @default(true)
+  tipsEnabled Boolean @default(true)
   tipsMessage String? @db.Text
 
   premiumPostsEnabled Boolean @default(true)
@@ -1014,7 +1021,7 @@ model Tip {
   creatorProfile   CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
 
   amount   Decimal @db.Decimal(18, 6)
-  currency String @default("USDC")
+  currency String  @default("USDC")
 
   message String? @db.Text
 
@@ -1046,7 +1053,7 @@ model PremiumPost {
   creatorProfile   CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
 
   price    Decimal @default(1.0) @db.Decimal(18, 6)
-  currency String @default("USDC")
+  currency String  @default("USDC")
 
   previewContent String? @db.Text
 
@@ -1073,7 +1080,7 @@ model PremiumPurchase {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   amount   Decimal @db.Decimal(18, 6)
-  currency String @default("USDC")
+  currency String  @default("USDC")
 
   transactionId String? @unique
 
@@ -1102,7 +1109,7 @@ model WithdrawalRequest {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   amount   Decimal @db.Decimal(18, 6)
-  currency String @default("USDC")
+  currency String  @default("USDC")
 
   walletAddress String
 
@@ -1205,7 +1212,7 @@ model AdCampaign {
   status AdCampaignStatus @default(DRAFT)
 
   bidType   AdBidType
-  bidAmount Decimal @db.Decimal(18, 6)
+  bidAmount Decimal   @db.Decimal(18, 6)
 
   budgetTotal Decimal @db.Decimal(18, 6)
   budgetSpent Decimal @default(0) @db.Decimal(18, 6)
@@ -1238,7 +1245,7 @@ model AdImpression {
   campaign   AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   userId String?
-  user   User? @relation("AdImpressionUser", fields: [userId], references: [id], onDelete: SetNull)
+  user   User?   @relation("AdImpressionUser", fields: [userId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 
@@ -1254,7 +1261,7 @@ model AdClick {
   campaign   AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   userId String?
-  user   User? @relation("AdClickUser", fields: [userId], references: [id], onDelete: SetNull)
+  user   User?   @relation("AdClickUser", fields: [userId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 
@@ -1284,7 +1291,7 @@ model SupportTicket {
   assignedAdmin User? @relation("AssignedTickets", fields: [assignedTo], references: [id], onDelete: SetNull)
 
   resolvedAt DateTime?
-  resolution String? @db.Text
+  resolution String?   @db.Text
 
   userAgent String?
   ipAddress String?
@@ -1332,11 +1339,11 @@ model TicketReply {
 model TicketFeedback {
   id String @id @default(cuid())
 
-  ticketId String @unique
+  ticketId String        @unique
   ticket   SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
   rating   Int?
-  comment  String? @db.Text
+  comment  String?  @db.Text
   resolved Boolean?
 
   createdAt DateTime @default(now())
@@ -1487,7 +1494,7 @@ model CharityDisbursement {
   currency        String  @default("USD")
 
   disbursedAt DateTime
-  note        String? @db.Text
+  note        String?  @db.Text
   proofUrl    String? // link to a receipt/confirmation the admin can point to
 
   recordedById       String
@@ -1528,10 +1535,10 @@ model PlayChallenge {
   // LOGIC:  { prompt, options: string[], correctIndex } or { prompt, answer } for free text
   content Json
 
-  maxScore      Int     @default(100)
-  isDaily       Boolean @default(false)
+  maxScore      Int       @default(100)
+  isDaily       Boolean   @default(false)
   activeDate    DateTime? // date-only marker (UTC midnight) for the daily-challenge slot
-  isAiGenerated Boolean @default(false)
+  isAiGenerated Boolean   @default(false)
 
   status        PlayChallengeStatus @default(ACTIVE)
   removedReason String?             @db.Text
@@ -1649,4 +1656,131 @@ model PlayUserAchievement {
 
   @@unique([userId, achievementKey])
   @@index([userId])
+}
+
+model MusicArtist {
+  id          String        @id @default(cuid())
+  userId      String        @unique
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName String
+  bio         String?       @db.Text
+  avatarUrl   String?
+  bannerUrl   String?
+  verified    Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  albums      MusicAlbum[]
+  tracks      MusicTrack[]
+  followers   MusicFollow[]
+
+  @@index([displayName])
+}
+
+model MusicAlbum {
+  id          String       @id @default(cuid())
+  artistId    String
+  artist      MusicArtist  @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  title       String
+  description String?      @db.Text
+  coverUrl    String?
+  releaseDate DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  tracks      MusicTrack[]
+
+  @@index([artistId])
+}
+
+model MusicTrack {
+  id            String               @id @default(cuid())
+  artistId      String
+  artist        MusicArtist          @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  albumId       String?
+  album         MusicAlbum?          @relation(fields: [albumId], references: [id], onDelete: SetNull)
+  title         String
+  description   String?              @db.Text
+  audioUrl      String
+  audioKey      String?
+  coverUrl      String?
+  durationSec   Int?
+  genre         String?
+  explicit      Boolean              @default(false)
+  status        String               @default("PUBLISHED")
+  playCount     Int                  @default(0)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  likes         MusicLike[]
+  playlistItems MusicPlaylistTrack[]
+  history       MusicHistory[]
+
+  @@index([artistId])
+  @@index([albumId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model MusicPlaylist {
+  id          String               @id @default(cuid())
+  userId      String
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?              @db.Text
+  coverUrl    String?
+  isPublic    Boolean              @default(true)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  tracks      MusicPlaylistTrack[]
+
+  @@index([userId])
+}
+
+model MusicPlaylistTrack {
+  id         String        @id @default(cuid())
+  playlistId String
+  playlist   MusicPlaylist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  trackId    String
+  track      MusicTrack    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  position   Int           @default(0)
+  addedAt    DateTime      @default(now())
+
+  @@unique([playlistId, trackId])
+  @@index([playlistId, position])
+}
+
+model MusicLike {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackId   String
+  track     MusicTrack @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+
+  @@unique([userId, trackId])
+  @@index([trackId])
+}
+
+model MusicFollow {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artistId  String
+  artist    MusicArtist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+
+  @@unique([userId, artistId])
+  @@index([artistId])
+}
+
+model MusicHistory {
+  id            String     @id @default(cuid())
+  userId        String
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackId       String
+  track         MusicTrack @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  secondsPlayed Int        @default(0)
+  completed     Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+
+  @@index([userId, createdAt])
+  @@index([trackId])
 }
