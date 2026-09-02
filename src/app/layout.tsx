@@ -20,6 +20,7 @@ import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import BottomNav from "@/components/BottomNav";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Suspense } from "react";
+import MusicProviderMount from "@/components/music/MusicProviderMount";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -320,6 +321,8 @@ export default function RootLayout({
         className={`${inter.variable} ${orbitron.variable} font-inter min-h-screen flex flex-col bg-white dark:bg-zrp-deepBlack`}
       >
         <div className="app-shell-clip w-full flex flex-col min-h-screen pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0">
+        <MusicProviderMount>
+
           <ErrorBoundary>
             <ThemeProvider>
               <LanguageProvider>
@@ -370,7 +373,9 @@ export default function RootLayout({
               </LanguageProvider>
             </ThemeProvider>
           </ErrorBoundary>
-        </div>
+
+        </MusicProviderMount>
+</div>
       </body>
     </html>
   );
