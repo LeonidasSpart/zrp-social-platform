@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Heart, ListPlus, Play, Search, UploadCloud } from "lucide-react";
+import { Heart, ListPlus, Play, Search, UploadCloud, Disc3, Music2, Sparkles, ChevronRight } from "lucide-react";
 import { useMusicPlayer, type MusicTrack } from "./MusicPlayerProvider";
 import { useUploadThing } from "@/lib/uploadthing-client";
 
@@ -55,53 +55,327 @@ export default function MusicShell() {
   };
 
   return (
-    <div className="min-h-screen pb-28">
-      <div className="sticky top-0 z-20 bg-white/90 dark:bg-zrp-deepBlack/90 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 p-4">
-        <div className="flex gap-3 items-center max-w-5xl mx-auto">
-          <div className="font-black text-2xl tracking-tight"><span className="text-zrp-red">ZRP</span> Music</div>
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400"/>
-            <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search songs, artists, genres..." className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 dark:bg-gray-900 outline-none"/>
-          </div>
-          <button onClick={()=>setStudio(v=>!v)} className="bg-zrp-red text-white rounded-full px-4 py-2 flex items-center gap-2"><UploadCloud className="w-4 h-4"/><span className="hidden sm:inline">Music Studio</span></button>
-        </div>
-      </div>
-
-      <main className="max-w-5xl mx-auto p-4 space-y-4">
-        {studio && (
-          <section className="rounded-2xl border border-gray-200 dark:border-gray-800 p-5 bg-white dark:bg-gray-950">
-            <h2 className="text-xl font-bold mb-4">Upload music</h2>
-            <div className="grid sm:grid-cols-2 gap-3">
-              <input value={artistName} onChange={e=>setArtistName(e.target.value)} placeholder="Artist name" className="p-3 rounded-xl bg-gray-100 dark:bg-gray-900"/>
-              <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Song title" className="p-3 rounded-xl bg-gray-100 dark:bg-gray-900"/>
-              <input value={genre} onChange={e=>setGenre(e.target.value)} placeholder="Genre" className="p-3 rounded-xl bg-gray-100 dark:bg-gray-900"/>
-              <label className="p-3 rounded-xl bg-gray-100 dark:bg-gray-900 cursor-pointer">Audio (MP3/WAV/etc.)<input type="file" accept=".mp3,.wav,.m4a,.aac,.aiff,.flac,.ogg,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/aac,audio/aiff,audio/flac,audio/ogg" className="block mt-2 w-full" onChange={e=>setAudio(e.target.files?.[0]||null)}/></label>
-              <label className="p-3 rounded-xl bg-gray-100 dark:bg-gray-900 cursor-pointer">Cover<input type="file" accept="image/*" className="block mt-2 w-full" onChange={e=>setCover(e.target.files?.[0]||null)}/></label>
+    <div className="min-h-screen bg-white dark:bg-[#050505] text-gray-950 dark:text-white pb-32">
+      {/* Premium header */}
+      <header className="sticky top-0 z-30 border-b border-gray-200/70 dark:border-white/10 bg-white/85 dark:bg-[#050505]/85 backdrop-blur-2xl">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-3">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-zrp-red text-white flex items-center justify-center shadow-lg shadow-red-500/20">
+                <Music2 className="w-5 h-5" />
+              </div>
+              <div className="hidden sm:block">
+                <div className="font-black tracking-tight leading-none">
+                  <span className="text-zrp-red">ZRP</span> Music
+                </div>
+                <div className="text-[9px] uppercase tracking-[0.22em] text-gray-400 mt-1">
+                  Your sound. Your world.
+                </div>
+              </div>
             </div>
-            <button disabled={busy || !audio || !title} onClick={submit} className="mt-4 px-5 py-3 rounded-full bg-zrp-red text-white font-bold disabled:opacity-50">{busy ? "Uploading..." : "Publish song"}</button>
-            <p className="text-xs text-gray-500 mt-2">Audio and artwork are uploaded directly to your existing UploadThing storage.</p>
+
+            <div className="relative flex-1 max-w-2xl mx-auto">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search songs, artists, albums..."
+                className="w-full h-11 pl-11 pr-4 rounded-full bg-gray-100 dark:bg-white/[0.07] border border-transparent focus:border-zrp-red/40 outline-none transition text-sm"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setStudio((v) => !v)}
+              className="shrink-0 h-11 px-4 sm:px-5 rounded-full bg-zrp-red text-white font-bold text-sm flex items-center gap-2 shadow-lg shadow-red-500/20 active:scale-95 transition"
+            >
+              <UploadCloud className="w-4 h-4" />
+              <span className="hidden sm:inline">Music Studio</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-10">
+        {/* Hero */}
+        <section className="relative overflow-hidden rounded-[28px] bg-[#090909] text-white border border-white/10">
+          <div className="absolute -right-32 -top-32 w-96 h-96 rounded-full bg-zrp-red/30 blur-3xl" />
+          <div className="absolute -left-20 -bottom-40 w-80 h-80 rounded-full bg-red-900/20 blur-3xl" />
+
+          <div className="relative grid lg:grid-cols-[1.25fr_.75fr] gap-8 p-7 sm:p-10 lg:p-12">
+            <div className="flex flex-col justify-center">
+              <div className="inline-flex items-center gap-2 w-fit px-3 py-1.5 rounded-full bg-white/10 border border-white/10 text-xs text-white/70">
+                <Sparkles className="w-3.5 h-3.5 text-zrp-red" />
+                Discover something new
+              </div>
+
+              <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[0.95]">
+                Music without
+                <span className="block text-zrp-red">boundaries.</span>
+              </h1>
+
+              <p className="mt-5 max-w-xl text-white/55 text-sm sm:text-base leading-relaxed">
+                Discover independent artists, listen to your favorite tracks,
+                build your queue and experience music inside ZRP.
+              </p>
+
+              <div className="flex flex-wrap gap-3 mt-7">
+                <button
+                  type="button"
+                  onClick={() => tracks[0] && play(tracks[0])}
+                  disabled={!tracks.length}
+                  className="h-12 px-6 rounded-full bg-zrp-red text-white font-bold flex items-center gap-2 disabled:opacity-40 active:scale-95 transition"
+                >
+                  <Play className="w-4 h-4 fill-current" />
+                  Play something
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStudio(true)}
+                  className="h-12 px-6 rounded-full bg-white/10 border border-white/10 font-semibold flex items-center gap-2 hover:bg-white/15 transition"
+                >
+                  <UploadCloud className="w-4 h-4" />
+                  Upload music
+                </button>
+              </div>
+            </div>
+
+            <div className="hidden lg:flex items-center justify-center">
+              <div className="relative w-72 h-72">
+                <div className="absolute inset-8 rounded-full bg-zrp-red/25 blur-3xl" />
+                <div className="absolute inset-0 rounded-full border border-white/10 bg-gradient-to-br from-white/[0.08] to-transparent" />
+                <div className="absolute inset-8 rounded-full border border-white/10 bg-[#111] flex items-center justify-center">
+                  <Disc3 className="w-28 h-28 text-white/80 animate-[spin_12s_linear_infinite]" />
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-full bg-zrp-red flex items-center justify-center shadow-2xl shadow-red-500/30">
+                    <Music2 className="w-6 h-6" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Studio */}
+        {studio && (
+          <section className="rounded-[24px] border border-gray-200 dark:border-white/10 bg-gray-50/80 dark:bg-white/[0.035] p-5 sm:p-7">
+            <div className="flex items-start justify-between gap-4 mb-6">
+              <div>
+                <div className="text-xs uppercase tracking-[0.2em] text-zrp-red font-bold">
+                  Creator tools
+                </div>
+                <h2 className="text-2xl font-black mt-1">Music Studio</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Publish your music directly to ZRP.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setStudio(false)}
+                className="text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-3">
+              <input
+                value={artistName}
+                onChange={(e) => setArtistName(e.target.value)}
+                placeholder="Artist name"
+                className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
+              />
+
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Song title"
+                className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
+              />
+
+              <input
+                value={genre}
+                onChange={(e) => setGenre(e.target.value)}
+                placeholder="Genre"
+                className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
+              />
+
+              <label className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 cursor-pointer text-sm text-gray-500">
+                Audio file
+                <input
+                  type="file"
+                  accept=".mp3,.wav,.m4a,.aac,.aiff,.flac,.ogg,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/aac,audio/aiff,audio/flac,audio/ogg"
+                  className="block mt-2 w-full text-xs"
+                  onChange={(e) => setAudio(e.target.files?.[0] || null)}
+                />
+              </label>
+
+              <label className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 cursor-pointer text-sm text-gray-500">
+                Cover artwork
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="block mt-2 w-full text-xs"
+                  onChange={(e) => setCover(e.target.files?.[0] || null)}
+                />
+              </label>
+
+              <button
+                disabled={busy || !audio || !title}
+                onClick={submit}
+                className="sm:col-span-2 h-12 rounded-xl bg-zrp-red text-white font-bold disabled:opacity-40"
+              >
+                {busy ? "Publishing..." : "Publish track"}
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-500 mt-3">
+              Audio and artwork are uploaded directly to your existing ZRP storage.
+            </p>
           </section>
         )}
 
-        <section>
-          <h1 className="text-2xl font-bold mb-3">Discover</h1>
-          <div className="space-y-2">
-            {tracks.map(track => (
-              <div key={track.id} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-900">
-                <img src={track.coverUrl || track.album?.coverUrl || "/logo.png"} alt="" className="w-14 h-14 rounded-xl object-cover"/>
-                <div className="min-w-0 flex-1">
-                  <div className="font-semibold truncate">{track.title}</div>
-                  <div className="text-sm text-gray-500 truncate">{track.artist.displayName}{track.genre ? ` • ${track.genre}` : ""}</div>
-                </div>
-                <button onClick={()=>play(track)} className="w-10 h-10 rounded-full bg-zrp-red text-white flex items-center justify-center"><Play className="w-5 h-5"/></button>
-                <button onClick={()=>addToQueue(track)} aria-label="Add to queue"><ListPlus className="w-5 h-5"/></button>
-                <button onClick={()=>like(track.id)} aria-label="Like"><Heart className={`w-5 h-5 ${track.liked ? "fill-zrp-red text-zrp-red" : ""}`}/></button>
+        {/* Quick navigation */}
+        <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            ["Discover", "Fresh music for you", Music2],
+            ["Albums", "Full releases", Disc3],
+            ["Artists", "Find new voices", Sparkles],
+            ["Your Queue", "What plays next", ListPlus],
+          ].map(([name, description, Icon]) => (
+            <button
+              key={String(name)}
+              type="button"
+              className="group text-left rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.035] p-4 hover:border-zrp-red/30 hover:bg-zrp-red/[0.03] transition"
+            >
+              <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-white/10 flex items-center justify-center group-hover:bg-zrp-red group-hover:text-white transition">
+                <Icon className="w-5 h-5" />
               </div>
-            ))}
-            {!tracks.length && <div className="py-16 text-center text-gray-500">No published music yet. Upload the first song from Music Studio.</div>}
+              <div className="font-bold mt-3">{String(name)}</div>
+              <div className="text-xs text-gray-500 mt-1">{String(description)}</div>
+            </button>
+          ))}
+        </section>
+
+        {/* Discover */}
+        <section>
+          <div className="flex items-end justify-between mb-5">
+            <div>
+              <div className="text-xs uppercase tracking-[0.2em] text-zrp-red font-bold">
+                Listen now
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black mt-1">
+                Discover music
+              </h2>
+            </div>
+
+            <div className="text-xs text-gray-500">
+              {tracks.length} track{tracks.length === 1 ? "" : "s"}
+            </div>
           </div>
+
+          {!tracks.length ? (
+            <div className="rounded-[24px] border border-dashed border-gray-300 dark:border-white/10 py-20 text-center">
+              <Music2 className="w-10 h-10 mx-auto text-gray-300 dark:text-white/20" />
+              <div className="font-bold mt-4">Your music universe starts here</div>
+              <div className="text-sm text-gray-500 mt-2">
+                Upload the first song from Music Studio.
+              </div>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              {tracks.map((track, index) => {
+                const cover = track.coverUrl || track.album?.coverUrl || "/logo.png";
+
+                return (
+                  <article
+                    key={track.id}
+                    className="group relative overflow-hidden rounded-[22px] border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.035] hover:-translate-y-1 hover:border-zrp-red/30 transition-all duration-300"
+                  >
+                    <div className="relative aspect-[1.55] overflow-hidden bg-gray-200 dark:bg-white/5">
+                      <img
+                        src={cover}
+                        alt=""
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+
+                      <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur text-[10px] text-white/80">
+                        #{String(index + 1).padStart(2, "0")}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => play(track)}
+                        className="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-zrp-red text-white flex items-center justify-center shadow-xl shadow-black/30 active:scale-95 transition"
+                        aria-label={`Play ${track.title}`}
+                      >
+                        <Play className="w-5 h-5 fill-current ml-0.5" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => addToQueue(track)}
+                        className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur text-white flex items-center justify-center hover:bg-black/70 transition"
+                        aria-label="Add to queue"
+                      >
+                        <ListPlus className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-bold truncate">{track.title}</h3>
+                          <p className="text-sm text-gray-500 truncate mt-1">
+                            {track.artist.displayName}
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => like(track.id)}
+                          className="shrink-0 w-9 h-9 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center"
+                          aria-label="Like"
+                        >
+                          <Heart
+                            className={`w-4 h-4 ${
+                              track.liked
+                                ? "fill-zrp-red text-zrp-red"
+                                : "text-gray-400"
+                            }`}
+                          />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-2 mt-3 text-[11px] text-gray-500">
+                        {track.genre && (
+                          <span className="px-2.5 py-1 rounded-full bg-gray-200 dark:bg-white/10">
+                            {track.genre}
+                          </span>
+                        )}
+
+                        {track.album?.title && (
+                          <span className="truncate">
+                            {track.album.title}
+                          </span>
+                        )}
+
+                        <ChevronRight className="w-3 h-3 ml-auto opacity-40" />
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </section>
       </main>
     </div>
-  );
+  )
+
 }
