@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Search, ShieldCheck, Music2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type ArtistSummary = {
   id: string;
@@ -13,6 +14,7 @@ type ArtistSummary = {
 };
 
 export default function MusicArtistsPage() {
+  const { t } = useLanguage();
   const [artists, setArtists] = useState<ArtistSummary[]>([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
@@ -33,18 +35,18 @@ export default function MusicArtistsPage() {
     <div className="min-h-screen bg-white dark:bg-[#050505] text-gray-950 dark:text-white pb-32">
       <header className="sticky top-0 z-30 border-b border-gray-200/70 dark:border-white/10 bg-white/85 dark:bg-[#050505]/85 backdrop-blur-2xl">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <Link href="/music" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10" aria-label="Back to Music">
+          <Link href="/music" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10" aria-label={t("music.common.backToMusic")}>
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <div className="font-black text-lg">Artists</div>
+          <div className="font-black text-lg">{t("music.artists.title")}</div>
 
           <div className="relative flex-1 max-w-xl ml-auto">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search artists..."
-              aria-label="Search artists"
+              placeholder={t("music.artists.searchPlaceholder")}
+              aria-label={t("music.artists.searchPlaceholder")}
               className="w-full h-10 pl-11 pr-4 rounded-full bg-gray-100 dark:bg-white/[0.07] border border-transparent focus:border-zrp-red/40 outline-none transition text-sm"
             />
           </div>
@@ -59,7 +61,7 @@ export default function MusicArtistsPage() {
         ) : !artists.length ? (
           <div className="rounded-[24px] border border-dashed border-gray-300 dark:border-white/10 py-20 text-center">
             <Music2 className="w-10 h-10 mx-auto text-gray-300 dark:text-white/20" />
-            <div className="font-bold mt-4">No artists found</div>
+            <div className="font-bold mt-4">{t("music.artists.noneFound")}</div>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -79,7 +81,9 @@ export default function MusicArtistsPage() {
                   {artist.verified && <ShieldCheck className="w-4 h-4 text-zrp-red shrink-0" />}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">
-                  {artist._count.tracks} track{artist._count.tracks === 1 ? "" : "s"} · {artist._count.followers} follower{artist._count.followers === 1 ? "" : "s"}
+                  {t(artist._count.tracks === 1 ? "music.count.tracksOne" : "music.count.tracksOther", { count: artist._count.tracks })}
+                  {" · "}
+                  {t(artist._count.followers === 1 ? "music.count.followersOne" : "music.count.followersOther", { count: artist._count.followers })}
                 </div>
               </Link>
             ))}

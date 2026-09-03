@@ -5,8 +5,10 @@ import Link from "next/link";
 import { ArrowLeft, Play, Shuffle } from "lucide-react";
 import TrackList from "@/components/music/TrackList";
 import { useMusicPlayer, type MusicTrack } from "@/components/music/MusicPlayerProvider";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function MusicLikedPage() {
+  const { t } = useLanguage();
   const [tracks, setTracks] = useState<MusicTrack[]>([]);
   const [loading, setLoading] = useState(true);
   const { play, addToQueue, clearQueue } = useMusicPlayer();
@@ -45,18 +47,18 @@ export default function MusicLikedPage() {
     <div className="min-h-screen bg-white dark:bg-[#050505] text-gray-950 dark:text-white pb-32">
       <header className="sticky top-0 z-30 border-b border-gray-200/70 dark:border-white/10 bg-white/85 dark:bg-[#050505]/85 backdrop-blur-2xl">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <Link href="/music" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10" aria-label="Back to Music">
+          <Link href="/music" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10" aria-label={t("music.common.backToMusic")}>
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <div className="font-black text-lg">Liked Music</div>
+          <div className="font-black text-lg">{t("music.liked.title")}</div>
 
           {tracks.length > 0 && (
             <div className="ml-auto flex gap-2">
               <button type="button" onClick={() => playAll(false)} className="h-9 px-4 rounded-full bg-zrp-red text-white text-sm font-bold flex items-center gap-1.5">
-                <Play className="w-3.5 h-3.5 fill-current" /> Play all
+                <Play className="w-3.5 h-3.5 fill-current" /> {t("music.common.playAll")}
               </button>
               <button type="button" onClick={() => playAll(true)} className="h-9 px-4 rounded-full bg-gray-100 dark:bg-white/10 text-sm font-bold flex items-center gap-1.5">
-                <Shuffle className="w-3.5 h-3.5" /> Shuffle
+                <Shuffle className="w-3.5 h-3.5" /> {t("music.common.shuffle")}
               </button>
             </div>
           )}
@@ -73,8 +75,8 @@ export default function MusicLikedPage() {
             tracks={tracks}
             onLike={unlike}
             showAlbum
-            emptyTitle="No liked tracks yet"
-            emptyDescription="Tap the heart on any track to save it here."
+            emptyTitle={t("music.liked.emptyTitle")}
+            emptyDescription={t("music.liked.emptyBody")}
           />
         )}
       </main>

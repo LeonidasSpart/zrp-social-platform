@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Play, Shuffle, Disc3 } from "lucide-react";
 import TrackList from "@/components/music/TrackList";
 import { useMusicPlayer, type MusicTrack } from "@/components/music/MusicPlayerProvider";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type AlbumDetail = {
   id: string;
@@ -17,6 +18,7 @@ type AlbumDetail = {
 };
 
 export default function MusicAlbumPage() {
+  const { t } = useLanguage();
   const params = useParams<{ id: string }>();
   const [album, setAlbum] = useState<AlbumDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,8 +66,8 @@ export default function MusicAlbumPage() {
   if (!album) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-white dark:bg-[#050505] text-gray-950 dark:text-white">
-        <div className="font-bold">Album not found</div>
-        <Link href="/music" className="text-zrp-red text-sm">Back to Music</Link>
+        <div className="font-bold">{t("music.albumDetail.notFound")}</div>
+        <Link href="/music" className="text-zrp-red text-sm">{t("music.common.backToMusic")}</Link>
       </div>
     );
   }
@@ -74,7 +76,7 @@ export default function MusicAlbumPage() {
     <div className="min-h-screen bg-white dark:bg-[#050505] text-gray-950 dark:text-white pb-32">
       <header className="sticky top-0 z-30 border-b border-gray-200/70 dark:border-white/10 bg-white/85 dark:bg-[#050505]/85 backdrop-blur-2xl">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <Link href="/music" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10" aria-label="Back to Music">
+          <Link href="/music" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10" aria-label={t("music.common.backToMusic")}>
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="font-black text-lg truncate">{album.title}</div>
@@ -94,7 +96,7 @@ export default function MusicAlbumPage() {
           </div>
 
           <div className="min-w-0 text-center sm:text-left flex-1">
-            <div className="text-xs uppercase tracking-[0.2em] text-zrp-red font-bold">Album</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-zrp-red font-bold">{t("music.albumDetail.eyebrow")}</div>
             <h1 className="text-2xl sm:text-4xl font-black mt-1">{album.title}</h1>
             <Link href={`/music/artists/${album.artist.id}`} className="text-sm text-gray-500 hover:underline mt-2 inline-block">
               {album.artist.displayName}
@@ -108,7 +110,7 @@ export default function MusicAlbumPage() {
                 disabled={!album.tracks.length}
                 className="h-11 px-5 rounded-full bg-zrp-red text-white font-bold flex items-center gap-2 disabled:opacity-40"
               >
-                <Play className="w-4 h-4 fill-current" /> Play all
+                <Play className="w-4 h-4 fill-current" /> {t("music.common.playAll")}
               </button>
               <button
                 type="button"
@@ -116,13 +118,13 @@ export default function MusicAlbumPage() {
                 disabled={!album.tracks.length}
                 className="h-11 px-5 rounded-full bg-gray-100 dark:bg-white/10 font-bold flex items-center gap-2 disabled:opacity-40"
               >
-                <Shuffle className="w-4 h-4" /> Shuffle
+                <Shuffle className="w-4 h-4" /> {t("music.common.shuffle")}
               </button>
             </div>
           </div>
         </section>
 
-        <TrackList tracks={album.tracks} onLike={like} showArtist={false} emptyTitle="No published tracks in this album yet" />
+        <TrackList tracks={album.tracks} onLike={like} showArtist={false} emptyTitle={t("music.albumDetail.noTracks")} />
       </main>
     </div>
   );

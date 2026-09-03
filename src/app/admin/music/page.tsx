@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Music2, ExternalLink, ShieldCheck, ShieldOff, Search } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface AdminMusicArtist {
   id: string;
@@ -15,6 +16,7 @@ interface AdminMusicArtist {
 }
 
 export default function AdminMusicPage() {
+  const { t } = useLanguage();
   const [artists, setArtists] = useState<AdminMusicArtist[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -54,15 +56,15 @@ export default function AdminMusicPage() {
         body: JSON.stringify({ verified }),
       });
       if (res.ok) {
-        setMessage({ type: "success", text: verified ? "Artist verified." : "Artist unverified." });
+        setMessage({ type: "success", text: verified ? t("music.admin.verifiedMsg") : t("music.admin.unverifiedMsg") });
         fetchArtists();
         setTimeout(() => setMessage(null), 3000);
       } else {
         const data = await res.json();
-        setMessage({ type: "error", text: data.error || "Update failed." });
+        setMessage({ type: "error", text: data.error || t("music.admin.updateFailedMsg") });
       }
     } catch {
-      setMessage({ type: "error", text: "Something went wrong." });
+      setMessage({ type: "error", text: t("adminReports.errSomethingWrong") });
     } finally {
       setBusyId(null);
     }
@@ -73,7 +75,7 @@ export default function AdminMusicPage() {
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <Music2 className="w-6 h-6" />
-          Music Artists
+          {t("adminMusic.title")}
         </h1>
 
         <div className="flex items-center gap-2">
@@ -88,7 +90,7 @@ export default function AdminMusicPage() {
                   fetchArtists();
                 }
               }}
-              placeholder="Search artists..."
+              placeholder={t("music.artists.searchPlaceholder")}
               className="pl-8 pr-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
             />
           </div>
@@ -101,18 +103,15 @@ export default function AdminMusicPage() {
             }}
             className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
           >
-            <option value="all">All</option>
-            <option value="verified">Verified</option>
-            <option value="unverified">Unverified</option>
+            <option value="all">{t("music.discover.all")}</option>
+            <option value="verified">{t("music.admin.verified")}</option>
+            <option value="unverified">{t("music.admin.unverified")}</option>
           </select>
         </div>
       </div>
 
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-        Verifying an artist here grants that account permission to publish
-        tracks in Music Studio even without a Creator status. Never verify
-        an artist without confirming their identity - this is the only way
-        an unverified artist profile can start publishing.
+        {t("music.admin.verifyWarning")}
       </p>
 
       {message && (
@@ -132,7 +131,7 @@ export default function AdminMusicPage() {
       ) : (
         <div className="space-y-3">
           {artists.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">No artist profiles found.</div>
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">{t("music.admin.noneFound")}</div>
           ) : (
             artists.map((artist) => (
               <div key={artist.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
@@ -148,7 +147,7 @@ export default function AdminMusicPage() {
                         <p className="font-semibold text-gray-900 dark:text-white truncate">{artist.displayName}</p>
                         {artist.verified && (
                           <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                            <ShieldCheck className="w-3 h-3" /> Verified
+                            <ShieldCheck className="w-3 h-3" /> {t("music.admin.verified")}
                           </span>
                         )}
                       </div>
@@ -162,7 +161,9 @@ export default function AdminMusicPage() {
                         @{artist.user.username}
                       </Link>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {artist._count.tracks} track{artist._count.tracks === 1 ? "" : "s"} · {artist._count.followers} follower{artist._count.followers === 1 ? "" : "s"}
+                        {t(artist._count.tracks === 1 ? "music.count.tracksOne" : "music.count.tracksOther", { count: artist._count.tracks })}
+                        {" · "}
+                        {t(artist._count.followers === 1 ? "music.count.followersOne" : "music.count.followersOther", { count: artist._count.followers })}
                       </p>
                     </div>
                   </div>
@@ -175,7 +176,7 @@ export default function AdminMusicPage() {
                       className="flex items-center gap-1 px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                     >
                       <ExternalLink className="w-4 h-4" />
-                      View
+                      {t("music.admin.view")}
                     </Link>
                     {artist.verified ? (
                       <button
@@ -184,7 +185,7 @@ export default function AdminMusicPage() {
                         className="flex items-center gap-1 px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50"
                       >
                         <ShieldOff className="w-4 h-4" />
-                        Unverify
+                        {t("music.admin.unverify")}
                       </button>
                     ) : (
                       <button
@@ -193,7 +194,7 @@ export default function AdminMusicPage() {
                         className="flex items-center gap-1 px-3 py-1 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50"
                       >
                         <ShieldCheck className="w-4 h-4" />
-                        Verify
+                        {t("music.admin.verify")}
                       </button>
                     )}
                   </div>
@@ -211,15 +212,15 @@ export default function AdminMusicPage() {
             disabled={page === 1}
             className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
           >
-            Previous
+            {t("adminReports.previous")}
           </button>
-          <span className="px-3 py-1 text-sm text-gray-700 dark:text-gray-300">Page {page} of {totalPages}</span>
+          <span className="px-3 py-1 text-sm text-gray-700 dark:text-gray-300">{t("adminReports.pageOf", { page, total: totalPages })}</span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
             className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
           >
-            Next
+            {t("adminReports.next")}
           </button>
         </div>
       )}

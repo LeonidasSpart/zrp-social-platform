@@ -7,6 +7,7 @@ import { ArrowLeft, Play, Shuffle, ShieldCheck, UserPlus, UserCheck, Disc3 } fro
 import { useSession } from "next-auth/react";
 import TrackList from "@/components/music/TrackList";
 import { useMusicPlayer, type MusicTrack } from "@/components/music/MusicPlayerProvider";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Album = { id: string; title: string; coverUrl: string | null; _count: { tracks: number } };
 
@@ -25,6 +26,7 @@ type ArtistDetail = {
 };
 
 export default function MusicArtistPage() {
+  const { t } = useLanguage();
   const params = useParams<{ id: string }>();
   const { data: session } = useSession();
   const [artist, setArtist] = useState<ArtistDetail | null>(null);
@@ -93,8 +95,8 @@ export default function MusicArtistPage() {
   if (!artist) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-white dark:bg-[#050505] text-gray-950 dark:text-white">
-        <div className="font-bold">Artist not found</div>
-        <Link href="/music" className="text-zrp-red text-sm">Back to Music</Link>
+        <div className="font-bold">{t("music.artistDetail.notFound")}</div>
+        <Link href="/music" className="text-zrp-red text-sm">{t("music.common.backToMusic")}</Link>
       </div>
     );
   }
@@ -103,7 +105,7 @@ export default function MusicArtistPage() {
     <div className="min-h-screen bg-white dark:bg-[#050505] text-gray-950 dark:text-white pb-32">
       <header className="sticky top-0 z-30 border-b border-gray-200/70 dark:border-white/10 bg-white/85 dark:bg-[#050505]/85 backdrop-blur-2xl">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <Link href="/music" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10" aria-label="Back to Music">
+          <Link href="/music" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10" aria-label={t("music.common.backToMusic")}>
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="font-black text-lg truncate">{artist.displayName}</div>
@@ -121,13 +123,15 @@ export default function MusicArtistPage() {
           <div className="min-w-0 text-center sm:text-left flex-1">
             <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
               <h1 className="text-2xl sm:text-4xl font-black">{artist.displayName}</h1>
-              {artist.verified && <ShieldCheck className="w-6 h-6 text-zrp-red" aria-label="Verified artist" />}
+              {artist.verified && <ShieldCheck className="w-6 h-6 text-zrp-red" aria-label={t("music.artistDetail.verifiedAria")} />}
             </div>
 
             {artist.bio && <p className="text-sm text-gray-500 mt-2 max-w-xl">{artist.bio}</p>}
 
             <div className="text-sm text-gray-500 mt-2">
-              {artist._count.tracks} track{artist._count.tracks === 1 ? "" : "s"} · {artist._count.followers} follower{artist._count.followers === 1 ? "" : "s"}
+              {t(artist._count.tracks === 1 ? "music.count.tracksOne" : "music.count.tracksOther", { count: artist._count.tracks })}
+              {" · "}
+              {t(artist._count.followers === 1 ? "music.count.followersOne" : "music.count.followersOther", { count: artist._count.followers })}
             </div>
 
             <div className="flex flex-wrap justify-center sm:justify-start gap-3 mt-5">
@@ -137,7 +141,7 @@ export default function MusicArtistPage() {
                 disabled={!artist.tracks.length}
                 className="h-11 px-5 rounded-full bg-zrp-red text-white font-bold flex items-center gap-2 disabled:opacity-40"
               >
-                <Play className="w-4 h-4 fill-current" /> Play all
+                <Play className="w-4 h-4 fill-current" /> {t("music.common.playAll")}
               </button>
               <button
                 type="button"
@@ -145,7 +149,7 @@ export default function MusicArtistPage() {
                 disabled={!artist.tracks.length}
                 className="h-11 px-5 rounded-full bg-gray-100 dark:bg-white/10 font-bold flex items-center gap-2 disabled:opacity-40"
               >
-                <Shuffle className="w-4 h-4" /> Shuffle
+                <Shuffle className="w-4 h-4" /> {t("music.common.shuffle")}
               </button>
               {session?.user && !artist.isOwner && (
                 <button
@@ -159,7 +163,7 @@ export default function MusicArtistPage() {
                   }`}
                 >
                   {artist.isFollowing ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
-                  {artist.isFollowing ? "Following" : "Follow"}
+                  {artist.isFollowing ? t("music.artistDetail.following") : t("music.artistDetail.follow")}
                 </button>
               )}
             </div>
@@ -168,7 +172,7 @@ export default function MusicArtistPage() {
 
         {artist.albums.length > 0 && (
           <section>
-            <h2 className="text-xl font-black mb-4">Albums</h2>
+            <h2 className="text-xl font-black mb-4">{t("music.artistDetail.albumsHeading")}</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {artist.albums.map((album) => (
                 <Link
@@ -187,7 +191,9 @@ export default function MusicArtistPage() {
                   </div>
                   <div className="p-3">
                     <div className="font-bold truncate">{album.title}</div>
-                    <div className="text-xs text-gray-500">{album._count.tracks} track{album._count.tracks === 1 ? "" : "s"}</div>
+                    <div className="text-xs text-gray-500">
+                      {t(album._count.tracks === 1 ? "music.count.tracksOne" : "music.count.tracksOther", { count: album._count.tracks })}
+                    </div>
                   </div>
                 </Link>
               ))}
@@ -196,13 +202,13 @@ export default function MusicArtistPage() {
         )}
 
         <section>
-          <h2 className="text-xl font-black mb-4">Tracks</h2>
+          <h2 className="text-xl font-black mb-4">{t("music.artistDetail.tracksHeading")}</h2>
           <TrackList
             tracks={artist.tracks}
             onLike={like}
             showArtist={false}
             showAlbum
-            emptyTitle="No published tracks yet"
+            emptyTitle={t("music.artistDetail.noTracks")}
           />
         </section>
       </main>

@@ -92,7 +92,7 @@ export default function Sidebar() {
     { href: "/explore", icon: Compass, label: t("nav.explore") },
     { href: "/news", icon: Newspaper, label: t("nav.news") },
     { href: "/marketplace", icon: Store, label: t("nav.marketplace") },
-    { href: "/music", icon: Music2, label: "Music" },
+    { href: "/music", icon: Music2, label: t("nav.music") },
     { href: "/play", icon: Gamepad2, label: t("nav.play") },
     { href: "/opportunity", icon: Briefcase, label: t("nav.opportunity") },
     { href: "/aid", icon: HeartHandshake, label: t("nav.help") },

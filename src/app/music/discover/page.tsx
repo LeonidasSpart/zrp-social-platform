@@ -5,10 +5,12 @@ import Link from "next/link";
 import { ArrowLeft, Search, Shuffle, Play } from "lucide-react";
 import TrackList from "@/components/music/TrackList";
 import { useMusicPlayer, type MusicTrack } from "@/components/music/MusicPlayerProvider";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Genre = { genre: string; count: number };
 
 export default function MusicDiscoverPage() {
+  const { t } = useLanguage();
   const [tracks, setTracks] = useState<MusicTrack[]>([]);
   const [genres, setGenres] = useState<Genre[]>([]);
   const [activeGenre, setActiveGenre] = useState<string | null>(null);
@@ -68,10 +70,10 @@ export default function MusicDiscoverPage() {
     <div className="min-h-screen bg-white dark:bg-[#050505] text-gray-950 dark:text-white pb-32">
       <header className="sticky top-0 z-30 border-b border-gray-200/70 dark:border-white/10 bg-white/85 dark:bg-[#050505]/85 backdrop-blur-2xl">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <Link href="/music" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10" aria-label="Back to Music">
+          <Link href="/music" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10" aria-label={t("music.common.backToMusic")}>
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <div className="font-black text-lg">Discover</div>
+          <div className="font-black text-lg">{t("music.nav.discoverTitle")}</div>
 
           <div className="relative flex-1 max-w-xl ml-auto">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -81,8 +83,8 @@ export default function MusicDiscoverPage() {
                 setQ(e.target.value);
                 setActiveGenre(null);
               }}
-              placeholder="Search songs, artists, genres..."
-              aria-label="Search music"
+              placeholder={t("music.discover.searchPlaceholder")}
+              aria-label={t("music.discover.searchPlaceholder")}
               className="w-full h-10 pl-11 pr-4 rounded-full bg-gray-100 dark:bg-white/[0.07] border border-transparent focus:border-zrp-red/40 outline-none transition text-sm"
             />
           </div>
@@ -92,7 +94,7 @@ export default function MusicDiscoverPage() {
       <main className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
         {genres.length > 0 && (
           <section>
-            <div className="text-xs uppercase tracking-[0.2em] text-zrp-red font-bold mb-3">Browse by genre</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-zrp-red font-bold mb-3">{t("music.discover.browseByGenre")}</div>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
@@ -101,7 +103,7 @@ export default function MusicDiscoverPage() {
                   !activeGenre ? "bg-zrp-red text-white" : "bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300"
                 }`}
               >
-                All
+                {t("music.discover.all")}
               </button>
               {genres.map((g) => (
                 <button
@@ -125,7 +127,7 @@ export default function MusicDiscoverPage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-xl sm:text-2xl font-black">
-              {activeGenre ? activeGenre : q ? `Results for "${q}"` : "All tracks"}
+              {activeGenre ? activeGenre : q ? t("music.discover.resultsFor", { query: q }) : t("music.discover.allTracks")}
             </h1>
 
             <div className="flex gap-2">
@@ -135,7 +137,7 @@ export default function MusicDiscoverPage() {
                 disabled={!tracks.length}
                 className="h-9 px-4 rounded-full bg-zrp-red text-white text-sm font-bold flex items-center gap-1.5 disabled:opacity-40"
               >
-                <Play className="w-3.5 h-3.5 fill-current" /> Play all
+                <Play className="w-3.5 h-3.5 fill-current" /> {t("music.common.playAll")}
               </button>
               <button
                 type="button"
@@ -143,7 +145,7 @@ export default function MusicDiscoverPage() {
                 disabled={!tracks.length}
                 className="h-9 px-4 rounded-full bg-gray-100 dark:bg-white/10 text-sm font-bold flex items-center gap-1.5 disabled:opacity-40"
               >
-                <Shuffle className="w-3.5 h-3.5" /> Shuffle
+                <Shuffle className="w-3.5 h-3.5" /> {t("music.common.shuffle")}
               </button>
             </div>
           </div>
@@ -156,8 +158,8 @@ export default function MusicDiscoverPage() {
             <TrackList
               tracks={tracks}
               onLike={like}
-              emptyTitle="No tracks found"
-              emptyDescription="Try a different search or genre."
+              emptyTitle={t("music.discover.noTracksTitle")}
+              emptyDescription={t("music.discover.noTracksBody")}
             />
           )}
         </section>

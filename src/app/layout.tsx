@@ -321,61 +321,69 @@ export default function RootLayout({
         className={`${inter.variable} ${orbitron.variable} font-inter min-h-screen flex flex-col bg-white dark:bg-zrp-deepBlack`}
       >
         <div className="app-shell-clip w-full flex flex-col min-h-screen pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0">
-        <MusicProviderMount>
 
           <ErrorBoundary>
             <ThemeProvider>
               <LanguageProvider>
-                <Suspense
-                  fallback={
-                    <div className="min-h-screen flex items-center justify-center">
-                      Loading...
-                    </div>
-                  }
-                >
-                  <AuthProvider>
-                    <UnreadCountProvider>
-                      <GoogleAnalytics />
-                      <NativeAppBridge />
-
-                      <Header />
-
-                      <EmailVerificationBanner />
-
-                      {/* Main application area.
-                          min-h-0 allows the chat page to shrink correctly
-                          inside the flex layout instead of forcing the
-                          composer below the visible viewport. */}
-                      <div className="flex justify-center w-full max-w-[1400px] mx-auto min-h-0 flex-1">
-                        <Sidebar />
-
-                        <main className="flex-1 min-w-0 min-h-0">
-                          <PageTransition>
-                            {children}
-                          </PageTransition>
-                        </main>
-
-                        <RightPanel />
+                {/*
+                  MusicProviderMount lives inside LanguageProvider (not
+                  outside it) specifically so MusicMiniPlayer and the
+                  music player context can call useLanguage() - that
+                  hook throws if rendered outside its provider, and
+                  MusicMiniPlayer renders as a sibling of {children}
+                  inside MusicProviderMount, not nested under it.
+                */}
+                <MusicProviderMount>
+                  <Suspense
+                    fallback={
+                      <div className="min-h-screen flex items-center justify-center">
+                        Loading...
                       </div>
+                    }
+                  >
+                    <AuthProvider>
+                      <UnreadCountProvider>
+                        <GoogleAnalytics />
+                        <NativeAppBridge />
 
-                      <CookieConsent />
+                        <Header />
 
-                      <Footer />
+                        <EmailVerificationBanner />
 
-                      <PushNotificationManager />
+                        {/* Main application area.
+                            min-h-0 allows the chat page to shrink correctly
+                            inside the flex layout instead of forcing the
+                            composer below the visible viewport. */}
+                        <div className="flex justify-center w-full max-w-[1400px] mx-auto min-h-0 flex-1">
+                          <Sidebar />
 
-                      <ServiceWorkerRegistration />
+                          <main className="flex-1 min-w-0 min-h-0">
+                            <PageTransition>
+                              {children}
+                            </PageTransition>
+                          </main>
 
-                      <BottomNav />
-                    </UnreadCountProvider>
-                  </AuthProvider>
-                </Suspense>
+                          <RightPanel />
+                        </div>
+
+                        <CookieConsent />
+
+                        <Footer />
+
+                        <PushNotificationManager />
+
+                        <ServiceWorkerRegistration />
+
+                        <BottomNav />
+                      </UnreadCountProvider>
+                    </AuthProvider>
+                  </Suspense>
+                </MusicProviderMount>
               </LanguageProvider>
             </ThemeProvider>
           </ErrorBoundary>
 
-        </MusicProviderMount>
-</div>
+        </div>
       </body>
     </html>
   );

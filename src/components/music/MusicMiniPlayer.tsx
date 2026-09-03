@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useMusicPlayer } from "./MusicPlayerProvider";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function formatTime(value: number) {
   if (!Number.isFinite(value) || value < 0) return "0:00";
@@ -27,6 +28,7 @@ function formatTime(value: number) {
 }
 
 export default function MusicMiniPlayer() {
+  const { t } = useLanguage();
   const {
     current,
     playing,
@@ -73,14 +75,14 @@ export default function MusicMiniPlayer() {
                 type="button"
                 onClick={() => setExpanded(false)}
                 className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center active:scale-95 transition"
-                aria-label="Close player"
+                aria-label={t("music.player.closeAria")}
               >
                 <X className="w-5 h-5" />
               </button>
 
               <div className="text-center">
                 <div className="text-[10px] uppercase tracking-[0.25em] text-white/50">
-                  Now Playing
+                  {t("music.player.nowPlayingLabel")}
                 </div>
                 <div className="text-sm font-semibold mt-1">
                   ZRP Music
@@ -90,7 +92,7 @@ export default function MusicMiniPlayer() {
               <button
                 type="button"
                 className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center"
-                aria-label="Queue"
+                aria-label={t("music.common.queue")}
               >
                 <ListMusic className="w-5 h-5" />
               </button>
@@ -142,7 +144,7 @@ export default function MusicMiniPlayer() {
                 {/* Progress */}
                 <div className="mt-8">
                   <input
-                    aria-label="Seek"
+                    aria-label={t("music.common.seekAria")}
                     type="range"
                     min={0}
                     max={duration || 1}
@@ -170,7 +172,7 @@ export default function MusicMiniPlayer() {
                         ? "text-zrp-red bg-zrp-red/10"
                         : "text-white/60"
                     }`}
-                    aria-label="Shuffle"
+                    aria-label={t("music.common.shuffle")}
                   >
                     <Shuffle className="w-5 h-5" />
                   </button>
@@ -179,7 +181,7 @@ export default function MusicMiniPlayer() {
                     type="button"
                     onClick={previous}
                     className="w-12 h-12 rounded-full flex items-center justify-center"
-                    aria-label="Previous"
+                    aria-label={t("music.common.previous")}
                   >
                     <SkipBack className="w-7 h-7 fill-current" />
                   </button>
@@ -190,7 +192,7 @@ export default function MusicMiniPlayer() {
                       playing ? pause() : play()
                     }
                     className="relative w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-zrp-red flex items-center justify-center shadow-[0_0_45px_rgba(220,38,38,0.35)] active:scale-95 transition"
-                    aria-label={playing ? "Pause" : "Play"}
+                    aria-label={playing ? t("music.common.pause") : t("music.common.play")}
                     aria-busy={buffering}
                   >
                     {buffering && playing && (
@@ -207,7 +209,7 @@ export default function MusicMiniPlayer() {
                     type="button"
                     onClick={next}
                     className="w-12 h-12 rounded-full flex items-center justify-center"
-                    aria-label="Next"
+                    aria-label={t("music.common.next")}
                   >
                     <SkipForward className="w-7 h-7 fill-current" />
                   </button>
@@ -220,7 +222,7 @@ export default function MusicMiniPlayer() {
                         ? "text-zrp-red bg-zrp-red/10"
                         : "text-white/60"
                     }`}
-                    aria-label="Repeat"
+                    aria-label={t("music.common.repeat")}
                   >
                     {repeat === "one" ? (
                       <Repeat1 className="w-5 h-5" />
@@ -236,7 +238,7 @@ export default function MusicMiniPlayer() {
                     type="button"
                     onClick={toggleMute}
                     className="text-white/60"
-                    aria-label={muted ? "Unmute" : "Mute"}
+                    aria-label={muted ? t("music.common.unmute") : t("music.common.mute")}
                   >
                     {muted || volume === 0 ? (
                       <VolumeX className="w-5 h-5" />
@@ -246,7 +248,7 @@ export default function MusicMiniPlayer() {
                   </button>
 
                   <input
-                    aria-label="Volume"
+                    aria-label={t("music.common.volumeAria")}
                     type="range"
                     min={0}
                     max={1}
@@ -269,11 +271,10 @@ export default function MusicMiniPlayer() {
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="font-semibold">
-                          Up Next
+                          {t("music.player.upNextLabel")}
                         </div>
                         <div className="text-xs text-white/40 mt-1">
-                          {queue.length} track
-                          {queue.length === 1 ? "" : "s"} in queue
+                          {t(queue.length === 1 ? "music.player.queueCountOne" : "music.player.queueCountOther", { count: queue.length })}
                         </div>
                       </div>
 
@@ -345,7 +346,7 @@ export default function MusicMiniPlayer() {
                   type="button"
                   onClick={() => setExpanded(true)}
                   className="shrink-0"
-                  aria-label="Open now playing"
+                  aria-label={t("music.player.openNowPlayingAria")}
                 >
                   <img
                     src={cover}
@@ -365,7 +366,7 @@ export default function MusicMiniPlayer() {
                   </div>
 
                   <div className="text-xs text-white/50 truncate">
-                    {error || (buffering ? "Buffering..." : current.artist.displayName)}
+                    {error || (buffering ? t("music.player.buffering") : current.artist.displayName)}
                   </div>
                 </button>
 
@@ -378,7 +379,7 @@ export default function MusicMiniPlayer() {
                       ? "text-zrp-red"
                       : "text-white/50"
                   }`}
-                  aria-label="Shuffle"
+                  aria-label={t("music.common.shuffle")}
                 >
                   <Shuffle className="w-4 h-4" />
                 </button>
@@ -388,7 +389,7 @@ export default function MusicMiniPlayer() {
                   type="button"
                   onClick={previous}
                   className="hidden sm:flex w-9 h-9 items-center justify-center text-white/70"
-                  aria-label="Previous"
+                  aria-label={t("music.common.previous")}
                 >
                   <SkipBack className="w-5 h-5 fill-current" />
                 </button>
@@ -400,7 +401,7 @@ export default function MusicMiniPlayer() {
                     playing ? pause() : play()
                   }
                   className="relative shrink-0 w-11 h-11 rounded-full bg-zrp-red text-white flex items-center justify-center active:scale-95 transition"
-                  aria-label={playing ? "Pause" : "Play"}
+                  aria-label={playing ? t("music.common.pause") : t("music.common.play")}
                   aria-busy={buffering}
                 >
                   {buffering && playing && (
@@ -418,7 +419,7 @@ export default function MusicMiniPlayer() {
                   type="button"
                   onClick={next}
                   className="hidden sm:flex w-9 h-9 items-center justify-center text-white/70"
-                  aria-label="Next"
+                  aria-label={t("music.common.next")}
                 >
                   <SkipForward className="w-5 h-5 fill-current" />
                 </button>
@@ -428,7 +429,7 @@ export default function MusicMiniPlayer() {
                   type="button"
                   onClick={toggleMute}
                   className="hidden lg:flex text-white/50"
-                  aria-label={muted ? "Unmute" : "Mute"}
+                  aria-label={muted ? t("music.common.unmute") : t("music.common.mute")}
                 >
                   {muted || volume === 0 ? (
                     <VolumeX className="w-5 h-5" />
@@ -438,7 +439,7 @@ export default function MusicMiniPlayer() {
                 </button>
 
                 <input
-                  aria-label="Volume"
+                  aria-label={t("music.common.volumeAria")}
                   type="range"
                   min={0}
                   max={1}
@@ -455,7 +456,7 @@ export default function MusicMiniPlayer() {
                   type="button"
                   onClick={() => setExpanded(true)}
                   className="shrink-0 w-9 h-9 flex items-center justify-center text-white/50"
-                  aria-label="Expand player"
+                  aria-label={t("music.player.expandAria")}
                 >
                   <Maximize2 className="w-4 h-4" />
                 </button>
@@ -464,7 +465,7 @@ export default function MusicMiniPlayer() {
               {/* Mobile seek */}
               <div className="px-3 pb-2 sm:hidden">
                 <input
-                  aria-label="Seek"
+                  aria-label={t("music.common.seekAria")}
                   type="range"
                   min={0}
                   max={duration || 1}

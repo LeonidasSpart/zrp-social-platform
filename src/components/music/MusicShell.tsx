@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useMusicPlayer, type MusicTrack } from "./MusicPlayerProvider";
 import { useUploadThing } from "@/lib/uploadthing-client";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type MusicAccess = {
   allowed: boolean;
@@ -19,6 +20,7 @@ type MusicAccess = {
 };
 
 export default function MusicShell() {
+  const { t } = useLanguage();
   const { data: session } = useSession();
   const [tracks, setTracks] = useState<MusicTrack[]>([]);
   const [q, setQ] = useState("");
@@ -51,7 +53,7 @@ export default function MusicShell() {
       });
       if (!trackRes.ok) {
         const data = await trackRes.json().catch(() => ({}));
-        setUploadError(data.error || "Publishing failed. Please try again.");
+        setUploadError(data.error || t("music.shell.publishFailedDefault"));
         setBusy(false);
         return;
       }
@@ -59,7 +61,7 @@ export default function MusicShell() {
       load();
     },
     onUploadError: (err) => {
-      setUploadError(err.message || "Upload failed. Please try again.");
+      setUploadError(err.message || t("music.shell.uploadFailedDefault"));
       setBusy(false);
     },
   });
@@ -130,7 +132,7 @@ export default function MusicShell() {
                   <span className="text-zrp-red">ZRP</span> Music
                 </div>
                 <div className="text-[9px] uppercase tracking-[0.22em] text-gray-400 mt-1">
-                  Your sound. Your world.
+                  {t("music.shell.tagline")}
                 </div>
               </div>
             </div>
@@ -140,7 +142,7 @@ export default function MusicShell() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search songs, artists, albums..."
+                placeholder={t("music.shell.searchPlaceholder")}
                 className="w-full h-11 pl-11 pr-4 rounded-full bg-gray-100 dark:bg-white/[0.07] border border-transparent focus:border-zrp-red/40 outline-none transition text-sm"
               />
             </div>
@@ -151,7 +153,7 @@ export default function MusicShell() {
               className="shrink-0 h-11 px-4 sm:px-5 rounded-full bg-zrp-red text-white font-bold text-sm flex items-center gap-2 shadow-lg shadow-red-500/20 active:scale-95 transition"
             >
               <UploadCloud className="w-4 h-4" />
-              <span className="hidden sm:inline">Music Studio</span>
+              <span className="hidden sm:inline">{t("music.shell.studioLabel")}</span>
             </button>
           </div>
         </div>
@@ -167,17 +169,16 @@ export default function MusicShell() {
             <div className="flex flex-col justify-center">
               <div className="inline-flex items-center gap-2 w-fit px-3 py-1.5 rounded-full bg-white/10 border border-white/10 text-xs text-white/70">
                 <Sparkles className="w-3.5 h-3.5 text-zrp-red" />
-                Discover something new
+                {t("music.shell.heroEyebrow")}
               </div>
 
               <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[0.95]">
-                Music without
-                <span className="block text-zrp-red">boundaries.</span>
+                {t("music.shell.heroTitleLine1")}
+                <span className="block text-zrp-red">{t("music.shell.heroTitleLine2")}</span>
               </h1>
 
               <p className="mt-5 max-w-xl text-white/55 text-sm sm:text-base leading-relaxed">
-                Discover independent artists, listen to your favorite tracks,
-                build your queue and experience music inside ZRP.
+                {t("music.shell.heroSubtitle")}
               </p>
 
               <div className="flex flex-wrap gap-3 mt-7">
@@ -188,7 +189,7 @@ export default function MusicShell() {
                   className="h-12 px-6 rounded-full bg-zrp-red text-white font-bold flex items-center gap-2 disabled:opacity-40 active:scale-95 transition"
                 >
                   <Play className="w-4 h-4 fill-current" />
-                  Play something
+                  {t("music.shell.playSomething")}
                 </button>
 
                 <button
@@ -197,7 +198,7 @@ export default function MusicShell() {
                   className="h-12 px-6 rounded-full bg-white/10 border border-white/10 font-semibold flex items-center gap-2 hover:bg-white/15 transition"
                 >
                   <UploadCloud className="w-4 h-4" />
-                  Upload music
+                  {t("music.shell.uploadMusic")}
                 </button>
               </div>
             </div>
@@ -225,11 +226,11 @@ export default function MusicShell() {
             <div className="flex items-start justify-between gap-4 mb-6">
               <div>
                 <div className="text-xs uppercase tracking-[0.2em] text-zrp-red font-bold">
-                  Creator tools
+                  {t("music.shell.studioEyebrow")}
                 </div>
-                <h2 className="text-2xl font-black mt-1">Music Studio</h2>
+                <h2 className="text-2xl font-black mt-1">{t("music.shell.studioLabel")}</h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  Publish your music directly to ZRP.
+                  {t("music.shell.studioDescription")}
                 </p>
               </div>
 
@@ -238,16 +239,16 @@ export default function MusicShell() {
                 onClick={() => setStudio(false)}
                 className="text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white"
               >
-                Close
+                {t("music.shell.close")}
               </button>
             </div>
 
             {!session?.user ? (
               <div className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-black/30 p-6 text-center">
                 <Lock className="w-8 h-8 mx-auto text-gray-400" />
-                <div className="font-bold mt-3">Sign in to publish music</div>
+                <div className="font-bold mt-3">{t("music.shell.signInTitle")}</div>
                 <p className="text-sm text-gray-500 mt-1">
-                  Listening to ZRP Music is open to everyone. You&apos;ll need to sign in to apply for publishing access.
+                  {t("music.shell.signInBody")}
                 </p>
               </div>
             ) : accessLoading ? (
@@ -261,29 +262,28 @@ export default function MusicShell() {
                     <Lock className="w-5 h-5 text-gray-500" />
                   </div>
                   <div>
-                    <div className="font-bold">Music Studio - Artist or Creator status required</div>
+                    <div className="font-bold">{t("music.shell.gateTitle")}</div>
                     <p className="text-sm text-gray-500 mt-1">
-                      Listening to ZRP Music is open to everyone. Publishing music requires
-                      an approved Creator status or a verified Music Artist profile.
+                      {t("music.shell.gateBody")}
                     </p>
                   </div>
                 </div>
 
                 {access?.hasArtistProfile ? (
                   <div className="mt-5 text-sm rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/40 p-3.5">
-                    Your artist profile has been submitted and is awaiting verification from ZRP staff.
+                    {t("music.shell.pendingVerification")}
                   </div>
                 ) : (
                   <div className="mt-5">
                     <p className="text-sm text-gray-500 mb-2">
-                      Create an artist profile to apply for Music Artist verification, or
-                      <Link href="/settings" className="text-zrp-red hover:underline"> apply for Creator status</Link> from your settings.
+                      {t("music.shell.applyIntroPrefix")}
+                      <Link href="/settings" className="text-zrp-red hover:underline"> {t("music.shell.applyIntroLink")}</Link> {t("music.shell.applyIntroSuffix")}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-2">
                       <input
                         value={applyName}
                         onChange={(e) => setApplyName(e.target.value)}
-                        placeholder="Artist name"
+                        placeholder={t("music.shell.artistNamePlaceholder")}
                         className="flex-1 p-3 rounded-xl bg-gray-50 dark:bg-white/[0.05] border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
                       />
                       <button
@@ -292,7 +292,7 @@ export default function MusicShell() {
                         onClick={applyForArtist}
                         className="h-11 px-5 rounded-xl bg-zrp-red text-white font-bold disabled:opacity-40 shrink-0"
                       >
-                        {applyBusy ? "Submitting..." : "Apply as Artist"}
+                        {applyBusy ? t("music.shell.applySubmitting") : t("music.shell.applySubmit")}
                       </button>
                     </div>
                   </div>
@@ -304,26 +304,26 @@ export default function MusicShell() {
                   <input
                     value={artistName}
                     onChange={(e) => setArtistName(e.target.value)}
-                    placeholder="Artist name"
+                    placeholder={t("music.shell.artistNamePlaceholder")}
                     className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
                   />
 
                   <input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Song title"
+                    placeholder={t("music.shell.songTitlePlaceholder")}
                     className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
                   />
 
                   <input
                     value={genre}
                     onChange={(e) => setGenre(e.target.value)}
-                    placeholder="Genre"
+                    placeholder={t("music.shell.genrePlaceholder")}
                     className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
                   />
 
                   <label className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 cursor-pointer text-sm text-gray-500">
-                    Audio file
+                    {t("music.shell.audioFileLabel")}
                     <input
                       type="file"
                       accept=".mp3,.wav,.m4a,.aac,.aiff,.flac,.ogg,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/aac,audio/aiff,audio/flac,audio/ogg"
@@ -333,7 +333,7 @@ export default function MusicShell() {
                   </label>
 
                   <label className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 cursor-pointer text-sm text-gray-500">
-                    Cover artwork
+                    {t("music.shell.coverArtworkLabel")}
                     <input
                       type="file"
                       accept="image/*"
@@ -347,7 +347,7 @@ export default function MusicShell() {
                     onClick={submit}
                     className="sm:col-span-2 h-12 rounded-xl bg-zrp-red text-white font-bold disabled:opacity-40"
                   >
-                    {busy ? "Publishing..." : "Publish track"}
+                    {busy ? t("music.shell.publishing") : t("music.shell.publishTrack")}
                   </button>
                 </div>
 
@@ -358,7 +358,7 @@ export default function MusicShell() {
                 )}
 
                 <p className="text-xs text-gray-500 mt-3">
-                  Audio and artwork are uploaded directly to your existing ZRP storage.
+                  {t("music.shell.uploadHint")}
                 </p>
               </>
             )}
@@ -368,16 +368,16 @@ export default function MusicShell() {
         {/* Quick navigation */}
         <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            ["Discover", "Fresh music for you", Compass, "/music/discover"],
-            ["Albums", "Full releases", Disc3, "/music/albums"],
-            ["Artists", "Find new voices", Users, "/music/artists"],
-            ["Your Queue", "What plays next", ListPlus, "/music/queue"],
-            ["Liked Music", "Tracks you saved", Heart, "/music/liked"],
-            ["Playlists", "Your collections", ListMusic, "/music/playlists"],
-            ["Recently Played", "Pick up where you left off", History, "/music/history"],
+            [t("music.nav.discoverTitle"), t("music.nav.discoverDesc"), Compass, "/music/discover"],
+            [t("music.nav.albumsTitle"), t("music.nav.albumsDesc"), Disc3, "/music/albums"],
+            [t("music.nav.artistsTitle"), t("music.nav.artistsDesc"), Users, "/music/artists"],
+            [t("music.nav.queueTitle"), t("music.nav.queueDesc"), ListPlus, "/music/queue"],
+            [t("music.nav.likedTitle"), t("music.nav.likedDesc"), Heart, "/music/liked"],
+            [t("music.nav.playlistsTitle"), t("music.nav.playlistsDesc"), ListMusic, "/music/playlists"],
+            [t("music.nav.historyTitle"), t("music.nav.historyDesc"), History, "/music/history"],
           ].map(([name, description, Icon, href]) => (
             <Link
-              key={String(name)}
+              key={String(href)}
               href={String(href)}
               className="group text-left rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.035] p-4 hover:border-zrp-red/30 hover:bg-zrp-red/[0.03] transition"
             >
@@ -398,24 +398,24 @@ export default function MusicShell() {
           <div className="flex items-end justify-between mb-5">
             <div>
               <div className="text-xs uppercase tracking-[0.2em] text-zrp-red font-bold">
-                Listen now
+                {t("music.shell.listenNowEyebrow")}
               </div>
               <h2 className="text-2xl sm:text-3xl font-black mt-1">
-                Discover music
+                {t("music.shell.discoverMusicTitle")}
               </h2>
             </div>
 
             <div className="text-xs text-gray-500">
-              {tracks.length} track{tracks.length === 1 ? "" : "s"}
+              {t(tracks.length === 1 ? "music.count.tracksOne" : "music.count.tracksOther", { count: tracks.length })}
             </div>
           </div>
 
           {!tracks.length ? (
             <div className="rounded-[24px] border border-dashed border-gray-300 dark:border-white/10 py-20 text-center">
               <Music2 className="w-10 h-10 mx-auto text-gray-300 dark:text-white/20" />
-              <div className="font-bold mt-4">Your music universe starts here</div>
+              <div className="font-bold mt-4">{t("music.shell.emptyTitle")}</div>
               <div className="text-sm text-gray-500 mt-2">
-                Upload the first song from Music Studio.
+                {t("music.shell.emptyBody")}
               </div>
             </div>
           ) : (
@@ -445,7 +445,7 @@ export default function MusicShell() {
                         type="button"
                         onClick={() => play(track)}
                         className="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-zrp-red text-white flex items-center justify-center shadow-xl shadow-black/30 active:scale-95 transition"
-                        aria-label={`Play ${track.title}`}
+                        aria-label={t("music.shell.playTrackAria", { title: track.title })}
                       >
                         <Play className="w-5 h-5 fill-current ml-0.5" />
                       </button>
@@ -454,7 +454,7 @@ export default function MusicShell() {
                         type="button"
                         onClick={() => addToQueue(track)}
                         className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur text-white flex items-center justify-center hover:bg-black/70 transition"
-                        aria-label="Add to queue"
+                        aria-label={t("music.common.addToQueue")}
                       >
                         <ListPlus className="w-4 h-4" />
                       </button>
@@ -473,7 +473,7 @@ export default function MusicShell() {
                           type="button"
                           onClick={() => like(track.id)}
                           className="shrink-0 w-9 h-9 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center"
-                          aria-label="Like"
+                          aria-label={track.liked ? t("music.common.unlike") : t("music.common.like")}
                         >
                           <Heart
                             className={`w-4 h-4 ${

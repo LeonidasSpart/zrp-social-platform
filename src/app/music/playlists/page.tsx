@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ListMusic, Plus, X } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type PlaylistSummary = {
   id: string;
@@ -13,6 +14,7 @@ type PlaylistSummary = {
 };
 
 export default function MusicPlaylistsPage() {
+  const { t } = useLanguage();
   const [playlists, setPlaylists] = useState<PlaylistSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -52,17 +54,17 @@ export default function MusicPlaylistsPage() {
     <div className="min-h-screen bg-white dark:bg-[#050505] text-gray-950 dark:text-white pb-32">
       <header className="sticky top-0 z-30 border-b border-gray-200/70 dark:border-white/10 bg-white/85 dark:bg-[#050505]/85 backdrop-blur-2xl">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <Link href="/music" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10" aria-label="Back to Music">
+          <Link href="/music" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10" aria-label={t("music.common.backToMusic")}>
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <div className="font-black text-lg">Your Playlists</div>
+          <div className="font-black text-lg">{t("music.playlists.title")}</div>
 
           <button
             type="button"
             onClick={() => setCreating(true)}
             className="ml-auto h-9 px-4 rounded-full bg-zrp-red text-white text-sm font-bold flex items-center gap-1.5"
           >
-            <Plus className="w-4 h-4" /> New playlist
+            <Plus className="w-4 h-4" /> {t("music.playlists.newPlaylist")}
           </button>
         </div>
       </header>
@@ -75,7 +77,7 @@ export default function MusicPlaylistsPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && createPlaylist()}
-              placeholder="Playlist name"
+              placeholder={t("music.playlists.namePlaceholder")}
               className="flex-1 p-2.5 rounded-xl bg-gray-100 dark:bg-white/[0.06] border border-transparent focus:border-zrp-red/40 outline-none"
             />
             <button
@@ -84,7 +86,7 @@ export default function MusicPlaylistsPage() {
               onClick={createPlaylist}
               className="h-10 px-4 rounded-full bg-zrp-red text-white font-bold disabled:opacity-40"
             >
-              Create
+              {t("music.playlists.create")}
             </button>
             <button
               type="button"
@@ -93,7 +95,7 @@ export default function MusicPlaylistsPage() {
                 setName("");
               }}
               className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 flex items-center justify-center"
-              aria-label="Cancel"
+              aria-label={t("music.playlists.cancelAria")}
             >
               <X className="w-4 h-4" />
             </button>
@@ -107,8 +109,8 @@ export default function MusicPlaylistsPage() {
         ) : !playlists.length ? (
           <div className="rounded-[24px] border border-dashed border-gray-300 dark:border-white/10 py-20 text-center">
             <ListMusic className="w-10 h-10 mx-auto text-gray-300 dark:text-white/20" />
-            <div className="font-bold mt-4">No playlists yet</div>
-            <div className="text-sm text-gray-500 mt-2">Create your first playlist to start organizing tracks.</div>
+            <div className="font-bold mt-4">{t("music.playlists.emptyTitle")}</div>
+            <div className="text-sm text-gray-500 mt-2">{t("music.playlists.emptyBody")}</div>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -130,7 +132,9 @@ export default function MusicPlaylistsPage() {
                   </div>
                   <div className="p-3">
                     <div className="font-bold truncate">{playlist.name}</div>
-                    <div className="text-xs text-gray-500">{playlist.tracks.length} track{playlist.tracks.length === 1 ? "" : "s"}</div>
+                    <div className="text-xs text-gray-500">
+                      {t(playlist.tracks.length === 1 ? "music.count.tracksOne" : "music.count.tracksOther", { count: playlist.tracks.length })}
+                    </div>
                   </div>
                 </Link>
               );

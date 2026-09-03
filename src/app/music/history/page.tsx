@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, History } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import TrackList from "@/components/music/TrackList";
 import { type MusicTrack } from "@/components/music/MusicPlayerProvider";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function MusicHistoryPage() {
+  const { t } = useLanguage();
   const [tracks, setTracks] = useState<MusicTrack[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -43,10 +45,10 @@ export default function MusicHistoryPage() {
     <div className="min-h-screen bg-white dark:bg-[#050505] text-gray-950 dark:text-white pb-32">
       <header className="sticky top-0 z-30 border-b border-gray-200/70 dark:border-white/10 bg-white/85 dark:bg-[#050505]/85 backdrop-blur-2xl">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <Link href="/music" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10" aria-label="Back to Music">
+          <Link href="/music" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10" aria-label={t("music.common.backToMusic")}>
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <div className="font-black text-lg">Recently Played</div>
+          <div className="font-black text-lg">{t("music.history.title")}</div>
         </div>
       </header>
 
@@ -61,8 +63,8 @@ export default function MusicHistoryPage() {
             onLike={like}
             showAlbum
             showIndex={false}
-            emptyTitle="No listening history yet"
-            emptyDescription="Tracks you play will show up here."
+            emptyTitle={t("music.history.emptyTitle")}
+            emptyDescription={t("music.history.emptyBody")}
           />
         )}
       </main>

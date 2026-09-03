@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { Heart, ListPlus, ListStart, Pause, Play, Trash2, FolderPlus, Check } from "lucide-react";
 import Link from "next/link";
 import { useMusicPlayer, type MusicTrack } from "./MusicPlayerProvider";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type MyPlaylist = { id: string; name: string };
 
@@ -19,11 +20,11 @@ export default function TrackList({
   tracks,
   onLike,
   onRemove,
-  removeLabel = "Remove",
+  removeLabel,
   showIndex = true,
   showArtist = true,
   showAlbum = false,
-  emptyTitle = "Nothing here yet",
+  emptyTitle,
   emptyDescription,
 }: {
   tracks: MusicTrack[];
@@ -36,6 +37,7 @@ export default function TrackList({
   emptyTitle?: string;
   emptyDescription?: string;
 }) {
+  const { t } = useLanguage();
   const { current, playing, play, pause, addToQueue, playNext } = useMusicPlayer();
   const { data: session } = useSession();
   const [myPlaylists, setMyPlaylists] = useState<MyPlaylist[]>([]);
@@ -64,7 +66,7 @@ export default function TrackList({
   if (!tracks.length) {
     return (
       <div className="rounded-[24px] border border-dashed border-gray-300 dark:border-white/10 py-16 text-center">
-        <div className="font-bold">{emptyTitle}</div>
+        <div className="font-bold">{emptyTitle ?? t("music.track.emptyDefaultTitle")}</div>
         {emptyDescription && (
           <div className="text-sm text-gray-500 mt-2">{emptyDescription}</div>
         )}
@@ -95,7 +97,11 @@ export default function TrackList({
               type="button"
               onClick={() => (isCurrent && playing ? pause() : play(track))}
               className="relative shrink-0 w-11 h-11 rounded-lg overflow-hidden"
-              aria-label={isCurrent && playing ? `Pause ${track.title}` : `Play ${track.title}`}
+              aria-label={
+                isCurrent && playing
+                  ? t("music.track.pauseAria", { title: track.title })
+                  : t("music.shell.playTrackAria", { title: track.title })
+              }
             >
               <img src={cover} alt="" className="w-full h-full object-cover" />
               <span className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
@@ -141,7 +147,7 @@ export default function TrackList({
                   type="button"
                   onClick={() => onLike(track.id)}
                   className="w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center"
-                  aria-label={track.liked ? "Unlike" : "Like"}
+                  aria-label={track.liked ? t("music.common.unlike") : t("music.common.like")}
                 >
                   <Heart className={`w-4 h-4 ${track.liked ? "fill-zrp-red text-zrp-red" : "text-gray-400"}`} />
                 </button>
@@ -151,8 +157,8 @@ export default function TrackList({
                 type="button"
                 onClick={() => playNext(track)}
                 className="w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 hidden sm:flex items-center justify-center"
-                aria-label="Play next"
-                title="Play next"
+                aria-label={t("music.common.playNext")}
+                title={t("music.common.playNext")}
               >
                 <ListStart className="w-4 h-4 text-gray-400" />
               </button>
@@ -161,8 +167,8 @@ export default function TrackList({
                 type="button"
                 onClick={() => addToQueue(track)}
                 className="w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center"
-                aria-label="Add to queue"
-                title="Add to queue"
+                aria-label={t("music.common.addToQueue")}
+                title={t("music.common.addToQueue")}
               >
                 <ListPlus className="w-4 h-4 text-gray-400" />
               </button>
@@ -173,8 +179,8 @@ export default function TrackList({
                     type="button"
                     onClick={() => setOpenMenuFor((prev) => (prev === track.id ? null : track.id))}
                     className="w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 hidden sm:flex items-center justify-center"
-                    aria-label="Add to playlist"
-                    title="Add to playlist"
+                    aria-label={t("music.common.addToPlaylist")}
+                    title={t("music.common.addToPlaylist")}
                   >
                     <FolderPlus className="w-4 h-4 text-gray-400" />
                   </button>
@@ -208,8 +214,8 @@ export default function TrackList({
                   type="button"
                   onClick={() => onRemove(track.id)}
                   className="w-8 h-8 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center"
-                  aria-label={removeLabel}
-                  title={removeLabel}
+                  aria-label={removeLabel ?? t("music.common.remove")}
+                  title={removeLabel ?? t("music.common.remove")}
                 >
                   <Trash2 className="w-4 h-4 text-gray-400" />
                 </button>

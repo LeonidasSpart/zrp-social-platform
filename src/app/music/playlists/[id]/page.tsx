@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Play, Shuffle, Pencil, Trash2, ArrowUp, ArrowDown, ListMusic, Check, X } from "lucide-react";
 import { useMusicPlayer, type MusicTrack } from "@/components/music/MusicPlayerProvider";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type PlaylistTrackRow = { id: string; position: number; track: MusicTrack };
 
@@ -18,6 +19,7 @@ type PlaylistDetail = {
 };
 
 export default function MusicPlaylistDetailPage() {
+  const { t } = useLanguage();
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [playlist, setPlaylist] = useState<PlaylistDetail | null>(null);
@@ -49,7 +51,7 @@ export default function MusicPlaylistDetailPage() {
 
   const deletePlaylist = async () => {
     if (!playlist) return;
-    if (!confirm(`Delete "${playlist.name}"? This can't be undone.`)) return;
+    if (!confirm(t("music.playlistDetail.deleteConfirm", { name: playlist.name }))) return;
     const res = await fetch(`/api/music/playlists/${playlist.id}`, { method: "DELETE" });
     if (res.ok) router.push("/music/playlists");
   };
@@ -99,8 +101,8 @@ export default function MusicPlaylistDetailPage() {
   if (!playlist) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-white dark:bg-[#050505] text-gray-950 dark:text-white">
-        <div className="font-bold">Playlist not found</div>
-        <Link href="/music/playlists" className="text-zrp-red text-sm">Back to playlists</Link>
+        <div className="font-bold">{t("music.playlistDetail.notFound")}</div>
+        <Link href="/music/playlists" className="text-zrp-red text-sm">{t("music.playlistDetail.backToPlaylists")}</Link>
       </div>
     );
   }
@@ -109,7 +111,7 @@ export default function MusicPlaylistDetailPage() {
     <div className="min-h-screen bg-white dark:bg-[#050505] text-gray-950 dark:text-white pb-32">
       <header className="sticky top-0 z-30 border-b border-gray-200/70 dark:border-white/10 bg-white/85 dark:bg-[#050505]/85 backdrop-blur-2xl">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <Link href="/music/playlists" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10" aria-label="Back to playlists">
+          <Link href="/music/playlists" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10" aria-label={t("music.playlistDetail.backToPlaylists")}>
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="font-black text-lg truncate">{playlist.name}</div>
@@ -132,7 +134,7 @@ export default function MusicPlaylistDetailPage() {
 
           <div className="min-w-0 text-center sm:text-left flex-1">
             <div className="text-xs uppercase tracking-[0.2em] text-zrp-red font-bold">
-              {playlist.isPublic ? "Public playlist" : "Private playlist"}
+              {playlist.isPublic ? t("music.playlistDetail.public") : t("music.playlistDetail.private")}
             </div>
 
             {editingName ? (
@@ -144,10 +146,10 @@ export default function MusicPlaylistDetailPage() {
                   onKeyDown={(e) => e.key === "Enter" && saveName()}
                   className="text-2xl sm:text-3xl font-black bg-transparent border-b-2 border-zrp-red outline-none"
                 />
-                <button type="button" onClick={saveName} aria-label="Save name" className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 flex items-center justify-center">
+                <button type="button" onClick={saveName} aria-label={t("music.playlistDetail.saveAria")} className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 flex items-center justify-center">
                   <Check className="w-4 h-4 text-zrp-red" />
                 </button>
-                <button type="button" onClick={() => setEditingName(false)} aria-label="Cancel" className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 flex items-center justify-center">
+                <button type="button" onClick={() => setEditingName(false)} aria-label={t("music.playlists.cancelAria")} className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 flex items-center justify-center">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -161,7 +163,7 @@ export default function MusicPlaylistDetailPage() {
                       setNameDraft(playlist.name);
                       setEditingName(true);
                     }}
-                    aria-label="Rename playlist"
+                    aria-label={t("music.playlistDetail.renameAria")}
                     className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 flex items-center justify-center"
                   >
                     <Pencil className="w-4 h-4 text-gray-400" />
@@ -170,7 +172,9 @@ export default function MusicPlaylistDetailPage() {
               </h1>
             )}
 
-            <div className="text-sm text-gray-500 mt-2">{playlist.tracks.length} track{playlist.tracks.length === 1 ? "" : "s"}</div>
+            <div className="text-sm text-gray-500 mt-2">
+              {t(playlist.tracks.length === 1 ? "music.count.tracksOne" : "music.count.tracksOther", { count: playlist.tracks.length })}
+            </div>
 
             <div className="flex flex-wrap justify-center sm:justify-start gap-3 mt-5">
               <button
@@ -179,7 +183,7 @@ export default function MusicPlaylistDetailPage() {
                 disabled={!playlist.tracks.length}
                 className="h-11 px-5 rounded-full bg-zrp-red text-white font-bold flex items-center gap-2 disabled:opacity-40"
               >
-                <Play className="w-4 h-4 fill-current" /> Play
+                <Play className="w-4 h-4 fill-current" /> {t("music.common.play")}
               </button>
               <button
                 type="button"
@@ -187,7 +191,7 @@ export default function MusicPlaylistDetailPage() {
                 disabled={!playlist.tracks.length}
                 className="h-11 px-5 rounded-full bg-gray-100 dark:bg-white/10 font-bold flex items-center gap-2 disabled:opacity-40"
               >
-                <Shuffle className="w-4 h-4" /> Shuffle
+                <Shuffle className="w-4 h-4" /> {t("music.common.shuffle")}
               </button>
               {playlist.isOwner && (
                 <button
@@ -195,7 +199,7 @@ export default function MusicPlaylistDetailPage() {
                   onClick={deletePlaylist}
                   className="h-11 px-5 rounded-full border border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400 font-bold flex items-center gap-2"
                 >
-                  <Trash2 className="w-4 h-4" /> Delete
+                  <Trash2 className="w-4 h-4" /> {t("music.playlistDetail.delete")}
                 </button>
               )}
             </div>
@@ -204,8 +208,8 @@ export default function MusicPlaylistDetailPage() {
 
         {!playlist.tracks.length ? (
           <div className="rounded-[24px] border border-dashed border-gray-300 dark:border-white/10 py-16 text-center">
-            <div className="font-bold">No tracks in this playlist yet</div>
-            <div className="text-sm text-gray-500 mt-2">Add tracks from Discover, an artist, or an album.</div>
+            <div className="font-bold">{t("music.playlistDetail.emptyTitle")}</div>
+            <div className="text-sm text-gray-500 mt-2">{t("music.playlistDetail.emptyBody")}</div>
           </div>
         ) : (
           <div className="divide-y divide-gray-100 dark:divide-white/5 rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden bg-white dark:bg-white/[0.02]">
@@ -217,7 +221,7 @@ export default function MusicPlaylistDetailPage() {
                       type="button"
                       onClick={() => move(index, -1)}
                       disabled={index === 0}
-                      aria-label="Move up"
+                      aria-label={t("music.playlistDetail.moveUpAria")}
                       className="w-5 h-5 flex items-center justify-center text-gray-400 hover:text-zrp-red disabled:opacity-30"
                     >
                       <ArrowUp className="w-3.5 h-3.5" />
@@ -226,7 +230,7 @@ export default function MusicPlaylistDetailPage() {
                       type="button"
                       onClick={() => move(index, 1)}
                       disabled={index === playlist.tracks.length - 1}
-                      aria-label="Move down"
+                      aria-label={t("music.playlistDetail.moveDownAria")}
                       className="w-5 h-5 flex items-center justify-center text-gray-400 hover:text-zrp-red disabled:opacity-30"
                     >
                       <ArrowDown className="w-3.5 h-3.5" />
@@ -238,7 +242,7 @@ export default function MusicPlaylistDetailPage() {
                   type="button"
                   onClick={() => play(row.track)}
                   className="shrink-0 w-11 h-11 rounded-lg overflow-hidden"
-                  aria-label={`Play ${row.track.title}`}
+                  aria-label={t("music.shell.playTrackAria", { title: row.track.title })}
                 >
                   <img
                     src={row.track.coverUrl || row.track.album?.coverUrl || "/logo.png"}
@@ -256,7 +260,7 @@ export default function MusicPlaylistDetailPage() {
                   type="button"
                   onClick={() => addToQueue(row.track)}
                   className="w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center shrink-0"
-                  aria-label="Add to queue"
+                  aria-label={t("music.common.addToQueue")}
                 >
                   <ListMusic className="w-4 h-4 text-gray-400" />
                 </button>
@@ -266,7 +270,7 @@ export default function MusicPlaylistDetailPage() {
                     type="button"
                     onClick={() => removeTrack(row.track.id)}
                     className="w-8 h-8 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center shrink-0"
-                    aria-label={`Remove ${row.track.title} from playlist`}
+                    aria-label={t("music.playlistDetail.removeTrackAria", { title: row.track.title })}
                   >
                     <Trash2 className="w-4 h-4 text-gray-400" />
                   </button>

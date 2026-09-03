@@ -8,6 +8,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export type RepeatMode = "off" | "all" | "one";
 
@@ -71,6 +72,7 @@ export function MusicPlayerProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const { t } = useLanguage();
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const [current, setCurrent] = useState<MusicTrack | null>(null);
@@ -93,12 +95,14 @@ export function MusicPlayerProvider({
   const currentRef = useRef<MusicTrack | null>(null);
   const repeatRef = useRef<RepeatMode>("off");
   const shuffleRef = useRef(false);
+  const tRef = useRef(t);
 
   useEffect(() => {
     currentRef.current = current;
     repeatRef.current = repeat;
     shuffleRef.current = shuffle;
-  }, [current, repeat, shuffle]);
+    tRef.current = t;
+  }, [current, repeat, shuffle, t]);
 
   /*
    * Create one persistent audio element.
@@ -149,7 +153,7 @@ export function MusicPlayerProvider({
     const handleError = () => {
       setBuffering(false);
       setPlaying(false);
-      setError("This track couldn't be played. Skipping to the next one.");
+      setError(tRef.current("music.player.playbackError"));
 
       const activeShuffle = shuffleRef.current;
 
