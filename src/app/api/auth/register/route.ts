@@ -15,12 +15,21 @@ export async function POST(req: NextRequest) {
   if (!limit.success) return limit.response;
 
   try {
-    const { name, username, email, password } = await req.json();
+    const { name, username, email: rawEmail, password } = await req.json();
 
     // ─── Validation ──────────────────────────────────────────────
-    if (!email || !password || !username) {
+    if (!rawEmail || !password || !username) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
+
+    // Login (auth.ts), forgot-password, and the Google OAuth signIn
+    // callback all normalize the email to lowercase before querying.
+    // Registration never did, so an account created as "User@x.com"
+    // could never log back in - the login query for "user@x.com"
+    // simply wouldn't match the row. Normalizing here (and everywhere
+    // else this model's email is written or looked up) keeps every
+    // entry point consistent.
+    const email = String(rawEmail).trim().toLowerCase();
 
     if (password.length < 6) {
       return NextResponse.json({ error: "Password too short" }, { status: 400 });

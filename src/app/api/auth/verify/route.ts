@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { hashToken } from "@/lib/tokens";
 import { rateLimit } from "@/lib/rate-limit";
+import { consumeVerificationToken } from "@/lib/verify-email";
 
 export async function GET(req: NextRequest) {
   // Prevent brute-forcing the verification token by request volume.
@@ -10,30 +9,13 @@ export async function GET(req: NextRequest) {
 
   const token = req.nextUrl.searchParams.get("token");
 
-  if (!token) {
-    return NextResponse.json({ error: "Missing token" }, { status: 400 });
-  }
-
   try {
-    const user = await prisma.user.findFirst({
-      where: {
-        verificationToken: hashToken(token),
-        verificationTokenExpiry: { gt: new Date() },
-      },
-    });
+    const result = await consumeVerificationToken(token);
 
-    if (!user) {
-      return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 });
+    if (!result.ok) {
+      const message = result.error === "missing_token" ? "Missing token" : "Invalid or expired token";
+      return NextResponse.json({ error: message }, { status: 400 });
     }
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        emailVerified: new Date(),
-        verificationToken: null,
-        verificationTokenExpiry: null,
-      },
-    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

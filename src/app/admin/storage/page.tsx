@@ -17,6 +17,8 @@ interface ScanResult {
   totalReferencedInDb: number;
   orphanedCount: number;
   orphanedSizeMB: number;
+  heldForReviewCount: number;
+  heldForReviewSizeMB: number;
   sample: OrphanFile[];
 }
 
@@ -162,6 +164,17 @@ export default function AdminStoragePage() {
                 <p className="text-xl font-bold text-zrp-red">{result.orphanedSizeMB} MB</p>
               </div>
             </div>
+
+            {result.heldForReviewCount > 0 && (
+              <div className="border-b border-gray-200 bg-amber-50 px-5 py-3 text-sm text-amber-800 dark:border-gray-800 dark:bg-amber-950/20 dark:text-amber-300">
+                <span className="font-semibold">
+                  {t("adminStorage.statHeldForReview")}: {result.heldForReviewCount} ({result.heldForReviewSizeMB} MB)
+                </span>
+                <p className="mt-0.5 text-xs text-amber-700/80 dark:text-amber-400/80">
+                  {t("adminStorage.heldForReviewHint", { count: result.heldForReviewCount })}
+                </p>
+              </div>
+            )}
 
             {result.orphanedCount === 0 ? (
               <p className="px-5 py-8 text-center text-sm text-gray-500 dark:text-gray-400">

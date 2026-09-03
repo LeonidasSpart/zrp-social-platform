@@ -15,11 +15,17 @@ export async function POST(req: NextRequest) {
   if (!limit.success) return limit.response;
 
   try {
-    const { email } = await req.json();
+    const { email: rawEmail } = await req.json();
 
-    if (!email) {
+    if (!rawEmail) {
       return NextResponse.json({ error: "Email required" }, { status: 400 });
     }
+
+    // Same normalization as registration/login - without it, a user
+    // whose account was created before this fix (or who just types
+    // their email in a different case) would get "User not found"
+    // even though the account exists.
+    const email = String(rawEmail).trim().toLowerCase();
 
     const user = await prisma.user.findUnique({
       where: { email },

@@ -13,11 +13,17 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { currentPassword, newEmail } = await req.json();
+  const { currentPassword, newEmail: rawNewEmail } = await req.json();
 
-  if (!currentPassword || !newEmail) {
+  if (!currentPassword || !rawNewEmail) {
     return NextResponse.json({ error: "All fields are required" }, { status: 400 });
   }
+
+  // Same normalization as registration/login (see register/route.ts) -
+  // every other entry point that writes or looks up User.email
+  // lowercases first, so this one must too or the account could end
+  // up unable to log in with its own new email.
+  const newEmail = String(rawNewEmail).trim().toLowerCase();
 
   // Validate email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -64,8 +70,14 @@ export async function PUT(req: NextRequest) {
     },
   });
 
-  // Construct the full verification URL
-  const baseUrl = process.env.NEXTAUTH_URL;
+  // Construct the full verification URL. Same fallback as
+  // sendVerificationEmail's own default link and /api/auth/verify's
+  // redirect - without it, a missing NEXTAUTH_URL would produce a
+  // literal "undefined/api/auth/verify-email?..." link, and unlike
+  // the default registration link this one is passed in as an
+  // explicit override, so sendVerificationEmail's own fallback never
+  // gets a chance to catch it.
+  const baseUrl = (process.env.NEXTAUTH_URL || "https://zrp.one").replace(/\/$/, "");
   const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${token}`;
 
   // Send the email
