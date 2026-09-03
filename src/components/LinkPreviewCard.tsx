@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Play } from "lucide-react";
 
 interface LinkPreview {
   url: string;
@@ -82,6 +82,13 @@ export default function LinkPreviewCard({ url, compact = false, onRemove, onLoad
     // keep whatever we have
   }
 
+  const isYouTube = preview.siteName === "YouTube";
+  const accessibleLabel = isYouTube
+    ? `Play "${preview.title || "video"}" on YouTube`
+    : preview.title
+    ? `${preview.title} - ${domain}`
+    : domain;
+
   return (
     <div
       className="mt-2 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:bg-gray-50 dark:hover:bg-gray-800/50 transition relative"
@@ -101,24 +108,40 @@ export default function LinkPreviewCard({ url, compact = false, onRemove, onLoad
           ✕
         </button>
       )}
-      <a href={preview.url} target="_blank" rel="noopener noreferrer" className="block">
+      <a
+        href={preview.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-zrp-red focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zrp-deepBlack rounded-2xl"
+        aria-label={accessibleLabel}
+      >
         {preview.image && (
-          <div className={`w-full bg-gray-100 dark:bg-gray-800 ${compact ? "h-28" : "h-48"} overflow-hidden`}>
+          <div
+            className={`w-full bg-gray-100 dark:bg-gray-800 ${compact ? "h-28" : "h-48"} overflow-hidden relative`}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={preview.image}
-              alt={preview.title || domain}
+              alt=""
+              aria-hidden="true"
               className="w-full h-full object-cover"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = "none";
               }}
             />
+            {isYouTube && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="bg-zrp-red/90 rounded-full p-3 shadow-lg">
+                  <Play className="w-6 h-6 text-white fill-white" />
+                </div>
+              </div>
+            )}
           </div>
         )}
         <div className="p-3">
           {domain && (
             <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1 mb-0.5">
-              <ExternalLink className="w-3 h-3" />
+              <ExternalLink className="w-3 h-3" aria-hidden="true" />
               {domain}
             </p>
           )}
