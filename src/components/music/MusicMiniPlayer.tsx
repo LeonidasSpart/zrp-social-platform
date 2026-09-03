@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 import { useMusicPlayer } from "./MusicPlayerProvider";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -89,13 +90,14 @@ export default function MusicMiniPlayer() {
                 </div>
               </div>
 
-              <button
-                type="button"
+              <Link
+                href="/music/queue"
+                onClick={() => setExpanded(false)}
                 className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center"
                 aria-label={t("music.common.queue")}
               >
                 <ListMusic className="w-5 h-5" />
-              </button>
+              </Link>
             </div>
 
             {/* Artwork */}
@@ -121,10 +123,25 @@ export default function MusicMiniPlayer() {
                     </h1>
 
                     <p className="text-white/60 mt-1 truncate">
-                      {current.artist.displayName}
-                      {current.album?.title
-                        ? ` • ${current.album.title}`
-                        : ""}
+                      <Link
+                        href={`/music/artists/${current.artist.id}`}
+                        onClick={() => setExpanded(false)}
+                        className="hover:underline hover:text-white transition"
+                      >
+                        {current.artist.displayName}
+                      </Link>
+                      {current.album?.title && (
+                        <>
+                          {" • "}
+                          <Link
+                            href={`/music/albums/${current.album.id}`}
+                            onClick={() => setExpanded(false)}
+                            className="hover:underline hover:text-white transition"
+                          >
+                            {current.album.title}
+                          </Link>
+                        </>
+                      )}
                     </p>
 
                     {error && (
