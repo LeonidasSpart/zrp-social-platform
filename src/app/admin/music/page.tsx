@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Music2, ExternalLink, ShieldCheck, ShieldOff, Search } from "lucide-react";
+import { Music2, ExternalLink, ShieldCheck, ShieldOff, Search, Trash2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface AdminMusicArtist {
@@ -62,6 +62,26 @@ export default function AdminMusicPage() {
       } else {
         const data = await res.json();
         setMessage({ type: "error", text: data.error || t("music.admin.updateFailedMsg") });
+      }
+    } catch {
+      setMessage({ type: "error", text: t("adminReports.errSomethingWrong") });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const deleteArtist = async (id: string, displayName: string) => {
+    if (!confirm(t("music.admin.deleteConfirm", { name: displayName }))) return;
+    setBusyId(id);
+    try {
+      const res = await fetch(`/api/admin/music/artists/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setMessage({ type: "success", text: t("music.admin.deletedMsg") });
+        fetchArtists();
+        setTimeout(() => setMessage(null), 3000);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setMessage({ type: "error", text: data.error || t("music.admin.deleteFailedMsg") });
       }
     } catch {
       setMessage({ type: "error", text: t("adminReports.errSomethingWrong") });
@@ -197,6 +217,14 @@ export default function AdminMusicPage() {
                         {t("music.admin.verify")}
                       </button>
                     )}
+                    <button
+                      disabled={busyId === artist.id}
+                      onClick={() => deleteArtist(artist.id, artist.displayName)}
+                      className="flex items-center gap-1 px-3 py-1 text-sm border border-red-300 dark:border-red-900/50 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition disabled:opacity-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      {t("music.admin.delete")}
+                    </button>
                   </div>
                 </div>
               </div>

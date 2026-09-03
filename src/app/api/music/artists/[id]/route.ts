@@ -21,7 +21,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       tracks: {
         where: { status: "PUBLISHED" },
         orderBy: [{ playCount: "desc" }, { createdAt: "desc" }],
-        include: { album: true },
+        // artist: true is required even though every track here already
+        // belongs to this same artist - MusicTrack (the player's shared
+        // type) always expects track.artist.displayName (used by the
+        // mini player and the Media Session integration), and omitting
+        // it here made "Play all" on an artist page throw as soon as a
+        // track without .artist became the now-playing track.
+        include: { album: true, artist: true },
       },
     },
   });
