@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import crypto from "crypto";
-import { sendVerificationEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
-import { hashToken } from "@/lib/tokens";
+import { resendVerificationEmail } from "@/lib/resend-verification";
 
 export async function POST(req: NextRequest) {
   // This endpoint is unauthenticated by necessity (a user who can't log
@@ -15,47 +12,35 @@ export async function POST(req: NextRequest) {
   if (!limit.success) return limit.response;
 
   try {
-    const { email: rawEmail } = await req.json();
+    const { email: rawIdentifier } = await req.json();
 
-    if (!rawEmail) {
-      return NextResponse.json({ error: "Email required" }, { status: 400 });
+    if (!rawIdentifier) {
+      return NextResponse.json(
+        { error: "Email required", code: "MISSING_IDENTIFIER" },
+        { status: 400 }
+      );
     }
 
-    // Same normalization as registration/login - without it, a user
-    // whose account was created before this fix (or who just types
-    // their email in a different case) would get "User not found"
-    // even though the account exists.
-    const email = String(rawEmail).trim().toLowerCase();
+    // The login form's field is labeled "Email or Username" and accepts
+    // either (see authorize() in lib/auth.ts) - this action is triggered
+    // directly from that same form's "unverified" error, so it must
+    // resolve the identifier the same way, not assume it's always an
+    // email address.
+    const result = await resendVerificationEmail(String(rawIdentifier));
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-      select: { id: true, emailVerified: true },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    if (!result.ok) {
+      const status = result.code === "USER_NOT_FOUND" ? 404 : 400;
+      const error =
+        result.code === "USER_NOT_FOUND" ? "User not found" : "Email already verified";
+      return NextResponse.json({ error, code: result.code }, { status });
     }
 
-    if (user.emailVerified) {
-      return NextResponse.json({ error: "Email already verified" }, { status: 400 });
-    }
-
-    const token = crypto.randomBytes(32).toString("hex");
-    const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        verificationToken: hashToken(token),
-        verificationTokenExpiry: expiry,
-      },
-    });
-
-    await sendVerificationEmail(email, token);
-
-    return NextResponse.json({ message: "Verification email sent" });
+    return NextResponse.json({ message: "Verification email sent", code: "SENT" });
   } catch (error) {
     console.error("Resend verification error:", error);
-    return NextResponse.json({ error: "Failed to resend verification" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to resend verification", code: "RESEND_FAILED" },
+      { status: 500 }
+    );
   }
 }
