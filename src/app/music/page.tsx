@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import MusicShell from "@/components/music/MusicShell";
 
 export const metadata = {
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function MusicPage() {
-  return <MusicShell />;
+  return (
+    <Suspense fallback={null}>
+      <MusicShell />
+    </Suspense>
+  );
 }

@@ -62,6 +62,7 @@ type PendingUpload = {
 };
 
 type Tab = "tracks" | "albums" | "artist";
+export type StudioTab = Tab;
 
 function ModalShell({
   title,
@@ -98,9 +99,11 @@ function ModalShell({
 export default function MusicStudio({
   onClose,
   onTrackChange,
+  initialTab,
 }: {
   onClose: () => void;
   onTrackChange?: () => void;
+  initialTab?: StudioTab;
 }) {
   const { t } = useLanguage();
   const { data: session } = useSession();
@@ -109,7 +112,9 @@ export default function MusicStudio({
   const [accessLoading, setAccessLoading] = useState(true);
   const [applyName, setApplyName] = useState("");
   const [applyBusy, setApplyBusy] = useState(false);
-  const [tab, setTab] = useState<Tab>("tracks");
+  const [tab, setTab] = useState<Tab>(
+    initialTab === "tracks" || initialTab === "albums" || initialTab === "artist" ? initialTab : "tracks"
+  );
 
   const loadAccess = useCallback(async () => {
     setAccessLoading(true);

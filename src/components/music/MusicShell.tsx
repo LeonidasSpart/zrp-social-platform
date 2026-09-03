@@ -2,20 +2,32 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Heart, ListPlus, Play, Search, UploadCloud, Disc3, Music2, Sparkles,
   ChevronRight, Compass, Users, ListMusic, History,
 } from "lucide-react";
 import { useMusicPlayer, type MusicTrack } from "./MusicPlayerProvider";
-import MusicStudio from "./MusicStudio";
+import MusicStudio, { type StudioTab } from "./MusicStudio";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function MusicShell() {
   const { t } = useLanguage();
+  const searchParams = useSearchParams();
   const [tracks, setTracks] = useState<MusicTrack[]>([]);
   const [q, setQ] = useState("");
   const [studio, setStudio] = useState(false);
   const { play, addToQueue } = useMusicPlayer();
+
+  // Lets other pages (the artist page's "Edit Profile"/"Manage in
+  // Studio" links, most notably) deep-link straight into Studio
+  // instead of duplicating its edit UI elsewhere - reuses the one
+  // existing Studio rather than building a second management surface.
+  const studioParam = searchParams.get("studio");
+  const tabParam = searchParams.get("tab") as StudioTab | null;
+  useEffect(() => {
+    if (studioParam === "1") setStudio(true);
+  }, [studioParam]);
 
   async function load() {
     const res = await fetch(`/api/music/tracks${q ? `?q=${encodeURIComponent(q)}` : ""}`, { cache: "no-store" });
@@ -133,7 +145,11 @@ export default function MusicShell() {
 
         {/* Studio */}
         {studio && (
-          <MusicStudio onClose={() => setStudio(false)} onTrackChange={load} />
+          <MusicStudio
+            onClose={() => setStudio(false)}
+            onTrackChange={load}
+            initialTab={tabParam || undefined}
+          />
         )}
 
         {/* Quick navigation */}

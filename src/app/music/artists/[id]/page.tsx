@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Play, Shuffle, ShieldCheck, UserPlus, UserCheck, Disc3 } from "lucide-react";
+import { ArrowLeft, Play, Shuffle, ShieldCheck, UserPlus, UserCheck, Disc3, Pencil } from "lucide-react";
 import { useSession } from "next-auth/react";
 import TrackList from "@/components/music/TrackList";
 import { useMusicPlayer, type MusicTrack } from "@/components/music/MusicPlayerProvider";
@@ -72,6 +72,24 @@ export default function MusicArtistPage() {
     if (res.ok) {
       setArtist((prev) =>
         prev ? { ...prev, tracks: prev.tracks.map((t) => (t.id === id ? { ...t, liked: !t.liked } : t)) } : prev
+      );
+    }
+  };
+
+  const deleteTrack = async (id: string) => {
+    if (!artist) return;
+    const track = artist.tracks.find((t) => t.id === id);
+    if (!confirm(t("music.studio.deleteTrackBody", { title: track?.title || "" }))) return;
+    const res = await fetch(`/api/music/tracks/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      setArtist((prev) =>
+        prev
+          ? {
+              ...prev,
+              tracks: prev.tracks.filter((tr) => tr.id !== id),
+              _count: { ...prev._count, tracks: prev._count.tracks - 1 },
+            }
+          : prev
       );
     }
   };
@@ -166,6 +184,15 @@ export default function MusicArtistPage() {
                   {artist.isFollowing ? t("music.artistDetail.following") : t("music.artistDetail.follow")}
                 </button>
               )}
+              {artist.isOwner && (
+                <Link
+                  href="/music?studio=1&tab=artist"
+                  className="h-11 px-5 rounded-full font-bold flex items-center gap-2 border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 transition"
+                >
+                  <Pencil className="w-4 h-4" />
+                  {t("music.artistDetail.editProfile")}
+                </Link>
+              )}
             </div>
           </div>
         </section>
@@ -202,10 +229,19 @@ export default function MusicArtistPage() {
         )}
 
         <section>
-          <h2 className="text-xl font-black mb-4">{t("music.artistDetail.tracksHeading")}</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-black">{t("music.artistDetail.tracksHeading")}</h2>
+            {artist.isOwner && artist.tracks.length > 0 && (
+              <Link href="/music?studio=1&tab=tracks" className="text-sm text-zrp-red hover:underline shrink-0">
+                {t("music.artistDetail.manageInStudio")}
+              </Link>
+            )}
+          </div>
           <TrackList
             tracks={artist.tracks}
             onLike={like}
+            onRemove={artist.isOwner ? deleteTrack : undefined}
+            removeLabel={artist.isOwner ? t("music.studio.deleteTrack") : undefined}
             showArtist={false}
             showAlbum
             emptyTitle={t("music.artistDetail.noTracks")}
