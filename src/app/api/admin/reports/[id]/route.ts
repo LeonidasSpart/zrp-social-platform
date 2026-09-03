@@ -24,19 +24,33 @@ export async function PUT(
       data.actionedAt = new Date();
 
       // Denormalize who this action was actually taken against, read
-      // from the post/comment author now while it's still resolvable -
-      // the content itself may be deleted moments later as part of
-      // carrying out this same action, and the report must still be
-      // able to identify its target afterward (for the appeals flow
-      // and for the moderation transparency dashboard).
+      // from the reported content's owner now while it's still
+      // resolvable - the content itself may be deleted moments later as
+      // part of carrying out this same action, and the report must
+      // still be able to identify its target afterward (for the appeals
+      // flow and for the moderation transparency dashboard). Covers
+      // every polymorphic report target, not just post/comment - a
+      // listing/challenge/opportunity/campaign report actioned before
+      // this was previously left with no identifiable target at all.
       const current = await prisma.report.findUnique({
         where: { id },
         select: {
           post: { select: { authorId: true } },
           comment: { select: { authorId: true } },
+          listing: { select: { sellerId: true } },
+          challenge: { select: { creatorId: true } },
+          opportunity: { select: { posterId: true } },
+          campaign: { select: { organizerId: true } },
         },
       });
-      data.targetUserId = current?.post?.authorId ?? current?.comment?.authorId ?? null;
+      data.targetUserId =
+        current?.post?.authorId ??
+        current?.comment?.authorId ??
+        current?.listing?.sellerId ??
+        current?.challenge?.creatorId ??
+        current?.opportunity?.posterId ??
+        current?.campaign?.organizerId ??
+        null;
     } else {
       // Optionally clear action fields when status changes away from actioned
       data.actionType = null;

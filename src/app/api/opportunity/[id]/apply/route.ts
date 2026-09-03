@@ -39,7 +39,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       where: { listingId_applicantId: { listingId, applicantId } },
     });
     if (existing) {
-      return NextResponse.json({ error: "You've already applied to this listing." }, { status: 400 });
+      return NextResponse.json({ error: "You've already applied to this listing." }, { status: 409 });
     }
 
     const body = await req.json();

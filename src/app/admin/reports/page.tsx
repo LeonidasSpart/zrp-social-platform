@@ -18,6 +18,9 @@ interface Report {
   post: { id: string; content: string; author: { username: string } } | null;
   comment: { id: string; content: string; postId: string; author: { username: string } } | null;
   listing: { id: string; title: string; category: string; seller: { username: string } } | null;
+  challenge: { id: string; title: string; creator: { username: string } | null } | null;
+  opportunity: { id: string; title: string; poster: { username: string } } | null;
+  campaign: { id: string; title: string; organizer: { username: string } } | null;
 }
 
 export default function AdminReports() {
@@ -213,8 +216,14 @@ export default function AdminReports() {
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">{t("adminReports.noReports")}</div>
         ) : (
           reports.map((report) => {
-            const content = report.post || report.comment || report.listing;
-            const author = report.post?.author || report.comment?.author || report.listing?.seller;
+            const content = report.post || report.comment || report.listing || report.challenge || report.opportunity || report.campaign;
+            const author =
+              report.post?.author ||
+              report.comment?.author ||
+              report.listing?.seller ||
+              report.challenge?.creator ||
+              report.opportunity?.poster ||
+              report.campaign?.organizer;
             // Comments deep-link to their parent post + scroll into view
             // via #comment-<id> (already supported by the post detail
             // page) - previously this was never actually constructed for
@@ -226,13 +235,25 @@ export default function AdminReports() {
                 ? `/post/${report.comment.postId}#comment-${report.comment.id}`
                 : report.listing
                   ? `/marketplace/listing/${report.listing.id}`
-                  : null;
+                  : report.challenge
+                    ? `/play/challenge/${report.challenge.id}`
+                    : report.opportunity
+                      ? `/opportunity/listing/${report.opportunity.id}`
+                      : report.campaign
+                        ? `/aid/campaign/${report.campaign.id}`
+                        : null;
             const viewAuthorLink = author ? `/profile/${author.username}` : null;
             const contentLabel = report.post
               ? t("adminReports.viewPost")
               : report.comment
                 ? t("adminReports.viewComment")
-                : t("adminMarketplace.viewListing");
+                : report.listing
+                  ? t("adminMarketplace.viewListing")
+                  : report.challenge
+                    ? t("adminReports.viewChallenge")
+                    : report.opportunity
+                      ? t("adminReports.viewOpportunity")
+                      : t("adminReports.viewCampaign");
 
             return (
               <div

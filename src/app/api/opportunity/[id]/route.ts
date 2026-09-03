@@ -43,7 +43,21 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       });
     }
 
-    return NextResponse.json({ listing });
+    // Without this, the Apply button always renders regardless of
+    // whether the current user already applied - every page reload
+    // after applying showed "Apply" again, so clicking it just surfaced
+    // a confusing "already applied" error from the apply route instead
+    // of the already-applied state the button should have shown.
+    let alreadyApplied = false;
+    if (session?.user?.id && !isOwner) {
+      const existing = await prisma.opportunityApplication.findUnique({
+        where: { listingId_applicantId: { listingId: id, applicantId: session.user.id } },
+        select: { id: true },
+      });
+      alreadyApplied = !!existing;
+    }
+
+    return NextResponse.json({ listing: { ...listing, alreadyApplied } });
   } catch (error) {
     console.error("Error fetching opportunity listing:", error);
     return NextResponse.json({ error: "Failed to fetch listing" }, { status: 500 });

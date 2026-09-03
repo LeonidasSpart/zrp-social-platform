@@ -12,6 +12,7 @@ import { TYPE_META, type OpportunitySummary } from "@/lib/opportunity";
 
 interface ListingDetail extends OpportunitySummary {
   posterId?: string;
+  alreadyApplied?: boolean;
 }
 
 const LOCALE_MAP: Record<string, string> = {
@@ -30,6 +31,10 @@ export default function OpportunityListingPage() {
   const [error, setError] = useState<string | null>(null);
   const [showApply, setShowApply] = useState(false);
   const [applied, setApplied] = useState(false);
+  // Distinct from `applied` so the confirmation text can say "already
+  // applied" for an application hydrated from a prior visit, vs. "sent"
+  // for one that was literally just submitted this page load.
+  const [justApplied, setJustApplied] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const load = () => {
@@ -38,7 +43,10 @@ export default function OpportunityListingPage() {
         if (!res.ok) throw new Error("not found");
         return res.json();
       })
-      .then((data) => setListing(data.listing))
+      .then((data) => {
+        setListing(data.listing);
+        setApplied(!!data.listing?.alreadyApplied);
+      })
       .catch(() => setError(t("opportunity.errLoadFailed")))
       .finally(() => setLoading(false));
   };
@@ -174,7 +182,9 @@ export default function OpportunityListingPage() {
               {t("opportunity.applyExternally")}
             </a>
           ) : applied ? (
-            <p className="text-sm font-semibold text-green-600 dark:text-green-400">{t("opportunity.applicationSent")}</p>
+            <p className="text-sm font-semibold text-green-600 dark:text-green-400">
+              {justApplied ? t("opportunity.applicationSent") : t("opportunity.alreadyApplied")}
+            </p>
           ) : (
             <button
               type="button"
@@ -194,6 +204,7 @@ export default function OpportunityListingPage() {
           onApplied={() => {
             setShowApply(false);
             setApplied(true);
+            setJustApplied(true);
           }}
         />
       )}

@@ -50,6 +50,27 @@ export async function GET(req: NextRequest) {
               seller: { select: { id: true, username: true, name: true } },
             },
           },
+          challenge: {
+            select: {
+              id: true,
+              title: true,
+              creator: { select: { id: true, username: true, name: true } },
+            },
+          },
+          opportunity: {
+            select: {
+              id: true,
+              title: true,
+              poster: { select: { id: true, username: true, name: true } },
+            },
+          },
+          campaign: {
+            select: {
+              id: true,
+              title: true,
+              organizer: { select: { id: true, username: true, name: true } },
+            },
+          },
         },
       }),
       prisma.report.count({ where }),

@@ -18,15 +18,15 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { postId, commentId, listingId, reason, details } = await req.json();
+    const { postId, commentId, listingId, challengeId, opportunityId, campaignId, reason, details } = await req.json();
 
     if (!reason) {
       return NextResponse.json({ error: "Reason is required" }, { status: 400 });
     }
 
-    if (!postId && !commentId && !listingId) {
+    if (!postId && !commentId && !listingId && !challengeId && !opportunityId && !campaignId) {
       return NextResponse.json(
-        { error: "One of postId, commentId, or listingId is required" },
+        { error: "One of postId, commentId, listingId, challengeId, opportunityId, or campaignId is required" },
         { status: 400 }
       );
     }
@@ -39,11 +39,23 @@ export async function POST(req: NextRequest) {
     // Scoped to "pending" specifically, so a genuinely new report is
     // still allowed once a prior one has actually been reviewed - e.g.
     // if the same post starts misbehaving again after being cleared.
+    const target = postId
+      ? { postId }
+      : commentId
+        ? { commentId }
+        : listingId
+          ? { listingId }
+          : challengeId
+            ? { challengeId }
+            : opportunityId
+              ? { opportunityId }
+              : { campaignId };
+
     const existingReport = await prisma.report.findFirst({
       where: {
         reporterId: session.user.id,
         status: "pending",
-        ...(postId ? { postId } : commentId ? { commentId } : { listingId }),
+        ...target,
       },
     });
 
@@ -60,6 +72,9 @@ export async function POST(req: NextRequest) {
         postId: postId || null,
         commentId: commentId || null,
         listingId: listingId || null,
+        challengeId: challengeId || null,
+        opportunityId: opportunityId || null,
+        campaignId: campaignId || null,
         reason,
         details: details || null,
         status: "pending",

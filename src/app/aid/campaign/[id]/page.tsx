@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { ArrowLeft, MapPin, HeartHandshake, Inbox } from "lucide-react";
+import { ArrowLeft, MapPin, HeartHandshake, Inbox, Flag } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ContributeModal from "@/components/help/ContributeModal";
+import ReportModal from "@/components/ReportModal";
 import { CATEGORY_META, NEED_TYPE_META, HELP_NEED_TYPES, formatCampaignAmount, campaignProgress, type HelpCampaignSummary, type HelpNeedType } from "@/lib/help";
 
 interface CampaignDetail extends HelpCampaignSummary {
@@ -35,6 +36,9 @@ export default function CampaignDetailPage() {
   const [offerSubmitting, setOfferSubmitting] = useState(false);
   const [offerSent, setOfferSent] = useState(false);
   const [offerError, setOfferError] = useState<string | null>(null);
+  const [showReport, setShowReport] = useState(false);
+  const [reportSent, setReportSent] = useState(false);
+  const [reportError, setReportError] = useState<string | null>(null);
 
   const load = () => {
     fetch(`/api/help/${params.id}`)
@@ -51,6 +55,23 @@ export default function CampaignDetailPage() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
+
+  const submitReport = async (reason: string, details?: string) => {
+    setReportError(null);
+    try {
+      const res = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ campaignId: params.id, reason, details }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to submit report");
+      setShowReport(false);
+      setReportSent(true);
+    } catch (err) {
+      setReportError(err instanceof Error ? err.message : t("help.errReportFailed"));
+    }
+  };
 
   const submitOffer = async () => {
     if (!offerType || !offerMessage.trim()) return;
@@ -241,8 +262,32 @@ export default function CampaignDetailPage() {
               {offerSent && <p className="text-sm text-green-600 dark:text-green-400">{t("help.offerSent")}</p>}
             </div>
           )}
+
+          {session?.user && !isOwner && (
+            <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+              {reportSent ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t("help.reportSubmitted")}</p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowReport(true)}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:text-zrp-red transition"
+                >
+                  <Flag className="w-3.5 h-3.5" />
+                  {t("help.reportCampaign")}
+                </button>
+              )}
+              {reportError && <p className="text-xs text-red-500 mt-1">{reportError}</p>}
+            </div>
+          )}
         </div>
       </div>
+
+      <ReportModal
+        isOpen={showReport}
+        onClose={() => setShowReport(false)}
+        onSubmit={submitReport}
+      />
 
       {showContribute && (
         <ContributeModal

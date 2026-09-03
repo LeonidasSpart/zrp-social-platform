@@ -230,7 +230,15 @@ export default function CreateCampaignPage() {
           <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-sm text-gray-500 dark:text-gray-400 cursor-pointer hover:border-zrp-red transition">
             {uploading && <Loader2 className="w-4 h-4 animate-spin" />}
             {uploading ? t("opportunity.uploading") : t("help.addImages")}
-            <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} disabled={uploading} />
+            {/* No accept restriction, deliberately - a cloud storage
+                app's own file picker (MEGA, Google Drive, Dropbox)
+                frequently doesn't tag an image with any MIME type this
+                would filter on, and both Android's and iOS's system
+                pickers grey out/hide files that don't match an accept
+                filter before this code ever runs. listingMedia's server
+                validation already rejects anything that isn't actually
+                an image. */}
+            <input type="file" multiple className="hidden" onChange={handleFileChange} disabled={uploading} />
           </label>
         </div>
 

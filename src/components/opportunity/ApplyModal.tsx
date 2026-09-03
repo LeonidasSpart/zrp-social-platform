@@ -99,7 +99,15 @@ export default function ApplyModal({ listingId, onClose, onApplied }: ApplyModal
               <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-sm text-gray-500 dark:text-gray-400 cursor-pointer hover:border-zrp-red transition">
                 {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
                 {uploading ? t("opportunity.uploading") : t("opportunity.attachResume")}
-                <input type="file" accept=".pdf,.txt,.doc,.docx" className="hidden" onChange={handleFileChange} disabled={uploading} />
+                {/* No accept restriction, deliberately - a cloud storage
+                    app's own file picker (MEGA, Google Drive, Dropbox)
+                    frequently doesn't tag a resume with any of the MIME
+                    types this would filter on, and both Android's and
+                    iOS's system pickers grey out/hide files that don't
+                    match an accept filter before this code ever runs.
+                    The server (chatFile's pdf/text/blob categories)
+                    already accepts whatever comes through. */}
+                <input type="file" className="hidden" onChange={handleFileChange} disabled={uploading} />
               </label>
             )}
           </div>
