@@ -18,10 +18,13 @@ export async function GET(req: NextRequest) {
   }
 
   const q = req.nextUrl.searchParams.get("q")?.trim() || "";
+  const sort = req.nextUrl.searchParams.get("sort") || "name";
+  const limit = Math.min(Number(req.nextUrl.searchParams.get("limit") || 50), 100);
+
   const artists = await prisma.musicArtist.findMany({
     where: q ? { displayName: { contains: q, mode: "insensitive" } } : undefined,
-    orderBy: { displayName: "asc" },
-    take: 50,
+    orderBy: sort === "popular" ? [{ followers: { _count: "desc" } }, { displayName: "asc" }] : { displayName: "asc" },
+    take: limit,
     include: { _count: { select: { tracks: true, followers: true } } },
   });
   return NextResponse.json(artists);

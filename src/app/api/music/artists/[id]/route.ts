@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { attachAlbumDurations } from "@/lib/music/album-aggregates";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +57,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     ...artist,
     isFollowing,
     isOwner: userId === artist.userId,
+    albums: await attachAlbumDurations(artist.albums),
     tracks: artist.tracks.map((t) => ({ ...t, liked: likedTrackIds.has(t.id) })),
   });
 }

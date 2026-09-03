@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { formatTotalDuration } from "@/lib/music/duration";
 
 type MusicAccess = {
   allowed: boolean;
@@ -34,6 +35,7 @@ type StudioAlbum = {
   coverUrl?: string | null;
   coverKey?: string | null;
   releaseDate?: string | null;
+  totalDurationSec?: number;
   _count?: { tracks: number };
 };
 
@@ -1054,6 +1056,7 @@ function AlbumsTab({
                 <div className="font-bold truncate">{album.title}</div>
                 <div className="text-xs text-gray-500 mt-0.5">
                   {t(album._count?.tracks === 1 ? "music.count.tracksOne" : "music.count.tracksOther", { count: album._count?.tracks || 0 })}
+                  {!!album.totalDurationSec && ` • ${formatTotalDuration(album.totalDurationSec, t)}`}
                 </div>
                 <div className="flex gap-2 mt-3">
                   <button

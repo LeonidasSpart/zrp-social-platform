@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getMusicPublishAccess, MUSIC_PUBLISH_DENIED_MESSAGE } from "@/lib/music/permissions";
+import { attachAlbumDurations } from "@/lib/music/album-aggregates";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
       take: limit,
       include: { artist: true, _count: { select: { tracks: true } } },
     });
-    return NextResponse.json(albums);
+    return NextResponse.json(await attachAlbumDurations(albums));
   }
 
   const albums = await prisma.musicAlbum.findMany({
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest) {
     include: { artist: true, _count: { select: { tracks: true } } },
   });
 
-  return NextResponse.json(albums);
+  return NextResponse.json(await attachAlbumDurations(albums));
 }
 
 export async function POST(req: NextRequest) {

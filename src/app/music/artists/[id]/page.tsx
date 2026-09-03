@@ -8,8 +8,16 @@ import { useSession } from "next-auth/react";
 import TrackList from "@/components/music/TrackList";
 import { useMusicPlayer, type MusicTrack } from "@/components/music/MusicPlayerProvider";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { formatTotalDuration } from "@/lib/music/duration";
 
-type Album = { id: string; title: string; coverUrl: string | null; _count: { tracks: number } };
+type Album = {
+  id: string;
+  title: string;
+  coverUrl: string | null;
+  releaseDate: string | null;
+  totalDurationSec: number;
+  _count: { tracks: number };
+};
 
 type ArtistDetail = {
   id: string;
@@ -218,8 +226,10 @@ export default function MusicArtistPage() {
                   </div>
                   <div className="p-3">
                     <div className="font-bold truncate">{album.title}</div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 truncate">
+                      {album.releaseDate && `${new Date(album.releaseDate).getFullYear()} • `}
                       {t(album._count.tracks === 1 ? "music.count.tracksOne" : "music.count.tracksOther", { count: album._count.tracks })}
+                      {album.totalDurationSec > 0 && ` • ${formatTotalDuration(album.totalDurationSec, t)}`}
                     </div>
                   </div>
                 </Link>

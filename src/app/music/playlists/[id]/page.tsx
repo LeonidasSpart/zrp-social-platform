@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Play, Shuffle, Pencil, Trash2, ArrowUp, ArrowDown, ListMusic, Check, X } from "lucide-react";
 import { useMusicPlayer, type MusicTrack } from "@/components/music/MusicPlayerProvider";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { sumDurationSec, formatTotalDuration } from "@/lib/music/duration";
 
 type PlaylistTrackRow = { id: string; position: number; track: MusicTrack };
 
@@ -89,6 +90,8 @@ export default function MusicPlaylistDetailPage() {
     play(ordered[0].track);
     ordered.slice(1).forEach((r) => addToQueue(r.track));
   };
+
+  const playlistDurationSec = playlist ? sumDurationSec(playlist.tracks.map((r) => r.track)) : 0;
 
   if (loading) {
     return (
@@ -174,6 +177,7 @@ export default function MusicPlaylistDetailPage() {
 
             <div className="text-sm text-gray-500 mt-2">
               {t(playlist.tracks.length === 1 ? "music.count.tracksOne" : "music.count.tracksOther", { count: playlist.tracks.length })}
+              {playlist.tracks.length > 0 && playlistDurationSec > 0 && ` • ${formatTotalDuration(playlistDurationSec, t)}`}
             </div>
 
             <div className="flex flex-wrap justify-center sm:justify-start gap-3 mt-5">

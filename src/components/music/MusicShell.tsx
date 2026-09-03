@@ -3,24 +3,165 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   Heart, ListPlus, Play, Search, UploadCloud, Disc3, Music2, Sparkles,
-  ChevronRight, Compass, Users, ListMusic, History,
+  ChevronRight, Compass, Users, ListMusic, History, ShieldCheck,
 } from "lucide-react";
 import { useMusicPlayer, type MusicTrack } from "./MusicPlayerProvider";
 import MusicStudio, { type StudioTab } from "./MusicStudio";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { formatTotalDuration } from "@/lib/music/duration";
+
+type AlbumSummary = {
+  id: string;
+  title: string;
+  coverUrl: string | null;
+  artist: { id: string; displayName: string };
+  _count: { tracks: number };
+  totalDurationSec: number;
+};
+
+type ArtistSummary = {
+  id: string;
+  displayName: string;
+  avatarUrl: string | null;
+  verified: boolean;
+  _count: { tracks: number; followers: number };
+};
+
+type PlaylistSummary = {
+  id: string;
+  name: string;
+  coverUrl: string | null;
+  tracks: Array<{ track: { coverUrl: string | null; album: { coverUrl: string | null } | null } }>;
+};
+
+// A horizontal row of small track cards - Recently Played, New
+// Releases, Liked Music preview all share this exact card and the
+// same "play this, then queue the rest of the row" behavior as every
+// other track list in Music, so Next/Previous work here too.
+function TrackRow({ tracks, onPlay, onLike }: { tracks: MusicTrack[]; onPlay: (track: MusicTrack, index: number) => void; onLike?: (id: string) => void }) {
+  const { t } = useLanguage();
+  return (
+    <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">
+      {tracks.map((track, index) => {
+        const cover = track.coverUrl || track.album?.coverUrl || "/logo.png";
+        return (
+          <div key={track.id} className="group shrink-0 w-36">
+            <button
+              type="button"
+              onClick={() => onPlay(track, index)}
+              className="relative w-36 h-36 rounded-2xl overflow-hidden block"
+              aria-label={t("music.shell.playTrackAria", { title: track.title })}
+            >
+              <img src={cover} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <span className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition flex items-center justify-center">
+                <Play className="w-8 h-8 text-white fill-white opacity-0 group-hover:opacity-100 transition" />
+              </span>
+            </button>
+            <div className="mt-2 flex items-start gap-1">
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-bold truncate">{track.title}</div>
+                <div className="text-xs text-gray-500 truncate">{track.artist.displayName}</div>
+              </div>
+              {onLike && (
+                <button
+                  type="button"
+                  onClick={() => onLike(track.id)}
+                  className="shrink-0 w-6 h-6 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center"
+                  aria-label={track.liked ? t("music.common.unlike") : t("music.common.like")}
+                >
+                  <Heart className={`w-3.5 h-3.5 ${track.liked ? "fill-zrp-red text-zrp-red" : "text-gray-400"}`} />
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function SectionHeading({ title, href, t }: { title: string; href: string; t: (k: any, v?: any) => string }) {
+  return (
+    <div className="flex items-center justify-between mb-3">
+      <h2 className="text-lg sm:text-xl font-black">{title}</h2>
+      <Link href={href} className="text-xs font-bold text-zrp-red hover:underline shrink-0">
+        {t("music.shell.seeAll")}
+      </Link>
+    </div>
+  );
+}
 
 export default function MusicShell() {
   const { t } = useLanguage();
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
   const [tracks, setTracks] = useState<MusicTrack[]>([]);
   const [matchingAlbums, setMatchingAlbums] = useState<
     { id: string; title: string; coverUrl: string | null; artist: { displayName: string } }[]
   >([]);
+  const [newReleases, setNewReleases] = useState<MusicTrack[]>([]);
+  const [latestAlbums, setLatestAlbums] = useState<AlbumSummary[]>([]);
+  const [popularArtists, setPopularArtists] = useState<ArtistSummary[]>([]);
+  const [genres, setGenres] = useState<{ genre: string; count: number }[]>([]);
+  const [recentlyPlayed, setRecentlyPlayed] = useState<MusicTrack[]>([]);
+  const [likedPreview, setLikedPreview] = useState<MusicTrack[]>([]);
+  const [yourPlaylists, setYourPlaylists] = useState<PlaylistSummary[]>([]);
   const [q, setQ] = useState("");
   const [studio, setStudio] = useState(false);
   const { play, addToQueue, clearQueue } = useMusicPlayer();
+
+  // Real, database-backed homepage sections - each only renders when
+  // it actually has data, never a fake/empty placeholder row.
+  useEffect(() => {
+    fetch("/api/music/tracks?sort=new&limit=10", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setNewReleases)
+      .catch(() => {});
+    fetch("/api/music/albums?limit=10", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setLatestAlbums)
+      .catch(() => {});
+    fetch("/api/music/artists?sort=popular&limit=10", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setPopularArtists)
+      .catch(() => {});
+    fetch("/api/music/genres", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setGenres)
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!session?.user) {
+      setRecentlyPlayed([]);
+      setLikedPreview([]);
+      setYourPlaylists([]);
+      return;
+    }
+    fetch("/api/music/library", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { likes?: { track: MusicTrack }[]; history?: { track: MusicTrack }[] } | null) => {
+        if (!data) return;
+        const seen = new Set<string>();
+        const recent: MusicTrack[] = [];
+        for (const entry of data.history || []) {
+          if (seen.has(entry.track.id)) continue;
+          seen.add(entry.track.id);
+          recent.push(entry.track);
+          if (recent.length >= 10) break;
+        }
+        setRecentlyPlayed(recent);
+        setLikedPreview((data.likes || []).slice(0, 10).map((l) => l.track));
+      })
+      .catch(() => {});
+    fetch("/api/music/playlists", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: PlaylistSummary[]) => setYourPlaylists(data.slice(0, 8)))
+      .catch(() => {});
+  }, [session?.user]);
 
   // Lets other pages (the artist page's "Edit Profile"/"Manage in
   // Studio" links, most notably) deep-link straight into Studio
@@ -59,7 +200,12 @@ export default function MusicShell() {
 
   const like = async (id: string) => {
     const res = await fetch("/api/music/tracks/like", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({trackId:id})});
-    if (res.ok) load();
+    if (!res.ok) return;
+    const toggle = (list: MusicTrack[]) => list.map((t) => (t.id === id ? { ...t, liked: !t.liked } : t));
+    setTracks(toggle);
+    setNewReleases(toggle);
+    setRecentlyPlayed(toggle);
+    setLikedPreview(toggle);
   };
 
   return (
@@ -230,6 +376,150 @@ export default function MusicShell() {
               ))}
             </div>
           </section>
+        )}
+
+        {!q && (
+          <>
+            {recentlyPlayed.length > 0 && (
+              <section>
+                <SectionHeading title={t("music.nav.historyTitle")} href="/music/history" t={t} />
+                <TrackRow
+                  tracks={recentlyPlayed}
+                  onLike={like}
+                  onPlay={(track, index) => {
+                    clearQueue();
+                    play(track);
+                    recentlyPlayed.slice(index + 1).forEach((tr) => addToQueue(tr));
+                  }}
+                />
+              </section>
+            )}
+
+            {yourPlaylists.length > 0 && (
+              <section>
+                <SectionHeading title={t("music.nav.playlistsTitle")} href="/music/playlists" t={t} />
+                <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">
+                  {yourPlaylists.map((playlist) => {
+                    const cover =
+                      playlist.coverUrl ||
+                      playlist.tracks[0]?.track.coverUrl ||
+                      playlist.tracks[0]?.track.album?.coverUrl ||
+                      "/logo.png";
+                    return (
+                      <Link
+                        key={playlist.id}
+                        href={`/music/playlists/${playlist.id}`}
+                        className="group shrink-0 w-36"
+                      >
+                        <div className="w-36 h-36 rounded-2xl overflow-hidden">
+                          <img src={cover} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        </div>
+                        <div className="mt-2 text-sm font-bold truncate">{playlist.name}</div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {likedPreview.length > 0 && (
+              <section>
+                <SectionHeading title={t("music.nav.likedTitle")} href="/music/liked" t={t} />
+                <TrackRow
+                  tracks={likedPreview}
+                  onLike={like}
+                  onPlay={(track, index) => {
+                    clearQueue();
+                    play(track);
+                    likedPreview.slice(index + 1).forEach((tr) => addToQueue(tr));
+                  }}
+                />
+              </section>
+            )}
+
+            {newReleases.length > 0 && (
+              <section>
+                <SectionHeading title={t("music.shell.newReleasesHeading")} href="/music/discover" t={t} />
+                <TrackRow
+                  tracks={newReleases}
+                  onLike={like}
+                  onPlay={(track, index) => {
+                    clearQueue();
+                    play(track);
+                    newReleases.slice(index + 1).forEach((tr) => addToQueue(tr));
+                  }}
+                />
+              </section>
+            )}
+
+            {latestAlbums.length > 0 && (
+              <section>
+                <SectionHeading title={t("music.shell.latestAlbumsHeading")} href="/music/albums" t={t} />
+                <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">
+                  {latestAlbums.map((album) => (
+                    <Link key={album.id} href={`/music/albums/${album.id}`} className="group shrink-0 w-36">
+                      <div className="w-36 h-36 rounded-2xl overflow-hidden bg-gray-200 dark:bg-white/5">
+                        {album.coverUrl ? (
+                          <img src={album.coverUrl} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Disc3 className="w-8 h-8 text-gray-300 dark:text-white/20" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="mt-2 text-sm font-bold truncate">{album.title}</div>
+                      <div className="text-xs text-gray-500 truncate">
+                        {album.artist.displayName}
+                        {album.totalDurationSec > 0 && ` • ${formatTotalDuration(album.totalDurationSec, t)}`}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {popularArtists.length > 0 && (
+              <section>
+                <SectionHeading title={t("music.shell.popularArtistsHeading")} href="/music/artists" t={t} />
+                <div className="flex gap-4 overflow-x-auto pb-1 no-scrollbar">
+                  {popularArtists.map((artist) => (
+                    <Link key={artist.id} href={`/music/artists/${artist.id}`} className="group shrink-0 w-28 text-center">
+                      <div className="w-28 h-28 rounded-full overflow-hidden bg-gray-200 dark:bg-white/5 mx-auto">
+                        {artist.avatarUrl ? (
+                          <img src={artist.avatarUrl} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Users className="w-8 h-8 text-gray-300 dark:text-white/20" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="mt-2 text-sm font-bold truncate flex items-center justify-center gap-1">
+                        {artist.displayName}
+                        {artist.verified && <ShieldCheck className="w-3.5 h-3.5 text-zrp-red shrink-0" aria-label={t("music.artistDetail.verifiedAria")} />}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {genres.length > 0 && (
+              <section>
+                <h2 className="text-lg sm:text-xl font-black mb-3">{t("music.shell.genresHeading")}</h2>
+                <div className="flex flex-wrap gap-2">
+                  {genres.map((g) => (
+                    <Link
+                      key={g.genre}
+                      href={`/music/discover?genre=${encodeURIComponent(g.genre)}`}
+                      className="px-3.5 py-1.5 rounded-full text-sm font-medium bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-zrp-red hover:text-white transition"
+                    >
+                      {g.genre} <span className="opacity-60">({g.count})</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
         )}
 
         {/* Discover */}

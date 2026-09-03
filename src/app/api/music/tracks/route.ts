@@ -77,6 +77,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(tracks);
   }
 
+  const sort = req.nextUrl.searchParams.get("sort") || "popular";
+
   const tracks = await prisma.musicTrack.findMany({
     where: {
       status: "PUBLISHED",
@@ -88,7 +90,7 @@ export async function GET(req: NextRequest) {
         ],
       } : {}),
     },
-    orderBy: [{ playCount: "desc" }, { createdAt: "desc" }],
+    orderBy: sort === "new" ? [{ createdAt: "desc" }] : [{ playCount: "desc" }, { createdAt: "desc" }],
     take: limit,
     include: {
       artist: true,

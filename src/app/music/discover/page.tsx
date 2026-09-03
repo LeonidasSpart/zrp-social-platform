@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Search, Shuffle, Play } from "lucide-react";
 import TrackList from "@/components/music/TrackList";
 import { useMusicPlayer, type MusicTrack } from "@/components/music/MusicPlayerProvider";
@@ -10,10 +11,22 @@ import { useLanguage } from "@/contexts/LanguageContext";
 type Genre = { genre: string; count: number };
 
 export default function MusicDiscoverPage() {
+  return (
+    <Suspense fallback={null}>
+      <MusicDiscoverPageInner />
+    </Suspense>
+  );
+}
+
+function MusicDiscoverPageInner() {
   const { t } = useLanguage();
+  const searchParams = useSearchParams();
   const [tracks, setTracks] = useState<MusicTrack[]>([]);
   const [genres, setGenres] = useState<Genre[]>([]);
-  const [activeGenre, setActiveGenre] = useState<string | null>(null);
+  // Lets the Music Home's genre chips deep-link straight into a
+  // pre-filtered Discover instead of landing on the unfiltered "All
+  // Tracks" view and making the user re-tap the genre.
+  const [activeGenre, setActiveGenre] = useState<string | null>(() => searchParams.get("genre"));
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
   const { play, addToQueue, clearQueue } = useMusicPlayer();

@@ -7,6 +7,7 @@ import { ArrowLeft, Play, Shuffle, Disc3 } from "lucide-react";
 import TrackList from "@/components/music/TrackList";
 import { useMusicPlayer, type MusicTrack } from "@/components/music/MusicPlayerProvider";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { sumDurationSec, formatTotalDuration } from "@/lib/music/duration";
 
 type AlbumDetail = {
   id: string;
@@ -116,6 +117,8 @@ export default function MusicAlbumPage() {
                 t(album.tracks.length === 1 ? "music.count.tracksOne" : "music.count.tracksOther", {
                   count: album.tracks.length,
                 })}
+              {album.tracks.length > 0 && sumDurationSec(album.tracks) > 0 && " • "}
+              {album.tracks.length > 0 && sumDurationSec(album.tracks) > 0 && formatTotalDuration(sumDurationSec(album.tracks), t)}
             </div>
 
             <div className="flex flex-wrap justify-center sm:justify-start gap-3 mt-5">

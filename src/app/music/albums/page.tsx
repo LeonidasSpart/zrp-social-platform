@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Search, Disc3 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { formatTotalDuration } from "@/lib/music/duration";
 
 type AlbumSummary = {
   id: string;
@@ -11,6 +12,7 @@ type AlbumSummary = {
   coverUrl: string | null;
   artist: { id: string; displayName: string };
   _count: { tracks: number };
+  totalDurationSec: number;
 };
 
 export default function MusicAlbumsPage() {
@@ -83,6 +85,10 @@ export default function MusicAlbumsPage() {
                 <div className="p-3">
                   <div className="font-bold truncate">{album.title}</div>
                   <div className="text-xs text-gray-500 truncate">{album.artist.displayName}</div>
+                  <div className="text-[11px] text-gray-400 truncate mt-0.5">
+                    {t(album._count.tracks === 1 ? "music.count.tracksOne" : "music.count.tracksOther", { count: album._count.tracks })}
+                    {album.totalDurationSec > 0 && ` • ${formatTotalDuration(album.totalDurationSec, t)}`}
+                  </div>
                 </div>
               </Link>
             ))}
