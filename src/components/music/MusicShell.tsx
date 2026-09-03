@@ -114,52 +114,31 @@ export default function MusicShell() {
   const { play, addToQueue, clearQueue } = useMusicPlayer();
 
   // Real, database-backed homepage sections - each only renders when
-  // it actually has data, never a fake/empty placeholder row.
+  // it actually has data, never a fake/empty placeholder row. All of
+  // it comes from one consolidated request instead of the up to 6-7
+  // separate round trips this used to take before the page had
+  // anything to show.
   useEffect(() => {
-    fetch("/api/music/tracks?sort=new&limit=10", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : []))
-      .then(setNewReleases)
-      .catch(() => {});
-    fetch("/api/music/albums?limit=10", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : []))
-      .then(setLatestAlbums)
-      .catch(() => {});
-    fetch("/api/music/artists?sort=popular&limit=10", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : []))
-      .then(setPopularArtists)
-      .catch(() => {});
-    fetch("/api/music/genres", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : []))
-      .then(setGenres)
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    if (!session?.user) {
-      setRecentlyPlayed([]);
-      setLikedPreview([]);
-      setYourPlaylists([]);
-      return;
-    }
-    fetch("/api/music/library", { cache: "no-store" })
+    fetch("/api/music/home", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((data: { likes?: { track: MusicTrack }[]; history?: { track: MusicTrack }[] } | null) => {
+      .then((data: {
+        newReleases?: MusicTrack[];
+        latestAlbums?: AlbumSummary[];
+        popularArtists?: ArtistSummary[];
+        genres?: { genre: string; count: number }[];
+        recentlyPlayed?: MusicTrack[];
+        likedPreview?: MusicTrack[];
+        yourPlaylists?: PlaylistSummary[];
+      } | null) => {
         if (!data) return;
-        const seen = new Set<string>();
-        const recent: MusicTrack[] = [];
-        for (const entry of data.history || []) {
-          if (seen.has(entry.track.id)) continue;
-          seen.add(entry.track.id);
-          recent.push(entry.track);
-          if (recent.length >= 10) break;
-        }
-        setRecentlyPlayed(recent);
-        setLikedPreview((data.likes || []).slice(0, 10).map((l) => l.track));
+        setNewReleases(data.newReleases || []);
+        setLatestAlbums(data.latestAlbums || []);
+        setPopularArtists(data.popularArtists || []);
+        setGenres(data.genres || []);
+        setRecentlyPlayed(data.recentlyPlayed || []);
+        setLikedPreview(data.likedPreview || []);
+        setYourPlaylists(data.yourPlaylists || []);
       })
-      .catch(() => {});
-    fetch("/api/music/playlists", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : []))
-      .then((data: PlaylistSummary[]) => setYourPlaylists(data.slice(0, 8)))
       .catch(() => {});
   }, [session?.user]);
 
