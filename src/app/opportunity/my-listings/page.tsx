@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Users } from "lucide-react";
+import { ArrowLeft, Users, Pencil } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { STATUS_LABEL_KEYS, STATUS_STYLES, TYPE_META, type OpportunitySummary } from "@/lib/opportunity";
 
@@ -61,13 +61,22 @@ export default function MyOpportunityListingsPage() {
                 {listing.rejectionReason && (
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{listing.rejectionReason}</p>
                 )}
-                <Link
-                  href={`/opportunity/listing/${listing.id}/applicants`}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-zrp-red hover:underline mt-2"
-                >
-                  <Users className="w-3.5 h-3.5" />
-                  {t("opportunity.viewApplicants", { n: listing._count?.applications ?? 0 })}
-                </Link>
+                <div className="flex items-center gap-4 mt-2">
+                  <Link
+                    href={`/opportunity/listing/${listing.id}/applicants`}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-zrp-red hover:underline"
+                  >
+                    <Users className="w-3.5 h-3.5" />
+                    {t("opportunity.viewApplicants", { n: listing._count?.applications ?? 0 })}
+                  </Link>
+                  <Link
+                    href={`/opportunity/edit/${listing.id}`}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-zrp-red hover:underline"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                    {t("opportunity.editListing")}
+                  </Link>
+                </div>
               </div>
             );
           })}

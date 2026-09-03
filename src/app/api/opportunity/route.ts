@@ -6,7 +6,7 @@ import { getToken } from "next-auth/jwt";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
-import { OPPORTUNITY_TYPES, type OpportunityType } from "@/lib/opportunity";
+import { OPPORTUNITY_TYPES, validateExternalUrl, type OpportunityType } from "@/lib/opportunity";
 import { Prisma } from "@prisma/client";
 
 const POSTER_SELECT = {
@@ -126,13 +126,9 @@ export async function POST(req: NextRequest) {
       : [];
 
     if (externalUrl && typeof externalUrl === "string") {
-      try {
-        const parsed = new URL(externalUrl);
-        if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-          return NextResponse.json({ error: "External application URL must be http(s)." }, { status: 400 });
-        }
-      } catch {
-        return NextResponse.json({ error: "External application URL is invalid." }, { status: 400 });
+      const urlError = validateExternalUrl(externalUrl);
+      if (urlError) {
+        return NextResponse.json({ error: urlError }, { status: 400 });
       }
     }
 

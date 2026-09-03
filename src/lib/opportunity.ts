@@ -100,6 +100,32 @@ export interface OpportunityPoster {
   badgeType: string | null;
 }
 
+// A poster once entered the platform's own homepage as the "external
+// application" URL (a copy-pasted zrp.one link instead of a real
+// employer page) - it's a syntactically valid URL, so a plain
+// http(s)-scheme check lets it straight through, and "Apply Externally"
+// just sends every applicant back to the ZRP homepage with no form on
+// it. Blocking ZRP's own domain here catches that mistake at the
+// source (create and edit both use this) instead of relying on
+// someone noticing after the listing is already live.
+const ZRP_HOSTNAMES = new Set(["zrp.one", "www.zrp.one"]);
+
+export function validateExternalUrl(value: string): string | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    return "External application URL is invalid.";
+  }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    return "External application URL must be http(s).";
+  }
+  if (ZRP_HOSTNAMES.has(parsed.hostname.toLowerCase())) {
+    return "External application URL can't point back to ZRP itself - leave it blank to use ZRP's built-in Apply flow instead.";
+  }
+  return null;
+}
+
 export interface OpportunitySummary {
   id: string;
   type: OpportunityType;

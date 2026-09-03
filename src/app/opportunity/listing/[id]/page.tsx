@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { ArrowLeft, MapPin, Laptop, Calendar, ExternalLink, Bookmark, BookMarked, Users } from "lucide-react";
+import { ArrowLeft, MapPin, Laptop, Calendar, ExternalLink, Bookmark, BookMarked, Users, Pencil } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ApplyModal from "@/components/opportunity/ApplyModal";
@@ -160,13 +160,22 @@ export default function OpportunityListingPage() {
 
         <div className="mt-6">
           {isOwner ? (
-            <Link
-              href={`/opportunity/listing/${listing.id}/applicants`}
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-zrp-red text-white font-semibold hover:bg-red-600 transition"
-            >
-              <Users className="w-4 h-4" />
-              {t("opportunity.viewApplicants", { n: listing._count?.applications ?? 0 })}
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href={`/opportunity/listing/${listing.id}/applicants`}
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-zrp-red text-white font-semibold hover:bg-red-600 transition"
+              >
+                <Users className="w-4 h-4" />
+                {t("opportunity.viewApplicants", { n: listing._count?.applications ?? 0 })}
+              </Link>
+              <Link
+                href={`/opportunity/edit/${listing.id}`}
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:border-zrp-red hover:text-zrp-red transition"
+              >
+                <Pencil className="w-4 h-4" />
+                {t("opportunity.editListing")}
+              </Link>
+            </div>
           ) : !session?.user ? (
             <Link href="/login" className="inline-block px-5 py-2.5 rounded-full bg-zrp-red text-white font-semibold hover:bg-red-600 transition">
               {t("opportunity.loginToApply")}

@@ -6,7 +6,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { isSessionAdmin } from "@/lib/admin";
-import { OPPORTUNITY_TYPES, type OpportunityType } from "@/lib/opportunity";
+import { OPPORTUNITY_TYPES, validateExternalUrl, type OpportunityType } from "@/lib/opportunity";
 
 const POSTER_SELECT = {
   id: true,
@@ -114,6 +114,17 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       (typeof description !== "string" || !description.trim() || description.trim().length > 8000)
     ) {
       return NextResponse.json({ error: "Description is required (max 8000 characters)." }, { status: 400 });
+    }
+    // This route previously had no externalUrl validation at all - the
+    // create route rejects a malformed URL, but an edit through this
+    // one could set literally any string. Same check as create, so an
+    // edit can't reintroduce the exact "external URL points back at
+    // ZRP itself" mistake this exists to catch.
+    if (externalUrl !== undefined && externalUrl !== null && typeof externalUrl === "string" && externalUrl.trim()) {
+      const urlError = validateExternalUrl(externalUrl.trim());
+      if (urlError) {
+        return NextResponse.json({ error: urlError }, { status: 400 });
+      }
     }
 
     const cleanSkills = Array.isArray(skills)
