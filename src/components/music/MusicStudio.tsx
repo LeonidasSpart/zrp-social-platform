@@ -116,6 +116,17 @@ export default function MusicStudio({
     initialTab === "tracks" || initialTab === "albums" || initialTab === "artist" ? initialTab : "tracks"
   );
 
+  // A single, shared success/error banner for every Studio action -
+  // create/edit/delete on tracks and albums all report through this
+  // instead of silently updating a list, so an artist always gets
+  // explicit confirmation of what just happened.
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  useEffect(() => {
+    if (!message) return;
+    const timeout = setTimeout(() => setMessage(null), 3500);
+    return () => clearTimeout(timeout);
+  }, [message]);
+
   const loadAccess = useCallback(async () => {
     setAccessLoading(true);
     try {
@@ -198,7 +209,11 @@ export default function MusicStudio({
     if (res.ok) {
       setTracks((prev) => prev.filter((tr) => tr.id !== deletingTrack.id));
       setDeletingTrack(null);
+      setMessage({ type: "success", text: t("music.studio.trackDeletedMsg") });
       onTrackChange?.();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setMessage({ type: "error", text: data.error || t("music.studio.saveFailed") });
     }
   };
 
@@ -210,7 +225,11 @@ export default function MusicStudio({
     if (res.ok) {
       setAlbums((prev) => prev.filter((al) => al.id !== deletingAlbum.id));
       setDeletingAlbum(null);
+      setMessage({ type: "success", text: t("music.studio.albumDeletedMsg") });
       loadMyTracks();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setMessage({ type: "error", text: data.error || t("music.studio.saveFailed") });
     }
   };
 
@@ -233,6 +252,19 @@ export default function MusicStudio({
           {t("music.shell.close")}
         </button>
       </div>
+
+      {message && (
+        <div
+          role="status"
+          className={`mb-5 rounded-xl px-4 py-3 text-sm font-medium ${
+            message.type === "success"
+              ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/40"
+              : "bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/40"
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
 
       {!session?.user ? (
         <div className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-black/30 p-6 text-center">
@@ -345,6 +377,7 @@ export default function MusicStudio({
           onSaved={(updated) => {
             setTracks((prev) => prev.map((tr) => (tr.id === updated.id ? { ...tr, ...updated } : tr)));
             setEditingTrack(null);
+            setMessage({ type: "success", text: t("music.studio.trackUpdatedMsg") });
             onTrackChange?.();
           }}
         />
@@ -384,6 +417,7 @@ export default function MusicStudio({
           onCreated={(album) => {
             setAlbums((prev) => [album, ...prev]);
             setCreatingAlbum(false);
+            setMessage({ type: "success", text: t("music.studio.albumCreatedMsg") });
           }}
         />
       )}
@@ -395,6 +429,7 @@ export default function MusicStudio({
           onClose={() => setManagingAlbum(null)}
           onAlbumSaved={(updated) => {
             setAlbums((prev) => prev.map((al) => (al.id === updated.id ? { ...al, ...updated } : al)));
+            setMessage({ type: "success", text: t("music.studio.albumUpdatedMsg") });
           }}
           onTracksChanged={() => {
             loadMyTracks();

@@ -13,6 +13,7 @@ type AlbumDetail = {
   title: string;
   description: string | null;
   coverUrl: string | null;
+  releaseDate: string | null;
   artist: { id: string; displayName: string; avatarUrl: string | null };
   tracks: MusicTrack[];
 };
@@ -102,6 +103,20 @@ export default function MusicAlbumPage() {
               {album.artist.displayName}
             </Link>
             {album.description && <p className="text-sm text-gray-500 mt-2 max-w-xl">{album.description}</p>}
+
+            <div className="text-xs text-gray-400 mt-2">
+              {album.releaseDate &&
+                `${t("music.albumDetail.releasedLabel")} ${new Date(album.releaseDate).toLocaleDateString(undefined, {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}`}
+              {album.releaseDate && album.tracks.length > 0 && " • "}
+              {album.tracks.length > 0 &&
+                t(album.tracks.length === 1 ? "music.count.tracksOne" : "music.count.tracksOther", {
+                  count: album.tracks.length,
+                })}
+            </div>
 
             <div className="flex flex-wrap justify-center sm:justify-start gap-3 mt-5">
               <button

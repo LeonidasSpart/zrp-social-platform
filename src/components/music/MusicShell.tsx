@@ -15,6 +15,9 @@ export default function MusicShell() {
   const { t } = useLanguage();
   const searchParams = useSearchParams();
   const [tracks, setTracks] = useState<MusicTrack[]>([]);
+  const [matchingAlbums, setMatchingAlbums] = useState<
+    { id: string; title: string; coverUrl: string | null; artist: { displayName: string } }[]
+  >([]);
   const [q, setQ] = useState("");
   const [studio, setStudio] = useState(false);
   const { play, addToQueue } = useMusicPlayer();
@@ -34,6 +37,25 @@ export default function MusicShell() {
     if (res.ok) setTracks(await res.json());
   }
   useEffect(() => { load(); }, [q]);
+
+  // The main search bar only ever queried tracks (matched by title,
+  // genre, or artist name) - a search for an album title turned up
+  // nothing here even though /api/music/albums already supports the
+  // same ?q= search. Surfacing album matches alongside track results
+  // reuses that existing endpoint rather than building new search
+  // infrastructure.
+  useEffect(() => {
+    if (!q) {
+      setMatchingAlbums([]);
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/music/albums?q=${encodeURIComponent(q)}&limit=6`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => { if (!cancelled) setMatchingAlbums(data); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [q]);
 
   const like = async (id: string) => {
     const res = await fetch("/api/music/tracks/like", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({trackId:id})});
@@ -179,6 +201,36 @@ export default function MusicShell() {
             </Link>
           ))}
         </section>
+
+        {/* Matching albums (search) */}
+        {q && matchingAlbums.length > 0 && (
+          <section>
+            <h2 className="text-lg font-black mb-3">{t("music.shell.matchingAlbumsHeading")}</h2>
+            <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">
+              {matchingAlbums.map((album) => (
+                <Link
+                  key={album.id}
+                  href={`/music/albums/${album.id}`}
+                  className="shrink-0 w-32 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.035] overflow-hidden hover:border-zrp-red/30 transition"
+                >
+                  <div className="aspect-square bg-gray-200 dark:bg-white/5">
+                    {album.coverUrl ? (
+                      <img src={album.coverUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Disc3 className="w-8 h-8 text-gray-300 dark:text-white/20" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-2.5">
+                    <div className="text-sm font-bold truncate">{album.title}</div>
+                    <div className="text-xs text-gray-500 truncate">{album.artist.displayName}</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Discover */}
         <section>
