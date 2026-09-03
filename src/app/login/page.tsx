@@ -9,6 +9,7 @@ import PasswordInput from "@/components/PasswordInput";
 import { useLanguage } from "@/contexts/LanguageContext";
 import GoogleIcon from "@/components/icons/GoogleIcon";
 import { isNativeApp, nativeGoogleSignIn } from "@/lib/nativeAuth";
+import type { TranslationKey } from "@/lib/translations";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
@@ -18,6 +19,11 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
     const errorParam = searchParams.get("error");
@@ -28,10 +34,45 @@ export default function LoginPage() {
     }
   }, [searchParams, t]);
 
+  const RESEND_ERROR_KEYS: Record<string, TranslationKey> = {
+    USER_NOT_FOUND: "auth.resendVerificationUserNotFound",
+    ALREADY_VERIFIED: "auth.resendVerificationAlreadyVerified",
+  };
+
+  const handleResendVerification = async () => {
+    setResendLoading(true);
+    setResendMessage(null);
+
+    try {
+      const res = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // `email` is the same identifier the user typed into "Email or
+        // Username" above - the endpoint resolves either, the same way
+        // credentials login itself does.
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok) {
+        setResendMessage({ type: "success", text: t("auth.resendVerificationSuccess") });
+      } else {
+        const key = RESEND_ERROR_KEYS[data.code] || "auth.resendVerificationError";
+        setResendMessage({ type: "error", text: t(key) });
+      }
+    } catch (err) {
+      console.error("Resend verification error:", err);
+      setResendMessage({ type: "error", text: t("auth.resendVerificationError") });
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setResendMessage(null);
 
     try {
       const result = await signIn("credentials", {
@@ -168,15 +209,29 @@ export default function LoginPage() {
                 {error}
                 {error.includes("verify") && (
                   <div className="mt-2">
-                    <Link
-                      href="/forgot-password"
-                      className="text-zrp-red dark:text-zrp-red underline text-sm hover:text-zrp-darkRed dark:hover:text-red-300"
+                    <button
+                      type="button"
+                      onClick={handleResendVerification}
+                      disabled={resendLoading}
+                      className="text-zrp-red dark:text-zrp-red underline text-sm hover:text-zrp-darkRed dark:hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {t("auth.resendVerification")}
-                    </Link>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {t("auth.checkSpam")}
-                    </p>
+                      {resendLoading ? t("auth.resendVerificationSending") : t("auth.resendVerification")}
+                    </button>
+                    {resendMessage ? (
+                      <p
+                        className={`text-xs mt-1 ${
+                          resendMessage.type === "success"
+                            ? "text-green-600 dark:text-green-400"
+                            : "text-red-600 dark:text-red-400"
+                        }`}
+                      >
+                        {resendMessage.text}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {t("auth.checkSpam")}
+                      </p>
+                    )}
                   </div>
                 )}
                 {error.includes("banned") && (
