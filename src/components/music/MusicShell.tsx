@@ -102,6 +102,7 @@ export default function MusicShell() {
   const [matchingAlbums, setMatchingAlbums] = useState<
     { id: string; title: string; coverUrl: string | null; artist: { displayName: string } }[]
   >([]);
+  const [trending, setTrending] = useState<MusicTrack[]>([]);
   const [newReleases, setNewReleases] = useState<MusicTrack[]>([]);
   const [latestAlbums, setLatestAlbums] = useState<AlbumSummary[]>([]);
   const [popularArtists, setPopularArtists] = useState<ArtistSummary[]>([]);
@@ -122,6 +123,7 @@ export default function MusicShell() {
     fetch("/api/music/home", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((data: {
+        trending?: MusicTrack[];
         newReleases?: MusicTrack[];
         latestAlbums?: AlbumSummary[];
         popularArtists?: ArtistSummary[];
@@ -131,6 +133,7 @@ export default function MusicShell() {
         yourPlaylists?: PlaylistSummary[];
       } | null) => {
         if (!data) return;
+        setTrending(data.trending || []);
         setNewReleases(data.newReleases || []);
         setLatestAlbums(data.latestAlbums || []);
         setPopularArtists(data.popularArtists || []);
@@ -182,6 +185,7 @@ export default function MusicShell() {
     if (!res.ok) return;
     const toggle = (list: MusicTrack[]) => list.map((t) => (t.id === id ? { ...t, liked: !t.liked } : t));
     setTracks(toggle);
+    setTrending(toggle);
     setNewReleases(toggle);
     setRecentlyPlayed(toggle);
     setLikedPreview(toggle);
@@ -369,6 +373,21 @@ export default function MusicShell() {
                     clearQueue();
                     play(track);
                     recentlyPlayed.slice(index + 1).forEach((tr) => addToQueue(tr));
+                  }}
+                />
+              </section>
+            )}
+
+            {trending.length > 0 && (
+              <section>
+                <SectionHeading title={t("music.shell.trendingHeading")} href="/music/discover" t={t} />
+                <TrackRow
+                  tracks={trending}
+                  onLike={like}
+                  onPlay={(track, index) => {
+                    clearQueue();
+                    play(track);
+                    trending.slice(index + 1).forEach((tr) => addToQueue(tr));
                   }}
                 />
               </section>

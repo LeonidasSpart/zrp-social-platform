@@ -16,8 +16,9 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  const [newReleasesRaw, latestAlbumsRaw, popularArtists, genreRows, likesRaw, historyRaw, playlistsRaw] =
+  const [newReleasesRaw, latestAlbumsRaw, popularArtists, genreRows, likesRaw, historyRaw, playlistsRaw, trendingGroups] =
     await Promise.all([
       prisma.musicTrack.findMany({
         where: { status: "PUBLISHED" },
@@ -75,7 +76,40 @@ export async function GET() {
             },
           })
         : Promise.resolve([]),
+      // Trending: real play events from the last 7 days, grouped by
+      // track and ranked by volume - not a fabricated "popularity"
+      // score. Unlike playCount (a lifetime counter with no time
+      // dimension), MusicHistory rows carry a timestamp, so this is
+      // the only data that can answer "trending" honestly.
+      prisma.musicHistory.groupBy({
+        by: ["trackId"],
+        where: { createdAt: { gte: sevenDaysAgo }, track: { status: "PUBLISHED" } },
+        _count: { trackId: true },
+        orderBy: { _count: { trackId: "desc" } },
+        take: 10,
+      }),
     ]);
+
+  const trendingIds = trendingGroups.map((g) => g.trackId);
+  const trendingTracksRaw = trendingIds.length
+    ? await prisma.musicTrack.findMany({
+        where: { id: { in: trendingIds } },
+        include: {
+          artist: true,
+          album: true,
+          ...(userId ? { likes: { where: { userId }, select: { id: true } } } : {}),
+        },
+      })
+    : [];
+  const trendingById = new Map(trendingTracksRaw.map((t) => [t.id, t]));
+  const trending = trendingIds
+    .map((id) => trendingById.get(id))
+    .filter((t): t is NonNullable<typeof t> => !!t)
+    .map((t) => ({
+      ...t,
+      liked: "likes" in t ? (t.likes as { id: string }[]).length > 0 : false,
+      likes: undefined,
+    }));
 
   const newReleases = newReleasesRaw.map((t) => ({
     ...t,
@@ -106,6 +140,7 @@ export async function GET() {
   const yourPlaylists = playlistsRaw;
 
   return NextResponse.json({
+    trending,
     newReleases,
     latestAlbums,
     popularArtists,
