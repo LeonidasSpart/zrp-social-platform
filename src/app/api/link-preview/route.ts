@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCached, setCached } from "@/lib/redis";
 import { safeFetch, SsrfBlockedError } from "@/lib/ssrf-guard";
 import { rateLimit } from "@/lib/rate-limit";
+import { extractYouTubeVideoId, getYouTubeThumbnailUrl, getYouTubeCanonicalUrl, isYouTubeUrl } from "@/lib/youtube";
 
 interface LinkPreview {
   url: string;
@@ -44,27 +45,51 @@ function extractTitleTag(html: string): string | null {
   return match?.[1]?.trim() || null;
 }
 
+// The video ID (and therefore the thumbnail, via YouTube's stable public
+// CDN URL pattern) is derivable straight from the URL string with no
+// network call at all. Only the title genuinely requires fetching
+// anything - via oEmbed, which is otherwise the fragile part of this:
+// it can fail for reasons that have nothing to do with the URL being
+// valid (rate limiting, a transient timeout, a cookie/consent response
+// instead of JSON for cookie-less server-side requests). Previously a
+// failed oEmbed call fell through to fetchGenericPreview() scraping the
+// watch page's HTML directly, which is fragile in exactly the same ways
+// plus its own (og:image is usually present, but not guaranteed) - and
+// if that failed too, no preview rendered at all, which is the bug this
+// fixes: a valid YouTube URL must always produce at least a thumbnail
+// card, with the title as a best-effort addition on top.
 async function fetchYouTubePreview(url: string): Promise<LinkPreview | null> {
+  const videoId = extractYouTubeVideoId(url);
+  if (!videoId) return null;
+
+  const preview: LinkPreview = {
+    url: getYouTubeCanonicalUrl(videoId),
+    title: null,
+    description: null,
+    image: getYouTubeThumbnailUrl(videoId),
+    siteName: "YouTube",
+  };
+
   try {
-    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(
+      getYouTubeCanonicalUrl(videoId)
+    )}&format=json`;
     // youtube.com is a fixed, trusted host, but route it through the
     // same guarded fetch for consistency and the same size/time caps.
     const res = await safeFetch(oembedUrl, { timeoutMs: 5000, maxBytes: 50_000 });
-    if (res.statusCode < 200 || res.statusCode >= 300) return null;
-    const data = JSON.parse(res.body.toString("utf-8"));
-    // oEmbed doesn't return a direct thumbnail field consistently across
-    // all video states, so derive it from the video id instead.
-    const videoId = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/)?.[1];
-    return {
-      url,
-      title: data.title || null,
-      description: null,
-      image: videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : null,
-      siteName: "YouTube",
-    };
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      const data = JSON.parse(res.body.toString("utf-8"));
+      if (typeof data.title === "string" && data.title.trim()) {
+        preview.title = data.title;
+      }
+    }
   } catch {
-    return null;
+    // oEmbed failed or returned something that wasn't the JSON we
+    // expected (e.g. an HTML response) - the thumbnail-only preview
+    // built above is still valid and still gets returned.
   }
+
+  return preview;
 }
 
 async function fetchGenericPreview(url: string): Promise<LinkPreview | null> {
@@ -141,13 +166,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(cached);
   }
 
-  const isYouTube =
-    target.hostname === "youtube.com" ||
-    target.hostname === "www.youtube.com" ||
-    target.hostname === "youtu.be" ||
-    target.hostname === "m.youtube.com";
-
-  const preview = isYouTube
+  const preview = isYouTubeUrl(target.toString())
     ? (await fetchYouTubePreview(target.toString())) || (await fetchGenericPreview(target.toString()))
     : await fetchGenericPreview(target.toString());
 
