@@ -92,6 +92,19 @@ export default function MusicShell() {
   const submit = async () => {
     if (!audio || !title) return;
     setUploadError(null);
+
+    // A file picked from iCloud Drive, a third-party Files provider,
+    // or a cloud storage app can come back as a zero-byte placeholder
+    // when the OS hasn't actually finished downloading its content
+    // yet. Uploading that gives a confusing generic failure - this
+    // catches it up front with a message that says what's actually
+    // going on.
+    const emptyFile = [audio, cover].find((f) => f && f.size === 0);
+    if (emptyFile) {
+      setUploadError(t("music.shell.emptyFileError", { name: emptyFile.name }));
+      return;
+    }
+
     setBusy(true);
     const files = cover ? [audio, cover] : [audio];
     await uploadMusic(files);
@@ -326,7 +339,7 @@ export default function MusicShell() {
                     {t("music.shell.audioFileLabel")}
                     <input
                       type="file"
-                      accept=".mp3,.wav,.m4a,.aac,.aiff,.flac,.ogg,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/aac,audio/aiff,audio/flac,audio/ogg"
+                      accept="audio/*,.mp3,.wav,.m4a,.aac,.aiff,.aif,.flac,.ogg,.oga,.opus,.wma,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/aac,audio/aiff,audio/x-aiff,audio/flac,audio/x-flac,audio/ogg"
                       className="block mt-2 w-full text-xs"
                       onChange={(e) => setAudio(e.target.files?.[0] || null)}
                     />

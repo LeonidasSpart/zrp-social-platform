@@ -62,6 +62,62 @@ function isVideoFile(file: {
   );
 }
 
+const AUDIO_EXTENSIONS = [
+  ".mp3",
+  ".wav",
+  ".m4a",
+  ".aac",
+  ".aiff",
+  ".aif",
+  ".flac",
+  ".ogg",
+  ".oga",
+  ".opus",
+  ".wma",
+];
+
+function isAudioFile(file: {
+  name?: string;
+  type?: string;
+}) {
+  const name = (file.name || "").toLowerCase();
+  const type = (file.type || "").toLowerCase();
+
+  if (type.startsWith("audio/")) {
+    return true;
+  }
+
+  return AUDIO_EXTENSIONS.some((extension) =>
+    name.split("?")[0].split("#")[0].endsWith(extension)
+  );
+}
+
+const IMAGE_EXTENSIONS = [
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".heic",
+  ".heif",
+  ".gif",
+];
+
+function isImageFile(file: {
+  name?: string;
+  type?: string;
+}) {
+  const name = (file.name || "").toLowerCase();
+  const type = (file.type || "").toLowerCase();
+
+  if (type.startsWith("image/")) {
+    return true;
+  }
+
+  return IMAGE_EXTENSIONS.some((extension) =>
+    name.split("?")[0].split("#")[0].endsWith(extension)
+  );
+}
+
 // ─────────────────────────────────────────────────────────────
 // FILE ROUTER
 // ─────────────────────────────────────────────────────────────
@@ -585,8 +641,24 @@ export const ourFileRouter = {
   musicTrack: f({
     audio: { maxFileSize: "512MB", maxFileCount: 1 },
     image: { maxFileSize: "8MB", maxFileCount: 1 },
+    // UploadThing decides a file's category from the browser-reported
+    // MIME type, falling back to a filename-extension lookup only when
+    // that type is completely empty. iOS/iPadOS - especially a file
+    // opened via a third-party Files provider or iCloud Drive, and
+    // especially for formats Safari doesn't natively decode (FLAC,
+    // OGG, sometimes AIFF) - regularly reports a generic type like
+    // "application/octet-stream" instead of "audio/...". That's a
+    // non-empty string, so UploadThing's own extension fallback never
+    // runs, and the upload is rejected client-side before it ever
+    // reaches this server. That silent client-side rejection - not
+    // the file picker - is the actual root cause behind "we can't
+    // reliably upload music." "blob" is UploadThing's catch-all
+    // category for exactly this case; the middleware below
+    // re-validates every file against real audio/image extensions so
+    // this doesn't turn into "upload any file type."
+    blob: { maxFileSize: "512MB", maxFileCount: 1 },
   })
-    .middleware(async () => {
+    .middleware(async ({ files }) => {
       const session = await getServerSession(authOptions);
       if (!session?.user) throw new UploadThingError("Unauthorized");
 
@@ -600,12 +672,22 @@ export const ourFileRouter = {
         throw new UploadThingError(MUSIC_PUBLISH_DENIED_MESSAGE);
       }
 
+      for (const file of files) {
+        if (!isAudioFile(file) && !isImageFile(file)) {
+          throw new UploadThingError(
+            `"${file.name}" isn't a supported audio or image file.`
+          );
+        }
+      }
+
       return { userId: session.user.id };
     })
     .onUploadComplete(async ({ file }) => ({
       url: file.ufsUrl,
       key: file.key,
-      type: file.type.startsWith("audio/") ? "audio" : "image",
+      // Same reasoning as isAudioFile/isImageFile above - classify by
+      // extension too, not just the (possibly generic) reported type.
+      type: isAudioFile(file) ? "audio" : "image",
     })),
 
 } satisfies FileRouter;

@@ -28,6 +28,7 @@ import {
   Gamepad2,
   Briefcase,
   HeartHandshake,
+  Music2,
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
@@ -170,6 +171,17 @@ export default function Header() {
       href: "/marketplace",
       icon: Store,
       label: t("nav.marketplace"),
+    },
+    {
+      // Kept in sync with Sidebar.tsx's navItems by hand - this is the
+      // tablet/mobile nav drawer (rendered lg:hidden), a completely
+      // separate list from the desktop Sidebar (hidden lg:flex). Music
+      // was added to Sidebar but not here, which is exactly how it
+      // went missing from navigation on every screen below the lg
+      // breakpoint - add any future nav destination to both.
+      href: "/music",
+      icon: Music2,
+      label: t("nav.music"),
     },
     {
       href: "/play",
