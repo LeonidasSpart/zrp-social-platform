@@ -106,7 +106,17 @@ function probeAudioDuration(file: File): Promise<number | null> {
 // Reading a small slice up front, with a timeout, catches this before
 // committing to the full (possibly multi-minute) upload and turns a
 // silent hang into a clear, actionable error.
-function verifyFileReadable(file: File, timeoutMs = 8000): Promise<boolean> {
+//
+// MEGA specifically encrypts everything client-side, so its Android/
+// iOS app generally can't hand over a slice of a file until it has
+// downloaded and decrypted the WHOLE thing locally first - there's no
+// partial read to serve. The original 8s timeout here was tuned for
+// "provider is stalled/broken", not "provider needs to pull down and
+// decrypt a multi-MB file over mobile data first", so real MEGA
+// uploads were being killed with a false "unreadable" error before
+// MEGA had even finished preparing the file. 60s gives that a real
+// chance to complete while still catching a genuinely dead handle.
+function verifyFileReadable(file: File, timeoutMs = 60000): Promise<boolean> {
   const slice = file.slice(0, Math.min(file.size, 65536));
   const timeout = new Promise<boolean>((resolve) => setTimeout(() => resolve(false), timeoutMs));
   const read = slice
@@ -549,6 +559,12 @@ function TracksTab({
   const [durationSec, setDurationSec] = useState<number | null>(null);
   const [cover, setCover] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  // Distinct from `busy` so the button/hint can say "Checking file..."
+  // during the pre-flight readability check instead of "Publishing...",
+  // since that check can now legitimately take up to a minute for a
+  // cloud-storage file (see verifyFileReadable) and looking identical
+  // to a normal publish made it easy to mistake for a freeze.
+  const [verifying, setVerifying] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   // Kept separate from the upload itself: once the (potentially very
   // large, slow-on-mobile) file transfer finishes, the actual audioUrl/
@@ -648,14 +664,17 @@ function TracksTab({
     setBusy(true);
 
     const filesToVerify = cover ? [audio, cover] : [audio];
+    setVerifying(true);
     for (const file of filesToVerify) {
       const readable = await verifyFileReadable(file);
       if (!readable) {
+        setVerifying(false);
         setUploadError(t("music.shell.unreadableFileError", { name: file.name }));
         setBusy(false);
         return;
       }
     }
+    setVerifying(false);
 
     const files = cover ? [audio, cover] : [audio];
     await uploadMusic(files);
@@ -762,11 +781,19 @@ function TracksTab({
             className="sm:col-span-2 h-12 rounded-xl bg-zrp-red text-white font-bold disabled:opacity-40"
           >
             {busy
-              ? t("music.shell.publishing")
+              ? verifying
+                ? t("music.studio.checkingFile")
+                : t("music.shell.publishing")
               : pendingUpload
                 ? t("music.studio.retryPublish")
                 : t("music.shell.publishTrack")}
           </button>
+
+          {verifying && (
+            <p className="sm:col-span-2 text-xs text-gray-500 -mt-1">
+              {t("music.studio.checkingFileHint")}
+            </p>
+          )}
 
           {pendingUpload && !busy && (
             <button
