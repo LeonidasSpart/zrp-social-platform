@@ -6,6 +6,7 @@ import { getToken } from "next-auth/jwt";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
+import { rejectNativePayment } from "@/lib/native-payment-policy.server";
 
 // Unlike Tip/PremiumPurchase, HELP contributions carry NO platform fee -
 // this is deliberately not a revenue feature, so 100% of a verified
@@ -24,6 +25,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Genuinely 100%-passthrough, but ZRP's campaigns are organizer/cause-
+    // based rather than strictly one individual gifting another as Apple's
+    // 3.2.1(vii) exemption is worded - materially ambiguous, so blocked
+    // for the native app conservatively. See native-payment-policy.ts.
+    const nativeBlock = rejectNativePayment(req);
+    if (nativeBlock) return nativeBlock;
+
     const contributorId = token.id as string;
 
     const contributor = await prisma.user.findUnique({

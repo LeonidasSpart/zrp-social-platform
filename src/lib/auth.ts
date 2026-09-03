@@ -1,10 +1,20 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import AppleProvider from "next-auth/providers/apple";
 import { prisma } from "./db";
 import bcrypt from "bcryptjs";
 import { getFeatureStatus, FeatureStatus } from "./permissions";
 import { checkRateLimitKey } from "./rate-limit";
+import { getAppleClientSecret } from "./apple-client-secret";
+
+// Only registered when APPLE_TEAM_ID/APPLE_KEY_ID/APPLE_CLIENT_ID/
+// APPLE_PRIVATE_KEY are all present and the key signs successfully - see
+// apple-client-secret.ts. Missing/invalid config means Apple sign-in is
+// simply absent from the providers list (NextAuth then errors cleanly on
+// /api/auth/signin/apple) rather than the app pretending it's available.
+const appleClientId = process.env.APPLE_CLIENT_ID;
+const appleClientSecret = getAppleClientSecret();
 
 // ─── Extend NextAuth types ────────────────────────────────────────
 declare module "next-auth" {
@@ -74,6 +84,14 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
+    ...(appleClientId && appleClientSecret
+      ? [
+          AppleProvider({
+            clientId: appleClientId,
+            clientSecret: appleClientSecret,
+          }),
+        ]
+      : []),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -191,9 +209,17 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    // ─── Handle Google account creation / linking ──────────────────
+    // ─── Handle Google/Apple account creation / linking ─────────────
+    // Both are OAuth providers verified by the provider itself before
+    // ZRP ever sees the user, so both get the same treatment: link to an
+    // existing account by email, or create a new pre-verified one. Apple
+    // only includes `name` in the very first authorization (not in the
+    // id_token on later sign-ins, and not surfaced by NextAuth's built-in
+    // Apple profile() mapping at all) and never provides an avatar image -
+    // both already fall back to null exactly like an incomplete Google
+    // profile would.
     async signIn({ user, account }) {
-      if (account?.provider === "google") {
+      if (account?.provider === "google" || account?.provider === "apple") {
         if (!user.email) return false;
 
         const existing = await prisma.user.findUnique({
@@ -205,7 +231,7 @@ export const authOptions: NextAuthOptions = {
           return true;
         }
 
-        // ─── Create a new user for this Google account ────────────
+        // ─── Create a new user for this Google/Apple account ──────
         const baseHandle = user.email.split("@")[0] || user.name || "user";
         const username = await generateUniqueUsername(baseHandle);
 
@@ -225,8 +251,8 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async jwt({ token, user, account, trigger }) {
-      // ─── On initial sign‑in via Google ─────────────────────────
-      if (account?.provider === "google" && user?.email) {
+      // ─── On initial sign‑in via Google or Apple ─────────────────
+      if ((account?.provider === "google" || account?.provider === "apple") && user?.email) {
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email.toLowerCase() },
         });

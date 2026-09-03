@@ -9,7 +9,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ContributeModal from "@/components/help/ContributeModal";
 import ReportModal from "@/components/ReportModal";
+import NativePaymentNotice from "@/components/NativePaymentNotice";
 import { CATEGORY_META, NEED_TYPE_META, HELP_NEED_TYPES, formatCampaignAmount, campaignProgress, type HelpCampaignSummary, type HelpNeedType } from "@/lib/help";
+import { isNativeApp } from "@/lib/nativeAuth";
+import { isNativeStoreRestrictedPayment } from "@/lib/native-payment-policy";
 
 interface CampaignDetail extends HelpCampaignSummary {
   organizerId?: string;
@@ -31,6 +34,7 @@ export default function CampaignDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showContribute, setShowContribute] = useState(false);
+  const [showContributeNativeNotice, setShowContributeNativeNotice] = useState(false);
   const [offerType, setOfferType] = useState<HelpNeedType | null>(null);
   const [offerMessage, setOfferMessage] = useState("");
   const [offerSubmitting, setOfferSubmitting] = useState(false);
@@ -205,7 +209,11 @@ export default function CampaignDetailPage() {
               {needsMoney && (
                 <button
                   type="button"
-                  onClick={() => setShowContribute(true)}
+                  onClick={() =>
+                    isNativeStoreRestrictedPayment("help-contribution", isNativeApp())
+                      ? setShowContributeNativeNotice(true)
+                      : setShowContribute(true)
+                  }
                   className="px-5 py-2.5 rounded-full bg-zrp-red text-white font-semibold hover:bg-red-600 transition self-start"
                 >
                   {t("help.contribute")}
@@ -298,6 +306,13 @@ export default function CampaignDetailPage() {
             setShowContribute(false);
             load();
           }}
+        />
+      )}
+
+      {showContributeNativeNotice && (
+        <NativePaymentNotice
+          messageKey="native.paymentUnavailable.helpMessage"
+          onClose={() => setShowContributeNativeNotice(false)}
         />
       )}
     </div>

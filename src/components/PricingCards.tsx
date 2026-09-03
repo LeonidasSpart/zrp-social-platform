@@ -5,8 +5,11 @@ import { useSession } from "next-auth/react";
 import { PLANS } from "@/lib/limits";
 import { Check, X, Copy } from "lucide-react";
 import CryptoPaymentModal from "./CryptoPaymentModal";
+import NativePaymentNotice from "./NativePaymentNotice";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
+import { isNativeApp } from "@/lib/nativeAuth";
+import { isNativeStoreRestrictedPayment } from "@/lib/native-payment-policy";
 
 interface PricingCardProps {
   plan: string;
@@ -40,6 +43,7 @@ const SUPPORT_KEYS: Record<string, TranslationKey> = {
 function PricingCard({ plan, limits, isCurrent, isAdmin, onUpgrade }: PricingCardProps) {
   const { t } = useLanguage();
   const [showCryptoModal, setShowCryptoModal] = useState(false);
+  const [showNativeNotice, setShowNativeNotice] = useState(false);
   const planLabel = t(PLAN_LABEL_KEYS[plan] ?? "pricing.planFree");
 
   const features: Array<{ icon: "check" | "cross" | "bullet"; text: string }> = [
@@ -148,7 +152,11 @@ function PricingCard({ plan, limits, isCurrent, isAdmin, onUpgrade }: PricingCar
           ) : plan !== "free" ? (
             <>
               <button
-                onClick={() => setShowCryptoModal(true)}
+                onClick={() =>
+                  isNativeStoreRestrictedPayment("plan-upgrade", isNativeApp())
+                    ? setShowNativeNotice(true)
+                    : setShowCryptoModal(true)
+                }
                 className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed transition"
               >
                 {t("pricing.subscribeWithCrypto")}
@@ -176,6 +184,13 @@ function PricingCard({ plan, limits, isCurrent, isAdmin, onUpgrade }: PricingCar
             setShowCryptoModal(false);
             // Optionally refresh the session or show a success message
           }}
+        />
+      )}
+
+      {showNativeNotice && (
+        <NativePaymentNotice
+          messageKey="native.paymentUnavailable.planUpgradeMessage"
+          onClose={() => setShowNativeNotice(false)}
         />
       )}
     </div>

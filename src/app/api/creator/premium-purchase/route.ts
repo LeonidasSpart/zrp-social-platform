@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { verifyUsdcTransaction } from "@/lib/solana";
 import { rateLimit } from "@/lib/rate-limit";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
+import { rejectNativePayment } from "@/lib/native-payment-policy.server";
 
 const PLATFORM_FEE = 0.10;
 const CHARITY_PERCENTAGE = 0.35;
@@ -22,6 +23,13 @@ export async function POST(req: NextRequest) {
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Unlocking gated post content via a crypto payment is a store-sensitive
+    // payment surface, blocked for the native app. There is currently no
+    // frontend trigger for this route at all (web included) - this is
+    // defense-in-depth regardless. See src/lib/native-payment-policy.ts.
+    const nativeBlock = rejectNativePayment(req);
+    if (nativeBlock) return nativeBlock;
 
     const userId = token.id as string;
     const body = await req.json();

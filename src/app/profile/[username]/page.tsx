@@ -42,8 +42,11 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import AnalyticsTab from "@/components/AnalyticsTab";
 import PostComposer from "@/components/PostComposer";
 import TipModal from "@/components/TipModal";
+import NativePaymentNotice from "@/components/NativePaymentNotice";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
+import { isNativeApp } from "@/lib/nativeAuth";
+import { isNativeStoreRestrictedPayment } from "@/lib/native-payment-policy";
 
 function formatProfileCount(n: number) {
   if (n >= 1_000_000) {
@@ -367,6 +370,9 @@ export default function ProfilePage(
   // ─── TIP MODAL STATE ───────────────────────────────────────────
 
   const [showTipModal, setShowTipModal] =
+    useState(false);
+
+  const [showTipNativeNotice, setShowTipNativeNotice] =
     useState(false);
 
   const bannerInputRef =
@@ -1567,9 +1573,9 @@ export default function ProfilePage(
                 {canReceiveTips && (
                   <button
                     onClick={() =>
-                      setShowTipModal(
-                        true
-                      )
+                      isNativeStoreRestrictedPayment("tips", isNativeApp())
+                        ? setShowTipNativeNotice(true)
+                        : setShowTipModal(true)
                     }
                     className="flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap bg-green-600 text-white hover:bg-green-700"
                   >
@@ -2363,6 +2369,13 @@ export default function ProfilePage(
             }}
           />
         )}
+
+      {showTipNativeNotice && (
+        <NativePaymentNotice
+          messageKey="native.paymentUnavailable.tipsMessage"
+          onClose={() => setShowTipNativeNotice(false)}
+        />
+      )}
     </div>
   );
 }
