@@ -10,6 +10,7 @@ import {
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatTotalDuration } from "@/lib/music/duration";
+import { MUSIC_GENRES } from "@/lib/music/genres";
 
 type MusicAccess = {
   allowed: boolean;
@@ -717,12 +718,23 @@ function TracksTab({
             className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
           />
 
-          <input
-            value={genre}
-            onChange={(e) => setGenre(e.target.value)}
-            placeholder={t("music.shell.genrePlaceholder")}
-            className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
-          />
+          <div>
+            <input
+              value={genre}
+              onChange={(e) => setGenre(e.target.value)}
+              placeholder={t("music.shell.genrePlaceholder")}
+              list="zrp-genre-list-upload"
+              className="w-full p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
+            />
+            {/* A suggestion list, not a closed vocabulary - genre stays
+                free text underneath so an artist can still type
+                anything that isn't on this list. */}
+            <datalist id="zrp-genre-list-upload">
+              {MUSIC_GENRES.map((g) => (
+                <option key={g} value={g} />
+              ))}
+            </datalist>
+          </div>
 
           <label className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 flex items-center gap-2 cursor-pointer text-sm">
             <input
@@ -979,8 +991,14 @@ function EditTrackModal({
           value={genre}
           onChange={(e) => setGenre(e.target.value)}
           placeholder={t("music.shell.genrePlaceholder")}
+          list="zrp-genre-list-edit"
           className="w-full p-3.5 rounded-xl bg-gray-50 dark:bg-white/[0.05] border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
         />
+        <datalist id="zrp-genre-list-edit">
+          {MUSIC_GENRES.map((g) => (
+            <option key={g} value={g} />
+          ))}
+        </datalist>
 
         <select
           value={albumId}
