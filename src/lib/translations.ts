@@ -61,7 +61,8 @@ type TranslationKey =
   | "auth.welcomeTitle" | "auth.signInSubtitle" | "auth.email" | "auth.password"
   | "auth.forgotPassword" | "auth.signingIn" | "auth.signIn" | "auth.noAccount"
   | "auth.signUp" | "auth.resendVerification" | "auth.checkSpam" | "auth.contactSupport"
-  | "auth.banAppealNote" | "auth.errBanned" | "auth.joinCommunity" | "auth.fullName"
+  | "auth.banAppealNote" | "auth.errBanned"
+  | "auth.errSessionExpired" | "auth.joinCommunity" | "auth.fullName"
   | "auth.username" | "auth.createPassword" | "auth.passwordMinLength" | "auth.creatingAccount"
   | "auth.createAccount" | "auth.alreadyHaveAccount" | "auth.errSomethingWrong" | "auth.errTryAgain"
   | "onboarding.stepProfile" | "onboarding.stepFollow" | "onboarding.stepDone"
@@ -450,6 +451,7 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.contactSupport": "📧 Contact support via email",
     "auth.banAppealNote": "Please include your username and the reason you believe this is a mistake.",
     "auth.errBanned": "Your account has been banned. Please contact support.",
+    "auth.errSessionExpired": "Your session is no longer valid. Please sign in again.",
     "auth.joinCommunity": "Join the community",
     "auth.fullName": "Full Name",
     "auth.username": "Username",
@@ -3977,6 +3979,7 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.contactSupport": "📧 Contacter le support par e-mail",
     "auth.banAppealNote": "Veuillez indiquer votre nom d'utilisateur et la raison pour laquelle vous pensez qu'il s'agit d'une erreur.",
     "auth.errBanned": "Votre compte a été banni. Veuillez contacter le support.",
+    "auth.errSessionExpired": "Votre session n'est plus valide. Veuillez vous reconnecter.",
     "auth.joinCommunity": "Rejoignez la communauté",
     "auth.fullName": "Nom complet",
     "auth.username": "Nom d'utilisateur",
@@ -7504,6 +7507,7 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.contactSupport": "📧 Support per E-Mail kontaktieren",
     "auth.banAppealNote": "Bitte gib deinen Benutzernamen und den Grund an, warum du glaubst, dass dies ein Fehler ist.",
     "auth.errBanned": "Dein Konto wurde gesperrt. Bitte kontaktiere den Support.",
+    "auth.errSessionExpired": "Deine Sitzung ist nicht mehr gültig. Bitte melde dich erneut an.",
     "auth.joinCommunity": "Der Community beitreten",
     "auth.fullName": "Vollständiger Name",
     "auth.username": "Benutzername",
@@ -11031,6 +11035,7 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.contactSupport": "📧 Contatta il supporto via email",
     "auth.banAppealNote": "Includi il tuo nome utente e il motivo per cui ritieni si tratti di un errore.",
     "auth.errBanned": "Il tuo account è stato bannato. Contatta il supporto.",
+    "auth.errSessionExpired": "La tua sessione non è più valida. Accedi di nuovo.",
     "auth.joinCommunity": "Unisciti alla community",
     "auth.fullName": "Nome completo",
     "auth.username": "Nome utente",
@@ -14558,6 +14563,7 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.contactSupport": "📧 Kontaktoni mbështetjen përmes emailit",
     "auth.banAppealNote": "Ju lutemi përfshini emrin e përdoruesit dhe arsyen pse mendoni se ky është një gabim.",
     "auth.errBanned": "Llogaria juaj është pezulluar. Ju lutemi kontaktoni mbështetjen.",
+    "auth.errSessionExpired": "Sesioni yt nuk është më i vlefshëm. Ju lutemi hyni përsëri.",
     "auth.joinCommunity": "Bashkohuni me komunitetin",
     "auth.fullName": "Emri i plotë",
     "auth.username": "Emri i përdoruesit",
@@ -18085,6 +18091,7 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.contactSupport": "📧 Contacta con soporte por correo electrónico",
     "auth.banAppealNote": "Incluye tu nombre de usuario y el motivo por el que crees que esto es un error.",
     "auth.errBanned": "Tu cuenta ha sido bloqueada. Contacta con soporte.",
+    "auth.errSessionExpired": "Tu sesión ya no es válida. Vuelve a iniciar sesión.",
     "auth.joinCommunity": "Únete a la comunidad",
     "auth.fullName": "Nombre completo",
     "auth.username": "Nombre de usuario",
@@ -21612,6 +21619,7 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.contactSupport": "📧 Связаться с поддержкой по эл. почте",
     "auth.banAppealNote": "Пожалуйста, укажите ваше имя пользователя и причину, по которой вы считаете это ошибкой.",
     "auth.errBanned": "Ваш аккаунт заблокирован. Пожалуйста, свяжитесь с поддержкой.",
+    "auth.errSessionExpired": "Ваша сессия больше не действительна. Пожалуйста, войдите снова.",
     "auth.joinCommunity": "Присоединиться к сообществу",
     "auth.fullName": "Полное имя",
     "auth.username": "Имя пользователя",
@@ -25139,6 +25147,7 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.contactSupport": "📧 تواصل مع الدعم عبر البريد الإلكتروني",
     "auth.banAppealNote": "يرجى تضمين اسم المستخدم الخاص بك والسبب الذي تعتقد أن هذا خطأ بسببه.",
     "auth.errBanned": "تم حظر حسابك. يرجى التواصل مع الدعم.",
+    "auth.errSessionExpired": "لم تعد جلستك صالحة. يرجى تسجيل الدخول مرة أخرى.",
     "auth.joinCommunity": "انضم إلى المجتمع",
     "auth.fullName": "الاسم الكامل",
     "auth.username": "اسم المستخدم",
@@ -28666,6 +28675,7 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.contactSupport": "📧 通过邮件联系客服",
     "auth.banAppealNote": "请附上你的用户名以及你认为这是误判的原因。",
     "auth.errBanned": "你的账户已被封禁，请联系客服。",
+    "auth.errSessionExpired": "您的登录状态已失效,请重新登录。",
     "auth.joinCommunity": "加入社区",
     "auth.fullName": "全名",
     "auth.username": "用户名",
@@ -32193,6 +32203,7 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.contactSupport": "📧 E-posta ile destek ekibiyle iletişime geçin",
     "auth.banAppealNote": "Lütfen kullanıcı adınızı ve bunun bir hata olduğunu düşünme nedeninizi belirtin.",
     "auth.errBanned": "Hesabınız yasaklandı. Lütfen destek ekibiyle iletişime geçin.",
+    "auth.errSessionExpired": "Oturumunuz artık geçerli değil. Lütfen tekrar giriş yapın.",
     "auth.joinCommunity": "Topluluğa katılın",
     "auth.fullName": "Ad Soyad",
     "auth.username": "Kullanıcı adı",
@@ -35720,6 +35731,7 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.contactSupport": "📧 Hubungi dukungan melalui email",
     "auth.banAppealNote": "Silakan sertakan nama pengguna Anda dan alasan mengapa Anda yakin ini adalah kesalahan.",
     "auth.errBanned": "Akun Anda telah diblokir. Silakan hubungi dukungan.",
+    "auth.errSessionExpired": "Sesi Anda tidak lagi valid. Silakan masuk kembali.",
     "auth.joinCommunity": "Bergabung dengan komunitas",
     "auth.fullName": "Nama Lengkap",
     "auth.username": "Nama pengguna",
