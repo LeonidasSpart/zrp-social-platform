@@ -4,6 +4,19 @@ import { prisma } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
+  const mine = req.nextUrl.searchParams.get("mine") === "true";
+
+  if (mine) {
+    // The Music Studio's Artist Profile tab needs to preload the
+    // current values before letting someone edit and save - without
+    // this, saving would overwrite an existing bio/avatar/banner with
+    // blank fields the form never actually loaded.
+    const session = await (await import("next-auth")).getServerSession((await import("@/lib/auth")).authOptions);
+    if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const artist = await prisma.musicArtist.findUnique({ where: { userId: session.user.id } });
+    return NextResponse.json(artist);
+  }
+
   const q = req.nextUrl.searchParams.get("q")?.trim() || "";
   const artists = await prisma.musicArtist.findMany({
     where: q ? { displayName: { contains: q, mode: "insensitive" } } : undefined,

@@ -9,6 +9,22 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q")?.trim() || "";
   const limit = Math.min(Number(req.nextUrl.searchParams.get("limit") || 30), 100);
+  const mine = req.nextUrl.searchParams.get("mine") === "true";
+
+  if (mine) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const artist = await prisma.musicArtist.findUnique({ where: { userId: session.user.id }, select: { id: true } });
+    if (!artist) return NextResponse.json([]);
+
+    const albums = await prisma.musicAlbum.findMany({
+      where: { artistId: artist.id },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      include: { artist: true, _count: { select: { tracks: true } } },
+    });
+    return NextResponse.json(albums);
+  }
 
   const albums = await prisma.musicAlbum.findMany({
     where: q ? { title: { contains: q, mode: "insensitive" } } : undefined,
@@ -45,6 +61,7 @@ export async function POST(req: NextRequest) {
       title,
       description: body.description || null,
       coverUrl: body.coverUrl || null,
+      coverKey: body.coverKey || null,
       releaseDate: body.releaseDate ? new Date(body.releaseDate) : null,
     },
   });

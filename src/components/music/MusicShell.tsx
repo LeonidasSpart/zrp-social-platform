@@ -2,128 +2,26 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import {
   Heart, ListPlus, Play, Search, UploadCloud, Disc3, Music2, Sparkles,
-  ChevronRight, Lock, Compass, Users, ListMusic, History,
+  ChevronRight, Compass, Users, ListMusic, History,
 } from "lucide-react";
 import { useMusicPlayer, type MusicTrack } from "./MusicPlayerProvider";
-import { useUploadThing } from "@/lib/uploadthing-client";
+import MusicStudio from "./MusicStudio";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-type MusicAccess = {
-  allowed: boolean;
-  isCreator: boolean;
-  isVerifiedArtist: boolean;
-  hasArtistProfile: boolean;
-  reason?: string;
-};
 
 export default function MusicShell() {
   const { t } = useLanguage();
-  const { data: session } = useSession();
   const [tracks, setTracks] = useState<MusicTrack[]>([]);
   const [q, setQ] = useState("");
   const [studio, setStudio] = useState(false);
-  const [artistName, setArtistName] = useState("");
-  const [title, setTitle] = useState("");
-  const [genre, setGenre] = useState("");
-  const [audio, setAudio] = useState<File | null>(null);
-  const [cover, setCover] = useState<File | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [access, setAccess] = useState<MusicAccess | null>(null);
-  const [accessLoading, setAccessLoading] = useState(true);
-  const [applyName, setApplyName] = useState("");
-  const [applyBusy, setApplyBusy] = useState(false);
   const { play, addToQueue } = useMusicPlayer();
-  const { startUpload: uploadMusic } = useUploadThing("musicTrack", {
-    onClientUploadComplete: async (files) => {
-      if (!files?.length) return;
-      const audioFile = files.find(f => f.serverData?.type === "audio") || files[0];
-      const imageFile = files.find(f => f.serverData?.type === "image");
-      const artistRes = await fetch("/api/music/artists", {
-        method: "POST", headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ displayName: artistName || undefined }),
-      });
-      const artist = await artistRes.json();
-      const trackRes = await fetch("/api/music/tracks", {
-        method: "POST", headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ title, genre, audioUrl: audioFile.ufsUrl, audioKey: audioFile.key, coverUrl: imageFile?.ufsUrl || null, artistId: artist.id }),
-      });
-      if (!trackRes.ok) {
-        const data = await trackRes.json().catch(() => ({}));
-        setUploadError(data.error || t("music.shell.publishFailedDefault"));
-        setBusy(false);
-        return;
-      }
-      setBusy(false); setAudio(null); setCover(null); setTitle(""); setStudio(false);
-      load();
-    },
-    onUploadError: (err) => {
-      setUploadError(err.message || t("music.shell.uploadFailedDefault"));
-      setBusy(false);
-    },
-  });
 
   async function load() {
     const res = await fetch(`/api/music/tracks${q ? `?q=${encodeURIComponent(q)}` : ""}`, { cache: "no-store" });
     if (res.ok) setTracks(await res.json());
   }
   useEffect(() => { load(); }, [q]);
-
-  async function loadAccess() {
-    setAccessLoading(true);
-    try {
-      const res = await fetch("/api/music/access", { cache: "no-store" });
-      if (res.ok) setAccess(await res.json());
-    } finally {
-      setAccessLoading(false);
-    }
-  }
-  useEffect(() => {
-    if (session?.user) loadAccess();
-    else {
-      setAccess(null);
-      setAccessLoading(false);
-    }
-  }, [session?.user]);
-
-  const submit = async () => {
-    if (!audio || !title) return;
-    setUploadError(null);
-
-    // A file picked from iCloud Drive, a third-party Files provider,
-    // or a cloud storage app can come back as a zero-byte placeholder
-    // when the OS hasn't actually finished downloading its content
-    // yet. Uploading that gives a confusing generic failure - this
-    // catches it up front with a message that says what's actually
-    // going on.
-    const emptyFile = [audio, cover].find((f) => f && f.size === 0);
-    if (emptyFile) {
-      setUploadError(t("music.shell.emptyFileError", { name: emptyFile.name }));
-      return;
-    }
-
-    setBusy(true);
-    const files = cover ? [audio, cover] : [audio];
-    await uploadMusic(files);
-  };
-
-  const applyForArtist = async () => {
-    if (!applyName.trim()) return;
-    setApplyBusy(true);
-    const res = await fetch("/api/music/artists", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ displayName: applyName.trim() }),
-    });
-    setApplyBusy(false);
-    if (res.ok) {
-      setApplyName("");
-      loadAccess();
-    }
-  };
 
   const like = async (id: string) => {
     const res = await fetch("/api/music/tracks/like", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({trackId:id})});
@@ -235,147 +133,7 @@ export default function MusicShell() {
 
         {/* Studio */}
         {studio && (
-          <section className="rounded-[24px] border border-gray-200 dark:border-white/10 bg-gray-50/80 dark:bg-white/[0.035] p-5 sm:p-7">
-            <div className="flex items-start justify-between gap-4 mb-6">
-              <div>
-                <div className="text-xs uppercase tracking-[0.2em] text-zrp-red font-bold">
-                  {t("music.shell.studioEyebrow")}
-                </div>
-                <h2 className="text-2xl font-black mt-1">{t("music.shell.studioLabel")}</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  {t("music.shell.studioDescription")}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setStudio(false)}
-                className="text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white"
-              >
-                {t("music.shell.close")}
-              </button>
-            </div>
-
-            {!session?.user ? (
-              <div className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-black/30 p-6 text-center">
-                <Lock className="w-8 h-8 mx-auto text-gray-400" />
-                <div className="font-bold mt-3">{t("music.shell.signInTitle")}</div>
-                <p className="text-sm text-gray-500 mt-1">
-                  {t("music.shell.signInBody")}
-                </p>
-              </div>
-            ) : accessLoading ? (
-              <div className="py-10 flex justify-center">
-                <div className="animate-spin rounded-full h-7 w-7 border-2 border-zrp-red border-t-transparent" />
-              </div>
-            ) : !access?.allowed ? (
-              <div className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-black/30 p-6">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center shrink-0">
-                    <Lock className="w-5 h-5 text-gray-500" />
-                  </div>
-                  <div>
-                    <div className="font-bold">{t("music.shell.gateTitle")}</div>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {t("music.shell.gateBody")}
-                    </p>
-                  </div>
-                </div>
-
-                {access?.hasArtistProfile ? (
-                  <div className="mt-5 text-sm rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/40 p-3.5">
-                    {t("music.shell.pendingVerification")}
-                  </div>
-                ) : (
-                  <div className="mt-5">
-                    <p className="text-sm text-gray-500 mb-2">
-                      {t("music.shell.applyIntroPrefix")}
-                      <Link href="/settings" className="text-zrp-red hover:underline"> {t("music.shell.applyIntroLink")}</Link> {t("music.shell.applyIntroSuffix")}
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <input
-                        value={applyName}
-                        onChange={(e) => setApplyName(e.target.value)}
-                        placeholder={t("music.shell.artistNamePlaceholder")}
-                        className="flex-1 p-3 rounded-xl bg-gray-50 dark:bg-white/[0.05] border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
-                      />
-                      <button
-                        type="button"
-                        disabled={applyBusy || !applyName.trim()}
-                        onClick={applyForArtist}
-                        className="h-11 px-5 rounded-xl bg-zrp-red text-white font-bold disabled:opacity-40 shrink-0"
-                      >
-                        {applyBusy ? t("music.shell.applySubmitting") : t("music.shell.applySubmit")}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <>
-                <div className="grid sm:grid-cols-2 gap-3">
-                  <input
-                    value={artistName}
-                    onChange={(e) => setArtistName(e.target.value)}
-                    placeholder={t("music.shell.artistNamePlaceholder")}
-                    className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
-                  />
-
-                  <input
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder={t("music.shell.songTitlePlaceholder")}
-                    className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
-                  />
-
-                  <input
-                    value={genre}
-                    onChange={(e) => setGenre(e.target.value)}
-                    placeholder={t("music.shell.genrePlaceholder")}
-                    className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 outline-none focus:border-zrp-red/50"
-                  />
-
-                  <label className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 cursor-pointer text-sm text-gray-500">
-                    {t("music.shell.audioFileLabel")}
-                    <input
-                      type="file"
-                      accept="audio/*,.mp3,.wav,.m4a,.aac,.aiff,.aif,.flac,.ogg,.oga,.opus,.wma,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/aac,audio/aiff,audio/x-aiff,audio/flac,audio/x-flac,audio/ogg"
-                      className="block mt-2 w-full text-xs"
-                      onChange={(e) => setAudio(e.target.files?.[0] || null)}
-                    />
-                  </label>
-
-                  <label className="p-3.5 rounded-xl bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 cursor-pointer text-sm text-gray-500">
-                    {t("music.shell.coverArtworkLabel")}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="block mt-2 w-full text-xs"
-                      onChange={(e) => setCover(e.target.files?.[0] || null)}
-                    />
-                  </label>
-
-                  <button
-                    disabled={busy || !audio || !title}
-                    onClick={submit}
-                    className="sm:col-span-2 h-12 rounded-xl bg-zrp-red text-white font-bold disabled:opacity-40"
-                  >
-                    {busy ? t("music.shell.publishing") : t("music.shell.publishTrack")}
-                  </button>
-                </div>
-
-                {uploadError && (
-                  <p role="alert" className="text-sm text-red-600 dark:text-red-400 mt-3">
-                    {uploadError}
-                  </p>
-                )}
-
-                <p className="text-xs text-gray-500 mt-3">
-                  {t("music.shell.uploadHint")}
-                </p>
-              </>
-            )}
-          </section>
+          <MusicStudio onClose={() => setStudio(false)} onTrackChange={load} />
         )}
 
         {/* Quick navigation */}

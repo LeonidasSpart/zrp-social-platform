@@ -30,8 +30,10 @@ export async function POST(req: NextRequest) {
 
   const track = await prisma.musicTrack.create({
     data: {
-      title, audioUrl, audioKey: body.audioKey || null, coverUrl: body.coverUrl || null,
+      title, audioUrl, audioKey: body.audioKey || null,
+      coverUrl: body.coverUrl || null, coverKey: body.coverKey || null,
       genre: body.genre || null, description: body.description || null, artistId,
+      explicit: !!body.explicit,
       status: "PUBLISHED",
     },
     include: { artist: true, album: true },
@@ -43,6 +45,26 @@ export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   const q = req.nextUrl.searchParams.get("q")?.trim() || "";
   const limit = Math.min(Number(req.nextUrl.searchParams.get("limit") || 30), 100);
+  const mine = req.nextUrl.searchParams.get("mine") === "true";
+
+  // "mine" is the Music Studio's own-tracks view: every track owned by
+  // the current session's artist profile, any status, not just
+  // PUBLISHED - so an artist can see and manage a track that's still
+  // processing or was unpublished. Ownership comes only from the
+  // session, never a client-supplied artistId.
+  if (mine) {
+    if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const artist = await prisma.musicArtist.findUnique({ where: { userId: session.user.id }, select: { id: true } });
+    if (!artist) return NextResponse.json([]);
+
+    const tracks = await prisma.musicTrack.findMany({
+      where: { artistId: artist.id },
+      orderBy: [{ createdAt: "desc" }],
+      take: limit,
+      include: { artist: true, album: true },
+    });
+    return NextResponse.json(tracks);
+  }
 
   const tracks = await prisma.musicTrack.findMany({
     where: {

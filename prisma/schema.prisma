@@ -2009,6 +2009,7 @@ model MusicAlbum {
   title       String
   description String?      @db.Text
   coverUrl    String?
+  coverKey    String?
   releaseDate DateTime?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
@@ -2028,11 +2029,17 @@ model MusicTrack {
   audioUrl      String
   audioKey      String?
   coverUrl      String?
+  coverKey      String?
   durationSec   Int?
   genre         String?
   explicit      Boolean              @default(false)
   status        String               @default("PUBLISHED")
   playCount     Int                  @default(0)
+  // Position of this track within its album (MusicTrack.albumId), NULL
+  // when the track isn't in an album. Nullable and additive - existing
+  // rows simply sort last (see the tracks-by-album ordering, which
+  // falls back to createdAt) until an artist explicitly reorders.
+  trackNumber   Int?
   createdAt     DateTime             @default(now())
   updatedAt     DateTime             @updatedAt
   likes         MusicLike[]
