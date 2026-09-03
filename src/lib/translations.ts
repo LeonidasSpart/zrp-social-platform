@@ -65,7 +65,9 @@ type TranslationKey =
   | "auth.resendVerificationSuccess"
   | "auth.resendVerificationUserNotFound"
   | "auth.resendVerificationAlreadyVerified"
-  | "auth.resendVerificationError" | "auth.contactSupport"
+  | "auth.resendVerificationError"
+  | "auth.signupSuccessTitle"
+  | "auth.signupSuccessBody" | "auth.contactSupport"
   | "auth.banAppealNote" | "auth.errBanned"
   | "auth.errSessionExpired" | "auth.joinCommunity" | "auth.fullName"
   | "auth.username" | "auth.createPassword" | "auth.passwordMinLength" | "auth.creatingAccount"
@@ -458,6 +460,8 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.resendVerificationUserNotFound": "We couldn't find an account matching that email or username.",
     "auth.resendVerificationAlreadyVerified": "This email is already verified. Please sign in.",
     "auth.resendVerificationError": "Failed to send verification email. Please try again.",
+    "auth.signupSuccessTitle": "Account created!",
+    "auth.signupSuccessBody": "We sent a verification link to {email}. Please check your inbox to activate your account before signing in.",
     "auth.contactSupport": "📧 Contact support via email",
     "auth.banAppealNote": "Please include your username and the reason you believe this is a mistake.",
     "auth.errBanned": "Your account has been banned. Please contact support.",
@@ -3991,6 +3995,8 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.resendVerificationUserNotFound": "Nous n'avons trouvé aucun compte correspondant à cet e-mail ou nom d'utilisateur.",
     "auth.resendVerificationAlreadyVerified": "Cet e-mail est déjà vérifié. Veuillez vous connecter.",
     "auth.resendVerificationError": "Échec de l'envoi de l'e-mail de vérification. Veuillez réessayer.",
+    "auth.signupSuccessTitle": "Compte créé !",
+    "auth.signupSuccessBody": "Nous avons envoyé un lien de vérification à {email}. Veuillez consulter votre boîte de réception pour activer votre compte avant de vous connecter.",
     "auth.contactSupport": "📧 Contacter le support par e-mail",
     "auth.banAppealNote": "Veuillez indiquer votre nom d'utilisateur et la raison pour laquelle vous pensez qu'il s'agit d'une erreur.",
     "auth.errBanned": "Votre compte a été banni. Veuillez contacter le support.",
@@ -7524,6 +7530,8 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.resendVerificationUserNotFound": "Wir konnten kein Konto mit dieser E-Mail-Adresse oder diesem Benutzernamen finden.",
     "auth.resendVerificationAlreadyVerified": "Diese E-Mail-Adresse ist bereits verifiziert. Bitte melde dich an.",
     "auth.resendVerificationError": "Verifizierungs-E-Mail konnte nicht gesendet werden. Bitte versuche es erneut.",
+    "auth.signupSuccessTitle": "Konto erstellt!",
+    "auth.signupSuccessBody": "Wir haben einen Verifizierungslink an {email} gesendet. Bitte überprüfe dein Postfach, um dein Konto zu aktivieren, bevor du dich anmeldest.",
     "auth.contactSupport": "📧 Support per E-Mail kontaktieren",
     "auth.banAppealNote": "Bitte gib deinen Benutzernamen und den Grund an, warum du glaubst, dass dies ein Fehler ist.",
     "auth.errBanned": "Dein Konto wurde gesperrt. Bitte kontaktiere den Support.",
@@ -11057,6 +11065,8 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.resendVerificationUserNotFound": "Non abbiamo trovato un account corrispondente a questa email o nome utente.",
     "auth.resendVerificationAlreadyVerified": "Questa email è già stata verificata. Effettua l'accesso.",
     "auth.resendVerificationError": "Impossibile inviare l'email di verifica. Riprova.",
+    "auth.signupSuccessTitle": "Account creato!",
+    "auth.signupSuccessBody": "Abbiamo inviato un link di verifica a {email}. Controlla la tua casella di posta per attivare il tuo account prima di accedere.",
     "auth.contactSupport": "📧 Contatta il supporto via email",
     "auth.banAppealNote": "Includi il tuo nome utente e il motivo per cui ritieni si tratti di un errore.",
     "auth.errBanned": "Il tuo account è stato bannato. Contatta il supporto.",
@@ -14590,6 +14600,8 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.resendVerificationUserNotFound": "Nuk gjetëm asnjë llogari që përputhet me atë email ose emër përdoruesi.",
     "auth.resendVerificationAlreadyVerified": "Ky email është verifikuar tashmë. Ju lutemi hyni në llogari.",
     "auth.resendVerificationError": "Dërgimi i emailit të verifikimit dështoi. Ju lutemi provoni përsëri.",
+    "auth.signupSuccessTitle": "Llogaria u krijua!",
+    "auth.signupSuccessBody": "Dërguam një lidhje verifikimi te {email}. Ju lutemi kontrolloni kutinë tuaj postare për të aktivizuar llogarinë përpara se të hyni.",
     "auth.contactSupport": "📧 Kontaktoni mbështetjen përmes emailit",
     "auth.banAppealNote": "Ju lutemi përfshini emrin e përdoruesit dhe arsyen pse mendoni se ky është një gabim.",
     "auth.errBanned": "Llogaria juaj është pezulluar. Ju lutemi kontaktoni mbështetjen.",
@@ -18123,6 +18135,8 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.resendVerificationUserNotFound": "No pudimos encontrar una cuenta que coincida con ese correo o nombre de usuario.",
     "auth.resendVerificationAlreadyVerified": "Este correo ya está verificado. Por favor, inicia sesión.",
     "auth.resendVerificationError": "No se pudo enviar el correo de verificación. Inténtalo de nuevo.",
+    "auth.signupSuccessTitle": "¡Cuenta creada!",
+    "auth.signupSuccessBody": "Enviamos un enlace de verificación a {email}. Por favor, revisa tu bandeja de entrada para activar tu cuenta antes de iniciar sesión.",
     "auth.contactSupport": "📧 Contacta con soporte por correo electrónico",
     "auth.banAppealNote": "Incluye tu nombre de usuario y el motivo por el que crees que esto es un error.",
     "auth.errBanned": "Tu cuenta ha sido bloqueada. Contacta con soporte.",
@@ -21656,6 +21670,8 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.resendVerificationUserNotFound": "Мы не смогли найти учётную запись с таким адресом электронной почты или именем пользователя.",
     "auth.resendVerificationAlreadyVerified": "Этот адрес электронной почты уже подтверждён. Пожалуйста, войдите в систему.",
     "auth.resendVerificationError": "Не удалось отправить письмо для подтверждения. Пожалуйста, попробуйте снова.",
+    "auth.signupSuccessTitle": "Аккаунт создан!",
+    "auth.signupSuccessBody": "Мы отправили ссылку для подтверждения на {email}. Пожалуйста, проверьте почту, чтобы активировать аккаунт перед входом.",
     "auth.contactSupport": "📧 Связаться с поддержкой по эл. почте",
     "auth.banAppealNote": "Пожалуйста, укажите ваше имя пользователя и причину, по которой вы считаете это ошибкой.",
     "auth.errBanned": "Ваш аккаунт заблокирован. Пожалуйста, свяжитесь с поддержкой.",
@@ -25189,6 +25205,8 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.resendVerificationUserNotFound": "لم نتمكن من العثور على حساب يطابق هذا البريد الإلكتروني أو اسم المستخدم.",
     "auth.resendVerificationAlreadyVerified": "تم التحقق من هذا البريد الإلكتروني بالفعل. يرجى تسجيل الدخول.",
     "auth.resendVerificationError": "فشل إرسال بريد التحقق. يرجى المحاولة مرة أخرى.",
+    "auth.signupSuccessTitle": "تم إنشاء الحساب!",
+    "auth.signupSuccessBody": "أرسلنا رابط تحقق إلى {email}. يرجى التحقق من بريدك الوارد لتفعيل حسابك قبل تسجيل الدخول.",
     "auth.contactSupport": "📧 تواصل مع الدعم عبر البريد الإلكتروني",
     "auth.banAppealNote": "يرجى تضمين اسم المستخدم الخاص بك والسبب الذي تعتقد أن هذا خطأ بسببه.",
     "auth.errBanned": "تم حظر حسابك. يرجى التواصل مع الدعم.",
@@ -28722,6 +28740,8 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.resendVerificationUserNotFound": "找不到与该邮箱或用户名匹配的账户。",
     "auth.resendVerificationAlreadyVerified": "该邮箱已通过验证，请直接登录。",
     "auth.resendVerificationError": "验证邮件发送失败，请重试。",
+    "auth.signupSuccessTitle": "账户已创建！",
+    "auth.signupSuccessBody": "我们已向 {email} 发送了验证链接。请查收您的收件箱以在登录前激活账户。",
     "auth.contactSupport": "📧 通过邮件联系客服",
     "auth.banAppealNote": "请附上你的用户名以及你认为这是误判的原因。",
     "auth.errBanned": "你的账户已被封禁，请联系客服。",
@@ -32255,6 +32275,8 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.resendVerificationUserNotFound": "Bu e-posta veya kullanıcı adıyla eşleşen bir hesap bulamadık.",
     "auth.resendVerificationAlreadyVerified": "Bu e-posta zaten doğrulanmış. Lütfen giriş yapın.",
     "auth.resendVerificationError": "Doğrulama e-postası gönderilemedi. Lütfen tekrar deneyin.",
+    "auth.signupSuccessTitle": "Hesap oluşturuldu!",
+    "auth.signupSuccessBody": "{email} adresine bir doğrulama bağlantısı gönderdik. Giriş yapmadan önce hesabınızı etkinleştirmek için lütfen gelen kutunuzu kontrol edin.",
     "auth.contactSupport": "📧 E-posta ile destek ekibiyle iletişime geçin",
     "auth.banAppealNote": "Lütfen kullanıcı adınızı ve bunun bir hata olduğunu düşünme nedeninizi belirtin.",
     "auth.errBanned": "Hesabınız yasaklandı. Lütfen destek ekibiyle iletişime geçin.",
@@ -35788,6 +35810,8 @@ export const translations: Record<Language, TranslationDict> = {
     "auth.resendVerificationUserNotFound": "Kami tidak dapat menemukan akun yang cocok dengan email atau nama pengguna tersebut.",
     "auth.resendVerificationAlreadyVerified": "Email ini sudah diverifikasi. Silakan masuk.",
     "auth.resendVerificationError": "Gagal mengirim email verifikasi. Silakan coba lagi.",
+    "auth.signupSuccessTitle": "Akun berhasil dibuat!",
+    "auth.signupSuccessBody": "Kami telah mengirim tautan verifikasi ke {email}. Silakan periksa kotak masuk Anda untuk mengaktifkan akun sebelum masuk.",
     "auth.contactSupport": "📧 Hubungi dukungan melalui email",
     "auth.banAppealNote": "Silakan sertakan nama pengguna Anda dan alasan mengapa Anda yakin ini adalah kesalahan.",
     "auth.errBanned": "Akun Anda telah diblokir. Silakan hubungi dukungan.",
