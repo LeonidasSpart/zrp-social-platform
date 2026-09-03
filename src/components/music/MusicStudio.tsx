@@ -719,7 +719,20 @@ function TracksTab({
                 {t("music.shell.audioFileLabel")}
                 <input
                   type="file"
-                  accept="audio/*,.mp3,.wav,.m4a,.aac,.aiff,.aif,.flac,.ogg,.oga,.opus,.wma,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/aac,audio/aiff,audio/x-aiff,audio/flac,audio/x-flac,audio/ogg"
+                  // No accept restriction, deliberately - a cloud
+                  // storage app's own file picker (MEGA, Google Drive,
+                  // Dropbox) frequently doesn't tag a file with any of
+                  // the MIME types listed here (often reporting a
+                  // generic type, or none, until the file is actually
+                  // downloaded), and both Android's and iOS's system
+                  // pickers grey out / hide files that don't match an
+                  // accept filter - before this code ever runs. That
+                  // silently made real audio files unselectable from
+                  // exactly the providers people use most. accept is a
+                  // UX hint, not a security boundary; the real
+                  // validation happens after selection (the empty/
+                  // unreadable-file checks below) and server-side
+                  // (isAudioFile() in the UploadThing middleware).
                   className="block mt-2 w-full text-xs"
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null;
@@ -734,7 +747,6 @@ function TracksTab({
                 {t("music.shell.coverArtworkLabel")}
                 <input
                   type="file"
-                  accept="image/*"
                   className="block mt-2 w-full text-xs"
                   onChange={(e) => setCover(e.target.files?.[0] || null)}
                 />
@@ -909,7 +921,6 @@ function EditTrackModal({
             {coverUploading ? t("music.studio.uploading") : t("music.studio.changeCover")}
             <input
               type="file"
-              accept="image/*"
               className="hidden"
               disabled={coverUploading}
               onChange={(e) => {
@@ -1151,7 +1162,6 @@ function CreateAlbumModal({
             {coverUploading ? t("music.studio.uploading") : t("music.studio.addCover")}
             <input
               type="file"
-              accept="image/*"
               className="hidden"
               disabled={coverUploading}
               onChange={(e) => {
@@ -1336,7 +1346,6 @@ function ManageAlbumModal({
               {coverUploading ? t("music.studio.uploading") : t("music.studio.changeCover")}
               <input
                 type="file"
-                accept="image/*"
                 className="hidden"
                 disabled={coverUploading}
                 onChange={(e) => {
@@ -1538,7 +1547,6 @@ function ArtistTab({ onSaved }: { onSaved: () => void }) {
           {bannerUploading ? t("music.studio.uploading") : t("music.studio.changeBanner")}
           <input
             type="file"
-            accept="image/*"
             className="hidden"
             disabled={bannerUploading}
             onChange={(e) => {
@@ -1558,7 +1566,6 @@ function ArtistTab({ onSaved }: { onSaved: () => void }) {
           )}
           <input
             type="file"
-            accept="image/*"
             className="hidden"
             disabled={avatarUploading}
             onChange={(e) => {
