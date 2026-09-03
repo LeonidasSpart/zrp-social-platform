@@ -10,6 +10,7 @@ import GoogleIcon from "@/components/icons/GoogleIcon";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Check, X, Loader2 } from "lucide-react";
 import { isNativeApp, nativeGoogleSignIn } from "@/lib/nativeAuth";
+import type { TranslationKey } from "@/lib/translations";
 
 type UsernameStatus = "idle" | "checking" | "available" | "taken" | "invalid";
 
@@ -22,6 +23,14 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  // Set once registration succeeds - see handleSubmit for why this is the
+  // normal outcome for every credentials signup, not an edge case.
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   // ─── Live username availability check ───────────────────────────
   const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
@@ -91,17 +100,62 @@ export default function SignupPage() {
         return;
       }
 
-      await signIn("credentials", {
+      const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
         callbackUrl: "/",
       });
 
+      // Every newly registered account starts unverified, and
+      // authorize() in lib/auth.ts deliberately refuses to sign in an
+      // unverified user - so this sign-in attempt failing here is the
+      // expected outcome for every credentials signup, not a rare edge
+      // case. Previously this result was never checked, so the user got
+      // no error but also never actually got signed in: they were just
+      // sent to "/", which middleware then silently bounced back to
+      // /login with zero explanation that an account was even created
+      // or that a verification email was on its way.
+      if (result?.error) {
+        setRegisteredEmail(email);
+        setLoading(false);
+        return;
+      }
+
       window.location.href = "/";
     } catch (err) {
       setError(t("auth.errTryAgain"));
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!registeredEmail) return;
+    setResendLoading(true);
+    setResendMessage(null);
+
+    try {
+      const res = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: registeredEmail }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok) {
+        setResendMessage({ type: "success", text: t("auth.resendVerificationSuccess") });
+      } else {
+        const key: TranslationKey =
+          data.code === "ALREADY_VERIFIED"
+            ? "auth.resendVerificationAlreadyVerified"
+            : "auth.resendVerificationError";
+        setResendMessage({ type: "error", text: t(key) });
+      }
+    } catch (err) {
+      console.error("Resend verification error:", err);
+      setResendMessage({ type: "error", text: t("auth.resendVerificationError") });
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -196,142 +250,183 @@ export default function SignupPage() {
             </h2>
           </div>
 
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            disabled={googleLoading}
-            className="w-full flex items-center justify-center gap-3 border border-gray-300 dark:border-gray-600 rounded-full py-3.5 sm:py-3 font-medium text-gray-700 dark:text-gray-100 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed text-base"
-          >
-            <GoogleIcon className="w-5 h-5" />
-            {googleLoading ? t("auth.signingIn") : t("auth.continueWithGoogle")}
-          </button>
-
-          <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-            <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t("auth.or")}</span>
-            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {t("auth.fullName")}
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base"
-                placeholder="John Doe"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {t("auth.username")}
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className={`w-full px-4 py-3.5 sm:py-3 pr-10 border rounded-xl focus:ring-2 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base ${usernameFieldBorder}`}
-                  placeholder="johndoe"
-                  required
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  {usernameStatus === "checking" && (
-                    <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
-                  )}
-                  {usernameStatus === "available" && (
-                    <Check className="w-4 h-4 text-green-500" />
-                  )}
-                  {(usernameStatus === "taken" || usernameStatus === "invalid") && (
-                    <X className="w-4 h-4 text-red-400" />
-                  )}
-                </div>
+          {registeredEmail ? (
+            <div className="text-center">
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-5">
+                <p className="font-semibold text-green-800 dark:text-green-300">
+                  {t("auth.signupSuccessTitle")}
+                </p>
+                <p className="text-sm text-green-700 dark:text-green-400 mt-2">
+                  {t("auth.signupSuccessBody", { email: registeredEmail })}
+                </p>
               </div>
 
-              {usernameStatus === "invalid" && username.trim().length > 0 && (
-                <p className="text-xs text-red-500 mt-1">
-                  3-20 characters, letters/numbers/underscores only
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                disabled={resendLoading}
+                className="text-zrp-red dark:text-zrp-red underline text-sm hover:text-zrp-darkRed dark:hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+              >
+                {resendLoading ? t("auth.resendVerificationSending") : t("auth.resendVerification")}
+              </button>
+              {resendMessage && (
+                <p
+                  className={`text-xs mt-1 ${
+                    resendMessage.type === "success"
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-red-600 dark:text-red-400"
+                  }`}
+                >
+                  {resendMessage.text}
                 </p>
               )}
 
-              {usernameStatus === "taken" && (
-                <div className="mt-2">
-                  <p className="text-xs text-red-500">That username is taken.</p>
-                  {usernameSuggestions.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-1.5">
-                      {usernameSuggestions.map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          onClick={() => setUsername(s)}
-                          className="text-xs px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-zrp-red hover:text-white transition"
-                        >
-                          {s}
-                        </button>
-                      ))}
+              <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
+                <Link href="/login" className="text-zrp-darkRed dark:text-zrp-red hover:underline font-medium">
+                  {t("auth.signIn")}
+                </Link>
+              </p>
+            </div>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={googleLoading}
+                className="w-full flex items-center justify-center gap-3 border border-gray-300 dark:border-gray-600 rounded-full py-3.5 sm:py-3 font-medium text-gray-700 dark:text-gray-100 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed text-base"
+              >
+                <GoogleIcon className="w-5 h-5" />
+                {googleLoading ? t("auth.signingIn") : t("auth.continueWithGoogle")}
+              </button>
+
+              <div className="flex items-center gap-3 my-6">
+                <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+                <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t("auth.or")}</span>
+                <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {error && (
+                  <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg text-sm">
+                    {error}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t("auth.fullName")}
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-4 py-3.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base"
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t("auth.username")}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className={`w-full px-4 py-3.5 sm:py-3 pr-10 border rounded-xl focus:ring-2 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base ${usernameFieldBorder}`}
+                      placeholder="johndoe"
+                      required
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {usernameStatus === "checking" && (
+                        <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
+                      )}
+                      {usernameStatus === "available" && (
+                        <Check className="w-4 h-4 text-green-500" />
+                      )}
+                      {(usernameStatus === "taken" || usernameStatus === "invalid") && (
+                        <X className="w-4 h-4 text-red-400" />
+                      )}
+                    </div>
+                  </div>
+
+                  {usernameStatus === "invalid" && username.trim().length > 0 && (
+                    <p className="text-xs text-red-500 mt-1">
+                      3-20 characters, letters/numbers/underscores only
+                    </p>
+                  )}
+
+                  {usernameStatus === "taken" && (
+                    <div className="mt-2">
+                      <p className="text-xs text-red-500">That username is taken.</p>
+                      {usernameSuggestions.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-1.5">
+                          {usernameSuggestions.map((s) => (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={() => setUsername(s)}
+                              className="text-xs px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-zrp-red hover:text-white transition"
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {t("auth.email")}
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base"
-                placeholder="you@example.com"
-                required
-              />
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t("auth.email")}
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-3.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </div>
 
-            <PasswordInput
-              id="password"
-              name="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              label={t("auth.password")}
-              placeholder={t("auth.createPassword")}
-              required
-              autoComplete="new-password"
-            />
+                <PasswordInput
+                  id="password"
+                  name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  label={t("auth.password")}
+                  placeholder={t("auth.createPassword")}
+                  required
+                  autoComplete="new-password"
+                />
 
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {t("auth.passwordMinLength")}
-            </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {t("auth.passwordMinLength")}
+                </p>
 
-            <button
-              type="submit"
-              disabled={loading || usernameStatus === "checking"}
-              className="w-full bg-zrp-darkRed hover:bg-zrp-red text-white py-3.5 sm:py-3 rounded-full font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm text-base"
-            >
-              {loading ? t("auth.creatingAccount") : t("auth.createAccount")}
-            </button>
-          </form>
+                <button
+                  type="submit"
+                  disabled={loading || usernameStatus === "checking"}
+                  className="w-full bg-zrp-darkRed hover:bg-zrp-red text-white py-3.5 sm:py-3 rounded-full font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm text-base"
+                >
+                  {loading ? t("auth.creatingAccount") : t("auth.createAccount")}
+                </button>
+              </form>
 
-          <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
-            {t("auth.alreadyHaveAccount")}{" "}
-            <Link href="/login" className="text-zrp-darkRed dark:text-zrp-red hover:underline font-medium">
-              {t("auth.signIn")}
-            </Link>
-          </p>
+              <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
+                {t("auth.alreadyHaveAccount")}{" "}
+                <Link href="/login" className="text-zrp-darkRed dark:text-zrp-red hover:underline font-medium">
+                  {t("auth.signIn")}
+                </Link>
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>
