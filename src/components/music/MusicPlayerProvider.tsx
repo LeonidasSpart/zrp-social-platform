@@ -193,6 +193,7 @@ export function MusicPlayerProvider({
             trackId: activeTrack.id,
             secondsPlayed: Math.round(audio.currentTime),
             completed: true,
+            durationSec: Number.isFinite(audio.duration) && audio.duration > 0 ? Math.round(audio.duration) : undefined,
           }),
         }).catch(() => {});
       }
@@ -577,6 +578,7 @@ export function MusicPlayerProvider({
         trackId: current.id,
         secondsPlayed: Math.round(progress),
         completed: false,
+        durationSec: Number.isFinite(duration) && duration > 0 ? Math.round(duration) : undefined,
       }),
     }).catch(() => {});
   }, [progress, current]);

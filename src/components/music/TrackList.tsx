@@ -38,7 +38,7 @@ export default function TrackList({
   emptyDescription?: string;
 }) {
   const { t } = useLanguage();
-  const { current, playing, play, pause, addToQueue, playNext } = useMusicPlayer();
+  const { current, playing, play, pause, addToQueue, playNext, clearQueue } = useMusicPlayer();
   const { data: session } = useSession();
   const [myPlaylists, setMyPlaylists] = useState<MyPlaylist[]>([]);
   const [openMenuFor, setOpenMenuFor] = useState<string | null>(null);
@@ -95,7 +95,20 @@ export default function TrackList({
 
             <button
               type="button"
-              onClick={() => (isCurrent && playing ? pause() : play(track))}
+              onClick={() => {
+                if (isCurrent && playing) {
+                  pause();
+                  return;
+                }
+                // Starting a track from this list queues the rest of
+                // the list behind it, the same way "Play all" does -
+                // without this, Next/Previous had nothing to advance
+                // to whenever someone played a track by clicking it
+                // directly instead of using Play all first.
+                clearQueue();
+                play(track);
+                tracks.slice(index + 1).forEach((t) => addToQueue(t));
+              }}
               className="relative shrink-0 w-11 h-11 rounded-lg overflow-hidden"
               aria-label={
                 isCurrent && playing

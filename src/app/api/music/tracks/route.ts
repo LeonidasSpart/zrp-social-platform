@@ -28,12 +28,23 @@ export async function POST(req: NextRequest) {
   const artist = await prisma.musicArtist.findFirst({ where: { id: artistId, userId: session.user.id } });
   if (!artist) return NextResponse.json({ error: "Artist profile not owned by current user" }, { status: 403 });
 
+  // Client-reported (read from the browser's own decode of the file
+  // being uploaded), so it's sanity-bounded rather than trusted
+  // outright - a bogus value just means the duration self-heals the
+  // first time someone actually plays the track (see the play route).
+  const reportedDuration = Number(body.durationSec);
+  const durationSec =
+    Number.isFinite(reportedDuration) && reportedDuration > 0 && reportedDuration < 6 * 60 * 60
+      ? Math.round(reportedDuration)
+      : null;
+
   const track = await prisma.musicTrack.create({
     data: {
       title, audioUrl, audioKey: body.audioKey || null,
       coverUrl: body.coverUrl || null, coverKey: body.coverKey || null,
       genre: body.genre || null, description: body.description || null, artistId,
       explicit: !!body.explicit,
+      durationSec,
       status: "PUBLISHED",
     },
     include: { artist: true, album: true },

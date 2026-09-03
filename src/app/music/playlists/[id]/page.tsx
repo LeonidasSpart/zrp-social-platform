@@ -240,7 +240,15 @@ export default function MusicPlaylistDetailPage() {
 
                 <button
                   type="button"
-                  onClick={() => play(row.track)}
+                  onClick={() => {
+                    // Same fix as the other track lists: seed the
+                    // queue with the rest of the playlist so Next/
+                    // Previous have somewhere to go after playing a
+                    // track picked directly instead of via Play all.
+                    clearQueue();
+                    play(row.track);
+                    playlist.tracks.slice(index + 1).forEach((r) => addToQueue(r.track));
+                  }}
                   className="shrink-0 w-11 h-11 rounded-lg overflow-hidden"
                   aria-label={t("music.shell.playTrackAria", { title: row.track.title })}
                 >

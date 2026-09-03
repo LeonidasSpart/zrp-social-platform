@@ -59,7 +59,60 @@ type PendingUpload = {
   audioKey?: string | null;
   coverUrl?: string | null;
   coverKey?: string | null;
+  durationSec?: number | null;
 };
+
+// Reads a track's length straight from the file the browser already
+// has, before it's even uploaded - MusicTrack.durationSec was never
+// being set at all (the create-track request never sent it), which is
+// why every track list showed "--:--" regardless of platform. Resolves
+// null rather than rejecting on a file the browser can't probe (some
+// mobile browsers/codecs), so a duration failure never blocks
+// publishing.
+function probeAudioDuration(file: File): Promise<number | null> {
+  return new Promise((resolve) => {
+    const objectUrl = URL.createObjectURL(file);
+    const audio = new Audio();
+    const cleanup = () => {
+      URL.revokeObjectURL(objectUrl);
+      audio.removeEventListener("loadedmetadata", onLoaded);
+      audio.removeEventListener("error", onError);
+    };
+    const onLoaded = () => {
+      const duration = audio.duration;
+      cleanup();
+      resolve(Number.isFinite(duration) && duration > 0 ? Math.round(duration) : null);
+    };
+    const onError = () => {
+      cleanup();
+      resolve(null);
+    };
+    audio.addEventListener("loadedmetadata", onLoaded);
+    audio.addEventListener("error", onError);
+    audio.preload = "metadata";
+    audio.src = objectUrl;
+  });
+}
+
+// A file picked through a cloud storage app's own picker (Google
+// Drive, MEGA, Dropbox, OneDrive - not just iCloud) can hand back a
+// content:// reference the OS has to stream/decrypt on demand rather
+// than actual local bytes. When that stream stalls - the file hasn't
+// finished downloading, or the app needs to decrypt it first - the
+// upload can hang with zero feedback: Publish just does nothing
+// forever, which is indistinguishable from the feature being broken.
+// Reading a small slice up front, with a timeout, catches this before
+// committing to the full (possibly multi-minute) upload and turns a
+// silent hang into a clear, actionable error.
+function verifyFileReadable(file: File, timeoutMs = 8000): Promise<boolean> {
+  const slice = file.slice(0, Math.min(file.size, 65536));
+  const timeout = new Promise<boolean>((resolve) => setTimeout(() => resolve(false), timeoutMs));
+  const read = slice
+    .arrayBuffer()
+    .then(() => true)
+    .catch(() => false);
+  return Promise.race([read, timeout]);
+}
 
 type Tab = "tracks" | "albums" | "artist";
 export type StudioTab = Tab;
@@ -491,6 +544,7 @@ function TracksTab({
   const [genre, setGenre] = useState("");
   const [explicit, setExplicit] = useState(false);
   const [audio, setAudio] = useState<File | null>(null);
+  const [durationSec, setDurationSec] = useState<number | null>(null);
   const [cover, setCover] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -522,6 +576,7 @@ function TracksTab({
             title, genre, explicit,
             audioUrl: uploaded.audioUrl, audioKey: uploaded.audioKey,
             coverUrl: uploaded.coverUrl ?? null, coverKey: uploaded.coverKey ?? null,
+            durationSec: uploaded.durationSec ?? null,
             artistId: artist.id,
           }),
         });
@@ -533,6 +588,7 @@ function TracksTab({
         setPendingUpload(null);
         setBusy(false);
         setAudio(null);
+        setDurationSec(null);
         setCover(null);
         setTitle("");
         setGenre("");
@@ -560,6 +616,7 @@ function TracksTab({
         audioKey: audioFile.key,
         coverUrl: imageFile?.ufsUrl ?? null,
         coverKey: imageFile?.key ?? null,
+        durationSec,
       };
       setPendingUpload(uploaded);
       await publish(uploaded);
@@ -587,6 +644,17 @@ function TracksTab({
     }
 
     setBusy(true);
+
+    const filesToVerify = cover ? [audio, cover] : [audio];
+    for (const file of filesToVerify) {
+      const readable = await verifyFileReadable(file);
+      if (!readable) {
+        setUploadError(t("music.shell.unreadableFileError", { name: file.name }));
+        setBusy(false);
+        return;
+      }
+    }
+
     const files = cover ? [audio, cover] : [audio];
     await uploadMusic(files);
   };
@@ -594,6 +662,7 @@ function TracksTab({
   const discardPending = () => {
     setPendingUpload(null);
     setAudio(null);
+    setDurationSec(null);
     setCover(null);
     setUploadError(null);
   };
@@ -652,7 +721,12 @@ function TracksTab({
                   type="file"
                   accept="audio/*,.mp3,.wav,.m4a,.aac,.aiff,.aif,.flac,.ogg,.oga,.opus,.wma,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/aac,audio/aiff,audio/x-aiff,audio/flac,audio/x-flac,audio/ogg"
                   className="block mt-2 w-full text-xs"
-                  onChange={(e) => setAudio(e.target.files?.[0] || null)}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setAudio(file);
+                    setDurationSec(null);
+                    if (file) probeAudioDuration(file).then(setDurationSec);
+                  }}
                 />
               </label>
 

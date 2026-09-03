@@ -20,7 +20,7 @@ export default function MusicShell() {
   >([]);
   const [q, setQ] = useState("");
   const [studio, setStudio] = useState(false);
-  const { play, addToQueue } = useMusicPlayer();
+  const { play, addToQueue, clearQueue } = useMusicPlayer();
 
   // Lets other pages (the artist page's "Edit Profile"/"Manage in
   // Studio" links, most notably) deep-link straight into Studio
@@ -282,7 +282,15 @@ export default function MusicShell() {
 
                       <button
                         type="button"
-                        onClick={() => play(track)}
+                        onClick={() => {
+                          // Queues the rest of the visible grid behind
+                          // this track, same fix as TrackList - Next/
+                          // Previous otherwise have nothing to
+                          // advance to after playing a card directly.
+                          clearQueue();
+                          play(track);
+                          tracks.slice(index + 1).forEach((t) => addToQueue(t));
+                        }}
                         className="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-zrp-red text-white flex items-center justify-center shadow-xl shadow-black/30 active:scale-95 transition"
                         aria-label={t("music.shell.playTrackAria", { title: track.title })}
                       >

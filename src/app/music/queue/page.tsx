@@ -85,7 +85,10 @@ export default function MusicQueuePage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => play(track)}
+                    onClick={() => {
+                      play(track);
+                      removeFromQueue(track.id);
+                    }}
                     className="w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center"
                     aria-label={t("music.queue.playNowAria", { title: track.title })}
                   >
