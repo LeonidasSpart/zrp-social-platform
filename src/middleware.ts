@@ -23,8 +23,23 @@ const AUTH_FLOW_PATHS = [
   "/signup",
   "/forgot-password",
   "/reset-password",
-  "/verify-email",
 ];
+
+// Deliberately NOT in AUTH_FLOW_PATHS above, even though it looks like
+// one: consuming a verification token never authenticates anyone (see
+// consumeVerificationToken - it only updates the User row), so bouncing
+// an "authenticated" visitor away from this page based on a session
+// token was wrong on two counts. First, it silently broke the email-
+// change confirmation case, where being logged in while verifying is
+// the normal, expected state. Second - the bug this exists to fix -
+// if that session token was stale (e.g. left over after the account it
+// pointed to was deleted), the bounce sent a brand-new user straight to
+// /onboarding on a session that resolves to no User row at all, before
+// their new verification link was ever actually consumed, surfacing as
+// "User account no longer exists" on a page that assumed it was safe to
+// render. This route must always be reachable regardless of session
+// state so the token actually gets consumed either way.
+const VERIFY_EMAIL_PATH = "/verify-email";
 
 // ─── PUBLIC PAGES ──────────────────────────────────────────────────
 
@@ -161,6 +176,15 @@ export async function middleware(req: NextRequest) {
       );
     }
 
+    return NextResponse.next();
+  }
+
+  // ─── EMAIL VERIFICATION ──────────────────────────────────────────
+  //
+  // Always reachable, regardless of session state - see the comment
+  // on VERIFY_EMAIL_PATH above.
+
+  if (pathMatches(path, [VERIFY_EMAIL_PATH])) {
     return NextResponse.next();
   }
 

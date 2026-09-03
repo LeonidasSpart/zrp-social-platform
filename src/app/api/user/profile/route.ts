@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { findExistingSessionUser, ACCOUNT_NOT_FOUND_RESPONSE } from "@/lib/session-user";
 
 export async function PUT(req: NextRequest) {
   try {
@@ -15,18 +16,10 @@ export async function PUT(req: NextRequest) {
     }
 
     // Verify that the session user still exists.
-    const existingUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { id: true },
-    });
+    const existingUser = await findExistingSessionUser(session.user.id);
 
     if (!existingUser) {
-      return NextResponse.json(
-        {
-          error: "User account no longer exists. Please sign in again.",
-        },
-        { status: 401 }
-      );
+      return NextResponse.json(ACCOUNT_NOT_FOUND_RESPONSE, { status: 401 });
     }
 
     const { name, bio, location, website } = await req.json();

@@ -23,6 +23,8 @@ export default function LoginPage() {
     const errorParam = searchParams.get("error");
     if (errorParam === "banned") {
       setError(t("auth.errBanned"));
+    } else if (errorParam === "session_expired") {
+      setError(t("auth.errSessionExpired"));
     }
   }, [searchParams, t]);
 

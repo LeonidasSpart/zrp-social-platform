@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Loader2, Check } from "lucide-react";
@@ -70,6 +70,18 @@ export default function OnboardingPage() {
     });
   };
 
+  // A session cookie is a self-contained signed JWT, not a live
+  // server-side record, so it can still read as "authenticated" after
+  // the User row it points to is gone (stale/deleted account). Every
+  // onboarding endpoint that can hit this reports it with this same
+  // code - recovering means signing out the dead session and sending
+  // the person to a real re-authentication, not leaving them stuck on
+  // a form that can never succeed.
+  const recoverFromMissingAccount = async () => {
+    await signOut({ redirect: false });
+    router.push("/login?error=session_expired");
+  };
+
   const handleNext = async () => {
     if (step === 0) {
       setSaving(true);
@@ -84,6 +96,10 @@ export default function OnboardingPage() {
         if (!profileRes.ok) {
           const errorData = await profileRes.json().catch(() => ({ error: "Unknown error" }));
           console.error("Profile update error:", errorData);
+          if (errorData.code === "ACCOUNT_NOT_FOUND") {
+            await recoverFromMissingAccount();
+            return;
+          }
           throw new Error(errorData.error || `Server error: ${profileRes.status}`);
         }
 
@@ -130,6 +146,10 @@ export default function OnboardingPage() {
         });
         if (!completeRes.ok) {
           const err = await completeRes.json().catch(() => ({ error: "Failed to complete onboarding" }));
+          if (err.code === "ACCOUNT_NOT_FOUND") {
+            await recoverFromMissingAccount();
+            return;
+          }
           throw new Error(err.error || "Failed to complete onboarding");
         }
 
@@ -156,6 +176,10 @@ export default function OnboardingPage() {
         window.location.href = "/";
       } else {
         const err = await res.json().catch(() => ({ error: "Failed to skip" }));
+        if (err.code === "ACCOUNT_NOT_FOUND") {
+          await recoverFromMissingAccount();
+          return;
+        }
         throw new Error(err.error || "Failed to skip onboarding");
       }
     } catch (error: any) {
