@@ -127,6 +127,8 @@ export default function MusicArtistPage() {
     );
   }
 
+  const singles = artist.tracks.filter((tr) => !tr.album);
+
   return (
     <div className="min-h-screen bg-white dark:bg-[#050505] text-gray-950 dark:text-white pb-32">
       <header className="sticky top-0 z-30 border-b border-gray-200/70 dark:border-white/10 bg-white/85 dark:bg-[#050505]/85 backdrop-blur-2xl">
@@ -235,6 +237,19 @@ export default function MusicArtistPage() {
                 </Link>
               ))}
             </div>
+          </section>
+        )}
+
+        {singles.length > 0 && (
+          <section>
+            <h2 className="text-xl font-black mb-4">{t("music.artistDetail.singlesHeading")}</h2>
+            <TrackList
+              tracks={singles}
+              onLike={like}
+              onRemove={artist.isOwner ? deleteTrack : undefined}
+              removeLabel={artist.isOwner ? t("music.studio.deleteTrack") : undefined}
+              showArtist={false}
+            />
           </section>
         )}
 

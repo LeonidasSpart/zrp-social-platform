@@ -75,7 +75,22 @@ export default function TrackList({
   }
 
   return (
-    <div className="divide-y divide-gray-100 dark:divide-white/5 rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden bg-white dark:bg-white/[0.02]">
+    <div className="rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden bg-white dark:bg-white/[0.02]">
+      {/* Column header - desktop/tablet only. Mirrors the exact
+          fixed-width classes used in each row below (w-6 index, w-11
+          artwork spacer, flex-1 title, w-32/w-40 album, w-10
+          duration) so the header actually lines up with the data
+          instead of just floating above it. */}
+      <div className="hidden sm:flex items-center gap-3 px-3 sm:px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-100 dark:border-white/5">
+        {showIndex && <div className="w-6 text-center shrink-0">#</div>}
+        <div className="w-11 shrink-0" />
+        <div className="min-w-0 flex-1">{t("music.track.columnTitle")}</div>
+        {showAlbum && <div className="hidden md:block w-32 lg:w-40 shrink-0 truncate">{t("music.track.columnAlbum")}</div>}
+        <div className="w-10 text-right shrink-0">{t("music.track.columnDuration")}</div>
+        <div className="w-[104px] shrink-0" aria-hidden="true" />
+      </div>
+
+      <div className="divide-y divide-gray-100 dark:divide-white/5">
       {tracks.map((track, index) => {
         const isCurrent = current?.id === track.id;
         const cover = track.coverUrl || track.album?.coverUrl || "/logo.png";
@@ -140,9 +155,27 @@ export default function TrackList({
                     {track.artist.displayName}
                   </Link>
                 )}
-                {showAlbum && track.album?.title ? ` • ${track.album.title}` : ""}
+                {/* Below md, the album column is hidden - keep the
+                    album name visible by falling back to the inline
+                    suffix here instead of just dropping it. */}
+                {showAlbum && track.album?.title ? (
+                  <span className="md:hidden">{showArtist ? " • " : ""}{track.album.title}</span>
+                ) : null}
               </div>
             </div>
+
+            {showAlbum && (
+              <Link
+                href={track.album?.id ? `/music/albums/${track.album.id}` : "#"}
+                onClick={(e) => {
+                  if (!track.album?.id) e.preventDefault();
+                  e.stopPropagation();
+                }}
+                className={`hidden md:block w-32 lg:w-40 shrink-0 truncate text-xs text-gray-500 ${track.album?.id ? "hover:underline hover:text-gray-900 dark:hover:text-white" : ""}`}
+              >
+                {track.album?.title || "—"}
+              </Link>
+            )}
 
             {track.genre && (
               <span className="hidden sm:inline-block text-[11px] px-2 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 shrink-0">
@@ -237,6 +270,7 @@ export default function TrackList({
           </div>
         );
       })}
+      </div>
     </div>
   );
 }
