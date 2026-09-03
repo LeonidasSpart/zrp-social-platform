@@ -47,6 +47,13 @@ import {
   AlertTriangle,
   Calendar,
   Store,
+  Music2,
+  ListMusic,
+  History,
+  Play,
+  Copyright,
+  HeartHandshake,
+  UserCheck,
 } from "lucide-react";
 
 interface HelpSection {
@@ -1104,8 +1111,197 @@ export default function HelpPage() {
     },
 
     {
-      id: "faq",
+      id: "music",
       number: "14",
+      title: t("help.section.music.title"),
+      subtitle: t("help.section.music.subtitle"),
+      icon: Music2,
+      content: (
+        <div className="space-y-6">
+          <p className="help-text">{t("help.music.intro")}</p>
+
+          <div>
+            <h3 className="font-orbitron font-bold text-base text-zrp-charcoal dark:text-white mb-4">
+              {t("help.music.listeningHeading")}
+            </h3>
+            <p className="help-text mb-4">{t("help.music.listeningIntro")}</p>
+            <div className="grid md:grid-cols-2 gap-4">
+              <FeatureCard icon={Search} title={t("help.music.f1Title")} description={t("help.music.f1Desc")} />
+              <FeatureCard icon={Play} title={t("help.music.f2Title")} description={t("help.music.f2Desc")} />
+              <FeatureCard icon={ListMusic} title={t("help.music.f3Title")} description={t("help.music.f3Desc")} />
+              <FeatureCard icon={History} title={t("help.music.f4Title")} description={t("help.music.f4Desc")} />
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-orbitron font-bold text-base text-zrp-charcoal dark:text-white mb-4">
+              {t("help.music.publishingHeading")}
+            </h3>
+            <div className="rounded-xl border border-zrp-red/20 bg-zrp-red/5 p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <Lock className="w-5 h-5 text-zrp-red flex-shrink-0" />
+                <p className="text-sm leading-6 text-zrp-charcoal/75 dark:text-white/70">{t("help.music.publishingIntro")}</p>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <InfoCard icon={CreditCard} title={t("help.music.creatorTitle")} text={t("help.music.creatorText")} />
+              <InfoCard icon={BadgeCheck} title={t("help.music.artistTitle")} text={t("help.music.artistText")} />
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-orbitron font-bold text-base text-zrp-charcoal dark:text-white mb-4">
+              {t("help.music.studioHeading")}
+            </h3>
+            <p className="help-text mb-4">{t("help.music.studioIntro")}</p>
+            <div className="grid md:grid-cols-2 gap-3">
+              <ChecklistItem text={t("help.music.studioC1")} />
+              <ChecklistItem text={t("help.music.studioC2")} />
+              <ChecklistItem text={t("help.music.studioC3")} />
+              <ChecklistItem text={t("help.music.studioC4")} />
+              <ChecklistItem text={t("help.music.studioC5")} />
+              <ChecklistItem text={t("help.music.studioC6")} />
+            </div>
+            <p className="text-xs text-zrp-charcoal/50 dark:text-white/45 mt-3">{t("help.music.albumNote")}</p>
+          </div>
+
+          <div>
+            <h3 className="font-orbitron font-bold text-base text-zrp-charcoal dark:text-white mb-4">
+              {t("help.music.uploaderPolicyHeading")}
+            </h3>
+            <p className="help-text mb-4">{t("help.music.uploaderPolicyIntro")}</p>
+            <div className="grid md:grid-cols-2 gap-4">
+              <InfoCard icon={Copyright} title={t("help.music.rightsTitle")} text={t("help.music.rightsText")} />
+              <InfoCard icon={User} title={t("help.music.responsibilitiesTitle")} text={t("help.music.responsibilitiesText")} />
+              <InfoCard icon={Image} title={t("help.music.artworkTitle")} text={t("help.music.artworkText")} />
+              <InfoCard icon={AlertTriangle} title={t("help.music.prohibitedTitle")} text={t("help.music.prohibitedText")} />
+            </div>
+            <div className="rounded-xl border border-zrp-red/20 bg-zrp-red/5 p-4 mt-4">
+              <div className="flex items-start gap-3">
+                <Flag className="w-5 h-5 text-zrp-red flex-shrink-0" />
+                <p className="text-sm leading-6 text-zrp-charcoal/75 dark:text-white/70">{t("help.music.reportText")}</p>
+              </div>
+            </div>
+          </div>
+
+          <Link href="/music" className="inline-flex items-center gap-2 text-sm font-semibold text-zrp-red hover:underline">
+            {t("help.music.browseLink")}
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      ),
+    },
+
+    {
+      id: "opportunity",
+      number: "15",
+      title: t("help.section.opportunity.title"),
+      subtitle: t("help.section.opportunity.subtitle"),
+      icon: Briefcase,
+      content: (
+        <div className="space-y-6">
+          <p className="help-text">{t("help.opportunity.intro")}</p>
+
+          <div>
+            <h3 className="font-orbitron font-bold text-base text-zrp-charcoal dark:text-white mb-4">
+              {t("help.opportunity.postingHeading")}
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <FeatureCard icon={PenTool} title={t("help.opportunity.f1Title")} description={t("help.opportunity.f1Desc")} />
+              <FeatureCard icon={Settings} title={t("help.opportunity.f2Title")} description={t("help.opportunity.f2Desc")} />
+              <FeatureCard icon={Users} title={t("help.opportunity.f3Title")} description={t("help.opportunity.f3Desc")} />
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-orbitron font-bold text-base text-zrp-charcoal dark:text-white mb-4">
+              {t("help.opportunity.applyingHeading")}
+            </h3>
+            <p className="help-text mb-4">{t("help.opportunity.applyIntro")}</p>
+            <div className="grid md:grid-cols-2 gap-3">
+              <ChecklistItem text={t("help.opportunity.applyC1")} />
+              <ChecklistItem text={t("help.opportunity.applyC2")} />
+              <ChecklistItem text={t("help.opportunity.applyC3")} />
+              <ChecklistItem text={t("help.opportunity.applyC4")} />
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-orbitron font-bold text-base text-zrp-charcoal dark:text-white mb-4">
+              {t("help.opportunity.countryManagerHeading")}
+            </h3>
+            <p className="help-text">{t("help.opportunity.countryManagerIntro")}</p>
+          </div>
+
+          <Link href="/opportunity" className="inline-flex items-center gap-2 text-sm font-semibold text-zrp-red hover:underline">
+            {t("help.opportunity.browseLink")}
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      ),
+    },
+
+    {
+      id: "aid",
+      number: "16",
+      title: t("help.section.aid.title"),
+      subtitle: t("help.section.aid.subtitle"),
+      icon: HeartHandshake,
+      content: (
+        <div className="space-y-6">
+          <p className="help-text">{t("help.aid.intro")}</p>
+          <p className="help-text">{t("help.aid.categoriesIntro")}</p>
+
+          <div>
+            <h3 className="font-orbitron font-bold text-base text-zrp-charcoal dark:text-white mb-4">
+              {t("help.aid.publishingHeading")}
+            </h3>
+            <div className="rounded-xl border border-zrp-red/20 bg-zrp-red/5 p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <UserCheck className="w-5 h-5 text-zrp-red flex-shrink-0" />
+                <p className="text-sm leading-6 text-zrp-charcoal/75 dark:text-white/70">{t("help.aid.publishingIntro")}</p>
+              </div>
+            </div>
+            <InfoCard icon={Mail} title={t("help.aid.verifiedHowTitle")} text={t("help.aid.verifiedHowText")} />
+          </div>
+
+          <div>
+            <h3 className="font-orbitron font-bold text-base text-zrp-charcoal dark:text-white mb-4">
+              {t("help.aid.campaignHeading")}
+            </h3>
+            <div className="grid md:grid-cols-2 gap-3">
+              <ChecklistItem text={t("help.aid.campaignC1")} />
+              <ChecklistItem text={t("help.aid.campaignC2")} />
+              <ChecklistItem text={t("help.aid.campaignC3")} />
+              <ChecklistItem text={t("help.aid.campaignC4")} />
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-orbitron font-bold text-base text-zrp-charcoal dark:text-white mb-4">
+              {t("help.aid.supportingHeading")}
+            </h3>
+            <p className="help-text">{t("help.aid.supportingIntro")}</p>
+          </div>
+
+          <div className="rounded-xl border border-zrp-red/20 bg-zrp-red/5 p-4">
+            <div className="flex items-start gap-3">
+              <Flag className="w-5 h-5 text-zrp-red flex-shrink-0" />
+              <p className="text-sm leading-6 text-zrp-charcoal/75 dark:text-white/70">{t("help.aid.reportIntro")}</p>
+            </div>
+          </div>
+
+          <Link href="/aid" className="inline-flex items-center gap-2 text-sm font-semibold text-zrp-red hover:underline">
+            {t("help.aid.browseLink")}
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      ),
+    },
+
+    {
+      id: "faq",
+      number: "17",
       title: t("help.section.faq.title"),
       subtitle: t("help.section.faq.subtitle"),
       icon: HelpCircle,
@@ -1175,6 +1371,30 @@ export default function HelpPage() {
             question={t("help.faqSection.q13")}
             answer={t("help.faqSection.a13")}
           />
+
+          <FaqItem question={t("help.faqSection.q14")} answer={t("help.faqSection.a14")} />
+          <FaqItem question={t("help.faqSection.q15")} answer={t("help.faqSection.a15")} />
+          <FaqItem question={t("help.faqSection.q16")} answer={t("help.faqSection.a16")} />
+          <FaqItem question={t("help.faqSection.q17")} answer={t("help.faqSection.a17")} />
+          <FaqItem question={t("help.faqSection.q18")} answer={t("help.faqSection.a18")} />
+          <FaqItem question={t("help.faqSection.q19")} answer={t("help.faqSection.a19")} />
+          <FaqItem question={t("help.faqSection.q20")} answer={t("help.faqSection.a20")} />
+          <FaqItem question={t("help.faqSection.q21")} answer={t("help.faqSection.a21")} />
+          <FaqItem question={t("help.faqSection.q22")} answer={t("help.faqSection.a22")} />
+          <FaqItem question={t("help.faqSection.q23")} answer={t("help.faqSection.a23")} />
+          <FaqItem question={t("help.faqSection.q24")} answer={t("help.faqSection.a24")} />
+          <FaqItem question={t("help.faqSection.q25")} answer={t("help.faqSection.a25")} />
+          <FaqItem question={t("help.faqSection.q26")} answer={t("help.faqSection.a26")} />
+          <FaqItem question={t("help.faqSection.q27")} answer={t("help.faqSection.a27")} />
+          <FaqItem question={t("help.faqSection.q28")} answer={t("help.faqSection.a28")} />
+          <FaqItem question={t("help.faqSection.q29")} answer={t("help.faqSection.a29")} />
+          <FaqItem question={t("help.faqSection.q30")} answer={t("help.faqSection.a30")} />
+          <FaqItem question={t("help.faqSection.q31")} answer={t("help.faqSection.a31")} />
+          <FaqItem question={t("help.faqSection.q32")} answer={t("help.faqSection.a32")} />
+          <FaqItem question={t("help.faqSection.q33")} answer={t("help.faqSection.a33")} />
+          <FaqItem question={t("help.faqSection.q34")} answer={t("help.faqSection.a34")} />
+          <FaqItem question={t("help.faqSection.q35")} answer={t("help.faqSection.a35")} />
+          <FaqItem question={t("help.faqSection.q36")} answer={t("help.faqSection.a36")} />
         </div>
       ),
     },
@@ -1350,7 +1570,7 @@ export default function HelpPage() {
               {t("help.nav.explore")}
             </span>
 
-            {sections.slice(0, 12).map((section) => (
+            {sections.map((section) => (
               <a
                 key={section.id}
                 href={`#help-${section.id}`}
