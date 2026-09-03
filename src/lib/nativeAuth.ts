@@ -44,3 +44,29 @@ export async function nativeGoogleSignIn(callbackUrl: string = "/"): Promise<voi
 
   await Browser.open({ url: data.url });
 }
+
+// Same reasoning and same request sequence as nativeGoogleSignIn above -
+// Apple is a second OAuth provider (see lib/auth.ts), not a different
+// auth architecture, so it reuses this exact mechanism rather than a new
+// one. If Apple sign-in isn't configured server-side (see
+// apple-client-secret.ts), /api/auth/signin/apple simply doesn't exist as
+// a registered provider and this throws instead of silently succeeding.
+export async function nativeAppleSignIn(callbackUrl: string = "/"): Promise<void> {
+  const csrfRes = await fetch("/api/auth/csrf");
+  if (!csrfRes.ok) {
+    throw new Error("Could not reach the sign-in service");
+  }
+  const { csrfToken } = await csrfRes.json();
+
+  const res = await fetch("/api/auth/signin/apple", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ csrfToken, callbackUrl, json: "true" }),
+  });
+  const data = await res.json();
+  if (!data?.url) {
+    throw new Error("Could not start Apple sign-in");
+  }
+
+  await Browser.open({ url: data.url });
+}

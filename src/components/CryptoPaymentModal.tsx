@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { X, Copy, Check } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { isNativeApp } from "@/lib/nativeAuth";
+import { nativePaymentHeaders } from "@/lib/native-payment-policy";
 
 interface Props {
   plan: string;
@@ -36,7 +38,10 @@ export default function CryptoPaymentModal({ plan, amount, onClose, onSuccess }:
     try {
       const res = await fetch("/api/payment/crypto", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...nativePaymentHeaders(isNativeApp()),
+        },
         body: JSON.stringify({ plan, transactionId }),
       });
       const data = await res.json();

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Loader2, X, Copy, Check } from "lucide-react";
+import { isNativeApp } from "@/lib/nativeAuth";
+import { nativePaymentHeaders } from "@/lib/native-payment-policy";
 
 /*
  * ============================================================
@@ -90,7 +92,10 @@ export default function TipModal({
     try {
       const response = await fetch("/api/creator/tip", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...nativePaymentHeaders(isNativeApp()),
+        },
         body: JSON.stringify({
           recipientId,
           amount: parsedAmount,

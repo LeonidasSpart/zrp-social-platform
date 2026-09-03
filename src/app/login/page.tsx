@@ -8,7 +8,8 @@ import { useSearchParams } from "next/navigation";
 import PasswordInput from "@/components/PasswordInput";
 import { useLanguage } from "@/contexts/LanguageContext";
 import GoogleIcon from "@/components/icons/GoogleIcon";
-import { isNativeApp, nativeGoogleSignIn } from "@/lib/nativeAuth";
+import AppleIcon from "@/components/icons/AppleIcon";
+import { isNativeApp, nativeGoogleSignIn, nativeAppleSignIn } from "@/lib/nativeAuth";
 import type { TranslationKey } from "@/lib/translations";
 
 export default function LoginPage() {
@@ -19,6 +20,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState<{
     type: "success" | "error";
@@ -113,6 +115,20 @@ export default function LoginPage() {
     await signIn("google", { callbackUrl: "/" });
   };
 
+  const handleAppleSignIn = async () => {
+    setAppleLoading(true);
+    if (isNativeApp()) {
+      try {
+        await nativeAppleSignIn("/");
+      } catch {
+        setError(t("auth.errSomethingWrong"));
+        setAppleLoading(false);
+      }
+      return;
+    }
+    await signIn("apple", { callbackUrl: "/" });
+  };
+
   return (
     <div className="min-h-screen flex bg-white dark:bg-zrp-deepBlack">
       {/* ─── Left brand panel, desktop only ─────────────────────────── */}
@@ -189,6 +205,16 @@ export default function LoginPage() {
           >
             <GoogleIcon className="w-5 h-5" />
             {googleLoading ? t("auth.signingIn") : t("auth.continueWithGoogle")}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleAppleSignIn}
+            disabled={appleLoading}
+            className="w-full flex items-center justify-center gap-3 rounded-full py-3.5 sm:py-3 font-medium text-white bg-black hover:bg-gray-900 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed text-base mt-3"
+          >
+            <AppleIcon className="w-5 h-5" />
+            {appleLoading ? t("auth.signingIn") : t("auth.continueWithApple")}
           </button>
 
           <div className="flex items-center gap-3 my-6 sm:my-6">

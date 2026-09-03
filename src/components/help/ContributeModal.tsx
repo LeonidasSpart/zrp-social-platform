@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Loader2, X, Copy, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { isNativeApp } from "@/lib/nativeAuth";
+import { nativePaymentHeaders } from "@/lib/native-payment-policy";
 
 /*
  * Same manual "send from your own wallet app, then paste the
@@ -64,7 +66,10 @@ export default function ContributeModal({ campaignId, campaignTitle, onClose, on
     try {
       const response = await fetch(`/api/help/${campaignId}/contribute`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...nativePaymentHeaders(isNativeApp()),
+        },
         body: JSON.stringify({
           amount: parsedAmount,
           message: message.trim() || undefined,

@@ -7,9 +7,10 @@ import Image from "next/image";
 import PasswordInput from "@/components/PasswordInput";
 import { useLanguage } from "@/contexts/LanguageContext";
 import GoogleIcon from "@/components/icons/GoogleIcon";
+import AppleIcon from "@/components/icons/AppleIcon";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Check, X, Loader2 } from "lucide-react";
-import { isNativeApp, nativeGoogleSignIn } from "@/lib/nativeAuth";
+import { isNativeApp, nativeGoogleSignIn, nativeAppleSignIn } from "@/lib/nativeAuth";
 import type { TranslationKey } from "@/lib/translations";
 
 type UsernameStatus = "idle" | "checking" | "available" | "taken" | "invalid";
@@ -23,6 +24,7 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
   // Set once registration succeeds - see handleSubmit for why this is the
   // normal outcome for every credentials signup, not an edge case.
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
@@ -176,6 +178,20 @@ export default function SignupPage() {
     await signIn("google", { callbackUrl: "/" });
   };
 
+  const handleAppleSignIn = async () => {
+    setAppleLoading(true);
+    if (isNativeApp()) {
+      try {
+        await nativeAppleSignIn("/");
+      } catch {
+        setError(t("auth.errSomethingWrong"));
+        setAppleLoading(false);
+      }
+      return;
+    }
+    await signIn("apple", { callbackUrl: "/" });
+  };
+
   const usernameFieldBorder =
     usernameStatus === "available"
       ? "border-green-500 focus:ring-green-500"
@@ -297,6 +313,16 @@ export default function SignupPage() {
               >
                 <GoogleIcon className="w-5 h-5" />
                 {googleLoading ? t("auth.signingIn") : t("auth.continueWithGoogle")}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleAppleSignIn}
+                disabled={appleLoading}
+                className="w-full flex items-center justify-center gap-3 rounded-full py-3.5 sm:py-3 font-medium text-white bg-black hover:bg-gray-900 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed text-base mt-3"
+              >
+                <AppleIcon className="w-5 h-5" />
+                {appleLoading ? t("auth.signingIn") : t("auth.continueWithApple")}
               </button>
 
               <div className="flex items-center gap-3 my-6">

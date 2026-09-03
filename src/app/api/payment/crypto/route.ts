@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { rejectNativePayment } from "@/lib/native-payment-policy.server";
 
 const PLANS = {
   pro: { amount: 9.99, label: "Pro" },
@@ -16,6 +17,11 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // The manual crypto plan-upgrade request is a store-sensitive payment
+  // surface, blocked for the native app. See src/lib/native-payment-policy.ts.
+  const nativeBlock = rejectNativePayment(req);
+  if (nativeBlock) return nativeBlock;
 
   const { plan, transactionId } = await req.json();
 

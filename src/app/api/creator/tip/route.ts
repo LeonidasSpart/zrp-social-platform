@@ -7,6 +7,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
+import { rejectNativePayment } from "@/lib/native-payment-policy.server";
 
 const PLATFORM_FEE = 0.10; // 10% platform fee
 const CHARITY_PERCENTAGE = 0.35; // 35% of platform fee goes to charity
@@ -41,6 +42,12 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Tips take a platform cut and unlock nothing distinguishable from a
+    // simple digital gratuity - a store-sensitive payment surface, blocked
+    // for the native app. See src/lib/native-payment-policy.ts.
+    const nativeBlock = rejectNativePayment(req);
+    if (nativeBlock) return nativeBlock;
 
     const sender = await prisma.user.findUnique({
       where: { id: senderId },
