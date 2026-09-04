@@ -2132,7 +2132,7 @@ export default function PostCard({
               post.imageUrls.length >
                 1 ? (
                 <div
-                  className={`mt-3 -mx-4 sm:mx-0 overflow-hidden grid gap-0.5 sm:rounded-2xl ${
+                  className={`mt-3 -ml-[4.75rem] -mr-4 sm:ml-0 sm:mr-0 overflow-hidden grid gap-0.5 sm:rounded-2xl ${
                     post.imageUrls.length === 2
                       ? "grid-cols-2"
                       : "grid-cols-2 grid-rows-2"
@@ -2200,7 +2200,7 @@ export default function PostCard({
               ) : (
                 post.imageUrl && (
                   <div
-                    className="mt-3 -mx-4 sm:mx-0 overflow-hidden sm:rounded-2xl cursor-pointer group relative"
+                    className="mt-3 -ml-[4.75rem] -mr-4 sm:ml-0 sm:mr-0 overflow-hidden sm:rounded-2xl cursor-pointer group relative"
                     onClick={(e) => {
                       e.stopPropagation();
 
