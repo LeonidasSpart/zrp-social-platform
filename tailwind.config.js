@@ -16,6 +16,18 @@ module.exports = {
           silver: "#BDBDBD",
           charcoal: "#0D0D0D",
           deepBlack: "#050505",
+          // ─── SECONDARY PREMIUM ACCENT ──────────────────────────
+          // ZRP red stays the one primary brand/action color. This is
+          // a restrained cool-blue accent for secondary UI only:
+          // informational/trust surfaces, activity/stats visualization,
+          // links, focus states and subtle separators - never used to
+          // replace red as the primary action color.
+          blue: {
+            DEFAULT: "#3B82F6",
+            dark: "#1D4ED8",
+            deep: "#0B2A4A",
+            surface: "#0B1830",
+          },
         },
         primary: {
           DEFAULT: "#FF2D2D",

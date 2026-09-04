@@ -160,6 +160,13 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: "#FF2D2D",
+  // Required for env(safe-area-inset-*) to resolve to anything but 0 in
+  // WKWebView/Capacitor on notched/home-indicator iOS devices - without
+  // it, BottomNav, the Music mini-player and other fixed elements that
+  // already pad for safe-area-inset-bottom render flush against the
+  // physical edge instead, since the WebView never reports real inset
+  // values without viewport-fit=cover.
+  viewportFit: "cover",
 };
 
 const structuredData = {

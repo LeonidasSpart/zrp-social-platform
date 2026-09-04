@@ -66,13 +66,13 @@ export default function StoriesBar() {
 
   return (
     <>
-      <div className="flex gap-4 overflow-x-auto py-3 px-4 bg-white dark:bg-zrp-deepBlack border-b border-gray-200 dark:border-gray-800">
+      <div className="flex gap-4 sm:gap-5 overflow-x-auto scrollbar-hide py-3 px-4 bg-white dark:bg-zrp-deepBlack border-b border-gray-200 dark:border-gray-800">
         {/* Your Story */}
         <button
           onClick={() => setShowComposer(true)}
           className="flex flex-col items-center gap-1 flex-shrink-0 group"
         >
-          <div className="relative w-16 h-16">
+          <div className="relative w-16 h-16 sm:w-[72px] sm:h-[72px]">
             <div className="w-full h-full rounded-full bg-gray-200 dark:bg-gray-600 overflow-hidden border-2 border-zrp-red">
               {session?.user?.avatarUrl ? (
                 <img
@@ -90,13 +90,13 @@ export default function StoriesBar() {
               <Plus className="w-3 h-3 text-white" />
             </div>
           </div>
-          <span className="text-xs text-gray-600 dark:text-gray-400 truncate max-w-[64px]">
+          <span className="text-xs text-gray-600 dark:text-gray-400 truncate max-w-[64px] sm:max-w-[72px]">
             {t("stories.yourStory")}
           </span>
         </button>
 
         {/* Other stories */}
-        {groups.map((group) => {
+        {groups.map((group, groupIndex) => {
           // Prefer an actual photo for the tray thumbnail (renders
           // simply and reliably); if the person's only story is a
           // video, fall back to that and let StoryCircle render it as
@@ -117,6 +117,13 @@ export default function StoriesBar() {
               onClick={() => setSelectedGroup(group)}
               storyPreview={previewUrl}
               storyPreviewType={previewType}
+              // Purely cosmetic alternation between the primary red ring
+              // and the secondary blue accent, matching the varied story
+              // rings in the design reference - does not change what the
+              // ring means (still unseen vs. seen).
+              ringAccent={
+                groupIndex % 2 === 0 ? "red" : "blue"
+              }
             />
           );
         })}

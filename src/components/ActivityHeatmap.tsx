@@ -61,11 +61,15 @@ function getColorClass(count: number) {
   // gray-200 + a subtle border keeps every cell visible so the full
   // structure always reads correctly, regardless of how sparse the
   // actual activity is.
+  //
+  // Colored in the secondary blue accent rather than ZRP red: this is a
+  // stats/activity visualization, not a primary brand action, and red
+  // is reserved for that across the app.
   if (count === 0) return "bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600";
-  if (count <= 1) return "bg-zrp-red/25";
-  if (count <= 3) return "bg-zrp-red/50";
-  if (count <= 6) return "bg-zrp-red/75";
-  return "bg-zrp-red";
+  if (count <= 1) return "bg-zrp-blue/25";
+  if (count <= 3) return "bg-zrp-blue/50";
+  if (count <= 6) return "bg-zrp-blue/75";
+  return "bg-zrp-blue";
 }
 
 export default function ActivityHeatmap({ username }: ActivityHeatmapProps) {
@@ -166,10 +170,10 @@ export default function ActivityHeatmap({ username }: ActivityHeatmapProps) {
       <div className="flex items-center gap-1.5 mt-2 justify-end">
         <span className="text-[10px] text-gray-400 dark:text-gray-500">{t("activity.less")}</span>
         <div className="w-[10px] h-[10px] rounded-sm bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600" />
-        <div className="w-[10px] h-[10px] rounded-sm bg-zrp-red/25" />
-        <div className="w-[10px] h-[10px] rounded-sm bg-zrp-red/50" />
-        <div className="w-[10px] h-[10px] rounded-sm bg-zrp-red/75" />
-        <div className="w-[10px] h-[10px] rounded-sm bg-zrp-red" />
+        <div className="w-[10px] h-[10px] rounded-sm bg-zrp-blue/25" />
+        <div className="w-[10px] h-[10px] rounded-sm bg-zrp-blue/50" />
+        <div className="w-[10px] h-[10px] rounded-sm bg-zrp-blue/75" />
+        <div className="w-[10px] h-[10px] rounded-sm bg-zrp-blue" />
         <span className="text-[10px] text-gray-400 dark:text-gray-500">{t("activity.more")}</span>
       </div>
     </div>

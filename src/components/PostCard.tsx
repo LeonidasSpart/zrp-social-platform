@@ -767,6 +767,16 @@ export default function PostCard({
     }
   };
 
+  const captureVideoAspect = (
+    el: HTMLVideoElement
+  ) => {
+    if (el.videoWidth > 0 && el.videoHeight > 0) {
+      setVideoAspectRatio(
+        el.videoWidth / el.videoHeight
+      );
+    }
+  };
+
   const videoContainerRef =
     useRef<HTMLDivElement>(null);
 
@@ -776,12 +786,23 @@ export default function PostCard({
   const [videoMuted, setVideoMuted] =
     useState(true);
 
+  // Natural width/height of the video, read from its own metadata once
+  // decoded. Feed videos used to render inside a hardcoded 16:9 box
+  // (aspect-video) regardless of their real shape, so a portrait/vertical
+  // video was squeezed into a landscape frame and played back tiny and
+  // heavily letterboxed. Defaulting to 16/9 keeps the layout stable before
+  // metadata loads, then switching to the real ratio makes the video use
+  // its own natural aspect ratio, same as images already do.
+  const [videoAspectRatio, setVideoAspectRatio] =
+    useState(16 / 9);
+
   // Reset media state if a reused PostCard receives
   // a completely different media URL.
   useEffect(() => {
     setVideoLoadFailed(false);
     setVideoInView(false);
     setVideoMuted(true);
+    setVideoAspectRatio(16 / 9);
     posterNudged.current = false;
   }, [
     post.id,
@@ -1801,7 +1822,7 @@ export default function PostCard({
                           ) =>
                             e.stopPropagation()
                           }
-                          className="text-zrp-red hover:underline break-all"
+                          className="text-blue-600 dark:text-blue-400 hover:underline break-all"
                         >
                           {
                             part.value
@@ -2111,7 +2132,7 @@ export default function PostCard({
               post.imageUrls.length >
                 1 ? (
                 <div
-                  className={`mt-3 rounded-2xl overflow-hidden grid gap-0.5 ${
+                  className={`mt-3 -mx-4 sm:mx-0 overflow-hidden grid gap-0.5 sm:rounded-2xl ${
                     post.imageUrls.length === 2
                       ? "grid-cols-2"
                       : "grid-cols-2 grid-rows-2"
@@ -2179,7 +2200,7 @@ export default function PostCard({
               ) : (
                 post.imageUrl && (
                   <div
-                    className="mt-3 rounded-2xl overflow-hidden cursor-pointer group relative"
+                    className="mt-3 -mx-4 sm:mx-0 overflow-hidden sm:rounded-2xl cursor-pointer group relative"
                     onClick={(e) => {
                       e.stopPropagation();
 
@@ -2206,7 +2227,11 @@ export default function PostCard({
                         ref={
                           videoContainerRef
                         }
-                        className="relative aspect-video w-full bg-black"
+                        className="relative w-full max-h-[75vh] bg-black flex items-center justify-center"
+                        style={{
+                          aspectRatio:
+                            videoAspectRatio,
+                        }}
                       >
                         <video
                           ref={
@@ -2229,18 +2254,24 @@ export default function PostCard({
                           }
                           onLoadedMetadata={(
                             e
-                          ) =>
+                          ) => {
                             nudgeVideoFrame(
                               e.currentTarget
-                            )
-                          }
+                            );
+                            captureVideoAspect(
+                              e.currentTarget
+                            );
+                          }}
                           onLoadedData={(
                             e
-                          ) =>
+                          ) => {
                             nudgeVideoFrame(
                               e.currentTarget
-                            )
-                          }
+                            );
+                            captureVideoAspect(
+                              e.currentTarget
+                            );
+                          }}
                           onCanPlay={(
                             e
                           ) => {
@@ -2316,12 +2347,19 @@ export default function PostCard({
                       </div>
                     ) : (
                       <>
+                        {/* Natural width/height, capped only by
+                            max-height so an unusually tall portrait
+                            shot never blows out the feed's scroll
+                            length - width/height both stay "auto" so
+                            the browser preserves the real aspect ratio
+                            instead of cropping or stretching it. */}
                         <img
                           src={
                             post.imageUrl
                           }
                           alt="Post image"
-                          className="w-full"
+                          className="block max-w-full max-h-[75vh] mx-auto"
+                          loading="lazy"
                         />
 
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/20">
