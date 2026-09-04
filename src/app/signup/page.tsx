@@ -8,6 +8,7 @@ import PasswordInput from "@/components/PasswordInput";
 import { useLanguage } from "@/contexts/LanguageContext";
 import GoogleIcon from "@/components/icons/GoogleIcon";
 import AppleIcon from "@/components/icons/AppleIcon";
+import { useAppleSignInEnabled } from "@/hooks/useAppleSignInEnabled";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Check, X, Loader2 } from "lucide-react";
 import { isNativeApp, nativeGoogleSignIn, nativeAppleSignIn } from "@/lib/nativeAuth";
@@ -25,6 +26,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
+  const appleSignInEnabled = useAppleSignInEnabled();
   // Set once registration succeeds - see handleSubmit for why this is the
   // normal outcome for every credentials signup, not an edge case.
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
@@ -315,15 +317,17 @@ export default function SignupPage() {
                 {googleLoading ? t("auth.signingIn") : t("auth.continueWithGoogle")}
               </button>
 
-              <button
-                type="button"
-                onClick={handleAppleSignIn}
-                disabled={appleLoading}
-                className="w-full flex items-center justify-center gap-3 rounded-full py-3.5 sm:py-3 font-medium text-white bg-black hover:bg-gray-900 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed text-base mt-3"
-              >
-                <AppleIcon className="w-5 h-5" />
-                {appleLoading ? t("auth.signingIn") : t("auth.continueWithApple")}
-              </button>
+              {appleSignInEnabled && (
+                <button
+                  type="button"
+                  onClick={handleAppleSignIn}
+                  disabled={appleLoading}
+                  className="w-full flex items-center justify-center gap-3 rounded-full py-3.5 sm:py-3 font-medium text-white bg-black hover:bg-gray-900 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed text-base mt-3"
+                >
+                  <AppleIcon className="w-5 h-5" />
+                  {appleLoading ? t("auth.signingIn") : t("auth.continueWithApple")}
+                </button>
+              )}
 
               <div className="flex items-center gap-3 my-6">
                 <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />

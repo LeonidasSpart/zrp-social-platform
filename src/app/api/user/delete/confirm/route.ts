@@ -21,13 +21,29 @@ export async function POST(req: NextRequest) {
 
     // Account deletion is the same UploadThing-orphan gap as individual
     // post/message/comment deletion, just at full-account scale - every
-    // post, message, comment, and story this user ever had cascades away
-    // in the database (onDelete: Cascade throughout), but none of that
-    // ever reaches UploadThing. Collecting every file this user actually
-    // owns before the cascade wipes the rows that reference them. Only
-    // messages they *sent* are included - an image in a received message
-    // was uploaded by the other person, not this account, and stays theirs.
-    const [posts, comments, messages, stories] = await Promise.all([
+    // post, message, comment, story, Music track/album/artist profile,
+    // playlist, Marketplace listing, Help campaign, and Opportunity
+    // application this user ever had cascades away in the database
+    // (onDelete: Cascade throughout), but none of that ever reaches
+    // UploadThing on its own. Collecting every file this user actually
+    // owns - and, for messages, every file the cascade is *also* about
+    // to remove regardless of who sent it (received-message images ride
+    // the same onDelete: Cascade on Message.receiver) - before the
+    // cascade wipes the rows that reference them.
+    const [
+      posts,
+      comments,
+      sentMessages,
+      receivedMessages,
+      stories,
+      musicTracks,
+      musicAlbums,
+      musicArtist,
+      musicPlaylists,
+      listings,
+      helpCampaigns,
+      opportunityApplications,
+    ] = await Promise.all([
       prisma.post.findMany({
         where: { authorId: user.id },
         select: { imageUrl: true, imageUrls: true },
@@ -40,9 +56,41 @@ export async function POST(req: NextRequest) {
         where: { senderId: user.id, imageUrl: { not: null } },
         select: { imageUrl: true },
       }),
+      prisma.message.findMany({
+        where: { receiverId: user.id, imageUrl: { not: null } },
+        select: { imageUrl: true },
+      }),
       prisma.story.findMany({
         where: { userId: user.id, mediaUrl: { not: null } },
         select: { mediaUrl: true },
+      }),
+      prisma.musicTrack.findMany({
+        where: { artist: { userId: user.id } },
+        select: { audioUrl: true, coverUrl: true },
+      }),
+      prisma.musicAlbum.findMany({
+        where: { artist: { userId: user.id }, coverUrl: { not: null } },
+        select: { coverUrl: true },
+      }),
+      prisma.musicArtist.findUnique({
+        where: { userId: user.id },
+        select: { avatarUrl: true, bannerUrl: true },
+      }),
+      prisma.musicPlaylist.findMany({
+        where: { userId: user.id, coverUrl: { not: null } },
+        select: { coverUrl: true },
+      }),
+      prisma.listing.findMany({
+        where: { sellerId: user.id },
+        select: { imageUrls: true, videoUrl: true },
+      }),
+      prisma.helpCampaign.findMany({
+        where: { organizerId: user.id },
+        select: { imageUrls: true, proofUrls: true },
+      }),
+      prisma.opportunityApplication.findMany({
+        where: { applicantId: user.id, resumeUrl: { not: null } },
+        select: { resumeUrl: true },
       }),
     ]);
 
@@ -55,8 +103,17 @@ export async function POST(req: NextRequest) {
       user.coverUrl,
       ...posts.flatMap((p) => [p.imageUrl, ...p.imageUrls]),
       ...comments.map((c) => c.imageUrl),
-      ...messages.map((m) => m.imageUrl),
+      ...sentMessages.map((m) => m.imageUrl),
+      ...receivedMessages.map((m) => m.imageUrl),
       ...stories.map((s) => s.mediaUrl),
+      ...musicTracks.flatMap((t) => [t.audioUrl, t.coverUrl]),
+      ...musicAlbums.map((a) => a.coverUrl),
+      musicArtist?.avatarUrl,
+      musicArtist?.bannerUrl,
+      ...musicPlaylists.map((p) => p.coverUrl),
+      ...listings.flatMap((l) => [...l.imageUrls, l.videoUrl]),
+      ...helpCampaigns.flatMap((c) => [...c.imageUrls, ...c.proofUrls]),
+      ...opportunityApplications.map((a) => a.resumeUrl),
     ]);
 
     const response = NextResponse.json({ success: true });

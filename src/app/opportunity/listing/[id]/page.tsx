@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { ArrowLeft, MapPin, Laptop, Calendar, ExternalLink, Bookmark, BookMarked, Users, Pencil } from "lucide-react";
+import { ArrowLeft, MapPin, Laptop, Calendar, ExternalLink, Bookmark, BookMarked, Users, Pencil, Flag } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ApplyModal from "@/components/opportunity/ApplyModal";
+import ReportModal from "@/components/ReportModal";
 import { TYPE_META, type OpportunitySummary } from "@/lib/opportunity";
 
 interface ListingDetail extends OpportunitySummary {
@@ -36,6 +37,8 @@ export default function OpportunityListingPage() {
   // for one that was literally just submitted this page load.
   const [justApplied, setJustApplied] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportSent, setReportSent] = useState(false);
 
   const load = () => {
     fetch(`/api/opportunity/${params.id}`)
@@ -62,6 +65,22 @@ export default function OpportunityListingPage() {
       setSaved((s) => !s);
     } catch (err) {
       console.error("Error toggling saved opportunity:", err);
+    }
+  };
+
+  const submitReport = async (reason: string, details?: string) => {
+    try {
+      const res = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ opportunityId: params.id, reason, details }),
+      });
+      if (!res.ok && res.status !== 409) throw new Error("Failed to submit report");
+      setShowReportModal(false);
+      setReportSent(true);
+    } catch (err) {
+      console.error("Error submitting opportunity report:", err);
+      setShowReportModal(false);
     }
   };
 
@@ -105,9 +124,20 @@ export default function OpportunityListingPage() {
             {listing.organizationName && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{listing.organizationName}</p>}
           </div>
           {session?.user && !isOwner && (
-            <button type="button" onClick={toggleSave} aria-label={t("opportunity.save")} className="flex-shrink-0">
-              {saved ? <BookMarked className="w-5 h-5 text-zrp-red" /> : <Bookmark className="w-5 h-5 text-gray-400" />}
-            </button>
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <button type="button" onClick={toggleSave} aria-label={t("opportunity.save")}>
+                {saved ? <BookMarked className="w-5 h-5 text-zrp-red" /> : <Bookmark className="w-5 h-5 text-gray-400" />}
+              </button>
+              {!reportSent && (
+                <button
+                  type="button"
+                  onClick={() => setShowReportModal(true)}
+                  aria-label={t("report.modalTitle")}
+                >
+                  <Flag className="w-5 h-5 text-gray-400 hover:text-zrp-red transition" />
+                </button>
+              )}
+            </div>
           )}
         </div>
 
@@ -217,6 +247,12 @@ export default function OpportunityListingPage() {
           }}
         />
       )}
+
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        onSubmit={submitReport}
+      />
     </div>
   );
 }
