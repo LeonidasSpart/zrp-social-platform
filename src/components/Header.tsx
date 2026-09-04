@@ -1043,7 +1043,20 @@ export default function Header() {
               ================================================= */}
 
               {isAuthenticated && (
-                <div className="mt-5 pt-5 border-t border-gray-200 dark:border-gray-800 pb-8">
+                // The drawer's scroll container spans the full viewport
+                // (fixed, bottom-0), but BottomNav (h-14 = 56px, plus its
+                // own safe-area padding) renders separately via a portal
+                // at z-[9999] - above this panel's z-50 - and sits on top
+                // of whatever content happens to land in that bottom
+                // strip. On a viewport tall enough that the drawer never
+                // needs to scroll this far, that's invisible; on a small
+                // phone where it does, Sign Out (the last item) used to
+                // land right under BottomNav - reachable by scroll, but
+                // visually covered and not reliably tappable. Reserving
+                // BottomNav's real footprint here, not a guessed number,
+                // is what actually fixes that: the true scrollable bottom
+                // now sits clear above BottomNav on every viewport.
+                <div className="mt-5 pt-5 border-t border-gray-200 dark:border-gray-800 pb-[calc(3.5rem+env(safe-area-inset-bottom)+1rem)]">
                   <button
                     type="button"
                     onClick={handleLogout}
