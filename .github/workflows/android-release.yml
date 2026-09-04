@@ -7,14 +7,16 @@ name: Android Release Build
 # environment - GitHub Actions runners have normal, unrestricted
 # internet access.
 #
-# Signing: intentionally not configured yet. android/app/build.gradle
-# only applies a release signingConfig when android/keystore.properties
-# exists, which this workflow only creates when the four
-# ANDROID_KEYSTORE_* secrets below are present in the repository. Until
-# someone adds those secrets, this workflow still runs the full build
-# pipeline end to end and uploads the resulting .aab as a build
-# artifact - it will be UNSIGNED and must never be uploaded to Play
-# Console as-is. This workflow never generates a keystore itself.
+# Signing: activates automatically once the real upload keystore exists
+# as repository secrets - this workflow never generates a keystore.
+# android/app/build.gradle only applies a release signingConfig when
+# android/keystore.properties exists, which the "Configure release
+# signing" step below only writes when the four ANDROID_KEYSTORE_*
+# secrets are present AND the decoded keystore passes a keytool
+# validation check. Until then, or if a secret is wrong, bundleRelease
+# still runs and produces a real .aab - useful for verifying the rest
+# of the pipeline - but it is UNSIGNED and must never be uploaded to
+# Play Console as-is; the workflow logs an explicit warning either way.
 on:
   workflow_dispatch: {}
   pull_request:
@@ -51,9 +53,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          # The Capacitor CLI (npx cap sync) requires Node >=22 - the
-          # first real run of this workflow failed at that exact step
-          # with Node 20 ("The Capacitor CLI requires NodeJS >=22.0.0").
+          # The Capacitor CLI (npx cap sync) requires Node >=22.
           node-version: "22"
           cache: "npm"
 
@@ -83,18 +83,18 @@ jobs:
           yes | sdkmanager --licenses > /dev/null || true
           sdkmanager "platform-tools" "platforms;android-36"
 
-      # ── Release signing (add the secrets below to activate) ──────
-      # ANDROID_KEYSTORE_BASE64  - `base64 -w0 your-release-key.jks`
-      # ANDROID_KEYSTORE_PASSWORD
-      # ANDROID_KEY_ALIAS
-      # ANDROID_KEY_PASSWORD
+      # ── Release signing ────────────────────────────────────────────
+      # Required secrets: ANDROID_KEYSTORE_BASE64 (`base64 -w0
+      # your-release-key.jks`), ANDROID_KEYSTORE_PASSWORD,
+      # ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD.
       #
-      # Decodes the keystore to a file inside the (gitignored, ephemeral
-      # runner-only) android/app/ directory and writes
-      # android/keystore.properties, which build.gradle's conditional
-      # signingConfig picks up with no further changes needed anywhere.
-      # This step is a no-op - and the resulting .aab stays unsigned -
-      # until all four secrets exist.
+      # The keystore is decoded to a file under $RUNNER_TEMP - a
+      # per-run temporary directory outside the git working tree,
+      # never included in any artifact upload, and removed explicitly
+      # in the cleanup step below regardless of build outcome.
+      #
+      # Never echo $ANDROID_KEYSTORE_BASE64, the passwords, or the
+      # decoded keystore's contents anywhere in this script.
       - name: Configure release signing
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -106,13 +106,42 @@ jobs:
             echo "No ANDROID_KEYSTORE_BASE64 secret set - skipping signing setup, the .aab will be unsigned."
             exit 0
           fi
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
-          cat > android/keystore.properties <<EOF
-          storeFile=app/release.keystore
-          storePassword=$ANDROID_KEYSTORE_PASSWORD
-          keyAlias=$ANDROID_KEY_ALIAS
-          keyPassword=$ANDROID_KEY_PASSWORD
-          EOF
+
+          KEYSTORE_PATH="$RUNNER_TEMP/zrp-release.keystore"
+
+          # A base64 secret pasted through different tools/clipboards/
+          # OSes can pick up stray whitespace, CRLF line endings, or a
+          # shell prompt's trailing '%' from a copy - none of that is
+          # valid base64, and a single stray character anywhere is
+          # enough for `base64 -d` to fail with a bare "invalid input"
+          # that doesn't say where. Strip all whitespace defensively
+          # before decoding rather than requiring the secret to be
+          # pasted in exactly one specific format.
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | tr -d '[:space:]' | base64 -d > "$KEYSTORE_PATH"
+
+          if [ ! -s "$KEYSTORE_PATH" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 did not decode to a non-empty file - its stored value is not valid base64. Regenerate it from the real keystore (e.g. 'base64 -w0 zrp-upload-key.jks') and reset the repository secret."
+            rm -f "$KEYSTORE_PATH"
+            exit 1
+          fi
+
+          # Confirm the decoded bytes are actually a usable keystore
+          # containing the expected alias before trusting them to
+          # Gradle - a wrong secret must fail here, loudly and
+          # specifically, rather than silently producing a build that
+          # "succeeds" but is unsigned or uses the wrong key.
+          if ! keytool -list -keystore "$KEYSTORE_PATH" -alias "$ANDROID_KEY_ALIAS" -storepass "$ANDROID_KEYSTORE_PASSWORD" > /dev/null 2>&1; then
+            echo "::error::The decoded keystore failed keytool validation for alias '$ANDROID_KEY_ALIAS'. This is a different failure than a base64 decode error - it means the file decoded fine but ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, or the keystore contents itself don't match. Verify each secret against the real keystore and reset them."
+            rm -f "$KEYSTORE_PATH"
+            exit 1
+          fi
+
+          echo "storeFile=$KEYSTORE_PATH" > android/keystore.properties
+          echo "storePassword=$ANDROID_KEYSTORE_PASSWORD" >> android/keystore.properties
+          echo "keyAlias=$ANDROID_KEY_ALIAS" >> android/keystore.properties
+          echo "keyPassword=$ANDROID_KEY_PASSWORD" >> android/keystore.properties
+
+          echo "Keystore decoded and validated (alias '$ANDROID_KEY_ALIAS' confirmed present)."
 
       - name: Build release AAB
         working-directory: android
@@ -123,7 +152,7 @@ jobs:
           if [ -f android/keystore.properties ]; then
             echo "Release signing: CONFIGURED - this .aab is signed."
           else
-            echo "::warning::Release signing NOT configured - this .aab is UNSIGNED. Do not upload it to Google Play Console. Add the ANDROID_KEYSTORE_* secrets to enable signing."
+            echo "::warning::Release signing NOT configured or the provided secrets failed validation - this .aab is UNSIGNED. Do not upload it to Google Play Console."
           fi
 
       - name: Upload AAB artifact
@@ -133,3 +162,11 @@ jobs:
           path: android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 30
+
+      # Belt-and-suspenders: $RUNNER_TEMP and the whole workspace are
+      # destroyed with the runner regardless, but clean up explicitly
+      # and unconditionally so no signing material lingers for even the
+      # remainder of the job (e.g. in later steps' working directory).
+      - name: Clean up temporary signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/zrp-release.keystore" android/keystore.properties
