@@ -117,10 +117,15 @@ jobs:
           # that doesn't say where. Strip all whitespace defensively
           # before decoding rather than requiring the secret to be
           # pasted in exactly one specific format.
-          printf '%s' "$ANDROID_KEYSTORE_BASE64" | tr -d '[:space:]' | base64 -d > "$KEYSTORE_PATH"
+          # The `|| true` matters: this workflow runs under `bash -e`,
+          # which aborts the whole step on ANY failing command - without
+          # it, a bad decode kills the step right here with bash's own
+          # generic "Process completed with exit code 1" and the
+          # specific, actionable checks below never get a chance to run.
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | tr -d '[:space:]' | base64 -d > "$KEYSTORE_PATH" 2>/dev/null || true
 
           if [ ! -s "$KEYSTORE_PATH" ]; then
-            echo "::error::ANDROID_KEYSTORE_BASE64 did not decode to a non-empty file - its stored value is not valid base64. Regenerate it from the real keystore (e.g. 'base64 -w0 zrp-upload-key.jks') and reset the repository secret."
+            echo "::error::ANDROID_KEYSTORE_BASE64 did not decode to a non-empty file - its stored value is not valid base64 even after stripping whitespace. This usually means the secret was set from the wrong source (e.g. a filename or an error message pasted in by mistake, not the actual base64 output) rather than just formatting noise. Regenerate it directly from the real keystore and reset the repository secret, e.g.: base64 -w0 zrp-upload-key.jks | gh secret set ANDROID_KEYSTORE_BASE64 - piped straight in, without going through an intermediate text file."
             rm -f "$KEYSTORE_PATH"
             exit 1
           fi
