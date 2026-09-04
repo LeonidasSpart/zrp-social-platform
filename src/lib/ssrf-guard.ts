@@ -2,6 +2,7 @@ import dns from "dns";
 import net from "net";
 import http from "http";
 import https from "https";
+import zlib from "zlib";
 
 /*
  * ============================================================
@@ -114,6 +115,34 @@ function safeLookup(
   });
 }
 
+/**
+ * Reverses standard HTTP content-coding (gzip/deflate/br) so callers
+ * always see the real bytes. Node's http/https client does this
+ * automatically nowhere - unlike a browser or `fetch()`, a raw
+ * `http.request`/`https.request` hands back exactly what was on the
+ * wire. Most modern hosting (Cloudflare, Fastly, nginx with gzip on,
+ * etc.) compresses HTML by default, including for requests that never
+ * asked for it via Accept-Encoding - so without this, treating the
+ * compressed bytes as UTF-8 text silently produces garbage that no
+ * meta-tag regex will ever match, indistinguishable from "the page
+ * really has no metadata." Failure here (e.g. a response truncated
+ * mid-stream by the maxBytes cap below, which can land inside a gzip
+ * frame) falls back to the raw bytes rather than throwing - the worst
+ * case is the same "no metadata found" outcome this replaces.
+ */
+export function decompressBody(body: Buffer, contentEncoding?: string): Buffer {
+  const encoding = (contentEncoding || "").toLowerCase().trim();
+  try {
+    if (encoding === "gzip" || encoding === "x-gzip") return zlib.gunzipSync(body);
+    if (encoding === "deflate") return zlib.inflateSync(body);
+    if (encoding === "br") return zlib.brotliDecompressSync(body);
+  } catch {
+    // Truncated or malformed stream - the raw bytes are the best
+    // fallback available.
+  }
+  return body;
+}
+
 export interface SafeFetchResult {
   statusCode: number;
   headers: http.IncomingHttpHeaders;
@@ -194,7 +223,7 @@ export async function safeFetch(
               resolve({
                 statusCode: status,
                 headers: res.headers,
-                body: Buffer.concat(chunks),
+                body: decompressBody(Buffer.concat(chunks), res.headers["content-encoding"]),
               });
               return;
             }
@@ -202,7 +231,11 @@ export async function safeFetch(
           });
 
           res.on("end", () => {
-            resolve({ statusCode: status, headers: res.headers, body: Buffer.concat(chunks) });
+            resolve({
+              statusCode: status,
+              headers: res.headers,
+              body: decompressBody(Buffer.concat(chunks), res.headers["content-encoding"]),
+            });
           });
 
           res.on("error", reject);

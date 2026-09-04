@@ -9,6 +9,7 @@ interface LinkPreview {
   description: string | null;
   image: string | null;
   siteName: string | null;
+  isVideo?: boolean;
 }
 
 interface LinkPreviewCardProps {
@@ -82,9 +83,17 @@ export default function LinkPreviewCard({ url, compact = false, onRemove, onLoad
     // keep whatever we have
   }
 
+  // isVideo covers any publisher whose page metadata (og:type=video,
+  // twitter:card=player) says so - not just YouTube - so a 20min.ch
+  // video article gets the same "this plays" affordance. This never
+  // embeds a player; it's purely a visual indicator, and the card still
+  // just opens the original page.
+  const isVideo = preview.isVideo === true;
   const isYouTube = preview.siteName === "YouTube";
   const accessibleLabel = isYouTube
     ? `Play "${preview.title || "video"}" on YouTube`
+    : isVideo
+    ? `Watch "${preview.title || "video"}" on ${domain}`
     : preview.title
     ? `${preview.title} - ${domain}`
     : domain;
@@ -129,7 +138,7 @@ export default function LinkPreviewCard({ url, compact = false, onRemove, onLoad
                 (e.target as HTMLImageElement).style.display = "none";
               }}
             />
-            {isYouTube && (
+            {(isYouTube || isVideo) && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="bg-zrp-red/90 rounded-full p-3 shadow-lg">
                   <Play className="w-6 h-6 text-white fill-white" />
