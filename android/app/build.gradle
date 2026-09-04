@@ -1,5 +1,25 @@
 apply plugin: 'com.android.application'
 
+// Release signing, wired but not yet active: the actual upload keystore
+// is a real secret nobody has generated yet (see the release workflow's
+// own comments for why it's never auto-generated). This file is what
+// lets that keystore start working the moment it exists, with zero
+// further Gradle changes - the CI workflow decodes the keystore from a
+// GitHub Actions secret and writes exactly this properties file at
+// build time; it is never committed (android/.gitignore). Locally, a
+// developer with the real keystore can drop the same file next to it.
+// Until keystore.properties exists, `hasReleaseSigning` stays false and
+// the release build type is intentionally left with NO signingConfig -
+// bundleRelease still succeeds (useful for verifying the rest of the
+// pipeline), it just produces an unsigned .aab that must never be
+// uploaded to Play Console as-is.
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+def keystoreProperties = new Properties()
+def hasReleaseSigning = keystorePropertiesFile.exists()
+if (hasReleaseSigning) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "one.zrp.social"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,10 +36,23 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                storeFile rootProject.file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }
