@@ -51,7 +51,10 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # The Capacitor CLI (npx cap sync) requires Node >=22 - the
+          # first real run of this workflow failed at that exact step
+          # with Node 20 ("The Capacitor CLI requires NodeJS >=22.0.0").
+          node-version: "22"
           cache: "npm"
 
       - name: Install dependencies
