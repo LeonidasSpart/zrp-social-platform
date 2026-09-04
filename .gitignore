@@ -10,3 +10,12 @@ node_modules
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Signing keys/credentials - never commit these regardless of where
+# they end up in the tree (android/.gitignore also covers the Android
+# app module specifically).
+*.jks
+*.keystore
+*.p8
+*.p12
+keystore.properties
