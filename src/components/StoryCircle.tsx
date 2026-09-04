@@ -9,9 +9,17 @@ interface Props {
   onClick: () => void;
   storyPreview?: string | null;
   storyPreviewType?: string | null; // "image" | "video"
+  // ZRP red stays the primary "you have something new to see" signal.
+  // A story tray showing dozens of identical red rings back-to-back
+  // reads as noisy rather than premium, so alternating a subset with
+  // the secondary blue accent (purely cosmetic, no semantic meaning)
+  // gives the row some visual rhythm - matching the varied red/blue
+  // story rings in the design reference - without changing what the
+  // ring communicates (still unseen vs. seen).
+  ringAccent?: "red" | "blue";
 }
 
-export default function StoryCircle({ user, hasUnseen, onClick, storyPreview, storyPreviewType }: Props) {
+export default function StoryCircle({ user, hasUnseen, onClick, storyPreview, storyPreviewType, ringAccent = "red" }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const nudged = useRef(false);
 
@@ -35,7 +43,15 @@ export default function StoryCircle({ user, hasUnseen, onClick, storyPreview, st
       onClick={onClick}
       className="flex flex-col items-center gap-1 flex-shrink-0"
     >
-      <div className={`w-16 h-16 rounded-full p-[2px] ${hasUnseen ? "bg-gradient-to-tr from-yellow-400 to-pink-500" : "bg-gray-300 dark:bg-gray-600"}`}>
+      <div
+        className={`w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-full p-[2px] ${
+          hasUnseen
+            ? ringAccent === "blue"
+              ? "bg-gradient-to-tr from-zrp-blue to-blue-300"
+              : "bg-gradient-to-tr from-zrp-red to-red-400"
+            : "bg-gray-300 dark:bg-gray-600"
+        }`}
+      >
         <div className="w-full h-full rounded-full bg-white dark:bg-gray-800 overflow-hidden">
           {storyPreview && storyPreviewType === "video" ? (
             <video
@@ -68,7 +84,7 @@ export default function StoryCircle({ user, hasUnseen, onClick, storyPreview, st
           )}
         </div>
       </div>
-      <span className="text-xs text-gray-600 dark:text-gray-400 truncate max-w-[64px]">
+      <span className="text-xs text-gray-600 dark:text-gray-400 truncate max-w-[64px] sm:max-w-[72px]">
         {user.name || user.username}
       </span>
     </button>

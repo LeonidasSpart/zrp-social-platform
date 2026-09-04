@@ -2013,11 +2013,11 @@ export default function ProfilePage(
 
           <Link
             href={`/trust/${profile.username}`}
-            className="mt-4 group flex items-center justify-between gap-3 rounded-2xl border border-zrp-red/20 bg-gradient-to-r from-zrp-red/5 to-transparent dark:from-zrp-red/10 dark:to-transparent px-4 py-3.5 hover:border-zrp-red/40 hover:bg-zrp-red/10 dark:hover:bg-zrp-red/15 transition"
+            className="mt-4 group flex items-center justify-between gap-3 rounded-2xl border border-zrp-blue/20 bg-gradient-to-r from-zrp-blue/5 to-transparent dark:from-zrp-blue/10 dark:to-transparent px-4 py-3.5 hover:border-zrp-blue/40 hover:bg-zrp-blue/10 dark:hover:bg-zrp-blue/15 transition"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div className="flex-shrink-0 w-11 h-11 rounded-full bg-zrp-red/10 flex items-center justify-center border border-zrp-red/10">
-                <ShieldCheck className="w-6 h-6 text-zrp-red" />
+              <div className="flex-shrink-0 w-11 h-11 rounded-full bg-zrp-blue/10 flex items-center justify-center border border-zrp-blue/10">
+                <ShieldCheck className="w-6 h-6 text-zrp-blue" />
               </div>
 
               <div className="min-w-0">
@@ -2037,7 +2037,7 @@ export default function ProfilePage(
               </div>
             </div>
 
-            <span className="flex-shrink-0 text-zrp-red text-sm font-semibold group-hover:translate-x-0.5 transition-transform">
+            <span className="flex-shrink-0 text-zrp-blue text-sm font-semibold group-hover:translate-x-0.5 transition-transform">
               {t("profile.trustPassportView")} →
             </span>
           </Link>
