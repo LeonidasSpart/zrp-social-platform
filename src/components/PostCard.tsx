@@ -45,6 +45,7 @@ const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
 import QuotePostModal from "./QuotePostModal";
 import VideoFeedViewer from "./VideoFeedViewer";
 import LinkPreviewCard from "./LinkPreviewCard";
+import { extractFirstUrl } from "@/lib/link-preview-parse";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface PostCardProps {
@@ -197,25 +198,6 @@ function parseContent(content: string) {
   }
 
   return parts;
-}
-
-// ─────────────────────────────────────────────────────────────
-// EXTRACT FIRST URL
-// ─────────────────────────────────────────────────────────────
-
-function extractFirstUrl(content: string): string | null {
-  const match = content.match(
-    /(https?:\/\/[^\s]+)|(www\.[^\s]+)/
-  );
-
-  if (!match) return null;
-
-  const raw = match[0].replace(
-    /[.,!?;:'")\]}]+$/,
-    ""
-  );
-
-  return raw.startsWith("http") ? raw : `https://${raw}`;
 }
 
 // ─────────────────────────────────────────────────────────────

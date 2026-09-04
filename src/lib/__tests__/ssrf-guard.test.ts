@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { isDisallowedIPv4, isDisallowedIPv6 } from "../ssrf-guard";
+import zlib from "zlib";
+import { isDisallowedIPv4, isDisallowedIPv6, decompressBody } from "../ssrf-guard";
 
 describe("isDisallowedIPv4", () => {
   it("blocks loopback", () => {
@@ -63,5 +64,49 @@ describe("isDisallowedIPv6", () => {
 
   it("allows an ordinary public IPv6 address", () => {
     expect(isDisallowedIPv6("2001:4860:4860::8888")).toBe(false);
+  });
+});
+
+// Node's raw http/https client never auto-decompresses (unlike a
+// browser or fetch()) - a response compressed by a CDN/host that
+// defaults to gzip, served with or without the client asking for it,
+// would otherwise be treated as UTF-8 text and silently fail every
+// meta-tag regex, indistinguishable from "the page has no metadata."
+describe("decompressBody", () => {
+  const html = "<html><head><meta property=\"og:title\" content=\"Hello\"></head></html>";
+  const original = Buffer.from(html, "utf-8");
+
+  it("reverses gzip", () => {
+    const compressed = zlib.gzipSync(original);
+    expect(decompressBody(compressed, "gzip").toString("utf-8")).toBe(html);
+  });
+
+  it("reverses gzip for the non-standard x-gzip label some servers send", () => {
+    const compressed = zlib.gzipSync(original);
+    expect(decompressBody(compressed, "x-gzip").toString("utf-8")).toBe(html);
+  });
+
+  it("reverses deflate", () => {
+    const compressed = zlib.deflateSync(original);
+    expect(decompressBody(compressed, "deflate").toString("utf-8")).toBe(html);
+  });
+
+  it("reverses brotli", () => {
+    const compressed = zlib.brotliCompressSync(original);
+    expect(decompressBody(compressed, "br").toString("utf-8")).toBe(html);
+  });
+
+  it("passes the body through unchanged when there is no content-encoding", () => {
+    expect(decompressBody(original, undefined).toString("utf-8")).toBe(html);
+    expect(decompressBody(original, "").toString("utf-8")).toBe(html);
+    expect(decompressBody(original, "identity").toString("utf-8")).toBe(html);
+  });
+
+  it("falls back to the raw bytes (never throws) on a truncated/corrupt gzip stream", () => {
+    const compressed = zlib.gzipSync(original);
+    const truncated = compressed.subarray(0, compressed.length - 5);
+    expect(() => decompressBody(truncated, "gzip")).not.toThrow();
+    // Can't recover the original from a truncated stream - just must not crash.
+    expect(Buffer.isBuffer(decompressBody(truncated, "gzip"))).toBe(true);
   });
 });

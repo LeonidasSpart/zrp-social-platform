@@ -3,47 +3,7 @@ import { getCached, setCached } from "@/lib/redis";
 import { safeFetch, SsrfBlockedError } from "@/lib/ssrf-guard";
 import { rateLimit } from "@/lib/rate-limit";
 import { extractYouTubeVideoId, getYouTubeThumbnailUrl, getYouTubeCanonicalUrl, isYouTubeUrl } from "@/lib/youtube";
-
-interface LinkPreview {
-  url: string;
-  title: string | null;
-  description: string | null;
-  image: string | null;
-  siteName: string | null;
-}
-
-// ─── Extract a meta tag value by property/name, regex-based (no HTML
-// parser dependency) - good enough for the standard og:* / twitter:*
-// tags virtually every site with a link preview sets ─────────────────
-function extractMeta(html: string, keys: string[]): string | null {
-  for (const key of keys) {
-    // Handles both attribute orders: property="x" content="y" and
-    // content="y" property="x"
-    const patterns = [
-      new RegExp(`<meta[^>]+property=["']${key}["'][^>]+content=["']([^"']*)["']`, "i"),
-      new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]+property=["']${key}["']`, "i"),
-      new RegExp(`<meta[^>]+name=["']${key}["'][^>]+content=["']([^"']*)["']`, "i"),
-      new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]+name=["']${key}["']`, "i"),
-    ];
-    for (const pattern of patterns) {
-      const match = html.match(pattern);
-      if (match?.[1]) {
-        return match[1]
-          .replace(/&amp;/g, "&")
-          .replace(/&quot;/g, '"')
-          .replace(/&#039;/g, "'")
-          .replace(/&lt;/g, "<")
-          .replace(/&gt;/g, ">");
-      }
-    }
-  }
-  return null;
-}
-
-function extractTitleTag(html: string): string | null {
-  const match = html.match(/<title[^>]*>([^<]*)<\/title>/i);
-  return match?.[1]?.trim() || null;
-}
+import { parseHtmlMetadata, type LinkPreview } from "@/lib/link-preview-parse";
 
 // The video ID (and therefore the thumbnail, via YouTube's stable public
 // CDN URL pattern) is derivable straight from the URL string with no
@@ -68,6 +28,7 @@ async function fetchYouTubePreview(url: string): Promise<LinkPreview | null> {
     description: null,
     image: getYouTubeThumbnailUrl(videoId),
     siteName: "YouTube",
+    isVideo: true,
   };
 
   try {
@@ -98,11 +59,21 @@ async function fetchGenericPreview(url: string): Promise<LinkPreview | null> {
       timeoutMs: 6000,
       maxBytes: 200_000,
       headers: {
-        // Many sites serve minimal/no OG tags to unrecognized bots -
-        // a normal browser UA gets the real page most reliably.
+        // A full, realistic header set - not just a User-Agent string -
+        // matters here: many publishers' CDN/bot-protection layers
+        // treat a suspiciously bare request (no Accept-Language, no
+        // Accept-Encoding) as a signal to serve a stripped-down or
+        // blocked response instead of the real page. Accept-Encoding
+        // additionally lets compression-by-default hosts (most modern
+        // CDNs) actually compress the reply, which - now that safeFetch
+        // decompresses it - means more real HTML content fits under
+        // maxBytes than the same cap would hold uncompressed.
         "User-Agent":
           "Mozilla/5.0 (compatible; ZRPLinkPreview/1.0; +https://zrp.one)",
-        Accept: "text/html,application/xhtml+xml",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
       },
     });
     if (res.statusCode < 200 || res.statusCode >= 300) return null;
@@ -112,21 +83,7 @@ async function fetchGenericPreview(url: string): Promise<LinkPreview | null> {
 
     const html = res.body.toString("utf-8");
 
-    const title =
-      extractMeta(html, ["og:title", "twitter:title"]) || extractTitleTag(html);
-    const description = extractMeta(html, ["og:description", "twitter:description", "description"]);
-    let image = extractMeta(html, ["og:image", "og:image:url", "twitter:image"]);
-    const siteName = extractMeta(html, ["og:site_name"]) || new URL(url).hostname.replace(/^www\./, "");
-
-    if (image && !image.startsWith("http")) {
-      // Resolve protocol-relative or root-relative image URLs
-      const base = new URL(url);
-      image = new URL(image, base.origin).toString();
-    }
-
-    if (!title && !image) return null;
-
-    return { url, title, description, image, siteName };
+    return parseHtmlMetadata(html, url);
   } catch {
     return null;
   }
@@ -176,7 +133,7 @@ export async function GET(req: NextRequest) {
     // empty-shape object rather than a bare null - a cached `null` would
     // be falsy and look identical to "not cached yet", defeating the
     // whole point of caching the negative result.
-    const empty: LinkPreview = { url: target.toString(), title: null, description: null, image: null, siteName: null };
+    const empty: LinkPreview = { url: target.toString(), title: null, description: null, image: null, siteName: null, isVideo: false };
     await setCached(cacheKey, empty, 3600);
     return NextResponse.json(empty);
   }
