@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import { getFeatureStatus, FeatureStatus } from "./permissions";
 import { checkRateLimitKey } from "./rate-limit";
 import { getAppleClientSecret } from "./apple-client-secret";
+import { findExistingSessionUser } from "./session-user";
 
 // Only registered when APPLE_TEAM_ID/APPLE_KEY_ID/APPLE_CLIENT_ID/
 // APPLE_PRIVATE_KEY are all present and the key signs successfully - see
@@ -310,6 +311,34 @@ export const authOptions: NextAuthOptions = {
           token.emailVerified = !!freshUser.emailVerified;
           token.plan = freshUser.plan || "free";
           token.features = getFeatureStatus({ plan: token.plan });
+        }
+      }
+
+      // ─── Periodic existence re-check for routine (non-login) reads ──
+      // The two branches above only refetch from the database on initial
+      // sign-in or an explicit client update() call. A routine session
+      // read (getServerSession, useSession's background polling) never
+      // touched the database at all, so a JWT for an account deleted
+      // after it was issued kept authenticating as that user for the
+      // rest of the token's lifetime (up to 30 days) - the app, and
+      // every API route trusting session.user.id, had no way to know.
+      // Re-checking on every single read would add a DB round trip to
+      // every authenticated request, so this throttles to once every 5
+      // minutes per token. Reusing `banned` rather than inventing a new
+      // signal is deliberate: middleware.ts and every downstream
+      // consumer already correctly treat banned === true as "sign this
+      // session out" (redirect, cleared cookies, blocked API writes),
+      // so a deleted account is handled by that exact same, already-
+      // proven path instead of a new one.
+      if (token.id && !user && trigger !== "update" && !token.banned) {
+        const lastChecked = (token.existsCheckedAt as number) || 0;
+        if (Date.now() - lastChecked > 5 * 60 * 1000) {
+          const stillExists = await findExistingSessionUser(token.id as string);
+          if (!stillExists) {
+            token.banned = true;
+          } else {
+            token.existsCheckedAt = Date.now();
+          }
         }
       }
 
