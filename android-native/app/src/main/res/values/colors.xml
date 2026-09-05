@@ -1,0 +1,13 @@
+<resources>
+    <!-- Exact hex values from tailwind.config.js's zrp.* palette - the
+         single source of truth for ZRP brand color shared with the web
+         app, not re-derived or approximated here. -->
+    <color name="zrp_red">#FF2D2D</color>
+    <color name="zrp_dark_red">#B10000</color>
+    <color name="zrp_white">#FFFFFF</color>
+    <color name="zrp_silver">#BDBDBD</color>
+    <color name="zrp_charcoal">#0D0D0D</color>
+    <color name="zrp_deep_black">#050505</color>
+    <color name="zrp_blue">#3B82F6</color>
+    <color name="zrp_blue_dark">#1D4ED8</color>
+</resources>
