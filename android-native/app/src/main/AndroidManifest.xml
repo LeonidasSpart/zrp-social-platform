@@ -22,6 +22,29 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!--
+                Deep links into zrp.one URLs (profile pages, and the
+                app's own core tabs) - handled by ZrpNavHost's deepLinks
+                entries. Deliberately no android:autoVerify="true" yet:
+                verified Android App Links need an assetlinks.json
+                hosted at https://zrp.one/.well-known/ listing this
+                app's release *signing certificate's* SHA-256
+                fingerprint, and this app has no release signing
+                configured yet (that's its own later, distinctly
+                security-sensitive phase - see the migration plan's
+                "native signing" step). Without verification, tapping a
+                zrp.one link still offers this app as an option (via
+                Android's normal disambiguation, or directly if the
+                user has set it as the default handler); it just isn't
+                automatic yet.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="zrp.one" />
+            </intent-filter>
         </activity>
 
     </application>

@@ -16,6 +16,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import one.zrp.social.mobile.ui.create.CreatePostScreen
 import one.zrp.social.mobile.ui.home.HomeScreen
 import one.zrp.social.mobile.ui.messages.ConversationScreen
@@ -27,6 +28,17 @@ import one.zrp.social.mobile.ui.search.SearchScreen
 import one.zrp.social.mobile.ui.stories.CreateStoryScreen
 import one.zrp.social.mobile.ui.stories.StoryViewerScreen
 
+/**
+ * Real zrp.one URLs (see the deepLinks on the routes below and
+ * AndroidManifest.xml's matching intent-filter) open directly into the
+ * matching native screen when this NavHost is already in composition -
+ * i.e. the app is already signed in and running. A link arriving
+ * before login completes isn't preserved past the login screen yet
+ * (MainActivity only creates this NavHost once AuthUiState is
+ * LoggedIn); handling that needs holding the pending destination
+ * across the auth gate, a distinctly separate piece of work from the
+ * routes themselves.
+ */
 @Composable
 fun ZrpNavHost(onLogout: () -> Unit) {
     val navController = rememberNavController()
@@ -53,19 +65,31 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             startDestination = ZrpDestination.Home.route,
             modifier = androidx.compose.ui.Modifier.padding(innerPadding),
         ) {
-            composable(ZrpDestination.Home.route) {
+            composable(
+                route = ZrpDestination.Home.route,
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/" }),
+            ) {
                 HomeScreen(
                     onAuthorClick = goToProfile,
                     onOpenStoryViewer = goToStoryViewer,
                     onCreateStory = goToCreateStory,
                 )
             }
-            composable(ZrpDestination.Search.route) {
+            composable(
+                route = ZrpDestination.Search.route,
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/search" }),
+            ) {
                 SearchScreen(onAuthorClick = goToProfile, onOpenMusic = goToMusic)
             }
             composable(ZrpDestination.Create.route) { CreatePostScreen(onPosted = goHome) }
-            composable(ZrpDestination.Notifications.route) { NotificationsScreen(onAuthorClick = goToProfile) }
-            composable(ZrpDestination.Messages.route) { MessagesScreen(onOpenConversation = goToConversation) }
+            composable(
+                route = ZrpDestination.Notifications.route,
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/notifications" }),
+            ) { NotificationsScreen(onAuthorClick = goToProfile) }
+            composable(
+                route = ZrpDestination.Messages.route,
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/messages" }),
+            ) { MessagesScreen(onOpenConversation = goToConversation) }
             composable(ZrpDestination.Profile.route) {
                 ProfileScreen(
                     username = null,
@@ -77,6 +101,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             composable(
                 route = "profile/{username}",
                 arguments = listOf(navArgument("username") { type = NavType.StringType }),
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/profile/{username}" }),
             ) { backStackEntry ->
                 val username = backStackEntry.arguments?.getString("username")
                 ProfileScreen(
