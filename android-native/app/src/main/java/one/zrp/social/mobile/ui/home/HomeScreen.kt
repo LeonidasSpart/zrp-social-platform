@@ -1,8 +1,11 @@
 package one.zrp.social.mobile.ui.home
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -48,7 +51,7 @@ fun HomeScreen() {
     )
 
     Box(modifier = Modifier.fillMaxSize()) {
-        androidx.compose.foundation.layout.Column(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
             TabRow(selectedTabIndex = if (activeTab == FeedTab.FOR_YOU) 0 else 1) {
                 Tab(
                     selected = activeTab == FeedTab.FOR_YOU,
@@ -105,7 +108,7 @@ fun HomeScreen() {
                             item {
                                 Box(
                                     modifier = Modifier
-                                        .fillMaxSize()
+                                        .fillMaxWidth()
                                         .padding(16.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
