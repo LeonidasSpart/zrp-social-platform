@@ -21,8 +21,10 @@ vi.mock("@/lib/redis", () => ({
 
 import { GET } from "../route";
 import { safeFetch } from "@/lib/ssrf-guard";
+import { setCached } from "@/lib/redis";
 
 const mockedSafeFetch = vi.mocked(safeFetch);
+const mockedSetCached = vi.mocked(setCached);
 
 function htmlResponse(html: string, contentType = "text/html; charset=utf-8") {
   return {
@@ -51,6 +53,7 @@ async function callGET(request: NextRequest): Promise<NextResponse> {
 describe("GET /api/link-preview", () => {
   beforeEach(() => {
     mockedSafeFetch.mockReset();
+    mockedSetCached.mockReset();
   });
 
   it("400s when the url parameter is missing", async () => {
@@ -127,33 +130,46 @@ describe("GET /api/link-preview", () => {
     expect(body.title).toBeNull();
   });
 
-  it("gracefully returns an empty-shaped preview (not an error) when the page has no usable metadata", async () => {
+  it("gracefully returns an empty-shaped preview (not an error) when the page has no usable metadata, and caches it for the full hour", async () => {
     mockedSafeFetch.mockResolvedValueOnce(htmlResponse("<html><body>nothing here</body></html>"));
     const res = await callGET(req("https://example.com/blank-page"));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.title).toBeNull();
     expect(body.image).toBeNull();
+    // The page was actually fetched and parsed - a confirmed-empty
+    // result, not a transient failure - so it's safe to cache for the
+    // full hour rather than retrying on every view.
+    expect(mockedSetCached).toHaveBeenCalledWith(expect.any(String), expect.anything(), 3600);
   });
 
-  it("gracefully returns an empty-shaped preview when the response isn't HTML", async () => {
+  // These three cases (non-HTML response, thrown fetch error, non-2xx
+  // status) never actually examined the page's real metadata - each is
+  // a transient failure at the network/transport level, not proof the
+  // page has no preview. Caching them for the same full hour as a
+  // confirmed-empty page would lock a link out of ever getting a
+  // preview just because its very first fetch attempt hit a momentary
+  // block, so these get a much shorter negative-cache TTL instead.
+  it("gracefully returns an empty-shaped preview when the response isn't HTML, cached only briefly", async () => {
     mockedSafeFetch.mockResolvedValueOnce(htmlResponse("{}", "application/json"));
     const res = await callGET(req("https://example.com/api/data"));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.title).toBeNull();
+    expect(mockedSetCached).toHaveBeenCalledWith(expect.any(String), expect.anything(), 60);
   });
 
-  it("gracefully returns an empty-shaped preview when the fetch throws (offline/timeout/blocked)", async () => {
+  it("gracefully returns an empty-shaped preview when the fetch throws (offline/timeout/blocked), cached only briefly", async () => {
     mockedSafeFetch.mockRejectedValueOnce(new Error("Request timed out"));
     const res = await callGET(req("https://example.com/unreachable"));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.title).toBeNull();
     expect(body.image).toBeNull();
+    expect(mockedSetCached).toHaveBeenCalledWith(expect.any(String), expect.anything(), 60);
   });
 
-  it("gracefully returns an empty-shaped preview on a non-2xx response", async () => {
+  it("gracefully returns an empty-shaped preview on a non-2xx response, cached only briefly", async () => {
     mockedSafeFetch.mockResolvedValueOnce({
       statusCode: 404,
       headers: { "content-type": "text/html" },
@@ -163,5 +179,6 @@ describe("GET /api/link-preview", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.title).toBeNull();
+    expect(mockedSetCached).toHaveBeenCalledWith(expect.any(String), expect.anything(), 60);
   });
 });
