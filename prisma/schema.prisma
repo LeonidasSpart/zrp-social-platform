@@ -636,10 +636,9 @@ model Mute {
 // mechanism. The token itself is what's unique (a re-login on the same
 // device re-registers the same token under whichever account is
 // signed in then, which is why registration is an upsert keyed on
-// `token` rather than on `userId`). Actually sending from these tokens
-// needs a Firebase service-account credential server-side (see
-// src/lib/fcm.ts) - separate from and not yet configured alongside the
-// client-side google-services.json.
+// `token` rather than on `userId`). Sending from these tokens goes
+// through src/lib/fcm.ts, using the Firebase service-account
+// credential configured server-side (FIREBASE_SERVICE_ACCOUNT_JSON).
 model FcmToken {
   id String @id @default(cuid())
 

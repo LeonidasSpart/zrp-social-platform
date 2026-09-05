@@ -22,12 +22,12 @@ import one.zrp.social.mobile.network.ApiClient
  * Receives real Firebase Cloud Messaging pushes and displays them as
  * native Android notifications - no fake/local-only notifications, and
  * no separate polling path (this is push, delivered by the OS itself
- * whenever the server side has a Firebase service-account credential
- * to send with; see src/lib/fcm.ts's KDoc on the web repo for that
- * side's current status). The default notification channel
- * ("zrp_general") is created once in ZrpApplication.onCreate() rather
- * than lazily here, since Android requires a channel to exist before
- * any notification posted to it will show.
+ * whenever the server side sends via its Firebase service-account
+ * credential; see src/lib/fcm.ts on the web repo). The default
+ * notification channel ("zrp_general") is created once in
+ * ZrpApplication.onCreate() rather than lazily here, since Android
+ * requires a channel to exist before any notification posted to it
+ * will show.
  */
 class ZrpFirebaseMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
