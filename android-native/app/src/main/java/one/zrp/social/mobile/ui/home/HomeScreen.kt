@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.data.PostsRepository
+import one.zrp.social.mobile.ui.stories.StoriesRail
 
 /**
  * The native Home screen: the same two real feed streams the website
@@ -37,7 +38,11 @@ import one.zrp.social.mobile.data.PostsRepository
  */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun HomeScreen(onAuthorClick: (String) -> Unit) {
+fun HomeScreen(
+    onAuthorClick: (String) -> Unit,
+    onOpenStoryViewer: (userId: String) -> Unit,
+    onCreateStory: () -> Unit,
+) {
     val viewModel: HomeViewModel = viewModel(factory = HomeViewModelFactory(PostsRepository()))
     val activeTab by viewModel.activeTab.collectAsState()
     val forYouState by viewModel.forYouState.collectAsState()
@@ -52,6 +57,8 @@ fun HomeScreen(onAuthorClick: (String) -> Unit) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
+            StoriesRail(onOpenViewer = onOpenStoryViewer, onCreateStory = onCreateStory)
+
             TabRow(selectedTabIndex = if (activeTab == FeedTab.FOR_YOU) 0 else 1) {
                 Tab(
                     selected = activeTab == FeedTab.FOR_YOU,

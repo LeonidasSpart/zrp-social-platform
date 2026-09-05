@@ -23,6 +23,8 @@ import one.zrp.social.mobile.ui.messages.MessagesScreen
 import one.zrp.social.mobile.ui.notifications.NotificationsScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
 import one.zrp.social.mobile.ui.search.SearchScreen
+import one.zrp.social.mobile.ui.stories.CreateStoryScreen
+import one.zrp.social.mobile.ui.stories.StoryViewerScreen
 
 @Composable
 fun ZrpNavHost(onLogout: () -> Unit) {
@@ -31,6 +33,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToConversation: (partnerId: String, partnerUsername: String) -> Unit = { partnerId, partnerUsername ->
         navController.navigate("messages/$partnerId/$partnerUsername")
     }
+    val goToStoryViewer: (String) -> Unit = { userId -> navController.navigate("stories/$userId") }
+    val goToCreateStory: () -> Unit = { navController.navigate("create-story") }
     val goHome: () -> Unit = {
         navController.navigate(ZrpDestination.Home.route) {
             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -47,7 +51,13 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             startDestination = ZrpDestination.Home.route,
             modifier = androidx.compose.ui.Modifier.padding(innerPadding),
         ) {
-            composable(ZrpDestination.Home.route) { HomeScreen(onAuthorClick = goToProfile) }
+            composable(ZrpDestination.Home.route) {
+                HomeScreen(
+                    onAuthorClick = goToProfile,
+                    onOpenStoryViewer = goToStoryViewer,
+                    onCreateStory = goToCreateStory,
+                )
+            }
             composable(ZrpDestination.Search.route) { SearchScreen(onAuthorClick = goToProfile) }
             composable(ZrpDestination.Create.route) { CreatePostScreen(onPosted = goHome) }
             composable(ZrpDestination.Notifications.route) { NotificationsScreen(onAuthorClick = goToProfile) }
@@ -88,6 +98,18 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                         onBack = { navController.popBackStack() },
                     )
                 }
+            }
+            composable(
+                route = "stories/{userId}",
+                arguments = listOf(navArgument("userId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId")
+                if (userId != null) {
+                    StoryViewerScreen(userId = userId, onClose = { navController.popBackStack() })
+                }
+            }
+            composable("create-story") {
+                CreateStoryScreen(onPosted = { navController.popBackStack() })
             }
         }
     }
