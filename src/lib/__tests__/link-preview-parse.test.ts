@@ -5,6 +5,7 @@ import {
   detectIsVideo,
   parseHtmlMetadata,
   extractFirstUrl,
+  decodeHtmlEntities,
 } from "../link-preview-parse";
 
 describe("extractMeta", () => {
@@ -46,6 +47,42 @@ describe("extractTitleTag", () => {
 
   it("returns null when there is no title tag", () => {
     expect(extractTitleTag("<html><body>hi</body></html>")).toBeNull();
+  });
+
+  it("decodes HTML entities, same as extractMeta (real <title> tags routinely contain them)", () => {
+    expect(extractTitleTag("<title>Firma &amp; Co. &mdash; News</title>")).toBe(
+      "Firma & Co. — News"
+    );
+  });
+});
+
+describe("decodeHtmlEntities", () => {
+  it("decodes the 5 predefined XML entities", () => {
+    expect(decodeHtmlEntities("A &amp; B &lt;tag&gt; &quot;q&quot; &apos;s&apos;")).toBe(
+      `A & B <tag> "q" 's'`
+    );
+  });
+
+  it("decodes named entities common in real article titles (dashes, quotes, ellipsis, nbsp)", () => {
+    expect(decodeHtmlEntities("Wait&hellip;")).toBe("Wait…");
+    expect(decodeHtmlEntities("2020&ndash;2024")).toBe("2020–2024");
+    expect(decodeHtmlEntities("A&mdash;B")).toBe("A—B");
+    expect(decodeHtmlEntities("&lsquo;hi&rsquo; &ldquo;there&rdquo;")).toBe("‘hi’ “there”");
+    expect(decodeHtmlEntities("a&nbsp;b")).toBe("a b");
+  });
+
+  it("decodes decimal numeric entities", () => {
+    expect(decodeHtmlEntities("&#39;s")).toBe("'s");
+    expect(decodeHtmlEntities("&#8217;s")).toBe("’s");
+  });
+
+  it("decodes hex numeric entities", () => {
+    expect(decodeHtmlEntities("&#x27;s")).toBe("'s");
+  });
+
+  it("leaves unknown entities and plain text untouched", () => {
+    expect(decodeHtmlEntities("plain text")).toBe("plain text");
+    expect(decodeHtmlEntities("&notarealentity;")).toBe("&notarealentity;");
   });
 });
 

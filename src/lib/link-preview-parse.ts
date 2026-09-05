@@ -12,6 +12,47 @@ export interface LinkPreview {
   isVideo: boolean;
 }
 
+// A handful of named entities beyond the 5 predefined XML ones
+// (&amp; &quot; &lt; &gt; &apos;/&#039;) show up constantly in real
+// article titles/descriptions - smart quotes, em/en dashes, ellipses,
+// non-breaking spaces - and would otherwise leak into the UI literally
+// as "&rsquo;" etc. Numeric entities (&#39; and &#x27;) are decoded
+// generically rather than one at a time.
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: "&",
+  quot: '"',
+  apos: "'",
+  lt: "<",
+  gt: ">",
+  nbsp: " ",
+  mdash: "—",
+  ndash: "–",
+  hellip: "…",
+  lsquo: "‘",
+  rsquo: "’",
+  ldquo: "“",
+  rdquo: "”",
+};
+
+export function decodeHtmlEntities(text: string): string {
+  return text.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (entity, body) => {
+    if (body[0] === "#") {
+      const codePoint =
+        body[1] === "x" || body[1] === "X"
+          ? parseInt(body.slice(2), 16)
+          : parseInt(body.slice(1), 10);
+      if (Number.isNaN(codePoint)) return entity;
+      try {
+        return String.fromCodePoint(codePoint);
+      } catch {
+        return entity;
+      }
+    }
+    const named = NAMED_ENTITIES[body.toLowerCase()];
+    return named !== undefined ? named : entity;
+  });
+}
+
 // ─── Extract a meta tag value by property/name, regex-based - good
 // enough for the standard og:* / twitter:* tags virtually every site
 // with a link preview sets. Handles both attribute orders
@@ -29,12 +70,7 @@ export function extractMeta(html: string, keys: string[]): string | null {
     for (const pattern of patterns) {
       const match = html.match(pattern);
       if (match?.[1]) {
-        return match[1]
-          .replace(/&amp;/g, "&")
-          .replace(/&quot;/g, '"')
-          .replace(/&#039;/g, "'")
-          .replace(/&lt;/g, "<")
-          .replace(/&gt;/g, ">");
+        return decodeHtmlEntities(match[1]);
       }
     }
   }
@@ -43,7 +79,8 @@ export function extractMeta(html: string, keys: string[]): string | null {
 
 export function extractTitleTag(html: string): string | null {
   const match = html.match(/<title[^>]*>([^<]*)<\/title>/i);
-  return match?.[1]?.trim() || null;
+  const raw = match?.[1]?.trim();
+  return raw ? decodeHtmlEntities(raw) : null;
 }
 
 // A page indicates video content two ways in practice: an og:type of

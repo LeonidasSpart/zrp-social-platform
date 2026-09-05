@@ -23,12 +23,14 @@ export default function LinkPreviewCard({ url, compact = false, onRemove, onLoad
   const [preview, setPreview] = useState<LinkPreview | null>(null);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
+  const [imageErrored, setImageErrored] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setFailed(false);
     setPreview(null);
+    setImageErrored(false);
 
     fetch(`/api/link-preview?url=${encodeURIComponent(url)}`)
       .then((res) => (res.ok ? res.json() : null))
@@ -60,7 +62,7 @@ export default function LinkPreviewCard({ url, compact = false, onRemove, onLoad
   if (loading) {
     return (
       <div className="mt-2 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-pulse">
-        <div className="h-32 bg-gray-100 dark:bg-gray-800" />
+        <div className={`w-full bg-gray-100 dark:bg-gray-800 ${compact ? "aspect-[2.5/1]" : "aspect-[1.91/1]"}`} />
         <div className="p-3 space-y-2">
           <div className="h-3 w-1/3 bg-gray-100 dark:bg-gray-800 rounded" />
           <div className="h-4 w-2/3 bg-gray-100 dark:bg-gray-800 rounded" />
@@ -100,7 +102,7 @@ export default function LinkPreviewCard({ url, compact = false, onRemove, onLoad
 
   return (
     <div
-      className="mt-2 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:bg-gray-50 dark:hover:bg-gray-800/50 transition relative"
+      className="mt-2 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:bg-gray-50 dark:hover:bg-gray-800/50 transition relative group"
       onClick={(e) => e.stopPropagation()}
     >
       {onRemove && (
@@ -124,19 +126,23 @@ export default function LinkPreviewCard({ url, compact = false, onRemove, onLoad
         className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-zrp-red focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zrp-deepBlack rounded-2xl"
         aria-label={accessibleLabel}
       >
-        {preview.image && (
+        {preview.image && !imageErrored && (
           <div
-            className={`w-full bg-gray-100 dark:bg-gray-800 ${compact ? "h-28" : "h-48"} overflow-hidden relative`}
+            // A standard OG image ratio (1.91:1, the same one Facebook/
+            // Twitter cards use) instead of a fixed pixel height - a
+            // fixed height crops very differently on a narrow phone card
+            // vs. a wide desktop one, while this keeps the crop
+            // proportion (and how "immersive" the thumbnail feels)
+            // consistent across every screen size.
+            className={`w-full bg-gray-100 dark:bg-gray-800 overflow-hidden relative ${compact ? "aspect-[2.5/1]" : "aspect-[1.91/1]"}`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={preview.image}
               alt=""
               aria-hidden="true"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              onError={() => setImageErrored(true)}
             />
             {(isYouTube || isVideo) && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -149,18 +155,18 @@ export default function LinkPreviewCard({ url, compact = false, onRemove, onLoad
         )}
         <div className="p-3">
           {domain && (
-            <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1 mb-0.5">
+            <p className="text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500 flex items-center gap-1 mb-1">
               <ExternalLink className="w-3 h-3" aria-hidden="true" />
               {domain}
             </p>
           )}
           {preview.title && (
-            <p className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">
+            <p className="text-[15px] font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2">
               {preview.title}
             </p>
           )}
           {!compact && preview.description && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5">
+            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
               {preview.description}
             </p>
           )}

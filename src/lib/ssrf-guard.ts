@@ -69,6 +69,15 @@ function isDisallowedIp(ip: string, family: number): boolean {
   return isDisallowedIPv4(ip);
 }
 
+// The real check every production call site uses. Exposed only so tests
+// can override it (see IsAddressAllowedFn below) - production code never
+// passes an override, so this stays the sole gate that matters at runtime.
+function defaultIsAddressAllowed(ip: string, family: number): boolean {
+  return !isDisallowedIp(ip, family);
+}
+
+export type IsAddressAllowedFn = (ip: string, family: number) => boolean;
+
 class SsrfBlockedError extends Error {
   constructor(message = "This URL cannot be reached.") {
     super(message);
@@ -83,36 +92,38 @@ class SsrfBlockedError extends Error {
  * on a private/internal target - even if the hostname's DNS record
  * later changes (rebinding).
  */
-function safeLookup(
-  hostname: string,
-  options: dns.LookupAllOptions | number,
-  callback: (err: NodeJS.ErrnoException | null, address: string, family: number) => void
-) {
-  const asIpFamily = net.isIP(hostname);
-  if (asIpFamily) {
-    if (isDisallowedIp(hostname, asIpFamily)) {
-      callback(new SsrfBlockedError(), "", 0);
-      return;
-    }
-    callback(null, hostname, asIpFamily);
-    return;
-  }
-
-  dns.lookup(hostname, { all: true, verbatim: true }, (err, addresses) => {
-    if (err) {
-      callback(err, "", 0);
+function makeSafeLookup(isAddressAllowed: IsAddressAllowedFn) {
+  return function safeLookup(
+    hostname: string,
+    options: dns.LookupAllOptions | number,
+    callback: (err: NodeJS.ErrnoException | null, address: string, family: number) => void
+  ) {
+    const asIpFamily = net.isIP(hostname);
+    if (asIpFamily) {
+      if (!isAddressAllowed(hostname, asIpFamily)) {
+        callback(new SsrfBlockedError(), "", 0);
+        return;
+      }
+      callback(null, hostname, asIpFamily);
       return;
     }
 
-    const allowed = addresses.find((a) => !isDisallowedIp(a.address, a.family));
+    dns.lookup(hostname, { all: true, verbatim: true }, (err, addresses) => {
+      if (err) {
+        callback(err, "", 0);
+        return;
+      }
 
-    if (!allowed) {
-      callback(new SsrfBlockedError(), "", 0);
-      return;
-    }
+      const allowed = addresses.find((a) => isAddressAllowed(a.address, a.family));
 
-    callback(null, allowed.address, allowed.family);
-  });
+      if (!allowed) {
+        callback(new SsrfBlockedError(), "", 0);
+        return;
+      }
+
+      callback(null, allowed.address, allowed.family);
+    });
+  };
 }
 
 /**
@@ -154,9 +165,17 @@ export interface SafeFetchOptions {
   timeoutMs?: number;
   maxBytes?: number;
   maxRedirects?: number;
+  // Test-only escape hatch: every production call site (link-preview's
+  // route.ts included) leaves this unset and gets the real private/
+  // loopback/link-local block. It exists purely so tests can point
+  // safeFetch at an ephemeral 127.0.0.1 server to exercise the real
+  // redirect-following, timeout and maxBytes mechanics - which the real
+  // guard would otherwise correctly refuse to connect to at all - without
+  // touching what ships to production.
+  isAddressAllowed?: IsAddressAllowedFn;
 }
 
-function validateUrl(urlString: string): URL {
+export function validateUrl(urlString: string): URL {
   let parsed: URL;
   try {
     parsed = new URL(urlString);
@@ -187,12 +206,28 @@ export async function safeFetch(
     timeoutMs = 6000,
     maxBytes = 200_000,
     maxRedirects = MAX_REDIRECTS,
+    isAddressAllowed = defaultIsAddressAllowed,
   } = options;
+
+  const safeLookup = makeSafeLookup(isAddressAllowed);
 
   let target = validateUrl(urlString);
   let redirectsLeft = maxRedirects;
 
   while (true) {
+    // Node's net module special-cases a literal IP host: when
+    // options.host is already an IP address, Socket.connect() skips the
+    // custom `lookup` entirely and connects directly - so a URL like
+    // http://127.0.0.1/ or http://169.254.169.254/ (cloud metadata) would
+    // reach its target completely unchecked despite the safeLookup
+    // passed below, since safeLookup is never even invoked for those.
+    // This check is what actually gates a literal-IP host; safeLookup
+    // below is what gates a hostname that only resolves to one via DNS.
+    const hostIpFamily = net.isIP(target.hostname);
+    if (hostIpFamily && !isAddressAllowed(target.hostname, hostIpFamily)) {
+      throw new SsrfBlockedError();
+    }
+
     const client = target.protocol === "https:" ? https : http;
 
     const result = await new Promise<SafeFetchResult | { redirectTo: string }>((resolve, reject) => {
@@ -219,6 +254,14 @@ export async function safeFetch(
           res.on("data", (chunk: Buffer) => {
             received += chunk.length;
             if (received > maxBytes) {
+              // The chunk that crosses the cap is often the *only* chunk
+              // (a small/fast response, e.g. from a local or otherwise
+              // low-latency server, frequently arrives as a single TCP
+              // read) - slicing in the remaining budget rather than
+              // dropping this chunk entirely is what keeps that case from
+              // resolving with an empty body instead of a truncated one.
+              const remaining = maxBytes - (received - chunk.length);
+              if (remaining > 0) chunks.push(chunk.subarray(0, remaining));
               res.destroy();
               resolve({
                 statusCode: status,

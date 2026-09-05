@@ -1,6 +1,15 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import zlib from "zlib";
-import { isDisallowedIPv4, isDisallowedIPv6, decompressBody } from "../ssrf-guard";
+import http from "http";
+import type { AddressInfo } from "net";
+import {
+  isDisallowedIPv4,
+  isDisallowedIPv6,
+  decompressBody,
+  validateUrl,
+  safeFetch,
+  SsrfBlockedError,
+} from "../ssrf-guard";
 
 describe("isDisallowedIPv4", () => {
   it("blocks loopback", () => {
@@ -108,5 +117,123 @@ describe("decompressBody", () => {
     expect(() => decompressBody(truncated, "gzip")).not.toThrow();
     // Can't recover the original from a truncated stream - just must not crash.
     expect(Buffer.isBuffer(decompressBody(truncated, "gzip"))).toBe(true);
+  });
+});
+
+describe("validateUrl", () => {
+  it("rejects dangerous protocols", () => {
+    expect(() => validateUrl("javascript:alert(1)")).toThrow(SsrfBlockedError);
+    expect(() => validateUrl("data:text/html,<script>alert(1)</script>")).toThrow(SsrfBlockedError);
+    expect(() => validateUrl("file:///etc/passwd")).toThrow(SsrfBlockedError);
+    expect(() => validateUrl("ftp://example.com/file")).toThrow(SsrfBlockedError);
+  });
+
+  it("rejects URLs with embedded credentials", () => {
+    expect(() => validateUrl("https://user:pass@example.com")).toThrow(SsrfBlockedError);
+  });
+
+  it("rejects unparseable input", () => {
+    expect(() => validateUrl("not a url")).toThrow(SsrfBlockedError);
+  });
+
+  it("accepts ordinary http/https URLs", () => {
+    expect(() => validateUrl("https://example.com/page")).not.toThrow();
+    expect(() => validateUrl("http://example.com/page")).not.toThrow();
+  });
+});
+
+// These exercise safeFetch's actual network mechanics (redirects, caps,
+// timeouts) against a real local HTTP server. The server is bound to
+// 127.0.0.1, which the production isAddressAllowed check correctly
+// refuses to connect to - so every test in this block that needs the
+// request to actually go through passes an allow-all override
+// (isAddressAllowed) that only these tests use. That override doesn't
+// exist in any production code path (route.ts never sets it), so this
+// is testing safeFetch's transport logic in isolation from the address
+// policy, not weakening it.
+describe("safeFetch (real local server)", () => {
+  let server: http.Server | null = null;
+
+  afterEach(async () => {
+    if (server) {
+      await new Promise((resolve) => server!.close(resolve));
+      server = null;
+    }
+  });
+
+  function listen(handler: http.RequestListener): Promise<string> {
+    return new Promise((resolve) => {
+      server = http.createServer(handler);
+      server.listen(0, "127.0.0.1", () => {
+        const { port } = server!.address() as AddressInfo;
+        resolve(`http://127.0.0.1:${port}`);
+      });
+    });
+  }
+
+  const allowAll = () => true;
+
+  it("without an override, refuses to connect to a real local server at all (the actual safety property)", async () => {
+    const base = await listen((_req, res) => {
+      res.writeHead(200, { "content-type": "text/html" });
+      res.end("<html></html>");
+    });
+    await expect(safeFetch(base)).rejects.toThrow(SsrfBlockedError);
+  });
+
+  it("with the test override, performs a normal GET", async () => {
+    const base = await listen((_req, res) => {
+      res.writeHead(200, { "content-type": "text/html" });
+      res.end("<html><title>Hi</title></html>");
+    });
+    const result = await safeFetch(base, { isAddressAllowed: allowAll });
+    expect(result.statusCode).toBe(200);
+    expect(result.body.toString("utf-8")).toContain("<title>Hi</title>");
+  });
+
+  it("follows a redirect and fetches the final destination", async () => {
+    const base = await listen((req, res) => {
+      if (req.url === "/start") {
+        res.writeHead(302, { location: "/final" });
+        res.end();
+        return;
+      }
+      res.writeHead(200, { "content-type": "text/html" });
+      res.end("<html><title>Final page</title></html>");
+    });
+    const result = await safeFetch(`${base}/start`, { isAddressAllowed: allowAll });
+    expect(result.statusCode).toBe(200);
+    expect(result.body.toString("utf-8")).toContain("Final page");
+  });
+
+  it("gives up after too many redirects", async () => {
+    const base = await listen((_req, res) => {
+      // Every request redirects to itself - an infinite redirect loop.
+      res.writeHead(301, { location: "/" });
+      res.end();
+    });
+    await expect(
+      safeFetch(base, { isAddressAllowed: allowAll, maxRedirects: 2 })
+    ).rejects.toThrow(SsrfBlockedError);
+  });
+
+  it("times out against a server that never responds", async () => {
+    const base = await listen(() => {
+      // Never call res.end() - the request should time out rather than hang.
+    });
+    await expect(
+      safeFetch(base, { isAddressAllowed: allowAll, timeoutMs: 200 })
+    ).rejects.toThrow();
+  });
+
+  it("truncates a response larger than maxBytes instead of buffering it all", async () => {
+    const big = "x".repeat(100_000);
+    const base = await listen((_req, res) => {
+      res.writeHead(200, { "content-type": "text/html" });
+      res.end(big);
+    });
+    const result = await safeFetch(base, { isAddressAllowed: allowAll, maxBytes: 1_000 });
+    expect(result.body.length).toBeLessThan(big.length);
+    expect(result.body.length).toBeGreaterThan(0);
   });
 });
