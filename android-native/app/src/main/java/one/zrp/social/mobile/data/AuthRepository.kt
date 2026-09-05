@@ -21,7 +21,7 @@ import retrofit2.HttpException
  * than opening a second EncryptedSharedPreferences handle.
  */
 class AuthRepository {
-    private val tokenStore = ApiClient.tokenStore()
+    private val tokenStore = ApiClient.getTokenStore()
     private val gson = Gson()
 
     fun isLoggedIn(): Boolean = tokenStore.getSessionToken() != null

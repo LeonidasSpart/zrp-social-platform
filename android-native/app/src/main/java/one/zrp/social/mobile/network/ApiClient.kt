@@ -29,8 +29,12 @@ object ApiClient {
 
     // Exposed so AuthRepository shares this exact instance rather than
     // opening a second EncryptedSharedPreferences handle onto the same
-    // underlying file.
-    fun tokenStore(): TokenStore {
+    // underlying file. Named getTokenStore() rather than tokenStore()
+    // because Kotlin treats a member function and a member property of
+    // the same name in the same scope as a genuine overload-resolution
+    // ambiguity at every call site, not two independently resolvable
+    // members.
+    fun getTokenStore(): TokenStore {
         check(::tokenStore.isInitialized) {
             "ApiClient.init(context) must be called (see ZrpApplication) before use."
         }

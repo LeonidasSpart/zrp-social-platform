@@ -65,7 +65,13 @@ dependencies {
     // app XML file on disk; this backs it with an Android Keystore-
     // derived key instead, the same mechanism NextAuth's httpOnly
     // cookie protects the equivalent value with on the web.
-    implementation 'androidx.security:security-crypto:1.0.0'
+    //
+    // The MasterKey/MasterKey.Builder API (as opposed to the older,
+    // now-deprecated MasterKeys.getOrCreate() static helper) only
+    // exists from 1.1.0-alpha03 onward - the true stable 1.0.0 release
+    // predates it and does not have this class at all, despite already
+    // shipping EncryptedSharedPreferences itself.
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
 
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
