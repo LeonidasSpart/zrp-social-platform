@@ -10,6 +10,9 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const requestedLimit = parseInt(req.nextUrl.searchParams.get("limit") || "10", 10);
+    const take = Math.min(Math.max(Number.isFinite(requestedLimit) ? requestedLimit : 10, 1), 50);
+
     // Get users that the current user is not following, excluding themselves
     const followed = await prisma.follow.findMany({
       where: { followerId: session.user.id },
@@ -33,7 +36,7 @@ export async function GET(req: NextRequest) {
       orderBy: {
         followers: { _count: "desc" },
       },
-      take: 10,
+      take,
     });
 
     return NextResponse.json(suggestions);
