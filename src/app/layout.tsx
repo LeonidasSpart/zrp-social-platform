@@ -6,7 +6,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import RightPanel from "@/components/RightPanel";
-import Footer from "@/components/Footer";
+import ConditionalFooter from "@/components/ConditionalFooter";
 import CookieConsent from "@/components/CookieConsent";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import PushNotificationManager from "@/components/PushNotificationManager";
@@ -375,7 +375,7 @@ export default function RootLayout({
 
                         <CookieConsent />
 
-                        <Footer />
+                        <ConditionalFooter />
 
                         <PushNotificationManager />
 

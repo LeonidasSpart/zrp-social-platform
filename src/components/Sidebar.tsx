@@ -9,7 +9,8 @@ import {
   Home, Compass, Search, MessageSquare, Bell, Bookmark, User,
   LayoutDashboard, Settings, Users, Key, LogOut, MoreHorizontal,
   PenSquare, Sun, Moon, Globe, Film, Newspaper, Store, Gamepad2,
-  Briefcase, HeartHandshake, Music2,
+  Briefcase, HeartHandshake, Music2, ChevronDown, Sparkles, Rocket,
+  Bot, Info, LifeBuoy, Scale,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -32,6 +33,9 @@ export default function Sidebar() {
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
 
   const isAuthenticated = !!session;
   const features = session?.user?.features;
@@ -124,6 +128,13 @@ export default function Sidebar() {
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: "/login" });
+  };
+
+  const closeMoreMenu = () => {
+    setMoreMenuOpen(false);
+    setAboutOpen(false);
+    setSupportOpen(false);
+    setLegalOpen(false);
   };
 
   const currentLangLabel =
@@ -318,13 +329,42 @@ export default function Sidebar() {
             <>
               <div
                 className="fixed inset-0 z-40"
-                onClick={() => setMoreMenuOpen(false)}
+                onClick={closeMoreMenu}
               />
 
-              <div className="absolute left-0 bottom-full mb-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+              <div className="absolute left-0 bottom-full mb-2 w-64 max-h-[70vh] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                <Link
+                  href="/pricing"
+                  onClick={closeMoreMenu}
+                  className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>{t("nav.premium")}</span>
+                </Link>
+
+                <Link
+                  href="/creator/dashboard"
+                  onClick={closeMoreMenu}
+                  className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                >
+                  <Rocket className="w-4 h-4" />
+                  <span>{t("nav.creatorStudio")}</span>
+                </Link>
+
+                <Link
+                  href="/ai"
+                  onClick={closeMoreMenu}
+                  className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                >
+                  <Bot className="w-4 h-4" />
+                  <span>{t("nav.aiAssistant")}</span>
+                </Link>
+
+                <hr className="my-1 border-gray-200 dark:border-gray-700" />
+
                 <Link
                   href="/settings"
-                  onClick={() => setMoreMenuOpen(false)}
+                  onClick={closeMoreMenu}
                   className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                 >
                   <Settings className="w-4 h-4" />
@@ -334,7 +374,7 @@ export default function Sidebar() {
                 {features?.teamManagement && (
                   <Link
                     href="/settings/team"
-                    onClick={() => setMoreMenuOpen(false)}
+                    onClick={closeMoreMenu}
                     className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                   >
                     <Users className="w-4 h-4" />
@@ -345,12 +385,119 @@ export default function Sidebar() {
                 {features?.apiAccess && (
                   <Link
                     href="/settings/api-keys"
-                    onClick={() => setMoreMenuOpen(false)}
+                    onClick={closeMoreMenu}
                     className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                   >
                     <Key className="w-4 h-4" />
                     <span>{t("nav.apiKeys")}</span>
                   </Link>
+                )}
+
+                <hr className="my-1 border-gray-200 dark:border-gray-700" />
+
+                {/* About ZRP */}
+                <button
+                  type="button"
+                  onClick={() => setAboutOpen((value) => !value)}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                  aria-expanded={aboutOpen}
+                >
+                  <Info className="w-4 h-4" />
+                  <span className="flex-1">{t("nav.aboutZrp")}</span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform ${aboutOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                {aboutOpen && (
+                  <div className="bg-gray-50 dark:bg-gray-900/40">
+                    {[
+                      { href: "/about", label: t("footer.about") },
+                      { href: "/careers", label: t("footer.careers") },
+                      { href: "/charity", label: t("footer.charity") },
+                      { href: "/transparency", label: t("footer.transparency") },
+                      { href: "/press", label: t("footer.pressKit") },
+                      { href: "/news", label: t("footer.zrpNews") },
+                      { href: "/journalist", label: t("footer.becomeJournalist") },
+                      { href: "/investors", label: t("footer.investors") },
+                      { href: "/contact", label: t("footer.contact") },
+                    ].map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={closeMoreMenu}
+                        className="block pl-11 pr-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+
+                {/* Support */}
+                <button
+                  type="button"
+                  onClick={() => setSupportOpen((value) => !value)}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                  aria-expanded={supportOpen}
+                >
+                  <LifeBuoy className="w-4 h-4" />
+                  <span className="flex-1">{t("footer.supportHeading")}</span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform ${supportOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                {supportOpen && (
+                  <div className="bg-gray-50 dark:bg-gray-900/40">
+                    {[
+                      { href: "/faq", label: t("footer.faq") },
+                      { href: "/help", label: t("footer.helpCenter") },
+                      { href: "/contact", label: t("footer.contactSupport") },
+                      { href: "/support/tickets", label: t("footer.myTickets") },
+                    ].map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={closeMoreMenu}
+                        className="block pl-11 pr-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+
+                {/* Legal */}
+                <button
+                  type="button"
+                  onClick={() => setLegalOpen((value) => !value)}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                  aria-expanded={legalOpen}
+                >
+                  <Scale className="w-4 h-4" />
+                  <span className="flex-1">{t("footer.legalHeading")}</span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform ${legalOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                {legalOpen && (
+                  <div className="bg-gray-50 dark:bg-gray-900/40">
+                    {[
+                      { href: "/privacy", label: t("footer.privacyPolicy") },
+                      { href: "/terms", label: t("footer.termsOfService") },
+                    ].map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={closeMoreMenu}
+                        className="block pl-11 pr-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
                 )}
 
                 <hr className="my-1 border-gray-200 dark:border-gray-700" />
