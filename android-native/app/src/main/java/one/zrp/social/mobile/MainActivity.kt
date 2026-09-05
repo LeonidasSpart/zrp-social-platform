@@ -9,6 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.data.AuthRepository
@@ -34,7 +35,9 @@ fun ZrpSocialApp() {
     // ApiClient.init() already ran in ZrpApplication.onCreate() before
     // this Activity exists, so AuthRepository() is safe to construct
     // here with no context of its own.
-    val authViewModel: AuthViewModel = viewModel(factory = AuthViewModelFactory(AuthRepository()))
+    val authViewModel: AuthViewModel = viewModel(
+        factory = remember { AuthViewModelFactory(AuthRepository()) },
+    )
 
     ZrpSocialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {

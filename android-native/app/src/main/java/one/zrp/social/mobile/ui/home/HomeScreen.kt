@@ -43,7 +43,9 @@ fun HomeScreen(
     onOpenStoryViewer: (userId: String) -> Unit,
     onCreateStory: () -> Unit,
 ) {
-    val viewModel: HomeViewModel = viewModel(factory = HomeViewModelFactory(PostsRepository()))
+    val viewModel: HomeViewModel = viewModel(
+        factory = remember { HomeViewModelFactory(PostsRepository()) },
+    )
     val activeTab by viewModel.activeTab.collectAsState()
     val forYouState by viewModel.forYouState.collectAsState()
     val followingState by viewModel.followingState.collectAsState()
