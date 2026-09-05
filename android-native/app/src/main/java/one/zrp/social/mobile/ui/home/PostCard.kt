@@ -44,6 +44,7 @@ fun PostCard(
     post: Post,
     onLikeClick: (String) -> Unit,
     onClick: (String) -> Unit,
+    onAuthorClick: (String) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -59,20 +60,26 @@ fun PostCard(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(44.dp)
-                        .clip(CircleShape),
+                        .clip(CircleShape)
+                        .clickable { onAuthorClick(post.author.username) },
                 )
             } else {
                 Icon(
                     imageVector = Icons.Filled.Person,
                     contentDescription = post.author.username,
-                    modifier = Modifier.size(44.dp),
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clickable { onAuthorClick(post.author.username) },
                 )
             }
 
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.fillMaxWidth()) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { onAuthorClick(post.author.username) },
+                ) {
                     Text(
                         text = post.author.name ?: post.author.username,
                         style = MaterialTheme.typography.titleSmall,

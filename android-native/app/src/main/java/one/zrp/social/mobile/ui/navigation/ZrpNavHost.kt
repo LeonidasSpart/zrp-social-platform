@@ -10,20 +10,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import one.zrp.social.mobile.ui.home.HomeScreen
+import one.zrp.social.mobile.ui.profile.ProfileScreen
 import one.zrp.social.mobile.ui.screens.CreateScreen
 import one.zrp.social.mobile.ui.screens.MessagesScreen
 import one.zrp.social.mobile.ui.screens.NotificationsScreen
-import one.zrp.social.mobile.ui.screens.ProfileScreen
 import one.zrp.social.mobile.ui.screens.SearchScreen
 
 @Composable
-fun ZrpNavHost() {
+fun ZrpNavHost(onLogout: () -> Unit) {
     val navController = rememberNavController()
+    val goToProfile: (String) -> Unit = { username -> navController.navigate("profile/$username") }
 
     Scaffold(
         bottomBar = { ZrpBottomBar(navController) },
@@ -33,12 +36,21 @@ fun ZrpNavHost() {
             startDestination = ZrpDestination.Home.route,
             modifier = androidx.compose.ui.Modifier.padding(innerPadding),
         ) {
-            composable(ZrpDestination.Home.route) { HomeScreen() }
+            composable(ZrpDestination.Home.route) { HomeScreen(onAuthorClick = goToProfile) }
             composable(ZrpDestination.Search.route) { SearchScreen() }
             composable(ZrpDestination.Create.route) { CreateScreen() }
             composable(ZrpDestination.Notifications.route) { NotificationsScreen() }
             composable(ZrpDestination.Messages.route) { MessagesScreen() }
-            composable(ZrpDestination.Profile.route) { ProfileScreen() }
+            composable(ZrpDestination.Profile.route) {
+                ProfileScreen(username = null, onLogout = onLogout, onAuthorClick = goToProfile)
+            }
+            composable(
+                route = "profile/{username}",
+                arguments = listOf(navArgument("username") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val username = backStackEntry.arguments?.getString("username")
+                ProfileScreen(username = username, onLogout = onLogout, onAuthorClick = goToProfile)
+            }
         }
     }
 }

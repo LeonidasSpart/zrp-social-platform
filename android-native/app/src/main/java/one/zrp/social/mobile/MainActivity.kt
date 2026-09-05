@@ -46,7 +46,7 @@ fun ZrpSocialApp() {
                     formState = loginForm,
                     onLogin = { identifier, password -> authViewModel.login(identifier, password) },
                 )
-                is AuthUiState.LoggedIn -> ZrpNavHost()
+                is AuthUiState.LoggedIn -> ZrpNavHost(onLogout = { authViewModel.logout() })
             }
         }
     }

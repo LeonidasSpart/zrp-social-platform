@@ -37,7 +37,7 @@ import one.zrp.social.mobile.data.PostsRepository
  */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(onAuthorClick: (String) -> Unit) {
     val viewModel: HomeViewModel = viewModel(factory = HomeViewModelFactory(PostsRepository()))
     val activeTab by viewModel.activeTab.collectAsState()
     val forYouState by viewModel.forYouState.collectAsState()
@@ -101,6 +101,7 @@ fun HomeScreen() {
                                 post = post,
                                 onLikeClick = { postId -> viewModel.toggleLike(activeTab, postId) },
                                 onClick = { /* Post detail screen lands in a later phase. */ },
+                                onAuthorClick = onAuthorClick,
                             )
                         }
 
