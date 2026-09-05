@@ -3,12 +3,11 @@ import { prisma } from "./db";
 // Firebase Cloud Messaging for the native Android app - separate from
 // src/lib/push-notifications.ts's Web Push (VAPID) path, which only
 // reaches browser tabs. Lazily initialized exactly like getWebPush()
-// there: sending real pushes needs a Firebase service-account
-// credential, which is a server secret distinct from the client-side
-// google-services.json the Android app ships with, and isn't
-// configured yet. Every call here is a safe no-op until
-// FIREBASE_SERVICE_ACCOUNT_JSON is set, so this activates the moment
-// that secret is added - no further code changes needed.
+// there, from the FIREBASE_SERVICE_ACCOUNT_JSON server secret
+// (distinct from the client-side google-services.json the Android app
+// ships with). Every call here is a safe no-op if that env var is ever
+// unset or malformed - see fcm.test.ts - rather than throwing and
+// taking down whatever caller triggered a push.
 let messagingApp: import("firebase-admin/app").App | null = null;
 let initAttempted = false;
 
@@ -25,6 +24,15 @@ function getFcmApp(): import("firebase-admin/app").App | null {
     messagingApp = getApps().length
       ? getApps()[0]
       : initializeApp({ credential: cert(serviceAccount) });
+
+    // Safe to log - project_id isn't sensitive on its own (it's
+    // visible in google-services.json too), and nothing else here
+    // touches the private key. This is the one signal that confirms
+    // the credential parsed and the SDK initialized at all, without
+    // waiting for an actual push send to find out.
+    console.log("FCM: Firebase Admin SDK initialized", {
+      projectId: serviceAccount?.project_id ?? "(missing)",
+    });
   } catch (err) {
     console.error("Failed to initialize Firebase Admin SDK for FCM:", err);
     messagingApp = null;
