@@ -279,7 +279,16 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-zrp-deepBlack">
+      {/* pt-[env(safe-area-inset-top)] keeps the header's tappable row
+          clear of the Android status bar / iOS notch: targeting Android
+          SDK 35+ (see variables.gradle) means edge-to-edge can no longer
+          be opted out of natively, so the WebView draws behind the
+          status bar regardless - this is what actually pushes the
+          header's content down into the safe area instead. The
+          border/background still extend up behind the status bar
+          (nothing here disables edge-to-edge), only the row holding the
+          tappable controls is inset. */}
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white pt-[env(safe-area-inset-top)] dark:border-gray-800 dark:bg-zrp-deepBlack">
         <div className="w-full max-w-[1400px] mx-auto px-3 sm:px-4">
           <div className="h-[64px] flex items-center justify-between gap-3">
 
@@ -622,7 +631,7 @@ export default function Header() {
               {isAuthenticated && (
                 <Link
                   href="/messages"
-                  className="relative flex items-center justify-center w-10 h-10 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  className="relative flex items-center justify-center w-12 h-12 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
                   aria-label={t("nav.messages")}
                 >
                   <MessageSquare className="w-5 h-5" />
@@ -642,7 +651,7 @@ export default function Header() {
               {isAuthenticated && (
                 <Link
                   href="/notifications"
-                  className="relative flex items-center justify-center w-10 h-10 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  className="relative flex items-center justify-center w-12 h-12 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
                   aria-label={t(
                     "nav.notifications"
                   )}
@@ -671,7 +680,7 @@ export default function Header() {
                   setUserMenuOpen(false);
                   setLangMenuOpen(false);
                 }}
-                className="flex items-center justify-center w-10 h-10 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-zrp-red transition"
+                className="flex items-center justify-center w-12 h-12 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-zrp-red transition"
                 aria-label={
                   mobileMenuOpen
                     ? t("nav.closeMenu")
@@ -704,12 +713,12 @@ export default function Header() {
             type="button"
             aria-label={t("nav.closeMenu")}
             onClick={closeMobileMenu}
-            className="lg:hidden fixed inset-0 top-[64px] z-40 bg-black/30 backdrop-blur-[2px]"
+            className="lg:hidden fixed inset-0 top-[calc(64px+env(safe-area-inset-top))] z-40 bg-black/30 backdrop-blur-[2px]"
           />
 
           {/* Menu Panel */}
 
-          <div className="lg:hidden fixed top-[64px] right-0 bottom-0 z-50 w-full sm:w-[420px] bg-white dark:bg-zrp-deepBlack border-l border-gray-200 dark:border-gray-800 shadow-2xl overflow-y-auto">
+          <div className="lg:hidden fixed top-[calc(64px+env(safe-area-inset-top))] right-0 bottom-0 z-50 w-full sm:w-[420px] bg-white dark:bg-zrp-deepBlack border-l border-gray-200 dark:border-gray-800 shadow-2xl overflow-y-auto">
 
             {/* =====================================================
                 USER HEADER
