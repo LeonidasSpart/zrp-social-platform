@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,7 +56,7 @@ fun ConversationScreen(
     onBack: () -> Unit,
 ) {
     val viewModel: ConversationViewModel = viewModel(
-        factory = ConversationViewModelFactory(MessagesRepository(), partnerId),
+        factory = remember(partnerId) { ConversationViewModelFactory(MessagesRepository(), partnerId) },
     )
     val state by viewModel.state.collectAsState()
 

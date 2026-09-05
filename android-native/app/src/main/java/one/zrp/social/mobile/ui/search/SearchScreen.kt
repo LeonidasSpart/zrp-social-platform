@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,7 +54,9 @@ import one.zrp.social.mobile.ui.home.PostCard
  */
 @Composable
 fun SearchScreen(onAuthorClick: (String) -> Unit, onOpenMusic: () -> Unit) {
-    val viewModel: SearchViewModel = viewModel(factory = SearchViewModelFactory(SearchRepository()))
+    val viewModel: SearchViewModel = viewModel(
+        factory = remember { SearchViewModelFactory(SearchRepository()) },
+    )
     val state by viewModel.state.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {

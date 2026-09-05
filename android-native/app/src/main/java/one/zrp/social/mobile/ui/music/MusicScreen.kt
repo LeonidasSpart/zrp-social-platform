@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,7 +55,9 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  */
 @Composable
 fun MusicScreen(onBack: () -> Unit) {
-    val viewModel: MusicViewModel = viewModel(factory = MusicViewModelFactory(MusicRepository()))
+    val viewModel: MusicViewModel = viewModel(
+        factory = remember { MusicViewModelFactory(MusicRepository()) },
+    )
     val state by viewModel.state.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {

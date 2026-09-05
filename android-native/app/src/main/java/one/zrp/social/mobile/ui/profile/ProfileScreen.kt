@@ -66,7 +66,7 @@ fun ProfileScreen(
     onMessageClick: (partnerId: String, partnerUsername: String) -> Unit,
 ) {
     val viewModel: ProfileViewModel = viewModel(
-        factory = ProfileViewModelFactory(ProfileRepository(), username),
+        factory = remember(username) { ProfileViewModelFactory(ProfileRepository(), username) },
     )
     val state by viewModel.state.collectAsState()
 

@@ -47,7 +47,7 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 @Composable
 fun StoryViewerScreen(userId: String, onClose: () -> Unit) {
     val viewModel: StoryViewerViewModel = viewModel(
-        factory = StoryViewerViewModelFactory(StoriesRepository(), userId),
+        factory = remember(userId) { StoryViewerViewModelFactory(StoriesRepository(), userId) },
     )
     val state by viewModel.state.collectAsState()
     var currentIndex by remember { mutableIntStateOf(0) }

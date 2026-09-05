@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -34,7 +35,9 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  */
 @Composable
 fun CreatePostScreen(onPosted: () -> Unit) {
-    val viewModel: CreatePostViewModel = viewModel(factory = CreatePostViewModelFactory(PostsRepository()))
+    val viewModel: CreatePostViewModel = viewModel(
+        factory = remember { CreatePostViewModelFactory(PostsRepository()) },
+    )
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(state.posted) {
