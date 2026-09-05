@@ -6,14 +6,14 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 /**
- * Base HTTP client for the existing ZRP REST API (src/app/api/** in the
- * web repo) - no backend rewrite, this talks to the same endpoints the
- * website itself calls. Not wired to any auth yet: NextAuth's default
- * session is an httpOnly browser cookie, which a native OkHttp client
- * has no equivalent of, so a bearer-token issuance/refresh endpoint is
- * real backend work for Phase 3 (Authentication) before any request
- * here can act as a signed-in user. This client is deliberately just
- * the transport foundation.
+ * Base HTTP client for the existing ZRP REST API (the web repo's
+ * src/app/api routes) - no backend rewrite, this talks to the same
+ * endpoints the website itself calls. Not wired to any auth yet:
+ * NextAuth's default session is an httpOnly browser cookie, which a
+ * native OkHttp client has no equivalent of, so a bearer-token
+ * issuance/refresh endpoint is real backend work for Phase 3
+ * (Authentication) before any request here can act as a signed-in
+ * user. This client is deliberately just the transport foundation.
  */
 object ApiClient {
     private const val BASE_URL = "https://zrp.one/api/"
