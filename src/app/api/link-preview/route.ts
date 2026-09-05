@@ -53,7 +53,20 @@ async function fetchYouTubePreview(url: string): Promise<LinkPreview | null> {
   return preview;
 }
 
-async function fetchGenericPreview(url: string): Promise<LinkPreview | null> {
+interface GenericPreviewResult {
+  preview: LinkPreview | null;
+  // true when the page itself was never actually examined - a network
+  // error, timeout, non-2xx status, or non-HTML response - as opposed
+  // to a page that was fetched and parsed cleanly but genuinely has no
+  // og:title/og:image. The route uses this to pick how long to cache
+  // the negative result: a transient failure (a momentary block by the
+  // publisher's bot protection, a timeout under load) shouldn't lock a
+  // link out of ever showing a preview for a full hour on its very
+  // first, possibly unlucky, attempt.
+  transient: boolean;
+}
+
+async function fetchGenericPreview(url: string): Promise<GenericPreviewResult> {
   try {
     const res = await safeFetch(url, {
       timeoutMs: 6000,
@@ -76,16 +89,20 @@ async function fetchGenericPreview(url: string): Promise<LinkPreview | null> {
         "Accept-Encoding": "gzip, deflate, br",
       },
     });
-    if (res.statusCode < 200 || res.statusCode >= 300) return null;
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      return { preview: null, transient: true };
+    }
 
     const contentType = (res.headers["content-type"] as string) || "";
-    if (!contentType.includes("text/html")) return null;
+    if (!contentType.includes("text/html")) {
+      return { preview: null, transient: true };
+    }
 
     const html = res.body.toString("utf-8");
 
-    return parseHtmlMetadata(html, url);
+    return { preview: parseHtmlMetadata(html, url), transient: false };
   } catch {
-    return null;
+    return { preview: null, transient: true };
   }
 }
 
@@ -123,9 +140,21 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(cached);
   }
 
-  const preview = isYouTubeUrl(target.toString())
-    ? (await fetchYouTubePreview(target.toString())) || (await fetchGenericPreview(target.toString()))
-    : await fetchGenericPreview(target.toString());
+  let preview: LinkPreview | null = null;
+  let transient = false;
+
+  if (isYouTubeUrl(target.toString())) {
+    preview = await fetchYouTubePreview(target.toString());
+    if (!preview) {
+      const generic = await fetchGenericPreview(target.toString());
+      preview = generic.preview;
+      transient = generic.transient;
+    }
+  } else {
+    const generic = await fetchGenericPreview(target.toString());
+    preview = generic.preview;
+    transient = generic.transient;
+  }
 
   if (!preview) {
     // Cache the "nothing found" result too (shorter TTL), so a broken/
@@ -133,8 +162,14 @@ export async function GET(req: NextRequest) {
     // empty-shape object rather than a bare null - a cached `null` would
     // be falsy and look identical to "not cached yet", defeating the
     // whole point of caching the negative result.
+    //
+    // A transient failure (timeout, non-2xx, non-HTML, thrown error)
+    // gets a much shorter TTL than a confirmed-empty page: the page was
+    // never actually examined, so caching it for a full hour would lock
+    // a link out of ever showing a preview just because its very first
+    // fetch attempt hit a momentary block or a slow response.
     const empty: LinkPreview = { url: target.toString(), title: null, description: null, image: null, siteName: null, isVideo: false };
-    await setCached(cacheKey, empty, 3600);
+    await setCached(cacheKey, empty, transient ? 60 : 3600);
     return NextResponse.json(empty);
   }
 
