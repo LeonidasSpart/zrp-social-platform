@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
@@ -51,7 +52,7 @@ import one.zrp.social.mobile.ui.home.PostCard
  * already use. No fake results, no separate search index.
  */
 @Composable
-fun SearchScreen(onAuthorClick: (String) -> Unit) {
+fun SearchScreen(onAuthorClick: (String) -> Unit, onOpenMusic: () -> Unit) {
     val viewModel: SearchViewModel = viewModel(factory = SearchViewModelFactory(SearchRepository()))
     val state by viewModel.state.collectAsState()
 
@@ -79,6 +80,7 @@ fun SearchScreen(onAuthorClick: (String) -> Unit) {
                 state = state,
                 onAuthorClick = onAuthorClick,
                 onHashtagClick = { tag -> viewModel.onHashtagClick(tag) },
+                onOpenMusic = onOpenMusic,
             )
         } else {
             SearchResultsContent(
@@ -95,6 +97,7 @@ private fun DiscoverContent(
     state: SearchUiState,
     onAuthorClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onOpenMusic: () -> Unit,
 ) {
     if (state.isLoadingDiscover) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -104,6 +107,10 @@ private fun DiscoverContent(
     }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
+        item {
+            MusicEntryRow(onClick = onOpenMusic)
+        }
+
         if (state.trendingHashtags.isNotEmpty()) {
             item {
                 Text(
@@ -245,6 +252,25 @@ private fun SearchUserRow(user: SearchUser, onClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+    }
+}
+
+@Composable
+private fun MusicEntryRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.MusicNote,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text = "ZRP Music", style = MaterialTheme.typography.titleSmall)
     }
 }
 
