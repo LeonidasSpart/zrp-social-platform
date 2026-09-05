@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1039614279907",
+    "project_id": "zrp-social",
+    "storage_bucket": "zrp-social.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1039614279907:android:cba16c50ba62e98af885d6",
+        "android_client_info": {
+          "package_name": "one.zrp.social"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjyHeqoSVTiMabeuIHSBhnhDlgzZh7CbY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

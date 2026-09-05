@@ -28,6 +28,7 @@
     "critters": "^0.0.22",
     "emoji-picker-react": "^4.12.0",
     "file-type": "^22.0.2",
+    "firebase-admin": "^14.3.0",
     "framer-motion": "^12.43.0",
     "lucide-react": "^0.263.1",
     "marked": "^18.0.11",

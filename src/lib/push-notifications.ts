@@ -1,6 +1,7 @@
 import webpush from "web-push";
 import crypto from "crypto";
 import { prisma } from "./db";
+import { sendFcmPush } from "./fcm";
 // Initialize Web Push lazily.
 // Do not initialize VAPID at module/build time.
 function getWebPush() {
@@ -94,6 +95,15 @@ export async function sendPushNotification(
   body: string,
   url: string = "/"
 ) {
+  // Native Android (FCM) and browser (Web Push) are independent
+  // delivery paths with their own subscriber lists - one having no
+  // registered devices, or erroring, must never stop the other.
+  try {
+    await sendFcmPush(userId, title, body);
+  } catch (err) {
+    console.error("FCM push notification error:", err);
+  }
+
   try {
     const push = getWebPush();
     const subscriptions = await prisma.pushSubscription.findMany({

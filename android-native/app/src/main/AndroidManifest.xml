@@ -3,6 +3,11 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Required from Android 13 (API 33) onward for any app that posts
+         notifications - requested at runtime from MainActivity once the
+         user is signed in (see AuthState-gated LaunchedEffect there),
+         not declaring this alone is enough. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".ZrpApplication"
@@ -46,6 +51,24 @@
                 <data android:scheme="https" android:host="zrp.one" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".push.ZrpFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Used for any push that arrives without an explicit
+             channel id (see ZrpFirebaseMessagingService's channel setup)
+             so a plain data-only message still lands somewhere sane. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/default_notification_channel_id" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" />
 
     </application>
 
