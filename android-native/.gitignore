@@ -8,3 +8,11 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Release upload keystore - never committed, exactly like android/.gitignore
+# for the Capacitor app. The CI workflow decodes it from a GitHub Actions
+# secret into keystore.properties at build time; it never exists in the
+# working tree otherwise unless a developer drops a real one in locally.
+*.jks
+*.keystore
+keystore.properties

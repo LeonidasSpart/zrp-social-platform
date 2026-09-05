@@ -5,6 +5,25 @@ plugins {
     id 'com.google.gms.google-services'
 }
 
+// Release signing, wired but not yet active locally: this file is what
+// lets the real upload keystore start working the moment
+// keystore.properties exists, with zero further Gradle changes. That
+// keystore already exists validated as this repo's ANDROID_KEYSTORE_*
+// secrets (used today to sign android/, the Capacitor app this module
+// is replacing) - the CI release job below decodes it from those same
+// secrets and writes exactly this properties file at build time; it is
+// never committed (see .gitignore). Locally, a developer with the real
+// keystore can drop the same file next to it. Until it exists,
+// hasReleaseSigning stays false and the release build type is
+// intentionally left with NO signingConfig - bundleRelease still
+// succeeds, it just produces an unsigned .aab.
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+def keystoreProperties = new Properties()
+def hasReleaseSigning = keystorePropertiesFile.exists()
+if (hasReleaseSigning) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "one.zrp.social.mobile"
     compileSdk = 36
@@ -20,6 +39,17 @@ android {
         versionCode 1
         versionName "0.1.0-foundation"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                storeFile rootProject.file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
     }
 
     buildTypes {
@@ -40,6 +70,9 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 
