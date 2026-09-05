@@ -36,8 +36,15 @@ android {
         applicationId "one.zrp.social"
         minSdkVersion 24
         targetSdkVersion 36
-        versionCode 1
-        versionName "0.1.0-foundation"
+        // versionCode 1 ("1.0") is the existing Capacitor app's Internal
+        // Testing release - confirmed via Play Console there is no
+        // Production release yet. This native app's first release is
+        // versionCode 2 so it can still be uploaded as a valid update to
+        // that same applicationId whenever it replaces the Capacitor
+        // build, per Play's per-applicationId monotonically-increasing
+        // versionCode requirement.
+        versionCode 2
+        versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
