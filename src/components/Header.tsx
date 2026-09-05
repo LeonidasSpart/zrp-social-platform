@@ -31,6 +31,12 @@ import {
   Music2,
   ChevronDown,
   ChevronRight,
+  Sparkles,
+  Rocket,
+  Bot,
+  Info,
+  LifeBuoy,
+  Scale,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -54,6 +60,9 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
 
   const isAuthenticated = !!session;
   const features = session?.user?.features;
@@ -246,6 +255,9 @@ export default function Header() {
     setMobileMenuOpen(false);
     setLangMenuOpen(false);
     setUserMenuOpen(false);
+    setAboutOpen(false);
+    setSupportOpen(false);
+    setLegalOpen(false);
   };
 
   /*
@@ -875,6 +887,34 @@ export default function Header() {
                   </Link>
 
                   <Link
+                    href="/pricing"
+                    onClick={closeMobileMenu}
+                    className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  >
+                    <Sparkles className="w-5 h-5 text-gray-500" />
+
+                    <span className="flex-1 font-medium">
+                      {t("nav.premium")}
+                    </span>
+
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </Link>
+
+                  <Link
+                    href="/creator/dashboard"
+                    onClick={closeMobileMenu}
+                    className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  >
+                    <Rocket className="w-5 h-5 text-gray-500" />
+
+                    <span className="flex-1 font-medium">
+                      {t("nav.creatorStudio")}
+                    </span>
+
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </Link>
+
+                  <Link
                     href="/settings"
                     onClick={closeMobileMenu}
                     className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
@@ -921,6 +961,193 @@ export default function Header() {
                   )}
                 </div>
               )}
+
+              {/* =================================================
+                  PLATFORM
+              ================================================= */}
+
+              {isAuthenticated && (
+                <div className="mt-5 pt-5 border-t border-gray-200 dark:border-gray-800">
+                  <p className="px-4 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    {t("nav.platform")}
+                  </p>
+
+                  <Link
+                    href="/ai"
+                    onClick={closeMobileMenu}
+                    className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  >
+                    <Bot className="w-5 h-5 text-gray-500" />
+
+                    <span className="flex-1 font-medium">
+                      {t("nav.aiAssistant")}
+                    </span>
+
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </Link>
+
+                  <Link
+                    href="/help"
+                    onClick={closeMobileMenu}
+                    className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  >
+                    <LifeBuoy className="w-5 h-5 text-gray-500" />
+
+                    <span className="flex-1 font-medium">
+                      {t("footer.helpCenter")}
+                    </span>
+
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </Link>
+                </div>
+              )}
+
+              {/* =================================================
+                  ABOUT ZRP / SUPPORT / LEGAL
+              ================================================= */}
+
+              <div className="mt-5 pt-5 border-t border-gray-200 dark:border-gray-800 space-y-1">
+                {/* About ZRP */}
+                <div className="rounded-xl overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setAboutOpen((value) => !value)}
+                    className={`w-full flex items-center gap-4 px-4 py-3.5 text-gray-700 dark:text-gray-200 transition ${
+                      aboutOpen
+                        ? "bg-gray-100 dark:bg-gray-800"
+                        : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                    }`}
+                    aria-expanded={aboutOpen}
+                  >
+                    <Info className="w-5 h-5 text-gray-500" />
+
+                    <span className="flex-1 text-left font-medium">
+                      {t("nav.aboutZrp")}
+                    </span>
+
+                    <ChevronDown
+                      className={`w-4 h-4 text-gray-400 transition-transform ${
+                        aboutOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {aboutOpen && (
+                    <div className="mx-2 mb-2 rounded-xl bg-gray-50 dark:bg-gray-800/70 overflow-hidden border border-gray-200 dark:border-gray-700">
+                      {[
+                        { href: "/about", label: t("footer.about") },
+                        { href: "/careers", label: t("footer.careers") },
+                        { href: "/charity", label: t("footer.charity") },
+                        { href: "/transparency", label: t("footer.transparency") },
+                        { href: "/press", label: t("footer.pressKit") },
+                        { href: "/news", label: t("footer.zrpNews") },
+                        { href: "/journalist", label: t("footer.becomeJournalist") },
+                        { href: "/investors", label: t("footer.investors") },
+                        { href: "/contact", label: t("footer.contact") },
+                      ].map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={closeMobileMenu}
+                          className="block px-4 py-3 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Support */}
+                <div className="rounded-xl overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setSupportOpen((value) => !value)}
+                    className={`w-full flex items-center gap-4 px-4 py-3.5 text-gray-700 dark:text-gray-200 transition ${
+                      supportOpen
+                        ? "bg-gray-100 dark:bg-gray-800"
+                        : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                    }`}
+                    aria-expanded={supportOpen}
+                  >
+                    <LifeBuoy className="w-5 h-5 text-gray-500" />
+
+                    <span className="flex-1 text-left font-medium">
+                      {t("footer.supportHeading")}
+                    </span>
+
+                    <ChevronDown
+                      className={`w-4 h-4 text-gray-400 transition-transform ${
+                        supportOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {supportOpen && (
+                    <div className="mx-2 mb-2 rounded-xl bg-gray-50 dark:bg-gray-800/70 overflow-hidden border border-gray-200 dark:border-gray-700">
+                      {[
+                        { href: "/faq", label: t("footer.faq") },
+                        { href: "/help", label: t("footer.helpCenter") },
+                        { href: "/contact", label: t("footer.contactSupport") },
+                        { href: "/support/tickets", label: t("footer.myTickets") },
+                      ].map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={closeMobileMenu}
+                          className="block px-4 py-3 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Legal */}
+                <div className="rounded-xl overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setLegalOpen((value) => !value)}
+                    className={`w-full flex items-center gap-4 px-4 py-3.5 text-gray-700 dark:text-gray-200 transition ${
+                      legalOpen
+                        ? "bg-gray-100 dark:bg-gray-800"
+                        : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                    }`}
+                    aria-expanded={legalOpen}
+                  >
+                    <Scale className="w-5 h-5 text-gray-500" />
+
+                    <span className="flex-1 text-left font-medium">
+                      {t("footer.legalHeading")}
+                    </span>
+
+                    <ChevronDown
+                      className={`w-4 h-4 text-gray-400 transition-transform ${
+                        legalOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {legalOpen && (
+                    <div className="mx-2 mb-2 rounded-xl bg-gray-50 dark:bg-gray-800/70 overflow-hidden border border-gray-200 dark:border-gray-700">
+                      {[
+                        { href: "/privacy", label: t("footer.privacyPolicy") },
+                        { href: "/terms", label: t("footer.termsOfService") },
+                      ].map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={closeMobileMenu}
+                          className="block px-4 py-3 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
 
               {/* =================================================
                   PREFERENCES
