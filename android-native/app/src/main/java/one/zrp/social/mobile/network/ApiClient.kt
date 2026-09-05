@@ -79,4 +79,5 @@ object ApiClient {
     val authApi: AuthApi by lazy { retrofit.create(AuthApi::class.java) }
     val postsApi: PostsApi by lazy { retrofit.create(PostsApi::class.java) }
     val usersApi: UsersApi by lazy { retrofit.create(UsersApi::class.java) }
+    val searchApi: SearchApi by lazy { retrofit.create(SearchApi::class.java) }
 }
