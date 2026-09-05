@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.plugin.compose'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -23,12 +24,17 @@ android {
 
     buildTypes {
         debug {
-            // Lets this build install side-by-side with the existing
-            // Capacitor app (applicationId "one.zrp.social") on the same
-            // test device during the transition - Android treats
-            // "one.zrp.social" and "one.zrp.social.native" as unrelated
-            // apps. Drop this suffix at the actual cutover release.
-            applicationIdSuffix ".native"
+            // No applicationIdSuffix here (there was one, ".native", for
+            // side-by-side installs with the existing Capacitor app
+            // during earlier phases): Firebase/FCM requires the built
+            // APK's applicationId to exactly match a package_name
+            // registered in google-services.json, and this Firebase
+            // project has exactly one Android app registered, for
+            // "one.zrp.social" - the same id defaultConfig already
+            // declares. A suffixed debug build would fail
+            // processDebugGoogleServices with "No matching client
+            // found". Side-by-side installs during development now mean
+            // uninstalling the Capacitor build first.
             versionNameSuffix "-debug"
         }
         release {
@@ -96,6 +102,13 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
 
     implementation 'io.coil-kt:coil-compose:2.7.0'
+
+    // Push notifications (Phase 13) - real device registration tokens
+    // and real message receipt via Firebase Cloud Messaging. The BoM
+    // pins a mutually-compatible set of Firebase library versions, so
+    // firebase-messaging-ktx below doesn't declare its own version.
+    implementation platform('com.google.firebase:firebase-bom:33.5.1')
+    implementation 'com.google.firebase:firebase-messaging-ktx'
 
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'

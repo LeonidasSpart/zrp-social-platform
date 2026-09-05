@@ -308,6 +308,8 @@ model User {
   notifications     Notification[] @relation("Notification_user")
   sentNotifications Notification[] @relation("Notification_fromUser")
 
+  fcmTokens FcmToken[]
+
   sentMessages     Message[] @relation("Message_sender")
   receivedMessages Message[] @relation("Message_receiver")
 
@@ -626,6 +628,31 @@ model Mute {
   @@unique([muterId, mutedId])
   @@index([muterId])
   @@index([mutedId])
+}
+
+// One row per device that has registered for native push (Firebase
+// Cloud Messaging) - separate from PushSubscription above, which is
+// browser Web Push (VAPID) and uses a completely different delivery
+// mechanism. The token itself is what's unique (a re-login on the same
+// device re-registers the same token under whichever account is
+// signed in then, which is why registration is an upsert keyed on
+// `token` rather than on `userId`). Actually sending from these tokens
+// needs a Firebase service-account credential server-side (see
+// src/lib/fcm.ts) - separate from and not yet configured alongside the
+// client-side google-services.json.
+model FcmToken {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  token    String @unique
+  platform String @default("android")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model Notification {

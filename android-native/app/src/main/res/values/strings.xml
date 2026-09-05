@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ZRP Social</string>
+    <string name="default_notification_channel_id" translatable="false">zrp_general</string>
+    <string name="notification_channel_general_name">General</string>
 </resources>

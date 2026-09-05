@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.AuthRepository
+import one.zrp.social.mobile.data.PushRepository
 import one.zrp.social.mobile.network.MobileUser
 
 sealed interface AuthUiState {
@@ -26,7 +27,10 @@ sealed interface LoginFormState {
  * form's own submit state. One shared ViewModel rather than two so
  * there's exactly one place that transitions LoggedOut -> LoggedIn.
  */
-class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
+class AuthViewModel(
+    private val authRepository: AuthRepository,
+    private val pushRepository: PushRepository = PushRepository(),
+) : ViewModel() {
     private val _authState = MutableStateFlow<AuthUiState>(
         if (authRepository.isLoggedIn()) AuthUiState.LoggedIn(user = null) else AuthUiState.LoggedOut
     )
@@ -34,6 +38,21 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
     private val _loginForm = MutableStateFlow<LoginFormState>(LoginFormState.Idle)
     val loginForm: StateFlow<LoginFormState> = _loginForm.asStateFlow()
+
+    init {
+        // Covers the cold-start-already-logged-in case, where login()'s
+        // own registration below never runs - e.g. the first app launch
+        // after this feature ships, for someone who signed in before it
+        // existed.
+        if (_authState.value is AuthUiState.LoggedIn) {
+            viewModelScope.launch {
+                try {
+                    pushRepository.registerCurrentToken()
+                } catch (_: Exception) {
+                }
+            }
+        }
+    }
 
     fun login(identifier: String, password: String) {
         if (identifier.isBlank() || password.isBlank()) {
@@ -47,6 +66,15 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
                 .onSuccess { user ->
                     _loginForm.value = LoginFormState.Idle
                     _authState.value = AuthUiState.LoggedIn(user)
+
+                    // Best-effort - a failure here (no network, no
+                    // notification permission granted yet) shouldn't
+                    // block a successful login. onNewToken picks up any
+                    // token FCM generates later on.
+                    try {
+                        pushRepository.registerCurrentToken()
+                    } catch (_: Exception) {
+                    }
                 }
                 .onFailure { error ->
                     _loginForm.value = LoginFormState.Error(
@@ -57,7 +85,20 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     }
 
     fun logout() {
-        authRepository.logout()
-        _authState.value = AuthUiState.LoggedOut
+        viewModelScope.launch {
+            // Unregister this device's token while the session is
+            // still valid - once authRepository.logout() clears it,
+            // this authenticated call would just 401. Best-effort: if
+            // it fails, the token lingers server-side until FCM itself
+            // reports it stale on a later send.
+            try {
+                val token = pushRepository.fetchCurrentToken()
+                pushRepository.unregisterToken(token)
+            } catch (_: Exception) {
+            }
+
+            authRepository.logout()
+            _authState.value = AuthUiState.LoggedOut
+        }
     }
 }
