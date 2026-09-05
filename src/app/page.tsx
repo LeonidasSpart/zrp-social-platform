@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   useEffect,
   useState,
@@ -14,6 +15,9 @@ import PostComposer from "@/components/PostComposer";
 import PostCard from "@/components/PostCard";
 import AdCard from "@/components/AdCard";
 import StoriesBar from "@/components/StoriesBar";
+import HomeCreatorsRow from "@/components/HomeCreatorsRow";
+import HomeTrending from "@/components/HomeTrending";
+import HomeMusicTeaser from "@/components/HomeMusicTeaser";
 
 import {
   Sparkles,
@@ -1261,33 +1265,76 @@ export default function HomePage() {
               </div>
 
               <h2 className="mt-5 text-lg font-bold text-gray-900 dark:text-white">
-                {t(
-                  "feed.noPosts"
-                )}
+                {feedType ===
+                "following"
+                  ? t(
+                      "home.emptyFollowingTitle"
+                    )
+                  : t(
+                      "feed.noPosts"
+                    )}
               </h2>
 
               <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
                 {feedType ===
                 "following"
                   ? t(
-                      "feed.followSomeone"
+                      "home.emptyFollowingSubtitle"
                     )
                   : t(
                       "feed.checkBackLater"
                     )}
               </p>
 
-              <button
-                type="button"
-                onClick={() =>
-                  loadPosts(true)
-                }
-                className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-zrp-red text-white text-sm font-semibold hover:bg-zrp-darkRed transition"
-              >
-                <RefreshCw className="w-4 h-4" />
+              {feedType ===
+              "following" ? (
+                <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFeedType(
+                        "for-you"
+                      )
+                    }
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zrp-red text-white text-sm font-semibold hover:bg-zrp-darkRed transition"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    {t(
+                      "home.ctaDiscoverCreators"
+                    )}
+                  </button>
 
-                Refresh
-              </button>
+                  <Link
+                    href="/music"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-zrp-blue/30 text-zrp-blue text-sm font-semibold hover:bg-zrp-blue/10 transition"
+                  >
+                    {t(
+                      "home.ctaExploreMusic"
+                    )}
+                  </Link>
+
+                  <Link
+                    href="/explore"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  >
+                    {t(
+                      "home.ctaExploreTopics"
+                    )}
+                  </Link>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() =>
+                    loadPosts(true)
+                  }
+                  className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-zrp-red text-white text-sm font-semibold hover:bg-zrp-darkRed transition"
+                >
+                  <RefreshCw className="w-4 h-4" />
+
+                  {t("feed.retry")}
+                </button>
+              )}
             </div>
           ) : (
             <>
@@ -1323,6 +1370,34 @@ export default function HomePage() {
                           key={`ad-${ad.campaignId}`}
                           ad={ad}
                         />
+                      )}
+
+                    {/* ==================================================
+                        DISCOVERY MODULES (For You only)
+
+                        Interleaved between posts rather than clustered up
+                        front - posts stay the primary content, these are
+                        spaced out like the ad slot above. Following stays
+                        exactly as before: no discovery modules, just the
+                        accounts the user chose to follow.
+                    ================================================== */}
+
+                    {feedType ===
+                      "for-you" &&
+                      index === 2 && (
+                        <HomeCreatorsRow key="discover-creators" />
+                      )}
+
+                    {feedType ===
+                      "for-you" &&
+                      index === 7 && (
+                        <HomeTrending key="discover-trending" />
+                      )}
+
+                    {feedType ===
+                      "for-you" &&
+                      index === 12 && (
+                        <HomeMusicTeaser key="discover-music" />
                       )}
                   </Fragment>
                 )
