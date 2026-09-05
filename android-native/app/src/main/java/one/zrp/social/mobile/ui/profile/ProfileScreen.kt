@@ -21,12 +21,14 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -61,6 +63,7 @@ fun ProfileScreen(
     username: String?,
     onLogout: () -> Unit,
     onAuthorClick: (String) -> Unit,
+    onMessageClick: (partnerId: String, partnerUsername: String) -> Unit,
 ) {
     val viewModel: ProfileViewModel = viewModel(
         factory = ProfileViewModelFactory(ProfileRepository(), username),
@@ -117,6 +120,7 @@ fun ProfileScreen(
                             isTogglingFollow = state.isTogglingFollow,
                             onFollowClick = { viewModel.toggleFollow() },
                             onLogoutClick = onLogout,
+                            onMessageClick = { onMessageClick(profile.id, profile.username) },
                         )
                     }
 
@@ -160,6 +164,7 @@ private fun ProfileHeader(
     isTogglingFollow: Boolean,
     onFollowClick: () -> Unit,
     onLogoutClick: () -> Unit,
+    onMessageClick: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         if (profile.coverUrl != null) {
@@ -223,6 +228,10 @@ private fun ProfileHeader(
                     Text("Log out")
                 }
             } else {
+                IconButton(onClick = onMessageClick) {
+                    Icon(Icons.Filled.MailOutline, contentDescription = "Message")
+                }
+
                 Button(
                     onClick = onFollowClick,
                     enabled = !isTogglingFollow,
