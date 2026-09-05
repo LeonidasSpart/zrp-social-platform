@@ -20,6 +20,7 @@ import one.zrp.social.mobile.ui.create.CreatePostScreen
 import one.zrp.social.mobile.ui.home.HomeScreen
 import one.zrp.social.mobile.ui.messages.ConversationScreen
 import one.zrp.social.mobile.ui.messages.MessagesScreen
+import one.zrp.social.mobile.ui.music.MusicScreen
 import one.zrp.social.mobile.ui.notifications.NotificationsScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
 import one.zrp.social.mobile.ui.search.SearchScreen
@@ -35,6 +36,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     }
     val goToStoryViewer: (String) -> Unit = { userId -> navController.navigate("stories/$userId") }
     val goToCreateStory: () -> Unit = { navController.navigate("create-story") }
+    val goToMusic: () -> Unit = { navController.navigate("music") }
     val goHome: () -> Unit = {
         navController.navigate(ZrpDestination.Home.route) {
             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -58,7 +60,9 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onCreateStory = goToCreateStory,
                 )
             }
-            composable(ZrpDestination.Search.route) { SearchScreen(onAuthorClick = goToProfile) }
+            composable(ZrpDestination.Search.route) {
+                SearchScreen(onAuthorClick = goToProfile, onOpenMusic = goToMusic)
+            }
             composable(ZrpDestination.Create.route) { CreatePostScreen(onPosted = goHome) }
             composable(ZrpDestination.Notifications.route) { NotificationsScreen(onAuthorClick = goToProfile) }
             composable(ZrpDestination.Messages.route) { MessagesScreen(onOpenConversation = goToConversation) }
@@ -110,6 +114,9 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             }
             composable("create-story") {
                 CreateStoryScreen(onPosted = { navController.popBackStack() })
+            }
+            composable("music") {
+                MusicScreen(onBack = { navController.popBackStack() })
             }
         }
     }
