@@ -14,8 +14,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
+import one.zrp.social.mobile.ui.home.HomeScreen
 import one.zrp.social.mobile.ui.screens.CreateScreen
-import one.zrp.social.mobile.ui.screens.HomeScreen
 import one.zrp.social.mobile.ui.screens.MessagesScreen
 import one.zrp.social.mobile.ui.screens.NotificationsScreen
 import one.zrp.social.mobile.ui.screens.ProfileScreen
