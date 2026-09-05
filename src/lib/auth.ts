@@ -48,6 +48,143 @@ declare module "next-auth/jwt" {
   }
 }
 
+// Thrown by verifyCredentials with an HTTP status attached - NextAuth's
+// own CredentialsProvider.authorize() only needs a thrown Error (it
+// discards the specific message/status for its own generic
+// "CredentialsSignin" browser-flow error), but the mobile JSON login
+// endpoint (src/app/api/mobile/auth/login) needs both the real message
+// and a status code to return a meaningful response to a native client.
+export class CredentialsAuthError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "CredentialsAuthError";
+    this.status = status;
+  }
+}
+
+export interface VerifiedCredentialsUser {
+  id: string;
+  email: string;
+  name: string | null;
+  username: string;
+  isAdmin: boolean;
+  role: "USER" | "MODERATOR" | "ADMIN" | "JOURNALIST";
+  badgeType: string | null;
+  avatarUrl: string | null;
+  onboardingCompleted: boolean;
+  banned: boolean;
+  emailVerified: boolean;
+  plan: string;
+}
+
+// The single source of truth for verifying an email/username + password
+// pair - shared by NextAuth's CredentialsProvider (the website's login
+// flow, below) and the mobile JSON login endpoint. Extracted rather
+// than duplicated so the two never drift apart on something
+// security-sensitive like rate limiting or the legacy-plaintext-
+// password upgrade path.
+export async function verifyCredentials({
+  identifier,
+  password,
+  ip,
+}: {
+  identifier: string;
+  password: string;
+  ip: string;
+}): Promise<VerifiedCredentialsUser> {
+  const isEmail = identifier.includes("@");
+
+  // ⚠️ SECURITY: brute-force protection. Limit both by source IP
+  // (protects against distributed guessing across many accounts)
+  // and by the targeted account/email (protects a single account
+  // from being hammered from many IPs). Either limit tripping
+  // blocks the attempt with a generic error and a retry delay.
+  const [ipLimit, acctLimit] = await Promise.all([
+    checkRateLimitKey(`login-ip:${ip}`, 20, 900),
+    checkRateLimitKey(`login-acct:${identifier.toLowerCase()}`, 8, 900),
+  ]);
+
+  if (!ipLimit.success || !acctLimit.success) {
+    throw new CredentialsAuthError("Too many login attempts. Please try again later.", 429);
+  }
+
+  const user = await prisma.user.findUnique({
+    where: isEmail
+      ? { email: identifier.toLowerCase() }
+      : { username: identifier },
+    select: {
+      id: true,
+      email: true,
+      password: true,
+      name: true,
+      username: true,
+      isAdmin: true,
+      role: true,
+      badgeType: true,
+      avatarUrl: true,
+      onboardingCompleted: true,
+      banned: true,
+      emailVerified: true,
+      plan: true,
+    },
+  });
+
+  if (!user || !user.password) {
+    throw new CredentialsAuthError("Invalid credentials", 401);
+  }
+
+  let isValid = false;
+  try {
+    isValid = await bcrypt.compare(password, user.password);
+  } catch (err) {
+    console.error("Password comparison error:", err);
+    isValid = false;
+  }
+
+  // ⚠️ SECURITY: legacy accounts with a non-bcrypt (plaintext) stored
+  // password are still supported here for backward compatibility,
+  // upgrading them to a real bcrypt hash on successful login. This
+  // should be treated as a known, tracked risk, not a permanent design
+  // - see the security audit notes for a recommended remediation plan.
+  if (!isValid && !user.password.startsWith('$2')) {
+    isValid = password === user.password;
+    if (isValid) {
+      const hashed = await bcrypt.hash(password, 10);
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { password: hashed },
+      });
+    }
+  }
+
+  if (!isValid) {
+    throw new CredentialsAuthError("Invalid credentials", 401);
+  }
+
+  if (!user.emailVerified) {
+    throw new CredentialsAuthError(
+      "Please verify your email before logging in. Check your inbox for the verification link.",
+      403
+    );
+  }
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    username: user.username,
+    isAdmin: user.isAdmin,
+    role: user.role,
+    badgeType: user.badgeType,
+    avatarUrl: user.avatarUrl,
+    onboardingCompleted: user.onboardingCompleted,
+    banned: user.banned || false,
+    emailVerified: !!user.emailVerified,
+    plan: user.plan || "free",
+  };
+}
+
 // ─── Helper: generate a unique username from an email/name ─────────
 async function generateUniqueUsername(base: string): Promise<string> {
   let candidate = base
@@ -104,15 +241,6 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
-        const identifier = credentials.email.trim();
-        const inputPassword = credentials.password.trim();
-        const isEmail = identifier.includes("@");
-
-        // ⚠️ SECURITY: brute-force protection. Limit both by source IP
-        // (protects against distributed guessing across many accounts)
-        // and by the targeted account/email (protects a single account
-        // from being hammered from many IPs). Either limit tripping
-        // blocks the attempt with a generic error and a retry delay.
         const forwardedFor = req?.headers?.["x-forwarded-for"];
         const ip =
           (Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor)
@@ -121,91 +249,15 @@ export const authOptions: NextAuthOptions = {
           (req?.headers as Record<string, string> | undefined)?.["x-real-ip"] ||
           "unknown";
 
-        const [ipLimit, acctLimit] = await Promise.all([
-          checkRateLimitKey(`login-ip:${ip}`, 20, 900),
-          checkRateLimitKey(`login-acct:${identifier.toLowerCase()}`, 8, 900),
-        ]);
-
-        if (!ipLimit.success || !acctLimit.success) {
-          throw new Error("Too many login attempts. Please try again later.");
-        }
-
-        const user = await prisma.user.findUnique({
-          where: isEmail
-            ? { email: identifier.toLowerCase() }
-            : { username: identifier },
-          select: {
-            id: true,
-            email: true,
-            password: true,
-            name: true,
-            username: true,
-            isAdmin: true,
-            role: true,
-            badgeType: true,
-            avatarUrl: true,
-            onboardingCompleted: true,
-            banned: true,
-            emailVerified: true,
-            plan: true,
-          },
+        // verifyCredentials throws CredentialsAuthError (a subclass of
+        // Error) on any failure - NextAuth only needs a thrown Error
+        // here to surface its own generic "CredentialsSignin" error to
+        // the browser flow, so nothing further to translate.
+        return await verifyCredentials({
+          identifier: credentials.email.trim(),
+          password: credentials.password.trim(),
+          ip,
         });
-
-        if (!user || !user.password) {
-          throw new Error("Invalid credentials");
-        }
-
-        let isValid = false;
-        try {
-          isValid = await bcrypt.compare(inputPassword, user.password);
-        } catch (err) {
-          console.error("Password comparison error:", err);
-          isValid = false;
-        }
-
-        // ⚠️ SECURITY: legacy accounts with a non-bcrypt (plaintext)
-        // stored password are still supported here for backward
-        // compatibility, upgrading them to a real bcrypt hash on
-        // successful login. This should be treated as a known, tracked
-        // risk, not a permanent design - see the security audit notes
-        // for a recommended remediation plan (identify affected
-        // accounts and force a password reset, then remove this
-        // fallback entirely once no legacy plaintext passwords remain).
-        if (!isValid && !user.password.startsWith('$2')) {
-          isValid = inputPassword === user.password;
-          if (isValid) {
-            const hashed = await bcrypt.hash(inputPassword, 10);
-            await prisma.user.update({
-              where: { id: user.id },
-              data: { password: hashed },
-            });
-          }
-        }
-
-        if (!isValid) {
-          throw new Error("Invalid credentials");
-        }
-
-        if (!user.emailVerified) {
-          throw new Error(
-            "Please verify your email before logging in. Check your inbox for the verification link."
-          );
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          username: user.username,
-          isAdmin: user.isAdmin,
-          role: user.role,
-          badgeType: user.badgeType,
-          avatarUrl: user.avatarUrl,
-          onboardingCompleted: user.onboardingCompleted,
-          banned: user.banned || false,
-          emailVerified: !!user.emailVerified,
-          plan: user.plan || "free",
-        };
       },
     }),
   ],
