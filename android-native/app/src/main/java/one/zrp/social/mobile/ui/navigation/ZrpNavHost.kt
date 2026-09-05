@@ -16,9 +16,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import one.zrp.social.mobile.ui.create.CreatePostScreen
 import one.zrp.social.mobile.ui.home.HomeScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
-import one.zrp.social.mobile.ui.screens.CreateScreen
 import one.zrp.social.mobile.ui.screens.MessagesScreen
 import one.zrp.social.mobile.ui.screens.NotificationsScreen
 import one.zrp.social.mobile.ui.search.SearchScreen
@@ -27,6 +27,13 @@ import one.zrp.social.mobile.ui.search.SearchScreen
 fun ZrpNavHost(onLogout: () -> Unit) {
     val navController = rememberNavController()
     val goToProfile: (String) -> Unit = { username -> navController.navigate("profile/$username") }
+    val goHome: () -> Unit = {
+        navController.navigate(ZrpDestination.Home.route) {
+            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
 
     Scaffold(
         bottomBar = { ZrpBottomBar(navController) },
@@ -38,7 +45,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
         ) {
             composable(ZrpDestination.Home.route) { HomeScreen(onAuthorClick = goToProfile) }
             composable(ZrpDestination.Search.route) { SearchScreen(onAuthorClick = goToProfile) }
-            composable(ZrpDestination.Create.route) { CreateScreen() }
+            composable(ZrpDestination.Create.route) { CreatePostScreen(onPosted = goHome) }
             composable(ZrpDestination.Notifications.route) { NotificationsScreen() }
             composable(ZrpDestination.Messages.route) { MessagesScreen() }
             composable(ZrpDestination.Profile.route) {

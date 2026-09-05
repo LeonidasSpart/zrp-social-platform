@@ -1,5 +1,6 @@
 package one.zrp.social.mobile.network
 
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -47,6 +48,10 @@ data class PostsPage(
 
 data class LikeResponse(val liked: Boolean)
 
+data class CreatePostRequest(val content: String)
+
+data class CreatePostResponse(val post: Post)
+
 /**
  * The two real Home feed streams the website itself uses - see
  * src/app/api/posts/explore/route.ts ("For You", engagement/age-ranked,
@@ -67,4 +72,13 @@ interface PostsApi {
 
     @POST("posts/{id}/like")
     suspend fun toggleLike(@Path("id") postId: String): LikeResponse
+
+    // Text-only for now - the same JSON body shape POST /api/posts
+    // accepts for content, just without imageUrl/imageUrls. Media
+    // attachment goes through UploadThing on the website (a presigned-
+    // upload SDK flow, not a plain REST call) and needs its own native
+    // upload path; shipping real, working text posts now rather than
+    // an untested native upload flow in the same change.
+    @POST("posts")
+    suspend fun createPost(@Body request: CreatePostRequest): CreatePostResponse
 }
