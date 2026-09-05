@@ -35,9 +35,6 @@ fun PlaceholderScreen(title: String) {
 }
 
 @Composable
-fun SearchScreen() = PlaceholderScreen("Search")
-
-@Composable
 fun CreateScreen() = PlaceholderScreen("New post")
 
 @Composable

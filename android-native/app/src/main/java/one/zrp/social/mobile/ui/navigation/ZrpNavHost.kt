@@ -21,7 +21,7 @@ import one.zrp.social.mobile.ui.profile.ProfileScreen
 import one.zrp.social.mobile.ui.screens.CreateScreen
 import one.zrp.social.mobile.ui.screens.MessagesScreen
 import one.zrp.social.mobile.ui.screens.NotificationsScreen
-import one.zrp.social.mobile.ui.screens.SearchScreen
+import one.zrp.social.mobile.ui.search.SearchScreen
 
 @Composable
 fun ZrpNavHost(onLogout: () -> Unit) {
@@ -37,7 +37,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             modifier = androidx.compose.ui.Modifier.padding(innerPadding),
         ) {
             composable(ZrpDestination.Home.route) { HomeScreen(onAuthorClick = goToProfile) }
-            composable(ZrpDestination.Search.route) { SearchScreen() }
+            composable(ZrpDestination.Search.route) { SearchScreen(onAuthorClick = goToProfile) }
             composable(ZrpDestination.Create.route) { CreateScreen() }
             composable(ZrpDestination.Notifications.route) { NotificationsScreen() }
             composable(ZrpDestination.Messages.route) { MessagesScreen() }
