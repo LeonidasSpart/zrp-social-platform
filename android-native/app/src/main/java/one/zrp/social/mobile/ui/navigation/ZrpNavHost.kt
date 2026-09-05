@@ -18,15 +18,19 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import one.zrp.social.mobile.ui.create.CreatePostScreen
 import one.zrp.social.mobile.ui.home.HomeScreen
+import one.zrp.social.mobile.ui.messages.ConversationScreen
+import one.zrp.social.mobile.ui.messages.MessagesScreen
 import one.zrp.social.mobile.ui.notifications.NotificationsScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
-import one.zrp.social.mobile.ui.screens.MessagesScreen
 import one.zrp.social.mobile.ui.search.SearchScreen
 
 @Composable
 fun ZrpNavHost(onLogout: () -> Unit) {
     val navController = rememberNavController()
     val goToProfile: (String) -> Unit = { username -> navController.navigate("profile/$username") }
+    val goToConversation: (partnerId: String, partnerUsername: String) -> Unit = { partnerId, partnerUsername ->
+        navController.navigate("messages/$partnerId/$partnerUsername")
+    }
     val goHome: () -> Unit = {
         navController.navigate(ZrpDestination.Home.route) {
             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -47,16 +51,43 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             composable(ZrpDestination.Search.route) { SearchScreen(onAuthorClick = goToProfile) }
             composable(ZrpDestination.Create.route) { CreatePostScreen(onPosted = goHome) }
             composable(ZrpDestination.Notifications.route) { NotificationsScreen(onAuthorClick = goToProfile) }
-            composable(ZrpDestination.Messages.route) { MessagesScreen() }
+            composable(ZrpDestination.Messages.route) { MessagesScreen(onOpenConversation = goToConversation) }
             composable(ZrpDestination.Profile.route) {
-                ProfileScreen(username = null, onLogout = onLogout, onAuthorClick = goToProfile)
+                ProfileScreen(
+                    username = null,
+                    onLogout = onLogout,
+                    onAuthorClick = goToProfile,
+                    onMessageClick = goToConversation,
+                )
             }
             composable(
                 route = "profile/{username}",
                 arguments = listOf(navArgument("username") { type = NavType.StringType }),
             ) { backStackEntry ->
                 val username = backStackEntry.arguments?.getString("username")
-                ProfileScreen(username = username, onLogout = onLogout, onAuthorClick = goToProfile)
+                ProfileScreen(
+                    username = username,
+                    onLogout = onLogout,
+                    onAuthorClick = goToProfile,
+                    onMessageClick = goToConversation,
+                )
+            }
+            composable(
+                route = "messages/{userId}/{username}",
+                arguments = listOf(
+                    navArgument("userId") { type = NavType.StringType },
+                    navArgument("username") { type = NavType.StringType },
+                ),
+            ) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId")
+                val username = backStackEntry.arguments?.getString("username")
+                if (userId != null && username != null) {
+                    ConversationScreen(
+                        partnerId = userId,
+                        partnerUsername = username,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
             }
         }
     }
