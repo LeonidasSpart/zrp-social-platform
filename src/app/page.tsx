@@ -1032,7 +1032,7 @@ export default function HomePage() {
             FEED CONTROLS
         ========================================================== */}
 
-        <div className="sticky top-[64px] z-20 mt-3 bg-white/95 dark:bg-zrp-deepBlack/95 backdrop-blur-md">
+        <div className="sticky top-[calc(64px+env(safe-area-inset-top))] z-20 mt-3 bg-white/95 dark:bg-zrp-deepBlack/95 backdrop-blur-md">
 
           <div className="relative">
             <div className="flex items-center border-b border-gray-200 dark:border-gray-800">
