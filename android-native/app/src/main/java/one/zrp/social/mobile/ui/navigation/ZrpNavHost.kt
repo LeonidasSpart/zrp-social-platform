@@ -18,9 +18,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import one.zrp.social.mobile.ui.create.CreatePostScreen
 import one.zrp.social.mobile.ui.home.HomeScreen
+import one.zrp.social.mobile.ui.notifications.NotificationsScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
 import one.zrp.social.mobile.ui.screens.MessagesScreen
-import one.zrp.social.mobile.ui.screens.NotificationsScreen
 import one.zrp.social.mobile.ui.search.SearchScreen
 
 @Composable
@@ -46,7 +46,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             composable(ZrpDestination.Home.route) { HomeScreen(onAuthorClick = goToProfile) }
             composable(ZrpDestination.Search.route) { SearchScreen(onAuthorClick = goToProfile) }
             composable(ZrpDestination.Create.route) { CreatePostScreen(onPosted = goHome) }
-            composable(ZrpDestination.Notifications.route) { NotificationsScreen() }
+            composable(ZrpDestination.Notifications.route) { NotificationsScreen(onAuthorClick = goToProfile) }
             composable(ZrpDestination.Messages.route) { MessagesScreen() }
             composable(ZrpDestination.Profile.route) {
                 ProfileScreen(username = null, onLogout = onLogout, onAuthorClick = goToProfile)
