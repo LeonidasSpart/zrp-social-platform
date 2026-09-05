@@ -58,8 +58,8 @@ export default function HomeTrending() {
         </h2>
 
         <Link
-          href="/explore"
-          className="text-xs font-semibold text-zrp-red hover:underline"
+          href="/explore/trending"
+          className="inline-block -m-2 p-2 text-xs font-semibold text-zrp-red hover:underline"
         >
           {t("home.seeAll")}
         </Link>
