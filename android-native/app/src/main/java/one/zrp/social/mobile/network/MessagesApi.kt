@@ -1,8 +1,10 @@
 package one.zrp.social.mobile.network
 
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 data class MessageReaction(
@@ -18,6 +20,7 @@ data class ChatMessage(
     val senderId: String,
     val receiverId: String,
     val read: Boolean,
+    val edited: Boolean = false,
     val createdAt: String,
     val sender: PostAuthor,
     // Present on the send-message response, absent on the conversation
@@ -36,7 +39,18 @@ data class ConversationSummary(
 data class SendMessageRequest(
     val content: String,
     val receiverId: String,
+    val replyToId: String? = null,
 )
+
+data class EditMessageRequest(val content: String)
+
+data class MessageReactionRequest(val emoji: String)
+
+// action is "added"/"removed"/"changed" - see the route's own comment
+// on why a message carries at most one reaction per person (switching
+// emoji replaces it), unlike a post's Reaction model which allows
+// several distinct emoji from the same person.
+data class MessageReactionResponse(val action: String, val reactions: List<MessageReaction>)
 
 /**
  * The same real direct-message system the website uses - GET
@@ -64,4 +78,19 @@ interface MessagesApi {
 
     @POST("messages")
     suspend fun sendMessage(@Body request: SendMessageRequest): ChatMessage
+
+    // Either party to the conversation may delete a message - unlike
+    // posts/comments, this isn't author-only (see the route's own
+    // senderId-or-receiverId check) since there's no per-side "delete
+    // for me only" concept in this schema; it deletes the one shared row.
+    @DELETE("messages/delete/{id}")
+    suspend fun deleteMessage(@Path("id") messageId: String)
+
+    // Sender-only, server-side (src/app/api/messages/edit/[id]/route.ts).
+    // Sets edited=true, unlike post/comment edits which have no such flag.
+    @PUT("messages/edit/{id}")
+    suspend fun editMessage(@Path("id") messageId: String, @Body request: EditMessageRequest): ChatMessage
+
+    @POST("messages/reaction/{id}")
+    suspend fun toggleReaction(@Path("id") messageId: String, @Body request: MessageReactionRequest): MessageReactionResponse
 }
