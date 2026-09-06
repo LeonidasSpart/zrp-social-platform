@@ -92,4 +92,10 @@
     <string name="profile_unblock">Разблокировать</string>
     <string name="nav_bookmarks">Закладки</string>
     <string name="nav_sign_out">Выйти</string>
+    <string name="notifications_empty">Нет уведомления пока</string>
+    <string name="notifications_empty_desc">Когда кто-то взаимодействует с вами, это появится здесь</string>
+    <string name="notifications_liked_post_suffix">понравилась ваша публикация</string>
+    <string name="notifications_commented_post_suffix">прокомментировал(а) вашу публикацию</string>
+    <string name="notifications_started_following_suffix">подписался(лась) на вас</string>
+    <string name="notifications_reposted_post_suffix">сделал(а) репост вашей публикации</string>
 </resources>

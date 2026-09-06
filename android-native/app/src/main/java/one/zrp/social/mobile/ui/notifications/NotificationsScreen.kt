@@ -44,9 +44,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.NotificationsRepository
 import one.zrp.social.mobile.network.PostAuthor
 import one.zrp.social.mobile.ui.components.Avatar
@@ -113,15 +115,30 @@ fun NotificationsScreen(
                 }
                 grouped.isEmpty() -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = state.error ?: "No notifications yet.",
-                            color = if (state.error != null) {
-                                MaterialTheme.colorScheme.error
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
-                            modifier = Modifier.padding(24.dp),
-                        )
+                        val error = state.error
+                        if (error != null) {
+                            Text(
+                                text = error,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(24.dp),
+                            )
+                        } else {
+                            // Matches the website's own two-line empty state
+                            // (notifications.empty + notifications.emptyDesc).
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = stringResource(R.string.notifications_empty),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    style = MaterialTheme.typography.titleSmall,
+                                )
+                                Text(
+                                    text = stringResource(R.string.notifications_empty_desc),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(top = 4.dp),
+                                )
+                            }
+                        }
                     }
                 }
                 else -> {
@@ -361,14 +378,27 @@ private fun NotificationRow(
 // name and places VerifiedBadge directly after it, before the rest of
 // the sentence. `others` mirrors the website's own pluralized suffix
 // for grouped rows ("and N others liked your post").
+//
+// The website's own getActionSuffix() only translates the SINGULAR
+// case for like/follow/repost - its plural fallback ("liked your
+// post", "started following you", "reposted your post") is hardcoded
+// English too, same as "comment" (always translated, no plural
+// variant) and "message" (always hardcoded, no translation at all).
+// This mirrors that asymmetry exactly rather than smoothing it over.
+// "mention" and "follow_request" have no web equivalent whatsoever
+// (getActionSuffix's switch has no case for either, falling through to
+// an empty string) - these two are a native-only addition, since
+// mentions and follow requests are real notification types that need
+// some visible text.
+@Composable
 private fun describeNotificationSuffix(type: String, others: Int): String {
     val plural = others > 0
     val prefix = if (plural) "and $others other${if (others > 1) "s" else ""} " else ""
     val suffix = when (type) {
-        "like" -> "liked your post"
-        "comment" -> "commented on your post"
-        "follow" -> "started following you"
-        "repost" -> "reposted your post"
+        "like" -> if (plural) "liked your post" else stringResource(R.string.notifications_liked_post_suffix)
+        "comment" -> stringResource(R.string.notifications_commented_post_suffix)
+        "follow" -> if (plural) "started following you" else stringResource(R.string.notifications_started_following_suffix)
+        "repost" -> if (plural) "reposted your post" else stringResource(R.string.notifications_reposted_post_suffix)
         "mention" -> "mentioned you"
         "message" -> "sent you a message"
         "follow_request" -> "requested to follow you"

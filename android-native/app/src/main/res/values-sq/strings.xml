@@ -92,4 +92,10 @@
     <string name="profile_unblock">Zhblloko</string>
     <string name="nav_bookmarks">Ruajtur</string>
     <string name="nav_sign_out">Dil</string>
+    <string name="notifications_empty">Nuk ka njoftime ende</string>
+    <string name="notifications_empty_desc">Kur dikush të ndërveprojë me ju, do të shfaqet këtu</string>
+    <string name="notifications_liked_post_suffix">pëlqeu postimin tuaj</string>
+    <string name="notifications_commented_post_suffix">komentoi në postimin tuaj</string>
+    <string name="notifications_started_following_suffix">filloi t\'ju ndjekë</string>
+    <string name="notifications_reposted_post_suffix">ripublikoi postimin tuaj</string>
 </resources>

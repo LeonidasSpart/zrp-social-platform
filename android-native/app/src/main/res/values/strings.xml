@@ -108,4 +108,10 @@
     <string name="profile_unblock">Unblock</string>
     <string name="nav_bookmarks">Bookmarks</string>
     <string name="nav_sign_out">Sign Out</string>
+    <string name="notifications_empty">No notifications yet</string>
+    <string name="notifications_empty_desc">When someone interacts with you, it will appear here</string>
+    <string name="notifications_liked_post_suffix">liked your post</string>
+    <string name="notifications_commented_post_suffix">commented on your post</string>
+    <string name="notifications_started_following_suffix">started following you</string>
+    <string name="notifications_reposted_post_suffix">reposted your post</string>
 </resources>

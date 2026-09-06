@@ -92,4 +92,10 @@
     <string name="profile_unblock">Sblocca</string>
     <string name="nav_bookmarks">Preferiti</string>
     <string name="nav_sign_out">Esci</string>
+    <string name="notifications_empty">Ancora nessuna notifica</string>
+    <string name="notifications_empty_desc">Quando qualcuno interagisce con te, apparirà qui</string>
+    <string name="notifications_liked_post_suffix">ha messo mi piace al tuo post</string>
+    <string name="notifications_commented_post_suffix">ha commentato il tuo post</string>
+    <string name="notifications_started_following_suffix">ha iniziato a seguirti</string>
+    <string name="notifications_reposted_post_suffix">ha ripubblicato il tuo post</string>
 </resources>

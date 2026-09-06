@@ -92,4 +92,10 @@
     <string name="profile_unblock">Desbloquear</string>
     <string name="nav_bookmarks">Marcadores</string>
     <string name="nav_sign_out">Cerrar sesión</string>
+    <string name="notifications_empty">Aún no hay notificaciones</string>
+    <string name="notifications_empty_desc">Cuando alguien interactúe contigo, aparecerá aquí</string>
+    <string name="notifications_liked_post_suffix">le gustó tu publicación</string>
+    <string name="notifications_commented_post_suffix">comentó tu publicación</string>
+    <string name="notifications_started_following_suffix">comenzó a seguirte</string>
+    <string name="notifications_reposted_post_suffix">republicó tu publicación</string>
 </resources>

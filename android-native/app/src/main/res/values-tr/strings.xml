@@ -92,4 +92,10 @@
     <string name="profile_unblock">Engeli kaldır</string>
     <string name="nav_bookmarks">Yer İmleri</string>
     <string name="nav_sign_out">Çıkış Yap</string>
+    <string name="notifications_empty">Henüz bildirim yok</string>
+    <string name="notifications_empty_desc">Biri sizinle etkileşime geçtiğinde burada görünecek</string>
+    <string name="notifications_liked_post_suffix">gönderinizi beğendi</string>
+    <string name="notifications_commented_post_suffix">gönderinize yorum yaptı</string>
+    <string name="notifications_started_following_suffix">sizi takip etmeye başladı</string>
+    <string name="notifications_reposted_post_suffix">gönderinizi yeniden paylaştı</string>
 </resources>

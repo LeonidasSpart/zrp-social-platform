@@ -92,4 +92,10 @@
     <string name="profile_unblock">取消屏蔽</string>
     <string name="nav_bookmarks">收藏</string>
     <string name="nav_sign_out">退出登录</string>
+    <string name="notifications_empty">无 通知 还</string>
+    <string name="notifications_empty_desc">当有人与你互动时，会显示在这里</string>
+    <string name="notifications_liked_post_suffix">赞了你的帖子</string>
+    <string name="notifications_commented_post_suffix">评论了你的帖子</string>
+    <string name="notifications_started_following_suffix">开始关注你</string>
+    <string name="notifications_reposted_post_suffix">转发了你的帖子</string>
 </resources>
