@@ -71,4 +71,12 @@
     <string name="action_reply">Responder</string>
     <string name="feed_for_you">Para ti</string>
     <string name="feed_following">Siguiendo</string>
+    <string name="search_placeholder">Buscar usuarios, publicaciones, hashtags...</string>
+    <string name="search_users_tab">Usuarios (%1$d)</string>
+    <string name="search_posts_tab">Publicaciones (%1$d)</string>
+    <string name="search_no_users">No se encontraron usuarios.</string>
+    <string name="search_no_posts">No se encontraron publicaciones.</string>
+    <string name="home_trending_on_zrp">Tendencias en ZRP</string>
+    <string name="right_panel_who_to_follow">A quién seguir</string>
+    <string name="home_discover_music">Descubrir nueva música</string>
 </resources>
