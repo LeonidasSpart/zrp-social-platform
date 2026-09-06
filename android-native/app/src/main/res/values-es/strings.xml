@@ -173,4 +173,7 @@
     <string name="report_reason_hate_speech">Discurso de odio</string>
     <string name="report_reason_impersonation">Suplantación de identidad</string>
     <string name="report_reason_other">Otro</string>
+    <string name="hashtag_post_count">%1$d %2$s con este hashtag</string>
+    <string name="hashtag_no_posts">Aún no hay publicaciones con #%1$s.</string>
+    <string name="hashtag_back_to_home">← Volver al inicio</string>
 </resources>

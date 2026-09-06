@@ -173,4 +173,7 @@
     <string name="report_reason_hate_speech">خطاب كراهية</string>
     <string name="report_reason_impersonation">انتحال شخصية</string>
     <string name="report_reason_other">أخرى</string>
+    <string name="hashtag_post_count">%1$d %2$s بهذا الهاشتاغ</string>
+    <string name="hashtag_no_posts">لا توجد منشورات مع #%1$s بعد.</string>
+    <string name="hashtag_back_to_home">← العودة إلى الرئيسية</string>
 </resources>

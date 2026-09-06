@@ -173,4 +173,7 @@
     <string name="report_reason_hate_speech">Hassrede</string>
     <string name="report_reason_impersonation">Identitätsdiebstahl</string>
     <string name="report_reason_other">Sonstiges</string>
+    <string name="hashtag_post_count">%1$d %2$s mit diesem Hashtag</string>
+    <string name="hashtag_no_posts">Noch keine Beiträge mit #%1$s.</string>
+    <string name="hashtag_back_to_home">← Zurück zur Startseite</string>
 </resources>
