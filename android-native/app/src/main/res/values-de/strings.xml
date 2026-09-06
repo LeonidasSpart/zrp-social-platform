@@ -60,4 +60,13 @@
     <string name="auth_email_or_username">E-Mail oder Benutzername</string>
     <string name="auth_signing_in">Anmeldung...</string>
     <string name="auth_password">Passwort</string>
+    <string name="messages_no_messages_yet">Noch keine Nachrichten.</string>
+    <string name="chat_back_to_messages">Zurück zu Nachrichten</string>
+    <string name="chat_message_placeholder">Nachricht an %1$s...</string>
+    <string name="chat_no_messages_yet">Noch keine Nachrichten</string>
+    <string name="chat_say_hello">Sag Hallo zu %1$s!</string>
+    <string name="chat_delete_message">Nachricht löschen</string>
+    <string name="chat_delete_message_confirm">Möchtest du diese Nachricht wirklich löschen?</string>
+    <string name="action_edit">Bearbeiten</string>
+    <string name="action_reply">Antworten</string>
 </resources>

@@ -14,6 +14,10 @@ class NotificationsRepository {
         Unit
     }
 
+    suspend fun getUnreadCount(): Result<Int> = runCatching {
+        ApiClient.notificationsApi.getUnreadCount().count
+    }
+
     // The website's own "Follow back" button posts {action: "follow"}
     // to this same endpoint, but the route (src/app/api/users/
     // [username]/follow/route.ts) never reads that field - it's a pure

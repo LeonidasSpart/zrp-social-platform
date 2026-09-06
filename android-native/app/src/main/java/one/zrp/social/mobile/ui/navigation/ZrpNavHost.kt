@@ -4,17 +4,23 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -24,6 +30,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import one.zrp.social.mobile.data.NotificationsRepository
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
@@ -101,8 +108,24 @@ fun ZrpNavHost(onLogout: () -> Unit) {
         }
     }
 
+    // Hoisted above the NavHost, not created inside NotificationsScreen's
+    // own composable, so the badge survives navigating away from the
+    // Notifications tab instead of resetting every time that screen
+    // leaves composition.
+    val unreadBadgeViewModel: UnreadBadgeViewModel = viewModel(
+        factory = remember { UnreadBadgeViewModelFactory(NotificationsRepository()) },
+    )
+    val unreadCount by unreadBadgeViewModel.unreadCount.collectAsState()
+
     Scaffold(
-        bottomBar = { ZrpBottomBar(navController) },
+        bottomBar = {
+            ZrpBottomBar(
+                navController = navController,
+                unreadCount = unreadCount,
+                onNotificationsSelected = { unreadBadgeViewModel.clear() },
+                onOtherTabSelected = { unreadBadgeViewModel.refresh() },
+            )
+        },
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -398,7 +421,12 @@ fun ZrpNavHost(onLogout: () -> Unit) {
 }
 
 @Composable
-private fun ZrpBottomBar(navController: androidx.navigation.NavHostController) {
+private fun ZrpBottomBar(
+    navController: androidx.navigation.NavHostController,
+    unreadCount: Int,
+    onNotificationsSelected: () -> Unit,
+    onOtherTabSelected: () -> Unit,
+) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
 
@@ -414,6 +442,11 @@ private fun ZrpBottomBar(navController: androidx.navigation.NavHostController) {
             NavigationBarItem(
                 selected = selected,
                 onClick = {
+                    if (destination == ZrpDestination.Notifications) {
+                        onNotificationsSelected()
+                    } else {
+                        onOtherTabSelected()
+                    }
                     navController.navigate(destination.route) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
@@ -423,11 +456,24 @@ private fun ZrpBottomBar(navController: androidx.navigation.NavHostController) {
                     }
                 },
                 icon = {
-                    Icon(
-                        imageVector = if (selected) destination.selectedIcon else destination.unselectedIcon,
-                        contentDescription = stringResource(destination.labelRes),
-                        modifier = Modifier.scale(iconScale),
-                    )
+                    val icon: @Composable () -> Unit = {
+                        Icon(
+                            imageVector = if (selected) destination.selectedIcon else destination.unselectedIcon,
+                            contentDescription = stringResource(destination.labelRes),
+                            modifier = Modifier.scale(iconScale),
+                        )
+                    }
+                    if (destination == ZrpDestination.Notifications && unreadCount > 0) {
+                        BadgedBox(
+                            badge = {
+                                Badge {
+                                    Text(if (unreadCount > 99) "99+" else unreadCount.toString())
+                                }
+                            },
+                        ) { icon() }
+                    } else {
+                        icon()
+                    }
                 },
                 label = null,
                 alwaysShowLabel = false,

@@ -19,6 +19,8 @@ data class AppNotification(
 
 data class MarkReadResponse(val success: Boolean)
 
+data class UnreadCountResponse(val count: Int)
+
 /**
  * The same real notifications the website's bell icon and
  * /notifications page use - GET /notifications (most recent 50) and
@@ -32,4 +34,11 @@ interface NotificationsApi {
 
     @PUT("notifications")
     suspend fun markAllRead(): MarkReadResponse
+
+    // Backs the bottom nav's unread badge - the same real GET
+    // /notifications/unread endpoint, not a count derived from the
+    // already-fetched list (which the badge, living outside the
+    // Notifications screen's own ViewModel, doesn't have access to).
+    @GET("notifications/unread")
+    suspend fun getUnreadCount(): UnreadCountResponse
 }

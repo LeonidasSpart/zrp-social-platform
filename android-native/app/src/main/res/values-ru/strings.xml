@@ -60,4 +60,13 @@
     <string name="auth_email_or_username">Эл. почта или имя пользователя</string>
     <string name="auth_signing_in">Вход...</string>
     <string name="auth_password">Пароль</string>
+    <string name="messages_no_messages_yet">Нет сообщения пока.</string>
+    <string name="chat_back_to_messages">назад в сообщения</string>
+    <string name="chat_message_placeholder">сообщение %1$s...</string>
+    <string name="chat_no_messages_yet">Нет сообщения пока</string>
+    <string name="chat_say_hello">Поздоровайтесь с %1$s!</string>
+    <string name="chat_delete_message">удалить сообщение</string>
+    <string name="chat_delete_message_confirm">Вы уверены, что хотите удалить это сообщение?</string>
+    <string name="action_edit">Изменить</string>
+    <string name="action_reply">Ответить</string>
 </resources>
