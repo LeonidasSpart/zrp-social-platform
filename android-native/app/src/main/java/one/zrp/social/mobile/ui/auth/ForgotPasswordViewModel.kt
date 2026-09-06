@@ -38,8 +38,8 @@ private const val FALLBACK_MESSAGE = "If an account exists, you'll receive a res
  * the emailed link) still happens in the device's browser today - the
  * website's own /reset-password/[token] page is already mobile-
  * responsive and fully functional there. A native in-app completion
- * screen would need a verified Android App Link for zrp.one/reset-
- * password/* to intercept the emailed link instead of opening a
+ * screen would need a verified Android App Link for the reset-password
+ * path on zrp.one to intercept the emailed link instead of opening a
  * browser, which is real, separate infrastructure work (a hosted
  * assetlinks.json plus the app's real release-signing fingerprint),
  * not a smaller gap in this screen.
