@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -67,20 +68,26 @@ fun LoginScreen(
     ) {
         Image(
             painter = painterResource(id = R.mipmap.ic_launcher_foreground),
-            contentDescription = "ZRP",
+            contentDescription = stringResource(R.string.app_name),
             modifier = Modifier.size(72.dp),
         )
 
         Text(
-            text = "Sign in to ZRP",
+            text = stringResource(R.string.auth_sign_in),
             style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(top = 16.dp, bottom = 32.dp),
+            modifier = Modifier.padding(top = 16.dp),
+        )
+        Text(
+            text = stringResource(R.string.auth_sign_in_subtitle),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp, bottom = 32.dp),
         )
 
         OutlinedTextField(
             value = identifier,
             onValueChange = { identifier = it },
-            label = { Text("Email or username") },
+            label = { Text(stringResource(R.string.auth_email_or_username)) },
             singleLine = true,
             enabled = !isSubmitting,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -90,7 +97,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text(stringResource(R.string.auth_password)) },
             singleLine = true,
             enabled = !isSubmitting,
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -132,8 +139,12 @@ fun LoginScreen(
                     color = MaterialTheme.colorScheme.onPrimary,
                     strokeWidth = 2.dp,
                 )
+                Text(
+                    text = stringResource(R.string.auth_signing_in),
+                    modifier = Modifier.padding(start = 8.dp),
+                )
             } else {
-                Text("Log in")
+                Text(stringResource(R.string.auth_sign_in))
             }
         }
     }

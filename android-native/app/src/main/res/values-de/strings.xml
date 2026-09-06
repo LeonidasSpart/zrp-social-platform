@@ -55,4 +55,9 @@
     <string name="nav_notifications">Benachrichtigungen</string>
     <string name="nav_profile">Profil</string>
     <string name="action_post">Posten</string>
+    <string name="auth_sign_in">Anmelden</string>
+    <string name="auth_sign_in_subtitle">Melde dich an, um der Community beizutreten</string>
+    <string name="auth_email_or_username">E-Mail oder Benutzername</string>
+    <string name="auth_signing_in">Anmeldung...</string>
+    <string name="auth_password">Passwort</string>
 </resources>

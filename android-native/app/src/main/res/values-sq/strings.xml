@@ -55,4 +55,9 @@
     <string name="nav_notifications">Njoftimet</string>
     <string name="nav_profile">Profili</string>
     <string name="action_post">Publiko</string>
+    <string name="auth_sign_in">Hyr</string>
+    <string name="auth_sign_in_subtitle">Hyni për t\'u bashkuar me komunitetin</string>
+    <string name="auth_email_or_username">Email ose emri i përdoruesit</string>
+    <string name="auth_signing_in">Duke hyrë...</string>
+    <string name="auth_password">Fjalëkalimi</string>
 </resources>

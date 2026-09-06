@@ -71,4 +71,9 @@
     <string name="nav_notifications">Notifications</string>
     <string name="nav_profile">Profile</string>
     <string name="action_post">Post</string>
+    <string name="auth_sign_in">Sign in</string>
+    <string name="auth_sign_in_subtitle">Sign in to join the community</string>
+    <string name="auth_email_or_username">Email or Username</string>
+    <string name="auth_signing_in">Signing in...</string>
+    <string name="auth_password">Password</string>
 </resources>
