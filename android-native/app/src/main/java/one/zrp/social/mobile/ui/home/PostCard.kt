@@ -33,9 +33,12 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.VolumeOff
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -46,6 +49,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,10 +62,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.VideoSize
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.network.ApiClient
@@ -81,6 +94,70 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatCount
 import one.zrp.social.mobile.util.formatRelativeTime
 import java.util.Locale
+
+// The exact same video-vs-image heuristic PostCard.tsx itself uses
+// (mediaType, URL extension, and URL path patterns together, since
+// storage/CDN URLs often carry no file extension at all) - ported
+// field-for-field from the real component rather than guessed, so a
+// post that plays as a video on web plays as one here too.
+private val imageExtensions = setOf(
+    "jpg", "jpeg", "png", "gif", "webp", "svg", "avif", "bmp", "tif", "tiff", "heic", "heif",
+)
+private val videoExtensions = setOf(
+    "mp4", "webm", "mov", "avi", "mkv", "m4v", "3gp", "3g2", "ogv", "mpeg", "mpg", "m2v", "ts",
+)
+
+private fun normalizeMediaType(value: String?): String =
+    (value ?: "").trim().lowercase().replace(Regex("\\s+"), "")
+
+private fun getMediaPath(url: String?): String {
+    if (url.isNullOrEmpty()) return ""
+    return url.lowercase().substringBefore('?').substringBefore('#')
+}
+
+private fun isGifMedia(url: String?, mediaType: String?): Boolean {
+    val type = normalizeMediaType(mediaType)
+    val path = getMediaPath(url)
+    return path.endsWith(".gif") || type == "gif" || type == "image/gif"
+}
+
+private fun isExplicitVideoMediaType(mediaType: String?): Boolean {
+    val type = normalizeMediaType(mediaType)
+    return type == "video" || type == "videos" || type == "movie" ||
+        type == "video/mp4" || type == "video/webm" || type == "video/mov" ||
+        type == "video/quicktime" || type.startsWith("video/")
+}
+
+private fun isExplicitImageMediaType(mediaType: String?): Boolean {
+    val type = normalizeMediaType(mediaType)
+    return type == "image" || type == "images" || type == "photo" || type == "picture" ||
+        type.startsWith("image/")
+}
+
+private fun isVideoPost(post: Post): Boolean {
+    val mediaUrl = post.imageUrl ?: ""
+    val mediaPath = getMediaPath(mediaUrl)
+    val isGif = isGifMedia(post.imageUrl, post.mediaType)
+    val isImageGallery = (post.imageUrls?.size ?: 0) > 1
+    val hasImageExtension = imageExtensions.any { mediaPath.endsWith(".$it") }
+    val hasVideoExtension = videoExtensions.any { mediaPath.endsWith(".$it") }
+
+    return !isGif && !isImageGallery && !isExplicitImageMediaType(post.mediaType) &&
+        (
+            isExplicitVideoMediaType(post.mediaType) ||
+                hasVideoExtension ||
+                (
+                    !hasImageExtension &&
+                        (
+                            mediaUrl.contains("/video/") ||
+                                mediaUrl.contains("/videos/") ||
+                                mediaUrl.contains("/media/video/") ||
+                                mediaUrl.contains("/uploads/video/") ||
+                                mediaUrl.contains("video=true")
+                        )
+                )
+        )
+}
 
 /**
  * The native app's own post card - not a copy of any of the website's
@@ -179,6 +256,7 @@ fun PostCard(
         post.imageUrls?.takeIf { it.isNotEmpty() } ?: listOfNotNull(post.imageUrl)
     }
     var lightboxIndex by remember(post.id) { mutableStateOf<Int?>(null) }
+    val isVideo = remember(post.id, post.imageUrl, post.mediaType, post.imageUrls) { isVideoPost(post) }
 
     suspend fun refreshReactions() {
         try {
@@ -319,7 +397,12 @@ fun PostCard(
                     )
                 }
 
-                if (galleryImages.isNotEmpty()) {
+                if (isVideo && post.imageUrl != null) {
+                    PostVideoPlayer(
+                        url = post.imageUrl,
+                        modifier = Modifier.padding(top = Spacing.sm),
+                    )
+                } else if (galleryImages.isNotEmpty()) {
                     PostImageGallery(
                         images = galleryImages,
                         onImageClick = { index -> lightboxIndex = index },
@@ -574,6 +657,117 @@ private fun ImageLightbox(images: List<String>, initialIndex: Int, onDismiss: ()
                 IconButton(onClick = onDismiss) {
                     Icon(Icons.Filled.Close, contentDescription = "Close image", tint = Color.White)
                 }
+            }
+        }
+    }
+}
+
+// Real ExoPlayer-backed inline video playback for a video post - the
+// same media3 setup StoryViewerScreen's own video stories already use.
+// PostCard.tsx autoplays muted once a video post scrolls into view
+// (an IntersectionObserver-driven `videoInView`) and otherwise shows a
+// centered Play icon over the paused first frame; replicating that
+// scroll-driven autoplay would require plumbing LazyListState-derived
+// visibility through every screen that renders PostCard (Home, Search,
+// Profile, Bookmarks, Reposts, Quotes, Hashtag). Deliberately narrower
+// here: every video post starts paused with that same real Play-icon
+// overlay (one of web's own two real states, not an invented one), and
+// tapping it starts real muted, looping playback with the same
+// Mute/Unmute video toggle web's own button offers - matching its real,
+// untranslated aria-label text. Scroll-triggered autoplay is left as a
+// separate follow-up, same as the full-screen Shorts feed a tap opens
+// on web (a much larger, distinct feature this slice doesn't build).
+@OptIn(UnstableApi::class)
+@Composable
+private fun PostVideoPlayer(url: String, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    var isPlaying by remember(url) { mutableStateOf(false) }
+    var isMuted by remember(url) { mutableStateOf(true) }
+    // Web captures the real video's own dimensions (captureVideoAspect)
+    // rather than assuming a fixed shape - a vertical phone-shot video
+    // is common enough that hardcoding 16:9 would letterbox/crop it.
+    var aspectRatio by remember(url) { mutableStateOf(16f / 9f) }
+
+    val exoPlayer = remember(url) {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(MediaItem.fromUri(url))
+            repeatMode = Player.REPEAT_MODE_ONE
+            volume = 0f
+            prepare()
+        }
+    }
+
+    DisposableEffect(exoPlayer) {
+        val listener = object : Player.Listener {
+            override fun onVideoSizeChanged(videoSize: VideoSize) {
+                if (videoSize.width > 0 && videoSize.height > 0) {
+                    aspectRatio = (videoSize.width.toFloat() / videoSize.height.toFloat())
+                }
+            }
+        }
+        exoPlayer.addListener(listener)
+        onDispose {
+            exoPlayer.removeListener(listener)
+            exoPlayer.release()
+        }
+    }
+
+    LaunchedEffect(isPlaying) {
+        exoPlayer.playWhenReady = isPlaying
+    }
+
+    LaunchedEffect(isMuted) {
+        exoPlayer.volume = if (isMuted) 0f else 1f
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .aspectRatio(aspectRatio)
+            .background(Color.Black)
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(enabled = !isPlaying) { isPlaying = true },
+    ) {
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = {
+                PlayerView(context).apply {
+                    player = exoPlayer
+                    useController = false
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                }
+            },
+        )
+
+        if (!isPlaying) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(MaterialTheme.shapes.extraLarge)
+                        .background(Color.Black.copy(alpha = 0.5f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = Color.White)
+                }
+            }
+        } else {
+            IconButton(
+                onClick = { isMuted = !isMuted },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(Spacing.sm),
+            ) {
+                Icon(
+                    imageVector = if (isMuted) Icons.Filled.VolumeOff else Icons.Filled.VolumeUp,
+                    contentDescription = if (isMuted) "Unmute video" else "Mute video",
+                    tint = Color.White,
+                )
             }
         }
     }
