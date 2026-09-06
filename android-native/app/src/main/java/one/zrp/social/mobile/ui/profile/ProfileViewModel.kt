@@ -22,6 +22,8 @@ data class ProfileUiState(
     val endReached: Boolean = false,
     val isTogglingFollow: Boolean = false,
     val isTogglingBlock: Boolean = false,
+    val isMuted: Boolean = false,
+    val isTogglingMute: Boolean = false,
     val error: String? = null,
 )
 
@@ -61,14 +63,16 @@ class ProfileViewModel(
 
             repository.getProfile(username)
                 .onSuccess { profile ->
+                    val isOwnProfile = requestedUsername == null
                     _state.update {
                         it.copy(
                             profile = profile,
-                            isOwnProfile = requestedUsername == null,
+                            isOwnProfile = isOwnProfile,
                             isLoadingProfile = false,
                         )
                     }
                     loadPosts(username, refresh = true)
+                    if (!isOwnProfile) loadMuteStatus(profile.id)
                 }
                 .onFailure { error ->
                     _state.update {
@@ -175,6 +179,26 @@ class ProfileViewModel(
                 .onFailure {
                     _state.update { it.copy(isTogglingBlock = false) }
                 }
+        }
+    }
+
+    private fun loadMuteStatus(userId: String) {
+        viewModelScope.launch {
+            repository.getMuteStatus(userId).onSuccess { muted ->
+                _state.update { it.copy(isMuted = muted) }
+            }
+        }
+    }
+
+    fun toggleMute() {
+        val profile = _state.value.profile ?: return
+        if (_state.value.isTogglingMute) return
+
+        _state.update { it.copy(isTogglingMute = true) }
+        viewModelScope.launch {
+            repository.toggleMute(profile.id)
+                .onSuccess { muted -> _state.update { it.copy(isTogglingMute = false, isMuted = muted) } }
+                .onFailure { _state.update { it.copy(isTogglingMute = false) } }
         }
     }
 

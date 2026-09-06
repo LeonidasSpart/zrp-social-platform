@@ -31,6 +31,8 @@ import one.zrp.social.mobile.ui.followlist.FollowListScreen
 import one.zrp.social.mobile.ui.home.HomeScreen
 import one.zrp.social.mobile.ui.messages.ConversationScreen
 import one.zrp.social.mobile.ui.messages.MessagesScreen
+import one.zrp.social.mobile.ui.moderation.ModerationListMode
+import one.zrp.social.mobile.ui.moderation.ModerationListScreen
 import one.zrp.social.mobile.ui.music.MusicScreen
 import one.zrp.social.mobile.ui.notifications.NotificationsScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
@@ -64,6 +66,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
+    val goToBlockedUsers: () -> Unit = { navController.navigate("blocked-users") }
+    val goToMutedUsers: () -> Unit = { navController.navigate("muted-users") }
     val goHome: () -> Unit = {
         navController.navigate(ZrpDestination.Home.route) {
             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -116,6 +120,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenBookmarks = goToBookmarks,
                     onOpenFollowers = goToFollowers,
                     onOpenFollowing = goToFollowing,
+                    onOpenBlockedUsers = goToBlockedUsers,
+                    onOpenMutedUsers = goToMutedUsers,
                 )
             }
             composable(
@@ -199,6 +205,20 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                 BookmarksScreen(
                     onAuthorClick = goToProfile,
                     onOpenComments = goToComments,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("blocked-users") {
+                ModerationListScreen(
+                    mode = ModerationListMode.BLOCKED,
+                    onAuthorClick = goToProfile,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("muted-users") {
+                ModerationListScreen(
+                    mode = ModerationListMode.MUTED,
+                    onAuthorClick = goToProfile,
                     onBack = { navController.popBackStack() },
                 )
             }

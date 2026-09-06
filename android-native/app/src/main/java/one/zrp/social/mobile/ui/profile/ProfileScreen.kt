@@ -25,10 +25,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -78,6 +83,8 @@ fun ProfileScreen(
     onOpenBookmarks: () -> Unit = {},
     onOpenFollowers: (username: String) -> Unit = {},
     onOpenFollowing: (username: String) -> Unit = {},
+    onOpenBlockedUsers: () -> Unit = {},
+    onOpenMutedUsers: () -> Unit = {},
 ) {
     val viewModel: ProfileViewModel = viewModel(
         factory = remember(username) { ProfileViewModelFactory(ProfileRepository(), username) },
@@ -139,13 +146,18 @@ fun ProfileScreen(
                             isOwnProfile = state.isOwnProfile,
                             isTogglingFollow = state.isTogglingFollow,
                             isTogglingBlock = state.isTogglingBlock,
+                            isMuted = state.isMuted,
+                            isTogglingMute = state.isTogglingMute,
                             onFollowClick = { viewModel.toggleFollow() },
                             onBlockClick = { viewModel.toggleBlock() },
+                            onMuteClick = { viewModel.toggleMute() },
                             onLogoutClick = onLogout,
                             onMessageClick = { onMessageClick(profile.id, profile.username) },
                             onBookmarksClick = onOpenBookmarks,
                             onFollowersClick = { onOpenFollowers(profile.username) },
                             onFollowingClick = { onOpenFollowing(profile.username) },
+                            onBlockedUsersClick = onOpenBlockedUsers,
+                            onMutedUsersClick = onOpenMutedUsers,
                         )
                     }
 
@@ -253,13 +265,18 @@ private fun ProfileHeader(
     isOwnProfile: Boolean,
     isTogglingFollow: Boolean,
     isTogglingBlock: Boolean,
+    isMuted: Boolean,
+    isTogglingMute: Boolean,
     onFollowClick: () -> Unit,
     onBlockClick: () -> Unit,
+    onMuteClick: () -> Unit,
     onLogoutClick: () -> Unit,
     onMessageClick: () -> Unit,
     onBookmarksClick: () -> Unit,
     onFollowersClick: () -> Unit,
     onFollowingClick: () -> Unit,
+    onBlockedUsersClick: () -> Unit,
+    onMutedUsersClick: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -300,16 +317,63 @@ private fun ProfileHeader(
                             Icon(Icons.Filled.Bookmark, contentDescription = "Bookmarks")
                         }
 
+                        var moreMenuOpen by remember { mutableStateOf(false) }
+                        Box {
+                            IconButton(onClick = { moreMenuOpen = true }) {
+                                Icon(Icons.Filled.MoreVert, contentDescription = "More options")
+                            }
+                            DropdownMenu(expanded = moreMenuOpen, onDismissRequest = { moreMenuOpen = false }) {
+                                DropdownMenuItem(
+                                    text = { Text("Blocked users") },
+                                    onClick = {
+                                        moreMenuOpen = false
+                                        onBlockedUsersClick()
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Muted users") },
+                                    onClick = {
+                                        moreMenuOpen = false
+                                        onMutedUsersClick()
+                                    },
+                                )
+                            }
+                        }
+
                         TextButton(onClick = onLogoutClick) {
                             Text("Log out")
                         }
                     } else {
-                        IconButton(onClick = onBlockClick, enabled = !isTogglingBlock) {
-                            Icon(
-                                imageVector = Icons.Filled.Block,
-                                contentDescription = if (profile.isBlocked) "Unblock" else "Block",
-                                tint = if (profile.isBlocked) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                        var moreMenuOpen by remember { mutableStateOf(false) }
+                        Box {
+                            IconButton(onClick = { moreMenuOpen = true }) {
+                                Icon(Icons.Filled.MoreVert, contentDescription = "More options")
+                            }
+                            DropdownMenu(expanded = moreMenuOpen, onDismissRequest = { moreMenuOpen = false }) {
+                                DropdownMenuItem(
+                                    text = { Text(if (isMuted) "Unmute" else "Mute") },
+                                    enabled = !isTogglingMute,
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = if (isMuted) Icons.Filled.NotificationsOff else Icons.Filled.Notifications,
+                                            contentDescription = null,
+                                        )
+                                    },
+                                    onClick = {
+                                        moreMenuOpen = false
+                                        onMuteClick()
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(if (profile.isBlocked) "Unblock" else "Block") },
+                                    enabled = !isTogglingBlock,
+                                    leadingIcon = { Icon(Icons.Filled.Block, contentDescription = null, tint = ZrpRed) },
+                                    onClick = {
+                                        moreMenuOpen = false
+                                        onBlockClick()
+                                    },
+                                )
+                            }
                         }
 
                         IconButton(onClick = onMessageClick) {

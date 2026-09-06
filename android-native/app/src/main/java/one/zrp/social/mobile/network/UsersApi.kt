@@ -1,5 +1,6 @@
 package one.zrp.social.mobile.network
 
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -60,6 +61,38 @@ data class FollowListUser(
 
 data class FollowListPage(val items: List<FollowListUser>, val nextCursor: String?)
 
+data class MuteToggleRequest(val userId: String)
+data class MuteToggleResponse(val muted: Boolean)
+data class MuteStatusResponse(val muted: Boolean)
+
+data class ModerationCounts(val followers: Int = 0, val following: Int = 0)
+
+// GET /users/blocked and GET /users/muted both respond with a bare
+// JSON array (no {items: ...} envelope, and no pagination - see their
+// route.ts files), the one real user-facing block/mute management
+// surface each list backs (src/app/settings/blocked|muted/page.tsx).
+data class BlockedUser(
+    val id: String,
+    val username: String,
+    val name: String?,
+    val avatarUrl: String?,
+    val badgeType: String?,
+    val bio: String?,
+    val blockedAt: String,
+    val _count: ModerationCounts,
+)
+
+data class MutedUser(
+    val id: String,
+    val username: String,
+    val name: String?,
+    val avatarUrl: String?,
+    val badgeType: String?,
+    val bio: String?,
+    val mutedAt: String,
+    val _count: ModerationCounts,
+)
+
 // GET /users/{username}/posts responds with {"items": [...], "nextCursor": ...}
 // - a genuinely different envelope key from PostsApi's PostsPage
 // ({"posts": [...]}), which the website's own profile page also
@@ -108,4 +141,16 @@ interface UsersApi {
         @Path("username") username: String,
         @Query("cursor") cursor: String?,
     ): FollowListPage
+
+    @POST("users/mute")
+    suspend fun toggleMute(@Body request: MuteToggleRequest): MuteToggleResponse
+
+    @GET("users/mute")
+    suspend fun getMuteStatus(@Query("userId") userId: String): MuteStatusResponse
+
+    @GET("users/blocked")
+    suspend fun getBlockedUsers(): List<BlockedUser>
+
+    @GET("users/muted")
+    suspend fun getMutedUsers(): List<MutedUser>
 }

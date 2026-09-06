@@ -2,11 +2,14 @@ package one.zrp.social.mobile.data
 
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.BlockToggleResponse
+import one.zrp.social.mobile.network.BlockedUser
 import one.zrp.social.mobile.network.BookmarkResponse
 import one.zrp.social.mobile.network.CreateReportRequest
 import one.zrp.social.mobile.network.FollowListPage
 import one.zrp.social.mobile.network.FollowToggleResponse
 import one.zrp.social.mobile.network.LikeResponse
+import one.zrp.social.mobile.network.MuteToggleRequest
+import one.zrp.social.mobile.network.MutedUser
 import one.zrp.social.mobile.network.PostsPage
 import one.zrp.social.mobile.network.RepostResponse
 import one.zrp.social.mobile.network.UserProfile
@@ -78,5 +81,21 @@ class ProfileRepository {
 
     suspend fun toggleBlock(username: String): Result<BlockToggleResponse> = runCatching {
         ApiClient.usersApi.toggleBlock(username)
+    }
+
+    suspend fun getMuteStatus(userId: String): Result<Boolean> = runCatching {
+        ApiClient.usersApi.getMuteStatus(userId).muted
+    }
+
+    suspend fun toggleMute(userId: String): Result<Boolean> = runCatching {
+        ApiClient.usersApi.toggleMute(MuteToggleRequest(userId)).muted
+    }
+
+    suspend fun getBlockedUsers(): Result<List<BlockedUser>> = runCatching {
+        ApiClient.usersApi.getBlockedUsers()
+    }
+
+    suspend fun getMutedUsers(): Result<List<MutedUser>> = runCatching {
+        ApiClient.usersApi.getMutedUsers()
     }
 }
