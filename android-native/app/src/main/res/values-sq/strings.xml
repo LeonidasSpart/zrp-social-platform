@@ -69,4 +69,6 @@
     <string name="chat_delete_message_confirm">Jeni të sigurt që dëshironi ta fshini këtë mesazh?</string>
     <string name="action_edit">Ndrysho</string>
     <string name="action_reply">Përgjigju</string>
+    <string name="feed_for_you">Për ju</string>
+    <string name="feed_following">Duke ndjekur</string>
 </resources>

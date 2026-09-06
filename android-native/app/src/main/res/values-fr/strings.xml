@@ -69,4 +69,6 @@
     <string name="chat_delete_message_confirm">Voulez-vous vraiment supprimer ce message ?</string>
     <string name="action_edit">Modifier</string>
     <string name="action_reply">Répondre</string>
+    <string name="feed_for_you">Pour vous</string>
+    <string name="feed_following">Abonnements</string>
 </resources>

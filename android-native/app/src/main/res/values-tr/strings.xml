@@ -69,4 +69,6 @@
     <string name="chat_delete_message_confirm">Bu mesajı silmek istediğinizden emin misiniz?</string>
     <string name="action_edit">Düzenle</string>
     <string name="action_reply">Yanıtla</string>
+    <string name="feed_for_you">Senin için</string>
+    <string name="feed_following">Takip Edilenler</string>
 </resources>

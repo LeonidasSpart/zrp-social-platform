@@ -69,4 +69,6 @@
     <string name="chat_delete_message_confirm">هل أنت متأكد أنك تريد حذف هذه الرسالة؟</string>
     <string name="action_edit">تعديل</string>
     <string name="action_reply">رد</string>
+    <string name="feed_for_you">لك</string>
+    <string name="feed_following">المتابَعون</string>
 </resources>
