@@ -129,4 +129,11 @@
     <string name="music_pause">إيقاف مؤقت</string>
     <string name="music_play">تشغيل</string>
     <string name="music_unlike">إلغاء الإعجاب</string>
+    <string name="composer_placeholder_default">ما الجديد؟ استخدم #هاشتاغات و@إشارات</string>
+    <string name="composer_post_button">نشر</string>
+    <string name="comments_title">تعليقات</string>
+    <string name="followers_title">المتابعون</string>
+    <string name="followers_empty">لا يوجد متابعون بعد.</string>
+    <string name="following_title">يتابع</string>
+    <string name="following_empty">لا تتابع أي شخص بعد.</string>
 </resources>

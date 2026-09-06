@@ -129,4 +129,11 @@
     <string name="music_pause">Pausa</string>
     <string name="music_play">Riproduci</string>
     <string name="music_unlike">Non mi piace più</string>
+    <string name="composer_placeholder_default">Cosa sta succedendo? Usa #hashtag e @menzioni</string>
+    <string name="composer_post_button">Pubblica</string>
+    <string name="comments_title">Commenti</string>
+    <string name="followers_title">Follower</string>
+    <string name="followers_empty">Ancora nessun follower.</string>
+    <string name="following_title">Seguiti</string>
+    <string name="following_empty">Non segue ancora nessuno.</string>
 </resources>

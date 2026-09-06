@@ -129,4 +129,11 @@
     <string name="music_pause">Пауза</string>
     <string name="music_play">Воспроизвести</string>
     <string name="music_unlike">Убрать из понравившихся</string>
+    <string name="composer_placeholder_default">Что происходит? Используйте #хэштеги и @упоминания</string>
+    <string name="composer_post_button">Опубликовать</string>
+    <string name="comments_title">комментариев</string>
+    <string name="followers_title">Подписчики</string>
+    <string name="followers_empty">Пока нет подписчиков.</string>
+    <string name="following_title">Подписки</string>
+    <string name="following_empty">Вы пока ни на кого не подписаны.</string>
 </resources>

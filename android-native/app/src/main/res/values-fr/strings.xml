@@ -129,4 +129,11 @@
     <string name="music_pause">Pause</string>
     <string name="music_play">Lecture</string>
     <string name="music_unlike">Je n\'aime plus</string>
+    <string name="composer_placeholder_default">Quoi de neuf ? Utilisez #hashtags et @mentions</string>
+    <string name="composer_post_button">Publier</string>
+    <string name="comments_title">Commentaires</string>
+    <string name="followers_title">Abonnés</string>
+    <string name="followers_empty">Aucun abonné pour le moment.</string>
+    <string name="following_title">Abonnements</string>
+    <string name="following_empty">Ne suit personne pour le moment.</string>
 </resources>

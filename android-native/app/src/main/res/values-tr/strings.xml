@@ -129,4 +129,11 @@
     <string name="music_pause">Duraklat</string>
     <string name="music_play">Oynat</string>
     <string name="music_unlike">Beğenmekten vazgeç</string>
+    <string name="composer_placeholder_default">Neler oluyor? #hashtag ve @bahsetme kullanın</string>
+    <string name="composer_post_button">Gönder</string>
+    <string name="comments_title">Yorumlar</string>
+    <string name="followers_title">Takipçiler</string>
+    <string name="followers_empty">Henüz takipçi yok.</string>
+    <string name="following_title">Takip Edilenler</string>
+    <string name="following_empty">Henüz kimseyi takip etmiyorsunuz.</string>
 </resources>

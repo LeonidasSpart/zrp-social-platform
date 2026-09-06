@@ -44,8 +44,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.CommentsRepository
 import one.zrp.social.mobile.network.Comment
 import one.zrp.social.mobile.ui.components.Avatar
@@ -106,7 +108,7 @@ fun CommentsScreen(
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Text(
-                text = "Comments",
+                text = stringResource(R.string.comments_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 4.dp),
             )
@@ -241,6 +243,8 @@ fun CommentsScreen(
 
     val deleteCommentId = deletingCommentId
     if (deleteCommentId != null) {
+        // English-only on purpose - CommentItem.tsx's own delete confirm
+        // is a plain, untranslated confirm("Delete this comment?") too.
         AlertDialog(
             onDismissRequest = { if (!isDeletingComment) deletingCommentId = null },
             title = { Text("Delete comment?") },

@@ -25,8 +25,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.VerifiedBadge
@@ -67,6 +69,8 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
             .padding(16.dp),
     ) {
         if (quotePostId != null) {
+            // "Quote Post" stays English-only on purpose - matches
+            // QuotePostModal.tsx's own hardcoded, untranslated title.
             Text(
                 text = "Quote Post",
                 style = MaterialTheme.typography.titleLarge,
@@ -119,7 +123,13 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
         OutlinedTextField(
             value = state.content,
             onValueChange = { viewModel.onContentChange(it) },
-            placeholder = { Text(if (quotePostId != null) "Add your thoughts..." else "What's happening on ZRP?") },
+            // The quote-post placeholder ("Add your thoughts...") stays
+            // English-only on purpose too - QuotePostModal.tsx's own
+            // placeholder is hardcoded the same way. The default placeholder
+            // uses PostComposer.tsx's real, translated copy.
+            placeholder = {
+                Text(if (quotePostId != null) "Add your thoughts..." else stringResource(R.string.composer_placeholder_default))
+            },
             enabled = !state.isPosting,
             modifier = Modifier
                 .fillMaxWidth()
@@ -161,7 +171,10 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
                         strokeWidth = 2.dp,
                     )
                 } else {
-                    Text(if (quotePostId != null) "Quote" else "Post")
+                    // "Quote" (the quote-post case) stays English-only on
+                    // purpose too - QuotePostModal.tsx's own submit button
+                    // is hardcoded the same way.
+                    Text(if (quotePostId != null) "Quote" else stringResource(R.string.composer_post_button))
                 }
             }
         }

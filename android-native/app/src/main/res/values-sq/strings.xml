@@ -129,4 +129,11 @@
     <string name="music_pause">Pauzë</string>
     <string name="music_play">Luaj</string>
     <string name="music_unlike">Hiq pëlqimin</string>
+    <string name="composer_placeholder_default">Çfarë po ndodh? Përdorni #hashtags dhe @mentions</string>
+    <string name="composer_post_button">Publiko</string>
+    <string name="comments_title">Komentet</string>
+    <string name="followers_title">Ndjekësit</string>
+    <string name="followers_empty">Nuk ka ndjekës ende.</string>
+    <string name="following_title">Të ndjekurit</string>
+    <string name="following_empty">Nuk po ndiqni asnjë përdorues ende.</string>
 </resources>
