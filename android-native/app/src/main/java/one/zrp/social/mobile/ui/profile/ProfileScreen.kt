@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -47,7 +48,10 @@ import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.home.PostCard
+import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.ui.theme.ZrpWhite
+import one.zrp.social.mobile.util.formatCount
 
 /**
  * A single profile screen instance - the signed-in user's own profile
@@ -158,6 +162,14 @@ fun ProfileScreen(
     }
 }
 
+private val CoverHeight = 128.dp
+private val HeaderAvatarSize = 88.dp
+
+// The avatar deliberately overlaps the bottom edge of the cover photo,
+// the one detail that reads as "designed profile" rather than "a list
+// of fields" in every reference social app (Twitter, LinkedIn,
+// Instagram all use it) - a ring in the page's own background color
+// makes it look cut out of the cover rather than merely placed near it.
 @Composable
 private fun ProfileHeader(
     profile: UserProfile,
@@ -168,85 +180,112 @@ private fun ProfileHeader(
     onMessageClick: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        if (profile.coverUrl != null) {
-            AsyncImage(
-                model = profile.coverUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp),
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-            )
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.Top,
-        ) {
-            Avatar(url = profile.avatarUrl, name = profile.name ?: profile.username, size = 72.dp)
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = profile.name ?: profile.username,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = "@${profile.username}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-
-            if (isOwnProfile) {
-                TextButton(onClick = onLogoutClick) {
-                    Text("Log out")
-                }
-            } else {
-                IconButton(onClick = onMessageClick) {
-                    Icon(Icons.Filled.MailOutline, contentDescription = "Message")
+        Box(modifier = Modifier.fillMaxWidth()) {
+            // Cover photo and the action-button row both live in this
+            // inner Column, which reserves HeaderAvatarSize/2 of empty
+            // space below the cover for the avatar to overlap into.
+            // The Avatar itself is a separate, later sibling of the
+            // outer Box - later siblings paint on top - so it's never
+            // covered by the button row underneath it.
+            Column(modifier = Modifier.fillMaxWidth()) {
+                if (profile.coverUrl != null) {
+                    AsyncImage(
+                        model = profile.coverUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(CoverHeight),
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(CoverHeight)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                    )
                 }
 
-                Button(
-                    onClick = onFollowClick,
-                    enabled = !isTogglingFollow,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (profile.isFollowing) {
-                            MaterialTheme.colorScheme.surfaceVariant
-                        } else {
-                            ZrpRed
-                        },
-                    ),
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = HeaderAvatarSize / 2 + Spacing.xs, end = Spacing.lg),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(if (profile.isFollowing) "Following" else "Follow")
+                    if (isOwnProfile) {
+                        TextButton(onClick = onLogoutClick) {
+                            Text("Log out")
+                        }
+                    } else {
+                        IconButton(onClick = onMessageClick) {
+                            Icon(Icons.Filled.MailOutline, contentDescription = "Message")
+                        }
+
+                        Spacer(modifier = Modifier.width(Spacing.xs))
+
+                        Button(
+                            onClick = onFollowClick,
+                            enabled = !isTogglingFollow,
+                            shape = MaterialTheme.shapes.large,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (profile.isFollowing) {
+                                    MaterialTheme.colorScheme.surfaceContainerHigh
+                                } else {
+                                    ZrpRed
+                                },
+                                contentColor = if (profile.isFollowing) {
+                                    MaterialTheme.colorScheme.onSurface
+                                } else {
+                                    ZrpWhite
+                                },
+                            ),
+                        ) {
+                            Text(if (profile.isFollowing) "Following" else "Follow")
+                        }
+                    }
                 }
             }
+
+            Avatar(
+                url = profile.avatarUrl,
+                name = profile.name ?: profile.username,
+                size = HeaderAvatarSize,
+                ringColor = MaterialTheme.colorScheme.background,
+                ringWidth = 4.dp,
+                modifier = Modifier
+                    .padding(start = Spacing.lg)
+                    .offset(y = CoverHeight - HeaderAvatarSize / 2)
+                    .align(Alignment.TopStart),
+            )
         }
 
-        if (!profile.bio.isNullOrBlank()) {
+        Column(modifier = Modifier.padding(horizontal = Spacing.lg, top = Spacing.sm)) {
             Text(
-                text = profile.bio,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                text = profile.name ?: profile.username,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
             )
+            Text(
+                text = "@${profile.username}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            if (!profile.bio.isNullOrBlank()) {
+                Text(
+                    text = profile.bio,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = Spacing.xs),
+                )
+            }
         }
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
+                .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xl),
         ) {
             ProfileStat(count = profile._count.posts, label = "Posts")
             ProfileStat(count = profile._count.followers, label = "Followers")
@@ -259,16 +298,15 @@ private fun ProfileHeader(
 
 @Composable
 private fun ProfileStat(count: Int, label: String) {
-    Row {
+    Column {
         Text(
-            text = count.toString(),
+            text = formatCount(count),
             fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.titleMedium,
         )
-        Spacer(modifier = Modifier.width(4.dp))
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }

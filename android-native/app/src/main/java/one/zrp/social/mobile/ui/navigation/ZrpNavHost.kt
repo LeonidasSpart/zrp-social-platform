@@ -1,13 +1,19 @@
 package one.zrp.social.mobile.ui.navigation
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.graphicsLayer
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -28,6 +34,7 @@ import one.zrp.social.mobile.ui.profile.ProfileScreen
 import one.zrp.social.mobile.ui.search.SearchScreen
 import one.zrp.social.mobile.ui.stories.CreateStoryScreen
 import one.zrp.social.mobile.ui.stories.StoryViewerScreen
+import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
  * Real zrp.one URLs (see the deepLinks on the routes below and
@@ -166,9 +173,14 @@ private fun ZrpBottomBar(navController: androidx.navigation.NavHostController) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
 
-    NavigationBar {
+    NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest) {
         ZrpDestination.entries.forEach { destination ->
             val selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true
+            val iconScale by animateFloatAsState(
+                targetValue = if (selected) 1f else 0.92f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+                label = "navIconScale",
+            )
 
             NavigationBarItem(
                 selected = selected,
@@ -181,8 +193,20 @@ private fun ZrpBottomBar(navController: androidx.navigation.NavHostController) {
                         restoreState = true
                     }
                 },
-                icon = { Icon(destination.icon, contentDescription = destination.label) },
-                label = { Text(destination.label) },
+                icon = {
+                    Icon(
+                        imageVector = if (selected) destination.selectedIcon else destination.unselectedIcon,
+                        contentDescription = destination.label,
+                        modifier = Modifier.graphicsLayer(scaleX = iconScale, scaleY = iconScale),
+                    )
+                },
+                label = null,
+                alwaysShowLabel = false,
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = ZrpRed,
+                    indicatorColor = ZrpRed.copy(alpha = 0.14f),
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
             )
         }
     }

@@ -1,5 +1,8 @@
 package one.zrp.social.mobile.ui.home
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Favorite
@@ -21,15 +23,24 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.ui.theme.TouchTarget
+import one.zrp.social.mobile.ui.theme.IconSize
 import one.zrp.social.mobile.ui.theme.ZrpGreen
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatCount
@@ -54,7 +65,7 @@ fun PostCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick(post.id) }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
     ) {
         Row(verticalAlignment = Alignment.Top) {
             Avatar(
@@ -64,7 +75,7 @@ fun PostCard(
                 modifier = Modifier.clickable { onAuthorClick(post.author.username) },
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(Spacing.md))
 
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
@@ -106,15 +117,15 @@ fun PostCard(
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp)
-                            .clip(RoundedCornerShape(12.dp)),
+                            .padding(top = Spacing.sm)
+                            .clip(MaterialTheme.shapes.medium),
                     )
                 }
 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 4.dp),
+                        .padding(top = Spacing.xs),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     PostStat(
@@ -140,16 +151,9 @@ fun PostCard(
             }
         }
 
-        HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
+        HorizontalDivider(modifier = Modifier.padding(top = Spacing.md))
     }
 }
-
-// 48dp is Android's own documented minimum accessible touch target
-// (see the Accessibility Scanner / Material Design guidelines) - the
-// icon glyph itself stays visually compact at 18dp, but IconButton's
-// padding fills the rest so a real finger on a real device actually
-// lands the tap instead of missing a tiny hitbox.
-private val StatTouchTargetSize = 48.dp
 
 // Each stat's accent color only shows once it's actually active (liked/
 // reposted) - matching the website's action bar, where comment=blue,
@@ -166,12 +170,12 @@ private fun PostStat(
 ) {
     val resolvedTint = if (active) tint else MaterialTheme.colorScheme.onSurfaceVariant
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = onClick, modifier = Modifier.size(StatTouchTargetSize)) {
+        IconButton(onClick = onClick, modifier = Modifier.size(TouchTarget.min)) {
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
                 tint = resolvedTint,
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier.size(IconSize.sm),
             )
         }
         Text(
@@ -182,15 +186,35 @@ private fun PostStat(
     }
 }
 
+// The one moment on this screen worth a deliberate flourish: liking a
+// post pops the heart briefly past full size before it settles, the
+// same "felt" acknowledgement every reference feed app gives this
+// specific action. Keyed off an actual liked:false -> true transition
+// (not the raw value) so a post that was already liked before this
+// card even entered composition - e.g. scrolling back up the feed -
+// never re-triggers it on mount.
 @Composable
 private fun LikeStat(liked: Boolean, count: Int, onClick: () -> Unit) {
+    var wasLiked by remember { mutableStateOf(liked) }
+    val scale = remember { Animatable(1f) }
+
+    LaunchedEffect(liked) {
+        if (liked && !wasLiked) {
+            scale.snapTo(0.7f)
+            scale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+        }
+        wasLiked = liked
+    }
+
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = onClick, modifier = Modifier.size(StatTouchTargetSize)) {
+        IconButton(onClick = onClick, modifier = Modifier.size(TouchTarget.min)) {
             Icon(
                 imageVector = if (liked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                 contentDescription = if (liked) "Unlike" else "Like",
                 tint = if (liked) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier
+                    .size(IconSize.sm)
+                    .scale(scale.value),
             )
         }
         Text(

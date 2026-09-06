@@ -13,12 +13,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AlternateEmail
+import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,11 +37,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.data.NotificationsRepository
 import one.zrp.social.mobile.network.AppNotification
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.ui.theme.ZrpBlue
+import one.zrp.social.mobile.ui.theme.ZrpGreen
+import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.ui.theme.ZrpWhite
 import one.zrp.social.mobile.util.formatRelativeTime
 
 /**
@@ -94,9 +112,25 @@ fun NotificationsScreen(onAuthorClick: (String) -> Unit) {
     }
 }
 
+private data class NotificationBadge(val icon: ImageVector, val tint: Color)
+
+// A small colored icon on the avatar's corner - the one detail that
+// lets a user tell a like from a follow from a repost at a glance,
+// scanning a long list, instead of reading every row's sentence.
+private fun badgeFor(type: String): NotificationBadge = when (type) {
+    "like" -> NotificationBadge(Icons.Filled.Favorite, ZrpRed)
+    "comment" -> NotificationBadge(Icons.Filled.ChatBubbleOutline, ZrpBlue)
+    "repost" -> NotificationBadge(Icons.Filled.Repeat, ZrpGreen)
+    "follow", "follow_request" -> NotificationBadge(Icons.Filled.PersonAdd, ZrpRed)
+    "mention" -> NotificationBadge(Icons.Filled.AlternateEmail, ZrpBlue)
+    "message" -> NotificationBadge(Icons.Filled.MailOutline, ZrpBlue)
+    else -> NotificationBadge(Icons.Filled.Notifications, ZrpBlue)
+}
+
 @Composable
 private fun NotificationRow(notification: AppNotification, onAuthorClick: (String) -> Unit) {
     val fromUser = notification.fromUser
+    val badge = badgeFor(notification.type)
 
     Row(
         modifier = Modifier
@@ -106,21 +140,41 @@ private fun NotificationRow(notification: AppNotification, onAuthorClick: (Strin
             }
             .background(
                 if (!notification.read) {
-                    MaterialTheme.colorScheme.surfaceVariant
+                    ZrpRed.copy(alpha = 0.06f)
                 } else {
                     MaterialTheme.colorScheme.surface
                 },
             )
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
         verticalAlignment = Alignment.Top,
     ) {
-        Avatar(
-            url = fromUser?.avatarUrl,
-            name = fromUser?.name ?: fromUser?.username ?: "?",
-            size = 40.dp,
-        )
+        Box {
+            Avatar(
+                url = fromUser?.avatarUrl,
+                name = fromUser?.name ?: fromUser?.username ?: "?",
+                size = 40.dp,
+            )
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(18.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(2.dp)
+                    .clip(CircleShape)
+                    .background(badge.tint),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = badge.icon,
+                    contentDescription = null,
+                    tint = ZrpWhite,
+                    modifier = Modifier.size(10.dp),
+                )
+            }
+        }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(Spacing.md))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -144,6 +198,16 @@ private fun NotificationRow(notification: AppNotification, onAuthorClick: (Strin
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 2.dp),
+            )
+        }
+
+        if (!notification.read) {
+            Box(
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(ZrpRed),
             )
         }
     }

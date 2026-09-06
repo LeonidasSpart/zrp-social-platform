@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -40,6 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.network.ChatMessage
+import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
 
@@ -152,23 +154,30 @@ fun ConversationScreen(
     }
 }
 
+// The corner nearest the sender's own side of the screen stays sharp -
+// the same "tail" convention every reference chat app uses so a glance
+// tells you which side sent a bubble even before reading its color.
+private val OwnMessageShape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomStart = 18.dp, bottomEnd = 4.dp)
+private val OtherMessageShape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomStart = 4.dp, bottomEnd = 18.dp)
+
 @Composable
 private fun MessageBubble(message: ChatMessage, isOwnMessage: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 3.dp),
         horizontalArrangement = if (isOwnMessage) Arrangement.End else Arrangement.Start,
     ) {
         Surface(
-            shape = RoundedCornerShape(16.dp),
-            color = if (isOwnMessage) ZrpRed else MaterialTheme.colorScheme.surfaceVariant,
+            shape = if (isOwnMessage) OwnMessageShape else OtherMessageShape,
+            color = if (isOwnMessage) ZrpRed else MaterialTheme.colorScheme.surfaceContainerHigh,
+            modifier = Modifier.widthIn(max = 280.dp),
         ) {
-            Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+            Column(modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm)) {
                 if (message.content.isNotBlank()) {
                     Text(
                         text = message.content,
-                        color = if (isOwnMessage) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (isOwnMessage) Color.White else MaterialTheme.colorScheme.onSurface,
                     )
                 }
 

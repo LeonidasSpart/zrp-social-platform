@@ -19,3 +19,25 @@ val ZrpBlueDark = Color(0xFF1D4ED8)
 // (see PostCard.tsx's reposted state: text-green-500) exactly, since
 // that's the one UI meaning ZRP's palette doesn't already cover.
 val ZrpGreen = Color(0xFF22C55E)
+
+// A short ramp of near-black grays, each a little lighter than the
+// last, used only as dark-theme surface elevation levels (see Theme.kt)
+// - not part of the website's palette, since the web has no equivalent
+// to Android's "lighter = higher" dark-surface convention. Without
+// this, every card/sheet/row in dark mode sat on the exact same flat
+// charcoal as the page background, with nothing but a hairline divider
+// to separate them.
+val ZrpSurfaceDim = Color(0xFF050505)
+val ZrpSurfaceLow = Color(0xFF0A0A0A)
+val ZrpSurfaceContainer = Color(0xFF121212)
+val ZrpSurfaceHigh = Color(0xFF1A1A1A)
+val ZrpSurfaceHighest = Color(0xFF242424)
+val ZrpOutline = Color(0xFF2E2E2E)
+val ZrpOutlineFaint = Color(0xFF1C1C1C)
+
+// Light-theme counterparts of the above - Tailwind's gray-50/100/200,
+// matching the website's own light-mode hover/border grays exactly
+// (e.g. PostCard.tsx's hover:bg-gray-50/70, border-gray-200).
+val ZrpLightSurfaceContainer = Color(0xFFF9FAFB)
+val ZrpLightSurfaceHigh = Color(0xFFF3F4F6)
+val ZrpLightOutline = Color(0xFFE5E7EB)

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -27,6 +28,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -156,11 +158,12 @@ fun MusicScreen(onBack: () -> Unit) {
 
         val currentTrack = state.currentTrack
         if (currentTrack != null) {
-            HorizontalDivider()
             MiniPlayerBar(
                 track = currentTrack,
                 isPlaying = state.isPlaying,
                 isBuffering = state.isBuffering,
+                positionMs = state.positionMs,
+                durationMs = state.durationMs,
                 onTogglePlayPause = { viewModel.togglePlayPause() },
                 onLikeClick = { viewModel.toggleLike(currentTrack) },
             )
@@ -247,65 +250,79 @@ private fun MiniPlayerBar(
     track: MusicTrack,
     isPlaying: Boolean,
     isBuffering: Boolean,
+    positionMs: Long,
+    durationMs: Long,
     onTogglePlayPause: () -> Unit,
     onLikeClick: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
+    Column(modifier = Modifier.fillMaxWidth()) {
+        val progress = if (durationMs > 0) (positionMs.toFloat() / durationMs.toFloat()).coerceIn(0f, 1f) else 0f
+        LinearProgressIndicator(
+            progress = { progress },
             modifier = Modifier
-                .size(48.dp)
-                .clip(RoundedCornerShape(6.dp)),
+                .fillMaxWidth()
+                .height(2.dp),
+            color = ZrpRed,
+            trackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (track.coverUrl != null) {
-                AsyncImage(
-                    model = track.coverUrl,
-                    contentDescription = track.title,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Filled.MusicNote,
-                    contentDescription = track.title,
-                    modifier = Modifier.fillMaxSize(),
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(6.dp)),
+            ) {
+                if (track.coverUrl != null) {
+                    AsyncImage(
+                        model = track.coverUrl,
+                        contentDescription = track.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Filled.MusicNote,
+                        contentDescription = track.title,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = track.title, style = MaterialTheme.typography.titleSmall, maxLines = 1)
+                Text(
+                    text = track.artist.displayName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
                 )
             }
-        }
 
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = track.title, style = MaterialTheme.typography.titleSmall, maxLines = 1)
-            Text(
-                text = track.artist.displayName,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-            )
-        }
-
-        IconButton(onClick = onLikeClick) {
-            Icon(
-                imageVector = if (track.liked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                contentDescription = "Like",
-                tint = if (track.liked) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
-        IconButton(onClick = onTogglePlayPause, enabled = !isBuffering) {
-            if (isBuffering) {
-                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-            } else {
+            IconButton(onClick = onLikeClick) {
                 Icon(
-                    imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                    contentDescription = if (isPlaying) "Pause" else "Play",
-                    tint = ZrpRed,
+                    imageVector = if (track.liked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    contentDescription = "Like",
+                    tint = if (track.liked) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+
+            IconButton(onClick = onTogglePlayPause, enabled = !isBuffering) {
+                if (isBuffering) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                } else {
+                    Icon(
+                        imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                        contentDescription = if (isPlaying) "Pause" else "Play",
+                        tint = ZrpRed,
+                    )
+                }
             }
         }
     }
