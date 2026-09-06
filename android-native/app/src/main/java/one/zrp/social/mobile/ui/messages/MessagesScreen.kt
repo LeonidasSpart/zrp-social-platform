@@ -30,9 +30,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.data.MessagesRepository
@@ -72,7 +74,7 @@ fun MessagesScreen(onOpenConversation: (partnerId: String, partnerUsername: Stri
             state.conversations.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = state.error ?: "No messages yet.",
+                        text = state.error ?: stringResource(R.string.messages_no_messages_yet),
                         color = if (state.error != null) {
                             MaterialTheme.colorScheme.error
                         } else {

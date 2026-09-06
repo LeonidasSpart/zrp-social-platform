@@ -60,4 +60,13 @@
     <string name="auth_email_or_username">Email ose emri i përdoruesit</string>
     <string name="auth_signing_in">Duke hyrë...</string>
     <string name="auth_password">Fjalëkalimi</string>
+    <string name="messages_no_messages_yet">Nuk ka mesazhe ende.</string>
+    <string name="chat_back_to_messages">Kthehu te mesazhet</string>
+    <string name="chat_message_placeholder">Shkruaj mesazh për %1$s...</string>
+    <string name="chat_no_messages_yet">Nuk ka mesazhe ende</string>
+    <string name="chat_say_hello">Thoni përshëndetje për %1$s!</string>
+    <string name="chat_delete_message">Fshi mesazhin</string>
+    <string name="chat_delete_message_confirm">Jeni të sigurt që dëshironi ta fshini këtë mesazh?</string>
+    <string name="action_edit">Ndrysho</string>
+    <string name="action_reply">Përgjigju</string>
 </resources>

@@ -60,4 +60,13 @@
     <string name="auth_email_or_username">Email atau Nama Pengguna</string>
     <string name="auth_signing_in">Sedang masuk...</string>
     <string name="auth_password">Kata Sandi</string>
+    <string name="messages_no_messages_yet">Belum ada pesan.</string>
+    <string name="chat_back_to_messages">Kembali ke pesan</string>
+    <string name="chat_message_placeholder">Pesan untuk %1$s...</string>
+    <string name="chat_no_messages_yet">Belum ada pesan</string>
+    <string name="chat_say_hello">Sapa %1$s!</string>
+    <string name="chat_delete_message">Hapus pesan</string>
+    <string name="chat_delete_message_confirm">Apakah Anda yakin ingin menghapus pesan ini?</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_reply">Balas</string>
 </resources>

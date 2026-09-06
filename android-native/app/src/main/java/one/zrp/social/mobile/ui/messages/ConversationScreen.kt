@@ -46,9 +46,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.network.ChatMessage
 import one.zrp.social.mobile.ui.components.AddReactionDialog
@@ -90,7 +92,7 @@ fun ConversationScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.chat_back_to_messages))
             }
             Text(
                 text = "@$partnerUsername",
@@ -108,6 +110,25 @@ fun ConversationScreen(
             if (state.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
+                }
+            } else if (state.messages.isEmpty()) {
+                // Matches ChatInterface.tsx's own empty-conversation state
+                // (chat.noMessagesYet + chat.sayHello) rather than the
+                // blank scroll view this screen showed before.
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = stringResource(R.string.chat_no_messages_yet),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            text = stringResource(R.string.chat_say_hello, partnerUsername),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                    }
                 }
             } else {
                 LaunchedEffect(state.messages.size) {
@@ -193,7 +214,7 @@ fun ConversationScreen(
             OutlinedTextField(
                 value = state.draft,
                 onValueChange = { viewModel.onDraftChange(it) },
-                placeholder = { Text("Message") },
+                placeholder = { Text(stringResource(R.string.chat_message_placeholder, partnerUsername)) },
                 enabled = !state.isSending,
                 modifier = Modifier.weight(1f),
             )
@@ -234,8 +255,8 @@ fun ConversationScreen(
     if (deleteMessageId != null) {
         AlertDialog(
             onDismissRequest = { if (!isDeletingMessage) deletingMessageId = null },
-            title = { Text("Delete message?") },
-            text = { Text("This can't be undone.") },
+            title = { Text(stringResource(R.string.chat_delete_message)) },
+            text = { Text(stringResource(R.string.chat_delete_message_confirm)) },
             confirmButton = {
                 if (isDeletingMessage) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp))
@@ -248,13 +269,13 @@ fun ConversationScreen(
                             result.onFailure { /* left visible; the row itself still shows the message on failure */ }
                         }
                     }) {
-                        Text("Delete", color = MaterialTheme.colorScheme.error)
+                        Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
                     }
                 }
             },
             dismissButton = {
                 TextButton(onClick = { deletingMessageId = null }, enabled = !isDeletingMessage) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
             },
         )
@@ -406,12 +427,25 @@ private fun MessageBubble(
             }
 
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                DropdownMenuItem(text = { Text("Reply") }, onClick = { menuOpen = false; onReplyClick() })
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_reply)) },
+                    onClick = { menuOpen = false; onReplyClick() },
+                )
+                // "React" has no web equivalent to translate from - ChatInterface.tsx's
+                // own reaction-picker trigger is an icon-only button with a hardcoded,
+                // untranslated aria-label ("React"), so this matches real web behavior
+                // rather than being a native-only gap.
                 DropdownMenuItem(text = { Text("React") }, onClick = { menuOpen = false; onAddReactionClick() })
                 if (isOwnMessage) {
-                    DropdownMenuItem(text = { Text("Edit") }, onClick = { menuOpen = false; onEditClick() })
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.action_edit)) },
+                        onClick = { menuOpen = false; onEditClick() },
+                    )
                 }
-                DropdownMenuItem(text = { Text("Delete") }, onClick = { menuOpen = false; onDeleteClick() })
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_delete)) },
+                    onClick = { menuOpen = false; onDeleteClick() },
+                )
             }
         }
     }

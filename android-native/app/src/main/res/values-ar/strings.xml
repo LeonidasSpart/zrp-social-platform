@@ -60,4 +60,13 @@
     <string name="auth_email_or_username">البريد الإلكتروني أو اسم المستخدم</string>
     <string name="auth_signing_in">جارٍ تسجيل الدخول...</string>
     <string name="auth_password">كلمة المرور</string>
+    <string name="messages_no_messages_yet">لا رسائل بعد.</string>
+    <string name="chat_back_to_messages">رجوع to رسائل</string>
+    <string name="chat_message_placeholder">رسالة %1$s...</string>
+    <string name="chat_no_messages_yet">لا رسائل بعد</string>
+    <string name="chat_say_hello">قل مرحبًا لـ %1$s!</string>
+    <string name="chat_delete_message">حذف رسالة</string>
+    <string name="chat_delete_message_confirm">هل أنت متأكد أنك تريد حذف هذه الرسالة؟</string>
+    <string name="action_edit">تعديل</string>
+    <string name="action_reply">رد</string>
 </resources>
