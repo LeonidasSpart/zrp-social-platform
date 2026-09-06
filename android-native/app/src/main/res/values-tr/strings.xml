@@ -212,4 +212,11 @@
     <string name="auth_err_try_again">Bir şeyler ters gitti. Lütfen tekrar deneyin.</string>
     <string name="auth_no_account">Hesabınız yok mu?</string>
     <string name="auth_sign_up">Kaydol</string>
+    <string name="auth_forgot_password">Şifrenizi mi unuttunuz?</string>
+    <string name="forgot_password_subtitle">Şifrenizi sıfırlayın</string>
+    <string name="forgot_password_success_default">Sıfırlama talimatları için e-postanızı kontrol edin</string>
+    <string name="forgot_password_email_address">E-posta Adresi</string>
+    <string name="forgot_password_sending">Gönderiliyor...</string>
+    <string name="forgot_password_send_reset_link">Sıfırlama Bağlantısı Gönder</string>
+    <string name="forgot_password_remember_password">Şifrenizi hatırladınız mı?</string>
 </resources>

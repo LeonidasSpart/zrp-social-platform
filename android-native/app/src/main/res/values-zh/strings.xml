@@ -212,4 +212,11 @@
     <string name="auth_err_try_again">出错了，请重试。</string>
     <string name="auth_no_account">还没有账户？</string>
     <string name="auth_sign_up">注册</string>
+    <string name="auth_forgot_password">忘记密码？</string>
+    <string name="forgot_password_subtitle">重置您的密码</string>
+    <string name="forgot_password_success_default">请查看您的邮箱以获取重置说明</string>
+    <string name="forgot_password_email_address">电子邮箱地址</string>
+    <string name="forgot_password_sending">发送中...</string>
+    <string name="forgot_password_send_reset_link">发送重置链接</string>
+    <string name="forgot_password_remember_password">记起密码了？</string>
 </resources>

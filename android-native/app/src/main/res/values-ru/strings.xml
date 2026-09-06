@@ -212,4 +212,11 @@
     <string name="auth_err_try_again">Что-то пошло не так. Попробуйте снова.</string>
     <string name="auth_no_account">Нет аккаунта?</string>
     <string name="auth_sign_up">Зарегистрироваться</string>
+    <string name="auth_forgot_password">Забыли пароль?</string>
+    <string name="forgot_password_subtitle">Сбросьте свой пароль</string>
+    <string name="forgot_password_success_default">Проверьте почту для получения инструкций по сбросу</string>
+    <string name="forgot_password_email_address">Адрес электронной почты</string>
+    <string name="forgot_password_sending">Отправка...</string>
+    <string name="forgot_password_send_reset_link">Отправить ссылку для сброса</string>
+    <string name="forgot_password_remember_password">Вспомнили пароль?</string>
 </resources>
