@@ -61,6 +61,7 @@ import one.zrp.social.mobile.network.ReactionToggleRequest
 import one.zrp.social.mobile.network.TranslateRequest
 import one.zrp.social.mobile.ui.components.AddReactionDialog
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.LinkifiedText
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.TouchTarget
@@ -86,6 +87,7 @@ fun PostCard(
     onRepostClick: (String) -> Unit,
     onClick: (String) -> Unit,
     onAuthorClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit = {},
     onBookmarkClick: (String) -> Unit = {},
     onReportClick: (String) -> Unit = {},
     isOwnPost: Boolean = false,
@@ -279,9 +281,12 @@ fun PostCard(
                 }
 
                 if (post.content.isNotBlank()) {
-                    Text(
+                    LinkifiedText(
                         text = post.content,
                         style = MaterialTheme.typography.bodyMedium,
+                        onMentionClick = onAuthorClick,
+                        onHashtagClick = onHashtagClick,
+                        onNonLinkClick = { onClick(post.id) },
                         modifier = Modifier.padding(top = 4.dp),
                     )
                 }

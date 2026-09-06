@@ -63,6 +63,7 @@ fun SearchScreen(
     onOpenQuotePost: (postId: String) -> Unit = {},
     onOpenReposts: (postId: String) -> Unit = {},
     onOpenQuotes: (postId: String) -> Unit = {},
+    onOpenHashtag: (String) -> Unit = {},
 ) {
     val viewModel: SearchViewModel = viewModel(
         factory = remember { SearchViewModelFactory(SearchRepository()) },
@@ -107,6 +108,7 @@ fun SearchScreen(
             SearchResultsContent(
                 state = state,
                 onAuthorClick = onAuthorClick,
+                onOpenHashtag = onOpenHashtag,
                 onLikeClick = { postId -> viewModel.toggleLike(postId) },
                 onCommentClick = onOpenComments,
                 onRepostClick = { postId -> viewModel.toggleRepost(postId) },
@@ -257,6 +259,7 @@ private fun DiscoverContent(
 private fun SearchResultsContent(
     state: SearchUiState,
     onAuthorClick: (String) -> Unit,
+    onOpenHashtag: (String) -> Unit,
     onLikeClick: (String) -> Unit,
     onCommentClick: (String) -> Unit,
     onRepostClick: (String) -> Unit,
@@ -330,6 +333,7 @@ private fun SearchResultsContent(
                     onViewQuotes = onViewQuotes,
                     onClick = onCommentClick,
                     onAuthorClick = onAuthorClick,
+                    onHashtagClick = onOpenHashtag,
                 )
             }
         }

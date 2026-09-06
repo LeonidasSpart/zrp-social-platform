@@ -93,6 +93,7 @@ fun ProfileScreen(
     onOpenQuotePost: (postId: String) -> Unit = {},
     onOpenReposts: (postId: String) -> Unit = {},
     onOpenQuotes: (postId: String) -> Unit = {},
+    onOpenHashtag: (String) -> Unit = {},
 ) {
     val viewModel: ProfileViewModel = viewModel(
         factory = remember(username) { ProfileViewModelFactory(ProfileRepository(), username) },
@@ -215,6 +216,7 @@ fun ProfileScreen(
                                     onViewQuotes = onOpenQuotes,
                                     onClick = onOpenComments,
                                     onAuthorClick = onAuthorClick,
+                                    onHashtagClick = onOpenHashtag,
                                     showPinOption = state.isOwnProfile,
                                     isPinned = true,
                                     onPinClick = { postId -> viewModel.togglePin(postId) },
@@ -247,6 +249,7 @@ fun ProfileScreen(
                             onViewQuotes = onOpenQuotes,
                             onClick = onOpenComments,
                             onAuthorClick = onAuthorClick,
+                            onHashtagClick = onOpenHashtag,
                             showPinOption = state.isOwnProfile,
                             isPinned = false,
                             onPinClick = { postId -> viewModel.togglePin(postId) },

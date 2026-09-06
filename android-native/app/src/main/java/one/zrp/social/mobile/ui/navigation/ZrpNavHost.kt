@@ -28,6 +28,7 @@ import one.zrp.social.mobile.ui.comments.CommentsScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
 import one.zrp.social.mobile.ui.followlist.FollowListMode
 import one.zrp.social.mobile.ui.followlist.FollowListScreen
+import one.zrp.social.mobile.ui.hashtag.HashtagScreen
 import one.zrp.social.mobile.ui.home.HomeScreen
 import one.zrp.social.mobile.ui.messages.ConversationScreen
 import one.zrp.social.mobile.ui.messages.MessagesScreen
@@ -85,6 +86,10 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
+    // Hashtags only ever match \w+ (see LinkifiedText's regex, the same
+    // one the website's own parseContent uses) - no spaces or reserved
+    // path characters, so this never needs URL-encoding.
+    val goToHashtag: (String) -> Unit = { tag -> navController.navigate("hashtag/$tag") }
     val goHome: () -> Unit = {
         navController.navigate(ZrpDestination.Home.route) {
             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -113,6 +118,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenQuotePost = goToQuotePost,
                     onOpenReposts = goToReposts,
                     onOpenQuotes = goToQuotes,
+                    onOpenHashtag = goToHashtag,
                 )
             }
             composable(
@@ -126,6 +132,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenQuotePost = goToQuotePost,
                     onOpenReposts = goToReposts,
                     onOpenQuotes = goToQuotes,
+                    onOpenHashtag = goToHashtag,
                 )
             }
             composable(ZrpDestination.Create.route) { CreatePostScreen(onPosted = goHome) }
@@ -159,6 +166,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenQuotePost = goToQuotePost,
                     onOpenReposts = goToReposts,
                     onOpenQuotes = goToQuotes,
+                    onOpenHashtag = goToHashtag,
                 )
             }
             composable(
@@ -179,6 +187,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenQuotePost = goToQuotePost,
                     onOpenReposts = goToReposts,
                     onOpenQuotes = goToQuotes,
+                    onOpenHashtag = goToHashtag,
                 )
             }
             composable(
@@ -253,6 +262,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenQuotePost = goToQuotePost,
                     onOpenReposts = goToReposts,
                     onOpenQuotes = goToQuotes,
+                    onOpenHashtag = goToHashtag,
                 )
             }
             composable("blocked-users") {
@@ -309,7 +319,12 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             ) { backStackEntry ->
                 val postId = backStackEntry.arguments?.getString("postId")
                 if (postId != null) {
-                    CommentsScreen(postId = postId, onBack = { navController.popBackStack() })
+                    CommentsScreen(
+                        postId = postId,
+                        onBack = { navController.popBackStack() },
+                        onAuthorClick = goToProfile,
+                        onOpenHashtag = goToHashtag,
+                    )
                 }
             }
             composable(
@@ -347,7 +362,27 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                         onOpenQuotePost = goToQuotePost,
                         onOpenReposts = goToReposts,
                         onOpenQuotes = goToQuotes,
+                        onOpenHashtag = goToHashtag,
                         onBack = { navController.popBackStack() },
+                    )
+                }
+            }
+            composable(
+                route = "hashtag/{tag}",
+                arguments = listOf(navArgument("tag") { type = NavType.StringType }),
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/hashtag/{tag}" }),
+            ) { backStackEntry ->
+                val tag = backStackEntry.arguments?.getString("tag")
+                if (tag != null) {
+                    HashtagScreen(
+                        tag = tag,
+                        onAuthorClick = goToProfile,
+                        onOpenComments = goToComments,
+                        onBack = { navController.popBackStack() },
+                        onOpenQuotePost = goToQuotePost,
+                        onOpenReposts = goToReposts,
+                        onOpenQuotes = goToQuotes,
+                        onOpenHashtag = goToHashtag,
                     )
                 }
             }
