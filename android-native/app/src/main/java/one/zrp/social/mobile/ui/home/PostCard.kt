@@ -23,7 +23,9 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -79,6 +81,13 @@ fun PostCard(
     onQuoteClick: (String) -> Unit = {},
     onViewReposts: (String) -> Unit = {},
     onViewQuotes: (String) -> Unit = {},
+    // Pin to profile - the website only offers this from the Profile
+    // screen itself (showPinOption there is isOwnProfile; every other
+    // surface that renders PostCard - Home, Search, Bookmarks, Quotes -
+    // never passes it), so it defaults off everywhere else too.
+    showPinOption: Boolean = false,
+    isPinned: Boolean = false,
+    onPinClick: (String) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -140,6 +149,16 @@ fun PostCard(
                     // GET /auth/session the same way ProfileViewModel
                     // already did.
                     if (isOwnPost) {
+                        if (showPinOption) {
+                            IconButton(onClick = { onPinClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
+                                Icon(
+                                    imageVector = if (isPinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
+                                    contentDescription = if (isPinned) "Unpin from profile" else "Pin to profile",
+                                    tint = if (isPinned) ZrpBlue else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(IconSize.sm),
+                                )
+                            }
+                        }
                         IconButton(onClick = { onEditClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
                             Icon(
                                 imageVector = Icons.Filled.Edit,

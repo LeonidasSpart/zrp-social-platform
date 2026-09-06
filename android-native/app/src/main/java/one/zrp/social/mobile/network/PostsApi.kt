@@ -68,6 +68,8 @@ data class RepostResponse(val reposted: Boolean)
 
 data class BookmarkResponse(val bookmarked: Boolean)
 
+data class PinToggleResponse(val pinned: Boolean)
+
 data class CreatePostRequest(val content: String, val quotePostId: String? = null)
 
 data class UpdatePostRequest(val content: String)
@@ -100,6 +102,14 @@ interface PostsApi {
 
     @POST("posts/{id}/bookmark")
     suspend fun toggleBookmark(@Path("id") postId: String): BookmarkResponse
+
+    // Pinning is single-slot per user (User.pinnedPostId), not a list -
+    // toggling a post that's already pinned clears it, toggling any
+    // other post replaces whatever was pinned before (see
+    // src/app/api/posts/[id]/pin/route.ts). Same 403-for-non-author
+    // enforcement as delete/edit, server-side.
+    @POST("posts/{id}/pin")
+    suspend fun togglePin(@Path("id") postId: String): PinToggleResponse
 
     // The website only lets a post's own author delete it - enforced
     // server-side (403 for anyone else), not just hidden client-side -

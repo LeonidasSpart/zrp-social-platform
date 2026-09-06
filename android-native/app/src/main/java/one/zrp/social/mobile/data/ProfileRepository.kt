@@ -12,6 +12,7 @@ import one.zrp.social.mobile.network.MuteToggleRequest
 import one.zrp.social.mobile.network.MutedUser
 import one.zrp.social.mobile.network.PostsPage
 import one.zrp.social.mobile.network.Post
+import one.zrp.social.mobile.network.PinToggleResponse
 import one.zrp.social.mobile.network.RepostResponse
 import one.zrp.social.mobile.network.UpdatePostRequest
 import one.zrp.social.mobile.network.UserProfile
@@ -109,5 +110,13 @@ class ProfileRepository {
         } catch (e: Exception) {
             Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
         }
+    }
+
+    suspend fun getPost(postId: String): Result<Post> = runCatching {
+        ApiClient.postsApi.getPost(postId)
+    }
+
+    suspend fun togglePin(postId: String): Result<PinToggleResponse> = runCatching {
+        ApiClient.postsApi.togglePin(postId)
     }
 }

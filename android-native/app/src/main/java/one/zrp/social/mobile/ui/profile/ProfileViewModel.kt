@@ -15,6 +15,8 @@ data class ProfileUiState(
     val isOwnProfile: Boolean = false,
     val profile: UserProfile? = null,
     val posts: List<Post> = emptyList(),
+    val pinnedPost: Post? = null,
+    val isTogglingPin: Boolean = false,
     val isLoadingProfile: Boolean = true,
     val isRefreshingPosts: Boolean = false,
     val isLoadingMore: Boolean = false,
@@ -73,6 +75,8 @@ class ProfileViewModel(
                     }
                     loadPosts(username, refresh = true)
                     if (!isOwnProfile) loadMuteStatus(profile.id)
+                    val pinnedPostId = profile.pinnedPostId
+                    if (pinnedPostId != null) loadPinnedPost(pinnedPostId) else _state.update { it.copy(pinnedPost = null) }
                 }
                 .onFailure { error ->
                     _state.update {
@@ -137,28 +141,36 @@ class ProfileViewModel(
 
     fun toggleLike(postId: String) {
         val previousPosts = _state.value.posts
+        val previousPinned = _state.value.pinnedPost
 
         _state.update { state ->
-            state.copy(posts = state.posts.map { post -> if (post.id == postId) applyOptimisticLike(post) else post })
+            state.copy(
+                posts = state.posts.map { post -> if (post.id == postId) applyOptimisticLike(post) else post },
+                pinnedPost = state.pinnedPost?.let { if (it.id == postId) applyOptimisticLike(it) else it },
+            )
         }
 
         viewModelScope.launch {
             repository.toggleLike(postId).onFailure {
-                _state.update { it.copy(posts = previousPosts) }
+                _state.update { it.copy(posts = previousPosts, pinnedPost = previousPinned) }
             }
         }
     }
 
     fun toggleRepost(postId: String) {
         val previousPosts = _state.value.posts
+        val previousPinned = _state.value.pinnedPost
 
         _state.update { state ->
-            state.copy(posts = state.posts.map { post -> if (post.id == postId) applyOptimisticRepost(post) else post })
+            state.copy(
+                posts = state.posts.map { post -> if (post.id == postId) applyOptimisticRepost(post) else post },
+                pinnedPost = state.pinnedPost?.let { if (it.id == postId) applyOptimisticRepost(it) else it },
+            )
         }
 
         viewModelScope.launch {
             repository.toggleRepost(postId).onFailure {
-                _state.update { it.copy(posts = previousPosts) }
+                _state.update { it.copy(posts = previousPosts, pinnedPost = previousPinned) }
             }
         }
     }
@@ -204,14 +216,18 @@ class ProfileViewModel(
 
     fun toggleBookmark(postId: String) {
         val previousPosts = _state.value.posts
+        val previousPinned = _state.value.pinnedPost
 
         _state.update { state ->
-            state.copy(posts = state.posts.map { post -> if (post.id == postId) applyOptimisticBookmark(post) else post })
+            state.copy(
+                posts = state.posts.map { post -> if (post.id == postId) applyOptimisticBookmark(post) else post },
+                pinnedPost = state.pinnedPost?.let { if (it.id == postId) applyOptimisticBookmark(it) else it },
+            )
         }
 
         viewModelScope.launch {
             repository.toggleBookmark(postId).onFailure {
-                _state.update { it.copy(posts = previousPosts) }
+                _state.update { it.copy(posts = previousPosts, pinnedPost = previousPinned) }
             }
         }
     }
@@ -220,7 +236,12 @@ class ProfileViewModel(
         viewModelScope.launch {
             val result = repository.deletePost(postId)
             result.onSuccess {
-                _state.update { it.copy(posts = it.posts.filterNot { post -> post.id == postId }) }
+                _state.update {
+                    it.copy(
+                        posts = it.posts.filterNot { post -> post.id == postId },
+                        pinnedPost = it.pinnedPost?.takeUnless { pinned -> pinned.id == postId },
+                    )
+                }
             }
             onResult(result)
         }
@@ -240,10 +261,45 @@ class ProfileViewModel(
         viewModelScope.launch {
             repository.updatePost(postId, content)
                 .onSuccess {
-                    _state.update { it.copy(posts = it.posts.map { post -> if (post.id == postId) post.copy(content = content) else post }) }
+                    _state.update {
+                        it.copy(
+                            posts = it.posts.map { post -> if (post.id == postId) post.copy(content = content) else post },
+                            pinnedPost = it.pinnedPost?.let { pinned -> if (pinned.id == postId) pinned.copy(content = content) else pinned },
+                        )
+                    }
                     onResult(Result.success(Unit))
                 }
                 .onFailure { onResult(Result.failure(it)) }
+        }
+    }
+
+    // Pinning is single-slot server-side (User.pinnedPostId) - toggling
+    // a post that's already pinned clears pinnedPost; toggling any other
+    // post replaces it, so the newly-pinned post is looked up from
+    // whichever list already has it (posts, or the previously pinned
+    // post itself) rather than re-fetched.
+    fun togglePin(postId: String) {
+        if (_state.value.isTogglingPin) return
+        val target = _state.value.posts.find { it.id == postId } ?: _state.value.pinnedPost?.takeIf { it.id == postId }
+        _state.update { it.copy(isTogglingPin = true) }
+        viewModelScope.launch {
+            repository.togglePin(postId)
+                .onSuccess { result ->
+                    _state.update {
+                        it.copy(
+                            isTogglingPin = false,
+                            pinnedPost = if (result.pinned) target else null,
+                            profile = it.profile?.copy(pinnedPostId = if (result.pinned) postId else null),
+                        )
+                    }
+                }
+                .onFailure { _state.update { it.copy(isTogglingPin = false) } }
+        }
+    }
+
+    private fun loadPinnedPost(postId: String) {
+        viewModelScope.launch {
+            repository.getPost(postId).onSuccess { post -> _state.update { it.copy(pinnedPost = post) } }
         }
     }
 
