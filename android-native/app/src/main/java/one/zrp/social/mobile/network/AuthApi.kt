@@ -3,6 +3,7 @@ package one.zrp.social.mobile.network
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 data class LoginRequest(
     val identifier: String,
@@ -27,7 +28,21 @@ data class LoginResponse(
     val user: MobileUser,
 )
 
-data class ApiErrorBody(val error: String?)
+data class ApiErrorBody(val error: String?, val code: String? = null)
+
+// ─── Registration (POST /auth/register) ────────────────────────────
+// Shared with the website - no mobile-specific equivalent exists (only
+// login has one, since it's the only step that needs to hand back a
+// session token). A fresh account is always created unverified, so
+// this never signs the caller in by itself.
+data class RegisterRequest(val name: String?, val username: String, val email: String, val password: String)
+data class RegisterResponse(val message: String?)
+
+// ─── Live username check (GET /auth/check-username) ─────────────────
+data class CheckUsernameResponse(val available: Boolean, val invalid: Boolean? = null, val suggestions: List<String> = emptyList())
+
+// ─── Resend verification (POST /auth/resend-verification) ──────────
+data class ResendVerificationRequest(val email: String)
 
 data class SessionUser(
     val id: String?,
@@ -60,4 +75,16 @@ interface AuthApi {
     // duplicating that resolution logic server-side.
     @GET("auth/session")
     suspend fun getSession(): SessionResponse
+
+    // Relative to ApiClient's base URL - the same real, shared
+    // src/app/api/auth/register route the website's own /signup page
+    // calls, since account creation needs no session cookie at all.
+    @POST("auth/register")
+    suspend fun register(@Body request: RegisterRequest): RegisterResponse
+
+    @GET("auth/check-username")
+    suspend fun checkUsername(@Query("username") username: String): CheckUsernameResponse
+
+    @POST("auth/resend-verification")
+    suspend fun resendVerification(@Body request: ResendVerificationRequest): RegisterResponse
 }

@@ -84,6 +84,23 @@ class AuthViewModel(
         }
     }
 
+    // Called after a signup flow's own post-registration login attempt
+    // (expected to fail, since a fresh account always starts
+    // unverified - see SignupViewModel) in case it unexpectedly
+    // succeeds, so the shared top-level gate reflects a real session
+    // immediately rather than only on the next app launch.
+    fun refreshLoggedInState() {
+        if (authRepository.isLoggedIn() && _authState.value !is AuthUiState.LoggedIn) {
+            _authState.value = AuthUiState.LoggedIn(user = null)
+            viewModelScope.launch {
+                try {
+                    pushRepository.registerCurrentToken()
+                } catch (_: Exception) {
+                }
+            }
+        }
+    }
+
     fun logout() {
         viewModelScope.launch {
             // Unregister this device's token while the session is

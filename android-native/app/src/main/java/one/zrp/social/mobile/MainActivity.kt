@@ -14,7 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.data.AuthRepository
@@ -22,6 +24,7 @@ import one.zrp.social.mobile.ui.auth.AuthUiState
 import one.zrp.social.mobile.ui.auth.AuthViewModel
 import one.zrp.social.mobile.ui.auth.AuthViewModelFactory
 import one.zrp.social.mobile.ui.auth.LoginScreen
+import one.zrp.social.mobile.ui.auth.SignupScreen
 import one.zrp.social.mobile.ui.navigation.ZrpNavHost
 import one.zrp.social.mobile.ui.theme.ZrpSocialTheme
 
@@ -66,10 +69,21 @@ fun ZrpSocialApp() {
             }
 
             when (authState) {
-                is AuthUiState.LoggedOut -> LoginScreen(
-                    formState = loginForm,
-                    onLogin = { identifier, password -> authViewModel.login(identifier, password) },
-                )
+                is AuthUiState.LoggedOut -> {
+                    var showSignup by remember { mutableStateOf(false) }
+                    if (showSignup) {
+                        SignupScreen(
+                            authViewModel = authViewModel,
+                            onSignIn = { showSignup = false },
+                        )
+                    } else {
+                        LoginScreen(
+                            formState = loginForm,
+                            onLogin = { identifier, password -> authViewModel.login(identifier, password) },
+                            onSignUp = { showSignup = true },
+                        )
+                    }
+                }
                 is AuthUiState.LoggedIn -> ZrpNavHost(onLogout = { authViewModel.logout() })
             }
         }
