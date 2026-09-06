@@ -25,7 +25,9 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -38,6 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,7 +50,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import kotlinx.coroutines.launch
+import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.Post
+import one.zrp.social.mobile.network.TranslateRequest
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
@@ -58,6 +64,7 @@ import one.zrp.social.mobile.ui.theme.ZrpGreen
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatCount
 import one.zrp.social.mobile.util.formatRelativeTime
+import java.util.Locale
 
 /**
  * The native app's own post card - not a copy of any of the website's
@@ -89,6 +96,45 @@ fun PostCard(
     isPinned: Boolean = false,
     onPinClick: (String) -> Unit = {},
 ) {
+    // Translation is purely local, ephemeral per-card UI state on the
+    // website too (PostCard.tsx's own translatedText/showTranslation/
+    // translating/translateError useState calls, never lifted to a
+    // parent post-list) - kept the same way here rather than threaded
+    // through a ViewModel, since it never needs to survive this card
+    // leaving composition.
+    val coroutineScope = rememberCoroutineScope()
+    var translatedText by remember(post.id) { mutableStateOf<String?>(null) }
+    var showTranslation by remember(post.id) { mutableStateOf(false) }
+    var translating by remember(post.id) { mutableStateOf(false) }
+    var translateError by remember(post.id) { mutableStateOf(false) }
+
+    fun handleTranslate() {
+        if (translatedText != null) {
+            showTranslation = !showTranslation
+            return
+        }
+        translating = true
+        translateError = false
+        coroutineScope.launch {
+            try {
+                // The website sends its viewer's site-wide UI language
+                // preference as targetLang; native has no such setting
+                // (the app is English-only, no i18n), so the device's
+                // own locale is the closest real equivalent of "the
+                // language this reader actually reads".
+                val response = ApiClient.translateApi.translate(
+                    TranslateRequest(text = post.content, targetLang = Locale.getDefault().language),
+                )
+                translatedText = response.translatedText
+                showTranslation = true
+            } catch (e: Exception) {
+                translateError = true
+            } finally {
+                translating = false
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -214,6 +260,55 @@ fun PostCard(
                         quotedPost = quotedPost,
                         onClick = { onClick(quotedPost.id) },
                     )
+                }
+
+                if (post.content.isNotBlank()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .padding(top = Spacing.xs)
+                            .clickable(enabled = !translating) { handleTranslate() },
+                    ) {
+                        if (translating) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(14.dp),
+                                strokeWidth = 2.dp,
+                                color = ZrpRed,
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Filled.Translate,
+                                contentDescription = null,
+                                tint = ZrpRed,
+                                modifier = Modifier.size(14.dp),
+                            )
+                        }
+                        Text(
+                            text = if (showTranslation) "Show original" else "Show translation",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = ZrpRed,
+                            modifier = Modifier.padding(start = 4.dp),
+                        )
+                    }
+
+                    if (translateError) {
+                        Text(
+                            text = "Translation unavailable right now.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 2.dp),
+                        )
+                    }
+
+                    val shownTranslation = translatedText
+                    if (showTranslation && shownTranslation != null) {
+                        Text(
+                            text = shownTranslation,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 6.dp, start = 8.dp),
+                        )
+                    }
                 }
 
                 Row(
