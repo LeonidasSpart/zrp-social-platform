@@ -49,4 +49,10 @@
     <string name="action_delete">حذف</string>
     <string name="action_retry">إعادة المحاولة</string>
     <string name="action_loading">جارٍ التحميل...</string>
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_search">بحث</string>
+    <string name="nav_messages">الرسائل</string>
+    <string name="nav_notifications">الإشعارات</string>
+    <string name="nav_profile">الملف الشخصي</string>
+    <string name="action_post">نشر</string>
 </resources>

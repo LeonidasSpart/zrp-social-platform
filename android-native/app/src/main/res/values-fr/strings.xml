@@ -49,4 +49,10 @@
     <string name="action_delete">Supprimer</string>
     <string name="action_retry">Réessayer</string>
     <string name="action_loading">Chargement...</string>
+    <string name="nav_home">Accueil</string>
+    <string name="nav_search">Rechercher</string>
+    <string name="nav_messages">Messages</string>
+    <string name="nav_notifications">Notifications</string>
+    <string name="nav_profile">Profil</string>
+    <string name="action_post">Publier</string>
 </resources>

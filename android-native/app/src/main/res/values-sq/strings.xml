@@ -49,4 +49,10 @@
     <string name="action_delete">Fshi</string>
     <string name="action_retry">Riprovo</string>
     <string name="action_loading">Duke u ngarkuar...</string>
+    <string name="nav_home">Kreu</string>
+    <string name="nav_search">Kërko</string>
+    <string name="nav_messages">Mesazhet</string>
+    <string name="nav_notifications">Njoftimet</string>
+    <string name="nav_profile">Profili</string>
+    <string name="action_post">Publiko</string>
 </resources>

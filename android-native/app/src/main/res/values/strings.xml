@@ -65,4 +65,10 @@
     <string name="action_delete">Delete</string>
     <string name="action_retry">Retry</string>
     <string name="action_loading">Loading...</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_search">Search</string>
+    <string name="nav_messages">Messages</string>
+    <string name="nav_notifications">Notifications</string>
+    <string name="nav_profile">Profile</string>
+    <string name="action_post">Post</string>
 </resources>
