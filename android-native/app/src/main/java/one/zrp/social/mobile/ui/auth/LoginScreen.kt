@@ -3,6 +3,7 @@ package one.zrp.social.mobile.ui.auth
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +53,7 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 fun LoginScreen(
     formState: LoginFormState,
     onLogin: (identifier: String, password: String) -> Unit,
+    onSignUp: () -> Unit,
 ) {
     var identifier by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
@@ -150,6 +153,17 @@ fun LoginScreen(
                 )
             } else {
                 Text(stringResource(R.string.auth_sign_in))
+            }
+        }
+
+        Row(modifier = Modifier.padding(top = 16.dp)) {
+            Text(
+                text = stringResource(R.string.auth_no_account) + " ",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            TextButton(onClick = onSignUp) {
+                Text(stringResource(R.string.auth_sign_up))
             }
         }
     }
