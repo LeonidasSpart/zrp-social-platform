@@ -30,8 +30,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
@@ -77,12 +79,12 @@ fun HomeScreen(
                 Tab(
                     selected = activeTab == FeedTab.FOR_YOU,
                     onClick = { viewModel.selectTab(FeedTab.FOR_YOU) },
-                    text = { Text("For You") },
+                    text = { Text(stringResource(R.string.feed_for_you)) },
                 )
                 Tab(
                     selected = activeTab == FeedTab.FOLLOWING,
                     onClick = { viewModel.selectTab(FeedTab.FOLLOWING) },
-                    text = { Text("Following") },
+                    text = { Text(stringResource(R.string.feed_following)) },
                 )
             }
 
@@ -186,6 +188,10 @@ fun HomeScreen(
 
                     val deletePostId = deletingPostId
                     if (deletePostId != null) {
+                        // "Delete Post?"/"This action cannot be undone."/"Cancel"/"Delete"
+                        // stay English-only here on purpose - PostCard.tsx's own delete
+                        // confirmation dialog hardcodes those same words untranslated too,
+                        // so this matches real web behavior rather than being a native gap.
                         AlertDialog(
                             onDismissRequest = { if (!isDeletingPost) deletingPostId = null },
                             title = { Text("Delete post?") },

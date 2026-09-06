@@ -69,4 +69,6 @@
     <string name="chat_delete_message_confirm">Apakah Anda yakin ingin menghapus pesan ini?</string>
     <string name="action_edit">Edit</string>
     <string name="action_reply">Balas</string>
+    <string name="feed_for_you">Untuk Anda</string>
+    <string name="feed_following">Mengikuti</string>
 </resources>
