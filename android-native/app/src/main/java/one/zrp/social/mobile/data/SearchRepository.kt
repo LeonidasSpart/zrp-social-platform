@@ -2,6 +2,7 @@ package one.zrp.social.mobile.data
 
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.LikeResponse
+import one.zrp.social.mobile.network.RepostResponse
 import one.zrp.social.mobile.network.SearchResults
 import one.zrp.social.mobile.network.SearchUser
 import one.zrp.social.mobile.network.TrendingHashtag
@@ -21,5 +22,9 @@ class SearchRepository {
 
     suspend fun toggleLike(postId: String): Result<LikeResponse> = runCatching {
         ApiClient.postsApi.toggleLike(postId)
+    }
+
+    suspend fun toggleRepost(postId: String): Result<RepostResponse> = runCatching {
+        ApiClient.postsApi.toggleRepost(postId)
     }
 }

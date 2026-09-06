@@ -64,6 +64,7 @@ fun ProfileScreen(
     onLogout: () -> Unit,
     onAuthorClick: (String) -> Unit,
     onMessageClick: (partnerId: String, partnerUsername: String) -> Unit,
+    onOpenComments: (postId: String) -> Unit,
 ) {
     val viewModel: ProfileViewModel = viewModel(
         factory = remember(username) { ProfileViewModelFactory(ProfileRepository(), username) },
@@ -128,7 +129,9 @@ fun ProfileScreen(
                         PostCard(
                             post = post,
                             onLikeClick = { postId -> viewModel.toggleLike(postId) },
-                            onClick = { /* Post detail screen lands in a later phase. */ },
+                            onCommentClick = onOpenComments,
+                            onRepostClick = { postId -> viewModel.toggleRepost(postId) },
+                            onClick = onOpenComments,
                             onAuthorClick = onAuthorClick,
                         )
                     }

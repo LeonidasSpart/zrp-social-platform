@@ -5,6 +5,7 @@ import one.zrp.social.mobile.network.CreatePostRequest
 import one.zrp.social.mobile.network.LikeResponse
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.PostsPage
+import one.zrp.social.mobile.network.RepostResponse
 import one.zrp.social.mobile.network.zrpErrorMessage
 import retrofit2.HttpException
 
@@ -26,6 +27,10 @@ class PostsRepository {
 
     suspend fun toggleLike(postId: String): Result<LikeResponse> = runCatching {
         ApiClient.postsApi.toggleLike(postId)
+    }
+
+    suspend fun toggleRepost(postId: String): Result<RepostResponse> = runCatching {
+        ApiClient.postsApi.toggleRepost(postId)
     }
 
     suspend fun createPost(content: String): Result<Post> {

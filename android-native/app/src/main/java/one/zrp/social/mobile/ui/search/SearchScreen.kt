@@ -53,7 +53,7 @@ import one.zrp.social.mobile.ui.home.PostCard
  * already use. No fake results, no separate search index.
  */
 @Composable
-fun SearchScreen(onAuthorClick: (String) -> Unit, onOpenMusic: () -> Unit) {
+fun SearchScreen(onAuthorClick: (String) -> Unit, onOpenMusic: () -> Unit, onOpenComments: (postId: String) -> Unit) {
     val viewModel: SearchViewModel = viewModel(
         factory = remember { SearchViewModelFactory(SearchRepository()) },
     )
@@ -90,6 +90,8 @@ fun SearchScreen(onAuthorClick: (String) -> Unit, onOpenMusic: () -> Unit) {
                 state = state,
                 onAuthorClick = onAuthorClick,
                 onLikeClick = { postId -> viewModel.toggleLike(postId) },
+                onCommentClick = onOpenComments,
+                onRepostClick = { postId -> viewModel.toggleRepost(postId) },
             )
         }
     }
@@ -157,6 +159,8 @@ private fun SearchResultsContent(
     state: SearchUiState,
     onAuthorClick: (String) -> Unit,
     onLikeClick: (String) -> Unit,
+    onCommentClick: (String) -> Unit,
+    onRepostClick: (String) -> Unit,
 ) {
     if (state.isSearching) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -208,7 +212,9 @@ private fun SearchResultsContent(
                 PostCard(
                     post = post,
                     onLikeClick = onLikeClick,
-                    onClick = { /* Post detail screen lands in a later phase. */ },
+                    onCommentClick = onCommentClick,
+                    onRepostClick = onRepostClick,
+                    onClick = onCommentClick,
                     onAuthorClick = onAuthorClick,
                 )
             }

@@ -17,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import one.zrp.social.mobile.ui.comments.CommentsScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
 import one.zrp.social.mobile.ui.home.HomeScreen
 import one.zrp.social.mobile.ui.messages.ConversationScreen
@@ -46,6 +47,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToConversation: (partnerId: String, partnerUsername: String) -> Unit = { partnerId, partnerUsername ->
         navController.navigate("messages/$partnerId/$partnerUsername")
     }
+    val goToComments: (String) -> Unit = { postId -> navController.navigate("post/$postId/comments") }
     val goToStoryViewer: (String) -> Unit = { userId -> navController.navigate("stories/$userId") }
     val goToCreateStory: () -> Unit = { navController.navigate("create-story") }
     val goToMusic: () -> Unit = { navController.navigate("music") }
@@ -71,6 +73,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             ) {
                 HomeScreen(
                     onAuthorClick = goToProfile,
+                    onOpenComments = goToComments,
                     onOpenStoryViewer = goToStoryViewer,
                     onCreateStory = goToCreateStory,
                 )
@@ -79,7 +82,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                 route = ZrpDestination.Search.route,
                 deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/search" }),
             ) {
-                SearchScreen(onAuthorClick = goToProfile, onOpenMusic = goToMusic)
+                SearchScreen(onAuthorClick = goToProfile, onOpenMusic = goToMusic, onOpenComments = goToComments)
             }
             composable(ZrpDestination.Create.route) { CreatePostScreen(onPosted = goHome) }
             composable(
@@ -96,6 +99,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onLogout = onLogout,
                     onAuthorClick = goToProfile,
                     onMessageClick = goToConversation,
+                    onOpenComments = goToComments,
                 )
             }
             composable(
@@ -109,6 +113,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onLogout = onLogout,
                     onAuthorClick = goToProfile,
                     onMessageClick = goToConversation,
+                    onOpenComments = goToComments,
                 )
             }
             composable(
@@ -142,6 +147,15 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             }
             composable("music") {
                 MusicScreen(onBack = { navController.popBackStack() })
+            }
+            composable(
+                route = "post/{postId}/comments",
+                arguments = listOf(navArgument("postId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val postId = backStackEntry.arguments?.getString("postId")
+                if (postId != null) {
+                    CommentsScreen(postId = postId, onBack = { navController.popBackStack() })
+                }
             }
         }
     }
