@@ -119,4 +119,14 @@
     <string name="moderation_muted_explanation">Përdoruesit që heshtni nuk do të mund të ndërveprojnë me ju, dhe postimet e tyre do të fshihen nga furnizimi juaj.</string>
     <string name="moderation_muted_count">%1$d të heshtur</string>
     <string name="moderation_muted_on">Heshtur më %1$s</string>
+    <string name="music_title">ZRP Music</string>
+    <string name="music_trending">Në Modë Tani</string>
+    <string name="music_recently_played">Dëgjuar së fundmi</string>
+    <string name="music_new_releases">Botime të Reja</string>
+    <string name="music_liked">Muzika e pëlqyer</string>
+    <string name="music_verified_artist">Artist i verifikuar</string>
+    <string name="music_like">Pëlqej</string>
+    <string name="music_pause">Pauzë</string>
+    <string name="music_play">Luaj</string>
+    <string name="music_unlike">Hiq pëlqimin</string>
 </resources>

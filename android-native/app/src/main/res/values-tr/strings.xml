@@ -119,4 +119,14 @@
     <string name="moderation_muted_explanation">Sessize aldığınız kullanıcılar sizinle etkileşime giremez ve gönderileri akışınızdan gizlenir.</string>
     <string name="moderation_muted_count">%1$d sessize alındı</string>
     <string name="moderation_muted_on">%1$s tarihinde sessize alındı</string>
+    <string name="music_title">ZRP Music</string>
+    <string name="music_trending">Şu An Trend</string>
+    <string name="music_recently_played">Son Dinlenenler</string>
+    <string name="music_new_releases">Yeni Çıkanlar</string>
+    <string name="music_liked">Beğenilen Müzikler</string>
+    <string name="music_verified_artist">Doğrulanmış sanatçı</string>
+    <string name="music_like">Beğen</string>
+    <string name="music_pause">Duraklat</string>
+    <string name="music_play">Oynat</string>
+    <string name="music_unlike">Beğenmekten vazgeç</string>
 </resources>

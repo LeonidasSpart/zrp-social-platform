@@ -119,4 +119,14 @@
     <string name="moderation_muted_explanation">你静音的用户将无法与你互动，他们的帖子也不会出现在你的动态中。</string>
     <string name="moderation_muted_count">已静音 %1$d 个</string>
     <string name="moderation_muted_on">于 %1$s 静音</string>
+    <string name="music_title">ZRP Music</string>
+    <string name="music_trending">热门趋势</string>
+    <string name="music_recently_played">最近播放</string>
+    <string name="music_new_releases">新发行</string>
+    <string name="music_liked">喜欢的音乐</string>
+    <string name="music_verified_artist">已认证艺人</string>
+    <string name="music_like">喜欢</string>
+    <string name="music_pause">暂停</string>
+    <string name="music_play">播放</string>
+    <string name="music_unlike">取消喜欢</string>
 </resources>

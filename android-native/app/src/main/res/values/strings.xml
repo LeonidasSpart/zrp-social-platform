@@ -135,4 +135,14 @@
     <string name="moderation_muted_explanation">Users you mute won\'t be able to interact with you, and their posts will be hidden from your feed.</string>
     <string name="moderation_muted_count">%1$d muted</string>
     <string name="moderation_muted_on">Muted %1$s</string>
+    <string name="music_title">ZRP Music</string>
+    <string name="music_trending">Trending Now</string>
+    <string name="music_recently_played">Recently Played</string>
+    <string name="music_new_releases">New Releases</string>
+    <string name="music_liked">Liked Music</string>
+    <string name="music_verified_artist">Verified artist</string>
+    <string name="music_like">Like</string>
+    <string name="music_pause">Pause</string>
+    <string name="music_play">Play</string>
+    <string name="music_unlike">Unlike</string>
 </resources>

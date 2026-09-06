@@ -119,4 +119,14 @@
     <string name="moderation_muted_explanation">المستخدمون الذين تكتمهم لن يتمكنوا من التفاعل معك، وستكون منشوراتهم مخفية عن خلاصتك.</string>
     <string name="moderation_muted_count">مكتوم: %1$d</string>
     <string name="moderation_muted_on">تم الكتم في %1$s</string>
+    <string name="music_title">ZRP Music</string>
+    <string name="music_trending">الرائج الآن</string>
+    <string name="music_recently_played">استُمع إليه مؤخرًا</string>
+    <string name="music_new_releases">إصدارات جديدة</string>
+    <string name="music_liked">الموسيقى المفضلة</string>
+    <string name="music_verified_artist">فنان موثّق</string>
+    <string name="music_like">إعجاب</string>
+    <string name="music_pause">إيقاف مؤقت</string>
+    <string name="music_play">تشغيل</string>
+    <string name="music_unlike">إلغاء الإعجاب</string>
 </resources>
