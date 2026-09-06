@@ -10,11 +10,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -38,6 +42,7 @@ import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.stories.StoriesRail
+import one.zrp.social.mobile.ui.theme.Spacing
 
 /**
  * The native Home screen: the same two real feed streams the website
@@ -246,6 +251,26 @@ fun HomeScreen(
                     state = pullRefreshState,
                     modifier = Modifier.align(Alignment.TopCenter),
                 )
+
+                // A real, always-visible manual refresh affordance -
+                // page.tsx's own floating "Refresh feed" button (fixed
+                // top-right over the feed, aria-label="Refresh feed",
+                // untranslated on web too) - not just the pull-to-refresh
+                // gesture above, which someone who doesn't know the
+                // gesture exists would otherwise have no way to trigger.
+                IconButton(
+                    onClick = { viewModel.refresh(activeTab) },
+                    enabled = !state.isRefreshing,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(Spacing.sm),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Refresh,
+                        contentDescription = "Refresh feed",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }
