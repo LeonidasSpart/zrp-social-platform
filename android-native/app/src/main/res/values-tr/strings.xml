@@ -173,4 +173,7 @@
     <string name="report_reason_hate_speech">Nefret söylemi</string>
     <string name="report_reason_impersonation">Kimlik taklidi</string>
     <string name="report_reason_other">Diğer</string>
+    <string name="hashtag_post_count">Bu hashtag ile %1$d %2$s</string>
+    <string name="hashtag_no_posts">#%1$s ile henüz gönderi yok.</string>
+    <string name="hashtag_back_to_home">← Ana sayfaya dön</string>
 </resources>

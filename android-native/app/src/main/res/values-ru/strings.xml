@@ -173,4 +173,7 @@
     <string name="report_reason_hate_speech">Разжигание ненависти</string>
     <string name="report_reason_impersonation">Выдача себя за другого</string>
     <string name="report_reason_other">Другое</string>
+    <string name="hashtag_post_count">%1$d %2$s с этим хэштегом</string>
+    <string name="hashtag_no_posts">Пока нет публикаций с #%1$s.</string>
+    <string name="hashtag_back_to_home">← Назад на главную</string>
 </resources>

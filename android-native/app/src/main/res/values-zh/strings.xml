@@ -173,4 +173,7 @@
     <string name="report_reason_hate_speech">仇恨言论</string>
     <string name="report_reason_impersonation">冒充他人</string>
     <string name="report_reason_other">其他</string>
+    <string name="hashtag_post_count">%1$d %2$s带有此话题标签</string>
+    <string name="hashtag_no_posts">暂无带有 #%1$s 的帖子。</string>
+    <string name="hashtag_back_to_home">← 返回首页</string>
 </resources>

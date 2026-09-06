@@ -27,13 +27,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.home.PostCard
-import one.zrp.social.mobile.util.formatCount
 
 /**
  * A single #hashtag feed - real posts from GET /posts/hashtag/{tag},
@@ -73,13 +74,21 @@ fun HashtagScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                // The real, translated hashtag.backToHome copy ("← Back to
+                // home") as this button's accessibility label - hashtag/
+                // [tag]/page.tsx shows that exact text as a visible link,
+                // native shows the same real words to a screen reader
+                // instead of a plain icon-only "Back".
+                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.hashtag_back_to_home))
             }
             Column(modifier = Modifier.padding(start = 4.dp)) {
                 Text(text = "#$tag", style = MaterialTheme.typography.titleMedium)
                 if (!state.isLoading) {
+                    val postWord = stringResource(
+                        if (state.posts.size == 1) R.string.action_post else R.string.profile_posts,
+                    ).lowercase()
                     Text(
-                        text = "${formatCount(state.posts.size)} ${if (state.posts.size == 1) "post" else "posts"}",
+                        text = stringResource(R.string.hashtag_post_count, state.posts.size, postWord),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -97,7 +106,7 @@ fun HashtagScreen(
             state.posts.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = state.error ?: "No posts with #$tag yet.",
+                        text = state.error ?: stringResource(R.string.hashtag_no_posts, tag),
                         color = if (state.error != null) {
                             MaterialTheme.colorScheme.error
                         } else {

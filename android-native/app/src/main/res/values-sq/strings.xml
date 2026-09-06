@@ -173,4 +173,7 @@
     <string name="report_reason_hate_speech">Ligjërim urrejtjeje</string>
     <string name="report_reason_impersonation">Imitim identiteti</string>
     <string name="report_reason_other">Tjetër</string>
+    <string name="hashtag_post_count">%1$d %2$s me këtë hashtag</string>
+    <string name="hashtag_no_posts">Nuk ka postime me #%1$s ende.</string>
+    <string name="hashtag_back_to_home">← Kthehu te Kreu</string>
 </resources>
