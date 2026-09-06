@@ -260,7 +260,7 @@ private fun ProfileHeader(
             )
         }
 
-        Column(modifier = Modifier.padding(horizontal = Spacing.lg, top = Spacing.sm)) {
+        Column(modifier = Modifier.padding(start = Spacing.lg, end = Spacing.lg, top = Spacing.sm)) {
             Text(
                 text = profile.name ?: profile.username,
                 style = MaterialTheme.typography.titleLarge,

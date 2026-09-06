@@ -13,7 +13,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.graphicsLayer
+import androidx.compose.ui.draw.scale
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -197,7 +197,7 @@ private fun ZrpBottomBar(navController: androidx.navigation.NavHostController) {
                     Icon(
                         imageVector = if (selected) destination.selectedIcon else destination.unselectedIcon,
                         contentDescription = destination.label,
-                        modifier = Modifier.graphicsLayer(scaleX = iconScale, scaleY = iconScale),
+                        modifier = Modifier.scale(iconScale),
                     )
                 },
                 label = null,
