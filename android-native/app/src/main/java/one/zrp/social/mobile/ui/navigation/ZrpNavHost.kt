@@ -120,7 +120,13 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             composable(
                 route = ZrpDestination.Notifications.route,
                 deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/notifications" }),
-            ) { NotificationsScreen(onAuthorClick = goToProfile) }
+            ) {
+                NotificationsScreen(
+                    onAuthorClick = goToProfile,
+                    onOpenComments = goToComments,
+                    onOpenMessage = goToConversation,
+                )
+            }
             composable(
                 route = ZrpDestination.Messages.route,
                 deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/messages" }),
