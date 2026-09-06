@@ -177,4 +177,6 @@
     <string name="hashtag_no_posts">لا توجد منشورات مع #%1$s بعد.</string>
     <string name="hashtag_back_to_home">← العودة إلى الرئيسية</string>
     <string name="composer_add_gif">إضافة GIF</string>
+    <string name="composer_schedule">جدولة</string>
+    <string name="composer_schedule_on">مجدول في</string>
 </resources>

@@ -177,4 +177,6 @@
     <string name="hashtag_no_posts">Belum ada postingan dengan #%1$s.</string>
     <string name="hashtag_back_to_home">← Kembali ke beranda</string>
     <string name="composer_add_gif">Tambah GIF</string>
+    <string name="composer_schedule">Jadwalkan</string>
+    <string name="composer_schedule_on">Dijadwalkan pada</string>
 </resources>

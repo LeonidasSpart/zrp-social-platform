@@ -177,4 +177,6 @@
     <string name="hashtag_no_posts">Пока нет публикаций с #%1$s.</string>
     <string name="hashtag_back_to_home">← Назад на главную</string>
     <string name="composer_add_gif">Добавить GIF</string>
+    <string name="composer_schedule">Запланировать</string>
+    <string name="composer_schedule_on">Запланировано на</string>
 </resources>

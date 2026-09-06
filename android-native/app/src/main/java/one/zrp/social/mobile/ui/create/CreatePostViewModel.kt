@@ -2,6 +2,8 @@ package one.zrp.social.mobile.ui.create
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import java.text.SimpleDateFormat
+import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +21,12 @@ data class CreatePostUiState(
     val quotedPost: Post? = null,
     val isLoadingQuotedPost: Boolean = false,
     val selectedGif: GifResult? = null,
+    val isScheduling: Boolean = false,
+    // Epoch millis in the device's own timezone, chosen via the
+    // date-then-time picker flow - kept as a raw instant rather than a
+    // pre-formatted string so the picked value can still be displayed
+    // and re-edited before submit() converts it to the wire format.
+    val scheduledAtMillis: Long? = null,
 )
 
 /**
@@ -70,18 +78,44 @@ class CreatePostViewModel(
         _state.update { it.copy(selectedGif = null) }
     }
 
+    // Matches PostComposer.tsx's own handleScheduleToggle: toggling off
+    // also clears whatever date/time was picked, rather than leaving a
+    // stale value the user would need to notice and re-clear.
+    fun onToggleSchedule() {
+        _state.update {
+            val next = !it.isScheduling
+            it.copy(isScheduling = next, scheduledAtMillis = if (next) it.scheduledAtMillis else null)
+        }
+    }
+
+    fun onScheduledAtSelected(millis: Long) {
+        _state.update { it.copy(scheduledAtMillis = millis, error = null) }
+    }
+
+    private val scheduledAtFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US)
+
     fun submit() {
         val content = _state.value.content.trim()
         val gif = _state.value.selectedGif
+        val isScheduling = _state.value.isScheduling
+        val scheduledAtMillis = _state.value.scheduledAtMillis
         // Matches PostComposer.tsx's own isSubmitDisabled: a post needs
         // real text OR real media (here, an attached GIF) - not
-        // necessarily both, unlike this composer's previous
-        // content-only requirement.
-        if ((content.isEmpty() && gif == null) || _state.value.isPosting) return
+        // necessarily both - and toggling "Schedule" on without yet
+        // picking a date/time blocks submit exactly like web's own
+        // `schedulePost && !scheduledAt` check.
+        if (
+            (content.isEmpty() && gif == null) ||
+            (isScheduling && scheduledAtMillis == null) ||
+            _state.value.isPosting
+        ) {
+            return
+        }
+        val scheduledAt = scheduledAtMillis?.let { scheduledAtFormat.format(it) }
 
         _state.update { it.copy(isPosting = true, error = null) }
         viewModelScope.launch {
-            repository.createPost(content, quotePostId, gif?.url)
+            repository.createPost(content, quotePostId, gif?.url, scheduledAt)
                 .onSuccess {
                     _state.update { it.copy(isPosting = false, posted = true) }
                 }

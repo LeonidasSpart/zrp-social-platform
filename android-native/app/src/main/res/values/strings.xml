@@ -193,4 +193,6 @@
     <string name="hashtag_no_posts">No posts with #%1$s yet.</string>
     <string name="hashtag_back_to_home">← Back to home</string>
     <string name="composer_add_gif">Add GIF</string>
+    <string name="composer_schedule">Schedule</string>
+    <string name="composer_schedule_on">Scheduling on</string>
 </resources>

@@ -60,13 +60,19 @@ class PostsRepository {
         }
     }
 
-    suspend fun createPost(content: String, quotePostId: String? = null, gifUrl: String? = null): Result<Post> {
+    suspend fun createPost(
+        content: String,
+        quotePostId: String? = null,
+        gifUrl: String? = null,
+        scheduledAt: String? = null,
+    ): Result<Post> {
         return try {
             val request = CreatePostRequest(
                 content = content,
                 quotePostId = quotePostId,
                 imageUrls = gifUrl?.let { listOf(it) },
                 mediaType = if (gifUrl != null) "image" else null,
+                scheduledAt = scheduledAt,
             )
             Result.success(ApiClient.postsApi.createPost(request).post)
         } catch (e: HttpException) {
