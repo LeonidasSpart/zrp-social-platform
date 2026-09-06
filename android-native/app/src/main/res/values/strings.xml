@@ -2,4 +2,67 @@
     <string name="app_name">ZRP Social</string>
     <string name="default_notification_channel_id" translatable="false">zrp_general</string>
     <string name="notification_channel_general_name">General</string>
+
+    <!-- Settings module + generic actions - real copy extracted from the
+         website's own src/lib/translations.ts (settings.*/action.*
+         namespaces), translated into all 11 official ZRP languages (see
+         values-fr, values-de, values-it, values-sq, values-es, values-ru,
+         values-ar, values-zh, values-tr, values-id). settings_account,
+         settings_security and settings_privacy_safety are English-only
+         here because the website's own CATEGORIES array
+         (src/app/settings/page.tsx) hardcodes those same three category
+         labels untranslated too - this matches real web behavior, not a
+         native gap. -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_account">Account</string>
+    <string name="settings_profile_category">Profile</string>
+    <string name="settings_security">Security</string>
+    <string name="settings_privacy_safety">Privacy &amp; Safety</string>
+    <string name="nav_language">Language</string>
+    <string name="settings_account_info">Account Info</string>
+    <string name="settings_change_email">Change Email</string>
+    <string name="settings_current_email">Current Email</string>
+    <string name="settings_new_email">New Email</string>
+    <string name="settings_new_email_placeholder">Enter new email address</string>
+    <string name="settings_current_password_field">Current Password</string>
+    <string name="settings_send_verification_email">Send Verification Email</string>
+    <string name="settings_sending">Sending...</string>
+    <string name="settings_username_title">Username</string>
+    <string name="settings_new_username">New Username</string>
+    <string name="settings_change_username">Change Username</string>
+    <string name="settings_updating">Updating...</string>
+    <string name="settings_username_cooldown_banner">⏳ You can change your username again in %1$d days</string>
+    <string name="settings_err_username_min_length">Username must be at least 3 characters</string>
+    <string name="settings_err_username_same">New username is the same as current</string>
+    <string name="settings_delete_account">Delete Account</string>
+    <string name="settings_joined">Joined %1$s</string>
+    <string name="settings_display_name">Display Name</string>
+    <string name="settings_bio">Bio</string>
+    <string name="settings_city">City</string>
+    <string name="settings_country">Country</string>
+    <string name="settings_website">Website</string>
+    <string name="settings_update_profile">Update Profile</string>
+    <string name="settings_saving">Saving...</string>
+    <string name="settings_change_password_title">Change Password</string>
+    <string name="settings_current_password_label">Current Password</string>
+    <string name="settings_new_password">New Password</string>
+    <string name="settings_confirm_new_password">Confirm New Password</string>
+    <string name="settings_change_password_action">Change Password</string>
+    <string name="settings_err_password_fields_required">All fields are required</string>
+    <string name="settings_err_password_min_length">New password must be at least 6 characters</string>
+    <string name="settings_err_passwords_mismatch">Passwords do not match</string>
+    <string name="settings_success_password_updated">Password updated successfully!</string>
+    <string name="settings_public_likes">Public Likes</string>
+    <string name="settings_public_likes_desc">Allow others to see what you like</string>
+    <string name="settings_public_following">Public Following</string>
+    <string name="settings_public_following_desc">Show who you follow to everyone</string>
+    <string name="settings_private_account">Private Account</string>
+    <string name="settings_private_account_desc">Only approved followers can see your posts and profile details.</string>
+    <string name="settings_muted_users">Muted Users</string>
+    <string name="settings_blocked_users">Blocked Users</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_save">Save</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_loading">Loading...</string>
 </resources>

@@ -101,6 +101,15 @@ dependencies {
     implementation platform('androidx.compose:compose-bom:2024.09.00')
 
     implementation 'androidx.core:core-ktx:1.13.1'
+
+    // Per-app language switching (Settings > Language) - AppCompatDelegate.
+    // setApplicationLocales()/getApplicationLocales() is the officially
+    // recommended API for this, delegating to the framework LocaleManager
+    // on API 33+ and to its own AppLocalesMetadataHolderService-backed
+    // storage below that (see the matching AndroidManifest.xml service
+    // entry). Needed even though MainActivity is a plain ComponentActivity,
+    // not AppCompatActivity - the API itself works standalone.
+    implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.6'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6'
