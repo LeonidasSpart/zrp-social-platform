@@ -136,4 +136,5 @@
     <string name="followers_empty">暂无粉丝。</string>
     <string name="following_title">关注中</string>
     <string name="following_empty">你还没有关注任何人。</string>
+    <string name="messages_you">你: %1$s</string>
 </resources>

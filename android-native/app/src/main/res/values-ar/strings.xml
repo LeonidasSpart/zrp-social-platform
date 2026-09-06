@@ -136,4 +136,5 @@
     <string name="followers_empty">لا يوجد متابعون بعد.</string>
     <string name="following_title">يتابع</string>
     <string name="following_empty">لا تتابع أي شخص بعد.</string>
+    <string name="messages_you">أنت: %1$s</string>
 </resources>

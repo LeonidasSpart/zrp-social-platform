@@ -136,4 +136,5 @@
     <string name="followers_empty">Aucun abonné pour le moment.</string>
     <string name="following_title">Abonnements</string>
     <string name="following_empty">Ne suit personne pour le moment.</string>
+    <string name="messages_you">Vous : %1$s</string>
 </resources>

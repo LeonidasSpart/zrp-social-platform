@@ -109,10 +109,22 @@ fun MessagesScreen(onOpenConversation: (partnerId: String, partnerUsername: Stri
 private fun ConversationRow(conversation: ConversationSummary, onClick: () -> Unit) {
     val partner = conversation.partner
     val lastMessage = conversation.lastMessage
-    val preview = if (lastMessage.content.isBlank() && lastMessage.imageUrl != null) {
+    // "Photo" stays English-only on purpose - it's a native-only fallback with
+    // no real web equivalent to translate from: /messages/page.tsx's own
+    // getLastMessagePreview() only checks lastMsg.content.trim() and shows a
+    // blank preview for an image sent with no caption, no image indicator at all.
+    val rawPreview = if (lastMessage.content.isBlank() && lastMessage.imageUrl != null) {
         "Photo"
     } else {
         lastMessage.content
+    }
+    // The real, translated "You: {msg}" prefix from getLastMessagePreview() -
+    // shown when the last message in the conversation was sent by the viewer.
+    val isOwnLastMessage = lastMessage.senderId != partner.id
+    val preview = if (isOwnLastMessage) {
+        stringResource(R.string.messages_you, rawPreview)
+    } else {
+        rawPreview
     }
 
     Row(

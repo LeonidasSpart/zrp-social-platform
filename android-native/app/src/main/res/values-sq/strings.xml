@@ -136,4 +136,5 @@
     <string name="followers_empty">Nuk ka ndjekës ende.</string>
     <string name="following_title">Të ndjekurit</string>
     <string name="following_empty">Nuk po ndiqni asnjë përdorues ende.</string>
+    <string name="messages_you">Ju: %1$s</string>
 </resources>

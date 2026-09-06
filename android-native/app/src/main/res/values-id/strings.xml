@@ -136,4 +136,5 @@
     <string name="followers_empty">Belum ada pengikut.</string>
     <string name="following_title">Mengikuti</string>
     <string name="following_empty">Belum mengikuti siapa pun.</string>
+    <string name="messages_you">Anda: %1$s</string>
 </resources>

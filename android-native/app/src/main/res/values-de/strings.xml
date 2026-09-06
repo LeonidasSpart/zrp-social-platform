@@ -136,4 +136,5 @@
     <string name="followers_empty">Noch keine Follower.</string>
     <string name="following_title">Folge ich</string>
     <string name="following_empty">Folgt noch niemandem.</string>
+    <string name="messages_you">Du: %1$s</string>
 </resources>

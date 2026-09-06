@@ -136,4 +136,5 @@
     <string name="followers_empty">Henüz takipçi yok.</string>
     <string name="following_title">Takip Edilenler</string>
     <string name="following_empty">Henüz kimseyi takip etmiyorsunuz.</string>
+    <string name="messages_you">Siz: %1$s</string>
 </resources>
