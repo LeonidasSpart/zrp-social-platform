@@ -55,4 +55,9 @@
     <string name="nav_notifications">Bildirimler</string>
     <string name="nav_profile">Profil</string>
     <string name="action_post">Gönder</string>
+    <string name="auth_sign_in">Giriş yap</string>
+    <string name="auth_sign_in_subtitle">Topluluğa katılmak için giriş yapın</string>
+    <string name="auth_email_or_username">E-posta veya Kullanıcı Adı</string>
+    <string name="auth_signing_in">Giriş yapılıyor...</string>
+    <string name="auth_password">Şifre</string>
 </resources>

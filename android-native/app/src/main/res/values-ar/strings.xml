@@ -55,4 +55,9 @@
     <string name="nav_notifications">الإشعارات</string>
     <string name="nav_profile">الملف الشخصي</string>
     <string name="action_post">نشر</string>
+    <string name="auth_sign_in">تسجيل الدخول</string>
+    <string name="auth_sign_in_subtitle">سجّل الدخول للانضمام إلى المجتمع</string>
+    <string name="auth_email_or_username">البريد الإلكتروني أو اسم المستخدم</string>
+    <string name="auth_signing_in">جارٍ تسجيل الدخول...</string>
+    <string name="auth_password">كلمة المرور</string>
 </resources>

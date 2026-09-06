@@ -55,4 +55,9 @@
     <string name="nav_notifications">Уведомления</string>
     <string name="nav_profile">Профиль</string>
     <string name="action_post">Опубликовать</string>
+    <string name="auth_sign_in">Войти</string>
+    <string name="auth_sign_in_subtitle">Войдите, чтобы присоединиться к сообществу</string>
+    <string name="auth_email_or_username">Эл. почта или имя пользователя</string>
+    <string name="auth_signing_in">Вход...</string>
+    <string name="auth_password">Пароль</string>
 </resources>

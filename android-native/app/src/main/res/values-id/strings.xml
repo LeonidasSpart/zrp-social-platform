@@ -55,4 +55,9 @@
     <string name="nav_notifications">Notifikasi</string>
     <string name="nav_profile">Profil</string>
     <string name="action_post">Kirim</string>
+    <string name="auth_sign_in">Masuk</string>
+    <string name="auth_sign_in_subtitle">Masuk untuk bergabung dengan komunitas</string>
+    <string name="auth_email_or_username">Email atau Nama Pengguna</string>
+    <string name="auth_signing_in">Sedang masuk...</string>
+    <string name="auth_password">Kata Sandi</string>
 </resources>
