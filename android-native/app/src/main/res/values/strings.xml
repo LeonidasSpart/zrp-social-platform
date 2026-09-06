@@ -114,4 +114,8 @@
     <string name="notifications_commented_post_suffix">commented on your post</string>
     <string name="notifications_started_following_suffix">started following you</string>
     <string name="notifications_reposted_post_suffix">reposted your post</string>
+    <string name="stories_your_story">Your Story</string>
+    <string name="stories_add_story">Add Story</string>
+    <string name="stories_share_story">Share Story</string>
+    <string name="stories_whats_on_your_mind">What\'s on your mind?</string>
 </resources>

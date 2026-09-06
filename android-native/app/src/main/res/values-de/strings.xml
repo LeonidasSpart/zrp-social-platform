@@ -98,4 +98,8 @@
     <string name="notifications_commented_post_suffix">hat deinen Beitrag kommentiert</string>
     <string name="notifications_started_following_suffix">folgt dir jetzt</string>
     <string name="notifications_reposted_post_suffix">hat deinen Beitrag repostet</string>
+    <string name="stories_your_story">Deine Story</string>
+    <string name="stories_add_story">Story hinzufügen</string>
+    <string name="stories_share_story">Story teilen</string>
+    <string name="stories_whats_on_your_mind">Was gibt\'s Neues?</string>
 </resources>

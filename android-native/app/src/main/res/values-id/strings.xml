@@ -98,4 +98,8 @@
     <string name="notifications_commented_post_suffix">mengomentari postingan Anda</string>
     <string name="notifications_started_following_suffix">mulai mengikuti Anda</string>
     <string name="notifications_reposted_post_suffix">membagikan ulang postingan Anda</string>
+    <string name="stories_your_story">Kisahmu</string>
+    <string name="stories_add_story">Tambah Kisah</string>
+    <string name="stories_share_story">Bagikan Kisah</string>
+    <string name="stories_whats_on_your_mind">Apa yang Anda pikirkan?</string>
 </resources>

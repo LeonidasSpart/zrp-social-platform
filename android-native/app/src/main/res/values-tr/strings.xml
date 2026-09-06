@@ -98,4 +98,8 @@
     <string name="notifications_commented_post_suffix">gönderinize yorum yaptı</string>
     <string name="notifications_started_following_suffix">sizi takip etmeye başladı</string>
     <string name="notifications_reposted_post_suffix">gönderinizi yeniden paylaştı</string>
+    <string name="stories_your_story">Hikayen</string>
+    <string name="stories_add_story">Hikaye Ekle</string>
+    <string name="stories_share_story">Hikayeyi Paylaş</string>
+    <string name="stories_whats_on_your_mind">Aklından ne geçiyor?</string>
 </resources>
