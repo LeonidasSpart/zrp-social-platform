@@ -83,6 +83,10 @@ class PostsRepository {
         PostsPage(posts = page.items ?: emptyList(), nextCursor = page.nextCursor)
     }
 
+    suspend fun getHashtagPosts(tag: String): Result<List<Post>> = runCatching {
+        ApiClient.postsApi.getHashtagPosts(tag)
+    }
+
     suspend fun updatePost(postId: String, content: String): Result<Post> {
         return try {
             Result.success(ApiClient.postsApi.updatePost(postId, UpdatePostRequest(content)))

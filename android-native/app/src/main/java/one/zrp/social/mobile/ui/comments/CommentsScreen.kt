@@ -1,6 +1,7 @@
 package one.zrp.social.mobile.ui.comments
 
 import android.content.Intent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -49,6 +50,7 @@ import one.zrp.social.mobile.data.CommentsRepository
 import one.zrp.social.mobile.network.Comment
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
+import one.zrp.social.mobile.ui.components.LinkifiedText
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.IconSize
 import one.zrp.social.mobile.ui.theme.Spacing
@@ -66,7 +68,12 @@ import one.zrp.social.mobile.util.formatRelativeTime
  * exposes, at any nesting depth.
  */
 @Composable
-fun CommentsScreen(postId: String, onBack: () -> Unit) {
+fun CommentsScreen(
+    postId: String,
+    onBack: () -> Unit,
+    onAuthorClick: (String) -> Unit = {},
+    onOpenHashtag: (String) -> Unit = {},
+) {
     val viewModel: CommentsViewModel = viewModel(
         factory = remember(postId) { CommentsViewModelFactory(CommentsRepository(), postId) },
     )
@@ -143,6 +150,8 @@ fun CommentsScreen(postId: String, onBack: () -> Unit) {
                                     editError = null
                                 },
                                 onDeleteClick = { id -> deletingCommentId = id },
+                                onAuthorClick = onAuthorClick,
+                                onHashtagClick = onOpenHashtag,
                             )
                             HorizontalDivider()
                         }
@@ -282,6 +291,8 @@ private fun CommentThread(
     onShareClick: (Comment) -> Unit,
     onEditClick: (String) -> Unit,
     onDeleteClick: (String) -> Unit,
+    onAuthorClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
     Column(modifier = Modifier.padding(start = (depth * 24).dp)) {
         CommentRow(
@@ -294,6 +305,9 @@ private fun CommentThread(
             onShareClick = { onShareClick(comment) },
             onEditClick = { onEditClick(comment.id) },
             onDeleteClick = { onDeleteClick(comment.id) },
+            onAuthorClick = { onAuthorClick(comment.author.username) },
+            onMentionClick = onAuthorClick,
+            onHashtagClick = onHashtagClick,
         )
         comment.replies?.forEach { reply ->
             CommentThread(
@@ -307,6 +321,8 @@ private fun CommentThread(
                 onShareClick = onShareClick,
                 onEditClick = onEditClick,
                 onDeleteClick = onDeleteClick,
+                onAuthorClick = onAuthorClick,
+                onHashtagClick = onHashtagClick,
             )
         }
     }
@@ -323,6 +339,9 @@ private fun CommentRow(
     onShareClick: () -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
+    onAuthorClick: () -> Unit,
+    onMentionClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -334,12 +353,16 @@ private fun CommentRow(
             url = comment.author.avatarUrl,
             name = comment.author.name ?: comment.author.username,
             size = 36.dp,
+            modifier = Modifier.clickable(onClick = onAuthorClick),
         )
 
         Spacer(modifier = Modifier.width(10.dp))
 
         Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable(onClick = onAuthorClick),
+            ) {
                 Text(
                     text = comment.author.name ?: comment.author.username,
                     style = MaterialTheme.typography.titleSmall,
@@ -352,9 +375,11 @@ private fun CommentRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Text(
+            LinkifiedText(
                 text = comment.content,
                 style = MaterialTheme.typography.bodyMedium,
+                onMentionClick = onMentionClick,
+                onHashtagClick = onHashtagClick,
                 modifier = Modifier.padding(top = 2.dp),
             )
 

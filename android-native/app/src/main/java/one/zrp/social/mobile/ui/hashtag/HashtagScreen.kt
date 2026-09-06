@@ -1,4 +1,4 @@
-package one.zrp.social.mobile.ui.bookmarks
+package one.zrp.social.mobile.ui.hashtag
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
@@ -21,9 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,19 +29,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import one.zrp.social.mobile.data.BookmarksRepository
+import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.home.PostCard
+import one.zrp.social.mobile.util.formatCount
 
 /**
- * Real saved posts from GET /bookmarks - the same list the website's
- * own Bookmarks page shows (post-bookmarks only; see
- * BookmarksRepository's KDoc for why saved comments aren't rendered
- * here yet).
+ * A single #hashtag feed - real posts from GET /posts/hashtag/{tag},
+ * the same endpoint the website's own /hashtag/{tag} page uses.
+ * Reached by tapping a #hashtag inside any post or comment's content
+ * (see LinkifiedText) - previously dead, unclickable text natively.
  */
 @Composable
-fun BookmarksScreen(
+fun HashtagScreen(
+    tag: String,
     onAuthorClick: (String) -> Unit,
     onOpenComments: (postId: String) -> Unit,
     onBack: () -> Unit,
@@ -53,8 +52,8 @@ fun BookmarksScreen(
     onOpenQuotes: (postId: String) -> Unit = {},
     onOpenHashtag: (String) -> Unit = {},
 ) {
-    val viewModel: BookmarksViewModel = viewModel(
-        factory = remember { BookmarksViewModelFactory(BookmarksRepository()) },
+    val viewModel: HashtagViewModel = viewModel(
+        factory = remember(tag) { HashtagViewModelFactory(PostsRepository(), tag) },
     )
     val state by viewModel.state.collectAsState()
     var reportingPostId by remember { mutableStateOf<String?>(null) }
@@ -76,25 +75,18 @@ fun BookmarksScreen(
             IconButton(onClick = onBack) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
-            Text(
-                text = "Bookmarks",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(start = 4.dp),
-            )
-        }
-        HorizontalDivider()
-
-        val listState = rememberLazyListState()
-        val shouldLoadMore by remember {
-            derivedStateOf {
-                val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                val totalItems = listState.layoutInfo.totalItemsCount
-                totalItems > 0 && lastVisible >= totalItems - 3
+            Column(modifier = Modifier.padding(start = 4.dp)) {
+                Text(text = "#$tag", style = MaterialTheme.typography.titleMedium)
+                if (!state.isLoading) {
+                    Text(
+                        text = "${formatCount(state.posts.size)} ${if (state.posts.size == 1) "post" else "posts"}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
-        LaunchedEffect(shouldLoadMore) {
-            if (shouldLoadMore) viewModel.loadMore()
-        }
+        HorizontalDivider()
 
         when {
             state.isLoading -> {
@@ -105,7 +97,7 @@ fun BookmarksScreen(
             state.posts.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = state.error ?: "No bookmarks yet. Posts you save will show up here.",
+                        text = state.error ?: "No posts with #$tag yet.",
                         color = if (state.error != null) {
                             MaterialTheme.colorScheme.error
                         } else {
@@ -116,7 +108,7 @@ fun BookmarksScreen(
                 }
             }
             else -> {
-                LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
                     itemsIndexed(state.posts, key = { _, post -> post.id }) { _, post ->
                         PostCard(
                             post = post,
@@ -141,19 +133,6 @@ fun BookmarksScreen(
                             onAuthorClick = onAuthorClick,
                             onHashtagClick = onOpenHashtag,
                         )
-                    }
-
-                    if (state.isLoadingMore) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                            }
-                        }
                     }
                 }
             }

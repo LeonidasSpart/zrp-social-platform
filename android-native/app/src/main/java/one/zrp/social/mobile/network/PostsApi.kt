@@ -202,4 +202,11 @@ interface PostsApi {
         @Path("id") postId: String,
         @Query("cursor") cursor: String?,
     ): UserPostsPage
+
+    // Bare JSON array (no envelope, no pagination - the real route
+    // takes 50 and returns them directly, see
+    // src/app/api/posts/hashtag/[tag]/route.ts), the same real posts
+    // backing the website's own /hashtag/{tag} page.
+    @GET("posts/hashtag/{tag}")
+    suspend fun getHashtagPosts(@Path("tag") tag: String): List<Post>
 }
