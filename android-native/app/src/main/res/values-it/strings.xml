@@ -137,4 +137,27 @@
     <string name="following_title">Seguiti</string>
     <string name="following_empty">Non segue ancora nessuno.</string>
     <string name="messages_you">Tu: %1$s</string>
+    <string name="delete_account_title">Elimina account</string>
+    <string name="delete_account_scheduled_message">Il tuo account è programmato per l\'eliminazione il %1$s.</string>
+    <string name="delete_account_cancel_anytime_hint">Puoi annullare questa richiesta in qualsiasi momento prima della data di eliminazione.</string>
+    <string name="delete_account_cancel_deletion_request">Annulla richiesta di eliminazione</string>
+    <string name="delete_account_delete_now">Elimina ora</string>
+    <string name="delete_account_permanent_warning">Questa azione è permanente e non può essere annullata.</string>
+    <string name="delete_account_deleting_will_intro">Eliminando il tuo account:</string>
+    <string name="delete_account_bullet1">Verranno eliminati tutti i tuoi post, commenti, mi piace, repost e segnalibri.</string>
+    <string name="delete_account_bullet2">Verranno rimossi tutti i tuoi messaggi e conversazioni.</string>
+    <string name="delete_account_bullet3">Verranno eliminate le informazioni del tuo profilo, avatar e impostazioni.</string>
+    <string name="delete_account_bullet4">Verranno annullate tutte le tue connessioni di follower e seguiti.</string>
+    <string name="delete_account_bullet5">Verrai rimosso da tutti i gruppi e comunità.</string>
+    <string name="delete_account_schedule_hint_pre">Se scegli di procedere, il tuo account verrà programmato per l\'eliminazione tra</string>
+    <string name="delete_account_thirty_days_bold">30 giorni</string>
+    <string name="delete_account_schedule_hint_post">Puoi annullare questa richiesta in qualsiasi momento durante questo periodo di 30 giorni.</string>
+    <string name="delete_account_confirm_deletion_title">Conferma eliminazione</string>
+    <string name="delete_account_confirm_instruction_pre">Digita</string>
+    <string name="delete_account_confirm_instruction_post">per confermare che vuoi eliminare definitivamente il tuo account.</string>
+    <string name="delete_account_type_delete_to_confirm">Digita &quot;DELETE&quot; per confermare</string>
+    <string name="delete_account_deleting">Eliminazione in corso...</string>
+    <string name="delete_account_permanently_delete">Elimina definitivamente l\'account</string>
+    <string name="delete_account_request_deletion">Richiedi eliminazione account</string>
+    <string name="delete_account_err_type_delete_confirm">Digita &quot;DELETE&quot; per confermare.</string>
 </resources>

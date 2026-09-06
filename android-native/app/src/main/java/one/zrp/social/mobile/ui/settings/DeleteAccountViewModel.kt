@@ -70,12 +70,11 @@ class DeleteAccountViewModel(private val repository: SettingsRepository) : ViewM
         }
     }
 
-    fun confirmDeletion(typedConfirmation: String) {
+    // The caller (DeleteAccountScreen) only invokes this once the user has
+    // typed "DELETE" - it shows its own real, translated validation error
+    // and never calls through otherwise, so no redundant check is needed here.
+    fun confirmDeletion() {
         if (_state.value.isSubmitting) return
-        if (typedConfirmation != "DELETE") {
-            _state.update { it.copy(error = "Type DELETE to confirm.") }
-            return
-        }
         _state.update { it.copy(isSubmitting = true, error = null) }
         viewModelScope.launch {
             repository.confirmDeletion()

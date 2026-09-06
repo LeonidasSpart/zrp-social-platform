@@ -137,4 +137,27 @@
     <string name="following_title">Folge ich</string>
     <string name="following_empty">Folgt noch niemandem.</string>
     <string name="messages_you">Du: %1$s</string>
+    <string name="delete_account_title">Konto löschen</string>
+    <string name="delete_account_scheduled_message">Dein Konto ist für die Löschung am %1$s vorgesehen.</string>
+    <string name="delete_account_cancel_anytime_hint">Du kannst diese Anfrage jederzeit vor dem Löschdatum abbrechen.</string>
+    <string name="delete_account_cancel_deletion_request">Löschanfrage abbrechen</string>
+    <string name="delete_account_delete_now">Jetzt löschen</string>
+    <string name="delete_account_permanent_warning">Diese Aktion ist endgültig und kann nicht rückgängig gemacht werden.</string>
+    <string name="delete_account_deleting_will_intro">Das Löschen deines Kontos wird:</string>
+    <string name="delete_account_bullet1">Alle deine Beiträge, Kommentare, Likes, Reposts und Lesezeichen löschen.</string>
+    <string name="delete_account_bullet2">Alle deine Nachrichten und Unterhaltungen entfernen.</string>
+    <string name="delete_account_bullet3">Deine Profilinformationen, dein Profilbild und deine Einstellungen löschen.</string>
+    <string name="delete_account_bullet4">Alle deine Follower- und Following-Verbindungen aufheben.</string>
+    <string name="delete_account_bullet5">Dich aus allen Gruppen und Communitys entfernen.</string>
+    <string name="delete_account_schedule_hint_pre">Wenn du fortfährst, wird dein Konto zur Löschung in</string>
+    <string name="delete_account_thirty_days_bold">30 Tagen</string>
+    <string name="delete_account_schedule_hint_post">Du kannst diese Anfrage jederzeit während dieses 30-tägigen Zeitraums abbrechen.</string>
+    <string name="delete_account_confirm_deletion_title">Löschung bestätigen</string>
+    <string name="delete_account_confirm_instruction_pre">Gib</string>
+    <string name="delete_account_confirm_instruction_post">ein, um zu bestätigen, dass du dein Konto dauerhaft löschen möchtest.</string>
+    <string name="delete_account_type_delete_to_confirm">Gib „DELETE“ ein, um zu bestätigen</string>
+    <string name="delete_account_deleting">Wird gelöscht...</string>
+    <string name="delete_account_permanently_delete">Konto endgültig löschen</string>
+    <string name="delete_account_request_deletion">Kontolöschung beantragen</string>
+    <string name="delete_account_err_type_delete_confirm">Bitte gib „DELETE“ ein, um zu bestätigen.</string>
 </resources>

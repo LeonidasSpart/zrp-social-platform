@@ -32,11 +32,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.SettingsRepository
 import one.zrp.social.mobile.ui.theme.Spacing
-import one.zrp.social.mobile.util.formatRelativeTime
+import one.zrp.social.mobile.util.formatAbsoluteDateEnglish
 
 /**
  * Real 30-day scheduled deletion, matching src/app/settings/delete/
@@ -68,7 +71,7 @@ fun DeleteAccountScreen(onBack: () -> Unit, onAccountDeleted: () -> Unit) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Text(
-                text = "Delete account",
+                text = stringResource(R.string.delete_account_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 4.dp),
             )
@@ -91,15 +94,54 @@ fun DeleteAccountScreen(onBack: () -> Unit, onAccountDeleted: () -> Unit) {
                     Column {
                         if (state.isScheduled && state.scheduledFor != null) {
                             Text(
-                                text = "Your account is scheduled for deletion ${formatRelativeTime(state.scheduledFor!!)}.",
+                                text = stringResource(
+                                    R.string.delete_account_scheduled_message,
+                                    formatAbsoluteDateEnglish(state.scheduledFor!!),
+                                ),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onErrorContainer,
                             )
+                            Text(
+                                text = stringResource(R.string.delete_account_cancel_anytime_hint),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.padding(top = Spacing.xs),
+                            )
                         } else {
                             Text(
-                                text = "Deleting your account removes your posts, comments, messages, and profile after a 30-day grace period, during which you can cancel.",
+                                text = stringResource(R.string.delete_account_permanent_warning),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                            )
+                            Text(
+                                text = stringResource(R.string.delete_account_deleting_will_intro),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.padding(top = Spacing.xs),
+                            )
+                            val bulletKeys = listOf(
+                                R.string.delete_account_bullet1,
+                                R.string.delete_account_bullet2,
+                                R.string.delete_account_bullet3,
+                                R.string.delete_account_bullet4,
+                                R.string.delete_account_bullet5,
+                            )
+                            bulletKeys.forEach { bulletRes ->
+                                Text(
+                                    text = "•  ${stringResource(bulletRes)}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                    modifier = Modifier.padding(top = Spacing.xs, start = Spacing.sm),
+                                )
+                            }
+                            Text(
+                                text = "${stringResource(R.string.delete_account_schedule_hint_pre)} " +
+                                    "${stringResource(R.string.delete_account_thirty_days_bold)}. " +
+                                    stringResource(R.string.delete_account_schedule_hint_post),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.padding(top = Spacing.sm),
                             )
                         }
                     }
@@ -144,7 +186,15 @@ fun DeleteAccountScreen(onBack: () -> Unit, onAccountDeleted: () -> Unit) {
                     if (state.isSubmitting) {
                         CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                     } else {
-                        Text(if (state.isScheduled) "Cancel deletion" else "Schedule account deletion")
+                        Text(
+                            stringResource(
+                                if (state.isScheduled) {
+                                    R.string.delete_account_cancel_deletion_request
+                                } else {
+                                    R.string.delete_account_request_deletion
+                                },
+                            ),
+                        )
                     }
                 }
 
@@ -156,7 +206,10 @@ fun DeleteAccountScreen(onBack: () -> Unit, onAccountDeleted: () -> Unit) {
                             .fillMaxWidth()
                             .padding(top = Spacing.sm),
                     ) {
-                        Text("Delete now instead", color = MaterialTheme.colorScheme.error)
+                        Text(
+                            stringResource(R.string.delete_account_delete_now),
+                            color = MaterialTheme.colorScheme.error,
+                        )
                     }
                 }
             }
@@ -164,29 +217,54 @@ fun DeleteAccountScreen(onBack: () -> Unit, onAccountDeleted: () -> Unit) {
     }
 
     if (showConfirmDialog) {
+        var showTypeMismatchError by remember { mutableStateOf(false) }
         AlertDialog(
             onDismissRequest = { if (!state.isSubmitting) { showConfirmDialog = false; confirmText = "" } },
-            title = { Text("Delete account now?") },
+            title = { Text(stringResource(R.string.delete_account_confirm_deletion_title)) },
             text = {
                 Column {
-                    Text("This can't be undone. Type DELETE to confirm.")
+                    Text(
+                        "${stringResource(R.string.delete_account_confirm_instruction_pre)} " +
+                            "DELETE " +
+                            stringResource(R.string.delete_account_confirm_instruction_post),
+                    )
                     OutlinedTextField(
                         value = confirmText,
-                        onValueChange = { confirmText = it },
+                        onValueChange = { confirmText = it; showTypeMismatchError = false },
+                        placeholder = { Text(stringResource(R.string.delete_account_type_delete_to_confirm)) },
                         singleLine = true,
                         enabled = !state.isSubmitting,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = Spacing.sm),
                     )
+                    if (showTypeMismatchError) {
+                        Text(
+                            text = stringResource(R.string.delete_account_err_type_delete_confirm),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(top = Spacing.xs),
+                        )
+                    }
                 }
             },
             confirmButton = {
                 if (state.isSubmitting) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                 } else {
-                    TextButton(onClick = { viewModel.confirmDeletion(confirmText) }) {
-                        Text("Delete", color = MaterialTheme.colorScheme.error)
+                    TextButton(
+                        onClick = {
+                            if (confirmText == "DELETE") {
+                                viewModel.confirmDeletion()
+                            } else {
+                                showTypeMismatchError = true
+                            }
+                        },
+                    ) {
+                        Text(
+                            stringResource(R.string.delete_account_permanently_delete),
+                            color = MaterialTheme.colorScheme.error,
+                        )
                     }
                 }
             },
@@ -194,7 +272,7 @@ fun DeleteAccountScreen(onBack: () -> Unit, onAccountDeleted: () -> Unit) {
                 TextButton(
                     onClick = { showConfirmDialog = false; confirmText = "" },
                     enabled = !state.isSubmitting,
-                ) { Text("Cancel") }
+                ) { Text(stringResource(R.string.action_cancel)) }
             },
         )
     }

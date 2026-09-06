@@ -137,4 +137,27 @@
     <string name="following_title">Takip Edilenler</string>
     <string name="following_empty">Henüz kimseyi takip etmiyorsunuz.</string>
     <string name="messages_you">Siz: %1$s</string>
+    <string name="delete_account_title">Hesabı Sil</string>
+    <string name="delete_account_scheduled_message">Hesabınız %1$s tarihinde silinmek üzere planlandı.</string>
+    <string name="delete_account_cancel_anytime_hint">Silme tarihinden önce bu talebi istediğiniz zaman iptal edebilirsiniz.</string>
+    <string name="delete_account_cancel_deletion_request">Silme Talebini İptal Et</string>
+    <string name="delete_account_delete_now">Şimdi Sil</string>
+    <string name="delete_account_permanent_warning">Bu işlem kalıcıdır ve geri alınamaz.</string>
+    <string name="delete_account_deleting_will_intro">Hesabınızı silmek şunları yapacaktır:</string>
+    <string name="delete_account_bullet1">Tüm gönderilerinizi, yorumlarınızı, beğenilerinizi, yeniden paylaşımlarınızı ve yer imlerinizi silecektir.</string>
+    <string name="delete_account_bullet2">Tüm mesajlarınızı ve sohbetlerinizi kaldıracaktır.</string>
+    <string name="delete_account_bullet3">Profil bilgilerinizi, avatarınızı ve ayarlarınızı silecektir.</string>
+    <string name="delete_account_bullet4">Tüm takipçi ve takip edilen bağlantılarınızı iptal edecektir.</string>
+    <string name="delete_account_bullet5">Sizi tüm gruplardan ve topluluklardan çıkaracaktır.</string>
+    <string name="delete_account_schedule_hint_pre">Devam etmeyi seçerseniz hesabınız şu süre içinde silinmek üzere planlanacaktır:</string>
+    <string name="delete_account_thirty_days_bold">30 gün</string>
+    <string name="delete_account_schedule_hint_post">Bu isteği 30 günlük süre boyunca istediğiniz zaman iptal edebilirsiniz.</string>
+    <string name="delete_account_confirm_deletion_title">Silme İşlemini Onaylayın</string>
+    <string name="delete_account_confirm_instruction_pre">Yazın</string>
+    <string name="delete_account_confirm_instruction_post">hesabınızı kalıcı olarak silmek istediğinizi onaylamak için.</string>
+    <string name="delete_account_type_delete_to_confirm">Onaylamak için &quot;DELETE&quot; yazın</string>
+    <string name="delete_account_deleting">Siliniyor...</string>
+    <string name="delete_account_permanently_delete">Hesabı Kalıcı Olarak Sil</string>
+    <string name="delete_account_request_deletion">Hesap Silme Talebinde Bulun</string>
+    <string name="delete_account_err_type_delete_confirm">Onaylamak için lütfen &quot;DELETE&quot; yazın.</string>
 </resources>
