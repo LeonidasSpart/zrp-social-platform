@@ -79,4 +79,17 @@
     <string name="home_trending_on_zrp">الأكثر رواجاً على ZRP</string>
     <string name="right_panel_who_to_follow">من تتابع</string>
     <string name="home_discover_music">اكتشف موسيقى جديدة</string>
+    <string name="action_follow">متابعة</string>
+    <string name="action_following">متابَع</string>
+    <string name="action_message">رسالة</string>
+    <string name="profile_posts">المنشورات</string>
+    <string name="profile_followers">المتابعون</string>
+    <string name="profile_following">يتابع</string>
+    <string name="profile_more_actions">المزيد من الإجراءات</string>
+    <string name="profile_mute">كتم</string>
+    <string name="profile_unmute">إلغاء الكتم</string>
+    <string name="profile_block">حظر</string>
+    <string name="profile_unblock">إلغاء الحظر</string>
+    <string name="nav_bookmarks">المحفوظات</string>
+    <string name="nav_sign_out">تسجيل الخروج</string>
 </resources>

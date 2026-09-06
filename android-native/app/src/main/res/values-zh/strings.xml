@@ -79,4 +79,17 @@
     <string name="home_trending_on_zrp">ZRP 热门话题</string>
     <string name="right_panel_who_to_follow">推荐关注</string>
     <string name="home_discover_music">发现新音乐</string>
+    <string name="action_follow">关注</string>
+    <string name="action_following">已关注</string>
+    <string name="action_message">私信</string>
+    <string name="profile_posts">帖子</string>
+    <string name="profile_followers">粉丝</string>
+    <string name="profile_following">关注中</string>
+    <string name="profile_more_actions">更多操作</string>
+    <string name="profile_mute">静音</string>
+    <string name="profile_unmute">取消静音</string>
+    <string name="profile_block">屏蔽</string>
+    <string name="profile_unblock">取消屏蔽</string>
+    <string name="nav_bookmarks">收藏</string>
+    <string name="nav_sign_out">退出登录</string>
 </resources>

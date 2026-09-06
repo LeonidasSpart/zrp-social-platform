@@ -79,4 +79,17 @@
     <string name="home_trending_on_zrp">Në trend në ZRP</string>
     <string name="right_panel_who_to_follow">Kë të ndiqni</string>
     <string name="home_discover_music">Zbulo muzikë të re</string>
+    <string name="action_follow">Ndiq</string>
+    <string name="action_following">Duke ndjekur</string>
+    <string name="action_message">Mesazh</string>
+    <string name="profile_posts">Postime</string>
+    <string name="profile_followers">Ndjekës</string>
+    <string name="profile_following">Të ndjekur</string>
+    <string name="profile_more_actions">Më shumë veprime</string>
+    <string name="profile_mute">Hesht</string>
+    <string name="profile_unmute">Cakto me zë</string>
+    <string name="profile_block">Blloko</string>
+    <string name="profile_unblock">Zhblloko</string>
+    <string name="nav_bookmarks">Ruajtur</string>
+    <string name="nav_sign_out">Dil</string>
 </resources>

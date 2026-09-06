@@ -95,4 +95,17 @@
     <string name="home_trending_on_zrp">Trending on ZRP</string>
     <string name="right_panel_who_to_follow">Who to follow</string>
     <string name="home_discover_music">Discover new music</string>
+    <string name="action_follow">Follow</string>
+    <string name="action_following">Following</string>
+    <string name="action_message">Message</string>
+    <string name="profile_posts">Posts</string>
+    <string name="profile_followers">Followers</string>
+    <string name="profile_following">Following</string>
+    <string name="profile_more_actions">More actions</string>
+    <string name="profile_mute">Mute</string>
+    <string name="profile_unmute">Unmute</string>
+    <string name="profile_block">Block</string>
+    <string name="profile_unblock">Unblock</string>
+    <string name="nav_bookmarks">Bookmarks</string>
+    <string name="nav_sign_out">Sign Out</string>
 </resources>

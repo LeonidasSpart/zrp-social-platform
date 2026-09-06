@@ -79,4 +79,17 @@
     <string name="home_trending_on_zrp">Tendances sur ZRP</string>
     <string name="right_panel_who_to_follow">À suivre</string>
     <string name="home_discover_music">Découvrir de la musique</string>
+    <string name="action_follow">Suivre</string>
+    <string name="action_following">Abonné(e)</string>
+    <string name="action_message">Message</string>
+    <string name="profile_posts">Publications</string>
+    <string name="profile_followers">Abonnés</string>
+    <string name="profile_following">Abonnements</string>
+    <string name="profile_more_actions">Plus d\'actions</string>
+    <string name="profile_mute">Muet</string>
+    <string name="profile_unmute">Réactiver</string>
+    <string name="profile_block">Bloquer</string>
+    <string name="profile_unblock">Débloquer</string>
+    <string name="nav_bookmarks">Favoris</string>
+    <string name="nav_sign_out">Déconnexion</string>
 </resources>
