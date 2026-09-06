@@ -235,4 +235,34 @@
     <string name="forgot_password_sending">Sending...</string>
     <string name="forgot_password_send_reset_link">Send Reset Link</string>
     <string name="forgot_password_remember_password">Remember your password?</string>
+    <!-- Onboarding -->
+    <string name="onboarding_step_profile">Profile</string>
+    <string name="onboarding_step_follow">Follow</string>
+    <string name="onboarding_step_done">Done</string>
+    <string name="onboarding_welcome_title">Welcome to ZRP! 👋</string>
+    <string name="onboarding_setup_subtitle">Set up your profile to get started.</string>
+    <string name="onboarding_profile_picture">Profile Picture</string>
+    <string name="onboarding_upload">Upload</string>
+    <string name="onboarding_display_name">Display Name</string>
+    <string name="onboarding_display_name_placeholder">Your name</string>
+    <string name="onboarding_bio">Bio</string>
+    <string name="onboarding_bio_placeholder">Tell us about yourself...</string>
+    <string name="onboarding_location_label">Location</string>
+    <string name="onboarding_location_placeholder">Search for a city...</string>
+    <string name="onboarding_website">Website</string>
+    <string name="onboarding_website_placeholder">https://your-site.com</string>
+    <string name="onboarding_follow_title">Follow some people 🧑‍🤝‍🧑</string>
+    <string name="onboarding_follow_subtitle">Choose people to follow and fill your feed.</string>
+    <string name="onboarding_no_suggestions">No suggestions available.</string>
+    <string name="onboarding_users_selected">%1$d user(s) selected</string>
+    <string name="onboarding_done_title">You\'re all set!</string>
+    <string name="onboarding_done_subtitle">Your profile is ready. Let\'s start exploring ZRP Social.</string>
+    <string name="onboarding_skip">Skip for now</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="onboarding_finish">Finish</string>
+    <string name="onboarding_go_to_home">Go to Home</string>
+    <string name="onboarding_err_save_profile">Failed to save profile. Please try again.</string>
+    <string name="onboarding_err_follow_users">Failed to follow users. Please try again.</string>
+    <string name="onboarding_err_skip">Failed to skip. Please try again.</string>
+    <string name="auth_err_session_expired">Your session is no longer valid. Please sign in again.</string>
 </resources>

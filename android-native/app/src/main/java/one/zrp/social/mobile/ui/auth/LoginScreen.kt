@@ -137,6 +137,13 @@ fun LoginScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 12.dp),
             )
+        } else if (formState is LoginFormState.SessionExpired) {
+            Text(
+                text = stringResource(R.string.auth_err_session_expired),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 12.dp),
+            )
         }
 
         Button(

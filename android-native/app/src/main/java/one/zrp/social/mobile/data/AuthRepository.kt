@@ -50,6 +50,16 @@ class AuthRepository {
         ApiClient.authApi.checkUsername(username)
     }
 
+    // Cold start's own AuthUiState.LoggedIn(user = null) doesn't know
+    // onboarding status yet (see AuthViewModel's own comment on why it
+    // never blocks the first paint on a network round trip) - this
+    // resolves it afterward from the real session. Fails open (treats
+    // an unreachable/error session as "onboarding done") so a transient
+    // network error at cold start can never trap an already-onboarded
+    // user behind a screen they don't need.
+    suspend fun getOnboardingStatus(): Boolean =
+        runCatching { ApiClient.authApi.getSession().user?.onboardingCompleted }.getOrNull() ?: true
+
     // The same real POST /auth/register the website's own /signup page
     // calls - no session is established here (a fresh account is
     // always created unverified), so this never touches tokenStore.

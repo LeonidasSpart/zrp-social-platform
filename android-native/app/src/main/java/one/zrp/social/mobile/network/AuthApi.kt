@@ -61,6 +61,11 @@ data class SessionUser(
     val badgeType: String?,
     val role: String?,
     val plan: String?,
+    // Present on the real session (see the jwt/session callbacks in
+    // src/lib/auth.ts) but unused by every screen built before
+    // Onboarding - null-safe default so this addition can't break any
+    // existing Gson deserialization of a session missing it in a test.
+    val onboardingCompleted: Boolean? = null,
 )
 
 data class SessionResponse(

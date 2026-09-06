@@ -219,4 +219,34 @@
     <string name="forgot_password_sending">Отправка...</string>
     <string name="forgot_password_send_reset_link">Отправить ссылку для сброса</string>
     <string name="forgot_password_remember_password">Вспомнили пароль?</string>
+    <!-- Onboarding -->
+    <string name="onboarding_step_profile">Профиль</string>
+    <string name="onboarding_step_follow">Подписаться</string>
+    <string name="onboarding_step_done">Готово</string>
+    <string name="onboarding_welcome_title">Добро пожаловать в ZRP! 👋</string>
+    <string name="onboarding_setup_subtitle">Настройте профиль, чтобы начать.</string>
+    <string name="onboarding_profile_picture">Фото профиля</string>
+    <string name="onboarding_upload">Загрузить</string>
+    <string name="onboarding_display_name">Отображаемое имя</string>
+    <string name="onboarding_display_name_placeholder">Ваше имя</string>
+    <string name="onboarding_bio">Биография</string>
+    <string name="onboarding_bio_placeholder">Расскажите о себе...</string>
+    <string name="onboarding_location_label">Местоположение</string>
+    <string name="onboarding_location_placeholder">Поиск города...</string>
+    <string name="onboarding_website">Веб-сайт</string>
+    <string name="onboarding_website_placeholder">https://your-site.com</string>
+    <string name="onboarding_follow_title">Подпишитесь на людей 🧑‍🤝‍🧑</string>
+    <string name="onboarding_follow_subtitle">Выберите людей, на которых хотите подписаться, чтобы наполнить ленту.</string>
+    <string name="onboarding_no_suggestions">Рекомендаций пока нет.</string>
+    <string name="onboarding_users_selected">Выбрано пользователей: %1$d</string>
+    <string name="onboarding_done_title">Всё готово!</string>
+    <string name="onboarding_done_subtitle">Ваш профиль готов. Давайте начнём знакомство с ZRP Social.</string>
+    <string name="onboarding_skip">Пропустить пока</string>
+    <string name="onboarding_continue">Продолжить</string>
+    <string name="onboarding_finish">Готово</string>
+    <string name="onboarding_go_to_home">На главную</string>
+    <string name="onboarding_err_save_profile">Не удалось сохранить профиль. Пожалуйста, попробуйте снова.</string>
+    <string name="onboarding_err_follow_users">Не удалось подписаться на пользователей. Пожалуйста, попробуйте снова.</string>
+    <string name="onboarding_err_skip">Не удалось пропустить. Пожалуйста, попробуйте снова.</string>
+    <string name="auth_err_session_expired">Ваша сессия больше не действительна. Пожалуйста, войдите снова.</string>
 </resources>

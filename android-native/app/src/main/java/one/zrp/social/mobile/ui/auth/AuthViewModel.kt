@@ -12,13 +12,23 @@ import one.zrp.social.mobile.network.MobileUser
 
 sealed interface AuthUiState {
     data object LoggedOut : AuthUiState
-    data class LoggedIn(val user: MobileUser?) : AuthUiState
+
+    // needsOnboarding starts false even on a signed-in cold start whose
+    // user is still unknown - see checkOnboardingStatus()'s own comment
+    // for why a network round trip never blocks the first paint here.
+    data class LoggedIn(val user: MobileUser?, val needsOnboarding: Boolean = false) : AuthUiState
 }
 
 sealed interface LoginFormState {
     data object Idle : LoginFormState
     data object Submitting : LoginFormState
     data class Error(val message: String) : LoginFormState
+
+    // Distinct from Error(message) because this ViewModel has no
+    // Context to resolve a localized string itself - LoginScreen
+    // renders this as the real, translated auth_err_session_expired,
+    // matching web's own /login?error=session_expired.
+    data object SessionExpired : LoginFormState
 }
 
 /**
@@ -51,6 +61,49 @@ class AuthViewModel(
                 } catch (_: Exception) {
                 }
             }
+            checkOnboardingStatus()
+        }
+    }
+
+    // Cold start's own LoggedIn(user = null) doesn't know onboarding
+    // status without a real request - rather than delay the first
+    // paint on that (see AuthRepository.getOnboardingStatus()'s own
+    // comment), this resolves it just after and flips needsOnboarding
+    // if it turns out false. The rare case this trades away is a user
+    // who quit mid-onboarding briefly seeing the main app again before
+    // being routed back into it on the same cold start.
+    private fun checkOnboardingStatus() {
+        viewModelScope.launch {
+            val completed = authRepository.getOnboardingStatus()
+            val current = _authState.value
+            if (current is AuthUiState.LoggedIn && !completed) {
+                _authState.value = current.copy(needsOnboarding = true)
+            }
+        }
+    }
+
+    // Called once OnboardingScreen's real POST /user/onboarding-complete
+    // (or its Skip, which calls the same route) succeeds, so the shared
+    // top-level gate returns to the main app without needing a fresh
+    // login.
+    fun onOnboardingFinished() {
+        val current = _authState.value
+        if (current is AuthUiState.LoggedIn) {
+            _authState.value = current.copy(needsOnboarding = false)
+        }
+    }
+
+    // The native equivalent of src/app/onboarding/page.tsx's own
+    // recoverFromMissingAccount(): a signed session whose underlying
+    // User row is gone (stale/deleted account) can still look
+    // "authenticated", so this signs out and surfaces the same real,
+    // translated auth.errSessionExpired message web's own
+    // /login?error=session_expired shows in that case.
+    fun logoutWithSessionExpired() {
+        viewModelScope.launch {
+            authRepository.logout()
+            _authState.value = AuthUiState.LoggedOut
+            _loginForm.value = LoginFormState.SessionExpired
         }
     }
 
@@ -65,7 +118,7 @@ class AuthViewModel(
             authRepository.login(identifier, password)
                 .onSuccess { user ->
                     _loginForm.value = LoginFormState.Idle
-                    _authState.value = AuthUiState.LoggedIn(user)
+                    _authState.value = AuthUiState.LoggedIn(user, needsOnboarding = !user.onboardingCompleted)
 
                     // Best-effort - a failure here (no network, no
                     // notification permission granted yet) shouldn't
@@ -98,6 +151,7 @@ class AuthViewModel(
                 } catch (_: Exception) {
                 }
             }
+            checkOnboardingStatus()
         }
     }
 

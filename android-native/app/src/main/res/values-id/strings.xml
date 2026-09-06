@@ -219,4 +219,34 @@
     <string name="forgot_password_sending">Mengirim...</string>
     <string name="forgot_password_send_reset_link">Kirim Tautan Pengaturan Ulang</string>
     <string name="forgot_password_remember_password">Ingat kata sandi Anda?</string>
+    <!-- Onboarding -->
+    <string name="onboarding_step_profile">Profil</string>
+    <string name="onboarding_step_follow">Ikuti</string>
+    <string name="onboarding_step_done">Selesai</string>
+    <string name="onboarding_welcome_title">Selamat Datang di ZRP! 👋</string>
+    <string name="onboarding_setup_subtitle">Siapkan profil Anda untuk memulai.</string>
+    <string name="onboarding_profile_picture">Foto Profil</string>
+    <string name="onboarding_upload">Unggah</string>
+    <string name="onboarding_display_name">Nama Tampilan</string>
+    <string name="onboarding_display_name_placeholder">Nama Anda</string>
+    <string name="onboarding_bio">Bio</string>
+    <string name="onboarding_bio_placeholder">Ceritakan tentang diri Anda...</string>
+    <string name="onboarding_location_label">Lokasi</string>
+    <string name="onboarding_location_placeholder">Cari kota...</string>
+    <string name="onboarding_website">Situs Web</string>
+    <string name="onboarding_website_placeholder">https://your-site.com</string>
+    <string name="onboarding_follow_title">Ikuti beberapa orang 🧑‍🤝‍🧑</string>
+    <string name="onboarding_follow_subtitle">Pilih orang untuk diikuti dan isi feed Anda.</string>
+    <string name="onboarding_no_suggestions">Tidak ada saran yang tersedia.</string>
+    <string name="onboarding_users_selected">%1$d pengguna dipilih</string>
+    <string name="onboarding_done_title">Anda sudah siap!</string>
+    <string name="onboarding_done_subtitle">Profil Anda sudah siap. Ayo mulai jelajahi ZRP Social.</string>
+    <string name="onboarding_skip">Lewati untuk saat ini</string>
+    <string name="onboarding_continue">Lanjutkan</string>
+    <string name="onboarding_finish">Selesai</string>
+    <string name="onboarding_go_to_home">Ke Beranda</string>
+    <string name="onboarding_err_save_profile">Gagal menyimpan profil. Silakan coba lagi.</string>
+    <string name="onboarding_err_follow_users">Gagal mengikuti pengguna. Silakan coba lagi.</string>
+    <string name="onboarding_err_skip">Gagal melewati. Silakan coba lagi.</string>
+    <string name="auth_err_session_expired">Sesi Anda tidak lagi valid. Silakan masuk kembali.</string>
 </resources>

@@ -219,4 +219,34 @@
     <string name="forgot_password_sending">Envoi en cours...</string>
     <string name="forgot_password_send_reset_link">Envoyer le lien de réinitialisation</string>
     <string name="forgot_password_remember_password">Vous vous souvenez de votre mot de passe ?</string>
+    <!-- Onboarding -->
+    <string name="onboarding_step_profile">Profil</string>
+    <string name="onboarding_step_follow">Suivre</string>
+    <string name="onboarding_step_done">Terminé</string>
+    <string name="onboarding_welcome_title">Bienvenue sur ZRP ! 👋</string>
+    <string name="onboarding_setup_subtitle">Configurez votre profil pour commencer.</string>
+    <string name="onboarding_profile_picture">Photo de profil</string>
+    <string name="onboarding_upload">Téléverser</string>
+    <string name="onboarding_display_name">Nom affiché</string>
+    <string name="onboarding_display_name_placeholder">Votre nom</string>
+    <string name="onboarding_bio">Bio</string>
+    <string name="onboarding_bio_placeholder">Parlez-nous de vous...</string>
+    <string name="onboarding_location_label">Lieu</string>
+    <string name="onboarding_location_placeholder">Rechercher une ville...</string>
+    <string name="onboarding_website">Site web</string>
+    <string name="onboarding_website_placeholder">https://votre-site.com</string>
+    <string name="onboarding_follow_title">Suivez quelques personnes 🧑‍🤝‍🧑</string>
+    <string name="onboarding_follow_subtitle">Choisissez des personnes à suivre pour remplir votre fil.</string>
+    <string name="onboarding_no_suggestions">Aucune suggestion disponible.</string>
+    <string name="onboarding_users_selected">%1$d utilisateur(s) sélectionné(s)</string>
+    <string name="onboarding_done_title">Tout est prêt !</string>
+    <string name="onboarding_done_subtitle">Votre profil est prêt. Commençons à explorer ZRP Social.</string>
+    <string name="onboarding_skip">Ignorer pour l\'instant</string>
+    <string name="onboarding_continue">Continuer</string>
+    <string name="onboarding_finish">Terminer</string>
+    <string name="onboarding_go_to_home">Aller à l\'accueil</string>
+    <string name="onboarding_err_save_profile">Échec de l\'enregistrement du profil. Veuillez réessayer.</string>
+    <string name="onboarding_err_follow_users">Échec du suivi des utilisateurs. Veuillez réessayer.</string>
+    <string name="onboarding_err_skip">Échec de l\'ignorance de cette étape. Veuillez réessayer.</string>
+    <string name="auth_err_session_expired">Votre session n\'est plus valide. Veuillez vous reconnecter.</string>
 </resources>
