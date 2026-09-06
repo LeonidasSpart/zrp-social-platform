@@ -16,12 +16,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -36,14 +34,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import one.zrp.social.mobile.data.SearchRepository
 import one.zrp.social.mobile.network.SearchUser
+import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.home.PostCard
 
 /**
@@ -231,30 +228,18 @@ private fun SearchUserRow(user: SearchUser, onClick: () -> Unit) {
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (user.avatarUrl != null) {
-            AsyncImage(
-                model = user.avatarUrl,
-                contentDescription = user.username,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape),
-            )
-        } else {
-            Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = user.username,
-                modifier = Modifier.size(44.dp),
-            )
-        }
+        Avatar(url = user.avatarUrl, name = user.name ?: user.username, size = 44.dp)
 
         Spacer(modifier = Modifier.width(12.dp))
 
         Column {
-            Text(
-                text = user.name ?: user.username,
-                style = MaterialTheme.typography.titleSmall,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = user.name ?: user.username,
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                VerifiedBadge(badgeType = user.badgeType, modifier = Modifier.padding(start = 3.dp))
+            }
             Text(
                 text = "@${user.username}",
                 style = MaterialTheme.typography.bodySmall,

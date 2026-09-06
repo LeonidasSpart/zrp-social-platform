@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,11 +26,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import one.zrp.social.mobile.data.StoriesRepository
+import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
@@ -112,20 +110,7 @@ private fun StoryTile(
                     .clip(CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
-                if (avatarUrl != null) {
-                    AsyncImage(
-                        model = avatarUrl,
-                        contentDescription = label,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Filled.Person,
-                        contentDescription = label,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
+                Avatar(url = avatarUrl, name = label, size = 58.dp)
             }
 
             if (showAddBadge) {

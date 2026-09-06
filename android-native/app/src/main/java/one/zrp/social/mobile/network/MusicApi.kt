@@ -8,6 +8,14 @@ data class MusicArtistRef(
     val id: String,
     val displayName: String,
     val avatarUrl: String?,
+    // The website (music/artists/page.tsx, music/artists/[id]/page.tsx)
+    // shows a ShieldCheck next to a verified artist's name - a real
+    // MusicArtist.verified column, entirely separate from a person's
+    // own User.badgeType. GET /music/home's track objects already
+    // include the artist's full row (Prisma include, not select), so
+    // this field is already present on the wire; it just wasn't mapped
+    // here yet.
+    val verified: Boolean = false,
 )
 
 data class MusicAlbumRef(

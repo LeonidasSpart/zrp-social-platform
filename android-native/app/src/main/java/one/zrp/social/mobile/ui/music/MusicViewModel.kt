@@ -4,6 +4,7 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +22,8 @@ data class MusicUiState(
     val currentTrack: MusicTrack? = null,
     val isPlaying: Boolean = false,
     val isBuffering: Boolean = false,
+    val positionMs: Long = 0L,
+    val durationMs: Long = 0L,
     val error: String? = null,
 )
 
@@ -44,6 +47,29 @@ class MusicViewModel(private val repository: MusicRepository) : ViewModel() {
 
     init {
         load()
+        observePlaybackPosition()
+    }
+
+    // A slim, real (not animated-for-show) progress indicator in the
+    // mini-player needs an actual position - MediaPlayer only exposes
+    // that via polling, there's no position callback to listen to.
+    // Runs for the ViewModel's lifetime; cancelled automatically with
+    // viewModelScope when the Music screen is left.
+    private fun observePlaybackPosition() {
+        viewModelScope.launch {
+            while (true) {
+                delay(500)
+                val player = mediaPlayer
+                if (player != null && _state.value.isPlaying) {
+                    _state.update {
+                        it.copy(
+                            positionMs = player.currentPosition.toLong(),
+                            durationMs = player.duration.toLong().coerceAtLeast(0),
+                        )
+                    }
+                }
+            }
+        }
     }
 
     private fun load() {
@@ -123,7 +149,16 @@ class MusicViewModel(private val repository: MusicRepository) : ViewModel() {
         mediaPlayer?.release()
         mediaPlayer = null
 
-        _state.update { it.copy(currentTrack = track, isPlaying = false, isBuffering = true, error = null) }
+        _state.update {
+            it.copy(
+                currentTrack = track,
+                isPlaying = false,
+                isBuffering = true,
+                positionMs = 0L,
+                durationMs = (track.durationSec?.times(1000L)) ?: 0L,
+                error = null,
+            )
+        }
 
         try {
             val player = MediaPlayer()
