@@ -68,6 +68,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
     val goToBlockedUsers: () -> Unit = { navController.navigate("blocked-users") }
     val goToMutedUsers: () -> Unit = { navController.navigate("muted-users") }
+    val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goHome: () -> Unit = {
         navController.navigate(ZrpDestination.Home.route) {
             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -93,13 +94,19 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenComments = goToComments,
                     onOpenStoryViewer = goToStoryViewer,
                     onCreateStory = goToCreateStory,
+                    onOpenQuotePost = goToQuotePost,
                 )
             }
             composable(
                 route = ZrpDestination.Search.route,
                 deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/search" }),
             ) {
-                SearchScreen(onAuthorClick = goToProfile, onOpenMusic = goToMusic, onOpenComments = goToComments)
+                SearchScreen(
+                    onAuthorClick = goToProfile,
+                    onOpenMusic = goToMusic,
+                    onOpenComments = goToComments,
+                    onOpenQuotePost = goToQuotePost,
+                )
             }
             composable(ZrpDestination.Create.route) { CreatePostScreen(onPosted = goHome) }
             composable(
@@ -122,6 +129,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenFollowing = goToFollowing,
                     onOpenBlockedUsers = goToBlockedUsers,
                     onOpenMutedUsers = goToMutedUsers,
+                    onOpenQuotePost = goToQuotePost,
                 )
             }
             composable(
@@ -139,6 +147,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenBookmarks = goToBookmarks,
                     onOpenFollowers = goToFollowers,
                     onOpenFollowing = goToFollowing,
+                    onOpenQuotePost = goToQuotePost,
                 )
             }
             composable(
@@ -206,6 +215,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onAuthorClick = goToProfile,
                     onOpenComments = goToComments,
                     onBack = { navController.popBackStack() },
+                    onOpenQuotePost = goToQuotePost,
                 )
             }
             composable("blocked-users") {
@@ -229,6 +239,15 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                 val postId = backStackEntry.arguments?.getString("postId")
                 if (postId != null) {
                     CommentsScreen(postId = postId, onBack = { navController.popBackStack() })
+                }
+            }
+            composable(
+                route = "post/{postId}/quote",
+                arguments = listOf(navArgument("postId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val postId = backStackEntry.arguments?.getString("postId")
+                if (postId != null) {
+                    CreatePostScreen(quotePostId = postId, onPosted = { navController.popBackStack() })
                 }
             }
         }

@@ -47,6 +47,7 @@ fun BookmarksScreen(
     onAuthorClick: (String) -> Unit,
     onOpenComments: (postId: String) -> Unit,
     onBack: () -> Unit,
+    onOpenQuotePost: (postId: String) -> Unit = {},
 ) {
     val viewModel: BookmarksViewModel = viewModel(
         factory = remember { BookmarksViewModelFactory(BookmarksRepository()) },
@@ -122,6 +123,7 @@ fun BookmarksScreen(
                             },
                             isOwnPost = state.ownUserId != null && post.author.id == state.ownUserId,
                             onDeleteClick = { postId -> deletingPostId = postId },
+                            onQuoteClick = onOpenQuotePost,
                             onClick = onOpenComments,
                             onAuthorClick = onAuthorClick,
                         )
