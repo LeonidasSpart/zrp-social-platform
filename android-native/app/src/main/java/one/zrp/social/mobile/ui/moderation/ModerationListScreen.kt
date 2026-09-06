@@ -43,9 +43,9 @@ import one.zrp.social.mobile.util.formatRelativeTime
 /**
  * Real blocked or muted users, from the same GET /users/blocked and
  * GET /users/muted endpoints the website's own settings pages use.
- * Reachable from the signed-in user's own profile header ("More"
- * menu) rather than a dedicated Settings hub - this native app has no
- * such hub yet, which is a separate, larger phase of its own.
+ * Reachable both from the signed-in user's own profile header ("More"
+ * menu) and from the Settings hub's Privacy & Safety screen - the same
+ * screen either way, not duplicated.
  */
 @Composable
 fun ModerationListScreen(

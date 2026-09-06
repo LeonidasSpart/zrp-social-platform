@@ -39,6 +39,12 @@ import one.zrp.social.mobile.ui.profile.ProfileScreen
 import one.zrp.social.mobile.ui.quotes.QuotesScreen
 import one.zrp.social.mobile.ui.reposts.RepostsScreen
 import one.zrp.social.mobile.ui.search.SearchScreen
+import one.zrp.social.mobile.ui.settings.AccountSettingsScreen
+import one.zrp.social.mobile.ui.settings.DeleteAccountScreen
+import one.zrp.social.mobile.ui.settings.PrivacySettingsScreen
+import one.zrp.social.mobile.ui.settings.ProfileEditScreen
+import one.zrp.social.mobile.ui.settings.SecuritySettingsScreen
+import one.zrp.social.mobile.ui.settings.SettingsScreen
 import one.zrp.social.mobile.ui.stories.CreateStoryScreen
 import one.zrp.social.mobile.ui.stories.StoryViewerScreen
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -70,6 +76,12 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
     val goToBlockedUsers: () -> Unit = { navController.navigate("blocked-users") }
     val goToMutedUsers: () -> Unit = { navController.navigate("muted-users") }
+    val goToSettings: () -> Unit = { navController.navigate("settings") }
+    val goToSettingsAccount: () -> Unit = { navController.navigate("settings/account") }
+    val goToSettingsProfile: () -> Unit = { navController.navigate("settings/profile") }
+    val goToSettingsSecurity: () -> Unit = { navController.navigate("settings/security") }
+    val goToSettingsPrivacy: () -> Unit = { navController.navigate("settings/privacy") }
+    val goToDeleteAccount: () -> Unit = { navController.navigate("settings/delete-account") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
@@ -143,6 +155,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenFollowing = goToFollowing,
                     onOpenBlockedUsers = goToBlockedUsers,
                     onOpenMutedUsers = goToMutedUsers,
+                    onOpenSettings = goToSettings,
                     onOpenQuotePost = goToQuotePost,
                     onOpenReposts = goToReposts,
                     onOpenQuotes = goToQuotes,
@@ -254,6 +267,40 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     mode = ModerationListMode.MUTED,
                     onAuthorClick = goToProfile,
                     onBack = { navController.popBackStack() },
+                )
+            }
+            composable("settings") {
+                SettingsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenAccount = goToSettingsAccount,
+                    onOpenProfile = goToSettingsProfile,
+                    onOpenSecurity = goToSettingsSecurity,
+                    onOpenPrivacy = goToSettingsPrivacy,
+                )
+            }
+            composable("settings/account") {
+                AccountSettingsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenDeleteAccount = goToDeleteAccount,
+                )
+            }
+            composable("settings/profile") {
+                ProfileEditScreen(onBack = { navController.popBackStack() })
+            }
+            composable("settings/security") {
+                SecuritySettingsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("settings/privacy") {
+                PrivacySettingsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenBlockedUsers = goToBlockedUsers,
+                    onOpenMutedUsers = goToMutedUsers,
+                )
+            }
+            composable("settings/delete-account") {
+                DeleteAccountScreen(
+                    onBack = { navController.popBackStack() },
+                    onAccountDeleted = onLogout,
                 )
             }
             composable(
