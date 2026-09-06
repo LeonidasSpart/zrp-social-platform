@@ -43,6 +43,8 @@ import one.zrp.social.mobile.util.formatRelativeTime
 fun PostCard(
     post: Post,
     onLikeClick: (String) -> Unit,
+    onCommentClick: (String) -> Unit,
+    onRepostClick: (String) -> Unit,
     onClick: (String) -> Unit,
     onAuthorClick: (String) -> Unit,
 ) {
@@ -122,11 +124,22 @@ fun PostCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp),
+                        .padding(top = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    PostStat(icon = Icons.Filled.ChatBubbleOutline, count = post._count.comments)
-                    PostStat(icon = Icons.Filled.Repeat, count = post._count.reposts)
+                    PostStat(
+                        icon = Icons.Filled.ChatBubbleOutline,
+                        count = post._count.comments,
+                        contentDescription = "Comments",
+                        onClick = { onCommentClick(post.id) },
+                    )
+                    PostStat(
+                        icon = Icons.Filled.Repeat,
+                        count = post._count.reposts,
+                        contentDescription = "Repost",
+                        tint = if (post.reposted == true) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
+                        onClick = { onRepostClick(post.id) },
+                    )
                     LikeStat(
                         liked = post.liked == true,
                         count = post._count.likes,
@@ -140,20 +153,34 @@ fun PostCard(
     }
 }
 
+// 48dp is Android's own documented minimum accessible touch target
+// (see the Accessibility Scanner / Material Design guidelines) - the
+// icon glyph itself stays visually compact at 18dp, but IconButton's
+// padding fills the rest so a real finger on a real device actually
+// lands the tap instead of missing a tiny hitbox.
+private val StatTouchTargetSize = 48.dp
+
 @Composable
-private fun PostStat(icon: androidx.compose.ui.graphics.vector.ImageVector, count: Int) {
+private fun PostStat(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    count: Int,
+    contentDescription: String,
+    onClick: () -> Unit,
+    tint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurfaceVariant,
+) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(18.dp),
-        )
-        Spacer(modifier = Modifier.width(4.dp))
+        IconButton(onClick = onClick, modifier = Modifier.size(StatTouchTargetSize)) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                tint = tint,
+                modifier = Modifier.size(18.dp),
+            )
+        }
         Text(
             text = count.toString(),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = tint,
         )
     }
 }
@@ -161,7 +188,7 @@ private fun PostStat(icon: androidx.compose.ui.graphics.vector.ImageVector, coun
 @Composable
 private fun LikeStat(liked: Boolean, count: Int, onClick: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = onClick, modifier = Modifier.size(24.dp)) {
+        IconButton(onClick = onClick, modifier = Modifier.size(StatTouchTargetSize)) {
             Icon(
                 imageVector = if (liked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                 contentDescription = if (liked) "Unlike" else "Like",

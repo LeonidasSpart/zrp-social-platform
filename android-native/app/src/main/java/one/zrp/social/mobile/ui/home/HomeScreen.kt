@@ -40,6 +40,7 @@ import one.zrp.social.mobile.ui.stories.StoriesRail
 @Composable
 fun HomeScreen(
     onAuthorClick: (String) -> Unit,
+    onOpenComments: (postId: String) -> Unit,
     onOpenStoryViewer: (userId: String) -> Unit,
     onCreateStory: () -> Unit,
 ) {
@@ -109,7 +110,9 @@ fun HomeScreen(
                             PostCard(
                                 post = post,
                                 onLikeClick = { postId -> viewModel.toggleLike(activeTab, postId) },
-                                onClick = { /* Post detail screen lands in a later phase. */ },
+                                onCommentClick = onOpenComments,
+                                onRepostClick = { postId -> viewModel.toggleRepost(activeTab, postId) },
+                                onClick = onOpenComments,
                                 onAuthorClick = onAuthorClick,
                             )
                         }

@@ -39,6 +39,14 @@ data class Post(
     val quotePost: Post?,
     val _count: PostCounts,
     val liked: Boolean?,
+    // Unlike `liked`, none of the feed/profile list endpoints attach a
+    // per-viewer repost flag to each post (checked against explore,
+    // following, and profile posts routes) - only GET
+    // /posts/{id}/repost does, and only for a single post. So this is
+    // always null from a list response; PostCard/HomeViewModel treat it
+    // as "reposted state unknown until you act on it here" rather than
+    // pre-highlighting reposts the backend itself doesn't report yet.
+    val reposted: Boolean? = null,
 )
 
 data class PostsPage(
@@ -47,6 +55,8 @@ data class PostsPage(
 )
 
 data class LikeResponse(val liked: Boolean)
+
+data class RepostResponse(val reposted: Boolean)
 
 data class CreatePostRequest(val content: String)
 
@@ -72,6 +82,9 @@ interface PostsApi {
 
     @POST("posts/{id}/like")
     suspend fun toggleLike(@Path("id") postId: String): LikeResponse
+
+    @POST("posts/{id}/repost")
+    suspend fun toggleRepost(@Path("id") postId: String): RepostResponse
 
     // Text-only for now - the same JSON body shape POST /api/posts
     // accepts for content, just without imageUrl/imageUrls. Media

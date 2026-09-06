@@ -144,11 +144,33 @@ class ProfileViewModel(
         }
     }
 
+    fun toggleRepost(postId: String) {
+        val previousPosts = _state.value.posts
+
+        _state.update { state ->
+            state.copy(posts = state.posts.map { post -> if (post.id == postId) applyOptimisticRepost(post) else post })
+        }
+
+        viewModelScope.launch {
+            repository.toggleRepost(postId).onFailure {
+                _state.update { it.copy(posts = previousPosts) }
+            }
+        }
+    }
+
     private fun applyOptimisticLike(post: Post): Post {
         val wasLiked = post.liked == true
         return post.copy(
             liked = !wasLiked,
             _count = post._count.copy(likes = post._count.likes + if (wasLiked) -1 else 1),
+        )
+    }
+
+    private fun applyOptimisticRepost(post: Post): Post {
+        val wasReposted = post.reposted == true
+        return post.copy(
+            reposted = !wasReposted,
+            _count = post._count.copy(reposts = post._count.reposts + if (wasReposted) -1 else 1),
         )
     }
 

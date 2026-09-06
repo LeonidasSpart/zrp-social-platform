@@ -99,6 +99,23 @@ class HomeViewModel(private val repository: PostsRepository) : ViewModel() {
         }
     }
 
+    fun toggleRepost(tab: FeedTab, postId: String) {
+        val stateFlow = stateFlowFor(tab)
+        val previousPosts = stateFlow.value.posts
+
+        // Same optimistic-toggle-with-rollback shape as toggleLike - the
+        // repost endpoint is a plain toggle too.
+        stateFlow.update { state ->
+            state.copy(posts = state.posts.map { post -> if (post.id == postId) applyOptimisticRepost(post) else post })
+        }
+
+        viewModelScope.launch {
+            repository.toggleRepost(postId).onFailure {
+                stateFlow.update { it.copy(posts = previousPosts) }
+            }
+        }
+    }
+
     private fun applyFreshPage(stateFlow: MutableStateFlow<HomeUiState>, page: PostsPage) {
         stateFlow.update {
             it.copy(
@@ -126,6 +143,14 @@ class HomeViewModel(private val repository: PostsRepository) : ViewModel() {
         return post.copy(
             liked = !wasLiked,
             _count = post._count.copy(likes = post._count.likes + if (wasLiked) -1 else 1),
+        )
+    }
+
+    private fun applyOptimisticRepost(post: Post): Post {
+        val wasReposted = post.reposted == true
+        return post.copy(
+            reposted = !wasReposted,
+            _count = post._count.copy(reposts = post._count.reposts + if (wasReposted) -1 else 1),
         )
     }
 

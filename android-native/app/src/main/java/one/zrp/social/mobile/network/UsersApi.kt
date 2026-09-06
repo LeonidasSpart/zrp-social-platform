@@ -46,12 +46,26 @@ data class FollowToggleResponse(
     val message: String? = null,
 )
 
+// GET /users/{username}/posts responds with {"items": [...], "nextCursor": ...}
+// - a genuinely different envelope key from PostsApi's PostsPage
+// ({"posts": [...]}), which the website's own profile page also
+// specifically reads as `data.items` (see src/app/profile/[username]/
+// page.tsx's fetchPosts). Reusing PostsPage here silently deserialized
+// to a null `posts` list (Gson's reflection-based construction doesn't
+// go through Kotlin's constructor, so it never enforced List<Post>'s
+// non-null constraint), which crashed the very first time a screen
+// tried to read it - the native Profile crash. A distinct response
+// type for this endpoint's actual shape, mapped to PostsPage in
+// ProfileRepository, keeps that mismatch from recurring.
+data class UserPostsPage(val items: List<Post>?, val nextCursor: String?)
+
 /**
  * The same profile endpoints the website itself uses - GET
  * /users/{username} for the profile header/stats, GET
  * /users/{username}/posts for their real posts (reusing PostsApi's
- * Post/PostsPage models rather than a second copy), and the same
- * follow toggle. No profile data is invented natively.
+ * Post model, but NOT its PostsPage envelope - see UserPostsPage's
+ * KDoc), and the same follow toggle. No profile data is invented
+ * natively.
  */
 interface UsersApi {
     @GET("users/{username}")
@@ -61,7 +75,7 @@ interface UsersApi {
     suspend fun getUserPosts(
         @Path("username") username: String,
         @Query("cursor") cursor: String?,
-    ): PostsPage
+    ): UserPostsPage
 
     @POST("users/{username}/follow")
     suspend fun toggleFollow(@Path("username") username: String): FollowToggleResponse

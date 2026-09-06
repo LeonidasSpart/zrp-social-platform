@@ -4,6 +4,7 @@ import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.FollowToggleResponse
 import one.zrp.social.mobile.network.LikeResponse
 import one.zrp.social.mobile.network.PostsPage
+import one.zrp.social.mobile.network.RepostResponse
 import one.zrp.social.mobile.network.UserProfile
 
 /**
@@ -22,7 +23,8 @@ class ProfileRepository {
     }
 
     suspend fun getUserPosts(username: String, cursor: String?): Result<PostsPage> = runCatching {
-        ApiClient.usersApi.getUserPosts(username, cursor)
+        val page = ApiClient.usersApi.getUserPosts(username, cursor)
+        PostsPage(posts = page.items ?: emptyList(), nextCursor = page.nextCursor)
     }
 
     suspend fun toggleFollow(username: String): Result<FollowToggleResponse> = runCatching {
@@ -31,5 +33,9 @@ class ProfileRepository {
 
     suspend fun toggleLike(postId: String): Result<LikeResponse> = runCatching {
         ApiClient.postsApi.toggleLike(postId)
+    }
+
+    suspend fun toggleRepost(postId: String): Result<RepostResponse> = runCatching {
+        ApiClient.postsApi.toggleRepost(postId)
     }
 }
