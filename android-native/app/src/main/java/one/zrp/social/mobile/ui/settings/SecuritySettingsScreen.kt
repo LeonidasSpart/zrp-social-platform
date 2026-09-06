@@ -31,11 +31,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.SettingsRepository
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -59,7 +61,7 @@ fun SecuritySettingsScreen(onBack: () -> Unit) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Text(
-                text = "Security",
+                text = stringResource(R.string.settings_security),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 4.dp),
             )
@@ -73,7 +75,7 @@ fun SecuritySettingsScreen(onBack: () -> Unit) {
                 .padding(Spacing.lg),
         ) {
             Text(
-                text = "Change password",
+                text = stringResource(R.string.settings_change_password_title),
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.padding(bottom = Spacing.sm),
             )
@@ -81,14 +83,14 @@ fun SecuritySettingsScreen(onBack: () -> Unit) {
             PasswordField(
                 value = state.currentPassword,
                 onValueChange = viewModel::onCurrentPasswordChange,
-                label = "Current password",
+                label = stringResource(R.string.settings_current_password_label),
                 enabled = !state.isSaving,
             )
 
             PasswordField(
                 value = state.newPassword,
                 onValueChange = viewModel::onNewPasswordChange,
-                label = "New password",
+                label = stringResource(R.string.settings_new_password),
                 enabled = !state.isSaving,
                 modifier = Modifier.padding(top = Spacing.md),
             )
@@ -96,7 +98,7 @@ fun SecuritySettingsScreen(onBack: () -> Unit) {
             PasswordField(
                 value = state.confirmPassword,
                 onValueChange = viewModel::onConfirmPasswordChange,
-                label = "Confirm new password",
+                label = stringResource(R.string.settings_confirm_new_password),
                 enabled = !state.isSaving,
                 modifier = Modifier.padding(top = Spacing.md),
             )
@@ -136,7 +138,7 @@ fun SecuritySettingsScreen(onBack: () -> Unit) {
                             strokeWidth = 2.dp,
                         )
                     } else {
-                        Text("Change password")
+                        Text(stringResource(R.string.settings_change_password_action))
                     }
                 }
             }

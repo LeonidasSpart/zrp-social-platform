@@ -28,8 +28,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.SettingsRepository
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -62,7 +64,7 @@ fun ProfileEditScreen(onBack: () -> Unit) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Text(
-                text = "Profile",
+                text = stringResource(R.string.settings_profile_category),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 4.dp),
             )
@@ -90,7 +92,7 @@ private fun ProfileEditForm(state: ProfileEditUiState, viewModel: ProfileEditVie
         OutlinedTextField(
             value = state.name,
             onValueChange = viewModel::onNameChange,
-            label = { Text("Display name") },
+            label = { Text(stringResource(R.string.settings_display_name)) },
             singleLine = true,
             enabled = !state.isSaving,
             modifier = Modifier.fillMaxWidth(),
@@ -99,7 +101,7 @@ private fun ProfileEditForm(state: ProfileEditUiState, viewModel: ProfileEditVie
         OutlinedTextField(
             value = state.bio,
             onValueChange = { if (it.length <= 160) viewModel.onBioChange(it) },
-            label = { Text("Bio") },
+            label = { Text(stringResource(R.string.settings_bio)) },
             enabled = !state.isSaving,
             minLines = 3,
             modifier = Modifier
@@ -116,7 +118,7 @@ private fun ProfileEditForm(state: ProfileEditUiState, viewModel: ProfileEditVie
         OutlinedTextField(
             value = state.location,
             onValueChange = viewModel::onLocationChange,
-            label = { Text("City") },
+            label = { Text(stringResource(R.string.settings_city)) },
             singleLine = true,
             enabled = !state.isSaving,
             modifier = Modifier
@@ -127,7 +129,7 @@ private fun ProfileEditForm(state: ProfileEditUiState, viewModel: ProfileEditVie
         OutlinedTextField(
             value = state.country,
             onValueChange = viewModel::onCountryChange,
-            label = { Text("Country") },
+            label = { Text(stringResource(R.string.settings_country)) },
             singleLine = true,
             enabled = !state.isSaving,
             modifier = Modifier
@@ -138,7 +140,7 @@ private fun ProfileEditForm(state: ProfileEditUiState, viewModel: ProfileEditVie
         OutlinedTextField(
             value = state.website,
             onValueChange = viewModel::onWebsiteChange,
-            label = { Text("Website") },
+            label = { Text(stringResource(R.string.settings_website)) },
             singleLine = true,
             enabled = !state.isSaving,
             modifier = Modifier
@@ -173,7 +175,7 @@ private fun ProfileEditForm(state: ProfileEditUiState, viewModel: ProfileEditVie
                         strokeWidth = 2.dp,
                     )
                 } else {
-                    Text("Save")
+                    Text(stringResource(R.string.action_save))
                 }
             }
         }

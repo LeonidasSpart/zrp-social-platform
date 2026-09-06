@@ -42,6 +42,7 @@ import one.zrp.social.mobile.ui.reposts.RepostsScreen
 import one.zrp.social.mobile.ui.search.SearchScreen
 import one.zrp.social.mobile.ui.settings.AccountSettingsScreen
 import one.zrp.social.mobile.ui.settings.DeleteAccountScreen
+import one.zrp.social.mobile.ui.settings.LanguageSettingsScreen
 import one.zrp.social.mobile.ui.settings.PrivacySettingsScreen
 import one.zrp.social.mobile.ui.settings.ProfileEditScreen
 import one.zrp.social.mobile.ui.settings.SecuritySettingsScreen
@@ -82,6 +83,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToSettingsProfile: () -> Unit = { navController.navigate("settings/profile") }
     val goToSettingsSecurity: () -> Unit = { navController.navigate("settings/security") }
     val goToSettingsPrivacy: () -> Unit = { navController.navigate("settings/privacy") }
+    val goToSettingsLanguage: () -> Unit = { navController.navigate("settings/language") }
     val goToDeleteAccount: () -> Unit = { navController.navigate("settings/delete-account") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
@@ -286,7 +288,11 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenProfile = goToSettingsProfile,
                     onOpenSecurity = goToSettingsSecurity,
                     onOpenPrivacy = goToSettingsPrivacy,
+                    onOpenLanguage = goToSettingsLanguage,
                 )
+            }
+            composable("settings/language") {
+                LanguageSettingsScreen(onBack = { navController.popBackStack() })
             }
             composable("settings/account") {
                 AccountSettingsScreen(

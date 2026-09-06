@@ -30,10 +30,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.SettingsRepository
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -63,7 +65,7 @@ fun AccountSettingsScreen(onBack: () -> Unit, onOpenDeleteAccount: () -> Unit) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Text(
-                text = "Account",
+                text = stringResource(R.string.settings_account),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 4.dp),
             )
@@ -81,7 +83,7 @@ fun AccountSettingsScreen(onBack: () -> Unit, onOpenDeleteAccount: () -> Unit) {
                     .verticalScroll(rememberScrollState())
                     .padding(Spacing.lg),
             ) {
-                Text(text = "Account info", style = MaterialTheme.typography.titleSmall)
+                Text(text = stringResource(R.string.settings_account_info), style = MaterialTheme.typography.titleSmall)
                 Text(
                     text = state.currentEmail,
                     style = MaterialTheme.typography.bodyMedium,
@@ -90,7 +92,7 @@ fun AccountSettingsScreen(onBack: () -> Unit, onOpenDeleteAccount: () -> Unit) {
                 )
                 if (state.joinedAt != null) {
                     Text(
-                        text = "Joined ${formatRelativeTime(state.joinedAt!!)}",
+                        text = stringResource(R.string.settings_joined, formatRelativeTime(state.joinedAt!!)),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -98,10 +100,10 @@ fun AccountSettingsScreen(onBack: () -> Unit, onOpenDeleteAccount: () -> Unit) {
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.lg))
 
-                Text(text = "Username", style = MaterialTheme.typography.titleSmall)
+                Text(text = stringResource(R.string.settings_username_title), style = MaterialTheme.typography.titleSmall)
                 if (state.usernameCooldownDays > 0) {
                     Text(
-                        text = "You can change your username again in ${state.usernameCooldownDays} days.",
+                        text = stringResource(R.string.settings_username_cooldown_banner, state.usernameCooldownDays),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(top = Spacing.xs),
@@ -110,7 +112,7 @@ fun AccountSettingsScreen(onBack: () -> Unit, onOpenDeleteAccount: () -> Unit) {
                 OutlinedTextField(
                     value = state.newUsername,
                     onValueChange = viewModel::onNewUsernameChange,
-                    label = { Text("Username") },
+                    label = { Text(stringResource(R.string.settings_new_username)) },
                     singleLine = true,
                     enabled = !state.isUpdatingUsername && state.usernameCooldownDays <= 0,
                     modifier = Modifier
@@ -146,18 +148,18 @@ fun AccountSettingsScreen(onBack: () -> Unit, onOpenDeleteAccount: () -> Unit) {
                                 strokeWidth = 2.dp,
                             )
                         } else {
-                            Text("Change username")
+                            Text(stringResource(R.string.settings_change_username))
                         }
                     }
                 }
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.lg))
 
-                Text(text = "Change email", style = MaterialTheme.typography.titleSmall)
+                Text(text = stringResource(R.string.settings_change_email), style = MaterialTheme.typography.titleSmall)
                 OutlinedTextField(
                     value = state.newEmail,
                     onValueChange = viewModel::onNewEmailChange,
-                    label = { Text("New email") },
+                    label = { Text(stringResource(R.string.settings_new_email)) },
                     singleLine = true,
                     enabled = !state.isUpdatingEmail,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -168,7 +170,7 @@ fun AccountSettingsScreen(onBack: () -> Unit, onOpenDeleteAccount: () -> Unit) {
                 OutlinedTextField(
                     value = state.emailPassword,
                     onValueChange = viewModel::onEmailPasswordChange,
-                    label = { Text("Current password") },
+                    label = { Text(stringResource(R.string.settings_current_password_field)) },
                     singleLine = true,
                     enabled = !state.isUpdatingEmail,
                     visualTransformation = PasswordVisualTransformation(),
@@ -206,7 +208,7 @@ fun AccountSettingsScreen(onBack: () -> Unit, onOpenDeleteAccount: () -> Unit) {
                                 strokeWidth = 2.dp,
                             )
                         } else {
-                            Text("Send verification email")
+                            Text(stringResource(R.string.settings_send_verification_email))
                         }
                     }
                 }
@@ -221,7 +223,7 @@ fun AccountSettingsScreen(onBack: () -> Unit, onOpenDeleteAccount: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Delete account",
+                        text = stringResource(R.string.settings_delete_account),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.weight(1f),

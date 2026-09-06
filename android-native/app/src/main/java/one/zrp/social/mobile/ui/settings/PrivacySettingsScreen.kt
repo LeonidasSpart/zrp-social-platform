@@ -26,8 +26,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.SettingsRepository
 import one.zrp.social.mobile.ui.theme.Spacing
 
@@ -60,7 +62,7 @@ fun PrivacySettingsScreen(
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Text(
-                text = "Privacy & Safety",
+                text = stringResource(R.string.settings_privacy_safety),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 4.dp),
             )
@@ -74,22 +76,22 @@ fun PrivacySettingsScreen(
         } else {
             Column(modifier = Modifier.fillMaxSize()) {
                 ToggleRow(
-                    title = "Public likes",
-                    subtitle = "Let others see the posts you've liked",
+                    title = stringResource(R.string.settings_public_likes),
+                    subtitle = stringResource(R.string.settings_public_likes_desc),
                     checked = state.publicLikes,
                     enabled = !state.isSaving,
                     onCheckedChange = viewModel::setPublicLikes,
                 )
                 ToggleRow(
-                    title = "Public following",
-                    subtitle = "Let others see who you follow",
+                    title = stringResource(R.string.settings_public_following),
+                    subtitle = stringResource(R.string.settings_public_following_desc),
                     checked = state.publicFollowing,
                     enabled = !state.isSaving,
                     onCheckedChange = viewModel::setPublicFollowing,
                 )
                 ToggleRow(
-                    title = "Private account",
-                    subtitle = "Only approved followers can see your posts",
+                    title = stringResource(R.string.settings_private_account),
+                    subtitle = stringResource(R.string.settings_private_account_desc),
                     checked = state.isPrivate,
                     enabled = !state.isSaving,
                     icon = Icons.Filled.Lock,
@@ -107,8 +109,8 @@ fun PrivacySettingsScreen(
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.sm))
 
-                NavRow(icon = Icons.Filled.NotificationsOff, label = "Muted users", onClick = onOpenMutedUsers)
-                NavRow(icon = Icons.Filled.Block, label = "Blocked users", onClick = onOpenBlockedUsers)
+                NavRow(icon = Icons.Filled.NotificationsOff, label = stringResource(R.string.settings_muted_users), onClick = onOpenMutedUsers)
+                NavRow(icon = Icons.Filled.Block, label = stringResource(R.string.settings_blocked_users), onClick = onOpenBlockedUsers)
             }
         }
     }

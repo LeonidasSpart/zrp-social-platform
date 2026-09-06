@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Shield
@@ -22,7 +23,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.ui.theme.Spacing
 
 /**
@@ -38,6 +41,14 @@ import one.zrp.social.mobile.ui.theme.Spacing
  * Notifications (email preferences), and Support are real web features
  * left for a later slice rather than linked to a screen that doesn't
  * exist yet. See SettingsRepository's KDoc for the full breakdown.
+ *
+ * Every label here is a string resource with real translations for
+ * all 11 official ZRP languages (extracted from the website's own
+ * src/lib/translations.ts) - see the per-language values directories
+ * under res/. Account and Security stay English-only because the
+ * website's own CATEGORIES array hardcodes those same two labels
+ * untranslated too (see values/strings.xml's comment) - not a native
+ * shortfall.
  */
 @Composable
 fun SettingsScreen(
@@ -46,6 +57,7 @@ fun SettingsScreen(
     onOpenProfile: () -> Unit,
     onOpenSecurity: () -> Unit,
     onOpenPrivacy: () -> Unit,
+    onOpenLanguage: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -58,17 +70,18 @@ fun SettingsScreen(
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Text(
-                text = "Settings",
+                text = stringResource(R.string.settings_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 4.dp),
             )
         }
         HorizontalDivider()
 
-        SettingsRow(icon = Icons.Filled.AccountCircle, label = "Account", onClick = onOpenAccount)
-        SettingsRow(icon = Icons.Filled.Person, label = "Profile", onClick = onOpenProfile)
-        SettingsRow(icon = Icons.Filled.Lock, label = "Security", onClick = onOpenSecurity)
-        SettingsRow(icon = Icons.Filled.Shield, label = "Privacy & Safety", onClick = onOpenPrivacy)
+        SettingsRow(icon = Icons.Filled.AccountCircle, label = stringResource(R.string.settings_account), onClick = onOpenAccount)
+        SettingsRow(icon = Icons.Filled.Person, label = stringResource(R.string.settings_profile_category), onClick = onOpenProfile)
+        SettingsRow(icon = Icons.Filled.Lock, label = stringResource(R.string.settings_security), onClick = onOpenSecurity)
+        SettingsRow(icon = Icons.Filled.Shield, label = stringResource(R.string.settings_privacy_safety), onClick = onOpenPrivacy)
+        SettingsRow(icon = Icons.Filled.Language, label = stringResource(R.string.nav_language), onClick = onOpenLanguage)
     }
 }
 
