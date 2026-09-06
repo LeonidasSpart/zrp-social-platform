@@ -49,4 +49,10 @@
     <string name="action_delete">删除</string>
     <string name="action_retry">重试</string>
     <string name="action_loading">加载中...</string>
+    <string name="nav_home">首页</string>
+    <string name="nav_search">搜索</string>
+    <string name="nav_messages">私信</string>
+    <string name="nav_notifications">通知</string>
+    <string name="nav_profile">个人资料</string>
+    <string name="action_post">发布</string>
 </resources>

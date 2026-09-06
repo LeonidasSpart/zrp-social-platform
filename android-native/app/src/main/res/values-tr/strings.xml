@@ -49,4 +49,10 @@
     <string name="action_delete">Sil</string>
     <string name="action_retry">Yeniden Dene</string>
     <string name="action_loading">Yükleniyor...</string>
+    <string name="nav_home">Ana Sayfa</string>
+    <string name="nav_search">Ara</string>
+    <string name="nav_messages">Mesajlar</string>
+    <string name="nav_notifications">Bildirimler</string>
+    <string name="nav_profile">Profil</string>
+    <string name="action_post">Gönder</string>
 </resources>

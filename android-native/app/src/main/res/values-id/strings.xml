@@ -49,4 +49,10 @@
     <string name="action_delete">Hapus</string>
     <string name="action_retry">Coba Lagi</string>
     <string name="action_loading">Memuat...</string>
+    <string name="nav_home">Beranda</string>
+    <string name="nav_search">Cari</string>
+    <string name="nav_messages">Pesan</string>
+    <string name="nav_notifications">Notifikasi</string>
+    <string name="nav_profile">Profil</string>
+    <string name="action_post">Kirim</string>
 </resources>

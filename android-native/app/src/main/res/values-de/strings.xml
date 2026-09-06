@@ -49,4 +49,10 @@
     <string name="action_delete">Löschen</string>
     <string name="action_retry">Erneut versuchen</string>
     <string name="action_loading">Wird geladen...</string>
+    <string name="nav_home">Startseite</string>
+    <string name="nav_search">Suche</string>
+    <string name="nav_messages">Nachrichten</string>
+    <string name="nav_notifications">Benachrichtigungen</string>
+    <string name="nav_profile">Profil</string>
+    <string name="action_post">Posten</string>
 </resources>

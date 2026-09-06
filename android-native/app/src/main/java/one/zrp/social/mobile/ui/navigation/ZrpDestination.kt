@@ -1,5 +1,6 @@
 package one.zrp.social.mobile.ui.navigation
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Home
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.graphics.vector.ImageVector
+import one.zrp.social.mobile.R
 
 /**
  * The six bottom-navigation destinations for the ZRP mobile app -
@@ -32,14 +34,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
  */
 enum class ZrpDestination(
     val route: String,
-    val label: String,
+    @StringRes val labelRes: Int,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector,
 ) {
-    Home("home", "Home", Icons.Filled.Home, Icons.Outlined.Home),
-    Search("search", "Search", Icons.Filled.Search, Icons.Outlined.Search),
-    Create("create", "Post", Icons.Filled.AddCircle, Icons.Filled.AddCircle),
-    Notifications("notifications", "Notifications", Icons.Filled.Notifications, Icons.Outlined.Notifications),
-    Messages("messages", "Messages", Icons.Filled.MailOutline, Icons.Outlined.MailOutline),
-    Profile("profile", "Profile", Icons.Filled.Person, Icons.Outlined.Person),
+    Home("home", R.string.nav_home, Icons.Filled.Home, Icons.Outlined.Home),
+    Search("search", R.string.nav_search, Icons.Filled.Search, Icons.Outlined.Search),
+    Create("create", R.string.action_post, Icons.Filled.AddCircle, Icons.Filled.AddCircle),
+    Notifications("notifications", R.string.nav_notifications, Icons.Filled.Notifications, Icons.Outlined.Notifications),
+    Messages("messages", R.string.nav_messages, Icons.Filled.MailOutline, Icons.Outlined.MailOutline),
+    Profile("profile", R.string.nav_profile, Icons.Filled.Person, Icons.Outlined.Person),
 }

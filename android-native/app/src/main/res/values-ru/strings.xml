@@ -49,4 +49,10 @@
     <string name="action_delete">Удалить</string>
     <string name="action_retry">Повторить</string>
     <string name="action_loading">Загрузка...</string>
+    <string name="nav_home">Главная</string>
+    <string name="nav_search">Поиск</string>
+    <string name="nav_messages">Сообщения</string>
+    <string name="nav_notifications">Уведомления</string>
+    <string name="nav_profile">Профиль</string>
+    <string name="action_post">Опубликовать</string>
 </resources>
