@@ -8,10 +8,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.StoriesRepository
+import one.zrp.social.mobile.network.StoryAuthor
 import one.zrp.social.mobile.network.StoryItem
 
 data class StoryViewerUiState(
+    val author: StoryAuthor? = null,
     val stories: List<StoryItem> = emptyList(),
+    val isOwnStories: Boolean = false,
     val isLoading: Boolean = true,
     val error: String? = null,
 )
@@ -36,10 +39,18 @@ class StoryViewerViewModel(
     private fun load() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
+            val ownUserId = repository.getOwnUserId().getOrNull()
             repository.getStories()
                 .onSuccess { groups ->
-                    val stories = groups.find { group -> group.user.id == userId }?.stories ?: emptyList()
-                    _state.update { it.copy(stories = stories, isLoading = false) }
+                    val group = groups.find { g -> g.user.id == userId }
+                    _state.update {
+                        it.copy(
+                            author = group?.user,
+                            stories = group?.stories ?: emptyList(),
+                            isOwnStories = ownUserId != null && userId == ownUserId,
+                            isLoading = false,
+                        )
+                    }
                 }
                 .onFailure { error ->
                     _state.update { it.copy(isLoading = false, error = error.message ?: "Couldn't load stories.") }
