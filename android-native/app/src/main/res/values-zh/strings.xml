@@ -108,4 +108,15 @@
     <string name="quotes_title">引用</string>
     <string name="quotes_count">%1$d 引用</string>
     <string name="quotes_empty">暂无引用。</string>
+    <string name="moderation_no_blocked_users">没有已屏蔽的用户</string>
+    <string name="moderation_no_blocked_desc">当你屏蔽某人时，他们会显示在这里。</string>
+    <string name="moderation_blocked_explanation">你屏蔽的用户将无法与你互动，他们的帖子也不会出现在你的动态中。</string>
+    <string name="moderation_blocked_count">已屏蔽 %1$d 个</string>
+    <string name="moderation_followers_count">%1$s 粉丝</string>
+    <string name="moderation_blocked_on">于 %1$s 屏蔽</string>
+    <string name="moderation_no_muted_users">没有已静音的用户</string>
+    <string name="moderation_no_muted_desc">当你静音某人时，他们会显示在这里。</string>
+    <string name="moderation_muted_explanation">你静音的用户将无法与你互动，他们的帖子也不会出现在你的动态中。</string>
+    <string name="moderation_muted_count">已静音 %1$d 个</string>
+    <string name="moderation_muted_on">于 %1$s 静音</string>
 </resources>

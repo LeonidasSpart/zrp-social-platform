@@ -108,4 +108,15 @@
     <string name="quotes_title">Citimet</string>
     <string name="quotes_count">%1$d citime</string>
     <string name="quotes_empty">Nuk ka citime ende.</string>
+    <string name="moderation_no_blocked_users">Nuk ka përdorues të bllokuar</string>
+    <string name="moderation_no_blocked_desc">Kur të bllokoni dikë, ai do të shfaqet këtu.</string>
+    <string name="moderation_blocked_explanation">Përdoruesit që bllokoni nuk do të mund të ndërveprojnë me ju, dhe postimet e tyre do të fshihen nga furnizimi juaj.</string>
+    <string name="moderation_blocked_count">%1$d të bllokuar</string>
+    <string name="moderation_followers_count">%1$s ndjekës</string>
+    <string name="moderation_blocked_on">Bllokuar më %1$s</string>
+    <string name="moderation_no_muted_users">Nuk ka përdorues të heshtur</string>
+    <string name="moderation_no_muted_desc">Kur të heshtni dikë, ai do të shfaqet këtu.</string>
+    <string name="moderation_muted_explanation">Përdoruesit që heshtni nuk do të mund të ndërveprojnë me ju, dhe postimet e tyre do të fshihen nga furnizimi juaj.</string>
+    <string name="moderation_muted_count">%1$d të heshtur</string>
+    <string name="moderation_muted_on">Heshtur më %1$s</string>
 </resources>
