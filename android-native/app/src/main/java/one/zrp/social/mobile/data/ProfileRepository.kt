@@ -4,6 +4,7 @@ import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.BlockToggleResponse
 import one.zrp.social.mobile.network.BookmarkResponse
 import one.zrp.social.mobile.network.CreateReportRequest
+import one.zrp.social.mobile.network.FollowListPage
 import one.zrp.social.mobile.network.FollowToggleResponse
 import one.zrp.social.mobile.network.LikeResponse
 import one.zrp.social.mobile.network.PostsPage
@@ -21,6 +22,18 @@ class ProfileRepository {
     suspend fun getOwnUsername(): Result<String> = runCatching {
         val session = ApiClient.authApi.getSession()
         session.user?.username ?: throw IllegalStateException("Not signed in")
+    }
+
+    suspend fun getOwnUserId(): Result<String?> = runCatching {
+        ApiClient.authApi.getSession().user?.id
+    }
+
+    suspend fun getFollowers(username: String, cursor: String?): Result<FollowListPage> = runCatching {
+        ApiClient.usersApi.getFollowers(username, cursor)
+    }
+
+    suspend fun getFollowing(username: String, cursor: String?): Result<FollowListPage> = runCatching {
+        ApiClient.usersApi.getFollowing(username, cursor)
     }
 
     suspend fun getProfile(username: String): Result<UserProfile> = runCatching {

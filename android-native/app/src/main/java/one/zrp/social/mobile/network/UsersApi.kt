@@ -48,6 +48,18 @@ data class FollowToggleResponse(
 
 data class BlockToggleResponse(val blocked: Boolean)
 
+data class FollowListUser(
+    val id: String,
+    val username: String,
+    val name: String?,
+    val avatarUrl: String?,
+    val bio: String?,
+    val badgeType: String?,
+    val isFollowing: Boolean,
+)
+
+data class FollowListPage(val items: List<FollowListUser>, val nextCursor: String?)
+
 // GET /users/{username}/posts responds with {"items": [...], "nextCursor": ...}
 // - a genuinely different envelope key from PostsApi's PostsPage
 // ({"posts": [...]}), which the website's own profile page also
@@ -84,4 +96,16 @@ interface UsersApi {
 
     @POST("users/{username}/block")
     suspend fun toggleBlock(@Path("username") username: String): BlockToggleResponse
+
+    @GET("users/{username}/followers")
+    suspend fun getFollowers(
+        @Path("username") username: String,
+        @Query("cursor") cursor: String?,
+    ): FollowListPage
+
+    @GET("users/{username}/following")
+    suspend fun getFollowing(
+        @Path("username") username: String,
+        @Query("cursor") cursor: String?,
+    ): FollowListPage
 }

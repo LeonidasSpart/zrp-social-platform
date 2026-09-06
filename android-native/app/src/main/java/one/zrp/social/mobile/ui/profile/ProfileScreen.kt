@@ -1,6 +1,7 @@
 package one.zrp.social.mobile.ui.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -75,6 +76,8 @@ fun ProfileScreen(
     onMessageClick: (partnerId: String, partnerUsername: String) -> Unit,
     onOpenComments: (postId: String) -> Unit,
     onOpenBookmarks: () -> Unit = {},
+    onOpenFollowers: (username: String) -> Unit = {},
+    onOpenFollowing: (username: String) -> Unit = {},
 ) {
     val viewModel: ProfileViewModel = viewModel(
         factory = remember(username) { ProfileViewModelFactory(ProfileRepository(), username) },
@@ -141,6 +144,8 @@ fun ProfileScreen(
                             onLogoutClick = onLogout,
                             onMessageClick = { onMessageClick(profile.id, profile.username) },
                             onBookmarksClick = onOpenBookmarks,
+                            onFollowersClick = { onOpenFollowers(profile.username) },
+                            onFollowingClick = { onOpenFollowing(profile.username) },
                         )
                     }
 
@@ -253,6 +258,8 @@ private fun ProfileHeader(
     onLogoutClick: () -> Unit,
     onMessageClick: () -> Unit,
     onBookmarksClick: () -> Unit,
+    onFollowersClick: () -> Unit,
+    onFollowingClick: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -382,8 +389,8 @@ private fun ProfileHeader(
             horizontalArrangement = Arrangement.spacedBy(Spacing.xl),
         ) {
             ProfileStat(count = profile._count.posts, label = "Posts")
-            ProfileStat(count = profile._count.followers, label = "Followers")
-            ProfileStat(count = profile._count.following, label = "Following")
+            ProfileStat(count = profile._count.followers, label = "Followers", onClick = onFollowersClick)
+            ProfileStat(count = profile._count.following, label = "Following", onClick = onFollowingClick)
         }
 
         HorizontalDivider()
@@ -391,8 +398,10 @@ private fun ProfileHeader(
 }
 
 @Composable
-private fun ProfileStat(count: Int, label: String) {
-    Column {
+private fun ProfileStat(count: Int, label: String, onClick: (() -> Unit)? = null) {
+    Column(
+        modifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier,
+    ) {
         Text(
             text = formatCount(count),
             fontWeight = FontWeight.Bold,

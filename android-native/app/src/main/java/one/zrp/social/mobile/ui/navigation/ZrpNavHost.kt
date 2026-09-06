@@ -26,6 +26,8 @@ import androidx.navigation.navDeepLink
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
+import one.zrp.social.mobile.ui.followlist.FollowListMode
+import one.zrp.social.mobile.ui.followlist.FollowListScreen
 import one.zrp.social.mobile.ui.home.HomeScreen
 import one.zrp.social.mobile.ui.messages.ConversationScreen
 import one.zrp.social.mobile.ui.messages.MessagesScreen
@@ -60,6 +62,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToCreateStory: () -> Unit = { navController.navigate("create-story") }
     val goToMusic: () -> Unit = { navController.navigate("music") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
+    val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
+    val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
     val goHome: () -> Unit = {
         navController.navigate(ZrpDestination.Home.route) {
             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -110,6 +114,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onMessageClick = goToConversation,
                     onOpenComments = goToComments,
                     onOpenBookmarks = goToBookmarks,
+                    onOpenFollowers = goToFollowers,
+                    onOpenFollowing = goToFollowing,
                 )
             }
             composable(
@@ -125,7 +131,37 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onMessageClick = goToConversation,
                     onOpenComments = goToComments,
                     onOpenBookmarks = goToBookmarks,
+                    onOpenFollowers = goToFollowers,
+                    onOpenFollowing = goToFollowing,
                 )
+            }
+            composable(
+                route = "profile/{username}/followers",
+                arguments = listOf(navArgument("username") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val username = backStackEntry.arguments?.getString("username")
+                if (username != null) {
+                    FollowListScreen(
+                        username = username,
+                        mode = FollowListMode.FOLLOWERS,
+                        onAuthorClick = goToProfile,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
+            }
+            composable(
+                route = "profile/{username}/following",
+                arguments = listOf(navArgument("username") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val username = backStackEntry.arguments?.getString("username")
+                if (username != null) {
+                    FollowListScreen(
+                        username = username,
+                        mode = FollowListMode.FOLLOWING,
+                        onAuthorClick = goToProfile,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
             }
             composable(
                 route = "messages/{userId}/{username}",
