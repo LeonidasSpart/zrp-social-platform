@@ -98,4 +98,8 @@
     <string name="notifications_commented_post_suffix">علّق على منشورك</string>
     <string name="notifications_started_following_suffix">بدأ بمتابعتك</string>
     <string name="notifications_reposted_post_suffix">أعاد نشر منشورك</string>
+    <string name="stories_your_story">قصتك</string>
+    <string name="stories_add_story">إضافة قصة</string>
+    <string name="stories_share_story">مشاركة القصة</string>
+    <string name="stories_whats_on_your_mind">بم تفكر؟</string>
 </resources>

@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -65,6 +66,7 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.StoriesRepository
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -348,7 +350,7 @@ fun StoryViewerScreen(userId: String, onClose: () -> Unit, onAddStory: () -> Uni
                         IconButton(onClick = onAddStory) {
                             Icon(
                                 imageVector = Icons.Filled.AddCircle,
-                                contentDescription = "Add to your story",
+                                contentDescription = stringResource(R.string.stories_add_story),
                                 tint = Color.White,
                                 modifier = Modifier.size(32.dp),
                             )
@@ -361,6 +363,8 @@ fun StoryViewerScreen(userId: String, onClose: () -> Unit, onAddStory: () -> Uni
                         IconButton(onClick = { viewModel.toggleLike(story.id) }) {
                             Icon(
                                 imageVector = if (story.liked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                                // English-only on purpose - StoryViewer.tsx's own
+                                // "Like story"/"Unlike story" aria-label is hardcoded too.
                                 contentDescription = if (story.liked) "Unlike" else "Like",
                                 tint = if (story.liked) ZrpRed else Color.White,
                                 modifier = Modifier.size(28.dp),

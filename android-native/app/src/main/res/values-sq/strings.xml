@@ -98,4 +98,8 @@
     <string name="notifications_commented_post_suffix">komentoi në postimin tuaj</string>
     <string name="notifications_started_following_suffix">filloi t\'ju ndjekë</string>
     <string name="notifications_reposted_post_suffix">ripublikoi postimin tuaj</string>
+    <string name="stories_your_story">Storia jote</string>
+    <string name="stories_add_story">Shto Storie</string>
+    <string name="stories_share_story">Shpërndaj Storien</string>
+    <string name="stories_whats_on_your_mind">Çfarë po mendon?</string>
 </resources>

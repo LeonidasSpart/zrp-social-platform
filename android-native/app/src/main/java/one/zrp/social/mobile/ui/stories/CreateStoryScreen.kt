@@ -17,8 +17,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.StoriesRepository
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
@@ -47,7 +49,7 @@ fun CreateStoryScreen(onPosted: () -> Unit) {
             .padding(16.dp),
     ) {
         Text(
-            text = "Add to your story",
+            text = stringResource(R.string.stories_add_story),
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(bottom = 16.dp),
         )
@@ -55,7 +57,7 @@ fun CreateStoryScreen(onPosted: () -> Unit) {
         OutlinedTextField(
             value = state.content,
             onValueChange = { viewModel.onContentChange(it) },
-            placeholder = { Text("Share something that disappears in 24 hours") },
+            placeholder = { Text(stringResource(R.string.stories_whats_on_your_mind)) },
             enabled = !state.isPosting,
             modifier = Modifier
                 .fillMaxWidth()
@@ -86,7 +88,7 @@ fun CreateStoryScreen(onPosted: () -> Unit) {
                     strokeWidth = 2.dp,
                 )
             } else {
-                Text("Share to story")
+                Text(stringResource(R.string.stories_share_story))
             }
         }
     }

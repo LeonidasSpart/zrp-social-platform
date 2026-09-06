@@ -98,4 +98,8 @@
     <string name="notifications_commented_post_suffix">прокомментировал(а) вашу публикацию</string>
     <string name="notifications_started_following_suffix">подписался(лась) на вас</string>
     <string name="notifications_reposted_post_suffix">сделал(а) репост вашей публикации</string>
+    <string name="stories_your_story">Ваша история</string>
+    <string name="stories_add_story">Добавить историю</string>
+    <string name="stories_share_story">Поделиться историей</string>
+    <string name="stories_whats_on_your_mind">О чём вы думаете?</string>
 </resources>

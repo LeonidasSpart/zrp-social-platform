@@ -98,4 +98,8 @@
     <string name="notifications_commented_post_suffix">评论了你的帖子</string>
     <string name="notifications_started_following_suffix">开始关注你</string>
     <string name="notifications_reposted_post_suffix">转发了你的帖子</string>
+    <string name="stories_your_story">你的动态</string>
+    <string name="stories_add_story">添加动态</string>
+    <string name="stories_share_story">分享动态</string>
+    <string name="stories_whats_on_your_mind">你在想什么?</string>
 </resources>

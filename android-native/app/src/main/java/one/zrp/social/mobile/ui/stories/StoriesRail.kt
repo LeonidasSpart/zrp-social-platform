@@ -26,8 +26,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.StoriesRepository
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -62,7 +64,7 @@ fun StoriesRail(
     ) {
         item {
             StoryTile(
-                label = "Your story",
+                label = stringResource(R.string.stories_your_story),
                 avatarUrl = ownGroup?.user?.avatarUrl,
                 hasUnviewed = ownGroup?.stories?.any { story -> !story.viewed } == true,
                 // Always available on your own tile, not just when you
@@ -130,7 +132,7 @@ private fun StoryTile(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.AddCircle,
-                        contentDescription = "Add to your story",
+                        contentDescription = stringResource(R.string.stories_add_story),
                         tint = ZrpRed,
                         modifier = Modifier.fillMaxSize(),
                     )
