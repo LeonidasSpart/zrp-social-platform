@@ -160,4 +160,17 @@
     <string name="delete_account_permanently_delete">Eliminar cuenta permanentemente</string>
     <string name="delete_account_request_deletion">Solicitar eliminación de cuenta</string>
     <string name="delete_account_err_type_delete_confirm">Escribe &quot;DELETE&quot; para confirmar.</string>
+    <string name="report_modal_title">Reportar</string>
+    <string name="report_reason_label">Motivo del reporte</string>
+    <string name="report_details_label">Detalles adicionales (opcional)</string>
+    <string name="report_details_placeholder">Proporciona más contexto...</string>
+    <string name="report_submit">Enviar reporte</string>
+    <string name="report_submitting">Enviando...</string>
+    <string name="report_reason_spam">Spam</string>
+    <string name="report_reason_harassment">Acoso o intimidación</string>
+    <string name="report_reason_inappropriate">Contenido inapropiado</string>
+    <string name="report_reason_misinformation">Desinformación</string>
+    <string name="report_reason_hate_speech">Discurso de odio</string>
+    <string name="report_reason_impersonation">Suplantación de identidad</string>
+    <string name="report_reason_other">Otro</string>
 </resources>

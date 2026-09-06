@@ -21,8 +21,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.network.ReportReasons
+
+/**
+ * The real, translated display label for a fixed-English reason value
+ * from [ReportReasons] - matches ReportModal.tsx's own `reasons` array,
+ * which keeps the submitted value in English (moderators/the
+ * transparency dashboard match on it verbatim) while only translating
+ * what the reporter sees.
+ */
+@Composable
+private fun reasonLabel(reason: String): String = when (reason) {
+    "Spam" -> stringResource(R.string.report_reason_spam)
+    "Harassment or bullying" -> stringResource(R.string.report_reason_harassment)
+    "Inappropriate content" -> stringResource(R.string.report_reason_inappropriate)
+    "Misinformation" -> stringResource(R.string.report_reason_misinformation)
+    "Hate speech" -> stringResource(R.string.report_reason_hate_speech)
+    "Impersonation" -> stringResource(R.string.report_reason_impersonation)
+    else -> stringResource(R.string.report_reason_other)
+}
 
 /**
  * The same reason list and semantics as the website's ReportModal -
@@ -41,9 +61,13 @@ fun ReportDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Report post") },
+        title = { Text(stringResource(R.string.report_modal_title)) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Text(
+                    text = stringResource(R.string.report_reason_label),
+                    style = MaterialTheme.typography.labelMedium,
+                )
                 ReportReasons.forEach { reason ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -55,17 +79,22 @@ fun ReportDialog(
                             ),
                     ) {
                         RadioButton(selected = selectedReason == reason, onClick = { selectedReason = reason })
-                        Text(text = reason, modifier = Modifier.padding(start = 4.dp))
+                        Text(text = reasonLabel(reason), modifier = Modifier.padding(start = 4.dp))
                     }
                 }
 
+                Text(
+                    text = stringResource(R.string.report_details_label),
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
                 OutlinedTextField(
                     value = details,
                     onValueChange = { details = it },
-                    placeholder = { Text("Additional details (optional)") },
+                    placeholder = { Text(stringResource(R.string.report_details_placeholder)) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp),
+                        .padding(top = 4.dp),
                 )
 
                 if (error != null) {
@@ -81,13 +110,13 @@ fun ReportDialog(
                     onClick = { selectedReason?.let { onSubmit(it, details.ifBlank { null }) } },
                     enabled = selectedReason != null,
                 ) {
-                    Text("Submit")
+                    Text(stringResource(R.string.report_submit))
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss, enabled = !isSubmitting) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         },
     )
