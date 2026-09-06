@@ -1,10 +1,14 @@
 package one.zrp.social.mobile.ui.create
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -20,9 +24,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.data.PostsRepository
+import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.VerifiedBadge
+import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
@@ -32,11 +40,17 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * its own native upload path (see PostsApi.createPost's comment);
  * shipping real, working text posts now rather than an untested
  * native upload flow in the same change.
+ *
+ * When [quotePostId] is set, this doubles as the Quote-post composer
+ * reached from a post's repost menu, showing a read-only preview of
+ * the real post being quoted - the same real post GET /posts/{id}
+ * returns, not a locally reconstructed guess - above the text field,
+ * matching the website's QuotePostModal.
  */
 @Composable
-fun CreatePostScreen(onPosted: () -> Unit) {
+fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
     val viewModel: CreatePostViewModel = viewModel(
-        factory = remember { CreatePostViewModelFactory(PostsRepository()) },
+        factory = remember(quotePostId) { CreatePostViewModelFactory(PostsRepository(), quotePostId) },
     )
     val state by viewModel.state.collectAsState()
 
@@ -52,14 +66,65 @@ fun CreatePostScreen(onPosted: () -> Unit) {
             .fillMaxSize()
             .padding(16.dp),
     ) {
+        if (quotePostId != null) {
+            Text(
+                text = "Quote Post",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = Spacing.sm),
+            )
+
+            val quotedPost = state.quotedPost
+            when {
+                state.isLoadingQuotedPost -> {
+                    Box(modifier = Modifier.fillMaxWidth().padding(Spacing.md), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+                quotedPost != null -> {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.medium)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                            .padding(Spacing.md),
+                    ) {
+                        Avatar(
+                            url = quotedPost.author.avatarUrl,
+                            name = quotedPost.author.name ?: quotedPost.author.username,
+                            size = 32.dp,
+                        )
+                        Column(modifier = Modifier.padding(start = Spacing.sm)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = quotedPost.author.name ?: quotedPost.author.username,
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+                                VerifiedBadge(
+                                    badgeType = quotedPost.author.badgeType,
+                                    modifier = Modifier.padding(start = 3.dp),
+                                )
+                            }
+                            Text(
+                                text = quotedPost.content,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(top = 2.dp),
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(Spacing.sm))
+                }
+            }
+        }
+
         OutlinedTextField(
             value = state.content,
             onValueChange = { viewModel.onContentChange(it) },
-            placeholder = { Text("What's happening on ZRP?") },
+            placeholder = { Text(if (quotePostId != null) "Add your thoughts..." else "What's happening on ZRP?") },
             enabled = !state.isPosting,
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
+                .weight(1f)
+                .padding(top = if (quotePostId != null) Spacing.sm else 0.dp),
         )
 
         if (state.error != null) {
@@ -96,7 +161,7 @@ fun CreatePostScreen(onPosted: () -> Unit) {
                         strokeWidth = 2.dp,
                     )
                 } else {
-                    Text("Post")
+                    Text(if (quotePostId != null) "Quote" else "Post")
                 }
             }
         }

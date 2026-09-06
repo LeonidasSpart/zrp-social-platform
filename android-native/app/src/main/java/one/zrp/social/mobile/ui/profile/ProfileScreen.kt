@@ -85,6 +85,7 @@ fun ProfileScreen(
     onOpenFollowing: (username: String) -> Unit = {},
     onOpenBlockedUsers: () -> Unit = {},
     onOpenMutedUsers: () -> Unit = {},
+    onOpenQuotePost: (postId: String) -> Unit = {},
 ) {
     val viewModel: ProfileViewModel = viewModel(
         factory = remember(username) { ProfileViewModelFactory(ProfileRepository(), username) },
@@ -174,6 +175,7 @@ fun ProfileScreen(
                             },
                             isOwnPost = state.isOwnProfile,
                             onDeleteClick = { postId -> deletingPostId = postId },
+                            onQuoteClick = onOpenQuotePost,
                             onClick = onOpenComments,
                             onAuthorClick = onAuthorClick,
                         )

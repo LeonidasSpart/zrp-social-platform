@@ -8,12 +8,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.PostsRepository
+import one.zrp.social.mobile.network.Post
 
 data class CreatePostUiState(
     val content: String = "",
     val isPosting: Boolean = false,
     val error: String? = null,
     val posted: Boolean = false,
+    val quotedPost: Post? = null,
+    val isLoadingQuotedPost: Boolean = false,
 )
 
 /**
@@ -21,10 +24,37 @@ data class CreatePostUiState(
  * client-side reimplementation of the server's plan-based length/
  * image limits: a rejected post simply surfaces the server's own
  * error message.
+ *
+ * When [quotePostId] is set (reached via the repost menu's "Quote"
+ * option, matching the website's QuotePostModal), the real post being
+ * quoted is fetched via GET /posts/{id} to render its own preview
+ * above the composer, and submit() attaches quotePostId to the create
+ * call the same way QuotePostModal.tsx does.
  */
-class CreatePostViewModel(private val repository: PostsRepository) : ViewModel() {
+class CreatePostViewModel(
+    private val repository: PostsRepository,
+    private val quotePostId: String? = null,
+) : ViewModel() {
     private val _state = MutableStateFlow(CreatePostUiState())
     val state: StateFlow<CreatePostUiState> = _state.asStateFlow()
+
+    init {
+        if (quotePostId != null) {
+            _state.update { it.copy(isLoadingQuotedPost = true) }
+            viewModelScope.launch {
+                repository.getPost(quotePostId)
+                    .onSuccess { post -> _state.update { it.copy(quotedPost = post, isLoadingQuotedPost = false) } }
+                    .onFailure { error ->
+                        _state.update {
+                            it.copy(
+                                isLoadingQuotedPost = false,
+                                error = error.message ?: "Couldn't load the post you're quoting.",
+                            )
+                        }
+                    }
+            }
+        }
+    }
 
     fun onContentChange(content: String) {
         _state.update { it.copy(content = content, error = null) }
@@ -36,9 +66,9 @@ class CreatePostViewModel(private val repository: PostsRepository) : ViewModel()
 
         _state.update { it.copy(isPosting = true, error = null) }
         viewModelScope.launch {
-            repository.createPost(content)
+            repository.createPost(content, quotePostId)
                 .onSuccess {
-                    _state.update { CreatePostUiState(posted = true) }
+                    _state.update { it.copy(isPosting = false, posted = true) }
                 }
                 .onFailure { error ->
                     _state.update {

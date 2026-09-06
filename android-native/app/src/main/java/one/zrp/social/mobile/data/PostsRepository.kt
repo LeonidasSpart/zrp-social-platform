@@ -58,13 +58,17 @@ class PostsRepository {
         }
     }
 
-    suspend fun createPost(content: String): Result<Post> {
+    suspend fun createPost(content: String, quotePostId: String? = null): Result<Post> {
         return try {
-            Result.success(ApiClient.postsApi.createPost(CreatePostRequest(content)).post)
+            Result.success(ApiClient.postsApi.createPost(CreatePostRequest(content, quotePostId)).post)
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't create this post. Please try again."))
         } catch (e: Exception) {
             Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
         }
+    }
+
+    suspend fun getPost(postId: String): Result<Post> = runCatching {
+        ApiClient.postsApi.getPost(postId)
     }
 }
