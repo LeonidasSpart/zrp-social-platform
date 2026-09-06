@@ -219,4 +219,34 @@
     <string name="forgot_password_sending">Duke dërguar...</string>
     <string name="forgot_password_send_reset_link">Dërgo Lidhjen e Rivendosjes</string>
     <string name="forgot_password_remember_password">E mban mend fjalëkalimin?</string>
+    <!-- Onboarding -->
+    <string name="onboarding_step_profile">Profili</string>
+    <string name="onboarding_step_follow">Ndiq</string>
+    <string name="onboarding_step_done">Përfunduar</string>
+    <string name="onboarding_welcome_title">Mirë se vini në ZRP! 👋</string>
+    <string name="onboarding_setup_subtitle">Rregulloni profilin tuaj për të filluar.</string>
+    <string name="onboarding_profile_picture">Foto e profilit</string>
+    <string name="onboarding_upload">Ngarko</string>
+    <string name="onboarding_display_name">Emri i shfaqur</string>
+    <string name="onboarding_display_name_placeholder">Emri juaj</string>
+    <string name="onboarding_bio">Biografia</string>
+    <string name="onboarding_bio_placeholder">Na tregoni diçka për veten...</string>
+    <string name="onboarding_location_label">Vendndodhja</string>
+    <string name="onboarding_location_placeholder">Kërkoni për një qytet...</string>
+    <string name="onboarding_website">Uebsajti</string>
+    <string name="onboarding_website_placeholder">https://uebsajti-juaj.com</string>
+    <string name="onboarding_follow_title">Ndiqni disa njerëz 🧑‍🤝‍🧑</string>
+    <string name="onboarding_follow_subtitle">Zgjidhni njerëz për t\'i ndjekur dhe mbushni furnizimin tuaj.</string>
+    <string name="onboarding_no_suggestions">Nuk ka sugjerime të disponueshme.</string>
+    <string name="onboarding_users_selected">%1$d përdorues të zgjedhur</string>
+    <string name="onboarding_done_title">Gjithçka është gati!</string>
+    <string name="onboarding_done_subtitle">Profili juaj është gati. Le të fillojmë eksplorimin në ZRP Social.</string>
+    <string name="onboarding_skip">Kaloje për tani</string>
+    <string name="onboarding_continue">Vazhdo</string>
+    <string name="onboarding_finish">Përfundo</string>
+    <string name="onboarding_go_to_home">Shko te Kreu</string>
+    <string name="onboarding_err_save_profile">Ruajtja e profilit dështoi. Ju lutemi riprovojeni.</string>
+    <string name="onboarding_err_follow_users">Ndjekja e përdoruesve dështoi. Ju lutemi riprovojeni.</string>
+    <string name="onboarding_err_skip">Kalimi dështoi. Ju lutemi riprovojeni.</string>
+    <string name="auth_err_session_expired">Sesioni yt nuk është më i vlefshëm. Ju lutemi hyni përsëri.</string>
 </resources>

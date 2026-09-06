@@ -219,4 +219,34 @@
     <string name="forgot_password_sending">Enviando...</string>
     <string name="forgot_password_send_reset_link">Enviar enlace de restablecimiento</string>
     <string name="forgot_password_remember_password">¿Recuerdas tu contraseña?</string>
+    <!-- Onboarding -->
+    <string name="onboarding_step_profile">Perfil</string>
+    <string name="onboarding_step_follow">Seguir</string>
+    <string name="onboarding_step_done">Listo</string>
+    <string name="onboarding_welcome_title">¡Bienvenido a ZRP! 👋</string>
+    <string name="onboarding_setup_subtitle">Configura tu perfil para empezar.</string>
+    <string name="onboarding_profile_picture">Foto de perfil</string>
+    <string name="onboarding_upload">Subir</string>
+    <string name="onboarding_display_name">Nombre visible</string>
+    <string name="onboarding_display_name_placeholder">Tu nombre</string>
+    <string name="onboarding_bio">Biografía</string>
+    <string name="onboarding_bio_placeholder">Cuéntanos sobre ti...</string>
+    <string name="onboarding_location_label">Ubicación</string>
+    <string name="onboarding_location_placeholder">Busca una ciudad...</string>
+    <string name="onboarding_website">Sitio web</string>
+    <string name="onboarding_website_placeholder">https://tu-sitio.com</string>
+    <string name="onboarding_follow_title">Sigue a algunas personas 🧑‍🤝‍🧑</string>
+    <string name="onboarding_follow_subtitle">Elige a quién seguir para llenar tu feed.</string>
+    <string name="onboarding_no_suggestions">No hay sugerencias disponibles.</string>
+    <string name="onboarding_users_selected">%1$d usuario(s) seleccionado(s)</string>
+    <string name="onboarding_done_title">¡Todo listo!</string>
+    <string name="onboarding_done_subtitle">Tu perfil está listo. Empecemos a explorar ZRP Social.</string>
+    <string name="onboarding_skip">Omitir por ahora</string>
+    <string name="onboarding_continue">Continuar</string>
+    <string name="onboarding_finish">Finalizar</string>
+    <string name="onboarding_go_to_home">Ir al inicio</string>
+    <string name="onboarding_err_save_profile">Error al guardar el perfil. Inténtalo de nuevo.</string>
+    <string name="onboarding_err_follow_users">Error al seguir usuarios. Inténtalo de nuevo.</string>
+    <string name="onboarding_err_skip">Error al omitir. Inténtalo de nuevo.</string>
+    <string name="auth_err_session_expired">Tu sesión ya no es válida. Vuelve a iniciar sesión.</string>
 </resources>

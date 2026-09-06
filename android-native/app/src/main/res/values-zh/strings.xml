@@ -219,4 +219,34 @@
     <string name="forgot_password_sending">发送中...</string>
     <string name="forgot_password_send_reset_link">发送重置链接</string>
     <string name="forgot_password_remember_password">记起密码了？</string>
+    <!-- Onboarding -->
+    <string name="onboarding_step_profile">个人资料</string>
+    <string name="onboarding_step_follow">关注</string>
+    <string name="onboarding_step_done">完成</string>
+    <string name="onboarding_welcome_title">欢迎来到 ZRP！👋</string>
+    <string name="onboarding_setup_subtitle">设置你的个人资料即可开始。</string>
+    <string name="onboarding_profile_picture">头像</string>
+    <string name="onboarding_upload">上传</string>
+    <string name="onboarding_display_name">显示名称</string>
+    <string name="onboarding_display_name_placeholder">你的名字</string>
+    <string name="onboarding_bio">简介</string>
+    <string name="onboarding_bio_placeholder">介绍一下你自己...</string>
+    <string name="onboarding_location_label">位置</string>
+    <string name="onboarding_location_placeholder">搜索城市...</string>
+    <string name="onboarding_website">网站</string>
+    <string name="onboarding_website_placeholder">https://your-site.com</string>
+    <string name="onboarding_follow_title">关注一些用户 🧑‍🤝‍🧑</string>
+    <string name="onboarding_follow_subtitle">选择要关注的人，让你的信息流充满内容。</string>
+    <string name="onboarding_no_suggestions">暂无推荐。</string>
+    <string name="onboarding_users_selected">已选择 %1$d 位用户</string>
+    <string name="onboarding_done_title">一切准备就绪！</string>
+    <string name="onboarding_done_subtitle">你的个人资料已准备就绪。让我们开始探索 ZRP Social。</string>
+    <string name="onboarding_skip">暂时跳过</string>
+    <string name="onboarding_continue">继续</string>
+    <string name="onboarding_finish">完成</string>
+    <string name="onboarding_go_to_home">返回首页</string>
+    <string name="onboarding_err_save_profile">保存个人资料失败，请重试。</string>
+    <string name="onboarding_err_follow_users">关注用户失败，请重试。</string>
+    <string name="onboarding_err_skip">跳过失败，请重试。</string>
+    <string name="auth_err_session_expired">您的登录状态已失效,请重新登录。</string>
 </resources>

@@ -27,6 +27,7 @@ import one.zrp.social.mobile.ui.auth.ForgotPasswordScreen
 import one.zrp.social.mobile.ui.auth.LoginScreen
 import one.zrp.social.mobile.ui.auth.SignupScreen
 import one.zrp.social.mobile.ui.navigation.ZrpNavHost
+import one.zrp.social.mobile.ui.onboarding.OnboardingScreen
 import one.zrp.social.mobile.ui.theme.ZrpSocialTheme
 
 private enum class LoggedOutScreen { LOGIN, SIGNUP, FORGOT_PASSWORD }
@@ -71,7 +72,12 @@ fun ZrpSocialApp() {
                 }
             }
 
-            when (authState) {
+            // Captured into a local val rather than switched on directly -
+            // authState is a collectAsState() delegate, so each textual
+            // reference to it (including inside a `when` branch body) is
+            // a fresh read that Kotlin can't smart-cast.
+            val currentAuthState = authState
+            when (currentAuthState) {
                 is AuthUiState.LoggedOut -> {
                     var loggedOutScreen by remember { mutableStateOf(LoggedOutScreen.LOGIN) }
                     when (loggedOutScreen) {
@@ -90,7 +96,16 @@ fun ZrpSocialApp() {
                         )
                     }
                 }
-                is AuthUiState.LoggedIn -> ZrpNavHost(onLogout = { authViewModel.logout() })
+                is AuthUiState.LoggedIn -> {
+                    if (currentAuthState.needsOnboarding) {
+                        OnboardingScreen(
+                            onAccountMissing = { authViewModel.logoutWithSessionExpired() },
+                            onFinished = { authViewModel.onOnboardingFinished() },
+                        )
+                    } else {
+                        ZrpNavHost(onLogout = { authViewModel.logout() })
+                    }
+                }
             }
         }
     }

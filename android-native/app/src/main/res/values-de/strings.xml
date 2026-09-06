@@ -219,4 +219,34 @@
     <string name="forgot_password_sending">Wird gesendet...</string>
     <string name="forgot_password_send_reset_link">Link zum Zurücksetzen senden</string>
     <string name="forgot_password_remember_password">Erinnern Sie sich an Ihr Passwort?</string>
+    <!-- Onboarding -->
+    <string name="onboarding_step_profile">Profil</string>
+    <string name="onboarding_step_follow">Folgen</string>
+    <string name="onboarding_step_done">Fertig</string>
+    <string name="onboarding_welcome_title">Willkommen bei ZRP! 👋</string>
+    <string name="onboarding_setup_subtitle">Richte dein Profil ein, um loszulegen.</string>
+    <string name="onboarding_profile_picture">Profilbild</string>
+    <string name="onboarding_upload">Hochladen</string>
+    <string name="onboarding_display_name">Anzeigename</string>
+    <string name="onboarding_display_name_placeholder">Dein Name</string>
+    <string name="onboarding_bio">Bio</string>
+    <string name="onboarding_bio_placeholder">Erzähl uns etwas über dich...</string>
+    <string name="onboarding_location_label">Standort</string>
+    <string name="onboarding_location_placeholder">Nach einer Stadt suchen...</string>
+    <string name="onboarding_website">Website</string>
+    <string name="onboarding_website_placeholder">https://deine-seite.com</string>
+    <string name="onboarding_follow_title">Folge ein paar Leuten 🧑‍🤝‍🧑</string>
+    <string name="onboarding_follow_subtitle">Wähle Leute aus, denen du folgen möchtest, um deinen Feed zu füllen.</string>
+    <string name="onboarding_no_suggestions">Keine Vorschläge verfügbar.</string>
+    <string name="onboarding_users_selected">%1$d Benutzer ausgewählt</string>
+    <string name="onboarding_done_title">Alles bereit!</string>
+    <string name="onboarding_done_subtitle">Dein Profil ist fertig. Lass uns ZRP Social erkunden.</string>
+    <string name="onboarding_skip">Vorerst überspringen</string>
+    <string name="onboarding_continue">Weiter</string>
+    <string name="onboarding_finish">Fertigstellen</string>
+    <string name="onboarding_go_to_home">Zur Startseite</string>
+    <string name="onboarding_err_save_profile">Profil konnte nicht gespeichert werden. Bitte versuche es erneut.</string>
+    <string name="onboarding_err_follow_users">Benutzern konnte nicht gefolgt werden. Bitte versuche es erneut.</string>
+    <string name="onboarding_err_skip">Überspringen fehlgeschlagen. Bitte versuche es erneut.</string>
+    <string name="auth_err_session_expired">Deine Sitzung ist nicht mehr gültig. Bitte melde dich erneut an.</string>
 </resources>

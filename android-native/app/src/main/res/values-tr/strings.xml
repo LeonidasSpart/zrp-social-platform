@@ -219,4 +219,34 @@
     <string name="forgot_password_sending">Gönderiliyor...</string>
     <string name="forgot_password_send_reset_link">Sıfırlama Bağlantısı Gönder</string>
     <string name="forgot_password_remember_password">Şifrenizi hatırladınız mı?</string>
+    <!-- Onboarding -->
+    <string name="onboarding_step_profile">Profil</string>
+    <string name="onboarding_step_follow">Takip Et</string>
+    <string name="onboarding_step_done">Tamamlandı</string>
+    <string name="onboarding_welcome_title">ZRP\'ye Hoş Geldiniz! 👋</string>
+    <string name="onboarding_setup_subtitle">Başlamak için profilinizi oluşturun.</string>
+    <string name="onboarding_profile_picture">Profil Fotoğrafı</string>
+    <string name="onboarding_upload">Yükle</string>
+    <string name="onboarding_display_name">Görünen Ad</string>
+    <string name="onboarding_display_name_placeholder">Adınız</string>
+    <string name="onboarding_bio">Biyografi</string>
+    <string name="onboarding_bio_placeholder">Bize kendinizden bahsedin...</string>
+    <string name="onboarding_location_label">Konum</string>
+    <string name="onboarding_location_placeholder">Bir şehir arayın...</string>
+    <string name="onboarding_website">Web Sitesi</string>
+    <string name="onboarding_website_placeholder">https://your-site.com</string>
+    <string name="onboarding_follow_title">Birkaç kişiyi takip edin 🧑‍🤝‍🧑</string>
+    <string name="onboarding_follow_subtitle">Akışınızı doldurmak için takip edilecek kişileri seçin.</string>
+    <string name="onboarding_no_suggestions">Kullanılabilir öneri yok.</string>
+    <string name="onboarding_users_selected">%1$d kullanıcı seçildi</string>
+    <string name="onboarding_done_title">Her şey hazır!</string>
+    <string name="onboarding_done_subtitle">Profiliniz hazır. Hadi ZRP Social\'ı keşfetmeye başlayalım.</string>
+    <string name="onboarding_skip">Şimdilik atla</string>
+    <string name="onboarding_continue">Devam Et</string>
+    <string name="onboarding_finish">Bitir</string>
+    <string name="onboarding_go_to_home">Ana Sayfaya Git</string>
+    <string name="onboarding_err_save_profile">Profil kaydedilemedi. Lütfen tekrar deneyin.</string>
+    <string name="onboarding_err_follow_users">Kullanıcılar takip edilemedi. Lütfen tekrar deneyin.</string>
+    <string name="onboarding_err_skip">Atlanamadı. Lütfen tekrar deneyin.</string>
+    <string name="auth_err_session_expired">Oturumunuz artık geçerli değil. Lütfen tekrar giriş yapın.</string>
 </resources>

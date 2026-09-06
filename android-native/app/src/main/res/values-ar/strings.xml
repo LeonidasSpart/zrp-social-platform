@@ -219,4 +219,34 @@
     <string name="forgot_password_sending">جارٍ الإرسال...</string>
     <string name="forgot_password_send_reset_link">إرسال رابط إعادة التعيين</string>
     <string name="forgot_password_remember_password">هل تتذكر كلمة المرور؟</string>
+    <!-- Onboarding -->
+    <string name="onboarding_step_profile">الملف الشخصي</string>
+    <string name="onboarding_step_follow">متابعة</string>
+    <string name="onboarding_step_done">تم</string>
+    <string name="onboarding_welcome_title">مرحبًا بك في ZRP! 👋</string>
+    <string name="onboarding_setup_subtitle">أنشئ ملفك الشخصي للبدء.</string>
+    <string name="onboarding_profile_picture">صورة الملف الشخصي</string>
+    <string name="onboarding_upload">رفع</string>
+    <string name="onboarding_display_name">اسم العرض</string>
+    <string name="onboarding_display_name_placeholder">اسمك</string>
+    <string name="onboarding_bio">النبذة</string>
+    <string name="onboarding_bio_placeholder">أخبرنا عن نفسك...</string>
+    <string name="onboarding_location_label">الموقع</string>
+    <string name="onboarding_location_placeholder">البحث عن مدينة...</string>
+    <string name="onboarding_website">الموقع الإلكتروني</string>
+    <string name="onboarding_website_placeholder">https://your-site.com</string>
+    <string name="onboarding_follow_title">تابع بعض الأشخاص 🧑‍🤝‍🧑</string>
+    <string name="onboarding_follow_subtitle">اختر أشخاصًا لمتابعتهم لملء خلاصتك.</string>
+    <string name="onboarding_no_suggestions">لا توجد اقتراحات متاحة.</string>
+    <string name="onboarding_users_selected">تم اختيار %1$d مستخدم(ين)</string>
+    <string name="onboarding_done_title">أنت جاهز!</string>
+    <string name="onboarding_done_subtitle">ملفك الشخصي جاهز. لنبدأ باستكشاف ZRP Social.</string>
+    <string name="onboarding_skip">تخطي الآن</string>
+    <string name="onboarding_continue">متابعة</string>
+    <string name="onboarding_finish">إنهاء</string>
+    <string name="onboarding_go_to_home">الانتقال إلى الرئيسية</string>
+    <string name="onboarding_err_save_profile">تعذر حفظ الملف الشخصي. يرجى المحاولة مرة أخرى.</string>
+    <string name="onboarding_err_follow_users">تعذر متابعة المستخدمين. يرجى المحاولة مرة أخرى.</string>
+    <string name="onboarding_err_skip">تعذر التخطي. يرجى المحاولة مرة أخرى.</string>
+    <string name="auth_err_session_expired">لم تعد جلستك صالحة. يرجى تسجيل الدخول مرة أخرى.</string>
 </resources>

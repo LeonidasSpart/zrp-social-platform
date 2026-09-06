@@ -219,4 +219,34 @@
     <string name="forgot_password_sending">Invio in corso...</string>
     <string name="forgot_password_send_reset_link">Invia link di reimpostazione</string>
     <string name="forgot_password_remember_password">Ricordi la tua password?</string>
+    <!-- Onboarding -->
+    <string name="onboarding_step_profile">Profilo</string>
+    <string name="onboarding_step_follow">Segui</string>
+    <string name="onboarding_step_done">Fatto</string>
+    <string name="onboarding_welcome_title">Benvenuto su ZRP! 👋</string>
+    <string name="onboarding_setup_subtitle">Configura il tuo profilo per iniziare.</string>
+    <string name="onboarding_profile_picture">Immagine del profilo</string>
+    <string name="onboarding_upload">Carica</string>
+    <string name="onboarding_display_name">Nome visualizzato</string>
+    <string name="onboarding_display_name_placeholder">Il tuo nome</string>
+    <string name="onboarding_bio">Bio</string>
+    <string name="onboarding_bio_placeholder">Raccontaci di te...</string>
+    <string name="onboarding_location_label">Posizione</string>
+    <string name="onboarding_location_placeholder">Cerca una città...</string>
+    <string name="onboarding_website">Sito web</string>
+    <string name="onboarding_website_placeholder">https://il-tuo-sito.com</string>
+    <string name="onboarding_follow_title">Segui alcune persone 🧑‍🤝‍🧑</string>
+    <string name="onboarding_follow_subtitle">Scegli le persone da seguire per riempire il tuo feed.</string>
+    <string name="onboarding_no_suggestions">Nessun suggerimento disponibile.</string>
+    <string name="onboarding_users_selected">%1$d utente/i selezionato/i</string>
+    <string name="onboarding_done_title">Tutto pronto!</string>
+    <string name="onboarding_done_subtitle">Il tuo profilo è pronto. Iniziamo a esplorare ZRP Social.</string>
+    <string name="onboarding_skip">Salta per ora</string>
+    <string name="onboarding_continue">Continua</string>
+    <string name="onboarding_finish">Termina</string>
+    <string name="onboarding_go_to_home">Vai alla Home</string>
+    <string name="onboarding_err_save_profile">Impossibile salvare il profilo. Riprova.</string>
+    <string name="onboarding_err_follow_users">Impossibile seguire gli utenti. Riprova.</string>
+    <string name="onboarding_err_skip">Impossibile saltare. Riprova.</string>
+    <string name="auth_err_session_expired">La tua sessione non è più valida. Accedi di nuovo.</string>
 </resources>
