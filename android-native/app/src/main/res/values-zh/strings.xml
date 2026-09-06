@@ -184,4 +184,8 @@
     <string name="composer_err_only_media">只允许上传图片和视频。</string>
     <string name="composer_err_upload_failed">上传失败，请重试。</string>
     <string name="composer_err_gif_limit">你的套餐每篇帖子最多允许 %1$d 张图片。</string>
+    <string name="profile_change_avatar">更换头像</string>
+    <string name="profile_change_banner">更换横幅</string>
+    <string name="profile_upload_avatar_failed">头像上传失败</string>
+    <string name="profile_upload_banner_failed">横幅上传失败</string>
 </resources>

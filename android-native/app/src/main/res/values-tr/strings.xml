@@ -184,4 +184,8 @@
     <string name="composer_err_only_media">Yalnızca görsel ve videolara izin verilir.</string>
     <string name="composer_err_upload_failed">Yükleme başarısız oldu. Lütfen tekrar deneyin.</string>
     <string name="composer_err_gif_limit">Planınız gönderi başına %1$d görsele izin veriyor.</string>
+    <string name="profile_change_avatar">Profil fotoğrafını değiştir</string>
+    <string name="profile_change_banner">Kapak fotoğrafını değiştir</string>
+    <string name="profile_upload_avatar_failed">Profil fotoğrafı yüklenemedi</string>
+    <string name="profile_upload_banner_failed">Kapak fotoğrafı yüklenemedi</string>
 </resources>

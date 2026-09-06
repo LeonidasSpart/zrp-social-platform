@@ -184,4 +184,8 @@
     <string name="composer_err_only_media">Hanya gambar dan video yang diizinkan.</string>
     <string name="composer_err_upload_failed">Unggahan gagal. Silakan coba lagi.</string>
     <string name="composer_err_gif_limit">Paket Anda mengizinkan %1$d gambar per postingan.</string>
+    <string name="profile_change_avatar">Ubah foto profil</string>
+    <string name="profile_change_banner">Ubah banner</string>
+    <string name="profile_upload_avatar_failed">Gagal mengunggah foto profil</string>
+    <string name="profile_upload_banner_failed">Gagal mengunggah banner</string>
 </resources>

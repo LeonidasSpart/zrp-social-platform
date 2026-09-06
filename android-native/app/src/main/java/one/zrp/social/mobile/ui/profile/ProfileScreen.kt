@@ -1,5 +1,9 @@
 package one.zrp.social.mobile.ui.profile
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +28,7 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
@@ -52,7 +57,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -101,6 +108,7 @@ fun ProfileScreen(
         factory = remember(username) { ProfileViewModelFactory(ProfileRepository(), username) },
     )
     val state by viewModel.state.collectAsState()
+    val contentResolver = LocalContext.current.contentResolver
 
     val pullRefreshState = rememberPullRefreshState(
         refreshing = state.isRefreshingPosts,
@@ -162,6 +170,8 @@ fun ProfileScreen(
                             isTogglingBlock = state.isTogglingBlock,
                             isMuted = state.isMuted,
                             isTogglingMute = state.isTogglingMute,
+                            isUploadingAvatar = state.isUploadingAvatar,
+                            isUploadingBanner = state.isUploadingBanner,
                             onFollowClick = { viewModel.toggleFollow() },
                             onBlockClick = { viewModel.toggleBlock() },
                             onMuteClick = { viewModel.toggleMute() },
@@ -173,7 +183,27 @@ fun ProfileScreen(
                             onBlockedUsersClick = onOpenBlockedUsers,
                             onMutedUsersClick = onOpenMutedUsers,
                             onSettingsClick = onOpenSettings,
+                            onAvatarPicked = { uri -> viewModel.uploadAvatar(contentResolver, uri) },
+                            onBannerPicked = { uri -> viewModel.uploadBanner(contentResolver, uri) },
                         )
+
+                        val mediaUploadError = state.mediaUploadError
+                        if (mediaUploadError != null) {
+                            Text(
+                                text = stringResource(
+                                    if (mediaUploadError == MediaUploadTarget.AVATAR) {
+                                        R.string.profile_upload_avatar_failed
+                                    } else {
+                                        R.string.profile_upload_banner_failed
+                                    },
+                                ),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier
+                                    .padding(horizontal = Spacing.lg, vertical = Spacing.xs)
+                                    .clickable { viewModel.dismissMediaUploadError() },
+                            )
+                        }
                     }
 
                     val pinnedPost = state.pinnedPost
@@ -368,18 +398,29 @@ private fun ProfileHeader(
     isTogglingBlock: Boolean,
     isMuted: Boolean,
     isTogglingMute: Boolean,
+    isUploadingAvatar: Boolean,
+    isUploadingBanner: Boolean,
     onFollowClick: () -> Unit,
     onBlockClick: () -> Unit,
     onMuteClick: () -> Unit,
     onLogoutClick: () -> Unit,
     onMessageClick: () -> Unit,
     onBookmarksClick: () -> Unit,
+    onAvatarPicked: (Uri) -> Unit,
+    onBannerPicked: (Uri) -> Unit,
     onFollowersClick: () -> Unit,
     onFollowingClick: () -> Unit,
     onBlockedUsersClick: () -> Unit,
     onMutedUsersClick: () -> Unit,
     onSettingsClick: () -> Unit,
 ) {
+    val avatarPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri -> if (uri != null) onAvatarPicked(uri) }
+    val bannerPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri -> if (uri != null) onBannerPicked(uri) }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Box(modifier = Modifier.fillMaxWidth()) {
             // Cover photo and the action-button row both live in this
@@ -389,22 +430,45 @@ private fun ProfileHeader(
             // outer Box - later siblings paint on top - so it's never
             // covered by the button row underneath it.
             Column(modifier = Modifier.fillMaxWidth()) {
-                if (profile.coverUrl != null) {
-                    AsyncImage(
-                        model = profile.coverUrl,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(CoverHeight),
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(CoverHeight)
-                            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-                    )
+                Box(modifier = Modifier.fillMaxWidth().height(CoverHeight)) {
+                    if (profile.coverUrl != null) {
+                        AsyncImage(
+                            model = profile.coverUrl,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                        )
+                    }
+
+                    if (isOwnProfile) {
+                        // "Change banner" - the same real, translated
+                        // tooltip src/app/profile/[username]/page.tsx's
+                        // own camera-overlay button carries.
+                        IconButton(
+                            onClick = { bannerPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                            enabled = !isUploadingBanner,
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(Spacing.xs)
+                                .background(Color.Black.copy(alpha = 0.5f), MaterialTheme.shapes.small),
+                        ) {
+                            if (isUploadingBanner) {
+                                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = Color.White)
+                            } else {
+                                Icon(
+                                    Icons.Filled.CameraAlt,
+                                    contentDescription = stringResource(R.string.profile_change_banner),
+                                    tint = Color.White,
+                                )
+                            }
+                        }
+                    }
                 }
 
                 Row(
@@ -515,17 +579,44 @@ private fun ProfileHeader(
                 }
             }
 
-            Avatar(
-                url = profile.avatarUrl,
-                name = profile.name ?: profile.username,
-                size = HeaderAvatarSize,
-                ringColor = MaterialTheme.colorScheme.background,
-                ringWidth = 4.dp,
+            Box(
                 modifier = Modifier
                     .padding(start = Spacing.lg)
                     .offset(y = CoverHeight - HeaderAvatarSize / 2)
                     .align(Alignment.TopStart),
-            )
+            ) {
+                Avatar(
+                    url = profile.avatarUrl,
+                    name = profile.name ?: profile.username,
+                    size = HeaderAvatarSize,
+                    ringColor = MaterialTheme.colorScheme.background,
+                    ringWidth = 4.dp,
+                )
+
+                if (isOwnProfile) {
+                    // "Change avatar" - the same real, translated
+                    // tooltip web's own camera-overlay button carries.
+                    IconButton(
+                        onClick = { avatarPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                        enabled = !isUploadingAvatar,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(28.dp)
+                            .background(Color.Black.copy(alpha = 0.6f), MaterialTheme.shapes.extraLarge),
+                    ) {
+                        if (isUploadingAvatar) {
+                            CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp, color = Color.White)
+                        } else {
+                            Icon(
+                                Icons.Filled.CameraAlt,
+                                contentDescription = stringResource(R.string.profile_change_avatar),
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
+                    }
+                }
+            }
         }
 
         Column(modifier = Modifier.padding(start = Spacing.lg, end = Spacing.lg, top = Spacing.sm)) {

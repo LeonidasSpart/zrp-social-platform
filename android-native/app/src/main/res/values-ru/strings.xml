@@ -184,4 +184,8 @@
     <string name="composer_err_only_media">Разрешены только изображения и видео.</string>
     <string name="composer_err_upload_failed">Не удалось загрузить файл. Пожалуйста, попробуйте снова.</string>
     <string name="composer_err_gif_limit">Ваш тариф позволяет добавлять %1$d изображение(й) к публикации.</string>
+    <string name="profile_change_avatar">Изменить аватар</string>
+    <string name="profile_change_banner">Изменить баннер</string>
+    <string name="profile_upload_avatar_failed">Не удалось загрузить аватар</string>
+    <string name="profile_upload_banner_failed">Не удалось загрузить баннер</string>
 </resources>

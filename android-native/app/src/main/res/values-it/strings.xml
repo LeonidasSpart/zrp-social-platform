@@ -184,4 +184,8 @@
     <string name="composer_err_only_media">Sono consentiti solo immagini e video.</string>
     <string name="composer_err_upload_failed">Caricamento non riuscito. Riprova.</string>
     <string name="composer_err_gif_limit">Il tuo piano consente %1$d immagine/i per post.</string>
+    <string name="profile_change_avatar">Cambia avatar</string>
+    <string name="profile_change_banner">Cambia copertina</string>
+    <string name="profile_upload_avatar_failed">Caricamento avatar non riuscito</string>
+    <string name="profile_upload_banner_failed">Caricamento copertina non riuscito</string>
 </resources>

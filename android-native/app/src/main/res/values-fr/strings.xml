@@ -184,4 +184,8 @@
     <string name="composer_err_only_media">Seules les images et vidéos sont autorisées.</string>
     <string name="composer_err_upload_failed">Échec du téléchargement. Veuillez réessayer.</string>
     <string name="composer_err_gif_limit">Votre offre permet %1$d image(s) par publication.</string>
+    <string name="profile_change_avatar">Changer l\'avatar</string>
+    <string name="profile_change_banner">Changer la bannière</string>
+    <string name="profile_upload_avatar_failed">Échec du téléchargement de l\'avatar</string>
+    <string name="profile_upload_banner_failed">Échec du téléchargement de la bannière</string>
 </resources>

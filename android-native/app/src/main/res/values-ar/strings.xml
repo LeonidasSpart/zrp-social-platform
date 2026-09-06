@@ -184,4 +184,8 @@
     <string name="composer_err_only_media">يُسمح بالصور ومقاطع الفيديو فقط.</string>
     <string name="composer_err_upload_failed">فشل رفع الملف. يرجى المحاولة مرة أخرى.</string>
     <string name="composer_err_gif_limit">تسمح خطتك بـ %1$d صورة (صور) لكل منشور.</string>
+    <string name="profile_change_avatar">تغيير الصورة الرمزية</string>
+    <string name="profile_change_banner">تغيير الغلاف</string>
+    <string name="profile_upload_avatar_failed">تعذّر رفع الصورة الرمزية</string>
+    <string name="profile_upload_banner_failed">تعذّر رفع الغلاف</string>
 </resources>

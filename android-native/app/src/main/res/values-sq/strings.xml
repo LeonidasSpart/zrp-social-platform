@@ -184,4 +184,8 @@
     <string name="composer_err_only_media">Lejohen vetëm imazhe dhe video.</string>
     <string name="composer_err_upload_failed">Ngarkimi dështoi. Ju lutemi riprovojeni.</string>
     <string name="composer_err_gif_limit">Plani juaj lejon %1$d imazh(e) për postim.</string>
+    <string name="profile_change_avatar">Ndrysho foton e profilit</string>
+    <string name="profile_change_banner">Ndrysho banderolën</string>
+    <string name="profile_upload_avatar_failed">Ngarkimi i fotos së profilit dështoi</string>
+    <string name="profile_upload_banner_failed">Ngarkimi i banderolës dështoi</string>
 </resources>

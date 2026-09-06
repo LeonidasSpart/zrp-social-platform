@@ -1,9 +1,12 @@
 package one.zrp.social.mobile.network
 
+import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 
 // ─── Profile edit (PUT /user) ───────────────────────────────────────
 // The real route (src/app/api/user/route.ts) only touches fields that
@@ -58,12 +61,27 @@ data class PrivacyResponse(
 data class DeletionStatusResponse(val requestedAt: String?, val scheduledFor: String?)
 data class DeletionToggleResponse(val message: String, val deletionDate: String?)
 
+// ─── Avatar/banner (POST update-avatar, POST update-cover) ─────────────
+// Both routes are real, live, and reachable from src/app/profile/
+// [username]/page.tsx's own avatar/banner camera-overlay buttons - a
+// plain multipart POST straight to our backend (which does the real
+// UploadThing upload server-side via UTApi), not the presigned-URL
+// client flow src/app/settings/page.tsx's avatar picker uses for the
+// same field. Picking this simpler, equally-real path avoids routing
+// a small (<=5MB) image through the heavier two-step protocol
+// MediaUploader.kt exists for. avatar's response nests success/
+// avatarUrl; cover's own response has no success field at all - a real
+// inconsistency between the two routes, matched here rather than
+// invented away.
+data class AvatarUpdateResponse(val success: Boolean? = null, val avatarUrl: String?)
+data class CoverUpdateResponse(val coverUrl: String?)
+
 /**
  * Settings/Account mutations - the same PUT/POST endpoints the web
  * settings hub (src/app/settings/page.tsx) and its delete-account page
  * call, none of them reinvented. Deliberately scoped to the fields this
  * slice's native screens actually edit (profile text fields, username,
- * password, email, privacy toggles, account deletion) - avatar upload,
+ * password, email, privacy toggles, account deletion, avatar/banner) -
  * the custom-URL/professional-category pickers, monetisation, and
  * email/support preferences are real backend features this slice does
  * not yet cover natively (see SettingsRepository's KDoc).
@@ -95,4 +113,12 @@ interface SettingsApi {
 
     @POST("user/delete/confirm")
     suspend fun confirmDeletion(): MessageResponse
+
+    @Multipart
+    @POST("user/update-avatar")
+    suspend fun updateAvatar(@Part file: MultipartBody.Part): AvatarUpdateResponse
+
+    @Multipart
+    @POST("user/update-cover")
+    suspend fun updateCover(@Part file: MultipartBody.Part): CoverUpdateResponse
 }

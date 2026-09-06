@@ -184,4 +184,8 @@
     <string name="composer_err_only_media">Nur Bilder und Videos sind erlaubt.</string>
     <string name="composer_err_upload_failed">Upload fehlgeschlagen. Bitte versuche es erneut.</string>
     <string name="composer_err_gif_limit">Dein Plan erlaubt %1$d Bild(er) pro Beitrag.</string>
+    <string name="profile_change_avatar">Profilbild ändern</string>
+    <string name="profile_change_banner">Banner ändern</string>
+    <string name="profile_upload_avatar_failed">Avatar-Upload fehlgeschlagen</string>
+    <string name="profile_upload_banner_failed">Banner-Upload fehlgeschlagen</string>
 </resources>
