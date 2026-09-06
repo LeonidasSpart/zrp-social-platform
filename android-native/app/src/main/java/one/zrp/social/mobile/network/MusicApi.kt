@@ -47,17 +47,52 @@ data class MusicLikeRequest(val trackId: String)
 
 data class MusicLikeResponse(val liked: Boolean)
 
+data class MusicAlbumSummary(
+    val id: String,
+    val title: String,
+    val coverUrl: String?,
+    val artist: MusicArtistRef,
+    // Prisma-computed via attachAlbumDurations() (sums PUBLISHED
+    // tracks' durationSec in one batched groupBy) - 0 for an album with
+    // no timed tracks yet, not a missing/unknown value.
+    val totalDurationSec: Int = 0,
+)
+
+data class MusicArtistSummary(
+    val id: String,
+    val displayName: String,
+    val avatarUrl: String?,
+    val verified: Boolean = false,
+)
+
+data class MusicPlaylistTrackPreview(val track: MusicTrack)
+
+data class MusicPlaylistSummary(
+    val id: String,
+    val name: String,
+    val coverUrl: String?,
+    // Only ever needs tracks[0] (the website's own playlist-cover
+    // fallback chain: playlist.coverUrl, else its first track's own
+    // cover, else its first track's album cover) - the full nested
+    // MusicTrack per entry is still mapped as-is rather than a
+    // purpose-built lighter shape, since it's the same real response
+    // the playlist detail screen (a later phase) also consumes.
+    val tracks: List<MusicPlaylistTrackPreview> = emptyList(),
+)
+
+data class MusicGenre(val genre: String, val count: Int)
+
 /**
  * The same real ZRP Music catalogue the website's Music home page
- * uses. GET /music/home returns far more than this model captures
- * (latestAlbums, popularArtists, genres, yourPlaylists too) - this
- * phase's native screen only covers browsing + playing + liking real
- * tracks, so only the track-shaped sections are mapped here; Gson
- * simply ignores the rest of the real response rather than this
- * inventing or dropping any of it server-side. Track publishing
- * (the Music Studio / artist upload flow) goes through the same
- * UploadThing presigned-upload path as post/story media, so it has
- * the same native-upload scope decision as PostsApi.createPost.
+ * uses. Artist/album/playlist detail, Discover, History, Liked and
+ * Music Studio each have their own real routes beyond GET /music/home -
+ * added screen by screen in later phases rather than all at once, so
+ * every home-screen link (Popular Artists, Latest Albums, Your
+ * Playlists, the quick-nav tiles) only appears once its real
+ * destination screen exists natively. Track publishing (the Music
+ * Studio / artist upload flow) goes through the same UploadThing
+ * presigned-upload path as post/story media, so it has the same
+ * native-upload scope decision as PostsApi.createPost.
  */
 interface MusicApi {
     @GET("music/home")
@@ -75,4 +110,8 @@ data class MusicHomeResponse(
     val newReleases: List<MusicTrack> = emptyList(),
     val recentlyPlayed: List<MusicTrack> = emptyList(),
     val likedPreview: List<MusicTrack> = emptyList(),
+    val latestAlbums: List<MusicAlbumSummary> = emptyList(),
+    val popularArtists: List<MusicArtistSummary> = emptyList(),
+    val genres: List<MusicGenre> = emptyList(),
+    val yourPlaylists: List<MusicPlaylistSummary> = emptyList(),
 )

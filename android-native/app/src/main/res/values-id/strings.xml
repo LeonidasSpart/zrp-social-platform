@@ -120,10 +120,6 @@
     <string name="moderation_muted_count">%1$d dibisukan</string>
     <string name="moderation_muted_on">Dibisukan %1$s</string>
     <string name="music_title">ZRP Music</string>
-    <string name="music_trending">Sedang Tren</string>
-    <string name="music_recently_played">Baru Diputar</string>
-    <string name="music_new_releases">Rilisan Baru</string>
-    <string name="music_liked">Musik yang Disukai</string>
     <string name="music_verified_artist">Artis terverifikasi</string>
     <string name="music_like">Suka</string>
     <string name="music_pause">Jeda</string>
@@ -249,4 +245,18 @@
     <string name="onboarding_err_follow_users">Gagal mengikuti pengguna. Silakan coba lagi.</string>
     <string name="onboarding_err_skip">Gagal melewati. Silakan coba lagi.</string>
     <string name="auth_err_session_expired">Sesi Anda tidak lagi valid. Silakan masuk kembali.</string>
+    <!-- Music Phase 1: shared player + Queue -->
+    <string name="music_nav_queue_title">Antreanmu</string>
+    <string name="music_nav_history_title">Baru Diputar</string>
+    <string name="music_shell_trending_heading">Sedang Tren</string>
+    <string name="music_nav_liked_title">Musik yang Disukai</string>
+    <string name="music_shell_new_releases_heading">Rilisan Baru</string>
+    <string name="music_queue_title">Antreanmu</string>
+    <string name="music_queue_clear_queue">Kosongkan antrean</string>
+    <string name="music_queue_empty_title">Antreanmu kosong</string>
+    <string name="music_queue_empty_body">Tambahkan lagu ke antreanmu dari Temukan, halaman artis, atau album.</string>
+    <string name="music_queue_now_playing">Sedang diputar</string>
+    <string name="music_queue_up_next">Berikutnya (%1$d)</string>
+    <string name="music_queue_play_now_aria">Putar %1$s sekarang</string>
+    <string name="music_queue_remove_aria">Hapus %1$s dari antrean</string>
 </resources>

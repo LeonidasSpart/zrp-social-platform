@@ -42,6 +42,10 @@ import one.zrp.social.mobile.ui.messages.ConversationScreen
 import one.zrp.social.mobile.ui.messages.MessagesScreen
 import one.zrp.social.mobile.ui.moderation.ModerationListMode
 import one.zrp.social.mobile.ui.moderation.ModerationListScreen
+import one.zrp.social.mobile.data.MusicRepository
+import one.zrp.social.mobile.ui.music.MusicPlayerViewModel
+import one.zrp.social.mobile.ui.music.MusicPlayerViewModelFactory
+import one.zrp.social.mobile.ui.music.MusicQueueScreen
 import one.zrp.social.mobile.ui.music.MusicScreen
 import one.zrp.social.mobile.ui.notifications.NotificationsScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
@@ -81,6 +85,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToStoryViewer: (String) -> Unit = { userId -> navController.navigate("stories/$userId") }
     val goToCreateStory: () -> Unit = { navController.navigate("create-story") }
     val goToMusic: () -> Unit = { navController.navigate("music") }
+    val goToMusicQueue: () -> Unit = { navController.navigate("music/queue") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -116,6 +121,15 @@ fun ZrpNavHost(onLogout: () -> Unit) {
         factory = remember { UnreadBadgeViewModelFactory(NotificationsRepository()) },
     )
     val unreadCount by unreadBadgeViewModel.unreadCount.collectAsState()
+
+    // Hoisted the same way as unreadBadgeViewModel above - playback and
+    // the play queue need to survive navigating between Music screens
+    // (Home, Queue, and later Artist/Album/Playlist/Discover/Liked/
+    // History), the native equivalent of the website's own
+    // MusicPlayerProvider React context wrapping every /music/* page.
+    val musicPlayerViewModel: MusicPlayerViewModel = viewModel(
+        factory = remember { MusicPlayerViewModelFactory(MusicRepository()) },
+    )
 
     Scaffold(
         bottomBar = {
@@ -278,7 +292,14 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                 CreateStoryScreen(onPosted = { navController.popBackStack() })
             }
             composable("music") {
-                MusicScreen(onBack = { navController.popBackStack() })
+                MusicScreen(
+                    player = musicPlayerViewModel,
+                    onBack = { navController.popBackStack() },
+                    onOpenQueue = goToMusicQueue,
+                )
+            }
+            composable("music/queue") {
+                MusicQueueScreen(player = musicPlayerViewModel, onBack = { navController.popBackStack() })
             }
             composable("bookmarks") {
                 BookmarksScreen(

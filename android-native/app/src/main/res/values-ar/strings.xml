@@ -120,10 +120,6 @@
     <string name="moderation_muted_count">مكتوم: %1$d</string>
     <string name="moderation_muted_on">تم الكتم في %1$s</string>
     <string name="music_title">ZRP Music</string>
-    <string name="music_trending">الرائج الآن</string>
-    <string name="music_recently_played">استُمع إليه مؤخرًا</string>
-    <string name="music_new_releases">إصدارات جديدة</string>
-    <string name="music_liked">الموسيقى المفضلة</string>
     <string name="music_verified_artist">فنان موثّق</string>
     <string name="music_like">إعجاب</string>
     <string name="music_pause">إيقاف مؤقت</string>
@@ -249,4 +245,18 @@
     <string name="onboarding_err_follow_users">تعذر متابعة المستخدمين. يرجى المحاولة مرة أخرى.</string>
     <string name="onboarding_err_skip">تعذر التخطي. يرجى المحاولة مرة أخرى.</string>
     <string name="auth_err_session_expired">لم تعد جلستك صالحة. يرجى تسجيل الدخول مرة أخرى.</string>
+    <!-- Music Phase 1: shared player + Queue -->
+    <string name="music_nav_queue_title">قائمة انتظارك</string>
+    <string name="music_nav_history_title">استُمع إليه مؤخرًا</string>
+    <string name="music_shell_trending_heading">الرائج الآن</string>
+    <string name="music_nav_liked_title">الموسيقى المفضلة</string>
+    <string name="music_shell_new_releases_heading">إصدارات جديدة</string>
+    <string name="music_queue_title">قائمة انتظارك</string>
+    <string name="music_queue_clear_queue">إفراغ قائمة الانتظار</string>
+    <string name="music_queue_empty_title">قائمة انتظارك فارغة</string>
+    <string name="music_queue_empty_body">أضف مقاطع إلى قائمة انتظارك من صفحة اكتشف أو فنان أو ألبوم.</string>
+    <string name="music_queue_now_playing">قيد التشغيل الآن</string>
+    <string name="music_queue_up_next">التالي (%1$d)</string>
+    <string name="music_queue_play_now_aria">تشغيل %1$s الآن</string>
+    <string name="music_queue_remove_aria">إزالة %1$s من قائمة الانتظار</string>
 </resources>

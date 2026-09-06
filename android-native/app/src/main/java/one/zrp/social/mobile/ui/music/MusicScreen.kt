@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.QueueMusic
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -55,15 +56,18 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * ZRP Music - real tracks, real playback, real likes. Reached from the
  * Search tab's Discover section rather than a bottom-nav tab, matching
  * how the website itself treats Music as one of several destinations
- * beyond the core social loop (see ZrpDestination's own KDoc).
- * Playback stops when this screen is left - see MusicViewModel's KDoc.
+ * beyond the core social loop (see ZrpDestination's own KDoc). Playback
+ * itself is owned by [player] (hoisted above ZrpNavHost), not this
+ * screen, so it keeps running when this screen is left for Queue or any
+ * other Music screen.
  */
 @Composable
-fun MusicScreen(onBack: () -> Unit) {
+fun MusicScreen(player: MusicPlayerViewModel, onBack: () -> Unit, onOpenQueue: () -> Unit) {
     val viewModel: MusicViewModel = viewModel(
-        factory = remember { MusicViewModelFactory(MusicRepository()) },
+        factory = remember(player) { MusicViewModelFactory(MusicRepository(), player) },
     )
     val state by viewModel.state.collectAsState()
+    val playerState by player.state.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -78,8 +82,13 @@ fun MusicScreen(onBack: () -> Unit) {
             Text(
                 text = stringResource(R.string.music_title),
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(start = 4.dp),
+                modifier = Modifier
+                    .padding(start = 4.dp)
+                    .weight(1f),
             )
+            IconButton(onClick = onOpenQueue) {
+                Icon(Icons.Filled.QueueMusic, contentDescription = stringResource(R.string.music_nav_queue_title))
+            }
         }
         HorizontalDivider()
 
@@ -118,44 +127,49 @@ fun MusicScreen(onBack: () -> Unit) {
                     }
                 }
                 else -> {
+                    // Section order matches MusicShell.tsx's own real
+                    // home layout: Recently Played, Trending, Liked
+                    // preview, New Releases (Latest Albums/Popular
+                    // Artists/Genres/Your Playlists follow in later
+                    // phases, once their own destination screens exist).
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        if (state.trending.isNotEmpty()) {
-                            item {
-                                MusicSection(
-                                    title = stringResource(R.string.music_trending),
-                                    tracks = state.trending,
-                                    currentTrackId = state.currentTrack?.id,
-                                    onTrackClick = { viewModel.onTrackClick(it) },
-                                )
-                            }
-                        }
                         if (state.recentlyPlayed.isNotEmpty()) {
                             item {
                                 MusicSection(
-                                    title = stringResource(R.string.music_recently_played),
+                                    title = stringResource(R.string.music_nav_history_title),
                                     tracks = state.recentlyPlayed,
-                                    currentTrackId = state.currentTrack?.id,
-                                    onTrackClick = { viewModel.onTrackClick(it) },
+                                    currentTrackId = playerState.currentTrack?.id,
+                                    onTrackClick = { viewModel.onTrackClick(it, state.recentlyPlayed) },
                                 )
                             }
                         }
-                        if (state.newReleases.isNotEmpty()) {
+                        if (state.trending.isNotEmpty()) {
                             item {
                                 MusicSection(
-                                    title = stringResource(R.string.music_new_releases),
-                                    tracks = state.newReleases,
-                                    currentTrackId = state.currentTrack?.id,
-                                    onTrackClick = { viewModel.onTrackClick(it) },
+                                    title = stringResource(R.string.music_shell_trending_heading),
+                                    tracks = state.trending,
+                                    currentTrackId = playerState.currentTrack?.id,
+                                    onTrackClick = { viewModel.onTrackClick(it, state.trending) },
                                 )
                             }
                         }
                         if (state.likedPreview.isNotEmpty()) {
                             item {
                                 MusicSection(
-                                    title = stringResource(R.string.music_liked),
+                                    title = stringResource(R.string.music_nav_liked_title),
                                     tracks = state.likedPreview,
-                                    currentTrackId = state.currentTrack?.id,
-                                    onTrackClick = { viewModel.onTrackClick(it) },
+                                    currentTrackId = playerState.currentTrack?.id,
+                                    onTrackClick = { viewModel.onTrackClick(it, state.likedPreview) },
+                                )
+                            }
+                        }
+                        if (state.newReleases.isNotEmpty()) {
+                            item {
+                                MusicSection(
+                                    title = stringResource(R.string.music_shell_new_releases_heading),
+                                    tracks = state.newReleases,
+                                    currentTrackId = playerState.currentTrack?.id,
+                                    onTrackClick = { viewModel.onTrackClick(it, state.newReleases) },
                                 )
                             }
                         }
@@ -164,15 +178,15 @@ fun MusicScreen(onBack: () -> Unit) {
             }
         }
 
-        val currentTrack = state.currentTrack
+        val currentTrack = playerState.currentTrack
         if (currentTrack != null) {
             MiniPlayerBar(
                 track = currentTrack,
-                isPlaying = state.isPlaying,
-                isBuffering = state.isBuffering,
-                positionMs = state.positionMs,
-                durationMs = state.durationMs,
-                onTogglePlayPause = { viewModel.togglePlayPause() },
+                isPlaying = playerState.isPlaying,
+                isBuffering = playerState.isBuffering,
+                positionMs = playerState.positionMs,
+                durationMs = playerState.durationMs,
+                onTogglePlayPause = { player.togglePlayPause() },
                 onLikeClick = { viewModel.toggleLike(currentTrack) },
             )
         }
@@ -267,7 +281,7 @@ private fun TrackCard(track: MusicTrack, isCurrent: Boolean, onClick: () -> Unit
 }
 
 @Composable
-private fun MiniPlayerBar(
+internal fun MiniPlayerBar(
     track: MusicTrack,
     isPlaying: Boolean,
     isBuffering: Boolean,
