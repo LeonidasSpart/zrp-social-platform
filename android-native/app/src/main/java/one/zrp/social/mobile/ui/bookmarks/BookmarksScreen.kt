@@ -12,12 +12,14 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -53,6 +55,8 @@ fun BookmarksScreen(
     var reportingPostId by remember { mutableStateOf<String?>(null) }
     var isSubmittingReport by remember { mutableStateOf(false) }
     var reportError by remember { mutableStateOf<String?>(null) }
+    var deletingPostId by remember { mutableStateOf<String?>(null) }
+    var isDeletingPost by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -116,6 +120,8 @@ fun BookmarksScreen(
                                 reportingPostId = postId
                                 reportError = null
                             },
+                            isOwnPost = state.ownUserId != null && post.author.id == state.ownUserId,
+                            onDeleteClick = { postId -> deletingPostId = postId },
                             onClick = onOpenComments,
                             onAuthorClick = onAuthorClick,
                         )
@@ -151,6 +157,36 @@ fun BookmarksScreen(
                     result
                         .onSuccess { reportingPostId = null }
                         .onFailure { reportError = it.message }
+                }
+            },
+        )
+    }
+
+    val deletePostId = deletingPostId
+    if (deletePostId != null) {
+        AlertDialog(
+            onDismissRequest = { if (!isDeletingPost) deletingPostId = null },
+            title = { Text("Delete post?") },
+            text = { Text("This can't be undone.") },
+            confirmButton = {
+                if (isDeletingPost) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                } else {
+                    TextButton(onClick = {
+                        isDeletingPost = true
+                        viewModel.deletePost(deletePostId) { result ->
+                            isDeletingPost = false
+                            deletingPostId = null
+                            result.onFailure { /* left visible; the row itself still shows the post on failure */ }
+                        }
+                    }) {
+                        Text("Delete", color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { deletingPostId = null }, enabled = !isDeletingPost) {
+                    Text("Cancel")
                 }
             },
         )

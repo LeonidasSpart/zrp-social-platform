@@ -17,6 +17,7 @@ data class BookmarksUiState(
     val nextCursor: String? = null,
     val endReached: Boolean = false,
     val error: String? = null,
+    val ownUserId: String? = null,
 )
 
 /**
@@ -32,6 +33,9 @@ class BookmarksViewModel(private val repository: BookmarksRepository) : ViewMode
 
     init {
         refresh()
+        viewModelScope.launch {
+            repository.getOwnUserId().onSuccess { id -> _state.update { it.copy(ownUserId = id) } }
+        }
     }
 
     fun refresh() {
@@ -112,6 +116,20 @@ class BookmarksViewModel(private val repository: BookmarksRepository) : ViewMode
             repository.toggleRepost(postId).onFailure {
                 _state.update { it.copy(posts = previousPosts) }
             }
+        }
+    }
+
+    // A deleted post disappears from the list the moment the server
+    // confirms it, matching HomeViewModel/SearchViewModel/
+    // ProfileViewModel's own deletePost - no optimistic removal, since
+    // there's nothing sensible to roll back to on failure.
+    fun deletePost(postId: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            val result = repository.deletePost(postId)
+            result.onSuccess {
+                _state.update { it.copy(posts = it.posts.filterNot { post -> post.id == postId }) }
+            }
+            onResult(result)
         }
     }
 

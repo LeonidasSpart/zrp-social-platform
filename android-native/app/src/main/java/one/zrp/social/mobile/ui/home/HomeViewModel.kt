@@ -38,8 +38,19 @@ class HomeViewModel(private val repository: PostsRepository) : ViewModel() {
     val forYouState: StateFlow<HomeUiState> = _forYou.asStateFlow()
     val followingState: StateFlow<HomeUiState> = _following.asStateFlow()
 
+    // Fetched once, the same way ProfileViewModel/FollowListViewModel
+    // resolve "who am I" - lets PostCard show Delete instead of Report
+    // on the signed-in user's own posts here too, matching the
+    // website's shared PostCard.tsx (it renders on every feed, not
+    // just the profile page).
+    private val _ownUserId = MutableStateFlow<String?>(null)
+    val ownUserId: StateFlow<String?> = _ownUserId.asStateFlow()
+
     init {
         refresh(FeedTab.FOR_YOU)
+        viewModelScope.launch {
+            repository.getOwnUserId().onSuccess { id -> _ownUserId.value = id }
+        }
     }
 
     fun selectTab(tab: FeedTab) {

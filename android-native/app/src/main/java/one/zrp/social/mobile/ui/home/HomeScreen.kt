@@ -13,11 +13,13 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -53,6 +55,7 @@ fun HomeScreen(
     val activeTab by viewModel.activeTab.collectAsState()
     val forYouState by viewModel.forYouState.collectAsState()
     val followingState by viewModel.followingState.collectAsState()
+    val ownUserId by viewModel.ownUserId.collectAsState()
 
     val state = if (activeTab == FeedTab.FOR_YOU) forYouState else followingState
 
@@ -111,6 +114,8 @@ fun HomeScreen(
                     var reportingPostId by remember { mutableStateOf<String?>(null) }
                     var isSubmittingReport by remember { mutableStateOf(false) }
                     var reportError by remember { mutableStateOf<String?>(null) }
+                    var deletingPostId by remember { mutableStateOf<String?>(null) }
+                    var isDeletingPost by remember { mutableStateOf(false) }
 
                     LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
                         itemsIndexed(state.posts, key = { _, post -> post.id }) { _, post ->
@@ -124,6 +129,8 @@ fun HomeScreen(
                                     reportingPostId = postId
                                     reportError = null
                                 },
+                                isOwnPost = ownUserId != null && post.author.id == ownUserId,
+                                onDeleteClick = { postId -> deletingPostId = postId },
                                 onClick = onOpenComments,
                                 onAuthorClick = onAuthorClick,
                             )
@@ -156,6 +163,36 @@ fun HomeScreen(
                                     result
                                         .onSuccess { reportingPostId = null }
                                         .onFailure { reportError = it.message }
+                                }
+                            },
+                        )
+                    }
+
+                    val deletePostId = deletingPostId
+                    if (deletePostId != null) {
+                        AlertDialog(
+                            onDismissRequest = { if (!isDeletingPost) deletingPostId = null },
+                            title = { Text("Delete post?") },
+                            text = { Text("This can't be undone.") },
+                            confirmButton = {
+                                if (isDeletingPost) {
+                                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                                } else {
+                                    TextButton(onClick = {
+                                        isDeletingPost = true
+                                        viewModel.deletePost(activeTab, deletePostId) { result ->
+                                            isDeletingPost = false
+                                            deletingPostId = null
+                                            result.onFailure { /* left visible; the row itself still shows the post on failure */ }
+                                        }
+                                    }) {
+                                        Text("Delete", color = MaterialTheme.colorScheme.error)
+                                    }
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { deletingPostId = null }, enabled = !isDeletingPost) {
+                                    Text("Cancel")
                                 }
                             },
                         )

@@ -19,6 +19,10 @@ import retrofit2.HttpException
  * that.
  */
 class PostsRepository {
+    suspend fun getOwnUserId(): Result<String?> = runCatching {
+        ApiClient.authApi.getSession().user?.id
+    }
+
     suspend fun getForYouFeed(cursor: String?): Result<PostsPage> = runCatching {
         ApiClient.postsApi.getForYouFeed(cursor)
     }

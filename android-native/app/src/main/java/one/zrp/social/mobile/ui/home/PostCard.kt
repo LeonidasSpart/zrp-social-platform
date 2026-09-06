@@ -121,14 +121,15 @@ fun PostCard(
                         )
                     }
 
-                    // The website shows Edit/Delete for the post's own
-                    // author and Report for everyone else - isOwnPost
-                    // mirrors that same isAuthor branch. Only ProfileScreen
-                    // currently knows per-post ownership cheaply (every
-                    // post on a profile page IS that profile's own
-                    // author's post); Home/Search/Bookmarks default to
-                    // the Report action, matching what the website shows
-                    // for a post you don't own.
+                    // The website's shared PostCard.tsx shows Delete for
+                    // the post's own author and Report for everyone else,
+                    // on every screen it renders on (Home, Profile,
+                    // Bookmarks, Search, post detail, hashtag, explore) -
+                    // isOwnPost mirrors that same isAuthor check
+                    // everywhere this PostCard is used too, each screen's
+                    // ViewModel resolving the signed-in user's real id via
+                    // GET /auth/session the same way ProfileViewModel
+                    // already did.
                     if (isOwnPost) {
                         IconButton(onClick = { onDeleteClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
                             Icon(

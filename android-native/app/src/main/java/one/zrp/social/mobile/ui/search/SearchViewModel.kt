@@ -25,6 +25,7 @@ data class SearchUiState(
     val trendingHashtags: List<TrendingHashtag> = emptyList(),
     val isLoadingDiscover: Boolean = true,
     val error: String? = null,
+    val ownUserId: String? = null,
 )
 
 /**
@@ -43,6 +44,9 @@ class SearchViewModel(private val repository: SearchRepository) : ViewModel() {
 
     init {
         loadDiscover()
+        viewModelScope.launch {
+            repository.getOwnUserId().onSuccess { id -> _state.update { it.copy(ownUserId = id) } }
+        }
     }
 
     fun onQueryChange(query: String) {

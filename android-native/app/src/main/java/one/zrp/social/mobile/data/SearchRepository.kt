@@ -12,6 +12,10 @@ import one.zrp.social.mobile.network.zrpErrorMessage
 import retrofit2.HttpException
 
 class SearchRepository {
+    suspend fun getOwnUserId(): Result<String?> = runCatching {
+        ApiClient.authApi.getSession().user?.id
+    }
+
     suspend fun search(query: String): Result<SearchResults> = runCatching {
         ApiClient.searchApi.search(query)
     }

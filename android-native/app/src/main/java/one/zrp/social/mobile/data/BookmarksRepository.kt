@@ -23,6 +23,10 @@ import retrofit2.HttpException
  * than passed through as a misleading null.
  */
 class BookmarksRepository {
+    suspend fun getOwnUserId(): Result<String?> = runCatching {
+        ApiClient.authApi.getSession().user?.id
+    }
+
     suspend fun getBookmarkedPosts(cursor: String?): Result<PostsPage> = runCatching {
         val page = ApiClient.bookmarksApi.getBookmarks(cursor)
         val posts = page.items
@@ -42,6 +46,10 @@ class BookmarksRepository {
 
     suspend fun toggleBookmark(postId: String): Result<BookmarkResponse> = runCatching {
         ApiClient.postsApi.toggleBookmark(postId)
+    }
+
+    suspend fun deletePost(postId: String): Result<Unit> = runCatching {
+        ApiClient.postsApi.deletePost(postId)
     }
 
     suspend fun reportPost(postId: String, reason: String, details: String?): Result<Unit> {
