@@ -176,4 +176,17 @@
     <string name="delete_account_permanently_delete">Permanently Delete Account</string>
     <string name="delete_account_request_deletion">Request Account Deletion</string>
     <string name="delete_account_err_type_delete_confirm">Please type &quot;DELETE&quot; to confirm.</string>
+    <string name="report_modal_title">Report</string>
+    <string name="report_reason_label">Reason for reporting</string>
+    <string name="report_details_label">Additional details (optional)</string>
+    <string name="report_details_placeholder">Provide more context...</string>
+    <string name="report_submit">Submit Report</string>
+    <string name="report_submitting">Submitting...</string>
+    <string name="report_reason_spam">Spam</string>
+    <string name="report_reason_harassment">Harassment or bullying</string>
+    <string name="report_reason_inappropriate">Inappropriate content</string>
+    <string name="report_reason_misinformation">Misinformation</string>
+    <string name="report_reason_hate_speech">Hate speech</string>
+    <string name="report_reason_impersonation">Impersonation</string>
+    <string name="report_reason_other">Other</string>
 </resources>

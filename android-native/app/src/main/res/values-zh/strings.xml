@@ -160,4 +160,17 @@
     <string name="delete_account_permanently_delete">永久删除账户</string>
     <string name="delete_account_request_deletion">申请删除账户</string>
     <string name="delete_account_err_type_delete_confirm">请输入“DELETE”以确认。</string>
+    <string name="report_modal_title">举报</string>
+    <string name="report_reason_label">举报原因</string>
+    <string name="report_details_label">补充说明(可选)</string>
+    <string name="report_details_placeholder">提供更多背景信息...</string>
+    <string name="report_submit">提交举报</string>
+    <string name="report_submitting">提交中...</string>
+    <string name="report_reason_spam">垃圾信息</string>
+    <string name="report_reason_harassment">骚扰或欺凌</string>
+    <string name="report_reason_inappropriate">不当内容</string>
+    <string name="report_reason_misinformation">虚假信息</string>
+    <string name="report_reason_hate_speech">仇恨言论</string>
+    <string name="report_reason_impersonation">冒充他人</string>
+    <string name="report_reason_other">其他</string>
 </resources>

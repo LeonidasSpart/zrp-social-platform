@@ -160,4 +160,17 @@
     <string name="delete_account_permanently_delete">Fshi Përgjithmonë Llogarinë</string>
     <string name="delete_account_request_deletion">Kërko Fshirjen e Llogarisë</string>
     <string name="delete_account_err_type_delete_confirm">Ju lutemi shkruani &quot;DELETE&quot; për të konfirmuar.</string>
+    <string name="report_modal_title">Raporto</string>
+    <string name="report_reason_label">Arsyeja e raportimit</string>
+    <string name="report_details_label">Detaje shtesë (opsionale)</string>
+    <string name="report_details_placeholder">Jep më shumë kontekst...</string>
+    <string name="report_submit">Dërgo raportimin</string>
+    <string name="report_submitting">Duke dërguar...</string>
+    <string name="report_reason_spam">Spam</string>
+    <string name="report_reason_harassment">Ngacmim ose bullizëm</string>
+    <string name="report_reason_inappropriate">Përmbajtje e papërshtatshme</string>
+    <string name="report_reason_misinformation">Dezinformim</string>
+    <string name="report_reason_hate_speech">Ligjërim urrejtjeje</string>
+    <string name="report_reason_impersonation">Imitim identiteti</string>
+    <string name="report_reason_other">Tjetër</string>
 </resources>

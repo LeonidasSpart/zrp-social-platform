@@ -9,6 +9,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
+import one.zrp.social.mobile.R
 
 /**
  * The website opens a full emoji-picker-react grid here to pick any
@@ -17,6 +19,13 @@ import androidx.compose.runtime.setValue
  * field the user types/pastes an emoji into via that keyboard - the
  * same "any real emoji" capability the website offers, through the
  * platform's own picker rather than a second one built into the app.
+ *
+ * "Add a reaction" and "Emoji" stay English-only: they exist only to
+ * explain this native text-field substitute, and the real
+ * emoji-picker-react grid it replaces has no title or label text of
+ * its own to translate from. "React" matches ChatInterface.tsx's own
+ * hardcoded, untranslated aria-label="React" (same reuse as the
+ * DropdownMenuItem in ConversationScreen.kt).
  */
 @Composable
 fun AddReactionDialog(
@@ -43,7 +52,7 @@ fun AddReactionDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         },
     )

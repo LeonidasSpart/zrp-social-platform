@@ -160,4 +160,17 @@
     <string name="delete_account_permanently_delete">Hesabı Kalıcı Olarak Sil</string>
     <string name="delete_account_request_deletion">Hesap Silme Talebinde Bulun</string>
     <string name="delete_account_err_type_delete_confirm">Onaylamak için lütfen &quot;DELETE&quot; yazın.</string>
+    <string name="report_modal_title">Bildir</string>
+    <string name="report_reason_label">Bildirme nedeni</string>
+    <string name="report_details_label">Ek ayrıntılar (isteğe bağlı)</string>
+    <string name="report_details_placeholder">Daha fazla bağlam sağlayın...</string>
+    <string name="report_submit">Bildirimi Gönder</string>
+    <string name="report_submitting">Gönderiliyor...</string>
+    <string name="report_reason_spam">Spam</string>
+    <string name="report_reason_harassment">Taciz veya zorbalık</string>
+    <string name="report_reason_inappropriate">Uygunsuz içerik</string>
+    <string name="report_reason_misinformation">Yanlış bilgi</string>
+    <string name="report_reason_hate_speech">Nefret söylemi</string>
+    <string name="report_reason_impersonation">Kimlik taklidi</string>
+    <string name="report_reason_other">Diğer</string>
 </resources>

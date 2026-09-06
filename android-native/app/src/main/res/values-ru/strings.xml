@@ -160,4 +160,17 @@
     <string name="delete_account_permanently_delete">Удалить аккаунт навсегда</string>
     <string name="delete_account_request_deletion">Запросить удаление аккаунта</string>
     <string name="delete_account_err_type_delete_confirm">Пожалуйста, введите «DELETE» для подтверждения.</string>
+    <string name="report_modal_title">Пожаловаться</string>
+    <string name="report_reason_label">Причина жалобы</string>
+    <string name="report_details_label">Дополнительные сведения (необязательно)</string>
+    <string name="report_details_placeholder">Укажите дополнительные сведения...</string>
+    <string name="report_submit">Отправить жалобу</string>
+    <string name="report_submitting">Отправка...</string>
+    <string name="report_reason_spam">Спам</string>
+    <string name="report_reason_harassment">Домогательства или травля</string>
+    <string name="report_reason_inappropriate">Неприемлемый контент</string>
+    <string name="report_reason_misinformation">Дезинформация</string>
+    <string name="report_reason_hate_speech">Разжигание ненависти</string>
+    <string name="report_reason_impersonation">Выдача себя за другого</string>
+    <string name="report_reason_other">Другое</string>
 </resources>

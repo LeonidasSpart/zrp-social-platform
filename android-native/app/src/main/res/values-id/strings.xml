@@ -160,4 +160,17 @@
     <string name="delete_account_permanently_delete">Hapus Akun Secara Permanen</string>
     <string name="delete_account_request_deletion">Ajukan Penghapusan Akun</string>
     <string name="delete_account_err_type_delete_confirm">Silakan ketik &quot;DELETE&quot; untuk mengonfirmasi.</string>
+    <string name="report_modal_title">Laporkan</string>
+    <string name="report_reason_label">Alasan pelaporan</string>
+    <string name="report_details_label">Detail tambahan (opsional)</string>
+    <string name="report_details_placeholder">Berikan konteks lebih lanjut...</string>
+    <string name="report_submit">Kirim Laporan</string>
+    <string name="report_submitting">Mengirim...</string>
+    <string name="report_reason_spam">Spam</string>
+    <string name="report_reason_harassment">Pelecehan atau perundungan</string>
+    <string name="report_reason_inappropriate">Konten tidak pantas</string>
+    <string name="report_reason_misinformation">Misinformasi</string>
+    <string name="report_reason_hate_speech">Ujaran kebencian</string>
+    <string name="report_reason_impersonation">Penyamaran identitas</string>
+    <string name="report_reason_other">Lainnya</string>
 </resources>

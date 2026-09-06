@@ -160,4 +160,17 @@
     <string name="delete_account_permanently_delete">حذف الحساب نهائيًا</string>
     <string name="delete_account_request_deletion">طلب حذف الحساب</string>
     <string name="delete_account_err_type_delete_confirm">يرجى كتابة &quot;DELETE&quot; للتأكيد.</string>
+    <string name="report_modal_title">إبلاغ</string>
+    <string name="report_reason_label">سبب الإبلاغ</string>
+    <string name="report_details_label">تفاصيل إضافية (اختياري)</string>
+    <string name="report_details_placeholder">قدّم مزيدًا من السياق...</string>
+    <string name="report_submit">إرسال البلاغ</string>
+    <string name="report_submitting">جارٍ الإرسال...</string>
+    <string name="report_reason_spam">رسائل مزعجة</string>
+    <string name="report_reason_harassment">تحرش أو تنمر</string>
+    <string name="report_reason_inappropriate">محتوى غير لائق</string>
+    <string name="report_reason_misinformation">معلومات مضللة</string>
+    <string name="report_reason_hate_speech">خطاب كراهية</string>
+    <string name="report_reason_impersonation">انتحال شخصية</string>
+    <string name="report_reason_other">أخرى</string>
 </resources>

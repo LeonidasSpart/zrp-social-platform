@@ -104,6 +104,11 @@ fun LoginScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    // "Hide password"/"Show password" stay English-only on
+                    // purpose - the website's own login page has no
+                    // show/hide-password toggle at all, so there's no real
+                    // web string to translate from for this native-only
+                    // affordance.
                     Icon(
                         imageVector = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
                         contentDescription = if (passwordVisible) "Hide password" else "Show password",
