@@ -195,4 +195,13 @@
     <string name="composer_add_gif">Add GIF</string>
     <string name="composer_schedule">Schedule</string>
     <string name="composer_schedule_on">Scheduling on</string>
+    <string name="composer_err_already_uploaded">You\'ve already uploaded an image. Your plan allows %1$d image(s) per post.</string>
+    <string name="composer_err_file_too_large">File too large. Max %1$dMB.</string>
+    <string name="composer_err_only_media">Only images and videos are allowed.</string>
+    <string name="composer_err_upload_failed">Upload failed. Please try again.</string>
+    <string name="composer_err_gif_limit">Your plan allows %1$d image(s) per post.</string>
+    <string name="profile_change_avatar">Change avatar</string>
+    <string name="profile_change_banner">Change banner</string>
+    <string name="profile_upload_avatar_failed">Failed to upload avatar</string>
+    <string name="profile_upload_banner_failed">Failed to upload banner</string>
 </resources>

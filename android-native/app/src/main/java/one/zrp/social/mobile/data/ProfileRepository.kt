@@ -1,5 +1,7 @@
 package one.zrp.social.mobile.data
 
+import android.content.ContentResolver
+import android.net.Uri
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.BlockToggleResponse
 import one.zrp.social.mobile.network.BlockedUser
@@ -16,6 +18,7 @@ import one.zrp.social.mobile.network.PinToggleResponse
 import one.zrp.social.mobile.network.RepostResponse
 import one.zrp.social.mobile.network.UpdatePostRequest
 import one.zrp.social.mobile.network.UserProfile
+import one.zrp.social.mobile.network.buildFileMultipart
 import one.zrp.social.mobile.network.zrpErrorMessage
 import retrofit2.HttpException
 
@@ -118,5 +121,19 @@ class ProfileRepository {
 
     suspend fun togglePin(postId: String): Result<PinToggleResponse> = runCatching {
         ApiClient.postsApi.togglePin(postId)
+    }
+
+    // Matches the real, live avatar/banner upload the website's own
+    // profile page performs from its camera-overlay buttons: a plain
+    // multipart POST straight to our backend (see SettingsApi's KDoc
+    // for why this doesn't go through the presigned UploadThing flow).
+    suspend fun updateAvatar(contentResolver: ContentResolver, uri: Uri): Result<String?> = runCatching {
+        val part = buildFileMultipart(contentResolver, uri)
+        ApiClient.settingsApi.updateAvatar(part).avatarUrl
+    }
+
+    suspend fun updateCover(contentResolver: ContentResolver, uri: Uri): Result<String?> = runCatching {
+        val part = buildFileMultipart(contentResolver, uri)
+        ApiClient.settingsApi.updateCover(part).coverUrl
     }
 }

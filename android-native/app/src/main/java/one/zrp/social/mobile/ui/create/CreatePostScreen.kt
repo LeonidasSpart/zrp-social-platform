@@ -1,5 +1,11 @@
 package one.zrp.social.mobile.ui.create
 
+import android.content.ContentResolver
+import android.net.Uri
+import android.provider.OpenableColumns
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Schedule
@@ -25,6 +32,7 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -35,6 +43,7 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,10 +53,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -60,33 +76,38 @@ import one.zrp.social.mobile.ui.components.GifPickerDialog
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.getPlanLimits
 
 /**
  * The Create tab's composer - a real POST /api/posts call. Photo/video
- * upload still goes through UploadThing's presigned-upload SDK on the
- * website rather than a plain REST call, and needs its own native
- * upload path (see PostsApi.createPost's comment) - but a GIF needs no
- * upload at all (it's just a hosted URL, exactly like PostComposer.tsx's
- * own GifPicker flow: setImageUrls([gifUrl])), so that one real media
- * type is wired up here now rather than waiting on the harder upload
- * problem.
+ * attachment now goes through the exact same real UploadThing protocol
+ * the website uses (see UploadThingApi/MediaUploader's own KDocs for
+ * how that was reverse-engineered from the actually-installed
+ * uploadthing v7.7.4 package, since there's no native/Android SDK for
+ * it), reached via Android's built-in Photo Picker
+ * (ActivityResultContracts.PickVisualMedia - no runtime permission
+ * needed). A GIF still needs no upload at all (it's just a hosted
+ * URL); both paths write into the same mediaUrls/mediaType state
+ * PostComposer.tsx itself uses, since a GIF really is just one more
+ * imageUrls entry there too.
  *
  * When [quotePostId] is set, this doubles as the Quote-post composer
  * reached from a post's repost menu, showing a read-only preview of
  * the real post being quoted - the same real post GET /posts/{id}
  * returns, not a locally reconstructed guess - above the text field,
  * matching the website's QuotePostModal. QuotePostModal.tsx has no GIF
- * picker of its own (confirmed by reading the component), so the GIF
- * button only shows for the default composer, matching that real
- * distinction rather than adding a feature the quote flow doesn't have.
+ * picker or media upload of its own (confirmed by reading the
+ * component), so neither button shows for the quote-post variant.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, UnstableApi::class)
 @Composable
 fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
     val viewModel: CreatePostViewModel = viewModel(
         factory = remember(quotePostId) { CreatePostViewModelFactory(PostsRepository(), quotePostId) },
     )
     val state by viewModel.state.collectAsState()
+    val contentResolver = LocalContext.current.contentResolver
+
     var showGifPicker by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
@@ -95,12 +116,26 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
     // combined with the picked hour/minute once that dialog confirms.
     var pendingDateMillis by remember { mutableStateOf<Long?>(null) }
 
+    val mediaPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri != null) {
+            val (name, size) = queryFileNameAndSize(contentResolver, uri)
+            val mimeType = contentResolver.getType(uri) ?: "application/octet-stream"
+            viewModel.onMediaPicked(contentResolver, uri, name, mimeType, size)
+        }
+    }
+
     LaunchedEffect(state.posted) {
         if (state.posted) {
             viewModel.consumePostedEvent()
             onPosted()
         }
     }
+
+    val limits = getPlanLimits(state.plan)
+    val maxImages = limits.imagesPerPost.coerceAtMost(4)
+    val canAddMoreMedia = maxImages > 0 && state.mediaUrls.size < maxImages && state.mediaType != "video"
 
     Column(
         modifier = Modifier
@@ -176,35 +211,37 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
                 .padding(top = if (quotePostId != null) Spacing.sm else 0.dp),
         )
 
-        val selectedGif = state.selectedGif
-        if (selectedGif != null) {
-            Box(
+        if (state.isUploading) {
+            LinearProgressIndicator(
+                progress = { state.uploadProgress },
                 modifier = Modifier
-                    .padding(top = Spacing.sm)
-                    .clip(MaterialTheme.shapes.medium),
-            ) {
-                AsyncImage(
-                    model = selectedGif.url,
-                    contentDescription = selectedGif.title,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .height(160.dp)
-                        .fillMaxWidth(),
-                )
-                IconButton(
-                    onClick = { viewModel.onRemoveGif() },
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(Spacing.xs),
-                ) {
-                    // "Remove image 1" matches PostComposer.tsx's own real,
-                    // untranslated aria-label for the first (here, only)
-                    // attached image - a GIF is stored as a normal imageUrls
-                    // entry, at index 0, so this is the exact same string a
-                    // real web user's screen reader would hear.
-                    Icon(Icons.Filled.Close, contentDescription = "Remove image 1", tint = MaterialTheme.colorScheme.onSurface)
-                }
-            }
+                    .fillMaxWidth()
+                    .padding(top = Spacing.sm),
+                color = ZrpRed,
+            )
+        }
+
+        if (state.mediaUrls.isNotEmpty()) {
+            ComposerMediaPreview(
+                urls = state.mediaUrls,
+                isVideo = state.mediaType == "video",
+                onRemove = { index -> viewModel.onRemoveMediaAt(index) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.sm),
+            )
+        }
+
+        val mediaError = state.mediaError
+        if (mediaError != null) {
+            Text(
+                text = mediaErrorMessage(mediaError),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .clickable { viewModel.dismissMediaError() },
+            )
         }
 
         if (quotePostId == null) {
@@ -268,18 +305,49 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (quotePostId == null && selectedGif == null) {
-                // PostComposer.tsx's own GIF button is icon-only too (a
-                // FileImage icon with no visible label), with a real,
-                // translated tooltip via t("composer.addGif") - the
-                // native equivalent of a tooltip is this button's
-                // accessibility content description.
-                IconButton(onClick = { showGifPicker = true }, enabled = !state.isPosting) {
-                    Icon(
-                        Icons.Filled.Image,
-                        contentDescription = stringResource(R.string.composer_add_gif),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+            if (quotePostId == null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // The real photo/video attach button - PostComposer.tsx's
+                    // own equivalent (an Image icon) is icon-only too, with a
+                    // dynamically-built, deliberately untranslated title
+                    // ("{n}/{max} media" or "Media unavailable for this
+                    // plan") rather than a translated tooltip string, which
+                    // this content description matches exactly rather than
+                    // inventing a translated key the website doesn't have.
+                    IconButton(
+                        onClick = {
+                            mediaPickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo),
+                            )
+                        },
+                        enabled = !state.isPosting && !state.isUploading && canAddMoreMedia,
+                    ) {
+                        Icon(
+                            Icons.Filled.AddAPhoto,
+                            contentDescription = if (maxImages > 0) {
+                                "${state.mediaUrls.size}/$maxImages media"
+                            } else {
+                                "Media unavailable for this plan"
+                            },
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+
+                    // PostComposer.tsx's own GIF button is icon-only too (a
+                    // FileImage icon with no visible label), with a real,
+                    // translated tooltip via t("composer.addGif") - the
+                    // native equivalent of a tooltip is this button's
+                    // accessibility content description.
+                    IconButton(
+                        onClick = { showGifPicker = true },
+                        enabled = !state.isPosting && !state.isUploading && canAddMoreMedia,
+                    ) {
+                        Icon(
+                            Icons.Filled.Image,
+                            contentDescription = stringResource(R.string.composer_add_gif),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             } else {
                 Spacer(modifier = Modifier.size(1.dp))
@@ -293,9 +361,10 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
 
             Button(
                 onClick = { viewModel.submit() },
-                enabled = (state.content.isNotBlank() || selectedGif != null) &&
+                enabled = (state.content.isNotBlank() || state.mediaUrls.isNotEmpty()) &&
                     !(state.isScheduling && state.scheduledAtMillis == null) &&
-                    !state.isPosting,
+                    !state.isPosting &&
+                    !state.isUploading,
                 colors = ButtonDefaults.buttonColors(containerColor = ZrpRed),
             ) {
                 if (state.isPosting) {
@@ -415,4 +484,128 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
             },
         )
     }
+}
+
+@Composable
+private fun mediaErrorMessage(error: MediaValidationError): String = when (error) {
+    is MediaValidationError.AlreadyUploaded -> stringResource(R.string.composer_err_already_uploaded, error.maxImages)
+    is MediaValidationError.FileTooLarge -> stringResource(R.string.composer_err_file_too_large, error.maxMb)
+    is MediaValidationError.OnlyMedia -> stringResource(R.string.composer_err_only_media)
+    is MediaValidationError.GifLimit -> stringResource(R.string.composer_err_gif_limit, error.maxImages)
+    is MediaValidationError.UploadFailed ->
+        stringResource(R.string.composer_err_upload_failed) + ": " + error.detail
+}
+
+/**
+ * Mirrors PostComposer.tsx's own preview grid: a single video (with
+ * playback controls, matching web's real `<video controls>`) or up to
+ * four images/GIFs in a simple grid, each with its own real,
+ * untranslated "Remove image {n}" / "Remove video" button matching the
+ * website's own aria-labels exactly.
+ */
+@OptIn(UnstableApi::class)
+@Composable
+private fun ComposerMediaPreview(
+    urls: List<String>,
+    isVideo: Boolean,
+    onRemove: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (isVideo) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(240.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .background(Color.Black),
+        ) {
+            ComposerVideoPlayer(url = urls[0], modifier = Modifier.fillMaxSize())
+            IconButton(
+                onClick = { onRemove(0) },
+                modifier = Modifier.align(Alignment.TopEnd).padding(Spacing.xs),
+            ) {
+                Icon(Icons.Filled.Close, contentDescription = "Remove video", tint = Color.White)
+            }
+        }
+        return
+    }
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        urls.chunked(2).forEachIndexed { rowIndex, rowUrls ->
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                rowUrls.forEachIndexed { colIndex, url ->
+                    val index = rowIndex * 2 + colIndex
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(if (urls.size == 1) 280.dp else 140.dp)
+                            .clip(MaterialTheme.shapes.medium),
+                    ) {
+                        AsyncImage(
+                            model = url,
+                            contentDescription = "Upload preview ${index + 1}",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                        IconButton(
+                            onClick = { onRemove(index) },
+                            modifier = Modifier.align(Alignment.TopEnd).padding(4.dp),
+                        ) {
+                            Icon(
+                                Icons.Filled.Close,
+                                contentDescription = "Remove image ${index + 1}",
+                                tint = Color.White,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A real, playable preview with ExoPlayer's own transport controls
+ * visible - the native equivalent of web's `<video controls playsInline>`
+ * in the composer (distinct from PostVideoPlayer's tap-to-play, muted,
+ * feed-style playback used for published posts).
+ */
+@OptIn(UnstableApi::class)
+@Composable
+private fun ComposerVideoPlayer(url: String, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val exoPlayer = remember(url) {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(MediaItem.fromUri(url))
+            prepare()
+        }
+    }
+
+    DisposableEffect(exoPlayer) {
+        onDispose { exoPlayer.release() }
+    }
+
+    AndroidView(
+        modifier = modifier,
+        factory = {
+            PlayerView(context).apply {
+                player = exoPlayer
+                useController = true
+            }
+        },
+    )
+}
+
+private fun queryFileNameAndSize(contentResolver: ContentResolver, uri: Uri): Pair<String, Long> {
+    var name = "upload"
+    var size = 0L
+    contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+        if (cursor.moveToFirst()) {
+            if (nameIndex >= 0) name = cursor.getString(nameIndex) ?: name
+            if (sizeIndex >= 0) size = cursor.getLong(sizeIndex)
+        }
+    }
+    return name to size
 }

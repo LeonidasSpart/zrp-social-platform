@@ -1,5 +1,7 @@
 package one.zrp.social.mobile.ui.profile
 
+import android.content.ContentResolver
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,6 +12,14 @@ import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.UserProfile
+
+/**
+ * Which upload just failed - CreatePostScreen's own MediaValidationError
+ * uses the same "ViewModel can't resolve string resources" reasoning:
+ * the Composable maps this to the real, translated profile.upload*
+ * Failed string.
+ */
+enum class MediaUploadTarget { AVATAR, BANNER }
 
 data class ProfileUiState(
     val isOwnProfile: Boolean = false,
@@ -27,6 +37,9 @@ data class ProfileUiState(
     val isMuted: Boolean = false,
     val isTogglingMute: Boolean = false,
     val error: String? = null,
+    val isUploadingAvatar: Boolean = false,
+    val isUploadingBanner: Boolean = false,
+    val mediaUploadError: MediaUploadTarget? = null,
 )
 
 /**
@@ -301,6 +314,52 @@ class ProfileViewModel(
         viewModelScope.launch {
             repository.getPost(postId).onSuccess { post -> _state.update { it.copy(pinnedPost = post) } }
         }
+    }
+
+    // Matches the real profile page's own handleAvatarUpload/
+    // handleBannerUpload: no client-side type/size validation at all -
+    // the server (5MB cap, image-type allowlist) is the only real gate,
+    // and a rejection just surfaces the same generic translated
+    // failure web's own alert() shows, never a more specific invented
+    // reason the server itself doesn't return structurally.
+    fun uploadAvatar(contentResolver: ContentResolver, uri: Uri) {
+        if (_state.value.isUploadingAvatar) return
+        _state.update { it.copy(isUploadingAvatar = true, mediaUploadError = null) }
+        viewModelScope.launch {
+            repository.updateAvatar(contentResolver, uri)
+                .onSuccess { url ->
+                    _state.update {
+                        it.copy(isUploadingAvatar = false, profile = it.profile?.copy(avatarUrl = url))
+                    }
+                }
+                .onFailure {
+                    _state.update {
+                        it.copy(isUploadingAvatar = false, mediaUploadError = MediaUploadTarget.AVATAR)
+                    }
+                }
+        }
+    }
+
+    fun uploadBanner(contentResolver: ContentResolver, uri: Uri) {
+        if (_state.value.isUploadingBanner) return
+        _state.update { it.copy(isUploadingBanner = true, mediaUploadError = null) }
+        viewModelScope.launch {
+            repository.updateCover(contentResolver, uri)
+                .onSuccess { url ->
+                    _state.update {
+                        it.copy(isUploadingBanner = false, profile = it.profile?.copy(coverUrl = url))
+                    }
+                }
+                .onFailure {
+                    _state.update {
+                        it.copy(isUploadingBanner = false, mediaUploadError = MediaUploadTarget.BANNER)
+                    }
+                }
+        }
+    }
+
+    fun dismissMediaUploadError() {
+        _state.update { it.copy(mediaUploadError = null) }
     }
 
     private fun applyOptimisticBookmark(post: Post): Post {
