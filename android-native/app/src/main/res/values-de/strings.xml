@@ -179,4 +179,9 @@
     <string name="composer_add_gif">GIF hinzufügen</string>
     <string name="composer_schedule">Planen</string>
     <string name="composer_schedule_on">Planung aktiv</string>
+    <string name="composer_err_already_uploaded">Du hast bereits ein Bild hochgeladen. Dein Plan erlaubt %1$d Bild(er) pro Beitrag.</string>
+    <string name="composer_err_file_too_large">Datei zu groß. Max. %1$dMB.</string>
+    <string name="composer_err_only_media">Nur Bilder und Videos sind erlaubt.</string>
+    <string name="composer_err_upload_failed">Upload fehlgeschlagen. Bitte versuche es erneut.</string>
+    <string name="composer_err_gif_limit">Dein Plan erlaubt %1$d Bild(er) pro Beitrag.</string>
 </resources>

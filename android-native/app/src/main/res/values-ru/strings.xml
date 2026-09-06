@@ -179,4 +179,9 @@
     <string name="composer_add_gif">Добавить GIF</string>
     <string name="composer_schedule">Запланировать</string>
     <string name="composer_schedule_on">Запланировано на</string>
+    <string name="composer_err_already_uploaded">Вы уже загрузили изображение. Ваш тариф позволяет добавлять %1$d изображение(я) в публикацию.</string>
+    <string name="composer_err_file_too_large">Файл слишком большой. Максимум %1$d МБ.</string>
+    <string name="composer_err_only_media">Разрешены только изображения и видео.</string>
+    <string name="composer_err_upload_failed">Не удалось загрузить файл. Пожалуйста, попробуйте снова.</string>
+    <string name="composer_err_gif_limit">Ваш тариф позволяет добавлять %1$d изображение(й) к публикации.</string>
 </resources>

@@ -179,4 +179,9 @@
     <string name="composer_add_gif">Tambah GIF</string>
     <string name="composer_schedule">Jadwalkan</string>
     <string name="composer_schedule_on">Dijadwalkan pada</string>
+    <string name="composer_err_already_uploaded">Anda sudah mengunggah gambar. Paket Anda mengizinkan %1$d gambar per postingan.</string>
+    <string name="composer_err_file_too_large">File terlalu besar. Maksimal %1$dMB.</string>
+    <string name="composer_err_only_media">Hanya gambar dan video yang diizinkan.</string>
+    <string name="composer_err_upload_failed">Unggahan gagal. Silakan coba lagi.</string>
+    <string name="composer_err_gif_limit">Paket Anda mengizinkan %1$d gambar per postingan.</string>
 </resources>

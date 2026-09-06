@@ -179,4 +179,9 @@
     <string name="composer_add_gif">添加 GIF</string>
     <string name="composer_schedule">安排</string>
     <string name="composer_schedule_on">计划发布于</string>
+    <string name="composer_err_already_uploaded">你已经上传了一张图片。你的套餐允许每条帖子添加 %1$d 张图片。</string>
+    <string name="composer_err_file_too_large">文件太大。最大为 %1$dMB。</string>
+    <string name="composer_err_only_media">只允许上传图片和视频。</string>
+    <string name="composer_err_upload_failed">上传失败，请重试。</string>
+    <string name="composer_err_gif_limit">你的套餐每篇帖子最多允许 %1$d 张图片。</string>
 </resources>

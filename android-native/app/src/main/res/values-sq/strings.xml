@@ -179,4 +179,9 @@
     <string name="composer_add_gif">Shto GIF</string>
     <string name="composer_schedule">Planifiko</string>
     <string name="composer_schedule_on">Planifikimi aktiv</string>
+    <string name="composer_err_already_uploaded">Keni ngarkuar tashmë një imazh. Plani juaj lejon %1$d imazh(e) për postim.</string>
+    <string name="composer_err_file_too_large">Skedari është tepër i madh. Maksimumi %1$dMB.</string>
+    <string name="composer_err_only_media">Lejohen vetëm imazhe dhe video.</string>
+    <string name="composer_err_upload_failed">Ngarkimi dështoi. Ju lutemi riprovojeni.</string>
+    <string name="composer_err_gif_limit">Plani juaj lejon %1$d imazh(e) për postim.</string>
 </resources>

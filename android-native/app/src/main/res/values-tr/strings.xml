@@ -179,4 +179,9 @@
     <string name="composer_add_gif">GIF Ekle</string>
     <string name="composer_schedule">Zamanla</string>
     <string name="composer_schedule_on">Zamanlama:</string>
+    <string name="composer_err_already_uploaded">Zaten bir görsel yüklediniz. Planınız gönderi başına %1$d görsele izin veriyor.</string>
+    <string name="composer_err_file_too_large">Dosya çok büyük. Maksimum %1$dMB.</string>
+    <string name="composer_err_only_media">Yalnızca görsel ve videolara izin verilir.</string>
+    <string name="composer_err_upload_failed">Yükleme başarısız oldu. Lütfen tekrar deneyin.</string>
+    <string name="composer_err_gif_limit">Planınız gönderi başına %1$d görsele izin veriyor.</string>
 </resources>

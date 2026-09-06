@@ -179,4 +179,9 @@
     <string name="composer_add_gif">Aggiungi GIF</string>
     <string name="composer_schedule">Pianifica</string>
     <string name="composer_schedule_on">Pianificazione attiva</string>
+    <string name="composer_err_already_uploaded">Hai già caricato un\'immagine. Il tuo piano consente %1$d immagine/i per post.</string>
+    <string name="composer_err_file_too_large">File troppo grande. Max %1$dMB.</string>
+    <string name="composer_err_only_media">Sono consentiti solo immagini e video.</string>
+    <string name="composer_err_upload_failed">Caricamento non riuscito. Riprova.</string>
+    <string name="composer_err_gif_limit">Il tuo piano consente %1$d immagine/i per post.</string>
 </resources>
