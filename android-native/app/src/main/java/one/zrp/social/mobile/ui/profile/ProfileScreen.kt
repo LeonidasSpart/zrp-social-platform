@@ -53,10 +53,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.ui.components.Avatar
@@ -290,6 +292,8 @@ fun ProfileScreen(
 
                 val deletePostId = deletingPostId
                 if (deletePostId != null) {
+                    // English-only on purpose - matches PostCard.tsx's own hardcoded,
+                    // untranslated delete-confirmation dialog (see HomeScreen.kt).
                     AlertDialog(
                         onDismissRequest = { if (!isDeletingPost) deletingPostId = null },
                         title = { Text("Delete post?") },
@@ -412,17 +416,17 @@ private fun ProfileHeader(
                 ) {
                     if (isOwnProfile) {
                         IconButton(onClick = onBookmarksClick) {
-                            Icon(Icons.Filled.Bookmark, contentDescription = "Bookmarks")
+                            Icon(Icons.Filled.Bookmark, contentDescription = stringResource(R.string.nav_bookmarks))
                         }
 
                         var moreMenuOpen by remember { mutableStateOf(false) }
                         Box {
                             IconButton(onClick = { moreMenuOpen = true }) {
-                                Icon(Icons.Filled.MoreVert, contentDescription = "More options")
+                                Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.profile_more_actions))
                             }
                             DropdownMenu(expanded = moreMenuOpen, onDismissRequest = { moreMenuOpen = false }) {
                                 DropdownMenuItem(
-                                    text = { Text("Settings") },
+                                    text = { Text(stringResource(R.string.settings_title)) },
                                     leadingIcon = { Icon(Icons.Filled.Settings, contentDescription = null) },
                                     onClick = {
                                         moreMenuOpen = false
@@ -430,14 +434,14 @@ private fun ProfileHeader(
                                     },
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Blocked users") },
+                                    text = { Text(stringResource(R.string.settings_blocked_users)) },
                                     onClick = {
                                         moreMenuOpen = false
                                         onBlockedUsersClick()
                                     },
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Muted users") },
+                                    text = { Text(stringResource(R.string.settings_muted_users)) },
                                     onClick = {
                                         moreMenuOpen = false
                                         onMutedUsersClick()
@@ -447,17 +451,17 @@ private fun ProfileHeader(
                         }
 
                         TextButton(onClick = onLogoutClick) {
-                            Text("Log out")
+                            Text(stringResource(R.string.nav_sign_out))
                         }
                     } else {
                         var moreMenuOpen by remember { mutableStateOf(false) }
                         Box {
                             IconButton(onClick = { moreMenuOpen = true }) {
-                                Icon(Icons.Filled.MoreVert, contentDescription = "More options")
+                                Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.profile_more_actions))
                             }
                             DropdownMenu(expanded = moreMenuOpen, onDismissRequest = { moreMenuOpen = false }) {
                                 DropdownMenuItem(
-                                    text = { Text(if (isMuted) "Unmute" else "Mute") },
+                                    text = { Text(stringResource(if (isMuted) R.string.profile_unmute else R.string.profile_mute)) },
                                     enabled = !isTogglingMute,
                                     leadingIcon = {
                                         Icon(
@@ -471,7 +475,7 @@ private fun ProfileHeader(
                                     },
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(if (profile.isBlocked) "Unblock" else "Block") },
+                                    text = { Text(stringResource(if (profile.isBlocked) R.string.profile_unblock else R.string.profile_block)) },
                                     enabled = !isTogglingBlock,
                                     leadingIcon = { Icon(Icons.Filled.Block, contentDescription = null, tint = ZrpRed) },
                                     onClick = {
@@ -483,7 +487,7 @@ private fun ProfileHeader(
                         }
 
                         IconButton(onClick = onMessageClick) {
-                            Icon(Icons.Filled.MailOutline, contentDescription = "Message")
+                            Icon(Icons.Filled.MailOutline, contentDescription = stringResource(R.string.action_message))
                         }
 
                         Spacer(modifier = Modifier.width(Spacing.xs))
@@ -505,7 +509,7 @@ private fun ProfileHeader(
                                 },
                             ),
                         ) {
-                            Text(if (profile.isFollowing) "Following" else "Follow")
+                            Text(stringResource(if (profile.isFollowing) R.string.action_following else R.string.action_follow))
                         }
                     }
                 }
@@ -558,9 +562,9 @@ private fun ProfileHeader(
                 .padding(horizontal = Spacing.lg, vertical = Spacing.md),
             horizontalArrangement = Arrangement.spacedBy(Spacing.xl),
         ) {
-            ProfileStat(count = profile._count.posts, label = "Posts")
-            ProfileStat(count = profile._count.followers, label = "Followers", onClick = onFollowersClick)
-            ProfileStat(count = profile._count.following, label = "Following", onClick = onFollowingClick)
+            ProfileStat(count = profile._count.posts, label = stringResource(R.string.profile_posts))
+            ProfileStat(count = profile._count.followers, label = stringResource(R.string.profile_followers), onClick = onFollowersClick)
+            ProfileStat(count = profile._count.following, label = stringResource(R.string.profile_following), onClick = onFollowingClick)
         }
 
         HorizontalDivider()

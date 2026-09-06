@@ -79,4 +79,17 @@
     <string name="home_trending_on_zrp">Sedang tren di ZRP</string>
     <string name="right_panel_who_to_follow">Yang bisa diikuti</string>
     <string name="home_discover_music">Temukan musik baru</string>
+    <string name="action_follow">Ikuti</string>
+    <string name="action_following">Mengikuti</string>
+    <string name="action_message">Pesan</string>
+    <string name="profile_posts">Postingan</string>
+    <string name="profile_followers">Pengikut</string>
+    <string name="profile_following">Mengikuti</string>
+    <string name="profile_more_actions">Tindakan lainnya</string>
+    <string name="profile_mute">Bisukan</string>
+    <string name="profile_unmute">Batalkan bisukan</string>
+    <string name="profile_block">Blokir</string>
+    <string name="profile_unblock">Batalkan blokir</string>
+    <string name="nav_bookmarks">Markah</string>
+    <string name="nav_sign_out">Keluar</string>
 </resources>

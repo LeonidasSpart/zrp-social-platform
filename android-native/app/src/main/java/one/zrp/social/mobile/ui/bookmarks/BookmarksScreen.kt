@@ -30,8 +30,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.BookmarksRepository
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
@@ -77,7 +79,7 @@ fun BookmarksScreen(
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Text(
-                text = "Bookmarks",
+                text = stringResource(R.string.nav_bookmarks),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 4.dp),
             )
@@ -180,6 +182,8 @@ fun BookmarksScreen(
 
     val deletePostId = deletingPostId
     if (deletePostId != null) {
+        // English-only on purpose - matches PostCard.tsx's own hardcoded,
+        // untranslated delete-confirmation dialog (see HomeScreen.kt).
         AlertDialog(
             onDismissRequest = { if (!isDeletingPost) deletingPostId = null },
             title = { Text("Delete post?") },

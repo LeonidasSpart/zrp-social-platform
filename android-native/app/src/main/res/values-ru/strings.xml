@@ -79,4 +79,17 @@
     <string name="home_trending_on_zrp">В тренде на ZRP</string>
     <string name="right_panel_who_to_follow">На кого подписаться</string>
     <string name="home_discover_music">Открыть новую музыку</string>
+    <string name="action_follow">Подписаться</string>
+    <string name="action_following">Подписан</string>
+    <string name="action_message">Написать</string>
+    <string name="profile_posts">Публикации</string>
+    <string name="profile_followers">Подписчики</string>
+    <string name="profile_following">Подписки</string>
+    <string name="profile_more_actions">Другие действия</string>
+    <string name="profile_mute">Отключить уведомления</string>
+    <string name="profile_unmute">Включить уведомления</string>
+    <string name="profile_block">Заблокировать</string>
+    <string name="profile_unblock">Разблокировать</string>
+    <string name="nav_bookmarks">Закладки</string>
+    <string name="nav_sign_out">Выйти</string>
 </resources>
