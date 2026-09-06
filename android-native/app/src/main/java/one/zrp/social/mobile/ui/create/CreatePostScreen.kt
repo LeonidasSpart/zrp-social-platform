@@ -11,9 +11,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -21,33 +26,43 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.GifPickerDialog
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
- * The Create tab's composer - a real POST /api/posts call, text-only
- * for now. Media attachment goes through UploadThing's presigned-
- * upload SDK on the website rather than a plain REST call, and needs
- * its own native upload path (see PostsApi.createPost's comment);
- * shipping real, working text posts now rather than an untested
- * native upload flow in the same change.
+ * The Create tab's composer - a real POST /api/posts call. Photo/video
+ * upload still goes through UploadThing's presigned-upload SDK on the
+ * website rather than a plain REST call, and needs its own native
+ * upload path (see PostsApi.createPost's comment) - but a GIF needs no
+ * upload at all (it's just a hosted URL, exactly like PostComposer.tsx's
+ * own GifPicker flow: setImageUrls([gifUrl])), so that one real media
+ * type is wired up here now rather than waiting on the harder upload
+ * problem.
  *
  * When [quotePostId] is set, this doubles as the Quote-post composer
  * reached from a post's repost menu, showing a read-only preview of
  * the real post being quoted - the same real post GET /posts/{id}
  * returns, not a locally reconstructed guess - above the text field,
- * matching the website's QuotePostModal.
+ * matching the website's QuotePostModal. QuotePostModal.tsx has no GIF
+ * picker of its own (confirmed by reading the component), so the GIF
+ * button only shows for the default composer, matching that real
+ * distinction rather than adding a feature the quote flow doesn't have.
  */
 @Composable
 fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
@@ -55,6 +70,7 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
         factory = remember(quotePostId) { CreatePostViewModelFactory(PostsRepository(), quotePostId) },
     )
     val state by viewModel.state.collectAsState()
+    var showGifPicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.posted) {
         if (state.posted) {
@@ -137,6 +153,37 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
                 .padding(top = if (quotePostId != null) Spacing.sm else 0.dp),
         )
 
+        val selectedGif = state.selectedGif
+        if (selectedGif != null) {
+            Box(
+                modifier = Modifier
+                    .padding(top = Spacing.sm)
+                    .clip(MaterialTheme.shapes.medium),
+            ) {
+                AsyncImage(
+                    model = selectedGif.url,
+                    contentDescription = selectedGif.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .height(160.dp)
+                        .fillMaxWidth(),
+                )
+                IconButton(
+                    onClick = { viewModel.onRemoveGif() },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(Spacing.xs),
+                ) {
+                    // "Remove image 1" matches PostComposer.tsx's own real,
+                    // untranslated aria-label for the first (here, only)
+                    // attached image - a GIF is stored as a normal imageUrls
+                    // entry, at index 0, so this is the exact same string a
+                    // real web user's screen reader would hear.
+                    Icon(Icons.Filled.Close, contentDescription = "Remove image 1", tint = MaterialTheme.colorScheme.onSurface)
+                }
+            }
+        }
+
         if (state.error != null) {
             Text(
                 text = state.error ?: "",
@@ -153,6 +200,23 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (quotePostId == null && selectedGif == null) {
+                // PostComposer.tsx's own GIF button is icon-only too (a
+                // FileImage icon with no visible label), with a real,
+                // translated tooltip via t("composer.addGif") - the
+                // native equivalent of a tooltip is this button's
+                // accessibility content description.
+                IconButton(onClick = { showGifPicker = true }, enabled = !state.isPosting) {
+                    Icon(
+                        Icons.Filled.Image,
+                        contentDescription = stringResource(R.string.composer_add_gif),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            } else {
+                Spacer(modifier = Modifier.size(1.dp))
+            }
+
             Text(
                 text = "${state.content.length} characters",
                 style = MaterialTheme.typography.bodySmall,
@@ -161,7 +225,7 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
 
             Button(
                 onClick = { viewModel.submit() },
-                enabled = state.content.isNotBlank() && !state.isPosting,
+                enabled = (state.content.isNotBlank() || selectedGif != null) && !state.isPosting,
                 colors = ButtonDefaults.buttonColors(containerColor = ZrpRed),
             ) {
                 if (state.isPosting) {
@@ -178,5 +242,15 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
                 }
             }
         }
+    }
+
+    if (showGifPicker) {
+        GifPickerDialog(
+            onDismiss = { showGifPicker = false },
+            onSelect = { gif ->
+                viewModel.onGifSelected(gif)
+                showGifPicker = false
+            },
+        )
     }
 }

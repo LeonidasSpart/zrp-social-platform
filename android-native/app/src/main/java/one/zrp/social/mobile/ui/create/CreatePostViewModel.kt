@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.PostsRepository
+import one.zrp.social.mobile.network.GifResult
 import one.zrp.social.mobile.network.Post
 
 data class CreatePostUiState(
@@ -17,6 +18,7 @@ data class CreatePostUiState(
     val posted: Boolean = false,
     val quotedPost: Post? = null,
     val isLoadingQuotedPost: Boolean = false,
+    val selectedGif: GifResult? = null,
 )
 
 /**
@@ -60,13 +62,26 @@ class CreatePostViewModel(
         _state.update { it.copy(content = content, error = null) }
     }
 
+    fun onGifSelected(gif: GifResult) {
+        _state.update { it.copy(selectedGif = gif, error = null) }
+    }
+
+    fun onRemoveGif() {
+        _state.update { it.copy(selectedGif = null) }
+    }
+
     fun submit() {
         val content = _state.value.content.trim()
-        if (content.isEmpty() || _state.value.isPosting) return
+        val gif = _state.value.selectedGif
+        // Matches PostComposer.tsx's own isSubmitDisabled: a post needs
+        // real text OR real media (here, an attached GIF) - not
+        // necessarily both, unlike this composer's previous
+        // content-only requirement.
+        if ((content.isEmpty() && gif == null) || _state.value.isPosting) return
 
         _state.update { it.copy(isPosting = true, error = null) }
         viewModelScope.launch {
-            repository.createPost(content, quotePostId)
+            repository.createPost(content, quotePostId, gif?.url)
                 .onSuccess {
                     _state.update { it.copy(isPosting = false, posted = true) }
                 }

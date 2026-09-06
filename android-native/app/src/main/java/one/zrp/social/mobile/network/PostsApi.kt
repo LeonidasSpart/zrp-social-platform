@@ -94,7 +94,17 @@ data class ReactionToggleRequest(val emoji: String)
 
 data class ReactionToggleResponse(val reaction: Reaction?)
 
-data class CreatePostRequest(val content: String, val quotePostId: String? = null)
+// imageUrls/mediaType mirror how PostComposer.tsx itself attaches a
+// GIF: setImageUrls([gifUrl]); setMediaType("image") - a GIF is just a
+// normal image-typed URL from the API's point of view, not a distinct
+// media kind of its own (isGifMedia on read-back is what recognizes it
+// as a GIF, from its real .gif extension, not from this field).
+data class CreatePostRequest(
+    val content: String,
+    val quotePostId: String? = null,
+    val imageUrls: List<String>? = null,
+    val mediaType: String? = null,
+)
 
 data class UpdatePostRequest(val content: String)
 

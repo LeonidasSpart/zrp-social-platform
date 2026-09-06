@@ -192,4 +192,5 @@
     <string name="hashtag_post_count">%1$d %2$s with this hashtag</string>
     <string name="hashtag_no_posts">No posts with #%1$s yet.</string>
     <string name="hashtag_back_to_home">← Back to home</string>
+    <string name="composer_add_gif">Add GIF</string>
 </resources>
