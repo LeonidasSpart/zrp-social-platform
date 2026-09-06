@@ -60,6 +60,8 @@ fun SearchScreen(
     onOpenMusic: () -> Unit,
     onOpenComments: (postId: String) -> Unit,
     onOpenQuotePost: (postId: String) -> Unit = {},
+    onOpenReposts: (postId: String) -> Unit = {},
+    onOpenQuotes: (postId: String) -> Unit = {},
 ) {
     val viewModel: SearchViewModel = viewModel(
         factory = remember { SearchViewModelFactory(SearchRepository()) },
@@ -111,6 +113,8 @@ fun SearchScreen(
                 },
                 onDeleteClick = { postId -> deletingPostId = postId },
                 onQuoteClick = onOpenQuotePost,
+                onViewReposts = onOpenReposts,
+                onViewQuotes = onOpenQuotes,
             )
         }
     }
@@ -232,6 +236,8 @@ private fun SearchResultsContent(
     onReportClick: (String) -> Unit,
     onDeleteClick: (String) -> Unit,
     onQuoteClick: (String) -> Unit,
+    onViewReposts: (String) -> Unit,
+    onViewQuotes: (String) -> Unit,
 ) {
     if (state.isSearching) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -290,6 +296,8 @@ private fun SearchResultsContent(
                     isOwnPost = state.ownUserId != null && post.author.id == state.ownUserId,
                     onDeleteClick = onDeleteClick,
                     onQuoteClick = onQuoteClick,
+                    onViewReposts = onViewReposts,
+                    onViewQuotes = onViewQuotes,
                     onClick = onCommentClick,
                     onAuthorClick = onAuthorClick,
                 )

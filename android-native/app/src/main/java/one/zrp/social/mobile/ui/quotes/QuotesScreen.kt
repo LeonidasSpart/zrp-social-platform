@@ -1,4 +1,4 @@
-package one.zrp.social.mobile.ui.bookmarks
+package one.zrp.social.mobile.ui.quotes
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,27 +32,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import one.zrp.social.mobile.data.BookmarksRepository
+import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.home.PostCard
 
 /**
- * Real saved posts from GET /bookmarks - the same list the website's
- * own Bookmarks page shows (post-bookmarks only; see
- * BookmarksRepository's KDoc for why saved comments aren't rendered
- * here yet).
+ * Real posts that quoted a given post - GET /posts/{id}/quotes, the
+ * same endpoint the website's own quotes page uses
+ * (src/app/post/[id]/quotes/page.tsx).
  */
 @Composable
-fun BookmarksScreen(
+fun QuotesScreen(
+    postId: String,
     onAuthorClick: (String) -> Unit,
     onOpenComments: (postId: String) -> Unit,
-    onBack: () -> Unit,
-    onOpenQuotePost: (postId: String) -> Unit = {},
+    onOpenQuotePost: (postId: String) -> Unit,
     onOpenReposts: (postId: String) -> Unit = {},
     onOpenQuotes: (postId: String) -> Unit = {},
+    onBack: () -> Unit,
 ) {
-    val viewModel: BookmarksViewModel = viewModel(
-        factory = remember { BookmarksViewModelFactory(BookmarksRepository()) },
+    val viewModel: QuotesViewModel = viewModel(
+        factory = remember(postId) { QuotesViewModelFactory(PostsRepository(), postId) },
     )
     val state by viewModel.state.collectAsState()
     var reportingPostId by remember { mutableStateOf<String?>(null) }
@@ -72,7 +72,7 @@ fun BookmarksScreen(
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Text(
-                text = "Bookmarks",
+                text = "Quotes",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 4.dp),
             )
@@ -100,7 +100,7 @@ fun BookmarksScreen(
             state.posts.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = state.error ?: "No bookmarks yet. Posts you save will show up here.",
+                        text = state.error ?: "No quotes yet.",
                         color = if (state.error != null) {
                             MaterialTheme.colorScheme.error
                         } else {
@@ -115,16 +115,16 @@ fun BookmarksScreen(
                     itemsIndexed(state.posts, key = { _, post -> post.id }) { _, post ->
                         PostCard(
                             post = post,
-                            onLikeClick = { postId -> viewModel.toggleLike(postId) },
+                            onLikeClick = { quotePostId -> viewModel.toggleLike(quotePostId) },
                             onCommentClick = onOpenComments,
-                            onRepostClick = { postId -> viewModel.toggleRepost(postId) },
-                            onBookmarkClick = { postId -> viewModel.toggleBookmark(postId) },
-                            onReportClick = { postId ->
-                                reportingPostId = postId
+                            onRepostClick = { quotePostId -> viewModel.toggleRepost(quotePostId) },
+                            onBookmarkClick = { quotePostId -> viewModel.toggleBookmark(quotePostId) },
+                            onReportClick = { quotePostId ->
+                                reportingPostId = quotePostId
                                 reportError = null
                             },
                             isOwnPost = state.ownUserId != null && post.author.id == state.ownUserId,
-                            onDeleteClick = { postId -> deletingPostId = postId },
+                            onDeleteClick = { quotePostId -> deletingPostId = quotePostId },
                             onQuoteClick = onOpenQuotePost,
                             onViewReposts = onOpenReposts,
                             onViewQuotes = onOpenQuotes,
@@ -150,15 +150,15 @@ fun BookmarksScreen(
         }
     }
 
-    val postId = reportingPostId
-    if (postId != null) {
+    val reportPostId = reportingPostId
+    if (reportPostId != null) {
         ReportDialog(
             isSubmitting = isSubmittingReport,
             error = reportError,
             onDismiss = { reportingPostId = null },
             onSubmit = { reason, details ->
                 isSubmittingReport = true
-                viewModel.reportPost(postId, reason, details) { result ->
+                viewModel.reportPost(reportPostId, reason, details) { result ->
                     isSubmittingReport = false
                     result
                         .onSuccess { reportingPostId = null }

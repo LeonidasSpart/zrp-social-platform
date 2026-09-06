@@ -75,6 +75,8 @@ fun PostCard(
     isOwnPost: Boolean = false,
     onDeleteClick: (String) -> Unit = {},
     onQuoteClick: (String) -> Unit = {},
+    onViewReposts: (String) -> Unit = {},
+    onViewQuotes: (String) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -199,9 +201,12 @@ fun PostCard(
                     )
                     RepostStat(
                         count = post._count.reposts,
+                        quoteCount = post._count.quotedBy ?: 0,
                         reposted = post.reposted == true,
                         onRepostToggle = { onRepostClick(post.id) },
                         onQuoteClick = { onQuoteClick(post.id) },
+                        onViewReposts = { onViewReposts(post.id) },
+                        onViewQuotes = { onViewQuotes(post.id) },
                     )
                     LikeStat(
                         liked = post.liked == true,
@@ -259,9 +264,12 @@ private fun PostStat(
 @Composable
 private fun RepostStat(
     count: Int,
+    quoteCount: Int,
     reposted: Boolean,
     onRepostToggle: () -> Unit,
     onQuoteClick: () -> Unit,
+    onViewReposts: () -> Unit,
+    onViewQuotes: () -> Unit,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     val resolvedTint = if (reposted) ZrpGreen else MaterialTheme.colorScheme.onSurfaceVariant
@@ -299,6 +307,21 @@ private fun RepostStat(
                 onClick = {
                     menuOpen = false
                     onQuoteClick()
+                },
+            )
+            HorizontalDivider()
+            DropdownMenuItem(
+                text = { Text("${formatCount(count)} reposts", style = MaterialTheme.typography.labelSmall) },
+                onClick = {
+                    menuOpen = false
+                    onViewReposts()
+                },
+            )
+            DropdownMenuItem(
+                text = { Text("${formatCount(quoteCount)} quotes", style = MaterialTheme.typography.labelSmall) },
+                onClick = {
+                    menuOpen = false
+                    onViewQuotes()
                 },
             )
         }

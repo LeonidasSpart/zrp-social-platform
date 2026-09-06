@@ -36,6 +36,8 @@ import one.zrp.social.mobile.ui.moderation.ModerationListScreen
 import one.zrp.social.mobile.ui.music.MusicScreen
 import one.zrp.social.mobile.ui.notifications.NotificationsScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
+import one.zrp.social.mobile.ui.quotes.QuotesScreen
+import one.zrp.social.mobile.ui.reposts.RepostsScreen
 import one.zrp.social.mobile.ui.search.SearchScreen
 import one.zrp.social.mobile.ui.stories.CreateStoryScreen
 import one.zrp.social.mobile.ui.stories.StoryViewerScreen
@@ -69,6 +71,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToBlockedUsers: () -> Unit = { navController.navigate("blocked-users") }
     val goToMutedUsers: () -> Unit = { navController.navigate("muted-users") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
+    val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
+    val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
     val goHome: () -> Unit = {
         navController.navigate(ZrpDestination.Home.route) {
             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -95,6 +99,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenStoryViewer = goToStoryViewer,
                     onCreateStory = goToCreateStory,
                     onOpenQuotePost = goToQuotePost,
+                    onOpenReposts = goToReposts,
+                    onOpenQuotes = goToQuotes,
                 )
             }
             composable(
@@ -106,6 +112,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenMusic = goToMusic,
                     onOpenComments = goToComments,
                     onOpenQuotePost = goToQuotePost,
+                    onOpenReposts = goToReposts,
+                    onOpenQuotes = goToQuotes,
                 )
             }
             composable(ZrpDestination.Create.route) { CreatePostScreen(onPosted = goHome) }
@@ -130,6 +138,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenBlockedUsers = goToBlockedUsers,
                     onOpenMutedUsers = goToMutedUsers,
                     onOpenQuotePost = goToQuotePost,
+                    onOpenReposts = goToReposts,
+                    onOpenQuotes = goToQuotes,
                 )
             }
             composable(
@@ -148,6 +158,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenFollowers = goToFollowers,
                     onOpenFollowing = goToFollowing,
                     onOpenQuotePost = goToQuotePost,
+                    onOpenReposts = goToReposts,
+                    onOpenQuotes = goToQuotes,
                 )
             }
             composable(
@@ -216,6 +228,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenComments = goToComments,
                     onBack = { navController.popBackStack() },
                     onOpenQuotePost = goToQuotePost,
+                    onOpenReposts = goToReposts,
+                    onOpenQuotes = goToQuotes,
                 )
             }
             composable("blocked-users") {
@@ -248,6 +262,36 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                 val postId = backStackEntry.arguments?.getString("postId")
                 if (postId != null) {
                     CreatePostScreen(quotePostId = postId, onPosted = { navController.popBackStack() })
+                }
+            }
+            composable(
+                route = "post/{postId}/reposts",
+                arguments = listOf(navArgument("postId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val postId = backStackEntry.arguments?.getString("postId")
+                if (postId != null) {
+                    RepostsScreen(
+                        postId = postId,
+                        onAuthorClick = goToProfile,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
+            }
+            composable(
+                route = "post/{postId}/quotes",
+                arguments = listOf(navArgument("postId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val postId = backStackEntry.arguments?.getString("postId")
+                if (postId != null) {
+                    QuotesScreen(
+                        postId = postId,
+                        onAuthorClick = goToProfile,
+                        onOpenComments = goToComments,
+                        onOpenQuotePost = goToQuotePost,
+                        onOpenReposts = goToReposts,
+                        onOpenQuotes = goToQuotes,
+                        onBack = { navController.popBackStack() },
+                    )
                 }
             }
         }

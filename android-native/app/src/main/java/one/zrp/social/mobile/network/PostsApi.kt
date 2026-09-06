@@ -121,4 +121,25 @@ interface PostsApi {
     // deep exactly like the list endpoints' own Post.quotePost field.
     @GET("posts/{id}")
     suspend fun getPost(@Path("id") postId: String): Post
+
+    // {items, nextCursor}, the same shape FollowListPage already models
+    // for users/{username}/followers|following - reused here rather
+    // than duplicated, since GET /posts/{id}/reposts returns the exact
+    // same real user fields (id/username/name/avatarUrl/badgeType/
+    // isFollowing), just for "who reposted this post" instead of "who
+    // follows this account".
+    @GET("posts/{id}/reposts")
+    suspend fun getReposts(
+        @Path("id") postId: String,
+        @Query("cursor") cursor: String?,
+    ): FollowListPage
+
+    // {items, nextCursor} of real Post objects (the quote posts
+    // themselves) - the same envelope UserPostsPage already models for
+    // GET /users/{username}/posts.
+    @GET("posts/{id}/quotes")
+    suspend fun getQuotes(
+        @Path("id") postId: String,
+        @Query("cursor") cursor: String?,
+    ): UserPostsPage
 }
