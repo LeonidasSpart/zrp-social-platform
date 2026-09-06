@@ -116,6 +116,48 @@ class HomeViewModel(private val repository: PostsRepository) : ViewModel() {
         }
     }
 
+    fun toggleBookmark(tab: FeedTab, postId: String) {
+        val stateFlow = stateFlowFor(tab)
+        val previousPosts = stateFlow.value.posts
+
+        stateFlow.update { state ->
+            state.copy(posts = state.posts.map { post -> if (post.id == postId) applyOptimisticBookmark(post) else post })
+        }
+
+        viewModelScope.launch {
+            repository.toggleBookmark(postId).onFailure {
+                stateFlow.update { it.copy(posts = previousPosts) }
+            }
+        }
+    }
+
+    // A deleted post disappears from the feed the moment the server
+    // confirms it, the same as the website's own onUpdate(deletedPostId)
+    // callback - no optimistic removal, since there's nothing sensible
+    // to roll back to if the delete actually fails (re-inserting a post
+    // at its old scroll position reads as more broken than just leaving
+    // it visible until the real answer comes back).
+    fun deletePost(tab: FeedTab, postId: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            val result = repository.deletePost(postId)
+            result.onSuccess {
+                val stateFlow = stateFlowFor(tab)
+                stateFlow.update { it.copy(posts = it.posts.filterNot { post -> post.id == postId }) }
+            }
+            onResult(result)
+        }
+    }
+
+    fun reportPost(postId: String, reason: String, details: String?, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            onResult(repository.reportPost(postId, reason, details))
+        }
+    }
+
+    private fun applyOptimisticBookmark(post: Post): Post {
+        return post.copy(bookmarked = post.bookmarked != true)
+    }
+
     private fun applyFreshPage(stateFlow: MutableStateFlow<HomeUiState>, page: PostsPage) {
         stateFlow.update {
             it.copy(

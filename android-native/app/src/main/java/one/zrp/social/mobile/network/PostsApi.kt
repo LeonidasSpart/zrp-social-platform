@@ -1,6 +1,7 @@
 package one.zrp.social.mobile.network
 
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -47,6 +48,12 @@ data class Post(
     // as "reposted state unknown until you act on it here" rather than
     // pre-highlighting reposts the backend itself doesn't report yet.
     val reposted: Boolean? = null,
+    // Same story as `reposted` above: no list/feed endpoint attaches a
+    // per-viewer bookmark flag (only GET /bookmarks, which returns the
+    // bookmarked posts themselves, not a flag on arbitrary posts), so
+    // this is always null from a feed response and only becomes known
+    // once toggled here or the post is viewed via the Bookmarks screen.
+    val bookmarked: Boolean? = null,
 )
 
 data class PostsPage(
@@ -57,6 +64,8 @@ data class PostsPage(
 data class LikeResponse(val liked: Boolean)
 
 data class RepostResponse(val reposted: Boolean)
+
+data class BookmarkResponse(val bookmarked: Boolean)
 
 data class CreatePostRequest(val content: String)
 
@@ -85,6 +94,16 @@ interface PostsApi {
 
     @POST("posts/{id}/repost")
     suspend fun toggleRepost(@Path("id") postId: String): RepostResponse
+
+    @POST("posts/{id}/bookmark")
+    suspend fun toggleBookmark(@Path("id") postId: String): BookmarkResponse
+
+    // The website only lets a post's own author delete it - enforced
+    // server-side (403 for anyone else), not just hidden client-side -
+    // so this is safe to expose from any PostCard; the backend is the
+    // real gate.
+    @DELETE("posts/{id}")
+    suspend fun deletePost(@Path("id") postId: String)
 
     // Text-only for now - the same JSON body shape POST /api/posts
     // accepts for content, just without imageUrl/imageUrls. Media

@@ -23,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
 import one.zrp.social.mobile.ui.home.HomeScreen
@@ -58,6 +59,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToStoryViewer: (String) -> Unit = { userId -> navController.navigate("stories/$userId") }
     val goToCreateStory: () -> Unit = { navController.navigate("create-story") }
     val goToMusic: () -> Unit = { navController.navigate("music") }
+    val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goHome: () -> Unit = {
         navController.navigate(ZrpDestination.Home.route) {
             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -107,6 +109,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onAuthorClick = goToProfile,
                     onMessageClick = goToConversation,
                     onOpenComments = goToComments,
+                    onOpenBookmarks = goToBookmarks,
                 )
             }
             composable(
@@ -121,6 +124,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onAuthorClick = goToProfile,
                     onMessageClick = goToConversation,
                     onOpenComments = goToComments,
+                    onOpenBookmarks = goToBookmarks,
                 )
             }
             composable(
@@ -154,6 +158,13 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             }
             composable("music") {
                 MusicScreen(onBack = { navController.popBackStack() })
+            }
+            composable("bookmarks") {
+                BookmarksScreen(
+                    onAuthorClick = goToProfile,
+                    onOpenComments = goToComments,
+                    onBack = { navController.popBackStack() },
+                )
             }
             composable(
                 route = "post/{postId}/comments",

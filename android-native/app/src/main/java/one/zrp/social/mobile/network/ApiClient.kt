@@ -86,4 +86,6 @@ object ApiClient {
     val musicApi: MusicApi by lazy { retrofit.create(MusicApi::class.java) }
     val pushApi: PushApi by lazy { retrofit.create(PushApi::class.java) }
     val commentsApi: CommentsApi by lazy { retrofit.create(CommentsApi::class.java) }
+    val reportsApi: ReportsApi by lazy { retrofit.create(ReportsApi::class.java) }
+    val bookmarksApi: BookmarksApi by lazy { retrofit.create(BookmarksApi::class.java) }
 }

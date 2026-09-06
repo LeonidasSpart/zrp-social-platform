@@ -13,9 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -42,6 +46,7 @@ import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.TouchTarget
 import one.zrp.social.mobile.ui.theme.IconSize
+import one.zrp.social.mobile.ui.theme.ZrpBlue
 import one.zrp.social.mobile.ui.theme.ZrpGreen
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatCount
@@ -61,6 +66,10 @@ fun PostCard(
     onRepostClick: (String) -> Unit,
     onClick: (String) -> Unit,
     onAuthorClick: (String) -> Unit,
+    onBookmarkClick: (String) -> Unit = {},
+    onReportClick: (String) -> Unit = {},
+    isOwnPost: Boolean = false,
+    onDeleteClick: (String) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -81,26 +90,64 @@ fun PostCard(
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { onAuthorClick(post.author.username) },
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(
-                        text = post.author.name ?: post.author.username,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    VerifiedBadge(badgeType = post.author.badgeType, modifier = Modifier.padding(start = 3.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "@${post.author.username}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "· ${formatRelativeTime(post.createdAt)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { onAuthorClick(post.author.username) },
+                    ) {
+                        Text(
+                            text = post.author.name ?: post.author.username,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                        )
+                        VerifiedBadge(badgeType = post.author.badgeType, modifier = Modifier.padding(start = 3.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "@${post.author.username}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "· ${formatRelativeTime(post.createdAt)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                        )
+                    }
+
+                    // The website shows Edit/Delete for the post's own
+                    // author and Report for everyone else - isOwnPost
+                    // mirrors that same isAuthor branch. Only ProfileScreen
+                    // currently knows per-post ownership cheaply (every
+                    // post on a profile page IS that profile's own
+                    // author's post); Home/Search/Bookmarks default to
+                    // the Report action, matching what the website shows
+                    // for a post you don't own.
+                    if (isOwnPost) {
+                        IconButton(onClick = { onDeleteClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
+                            Icon(
+                                imageVector = Icons.Filled.DeleteOutline,
+                                contentDescription = "Delete post",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(IconSize.sm),
+                            )
+                        }
+                    } else {
+                        IconButton(onClick = { onReportClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
+                            Icon(
+                                imageVector = Icons.Filled.Flag,
+                                contentDescription = "Report post",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(IconSize.sm),
+                            )
+                        }
+                    }
                 }
 
                 if (post.content.isNotBlank()) {
@@ -148,6 +195,10 @@ fun PostCard(
                         liked = post.liked == true,
                         count = post._count.likes,
                         onClick = { onLikeClick(post.id) },
+                    )
+                    BookmarkButton(
+                        bookmarked = post.bookmarked == true,
+                        onClick = { onBookmarkClick(post.id) },
                     )
                 }
             }
@@ -223,6 +274,20 @@ private fun LikeStat(liked: Boolean, count: Int, onClick: () -> Unit) {
             text = formatCount(count),
             style = MaterialTheme.typography.bodySmall,
             color = if (liked) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+// No count shown, matching the website's own bookmark control (a
+// plain toggle icon, never a bookmark tally next to a post).
+@Composable
+private fun BookmarkButton(bookmarked: Boolean, onClick: () -> Unit) {
+    IconButton(onClick = onClick, modifier = Modifier.size(TouchTarget.min)) {
+        Icon(
+            imageVector = if (bookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+            contentDescription = if (bookmarked) "Remove bookmark" else "Bookmark",
+            tint = if (bookmarked) ZrpBlue else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(IconSize.sm),
         )
     }
 }

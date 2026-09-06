@@ -1,39 +1,35 @@
 package one.zrp.social.mobile.data
 
 import one.zrp.social.mobile.network.ApiClient
-import one.zrp.social.mobile.network.BlockToggleResponse
 import one.zrp.social.mobile.network.BookmarkResponse
 import one.zrp.social.mobile.network.CreateReportRequest
-import one.zrp.social.mobile.network.FollowToggleResponse
 import one.zrp.social.mobile.network.LikeResponse
+import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.PostsPage
 import one.zrp.social.mobile.network.RepostResponse
-import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.network.zrpErrorMessage
 import retrofit2.HttpException
 
 /**
- * Thin wrapper around UsersApi (and the shared like toggle) for the
- * Profile screen - the signed-in user's own profile or someone else's,
- * both backed by the same real endpoints the website uses.
+ * The website's Bookmarks page (src/app/bookmarks/page.tsx) shows both
+ * saved posts and saved comments in one merged list; this screen only
+ * has a real comment-viewing surface reached through a comment's
+ * parent post, not a standalone comment view, so it shows the saved
+ * posts (the overwhelming common case) and leaves saved comments for a
+ * later, dedicated pass rather than inventing a bare-comment screen.
+ * GET /bookmarks doesn't mark each post's own `bookmarked` flag (only
+ * `liked` gets that treatment server-side) even though every post
+ * here is definitionally bookmarked, so that's corrected here rather
+ * than passed through as a misleading null.
  */
-class ProfileRepository {
-    suspend fun getOwnUsername(): Result<String> = runCatching {
-        val session = ApiClient.authApi.getSession()
-        session.user?.username ?: throw IllegalStateException("Not signed in")
-    }
-
-    suspend fun getProfile(username: String): Result<UserProfile> = runCatching {
-        ApiClient.usersApi.getProfile(username)
-    }
-
-    suspend fun getUserPosts(username: String, cursor: String?): Result<PostsPage> = runCatching {
-        val page = ApiClient.usersApi.getUserPosts(username, cursor)
-        PostsPage(posts = page.items ?: emptyList(), nextCursor = page.nextCursor)
-    }
-
-    suspend fun toggleFollow(username: String): Result<FollowToggleResponse> = runCatching {
-        ApiClient.usersApi.toggleFollow(username)
+class BookmarksRepository {
+    suspend fun getBookmarkedPosts(cursor: String?): Result<PostsPage> = runCatching {
+        val page = ApiClient.bookmarksApi.getBookmarks(cursor)
+        val posts = page.items
+            .filter { it.type == "post" }
+            .mapNotNull { it.post }
+            .map { post: Post -> post.copy(bookmarked = true) }
+        PostsPage(posts = posts, nextCursor = page.nextCursor)
     }
 
     suspend fun toggleLike(postId: String): Result<LikeResponse> = runCatching {
@@ -48,10 +44,6 @@ class ProfileRepository {
         ApiClient.postsApi.toggleBookmark(postId)
     }
 
-    suspend fun deletePost(postId: String): Result<Unit> = runCatching {
-        ApiClient.postsApi.deletePost(postId)
-    }
-
     suspend fun reportPost(postId: String, reason: String, details: String?): Result<Unit> {
         return try {
             ApiClient.reportsApi.createReport(CreateReportRequest(postId = postId, reason = reason, details = details))
@@ -61,9 +53,5 @@ class ProfileRepository {
         } catch (e: Exception) {
             Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
         }
-    }
-
-    suspend fun toggleBlock(username: String): Result<BlockToggleResponse> = runCatching {
-        ApiClient.usersApi.toggleBlock(username)
     }
 }

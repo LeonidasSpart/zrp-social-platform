@@ -21,6 +21,7 @@ data class ProfileUiState(
     val nextCursor: String? = null,
     val endReached: Boolean = false,
     val isTogglingFollow: Boolean = false,
+    val isTogglingBlock: Boolean = false,
     val error: String? = null,
 )
 
@@ -156,6 +157,59 @@ class ProfileViewModel(
                 _state.update { it.copy(posts = previousPosts) }
             }
         }
+    }
+
+    fun toggleBlock() {
+        val username = resolvedUsername ?: return
+        val profile = _state.value.profile ?: return
+        if (_state.value.isTogglingBlock) return
+
+        _state.update { it.copy(isTogglingBlock = true) }
+        viewModelScope.launch {
+            repository.toggleBlock(username)
+                .onSuccess { result ->
+                    _state.update {
+                        it.copy(isTogglingBlock = false, profile = profile.copy(isBlocked = result.blocked))
+                    }
+                }
+                .onFailure {
+                    _state.update { it.copy(isTogglingBlock = false) }
+                }
+        }
+    }
+
+    fun toggleBookmark(postId: String) {
+        val previousPosts = _state.value.posts
+
+        _state.update { state ->
+            state.copy(posts = state.posts.map { post -> if (post.id == postId) applyOptimisticBookmark(post) else post })
+        }
+
+        viewModelScope.launch {
+            repository.toggleBookmark(postId).onFailure {
+                _state.update { it.copy(posts = previousPosts) }
+            }
+        }
+    }
+
+    fun deletePost(postId: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            val result = repository.deletePost(postId)
+            result.onSuccess {
+                _state.update { it.copy(posts = it.posts.filterNot { post -> post.id == postId }) }
+            }
+            onResult(result)
+        }
+    }
+
+    fun reportPost(postId: String, reason: String, details: String?, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            onResult(repository.reportPost(postId, reason, details))
+        }
+    }
+
+    private fun applyOptimisticBookmark(post: Post): Post {
+        return post.copy(bookmarked = post.bookmarked != true)
     }
 
     private fun applyOptimisticLike(post: Post): Post {

@@ -21,7 +21,10 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -36,7 +39,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -47,6 +52,7 @@ import coil.compose.AsyncImage
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.home.PostCard
 import one.zrp.social.mobile.ui.theme.Spacing
@@ -68,6 +74,7 @@ fun ProfileScreen(
     onAuthorClick: (String) -> Unit,
     onMessageClick: (partnerId: String, partnerUsername: String) -> Unit,
     onOpenComments: (postId: String) -> Unit,
+    onOpenBookmarks: () -> Unit = {},
 ) {
     val viewModel: ProfileViewModel = viewModel(
         factory = remember(username) { ProfileViewModelFactory(ProfileRepository(), username) },
@@ -102,6 +109,12 @@ fun ProfileScreen(
                 }
             }
             else -> {
+                var reportingPostId by remember { mutableStateOf<String?>(null) }
+                var isSubmittingReport by remember { mutableStateOf(false) }
+                var reportError by remember { mutableStateOf<String?>(null) }
+                var deletingPostId by remember { mutableStateOf<String?>(null) }
+                var isDeletingPost by remember { mutableStateOf(false) }
+
                 val listState = rememberLazyListState()
 
                 val shouldLoadMore by remember {
@@ -122,9 +135,12 @@ fun ProfileScreen(
                             profile = profile,
                             isOwnProfile = state.isOwnProfile,
                             isTogglingFollow = state.isTogglingFollow,
+                            isTogglingBlock = state.isTogglingBlock,
                             onFollowClick = { viewModel.toggleFollow() },
+                            onBlockClick = { viewModel.toggleBlock() },
                             onLogoutClick = onLogout,
                             onMessageClick = { onMessageClick(profile.id, profile.username) },
+                            onBookmarksClick = onOpenBookmarks,
                         )
                     }
 
@@ -134,6 +150,13 @@ fun ProfileScreen(
                             onLikeClick = { postId -> viewModel.toggleLike(postId) },
                             onCommentClick = onOpenComments,
                             onRepostClick = { postId -> viewModel.toggleRepost(postId) },
+                            onBookmarkClick = { postId -> viewModel.toggleBookmark(postId) },
+                            onReportClick = { postId ->
+                                reportingPostId = postId
+                                reportError = null
+                            },
+                            isOwnPost = state.isOwnProfile,
+                            onDeleteClick = { postId -> deletingPostId = postId },
                             onClick = onOpenComments,
                             onAuthorClick = onAuthorClick,
                         )
@@ -151,6 +174,54 @@ fun ProfileScreen(
                             }
                         }
                     }
+                }
+
+                val reportPostId = reportingPostId
+                if (reportPostId != null) {
+                    ReportDialog(
+                        isSubmitting = isSubmittingReport,
+                        error = reportError,
+                        onDismiss = { reportingPostId = null },
+                        onSubmit = { reason, details ->
+                            isSubmittingReport = true
+                            viewModel.reportPost(reportPostId, reason, details) { result ->
+                                isSubmittingReport = false
+                                result
+                                    .onSuccess { reportingPostId = null }
+                                    .onFailure { reportError = it.message }
+                            }
+                        },
+                    )
+                }
+
+                val deletePostId = deletingPostId
+                if (deletePostId != null) {
+                    AlertDialog(
+                        onDismissRequest = { if (!isDeletingPost) deletingPostId = null },
+                        title = { Text("Delete post?") },
+                        text = { Text("This can't be undone.") },
+                        confirmButton = {
+                            if (isDeletingPost) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                            } else {
+                                TextButton(onClick = {
+                                    isDeletingPost = true
+                                    viewModel.deletePost(deletePostId) { result ->
+                                        isDeletingPost = false
+                                        deletingPostId = null
+                                        result.onFailure { /* left visible; the row itself still shows the post on failure */ }
+                                    }
+                                }) {
+                                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                                }
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { deletingPostId = null }, enabled = !isDeletingPost) {
+                                Text("Cancel")
+                            }
+                        },
+                    )
                 }
             }
         }
@@ -176,9 +247,12 @@ private fun ProfileHeader(
     profile: UserProfile,
     isOwnProfile: Boolean,
     isTogglingFollow: Boolean,
+    isTogglingBlock: Boolean,
     onFollowClick: () -> Unit,
+    onBlockClick: () -> Unit,
     onLogoutClick: () -> Unit,
     onMessageClick: () -> Unit,
+    onBookmarksClick: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -215,10 +289,22 @@ private fun ProfileHeader(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (isOwnProfile) {
+                        IconButton(onClick = onBookmarksClick) {
+                            Icon(Icons.Filled.Bookmark, contentDescription = "Bookmarks")
+                        }
+
                         TextButton(onClick = onLogoutClick) {
                             Text("Log out")
                         }
                     } else {
+                        IconButton(onClick = onBlockClick, enabled = !isTogglingBlock) {
+                            Icon(
+                                imageVector = Icons.Filled.Block,
+                                contentDescription = if (profile.isBlocked) "Unblock" else "Block",
+                                tint = if (profile.isBlocked) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+
                         IconButton(onClick = onMessageClick) {
                             Icon(Icons.Filled.MailOutline, contentDescription = "Message")
                         }

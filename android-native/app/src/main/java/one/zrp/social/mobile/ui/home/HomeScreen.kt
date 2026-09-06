@@ -23,12 +23,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.data.PostsRepository
+import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.stories.StoriesRail
 
 /**
@@ -105,6 +108,10 @@ fun HomeScreen(
                             .padding(24.dp),
                     )
                 } else {
+                    var reportingPostId by remember { mutableStateOf<String?>(null) }
+                    var isSubmittingReport by remember { mutableStateOf(false) }
+                    var reportError by remember { mutableStateOf<String?>(null) }
+
                     LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
                         itemsIndexed(state.posts, key = { _, post -> post.id }) { _, post ->
                             PostCard(
@@ -112,6 +119,11 @@ fun HomeScreen(
                                 onLikeClick = { postId -> viewModel.toggleLike(activeTab, postId) },
                                 onCommentClick = onOpenComments,
                                 onRepostClick = { postId -> viewModel.toggleRepost(activeTab, postId) },
+                                onBookmarkClick = { postId -> viewModel.toggleBookmark(activeTab, postId) },
+                                onReportClick = { postId ->
+                                    reportingPostId = postId
+                                    reportError = null
+                                },
                                 onClick = onOpenComments,
                                 onAuthorClick = onAuthorClick,
                             )
@@ -129,6 +141,24 @@ fun HomeScreen(
                                 }
                             }
                         }
+                    }
+
+                    val postId = reportingPostId
+                    if (postId != null) {
+                        ReportDialog(
+                            isSubmitting = isSubmittingReport,
+                            error = reportError,
+                            onDismiss = { reportingPostId = null },
+                            onSubmit = { reason, details ->
+                                isSubmittingReport = true
+                                viewModel.reportPost(postId, reason, details) { result ->
+                                    isSubmittingReport = false
+                                    result
+                                        .onSuccess { reportingPostId = null }
+                                        .onFailure { reportError = it.message }
+                                }
+                            },
+                        )
                     }
                 }
 
