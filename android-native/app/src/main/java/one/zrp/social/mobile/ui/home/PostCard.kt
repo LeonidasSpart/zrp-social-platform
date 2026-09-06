@@ -3,8 +3,10 @@ package one.zrp.social.mobile.ui.home
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +16,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ChatBubbleOutline
@@ -53,7 +57,9 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.Post
+import one.zrp.social.mobile.network.ReactionToggleRequest
 import one.zrp.social.mobile.network.TranslateRequest
+import one.zrp.social.mobile.ui.components.AddReactionDialog
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
@@ -131,6 +137,45 @@ fun PostCard(
                 translateError = true
             } finally {
                 translating = false
+            }
+        }
+    }
+
+    // Reactions are the same kind of local, per-card state as
+    // translation above - PostCard.tsx fetches them per-card via its
+    // own useEffect keyed on post.id, never through a shared post-list
+    // ViewModel.
+    var reactions by remember(post.id) { mutableStateOf<Map<String, Int>>(emptyMap()) }
+    var userReaction by remember(post.id) { mutableStateOf<String?>(null) }
+    var reactionsLoading by remember(post.id) { mutableStateOf(true) }
+    var showAddReactionDialog by remember(post.id) { mutableStateOf(false) }
+
+    suspend fun refreshReactions() {
+        try {
+            val currentUserId = runCatching { ApiClient.authApi.getSession().user?.id }.getOrNull()
+            val list = ApiClient.postsApi.getReactions(post.id)
+            reactions = list.groupingBy { it.emoji }.eachCount()
+            userReaction = list.firstOrNull { it.user.id == currentUserId }?.emoji
+        } catch (e: Exception) {
+            // The website only console.errors a failed fetch too - no
+            // user-facing error state for reactions, unlike translation.
+        } finally {
+            reactionsLoading = false
+        }
+    }
+
+    LaunchedEffect(post.id) {
+        refreshReactions()
+    }
+
+    fun handleReaction(emoji: String) {
+        coroutineScope.launch {
+            try {
+                ApiClient.postsApi.toggleReaction(post.id, ReactionToggleRequest(emoji))
+                refreshReactions()
+                showAddReactionDialog = false
+            } catch (e: Exception) {
+                // Same silent handling as the website's own catch block.
             }
         }
     }
@@ -342,7 +387,41 @@ fun PostCard(
                         onClick = { onBookmarkClick(post.id) },
                     )
                 }
+
+                if (!reactionsLoading) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                        modifier = Modifier
+                            .padding(top = Spacing.xs)
+                            .horizontalScroll(rememberScrollState()),
+                    ) {
+                        reactions.entries.sortedByDescending { it.value }.forEach { (emoji, count) ->
+                            ReactionPill(
+                                emoji = emoji,
+                                count = count,
+                                isOwn = userReaction == emoji,
+                                onClick = { handleReaction(emoji) },
+                            )
+                        }
+                        IconButton(onClick = { showAddReactionDialog = true }, modifier = Modifier.size(TouchTarget.min)) {
+                            Icon(
+                                imageVector = Icons.Filled.Add,
+                                contentDescription = "Add reaction",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(IconSize.sm),
+                            )
+                        }
+                    }
+                }
             }
+        }
+
+        if (showAddReactionDialog) {
+            AddReactionDialog(
+                onDismiss = { showAddReactionDialog = false },
+                onSubmit = { emoji -> handleReaction(emoji) },
+            )
         }
 
         HorizontalDivider(modifier = Modifier.padding(top = Spacing.md))
@@ -560,6 +639,33 @@ private fun BookmarkButton(bookmarked: Boolean, onClick: () -> Unit) {
             contentDescription = if (bookmarked) "Remove bookmark" else "Bookmark",
             tint = if (bookmarked) ZrpBlue else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(IconSize.sm),
+        )
+    }
+}
+
+// One pill per distinct emoji already on the post (website: a rounded
+// button per emoji key in the reduced reaction counts, tapping any of
+// them - including a different emoji than your own - calls the same
+// toggle endpoint for that specific emoji, exactly mirrored here rather
+// than restricting taps to only your own reaction, a restriction the
+// real UI doesn't have.
+@Composable
+private fun ReactionPill(emoji: String, count: Int, isOwn: Boolean, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.extraLarge)
+            .background(if (isOwn) ZrpRed.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceContainerHigh)
+            .border(1.dp, if (isOwn) ZrpRed else MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.extraLarge)
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.sm, vertical = 4.dp),
+    ) {
+        Text(text = emoji, style = MaterialTheme.typography.bodyMedium)
+        Text(
+            text = count.toString(),
+            style = MaterialTheme.typography.labelSmall,
+            color = if (isOwn) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 4.dp),
         )
     }
 }
