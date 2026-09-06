@@ -23,10 +23,13 @@ import one.zrp.social.mobile.data.AuthRepository
 import one.zrp.social.mobile.ui.auth.AuthUiState
 import one.zrp.social.mobile.ui.auth.AuthViewModel
 import one.zrp.social.mobile.ui.auth.AuthViewModelFactory
+import one.zrp.social.mobile.ui.auth.ForgotPasswordScreen
 import one.zrp.social.mobile.ui.auth.LoginScreen
 import one.zrp.social.mobile.ui.auth.SignupScreen
 import one.zrp.social.mobile.ui.navigation.ZrpNavHost
 import one.zrp.social.mobile.ui.theme.ZrpSocialTheme
+
+private enum class LoggedOutScreen { LOGIN, SIGNUP, FORGOT_PASSWORD }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,17 +73,20 @@ fun ZrpSocialApp() {
 
             when (authState) {
                 is AuthUiState.LoggedOut -> {
-                    var showSignup by remember { mutableStateOf(false) }
-                    if (showSignup) {
-                        SignupScreen(
-                            authViewModel = authViewModel,
-                            onSignIn = { showSignup = false },
-                        )
-                    } else {
-                        LoginScreen(
+                    var loggedOutScreen by remember { mutableStateOf(LoggedOutScreen.LOGIN) }
+                    when (loggedOutScreen) {
+                        LoggedOutScreen.LOGIN -> LoginScreen(
                             formState = loginForm,
                             onLogin = { identifier, password -> authViewModel.login(identifier, password) },
-                            onSignUp = { showSignup = true },
+                            onSignUp = { loggedOutScreen = LoggedOutScreen.SIGNUP },
+                            onForgotPassword = { loggedOutScreen = LoggedOutScreen.FORGOT_PASSWORD },
+                        )
+                        LoggedOutScreen.SIGNUP -> SignupScreen(
+                            authViewModel = authViewModel,
+                            onSignIn = { loggedOutScreen = LoggedOutScreen.LOGIN },
+                        )
+                        LoggedOutScreen.FORGOT_PASSWORD -> ForgotPasswordScreen(
+                            onSignIn = { loggedOutScreen = LoggedOutScreen.LOGIN },
                         )
                     }
                 }

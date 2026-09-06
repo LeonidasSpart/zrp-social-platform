@@ -44,6 +44,14 @@ data class CheckUsernameResponse(val available: Boolean, val invalid: Boolean? =
 // ─── Resend verification (POST /auth/resend-verification) ──────────
 data class ResendVerificationRequest(val email: String)
 
+// ─── Forgot password (POST /auth/forgot-password) ───────────────────
+// Always returns the same generic 200 message regardless of whether
+// the account exists (see the real route's own comment: "For
+// security, always return a generic message") - there is no
+// success/failure branch to model here beyond a network error.
+data class ForgotPasswordRequest(val email: String)
+data class ForgotPasswordResponse(val message: String?)
+
 data class SessionUser(
     val id: String?,
     val username: String?,
@@ -87,4 +95,7 @@ interface AuthApi {
 
     @POST("auth/resend-verification")
     suspend fun resendVerification(@Body request: ResendVerificationRequest): RegisterResponse
+
+    @POST("auth/forgot-password")
+    suspend fun forgotPassword(@Body request: ForgotPasswordRequest): ForgotPasswordResponse
 }

@@ -212,4 +212,11 @@
     <string name="auth_err_try_again">Terjadi kesalahan. Silakan coba lagi.</string>
     <string name="auth_no_account">Belum punya akun?</string>
     <string name="auth_sign_up">Daftar</string>
+    <string name="auth_forgot_password">Lupa kata sandi?</string>
+    <string name="forgot_password_subtitle">Atur ulang kata sandi Anda</string>
+    <string name="forgot_password_success_default">Periksa email Anda untuk instruksi pengaturan ulang</string>
+    <string name="forgot_password_email_address">Alamat Email</string>
+    <string name="forgot_password_sending">Mengirim...</string>
+    <string name="forgot_password_send_reset_link">Kirim Tautan Pengaturan Ulang</string>
+    <string name="forgot_password_remember_password">Ingat kata sandi Anda?</string>
 </resources>

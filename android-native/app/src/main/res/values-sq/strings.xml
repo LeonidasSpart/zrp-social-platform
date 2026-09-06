@@ -212,4 +212,11 @@
     <string name="auth_err_try_again">Diçka shkoi gabim. Ju lutemi riprovojeni.</string>
     <string name="auth_no_account">Nuk keni një llogari?</string>
     <string name="auth_sign_up">Regjistrohu</string>
+    <string name="auth_forgot_password">Harruat fjalëkalimin?</string>
+    <string name="forgot_password_subtitle">Rivendos fjalëkalimin tënd</string>
+    <string name="forgot_password_success_default">Kontrollo email-in për udhëzimet e rivendosjes</string>
+    <string name="forgot_password_email_address">Adresa Email</string>
+    <string name="forgot_password_sending">Duke dërguar...</string>
+    <string name="forgot_password_send_reset_link">Dërgo Lidhjen e Rivendosjes</string>
+    <string name="forgot_password_remember_password">E mban mend fjalëkalimin?</string>
 </resources>

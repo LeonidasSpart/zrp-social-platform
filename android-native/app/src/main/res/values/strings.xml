@@ -228,4 +228,11 @@
     <string name="auth_err_try_again">Something went wrong. Please try again.</string>
     <string name="auth_no_account">Don\'t have an account?</string>
     <string name="auth_sign_up">Sign up</string>
+    <string name="auth_forgot_password">Forgot password?</string>
+    <string name="forgot_password_subtitle">Reset your password</string>
+    <string name="forgot_password_success_default">Check your email for reset instructions</string>
+    <string name="forgot_password_email_address">Email Address</string>
+    <string name="forgot_password_sending">Sending...</string>
+    <string name="forgot_password_send_reset_link">Send Reset Link</string>
+    <string name="forgot_password_remember_password">Remember your password?</string>
 </resources>

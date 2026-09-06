@@ -212,4 +212,11 @@
     <string name="auth_err_try_again">Une erreur est survenue. Veuillez réessayer.</string>
     <string name="auth_no_account">Vous n\'avez pas de compte ?</string>
     <string name="auth_sign_up">S\'inscrire</string>
+    <string name="auth_forgot_password">Mot de passe oublié ?</string>
+    <string name="forgot_password_subtitle">Réinitialisez votre mot de passe</string>
+    <string name="forgot_password_success_default">Consultez votre e-mail pour les instructions de réinitialisation</string>
+    <string name="forgot_password_email_address">Adresse e-mail</string>
+    <string name="forgot_password_sending">Envoi en cours...</string>
+    <string name="forgot_password_send_reset_link">Envoyer le lien de réinitialisation</string>
+    <string name="forgot_password_remember_password">Vous vous souvenez de votre mot de passe ?</string>
 </resources>

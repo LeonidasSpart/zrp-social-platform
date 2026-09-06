@@ -212,4 +212,11 @@
     <string name="auth_err_try_again">Qualcosa è andato storto. Riprova.</string>
     <string name="auth_no_account">Non hai un account?</string>
     <string name="auth_sign_up">Registrati</string>
+    <string name="auth_forgot_password">Password dimenticata?</string>
+    <string name="forgot_password_subtitle">Reimposta la tua password</string>
+    <string name="forgot_password_success_default">Controlla la tua email per le istruzioni di reimpostazione</string>
+    <string name="forgot_password_email_address">Indirizzo email</string>
+    <string name="forgot_password_sending">Invio in corso...</string>
+    <string name="forgot_password_send_reset_link">Invia link di reimpostazione</string>
+    <string name="forgot_password_remember_password">Ricordi la tua password?</string>
 </resources>

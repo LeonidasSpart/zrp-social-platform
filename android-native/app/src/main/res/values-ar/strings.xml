@@ -212,4 +212,11 @@
     <string name="auth_err_try_again">حدث خطأ ما. يرجى المحاولة مرة أخرى.</string>
     <string name="auth_no_account">ليس لديك حساب؟</string>
     <string name="auth_sign_up">إنشاء حساب</string>
+    <string name="auth_forgot_password">هل نسيت كلمة المرور؟</string>
+    <string name="forgot_password_subtitle">أعد تعيين كلمة المرور الخاصة بك</string>
+    <string name="forgot_password_success_default">تحقق من بريدك الإلكتروني للحصول على تعليمات إعادة التعيين</string>
+    <string name="forgot_password_email_address">عنوان البريد الإلكتروني</string>
+    <string name="forgot_password_sending">جارٍ الإرسال...</string>
+    <string name="forgot_password_send_reset_link">إرسال رابط إعادة التعيين</string>
+    <string name="forgot_password_remember_password">هل تتذكر كلمة المرور؟</string>
 </resources>

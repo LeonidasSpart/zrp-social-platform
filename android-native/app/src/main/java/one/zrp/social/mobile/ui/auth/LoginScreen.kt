@@ -54,6 +54,7 @@ fun LoginScreen(
     formState: LoginFormState,
     onLogin: (identifier: String, password: String) -> Unit,
     onSignUp: () -> Unit,
+    onForgotPassword: () -> Unit,
 ) {
     var identifier by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
@@ -122,6 +123,12 @@ fun LoginScreen(
                 .fillMaxWidth()
                 .padding(top = 12.dp),
         )
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            TextButton(onClick = onForgotPassword) {
+                Text(stringResource(R.string.auth_forgot_password))
+            }
+        }
 
         if (formState is LoginFormState.Error) {
             Text(

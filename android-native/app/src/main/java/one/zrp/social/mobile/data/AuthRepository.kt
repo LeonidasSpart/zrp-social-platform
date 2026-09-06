@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import one.zrp.social.mobile.network.ApiErrorBody
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.CheckUsernameResponse
+import one.zrp.social.mobile.network.ForgotPasswordRequest
 import one.zrp.social.mobile.network.LoginRequest
 import one.zrp.social.mobile.network.MobileUser
 import one.zrp.social.mobile.network.RegisterRequest
@@ -76,6 +77,14 @@ class AuthRepository {
         } catch (e: Exception) {
             ResendVerificationResult.FAILED
         }
+    }
+
+    // Always succeeds with the same generic message regardless of
+    // whether the account exists (the real route's own comment: "For
+    // security, always return a generic message") - only a real
+    // network failure surfaces as an error here.
+    suspend fun forgotPassword(email: String): Result<String?> = runCatching {
+        ApiClient.authApi.forgotPassword(ForgotPasswordRequest(email)).message
     }
 
     private fun extractErrorMessage(e: HttpException): String? {
