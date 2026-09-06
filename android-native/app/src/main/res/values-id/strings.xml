@@ -137,4 +137,27 @@
     <string name="following_title">Mengikuti</string>
     <string name="following_empty">Belum mengikuti siapa pun.</string>
     <string name="messages_you">Anda: %1$s</string>
+    <string name="delete_account_title">Hapus Akun</string>
+    <string name="delete_account_scheduled_message">Akun Anda dijadwalkan untuk dihapus pada %1$s.</string>
+    <string name="delete_account_cancel_anytime_hint">Anda dapat membatalkan permintaan ini kapan saja sebelum tanggal penghapusan.</string>
+    <string name="delete_account_cancel_deletion_request">Batalkan Permintaan Penghapusan</string>
+    <string name="delete_account_delete_now">Hapus Sekarang</string>
+    <string name="delete_account_permanent_warning">Tindakan ini bersifat permanen dan tidak dapat dibatalkan.</string>
+    <string name="delete_account_deleting_will_intro">Menghapus akun Anda akan:</string>
+    <string name="delete_account_bullet1">Menghapus semua postingan, komentar, suka, repost, dan bookmark Anda.</string>
+    <string name="delete_account_bullet2">Menghapus semua pesan dan percakapan Anda.</string>
+    <string name="delete_account_bullet3">Menghapus informasi profil, avatar, dan pengaturan Anda.</string>
+    <string name="delete_account_bullet4">Membatalkan semua koneksi pengikut dan yang Anda ikuti.</string>
+    <string name="delete_account_bullet5">Mengeluarkan Anda dari semua grup dan komunitas.</string>
+    <string name="delete_account_schedule_hint_pre">Jika Anda memilih untuk melanjutkan, akun Anda akan dijadwalkan untuk dihapus dalam</string>
+    <string name="delete_account_thirty_days_bold">30 hari</string>
+    <string name="delete_account_schedule_hint_post">Anda dapat membatalkan permintaan ini kapan saja selama periode 30 hari.</string>
+    <string name="delete_account_confirm_deletion_title">Konfirmasi Penghapusan</string>
+    <string name="delete_account_confirm_instruction_pre">Ketik</string>
+    <string name="delete_account_confirm_instruction_post">untuk mengonfirmasi bahwa Anda ingin menghapus akun Anda secara permanen.</string>
+    <string name="delete_account_type_delete_to_confirm">Ketik &quot;DELETE&quot; untuk mengonfirmasi</string>
+    <string name="delete_account_deleting">Menghapus...</string>
+    <string name="delete_account_permanently_delete">Hapus Akun Secara Permanen</string>
+    <string name="delete_account_request_deletion">Ajukan Penghapusan Akun</string>
+    <string name="delete_account_err_type_delete_confirm">Silakan ketik &quot;DELETE&quot; untuk mengonfirmasi.</string>
 </resources>

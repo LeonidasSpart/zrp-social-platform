@@ -32,3 +32,24 @@ fun formatRelativeTime(iso: String): String {
         DateUtils.FORMAT_ABBREV_RELATIVE,
     ).toString()
 }
+
+private val absoluteDateFormat = ThreadLocal.withInitial {
+    SimpleDateFormat("MMMM d, yyyy", Locale.US)
+}
+
+/**
+ * Matches settings/delete/page.tsx's own
+ * `toLocaleDateString("en-US", {year: "numeric", month: "long", day: "numeric"})`
+ * exactly, English month name included - that call hardcodes "en-US"
+ * regardless of the viewer's own language, so this stays unlocalized
+ * on purpose rather than a translation gap.
+ */
+fun formatAbsoluteDateEnglish(iso: String): String {
+    val date = try {
+        isoFormat.get()!!.parse(iso)
+    } catch (_: Exception) {
+        null
+    } ?: return ""
+
+    return absoluteDateFormat.get()!!.format(date)
+}

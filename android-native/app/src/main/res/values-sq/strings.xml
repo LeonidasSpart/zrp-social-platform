@@ -137,4 +137,27 @@
     <string name="following_title">Të ndjekurit</string>
     <string name="following_empty">Nuk po ndiqni asnjë përdorues ende.</string>
     <string name="messages_you">Ju: %1$s</string>
+    <string name="delete_account_title">Fshi Llogarinë</string>
+    <string name="delete_account_scheduled_message">Llogaria jote është planifikuar për fshirje më %1$s.</string>
+    <string name="delete_account_cancel_anytime_hint">Mund ta anulosh këtë kërkesë në çdo kohë përpara datës së fshirjes.</string>
+    <string name="delete_account_cancel_deletion_request">Anulo Kërkesën për Fshirje</string>
+    <string name="delete_account_delete_now">Fshi Tani</string>
+    <string name="delete_account_permanent_warning">Ky veprim është i përhershëm dhe nuk mund të zhbëhet.</string>
+    <string name="delete_account_deleting_will_intro">Fshirja e llogarisë tënde do të:</string>
+    <string name="delete_account_bullet1">Fshijë të gjitha postimet, komentet, pëlqimet, ripostimet dhe të preferuarat e tua.</string>
+    <string name="delete_account_bullet2">Heqë të gjitha mesazhet dhe bisedat e tua.</string>
+    <string name="delete_account_bullet3">Fshijë informacionin e profilit tënd, avatarin dhe cilësimet.</string>
+    <string name="delete_account_bullet4">Anulojë të gjitha lidhjet e tua me ndjekës dhe ndjekjet.</string>
+    <string name="delete_account_bullet5">Të heqë nga të gjitha grupet dhe komunitetet.</string>
+    <string name="delete_account_schedule_hint_pre">Nëse zgjedh të vazhdosh, llogaria jote do të planifikohet për fshirje brenda</string>
+    <string name="delete_account_thirty_days_bold">30 ditësh</string>
+    <string name="delete_account_schedule_hint_post">Mund ta anulosh këtë kërkesë në çdo kohë gjatë kësaj periudhe 30-ditore.</string>
+    <string name="delete_account_confirm_deletion_title">Konfirmo Fshirjen</string>
+    <string name="delete_account_confirm_instruction_pre">Shkruaj</string>
+    <string name="delete_account_confirm_instruction_post">për të konfirmuar që dëshiron ta fshish përgjithmonë llogarinë tënde.</string>
+    <string name="delete_account_type_delete_to_confirm">Shkruaj &quot;DELETE&quot; për të konfirmuar</string>
+    <string name="delete_account_deleting">Duke fshirë...</string>
+    <string name="delete_account_permanently_delete">Fshi Përgjithmonë Llogarinë</string>
+    <string name="delete_account_request_deletion">Kërko Fshirjen e Llogarisë</string>
+    <string name="delete_account_err_type_delete_confirm">Ju lutemi shkruani &quot;DELETE&quot; për të konfirmuar.</string>
 </resources>

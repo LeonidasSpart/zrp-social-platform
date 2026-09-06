@@ -137,4 +137,27 @@
     <string name="following_title">Abonnements</string>
     <string name="following_empty">Ne suit personne pour le moment.</string>
     <string name="messages_you">Vous : %1$s</string>
+    <string name="delete_account_title">Supprimer le compte</string>
+    <string name="delete_account_scheduled_message">Votre compte est programmé pour suppression le %1$s.</string>
+    <string name="delete_account_cancel_anytime_hint">Vous pouvez annuler cette demande à tout moment avant la date de suppression.</string>
+    <string name="delete_account_cancel_deletion_request">Annuler la demande de suppression</string>
+    <string name="delete_account_delete_now">Supprimer maintenant</string>
+    <string name="delete_account_permanent_warning">Cette action est irréversible et ne peut pas être annulée.</string>
+    <string name="delete_account_deleting_will_intro">La suppression de votre compte entraînera :</string>
+    <string name="delete_account_bullet1">La suppression de toutes vos publications, commentaires, likes, reposts et favoris.</string>
+    <string name="delete_account_bullet2">La suppression de tous vos messages et conversations.</string>
+    <string name="delete_account_bullet3">La suppression de vos informations de profil, avatar et paramètres.</string>
+    <string name="delete_account_bullet4">L\'annulation de toutes vos connexions d\'abonnés et d\'abonnements.</string>
+    <string name="delete_account_bullet5">Votre retrait de tous les groupes et communautés.</string>
+    <string name="delete_account_schedule_hint_pre">Si vous choisissez de continuer, votre compte sera programmé pour suppression dans</string>
+    <string name="delete_account_thirty_days_bold">30 jours</string>
+    <string name="delete_account_schedule_hint_post">Vous pouvez annuler cette demande à tout moment pendant cette période de 30 jours.</string>
+    <string name="delete_account_confirm_deletion_title">Confirmer la suppression</string>
+    <string name="delete_account_confirm_instruction_pre">Tapez</string>
+    <string name="delete_account_confirm_instruction_post">pour confirmer que vous souhaitez supprimer définitivement votre compte.</string>
+    <string name="delete_account_type_delete_to_confirm">Tapez « DELETE » pour confirmer</string>
+    <string name="delete_account_deleting">Suppression en cours...</string>
+    <string name="delete_account_permanently_delete">Supprimer définitivement le compte</string>
+    <string name="delete_account_request_deletion">Demander la suppression du compte</string>
+    <string name="delete_account_err_type_delete_confirm">Veuillez taper « DELETE » pour confirmer.</string>
 </resources>

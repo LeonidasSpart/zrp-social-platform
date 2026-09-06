@@ -137,4 +137,27 @@
     <string name="following_title">يتابع</string>
     <string name="following_empty">لا تتابع أي شخص بعد.</string>
     <string name="messages_you">أنت: %1$s</string>
+    <string name="delete_account_title">حذف الحساب</string>
+    <string name="delete_account_scheduled_message">حسابك مُجدوَل للحذف في %1$s.</string>
+    <string name="delete_account_cancel_anytime_hint">يمكنك إلغاء هذا الطلب في أي وقت قبل تاريخ الحذف.</string>
+    <string name="delete_account_cancel_deletion_request">إلغاء طلب الحذف</string>
+    <string name="delete_account_delete_now">احذف الآن</string>
+    <string name="delete_account_permanent_warning">هذا الإجراء نهائي ولا يمكن التراجع عنه.</string>
+    <string name="delete_account_deleting_will_intro">حذف حسابك سوف:</string>
+    <string name="delete_account_bullet1">يحذف جميع منشوراتك وتعليقاتك وإعجاباتك وإعادة نشرك وعناصرك المحفوظة.</string>
+    <string name="delete_account_bullet2">يزيل جميع رسائلك ومحادثاتك.</string>
+    <string name="delete_account_bullet3">يحذف معلومات ملفك الشخصي وصورتك الرمزية وإعداداتك.</string>
+    <string name="delete_account_bullet4">يلغي جميع روابط متابعيك ومن تتابعهم.</string>
+    <string name="delete_account_bullet5">يزيلك من جميع المجموعات والمجتمعات.</string>
+    <string name="delete_account_schedule_hint_pre">إذا اخترت المتابعة، سيتم جدولة حسابك للحذف خلال</string>
+    <string name="delete_account_thirty_days_bold">30 يومًا</string>
+    <string name="delete_account_schedule_hint_post">يمكنك إلغاء هذا الطلب في أي وقت خلال فترة الـ30 يومًا هذه.</string>
+    <string name="delete_account_confirm_deletion_title">تأكيد الحذف</string>
+    <string name="delete_account_confirm_instruction_pre">اكتب</string>
+    <string name="delete_account_confirm_instruction_post">لتأكيد رغبتك في حذف حسابك نهائيًا.</string>
+    <string name="delete_account_type_delete_to_confirm">اكتب &quot;DELETE&quot; للتأكيد</string>
+    <string name="delete_account_deleting">جارٍ الحذف...</string>
+    <string name="delete_account_permanently_delete">حذف الحساب نهائيًا</string>
+    <string name="delete_account_request_deletion">طلب حذف الحساب</string>
+    <string name="delete_account_err_type_delete_confirm">يرجى كتابة &quot;DELETE&quot; للتأكيد.</string>
 </resources>

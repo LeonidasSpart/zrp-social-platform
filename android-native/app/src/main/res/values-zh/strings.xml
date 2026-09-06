@@ -137,4 +137,27 @@
     <string name="following_title">关注中</string>
     <string name="following_empty">你还没有关注任何人。</string>
     <string name="messages_you">你: %1$s</string>
+    <string name="delete_account_title">删除账户</string>
+    <string name="delete_account_scheduled_message">您的账户已计划于 %1$s 删除。</string>
+    <string name="delete_account_cancel_anytime_hint">您可以在删除日期之前随时取消此请求。</string>
+    <string name="delete_account_cancel_deletion_request">取消删除请求</string>
+    <string name="delete_account_delete_now">立即删除</string>
+    <string name="delete_account_permanent_warning">此操作为永久性操作，无法撤销。</string>
+    <string name="delete_account_deleting_will_intro">删除您的账户将会：</string>
+    <string name="delete_account_bullet1">删除您的所有帖子、评论、点赞、转发和收藏。</string>
+    <string name="delete_account_bullet2">移除您的所有消息和对话。</string>
+    <string name="delete_account_bullet3">删除您的个人资料信息、头像和设置。</string>
+    <string name="delete_account_bullet4">取消您所有的关注者和关注关系。</string>
+    <string name="delete_account_bullet5">将您从所有群组和社区中移除。</string>
+    <string name="delete_account_schedule_hint_pre">如果您选择继续，您的账户将被安排在</string>
+    <string name="delete_account_thirty_days_bold">30 天后</string>
+    <string name="delete_account_schedule_hint_post">删除。您可以在这 30 天内随时取消此请求。</string>
+    <string name="delete_account_confirm_deletion_title">确认删除</string>
+    <string name="delete_account_confirm_instruction_pre">输入</string>
+    <string name="delete_account_confirm_instruction_post">以确认您要永久删除您的账户。</string>
+    <string name="delete_account_type_delete_to_confirm">输入“DELETE”以确认</string>
+    <string name="delete_account_deleting">删除中...</string>
+    <string name="delete_account_permanently_delete">永久删除账户</string>
+    <string name="delete_account_request_deletion">申请删除账户</string>
+    <string name="delete_account_err_type_delete_confirm">请输入“DELETE”以确认。</string>
 </resources>

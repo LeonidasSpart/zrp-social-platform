@@ -153,4 +153,27 @@
     <string name="following_title">Following</string>
     <string name="following_empty">Not following anyone yet.</string>
     <string name="messages_you">You: %1$s</string>
+    <string name="delete_account_title">Delete Account</string>
+    <string name="delete_account_scheduled_message">Your account is scheduled for deletion on %1$s.</string>
+    <string name="delete_account_cancel_anytime_hint">You can cancel this request at any time before the deletion date.</string>
+    <string name="delete_account_cancel_deletion_request">Cancel Deletion Request</string>
+    <string name="delete_account_delete_now">Delete Now</string>
+    <string name="delete_account_permanent_warning">This action is permanent and cannot be undone.</string>
+    <string name="delete_account_deleting_will_intro">Deleting your account will:</string>
+    <string name="delete_account_bullet1">Delete all your posts, comments, likes, reposts, and bookmarks.</string>
+    <string name="delete_account_bullet2">Remove all your messages and conversations.</string>
+    <string name="delete_account_bullet3">Delete your profile information, avatar, and settings.</string>
+    <string name="delete_account_bullet4">Cancel all your followers and following connections.</string>
+    <string name="delete_account_bullet5">Remove you from all groups and communities.</string>
+    <string name="delete_account_schedule_hint_pre">If you choose to proceed, your account will be scheduled for deletion in</string>
+    <string name="delete_account_thirty_days_bold">30 days</string>
+    <string name="delete_account_schedule_hint_post">You can cancel this request at any time during the 30-day period.</string>
+    <string name="delete_account_confirm_deletion_title">Confirm Deletion</string>
+    <string name="delete_account_confirm_instruction_pre">Type</string>
+    <string name="delete_account_confirm_instruction_post">to confirm you want to permanently delete your account.</string>
+    <string name="delete_account_type_delete_to_confirm">Type &quot;DELETE&quot; to confirm</string>
+    <string name="delete_account_deleting">Deleting...</string>
+    <string name="delete_account_permanently_delete">Permanently Delete Account</string>
+    <string name="delete_account_request_deletion">Request Account Deletion</string>
+    <string name="delete_account_err_type_delete_confirm">Please type &quot;DELETE&quot; to confirm.</string>
 </resources>

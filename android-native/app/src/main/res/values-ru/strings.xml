@@ -137,4 +137,27 @@
     <string name="following_title">Подписки</string>
     <string name="following_empty">Вы пока ни на кого не подписаны.</string>
     <string name="messages_you">вы: %1$s</string>
+    <string name="delete_account_title">Удалить аккаунт</string>
+    <string name="delete_account_scheduled_message">Ваш аккаунт запланирован к удалению %1$s.</string>
+    <string name="delete_account_cancel_anytime_hint">Вы можете отменить этот запрос в любое время до даты удаления.</string>
+    <string name="delete_account_cancel_deletion_request">Отменить запрос на удаление</string>
+    <string name="delete_account_delete_now">Удалить сейчас</string>
+    <string name="delete_account_permanent_warning">Это действие необратимо и не может быть отменено.</string>
+    <string name="delete_account_deleting_will_intro">Удаление аккаунта приведёт к следующему:</string>
+    <string name="delete_account_bullet1">Будут удалены все ваши публикации, комментарии, лайки, репосты и закладки.</string>
+    <string name="delete_account_bullet2">Будут удалены все ваши сообщения и переписки.</string>
+    <string name="delete_account_bullet3">Будет удалена информация профиля, аватар и настройки.</string>
+    <string name="delete_account_bullet4">Будут отменены все связи подписчиков и подписок.</string>
+    <string name="delete_account_bullet5">Вы будете удалены из всех групп и сообществ.</string>
+    <string name="delete_account_schedule_hint_pre">Если вы продолжите, ваш аккаунт будет запланирован к удалению через</string>
+    <string name="delete_account_thirty_days_bold">30 дней</string>
+    <string name="delete_account_schedule_hint_post">Вы можете отменить этот запрос в любое время в течение этих 30 дней.</string>
+    <string name="delete_account_confirm_deletion_title">Подтвердите удаление</string>
+    <string name="delete_account_confirm_instruction_pre">Введите</string>
+    <string name="delete_account_confirm_instruction_post">чтобы подтвердить окончательное удаление вашего аккаунта.</string>
+    <string name="delete_account_type_delete_to_confirm">Введите «DELETE» для подтверждения</string>
+    <string name="delete_account_deleting">Удаление...</string>
+    <string name="delete_account_permanently_delete">Удалить аккаунт навсегда</string>
+    <string name="delete_account_request_deletion">Запросить удаление аккаунта</string>
+    <string name="delete_account_err_type_delete_confirm">Пожалуйста, введите «DELETE» для подтверждения.</string>
 </resources>
