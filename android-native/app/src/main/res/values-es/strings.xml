@@ -119,4 +119,14 @@
     <string name="moderation_muted_explanation">Los usuarios que silencies no podrán interactuar contigo, y sus publicaciones se ocultarán de tu feed.</string>
     <string name="moderation_muted_count">%1$d silenciado(s)</string>
     <string name="moderation_muted_on">Silenciado el %1$s</string>
+    <string name="music_title">ZRP Music</string>
+    <string name="music_trending">Tendencias ahora</string>
+    <string name="music_recently_played">Escuchado recientemente</string>
+    <string name="music_new_releases">Nuevos lanzamientos</string>
+    <string name="music_liked">Música que te gusta</string>
+    <string name="music_verified_artist">Artista verificado</string>
+    <string name="music_like">Me gusta</string>
+    <string name="music_pause">Pausa</string>
+    <string name="music_play">Reproducir</string>
+    <string name="music_unlike">Ya no me gusta</string>
 </resources>

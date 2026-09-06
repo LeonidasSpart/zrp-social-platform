@@ -119,4 +119,14 @@
     <string name="moderation_muted_explanation">Pengguna yang Anda bisukan tidak akan dapat berinteraksi dengan Anda, dan postingan mereka akan disembunyikan dari feed Anda.</string>
     <string name="moderation_muted_count">%1$d dibisukan</string>
     <string name="moderation_muted_on">Dibisukan %1$s</string>
+    <string name="music_title">ZRP Music</string>
+    <string name="music_trending">Sedang Tren</string>
+    <string name="music_recently_played">Baru Diputar</string>
+    <string name="music_new_releases">Rilisan Baru</string>
+    <string name="music_liked">Musik yang Disukai</string>
+    <string name="music_verified_artist">Artis terverifikasi</string>
+    <string name="music_like">Suka</string>
+    <string name="music_pause">Jeda</string>
+    <string name="music_play">Putar</string>
+    <string name="music_unlike">Batalkan suka</string>
 </resources>

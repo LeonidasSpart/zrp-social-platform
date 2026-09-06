@@ -119,4 +119,14 @@
     <string name="moderation_muted_explanation">Пользователи, которых вы отключили, не смогут взаимодействовать с вами, а их публикации будут скрыты из вашей ленты.</string>
     <string name="moderation_muted_count">Отключено: %1$d</string>
     <string name="moderation_muted_on">Отключено %1$s</string>
+    <string name="music_title">ZRP Music</string>
+    <string name="music_trending">Сейчас в тренде</string>
+    <string name="music_recently_played">Недавно прослушанное</string>
+    <string name="music_new_releases">Новые релизы</string>
+    <string name="music_liked">Понравившаяся музыка</string>
+    <string name="music_verified_artist">Подтвержденный артист</string>
+    <string name="music_like">Нравится</string>
+    <string name="music_pause">Пауза</string>
+    <string name="music_play">Воспроизвести</string>
+    <string name="music_unlike">Убрать из понравившихся</string>
 </resources>

@@ -41,10 +41,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MusicRepository
 import one.zrp.social.mobile.network.MusicTrack
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -74,7 +76,7 @@ fun MusicScreen(onBack: () -> Unit) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Text(
-                text = "ZRP Music",
+                text = stringResource(R.string.music_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 4.dp),
             )
@@ -99,6 +101,11 @@ fun MusicScreen(onBack: () -> Unit) {
                 }
                 !hasAnyTracks -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        // "No tracks available yet." stays English-only on purpose -
+                        // the website's own music.shell.emptyTitle/emptyBody point the
+                        // user at Music Studio to upload the first track, a flow this
+                        // app doesn't expose, so reusing that copy verbatim would be
+                        // misleading here.
                         Text(
                             text = state.error ?: "No tracks available yet.",
                             color = if (state.error != null) {
@@ -115,7 +122,7 @@ fun MusicScreen(onBack: () -> Unit) {
                         if (state.trending.isNotEmpty()) {
                             item {
                                 MusicSection(
-                                    title = "Trending",
+                                    title = stringResource(R.string.music_trending),
                                     tracks = state.trending,
                                     currentTrackId = state.currentTrack?.id,
                                     onTrackClick = { viewModel.onTrackClick(it) },
@@ -125,7 +132,7 @@ fun MusicScreen(onBack: () -> Unit) {
                         if (state.recentlyPlayed.isNotEmpty()) {
                             item {
                                 MusicSection(
-                                    title = "Recently Played",
+                                    title = stringResource(R.string.music_recently_played),
                                     tracks = state.recentlyPlayed,
                                     currentTrackId = state.currentTrack?.id,
                                     onTrackClick = { viewModel.onTrackClick(it) },
@@ -135,7 +142,7 @@ fun MusicScreen(onBack: () -> Unit) {
                         if (state.newReleases.isNotEmpty()) {
                             item {
                                 MusicSection(
-                                    title = "New Releases",
+                                    title = stringResource(R.string.music_new_releases),
                                     tracks = state.newReleases,
                                     currentTrackId = state.currentTrack?.id,
                                     onTrackClick = { viewModel.onTrackClick(it) },
@@ -145,7 +152,7 @@ fun MusicScreen(onBack: () -> Unit) {
                         if (state.likedPreview.isNotEmpty()) {
                             item {
                                 MusicSection(
-                                    title = "Liked Songs",
+                                    title = stringResource(R.string.music_liked),
                                     tracks = state.likedPreview,
                                     currentTrackId = state.currentTrack?.id,
                                     onTrackClick = { viewModel.onTrackClick(it) },
@@ -248,7 +255,7 @@ private fun TrackCard(track: MusicTrack, isCurrent: Boolean, onClick: () -> Unit
             if (track.artist.verified) {
                 Icon(
                     imageVector = Icons.Filled.VerifiedUser,
-                    contentDescription = "Verified artist",
+                    contentDescription = stringResource(R.string.music_verified_artist),
                     tint = ZrpRed,
                     modifier = Modifier
                         .padding(start = 3.dp)
@@ -322,7 +329,7 @@ private fun MiniPlayerBar(
                     if (track.artist.verified) {
                         Icon(
                             imageVector = Icons.Filled.VerifiedUser,
-                            contentDescription = "Verified artist",
+                            contentDescription = stringResource(R.string.music_verified_artist),
                             tint = ZrpRed,
                             modifier = Modifier
                                 .padding(start = 3.dp)
@@ -335,7 +342,7 @@ private fun MiniPlayerBar(
             IconButton(onClick = onLikeClick) {
                 Icon(
                     imageVector = if (track.liked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                    contentDescription = "Like",
+                    contentDescription = stringResource(if (track.liked) R.string.music_unlike else R.string.music_like),
                     tint = if (track.liked) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -346,7 +353,7 @@ private fun MiniPlayerBar(
                 } else {
                     Icon(
                         imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                        contentDescription = if (isPlaying) "Pause" else "Play",
+                        contentDescription = stringResource(if (isPlaying) R.string.music_pause else R.string.music_play),
                         tint = ZrpRed,
                     )
                 }

@@ -119,4 +119,14 @@
     <string name="moderation_muted_explanation">Les utilisateurs que vous mettez en sourdine ne pourront pas interagir avec vous, et leurs publications seront masquées de votre fil.</string>
     <string name="moderation_muted_count">%1$d en sourdine</string>
     <string name="moderation_muted_on">En sourdine depuis le %1$s</string>
+    <string name="music_title">ZRP Music</string>
+    <string name="music_trending">Tendances du moment</string>
+    <string name="music_recently_played">Écoutés récemment</string>
+    <string name="music_new_releases">Nouveautés</string>
+    <string name="music_liked">Musique aimée</string>
+    <string name="music_verified_artist">Artiste vérifié</string>
+    <string name="music_like">J\'aime</string>
+    <string name="music_pause">Pause</string>
+    <string name="music_play">Lecture</string>
+    <string name="music_unlike">Je n\'aime plus</string>
 </resources>

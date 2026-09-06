@@ -119,4 +119,14 @@
     <string name="moderation_muted_explanation">Nutzer, die du stummschaltest, können nicht mit dir interagieren, und ihre Beiträge werden aus deinem Feed ausgeblendet.</string>
     <string name="moderation_muted_count">%1$d stumm</string>
     <string name="moderation_muted_on">Stummgeschaltet am %1$s</string>
+    <string name="music_title">ZRP Music</string>
+    <string name="music_trending">Aktuell angesagt</string>
+    <string name="music_recently_played">Zuletzt gehört</string>
+    <string name="music_new_releases">Neuerscheinungen</string>
+    <string name="music_liked">Gefällt mir Musik</string>
+    <string name="music_verified_artist">Verifizierter Künstler</string>
+    <string name="music_like">Gefällt mir</string>
+    <string name="music_pause">Pause</string>
+    <string name="music_play">Abspielen</string>
+    <string name="music_unlike">Gefällt mir nicht mehr</string>
 </resources>
