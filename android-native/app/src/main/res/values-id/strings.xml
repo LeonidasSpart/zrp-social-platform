@@ -129,4 +129,12 @@
     <string name="music_pause">Jeda</string>
     <string name="music_play">Putar</string>
     <string name="music_unlike">Batalkan suka</string>
+    <string name="composer_placeholder_default">Apa yang terjadi? Gunakan #hashtag dan @mention</string>
+    <string name="composer_post_button">Kirim</string>
+    <string name="comments_title">Komentar</string>
+    <string name="followers_title">Pengikut</string>
+    <string name="followers_empty">Belum ada pengikut.</string>
+    <string name="following_title">Mengikuti</string>
+    <string name="following_empty">Belum mengikuti siapa pun.</string>
+    <string name="messages_you">Anda: %1$s</string>
 </resources>

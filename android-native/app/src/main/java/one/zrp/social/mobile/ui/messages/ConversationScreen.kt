@@ -194,12 +194,17 @@ fun ConversationScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
-                        text = replyingTo.content.ifBlank { if (replyingTo.imageUrl != null) "Photo" else "" },
+                        // "📷 Image" stays English-only on purpose - matches
+                        // ChatInterface.tsx's own hardcoded, untranslated reply-preview
+                        // fallback for an image sent with no caption.
+                        text = replyingTo.content.ifBlank { if (replyingTo.imageUrl != null) "📷 Image" else "" },
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
                     )
                 }
                 IconButton(onClick = { viewModel.cancelReply() }) {
+                    // "Cancel reply" stays English-only on purpose - matches
+                    // ChatInterface.tsx's own hardcoded, untranslated aria-label.
                     Icon(Icons.Filled.Close, contentDescription = "Cancel reply")
                 }
             }
@@ -228,9 +233,12 @@ fun ConversationScreen(
                 if (state.isSending) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                 } else {
+                    // "Send message" stays English-only on purpose - matches
+                    // ChatInterface.tsx's own hardcoded, untranslated aria-label
+                    // (aria-label="Send message" on its send button).
                     Icon(
                         imageVector = Icons.Filled.Send,
-                        contentDescription = "Send",
+                        contentDescription = "Send message",
                         tint = ZrpRed,
                     )
                 }
@@ -241,6 +249,9 @@ fun ConversationScreen(
     val editMessageId = state.editingMessageId
     val editMessageContent = state.messages.find { it.id == editMessageId }?.content
     if (editMessageId != null && editMessageContent != null) {
+        // "Edit message" stays English-only on purpose - ChatInterface.tsx has no
+        // equivalent dialog title at all, since web edits a message inline (an
+        // in-place textarea replacing the bubble) rather than through a modal.
         EditPostDialog(
             initialContent = editMessageContent,
             isSubmitting = state.isSavingEdit,
@@ -339,7 +350,10 @@ private fun MessageBubble(
                                 .padding(start = 6.dp),
                         ) {
                             Text(
-                                text = replyTo.content.ifBlank { if (replyTo.imageUrl != null) "Photo" else "" },
+                                // "📷 Image" stays English-only on purpose - matches
+                                // ChatInterface.tsx's own hardcoded, untranslated
+                                // reply-reference fallback.
+                                text = replyTo.content.ifBlank { if (replyTo.imageUrl != null) "📷 Image" else "" },
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (isOwnMessage) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,

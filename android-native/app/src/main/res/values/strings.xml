@@ -145,4 +145,12 @@
     <string name="music_pause">Pause</string>
     <string name="music_play">Play</string>
     <string name="music_unlike">Unlike</string>
+    <string name="composer_placeholder_default">What\'s happening? Use #hashtags and @mentions</string>
+    <string name="composer_post_button">Post</string>
+    <string name="comments_title">Comments</string>
+    <string name="followers_title">Followers</string>
+    <string name="followers_empty">No followers yet.</string>
+    <string name="following_title">Following</string>
+    <string name="following_empty">Not following anyone yet.</string>
+    <string name="messages_you">You: %1$s</string>
 </resources>

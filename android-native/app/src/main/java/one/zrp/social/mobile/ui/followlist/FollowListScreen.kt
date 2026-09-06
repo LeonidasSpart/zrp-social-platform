@@ -31,9 +31,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.VerifiedBadge
@@ -72,7 +74,9 @@ fun FollowListScreen(
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Text(
-                text = if (mode == FollowListMode.FOLLOWERS) "Followers" else "Following",
+                text = stringResource(
+                    if (mode == FollowListMode.FOLLOWERS) R.string.followers_title else R.string.following_title,
+                ),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 4.dp),
             )
@@ -99,11 +103,9 @@ fun FollowListScreen(
             }
             state.users.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    val emptyText = state.error ?: if (mode == FollowListMode.FOLLOWERS) {
-                        "No followers yet."
-                    } else {
-                        "Not following anyone yet."
-                    }
+                    val emptyText = state.error ?: stringResource(
+                        if (mode == FollowListMode.FOLLOWERS) R.string.followers_empty else R.string.following_empty,
+                    )
                     Text(
                         text = emptyText,
                         color = if (state.error != null) {
@@ -215,7 +217,7 @@ private fun FollowListRow(
                         color = if (isFollowing) MaterialTheme.colorScheme.onSurface else ZrpWhite,
                     )
                 } else {
-                    Text(if (isFollowing) "Following" else "Follow")
+                    Text(stringResource(if (isFollowing) R.string.action_following else R.string.action_follow))
                 }
             }
         }

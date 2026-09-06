@@ -129,4 +129,12 @@
     <string name="music_pause">暂停</string>
     <string name="music_play">播放</string>
     <string name="music_unlike">取消喜欢</string>
+    <string name="composer_placeholder_default">有什么新鲜事？使用 #话题标签 和 @提及</string>
+    <string name="composer_post_button">发布</string>
+    <string name="comments_title">评论</string>
+    <string name="followers_title">粉丝</string>
+    <string name="followers_empty">暂无粉丝。</string>
+    <string name="following_title">关注中</string>
+    <string name="following_empty">你还没有关注任何人。</string>
+    <string name="messages_you">你: %1$s</string>
 </resources>
