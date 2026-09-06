@@ -76,7 +76,7 @@ object MediaUploader {
             val parsed = runCatching { gson.fromJson(text, UploadedFileResponse::class.java) }
                 .getOrNull()
 
-            if (!response.isSuccessful || parsed?.error != null) {
+            if (!response.isSuccessful || parsed == null || parsed.error != null) {
                 throw IOException(parsed?.error ?: "Upload failed (HTTP ${response.code}).")
             }
 
