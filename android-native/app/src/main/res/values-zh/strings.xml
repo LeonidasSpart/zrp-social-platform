@@ -102,4 +102,10 @@
     <string name="stories_add_story">添加动态</string>
     <string name="stories_share_story">分享动态</string>
     <string name="stories_whats_on_your_mind">你在想什么?</string>
+    <string name="reposts_title">转发</string>
+    <string name="reposts_count">%1$d 转发</string>
+    <string name="reposts_empty">暂无转发。</string>
+    <string name="quotes_title">引用</string>
+    <string name="quotes_count">%1$d 引用</string>
+    <string name="quotes_empty">暂无引用。</string>
 </resources>

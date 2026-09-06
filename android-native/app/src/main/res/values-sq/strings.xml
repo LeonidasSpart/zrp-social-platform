@@ -102,4 +102,10 @@
     <string name="stories_add_story">Shto Storie</string>
     <string name="stories_share_story">Shpërndaj Storien</string>
     <string name="stories_whats_on_your_mind">Çfarë po mendon?</string>
+    <string name="reposts_title">Ripublikimet</string>
+    <string name="reposts_count">%1$d ripublikime</string>
+    <string name="reposts_empty">Nuk ka ripublikime ende.</string>
+    <string name="quotes_title">Citimet</string>
+    <string name="quotes_count">%1$d citime</string>
+    <string name="quotes_empty">Nuk ka citime ende.</string>
 </resources>

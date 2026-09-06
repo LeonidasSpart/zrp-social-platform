@@ -118,4 +118,10 @@
     <string name="stories_add_story">Add Story</string>
     <string name="stories_share_story">Share Story</string>
     <string name="stories_whats_on_your_mind">What\'s on your mind?</string>
+    <string name="reposts_title">Reposts</string>
+    <string name="reposts_count">%1$d reposts</string>
+    <string name="reposts_empty">No reposts yet.</string>
+    <string name="quotes_title">Quotes</string>
+    <string name="quotes_count">%1$d quotes</string>
+    <string name="quotes_empty">No quotes yet.</string>
 </resources>

@@ -102,4 +102,10 @@
     <string name="stories_add_story">Ajouter une story</string>
     <string name="stories_share_story">Partager la story</string>
     <string name="stories_whats_on_your_mind">À quoi pensez-vous ?</string>
+    <string name="reposts_title">Republications</string>
+    <string name="reposts_count">%1$d republications</string>
+    <string name="reposts_empty">Aucune republication pour le moment.</string>
+    <string name="quotes_title">Citations</string>
+    <string name="quotes_count">%1$d citations</string>
+    <string name="quotes_empty">Aucune citation pour le moment.</string>
 </resources>

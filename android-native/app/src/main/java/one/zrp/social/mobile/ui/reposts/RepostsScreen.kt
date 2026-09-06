@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,9 +31,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.VerifiedBadge
@@ -64,9 +67,15 @@ fun RepostsScreen(
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Text(
-                text = "Reposts",
+                text = stringResource(R.string.reposts_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 4.dp),
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = stringResource(R.string.reposts_count, state.users.size),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         HorizontalDivider()
@@ -92,7 +101,7 @@ fun RepostsScreen(
             state.users.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = state.error ?: "No reposts yet.",
+                        text = state.error ?: stringResource(R.string.reposts_empty),
                         color = if (state.error != null) {
                             MaterialTheme.colorScheme.error
                         } else {
@@ -149,7 +158,7 @@ fun RepostsScreen(
                                         .padding(horizontal = Spacing.sm, vertical = 4.dp),
                                 ) {
                                     Text(
-                                        text = "Following",
+                                        text = stringResource(R.string.action_following),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )

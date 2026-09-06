@@ -102,4 +102,10 @@
     <string name="stories_add_story">Tambah Kisah</string>
     <string name="stories_share_story">Bagikan Kisah</string>
     <string name="stories_whats_on_your_mind">Apa yang Anda pikirkan?</string>
+    <string name="reposts_title">Postingan Ulang</string>
+    <string name="reposts_count">%1$d postingan ulang</string>
+    <string name="reposts_empty">Belum ada postingan ulang.</string>
+    <string name="quotes_title">Kutipan</string>
+    <string name="quotes_count">%1$d kutipan</string>
+    <string name="quotes_empty">Belum ada kutipan.</string>
 </resources>

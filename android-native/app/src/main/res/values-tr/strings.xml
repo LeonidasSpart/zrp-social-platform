@@ -102,4 +102,10 @@
     <string name="stories_add_story">Hikaye Ekle</string>
     <string name="stories_share_story">Hikayeyi Paylaş</string>
     <string name="stories_whats_on_your_mind">Aklından ne geçiyor?</string>
+    <string name="reposts_title">Yeniden Paylaşımlar</string>
+    <string name="reposts_count">%1$d yeniden paylaşım</string>
+    <string name="reposts_empty">Henüz yeniden paylaşım yok.</string>
+    <string name="quotes_title">Alıntılar</string>
+    <string name="quotes_count">%1$d alıntı</string>
+    <string name="quotes_empty">Henüz alıntı yok.</string>
 </resources>
