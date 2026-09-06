@@ -108,4 +108,15 @@
     <string name="quotes_title">Kutipan</string>
     <string name="quotes_count">%1$d kutipan</string>
     <string name="quotes_empty">Belum ada kutipan.</string>
+    <string name="moderation_no_blocked_users">Tidak ada pengguna yang diblokir</string>
+    <string name="moderation_no_blocked_desc">Saat Anda memblokir seseorang, mereka akan muncul di sini.</string>
+    <string name="moderation_blocked_explanation">Pengguna yang Anda blokir tidak akan dapat berinteraksi dengan Anda, dan postingan mereka akan disembunyikan dari feed Anda.</string>
+    <string name="moderation_blocked_count">%1$d diblokir</string>
+    <string name="moderation_followers_count">%1$s pengikut</string>
+    <string name="moderation_blocked_on">Diblokir %1$s</string>
+    <string name="moderation_no_muted_users">Tidak ada pengguna yang dibisukan</string>
+    <string name="moderation_no_muted_desc">Saat Anda membisukan seseorang, mereka akan muncul di sini.</string>
+    <string name="moderation_muted_explanation">Pengguna yang Anda bisukan tidak akan dapat berinteraksi dengan Anda, dan postingan mereka akan disembunyikan dari feed Anda.</string>
+    <string name="moderation_muted_count">%1$d dibisukan</string>
+    <string name="moderation_muted_on">Dibisukan %1$s</string>
 </resources>

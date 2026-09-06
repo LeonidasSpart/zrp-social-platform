@@ -108,4 +108,15 @@
     <string name="quotes_title">Alıntılar</string>
     <string name="quotes_count">%1$d alıntı</string>
     <string name="quotes_empty">Henüz alıntı yok.</string>
+    <string name="moderation_no_blocked_users">Engellenen kullanıcı yok</string>
+    <string name="moderation_no_blocked_desc">Birini engellediğinizde burada görünür.</string>
+    <string name="moderation_blocked_explanation">Engellediğiniz kullanıcılar sizinle etkileşime giremez ve gönderileri akışınızdan gizlenir.</string>
+    <string name="moderation_blocked_count">%1$d engellendi</string>
+    <string name="moderation_followers_count">%1$s takipçi</string>
+    <string name="moderation_blocked_on">%1$s tarihinde engellendi</string>
+    <string name="moderation_no_muted_users">Sessize alınan kullanıcı yok</string>
+    <string name="moderation_no_muted_desc">Birini sessize aldığınızda burada görünür.</string>
+    <string name="moderation_muted_explanation">Sessize aldığınız kullanıcılar sizinle etkileşime giremez ve gönderileri akışınızdan gizlenir.</string>
+    <string name="moderation_muted_count">%1$d sessize alındı</string>
+    <string name="moderation_muted_on">%1$s tarihinde sessize alındı</string>
 </resources>

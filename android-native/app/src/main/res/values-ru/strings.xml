@@ -108,4 +108,15 @@
     <string name="quotes_title">цитат</string>
     <string name="quotes_count">%1$d цитат</string>
     <string name="quotes_empty">Пока нет цитат.</string>
+    <string name="moderation_no_blocked_users">Нет заблокированных пользователей</string>
+    <string name="moderation_no_blocked_desc">Когда вы кого-то заблокируете, он появится здесь.</string>
+    <string name="moderation_blocked_explanation">Пользователи, которых вы заблокировали, не смогут взаимодействовать с вами, а их публикации будут скрыты из вашей ленты.</string>
+    <string name="moderation_blocked_count">Заблокировано: %1$d</string>
+    <string name="moderation_followers_count">%1$s подписчиков</string>
+    <string name="moderation_blocked_on">Заблокирован %1$s</string>
+    <string name="moderation_no_muted_users">Нет отключённых пользователей</string>
+    <string name="moderation_no_muted_desc">Когда вы кого-то отключите, он появится здесь.</string>
+    <string name="moderation_muted_explanation">Пользователи, которых вы отключили, не смогут взаимодействовать с вами, а их публикации будут скрыты из вашей ленты.</string>
+    <string name="moderation_muted_count">Отключено: %1$d</string>
+    <string name="moderation_muted_on">Отключено %1$s</string>
 </resources>

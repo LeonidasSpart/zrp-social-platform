@@ -124,4 +124,15 @@
     <string name="quotes_title">Quotes</string>
     <string name="quotes_count">%1$d quotes</string>
     <string name="quotes_empty">No quotes yet.</string>
+    <string name="moderation_no_blocked_users">No blocked users</string>
+    <string name="moderation_no_blocked_desc">When you block someone, they\'ll appear here.</string>
+    <string name="moderation_blocked_explanation">Users you block won\'t be able to interact with you, and their posts will be hidden from your feed.</string>
+    <string name="moderation_blocked_count">%1$d blocked</string>
+    <string name="moderation_followers_count">%1$s followers</string>
+    <string name="moderation_blocked_on">Blocked %1$s</string>
+    <string name="moderation_no_muted_users">No muted users</string>
+    <string name="moderation_no_muted_desc">When you mute someone, they\'ll appear here.</string>
+    <string name="moderation_muted_explanation">Users you mute won\'t be able to interact with you, and their posts will be hidden from your feed.</string>
+    <string name="moderation_muted_count">%1$d muted</string>
+    <string name="moderation_muted_on">Muted %1$s</string>
 </resources>

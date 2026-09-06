@@ -108,4 +108,15 @@
     <string name="quotes_title">اقتباسات</string>
     <string name="quotes_count">%1$d اقتباسات</string>
     <string name="quotes_empty">لا توجد اقتباسات بعد.</string>
+    <string name="moderation_no_blocked_users">لا يوجد مستخدمون محظورون</string>
+    <string name="moderation_no_blocked_desc">عندما تحظر شخصًا ما، سيظهر هنا.</string>
+    <string name="moderation_blocked_explanation">المستخدمون الذين تحظرهم لن يتمكنوا من التفاعل معك، وستكون منشوراتهم مخفية عن خلاصتك.</string>
+    <string name="moderation_blocked_count">محظور: %1$d</string>
+    <string name="moderation_followers_count">%1$s متابعون</string>
+    <string name="moderation_blocked_on">تم الحظر في %1$s</string>
+    <string name="moderation_no_muted_users">لا يوجد مستخدمون مكتومون</string>
+    <string name="moderation_no_muted_desc">عندما تكتم شخصًا ما، سيظهر هنا.</string>
+    <string name="moderation_muted_explanation">المستخدمون الذين تكتمهم لن يتمكنوا من التفاعل معك، وستكون منشوراتهم مخفية عن خلاصتك.</string>
+    <string name="moderation_muted_count">مكتوم: %1$d</string>
+    <string name="moderation_muted_on">تم الكتم في %1$s</string>
 </resources>

@@ -108,4 +108,15 @@
     <string name="quotes_title">Citazioni</string>
     <string name="quotes_count">%1$d citazioni</string>
     <string name="quotes_empty">Ancora nessuna citazione.</string>
+    <string name="moderation_no_blocked_users">Nessun utente bloccato</string>
+    <string name="moderation_no_blocked_desc">Quando blocchi qualcuno, apparirà qui.</string>
+    <string name="moderation_blocked_explanation">Gli utenti che blocchi non potranno interagire con te e i loro post saranno nascosti dal tuo feed.</string>
+    <string name="moderation_blocked_count">%1$d bloccati</string>
+    <string name="moderation_followers_count">%1$s follower</string>
+    <string name="moderation_blocked_on">Bloccato il %1$s</string>
+    <string name="moderation_no_muted_users">Nessun utente silenziato</string>
+    <string name="moderation_no_muted_desc">Quando silenzi qualcuno, apparirà qui.</string>
+    <string name="moderation_muted_explanation">Gli utenti che silenzi non potranno interagire con te e i loro post saranno nascosti dal tuo feed.</string>
+    <string name="moderation_muted_count">%1$d silenziati</string>
+    <string name="moderation_muted_on">Silenziato il %1$s</string>
 </resources>

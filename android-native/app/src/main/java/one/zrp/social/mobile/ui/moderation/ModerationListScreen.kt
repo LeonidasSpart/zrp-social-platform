@@ -28,9 +28,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.VerifiedBadge
@@ -58,6 +60,8 @@ fun ModerationListScreen(
     )
     val state by viewModel.state.collectAsState()
 
+    val isBlocked = mode == ModerationListMode.BLOCKED
+
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
@@ -69,11 +73,29 @@ fun ModerationListScreen(
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Text(
-                text = if (mode == ModerationListMode.BLOCKED) "Blocked users" else "Muted users",
+                text = stringResource(if (isBlocked) R.string.settings_blocked_users else R.string.settings_muted_users),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 4.dp),
             )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = stringResource(
+                    if (isBlocked) R.string.moderation_blocked_count else R.string.moderation_muted_count,
+                    state.items.size,
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
+        // Matches the website's own /settings/blocked and /settings/muted
+        // pages, which explain the effect of blocking/muting right under
+        // the header - previously missing natively entirely.
+        Text(
+            text = stringResource(if (isBlocked) R.string.moderation_blocked_explanation else R.string.moderation_muted_explanation),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+        )
         HorizontalDivider()
 
         when {
@@ -84,20 +106,30 @@ fun ModerationListScreen(
             }
             state.items.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    val emptyText = state.error ?: if (mode == ModerationListMode.BLOCKED) {
-                        "You haven't blocked anyone."
+                    val error = state.error
+                    if (error != null) {
+                        Text(
+                            text = error,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(24.dp),
+                        )
                     } else {
-                        "You haven't muted anyone."
+                        // Matches the website's own two-line empty state
+                        // (blocked/muted.emptyTitle + emptyDesc).
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = stringResource(if (isBlocked) R.string.moderation_no_blocked_users else R.string.moderation_no_muted_users),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.titleSmall,
+                            )
+                            Text(
+                                text = stringResource(if (isBlocked) R.string.moderation_no_blocked_desc else R.string.moderation_no_muted_desc),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(top = 4.dp),
+                            )
+                        }
                     }
-                    Text(
-                        text = emptyText,
-                        color = if (state.error != null) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                        modifier = Modifier.padding(24.dp),
-                    )
                 }
             }
             else -> {
@@ -155,8 +187,17 @@ private fun ModerationListRow(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            // The two halves each use their own real translated copy
+            // (blocked/muted.followers, blocked/muted.blockedOn/mutedOn)
+            // joined with " · ", same as the "N followers" + relative-time
+            // shape the website itself uses elsewhere for this kind of row.
             Text(
-                text = "${formatCount(item.followerCount)} followers · ${formatRelativeTime(item.actionDate)}",
+                text = stringResource(R.string.moderation_followers_count, formatCount(item.followerCount)) +
+                    " · " +
+                    stringResource(
+                        if (mode == ModerationListMode.BLOCKED) R.string.moderation_blocked_on else R.string.moderation_muted_on,
+                        formatRelativeTime(item.actionDate),
+                    ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -175,7 +216,7 @@ private fun ModerationListRow(
             if (isToggling) {
                 CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = ZrpWhite)
             } else {
-                Text(if (mode == ModerationListMode.BLOCKED) "Unblock" else "Unmute")
+                Text(stringResource(if (mode == ModerationListMode.BLOCKED) R.string.profile_unblock else R.string.profile_unmute))
             }
         }
     }
