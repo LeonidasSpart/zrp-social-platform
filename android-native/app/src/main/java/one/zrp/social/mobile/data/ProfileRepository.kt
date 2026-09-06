@@ -1,11 +1,20 @@
 package one.zrp.social.mobile.data
 
 import one.zrp.social.mobile.network.ApiClient
+import one.zrp.social.mobile.network.BlockToggleResponse
+import one.zrp.social.mobile.network.BlockedUser
+import one.zrp.social.mobile.network.BookmarkResponse
+import one.zrp.social.mobile.network.CreateReportRequest
+import one.zrp.social.mobile.network.FollowListPage
 import one.zrp.social.mobile.network.FollowToggleResponse
 import one.zrp.social.mobile.network.LikeResponse
+import one.zrp.social.mobile.network.MuteToggleRequest
+import one.zrp.social.mobile.network.MutedUser
 import one.zrp.social.mobile.network.PostsPage
 import one.zrp.social.mobile.network.RepostResponse
 import one.zrp.social.mobile.network.UserProfile
+import one.zrp.social.mobile.network.zrpErrorMessage
+import retrofit2.HttpException
 
 /**
  * Thin wrapper around UsersApi (and the shared like toggle) for the
@@ -16,6 +25,18 @@ class ProfileRepository {
     suspend fun getOwnUsername(): Result<String> = runCatching {
         val session = ApiClient.authApi.getSession()
         session.user?.username ?: throw IllegalStateException("Not signed in")
+    }
+
+    suspend fun getOwnUserId(): Result<String?> = runCatching {
+        ApiClient.authApi.getSession().user?.id
+    }
+
+    suspend fun getFollowers(username: String, cursor: String?): Result<FollowListPage> = runCatching {
+        ApiClient.usersApi.getFollowers(username, cursor)
+    }
+
+    suspend fun getFollowing(username: String, cursor: String?): Result<FollowListPage> = runCatching {
+        ApiClient.usersApi.getFollowing(username, cursor)
     }
 
     suspend fun getProfile(username: String): Result<UserProfile> = runCatching {
@@ -37,5 +58,44 @@ class ProfileRepository {
 
     suspend fun toggleRepost(postId: String): Result<RepostResponse> = runCatching {
         ApiClient.postsApi.toggleRepost(postId)
+    }
+
+    suspend fun toggleBookmark(postId: String): Result<BookmarkResponse> = runCatching {
+        ApiClient.postsApi.toggleBookmark(postId)
+    }
+
+    suspend fun deletePost(postId: String): Result<Unit> = runCatching {
+        ApiClient.postsApi.deletePost(postId)
+    }
+
+    suspend fun reportPost(postId: String, reason: String, details: String?): Result<Unit> {
+        return try {
+            ApiClient.reportsApi.createReport(CreateReportRequest(postId = postId, reason = reason, details = details))
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't submit this report. Please try again."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    suspend fun toggleBlock(username: String): Result<BlockToggleResponse> = runCatching {
+        ApiClient.usersApi.toggleBlock(username)
+    }
+
+    suspend fun getMuteStatus(userId: String): Result<Boolean> = runCatching {
+        ApiClient.usersApi.getMuteStatus(userId).muted
+    }
+
+    suspend fun toggleMute(userId: String): Result<Boolean> = runCatching {
+        ApiClient.usersApi.toggleMute(MuteToggleRequest(userId)).muted
+    }
+
+    suspend fun getBlockedUsers(): Result<List<BlockedUser>> = runCatching {
+        ApiClient.usersApi.getBlockedUsers()
+    }
+
+    suspend fun getMutedUsers(): Result<List<MutedUser>> = runCatching {
+        ApiClient.usersApi.getMutedUsers()
     }
 }

@@ -1,7 +1,9 @@
 package one.zrp.social.mobile.data
 
 import one.zrp.social.mobile.network.ApiClient
+import one.zrp.social.mobile.network.BookmarkResponse
 import one.zrp.social.mobile.network.CreatePostRequest
+import one.zrp.social.mobile.network.CreateReportRequest
 import one.zrp.social.mobile.network.LikeResponse
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.PostsPage
@@ -17,6 +19,10 @@ import retrofit2.HttpException
  * that.
  */
 class PostsRepository {
+    suspend fun getOwnUserId(): Result<String?> = runCatching {
+        ApiClient.authApi.getSession().user?.id
+    }
+
     suspend fun getForYouFeed(cursor: String?): Result<PostsPage> = runCatching {
         ApiClient.postsApi.getForYouFeed(cursor)
     }
@@ -31,6 +37,25 @@ class PostsRepository {
 
     suspend fun toggleRepost(postId: String): Result<RepostResponse> = runCatching {
         ApiClient.postsApi.toggleRepost(postId)
+    }
+
+    suspend fun toggleBookmark(postId: String): Result<BookmarkResponse> = runCatching {
+        ApiClient.postsApi.toggleBookmark(postId)
+    }
+
+    suspend fun deletePost(postId: String): Result<Unit> = runCatching {
+        ApiClient.postsApi.deletePost(postId)
+    }
+
+    suspend fun reportPost(postId: String, reason: String, details: String?): Result<Unit> {
+        return try {
+            ApiClient.reportsApi.createReport(CreateReportRequest(postId = postId, reason = reason, details = details))
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't submit this report. Please try again."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
     }
 
     suspend fun createPost(content: String): Result<Post> {

@@ -25,6 +25,7 @@ data class SearchUiState(
     val trendingHashtags: List<TrendingHashtag> = emptyList(),
     val isLoadingDiscover: Boolean = true,
     val error: String? = null,
+    val ownUserId: String? = null,
 )
 
 /**
@@ -43,6 +44,9 @@ class SearchViewModel(private val repository: SearchRepository) : ViewModel() {
 
     init {
         loadDiscover()
+        viewModelScope.launch {
+            repository.getOwnUserId().onSuccess { id -> _state.update { it.copy(ownUserId = id) } }
+        }
     }
 
     fun onQueryChange(query: String) {
@@ -102,6 +106,40 @@ class SearchViewModel(private val repository: SearchRepository) : ViewModel() {
                 _state.update { it.copy(posts = previousPosts) }
             }
         }
+    }
+
+    fun toggleBookmark(postId: String) {
+        val previousPosts = _state.value.posts
+
+        _state.update { state ->
+            state.copy(posts = state.posts.map { post -> if (post.id == postId) applyOptimisticBookmark(post) else post })
+        }
+
+        viewModelScope.launch {
+            repository.toggleBookmark(postId).onFailure {
+                _state.update { it.copy(posts = previousPosts) }
+            }
+        }
+    }
+
+    fun deletePost(postId: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            val result = repository.deletePost(postId)
+            result.onSuccess {
+                _state.update { it.copy(posts = it.posts.filterNot { post -> post.id == postId }) }
+            }
+            onResult(result)
+        }
+    }
+
+    fun reportPost(postId: String, reason: String, details: String?, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            onResult(repository.reportPost(postId, reason, details))
+        }
+    }
+
+    private fun applyOptimisticBookmark(post: Post): Post {
+        return post.copy(bookmarked = post.bookmarked != true)
     }
 
     private fun applyOptimisticLike(post: Post): Post {

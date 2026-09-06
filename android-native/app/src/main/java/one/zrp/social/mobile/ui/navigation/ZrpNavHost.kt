@@ -23,11 +23,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
+import one.zrp.social.mobile.ui.followlist.FollowListMode
+import one.zrp.social.mobile.ui.followlist.FollowListScreen
 import one.zrp.social.mobile.ui.home.HomeScreen
 import one.zrp.social.mobile.ui.messages.ConversationScreen
 import one.zrp.social.mobile.ui.messages.MessagesScreen
+import one.zrp.social.mobile.ui.moderation.ModerationListMode
+import one.zrp.social.mobile.ui.moderation.ModerationListScreen
 import one.zrp.social.mobile.ui.music.MusicScreen
 import one.zrp.social.mobile.ui.notifications.NotificationsScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
@@ -58,6 +63,11 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToStoryViewer: (String) -> Unit = { userId -> navController.navigate("stories/$userId") }
     val goToCreateStory: () -> Unit = { navController.navigate("create-story") }
     val goToMusic: () -> Unit = { navController.navigate("music") }
+    val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
+    val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
+    val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
+    val goToBlockedUsers: () -> Unit = { navController.navigate("blocked-users") }
+    val goToMutedUsers: () -> Unit = { navController.navigate("muted-users") }
     val goHome: () -> Unit = {
         navController.navigate(ZrpDestination.Home.route) {
             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -107,6 +117,11 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onAuthorClick = goToProfile,
                     onMessageClick = goToConversation,
                     onOpenComments = goToComments,
+                    onOpenBookmarks = goToBookmarks,
+                    onOpenFollowers = goToFollowers,
+                    onOpenFollowing = goToFollowing,
+                    onOpenBlockedUsers = goToBlockedUsers,
+                    onOpenMutedUsers = goToMutedUsers,
                 )
             }
             composable(
@@ -121,7 +136,38 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onAuthorClick = goToProfile,
                     onMessageClick = goToConversation,
                     onOpenComments = goToComments,
+                    onOpenBookmarks = goToBookmarks,
+                    onOpenFollowers = goToFollowers,
+                    onOpenFollowing = goToFollowing,
                 )
+            }
+            composable(
+                route = "profile/{username}/followers",
+                arguments = listOf(navArgument("username") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val username = backStackEntry.arguments?.getString("username")
+                if (username != null) {
+                    FollowListScreen(
+                        username = username,
+                        mode = FollowListMode.FOLLOWERS,
+                        onAuthorClick = goToProfile,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
+            }
+            composable(
+                route = "profile/{username}/following",
+                arguments = listOf(navArgument("username") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val username = backStackEntry.arguments?.getString("username")
+                if (username != null) {
+                    FollowListScreen(
+                        username = username,
+                        mode = FollowListMode.FOLLOWING,
+                        onAuthorClick = goToProfile,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
             }
             composable(
                 route = "messages/{userId}/{username}",
@@ -154,6 +200,27 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             }
             composable("music") {
                 MusicScreen(onBack = { navController.popBackStack() })
+            }
+            composable("bookmarks") {
+                BookmarksScreen(
+                    onAuthorClick = goToProfile,
+                    onOpenComments = goToComments,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("blocked-users") {
+                ModerationListScreen(
+                    mode = ModerationListMode.BLOCKED,
+                    onAuthorClick = goToProfile,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("muted-users") {
+                ModerationListScreen(
+                    mode = ModerationListMode.MUTED,
+                    onAuthorClick = goToProfile,
+                    onBack = { navController.popBackStack() },
+                )
             }
             composable(
                 route = "post/{postId}/comments",

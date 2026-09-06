@@ -4,28 +4,36 @@ import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.BookmarkResponse
 import one.zrp.social.mobile.network.CreateReportRequest
 import one.zrp.social.mobile.network.LikeResponse
+import one.zrp.social.mobile.network.Post
+import one.zrp.social.mobile.network.PostsPage
 import one.zrp.social.mobile.network.RepostResponse
-import one.zrp.social.mobile.network.SearchResults
-import one.zrp.social.mobile.network.SearchUser
-import one.zrp.social.mobile.network.TrendingHashtag
 import one.zrp.social.mobile.network.zrpErrorMessage
 import retrofit2.HttpException
 
-class SearchRepository {
+/**
+ * The website's Bookmarks page (src/app/bookmarks/page.tsx) shows both
+ * saved posts and saved comments in one merged list; this screen only
+ * has a real comment-viewing surface reached through a comment's
+ * parent post, not a standalone comment view, so it shows the saved
+ * posts (the overwhelming common case) and leaves saved comments for a
+ * later, dedicated pass rather than inventing a bare-comment screen.
+ * GET /bookmarks doesn't mark each post's own `bookmarked` flag (only
+ * `liked` gets that treatment server-side) even though every post
+ * here is definitionally bookmarked, so that's corrected here rather
+ * than passed through as a misleading null.
+ */
+class BookmarksRepository {
     suspend fun getOwnUserId(): Result<String?> = runCatching {
         ApiClient.authApi.getSession().user?.id
     }
 
-    suspend fun search(query: String): Result<SearchResults> = runCatching {
-        ApiClient.searchApi.search(query)
-    }
-
-    suspend fun getSuggestedUsers(): Result<List<SearchUser>> = runCatching {
-        ApiClient.searchApi.getSuggestedUsers()
-    }
-
-    suspend fun getTrendingHashtags(): Result<List<TrendingHashtag>> = runCatching {
-        ApiClient.searchApi.getTrendingHashtags()
+    suspend fun getBookmarkedPosts(cursor: String?): Result<PostsPage> = runCatching {
+        val page = ApiClient.bookmarksApi.getBookmarks(cursor)
+        val posts = page.items
+            .filter { it.type == "post" }
+            .mapNotNull { it.post }
+            .map { post: Post -> post.copy(bookmarked = true) }
+        PostsPage(posts = posts, nextCursor = page.nextCursor)
     }
 
     suspend fun toggleLike(postId: String): Result<LikeResponse> = runCatching {

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,16 +29,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.data.SearchRepository
+import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.network.SearchUser
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.VerifiedBadge
@@ -55,6 +60,11 @@ fun SearchScreen(onAuthorClick: (String) -> Unit, onOpenMusic: () -> Unit, onOpe
         factory = remember { SearchViewModelFactory(SearchRepository()) },
     )
     val state by viewModel.state.collectAsState()
+    var reportingPostId by remember { mutableStateOf<String?>(null) }
+    var isSubmittingReport by remember { mutableStateOf(false) }
+    var reportError by remember { mutableStateOf<String?>(null) }
+    var deletingPostId by remember { mutableStateOf<String?>(null) }
+    var isDeletingPost by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         OutlinedTextField(
@@ -89,8 +99,62 @@ fun SearchScreen(onAuthorClick: (String) -> Unit, onOpenMusic: () -> Unit, onOpe
                 onLikeClick = { postId -> viewModel.toggleLike(postId) },
                 onCommentClick = onOpenComments,
                 onRepostClick = { postId -> viewModel.toggleRepost(postId) },
+                onBookmarkClick = { postId -> viewModel.toggleBookmark(postId) },
+                onReportClick = { postId ->
+                    reportingPostId = postId
+                    reportError = null
+                },
+                onDeleteClick = { postId -> deletingPostId = postId },
             )
         }
+    }
+
+    val postId = reportingPostId
+    if (postId != null) {
+        ReportDialog(
+            isSubmitting = isSubmittingReport,
+            error = reportError,
+            onDismiss = { reportingPostId = null },
+            onSubmit = { reason, details ->
+                isSubmittingReport = true
+                viewModel.reportPost(postId, reason, details) { result ->
+                    isSubmittingReport = false
+                    result
+                        .onSuccess { reportingPostId = null }
+                        .onFailure { reportError = it.message }
+                }
+            },
+        )
+    }
+
+    val deletePostId = deletingPostId
+    if (deletePostId != null) {
+        AlertDialog(
+            onDismissRequest = { if (!isDeletingPost) deletingPostId = null },
+            title = { Text("Delete post?") },
+            text = { Text("This can't be undone.") },
+            confirmButton = {
+                if (isDeletingPost) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                } else {
+                    TextButton(onClick = {
+                        isDeletingPost = true
+                        viewModel.deletePost(deletePostId) { result ->
+                            isDeletingPost = false
+                            deletingPostId = null
+                            result.onFailure { /* left visible; the row itself still shows the post on failure */ }
+                        }
+                    }) {
+                        Text("Delete", color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { deletingPostId = null }, enabled = !isDeletingPost) {
+                    Text("Cancel")
+                }
+            },
+        )
     }
 }
 
@@ -158,6 +222,9 @@ private fun SearchResultsContent(
     onLikeClick: (String) -> Unit,
     onCommentClick: (String) -> Unit,
     onRepostClick: (String) -> Unit,
+    onBookmarkClick: (String) -> Unit,
+    onReportClick: (String) -> Unit,
+    onDeleteClick: (String) -> Unit,
 ) {
     if (state.isSearching) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -211,6 +278,10 @@ private fun SearchResultsContent(
                     onLikeClick = onLikeClick,
                     onCommentClick = onCommentClick,
                     onRepostClick = onRepostClick,
+                    onBookmarkClick = onBookmarkClick,
+                    onReportClick = onReportClick,
+                    isOwnPost = state.ownUserId != null && post.author.id == state.ownUserId,
+                    onDeleteClick = onDeleteClick,
                     onClick = onCommentClick,
                     onAuthorClick = onAuthorClick,
                 )

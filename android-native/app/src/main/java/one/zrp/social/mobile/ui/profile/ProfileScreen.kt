@@ -1,6 +1,7 @@
 package one.zrp.social.mobile.ui.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,10 +22,18 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,7 +45,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -47,6 +58,7 @@ import coil.compose.AsyncImage
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.home.PostCard
 import one.zrp.social.mobile.ui.theme.Spacing
@@ -68,6 +80,11 @@ fun ProfileScreen(
     onAuthorClick: (String) -> Unit,
     onMessageClick: (partnerId: String, partnerUsername: String) -> Unit,
     onOpenComments: (postId: String) -> Unit,
+    onOpenBookmarks: () -> Unit = {},
+    onOpenFollowers: (username: String) -> Unit = {},
+    onOpenFollowing: (username: String) -> Unit = {},
+    onOpenBlockedUsers: () -> Unit = {},
+    onOpenMutedUsers: () -> Unit = {},
 ) {
     val viewModel: ProfileViewModel = viewModel(
         factory = remember(username) { ProfileViewModelFactory(ProfileRepository(), username) },
@@ -102,6 +119,12 @@ fun ProfileScreen(
                 }
             }
             else -> {
+                var reportingPostId by remember { mutableStateOf<String?>(null) }
+                var isSubmittingReport by remember { mutableStateOf(false) }
+                var reportError by remember { mutableStateOf<String?>(null) }
+                var deletingPostId by remember { mutableStateOf<String?>(null) }
+                var isDeletingPost by remember { mutableStateOf(false) }
+
                 val listState = rememberLazyListState()
 
                 val shouldLoadMore by remember {
@@ -122,9 +145,19 @@ fun ProfileScreen(
                             profile = profile,
                             isOwnProfile = state.isOwnProfile,
                             isTogglingFollow = state.isTogglingFollow,
+                            isTogglingBlock = state.isTogglingBlock,
+                            isMuted = state.isMuted,
+                            isTogglingMute = state.isTogglingMute,
                             onFollowClick = { viewModel.toggleFollow() },
+                            onBlockClick = { viewModel.toggleBlock() },
+                            onMuteClick = { viewModel.toggleMute() },
                             onLogoutClick = onLogout,
                             onMessageClick = { onMessageClick(profile.id, profile.username) },
+                            onBookmarksClick = onOpenBookmarks,
+                            onFollowersClick = { onOpenFollowers(profile.username) },
+                            onFollowingClick = { onOpenFollowing(profile.username) },
+                            onBlockedUsersClick = onOpenBlockedUsers,
+                            onMutedUsersClick = onOpenMutedUsers,
                         )
                     }
 
@@ -134,6 +167,13 @@ fun ProfileScreen(
                             onLikeClick = { postId -> viewModel.toggleLike(postId) },
                             onCommentClick = onOpenComments,
                             onRepostClick = { postId -> viewModel.toggleRepost(postId) },
+                            onBookmarkClick = { postId -> viewModel.toggleBookmark(postId) },
+                            onReportClick = { postId ->
+                                reportingPostId = postId
+                                reportError = null
+                            },
+                            isOwnPost = state.isOwnProfile,
+                            onDeleteClick = { postId -> deletingPostId = postId },
                             onClick = onOpenComments,
                             onAuthorClick = onAuthorClick,
                         )
@@ -151,6 +191,54 @@ fun ProfileScreen(
                             }
                         }
                     }
+                }
+
+                val reportPostId = reportingPostId
+                if (reportPostId != null) {
+                    ReportDialog(
+                        isSubmitting = isSubmittingReport,
+                        error = reportError,
+                        onDismiss = { reportingPostId = null },
+                        onSubmit = { reason, details ->
+                            isSubmittingReport = true
+                            viewModel.reportPost(reportPostId, reason, details) { result ->
+                                isSubmittingReport = false
+                                result
+                                    .onSuccess { reportingPostId = null }
+                                    .onFailure { reportError = it.message }
+                            }
+                        },
+                    )
+                }
+
+                val deletePostId = deletingPostId
+                if (deletePostId != null) {
+                    AlertDialog(
+                        onDismissRequest = { if (!isDeletingPost) deletingPostId = null },
+                        title = { Text("Delete post?") },
+                        text = { Text("This can't be undone.") },
+                        confirmButton = {
+                            if (isDeletingPost) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                            } else {
+                                TextButton(onClick = {
+                                    isDeletingPost = true
+                                    viewModel.deletePost(deletePostId) { result ->
+                                        isDeletingPost = false
+                                        deletingPostId = null
+                                        result.onFailure { /* left visible; the row itself still shows the post on failure */ }
+                                    }
+                                }) {
+                                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                                }
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { deletingPostId = null }, enabled = !isDeletingPost) {
+                                Text("Cancel")
+                            }
+                        },
+                    )
                 }
             }
         }
@@ -176,9 +264,19 @@ private fun ProfileHeader(
     profile: UserProfile,
     isOwnProfile: Boolean,
     isTogglingFollow: Boolean,
+    isTogglingBlock: Boolean,
+    isMuted: Boolean,
+    isTogglingMute: Boolean,
     onFollowClick: () -> Unit,
+    onBlockClick: () -> Unit,
+    onMuteClick: () -> Unit,
     onLogoutClick: () -> Unit,
     onMessageClick: () -> Unit,
+    onBookmarksClick: () -> Unit,
+    onFollowersClick: () -> Unit,
+    onFollowingClick: () -> Unit,
+    onBlockedUsersClick: () -> Unit,
+    onMutedUsersClick: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -215,10 +313,69 @@ private fun ProfileHeader(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (isOwnProfile) {
+                        IconButton(onClick = onBookmarksClick) {
+                            Icon(Icons.Filled.Bookmark, contentDescription = "Bookmarks")
+                        }
+
+                        var moreMenuOpen by remember { mutableStateOf(false) }
+                        Box {
+                            IconButton(onClick = { moreMenuOpen = true }) {
+                                Icon(Icons.Filled.MoreVert, contentDescription = "More options")
+                            }
+                            DropdownMenu(expanded = moreMenuOpen, onDismissRequest = { moreMenuOpen = false }) {
+                                DropdownMenuItem(
+                                    text = { Text("Blocked users") },
+                                    onClick = {
+                                        moreMenuOpen = false
+                                        onBlockedUsersClick()
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Muted users") },
+                                    onClick = {
+                                        moreMenuOpen = false
+                                        onMutedUsersClick()
+                                    },
+                                )
+                            }
+                        }
+
                         TextButton(onClick = onLogoutClick) {
                             Text("Log out")
                         }
                     } else {
+                        var moreMenuOpen by remember { mutableStateOf(false) }
+                        Box {
+                            IconButton(onClick = { moreMenuOpen = true }) {
+                                Icon(Icons.Filled.MoreVert, contentDescription = "More options")
+                            }
+                            DropdownMenu(expanded = moreMenuOpen, onDismissRequest = { moreMenuOpen = false }) {
+                                DropdownMenuItem(
+                                    text = { Text(if (isMuted) "Unmute" else "Mute") },
+                                    enabled = !isTogglingMute,
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = if (isMuted) Icons.Filled.NotificationsOff else Icons.Filled.Notifications,
+                                            contentDescription = null,
+                                        )
+                                    },
+                                    onClick = {
+                                        moreMenuOpen = false
+                                        onMuteClick()
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(if (profile.isBlocked) "Unblock" else "Block") },
+                                    enabled = !isTogglingBlock,
+                                    leadingIcon = { Icon(Icons.Filled.Block, contentDescription = null, tint = ZrpRed) },
+                                    onClick = {
+                                        moreMenuOpen = false
+                                        onBlockClick()
+                                    },
+                                )
+                            }
+                        }
+
                         IconButton(onClick = onMessageClick) {
                             Icon(Icons.Filled.MailOutline, contentDescription = "Message")
                         }
@@ -296,8 +453,8 @@ private fun ProfileHeader(
             horizontalArrangement = Arrangement.spacedBy(Spacing.xl),
         ) {
             ProfileStat(count = profile._count.posts, label = "Posts")
-            ProfileStat(count = profile._count.followers, label = "Followers")
-            ProfileStat(count = profile._count.following, label = "Following")
+            ProfileStat(count = profile._count.followers, label = "Followers", onClick = onFollowersClick)
+            ProfileStat(count = profile._count.following, label = "Following", onClick = onFollowingClick)
         }
 
         HorizontalDivider()
@@ -305,8 +462,10 @@ private fun ProfileHeader(
 }
 
 @Composable
-private fun ProfileStat(count: Int, label: String) {
-    Column {
+private fun ProfileStat(count: Int, label: String, onClick: (() -> Unit)? = null) {
+    Column(
+        modifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier,
+    ) {
         Text(
             text = formatCount(count),
             fontWeight = FontWeight.Bold,

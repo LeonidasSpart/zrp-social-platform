@@ -38,8 +38,19 @@ class HomeViewModel(private val repository: PostsRepository) : ViewModel() {
     val forYouState: StateFlow<HomeUiState> = _forYou.asStateFlow()
     val followingState: StateFlow<HomeUiState> = _following.asStateFlow()
 
+    // Fetched once, the same way ProfileViewModel/FollowListViewModel
+    // resolve "who am I" - lets PostCard show Delete instead of Report
+    // on the signed-in user's own posts here too, matching the
+    // website's shared PostCard.tsx (it renders on every feed, not
+    // just the profile page).
+    private val _ownUserId = MutableStateFlow<String?>(null)
+    val ownUserId: StateFlow<String?> = _ownUserId.asStateFlow()
+
     init {
         refresh(FeedTab.FOR_YOU)
+        viewModelScope.launch {
+            repository.getOwnUserId().onSuccess { id -> _ownUserId.value = id }
+        }
     }
 
     fun selectTab(tab: FeedTab) {
@@ -114,6 +125,48 @@ class HomeViewModel(private val repository: PostsRepository) : ViewModel() {
                 stateFlow.update { it.copy(posts = previousPosts) }
             }
         }
+    }
+
+    fun toggleBookmark(tab: FeedTab, postId: String) {
+        val stateFlow = stateFlowFor(tab)
+        val previousPosts = stateFlow.value.posts
+
+        stateFlow.update { state ->
+            state.copy(posts = state.posts.map { post -> if (post.id == postId) applyOptimisticBookmark(post) else post })
+        }
+
+        viewModelScope.launch {
+            repository.toggleBookmark(postId).onFailure {
+                stateFlow.update { it.copy(posts = previousPosts) }
+            }
+        }
+    }
+
+    // A deleted post disappears from the feed the moment the server
+    // confirms it, the same as the website's own onUpdate(deletedPostId)
+    // callback - no optimistic removal, since there's nothing sensible
+    // to roll back to if the delete actually fails (re-inserting a post
+    // at its old scroll position reads as more broken than just leaving
+    // it visible until the real answer comes back).
+    fun deletePost(tab: FeedTab, postId: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            val result = repository.deletePost(postId)
+            result.onSuccess {
+                val stateFlow = stateFlowFor(tab)
+                stateFlow.update { it.copy(posts = it.posts.filterNot { post -> post.id == postId }) }
+            }
+            onResult(result)
+        }
+    }
+
+    fun reportPost(postId: String, reason: String, details: String?, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            onResult(repository.reportPost(postId, reason, details))
+        }
+    }
+
+    private fun applyOptimisticBookmark(post: Post): Post {
+        return post.copy(bookmarked = post.bookmarked != true)
     }
 
     private fun applyFreshPage(stateFlow: MutableStateFlow<HomeUiState>, page: PostsPage) {
