@@ -26,6 +26,7 @@ data class UserProfile(
     val country: String?,
     val website: String?,
     val createdAt: String,
+    val usernameChangedAt: String?,
     val isPrivate: Boolean,
     val badgeType: String?,
     val pinnedPostId: String?,

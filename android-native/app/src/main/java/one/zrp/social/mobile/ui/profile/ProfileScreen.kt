@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -88,6 +89,7 @@ fun ProfileScreen(
     onOpenFollowing: (username: String) -> Unit = {},
     onOpenBlockedUsers: () -> Unit = {},
     onOpenMutedUsers: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
     onOpenQuotePost: (postId: String) -> Unit = {},
     onOpenReposts: (postId: String) -> Unit = {},
     onOpenQuotes: (postId: String) -> Unit = {},
@@ -167,6 +169,7 @@ fun ProfileScreen(
                             onFollowingClick = { onOpenFollowing(profile.username) },
                             onBlockedUsersClick = onOpenBlockedUsers,
                             onMutedUsersClick = onOpenMutedUsers,
+                            onSettingsClick = onOpenSettings,
                         )
                     }
 
@@ -368,6 +371,7 @@ private fun ProfileHeader(
     onFollowingClick: () -> Unit,
     onBlockedUsersClick: () -> Unit,
     onMutedUsersClick: () -> Unit,
+    onSettingsClick: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -414,6 +418,14 @@ private fun ProfileHeader(
                                 Icon(Icons.Filled.MoreVert, contentDescription = "More options")
                             }
                             DropdownMenu(expanded = moreMenuOpen, onDismissRequest = { moreMenuOpen = false }) {
+                                DropdownMenuItem(
+                                    text = { Text("Settings") },
+                                    leadingIcon = { Icon(Icons.Filled.Settings, contentDescription = null) },
+                                    onClick = {
+                                        moreMenuOpen = false
+                                        onSettingsClick()
+                                    },
+                                )
                                 DropdownMenuItem(
                                     text = { Text("Blocked users") },
                                     onClick = {

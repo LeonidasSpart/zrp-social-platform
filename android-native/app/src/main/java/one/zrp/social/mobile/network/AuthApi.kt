@@ -33,6 +33,7 @@ data class SessionUser(
     val id: String?,
     val username: String?,
     val name: String?,
+    val email: String?,
     val avatarUrl: String?,
     val badgeType: String?,
     val role: String?,

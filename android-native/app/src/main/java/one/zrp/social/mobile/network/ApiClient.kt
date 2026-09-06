@@ -89,4 +89,5 @@ object ApiClient {
     val reportsApi: ReportsApi by lazy { retrofit.create(ReportsApi::class.java) }
     val bookmarksApi: BookmarksApi by lazy { retrofit.create(BookmarksApi::class.java) }
     val translateApi: TranslateApi by lazy { retrofit.create(TranslateApi::class.java) }
+    val settingsApi: SettingsApi by lazy { retrofit.create(SettingsApi::class.java) }
 }
