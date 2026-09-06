@@ -34,9 +34,11 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
  * The Home feed's stories rail - real 24-hour stories (own + everyone
- * followed), same as the website's rail. Tapping "Your story" opens
- * the viewer if there's an active one, otherwise the composer;
- * tapping anyone else's avatar always opens the viewer.
+ * followed), same as the website's rail. Tapping "Your story"'s avatar
+ * opens the viewer if there's an active one, otherwise the composer;
+ * its small "+" badge always opens the composer directly, so posting
+ * another story doesn't require first navigating away from an active
+ * one. Tapping anyone else's avatar always opens the viewer.
  */
 @Composable
 fun StoriesRail(
@@ -63,7 +65,12 @@ fun StoriesRail(
                 label = "Your story",
                 avatarUrl = ownGroup?.user?.avatarUrl,
                 hasUnviewed = ownGroup?.stories?.any { story -> !story.viewed } == true,
-                showAddBadge = ownGroup == null,
+                // Always available on your own tile, not just when you
+                // have no active story - the badge is a persistent "add
+                // another" affordance (matching the website's own "Your
+                // Story" button, which always opens the composer),
+                // separate from the avatar's own tap target below.
+                onAddClick = onCreateStory,
                 onClick = {
                     val ownId = state.ownUserId
                     if (ownGroup != null && ownId != null) onOpenViewer(ownId) else onCreateStory()
@@ -76,7 +83,7 @@ fun StoriesRail(
                 label = group.user.name ?: group.user.username,
                 avatarUrl = group.user.avatarUrl,
                 hasUnviewed = group.stories.any { story -> !story.viewed },
-                showAddBadge = false,
+                onAddClick = null,
                 onClick = { onOpenViewer(group.user.id) },
             )
         }
@@ -88,7 +95,7 @@ private fun StoryTile(
     label: String,
     avatarUrl: String?,
     hasUnviewed: Boolean,
-    showAddBadge: Boolean,
+    onAddClick: (() -> Unit)?,
     onClick: () -> Unit,
 ) {
     Column(
@@ -113,15 +120,21 @@ private fun StoryTile(
                 Avatar(url = avatarUrl, name = label, size = 58.dp)
             }
 
-            if (showAddBadge) {
-                Icon(
-                    imageVector = Icons.Filled.AddCircle,
-                    contentDescription = null,
-                    tint = ZrpRed,
+            if (onAddClick != null) {
+                Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .size(20.dp),
-                )
+                        .size(20.dp)
+                        .clip(CircleShape)
+                        .clickable(onClick = onAddClick),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.AddCircle,
+                        contentDescription = "Add to your story",
+                        tint = ZrpRed,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
             }
         }
 

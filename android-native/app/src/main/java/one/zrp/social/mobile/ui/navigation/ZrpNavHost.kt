@@ -219,7 +219,11 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             ) { backStackEntry ->
                 val userId = backStackEntry.arguments?.getString("userId")
                 if (userId != null) {
-                    StoryViewerScreen(userId = userId, onClose = { navController.popBackStack() })
+                    StoryViewerScreen(
+                        userId = userId,
+                        onClose = { navController.popBackStack() },
+                        onAddStory = goToCreateStory,
+                    )
                 }
             }
             composable("create-story") {

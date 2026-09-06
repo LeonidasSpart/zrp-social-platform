@@ -143,6 +143,13 @@ dependencies {
 
     implementation 'io.coil-kt:coil-compose:2.7.0'
 
+    // Real video story playback (Stories parity) - Google's own,
+    // long-stable Compose-friendly video stack. StoryViewerScreen wraps
+    // ExoPlayer's PlayerView via AndroidView; media3-ui supplies that
+    // view class, media3-exoplayer the actual player/decoder.
+    implementation 'androidx.media3:media3-exoplayer:1.4.1'
+    implementation 'androidx.media3:media3-ui:1.4.1'
+
     // Push notifications (Phase 13) - real device registration tokens
     // and real message receipt via Firebase Cloud Messaging. The BoM
     // pins a mutually-compatible set of Firebase library versions, so
