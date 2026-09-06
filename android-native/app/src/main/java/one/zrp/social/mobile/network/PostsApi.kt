@@ -70,6 +70,30 @@ data class BookmarkResponse(val bookmarked: Boolean)
 
 data class PinToggleResponse(val pinned: Boolean)
 
+data class ReactionUser(
+    val id: String,
+    val username: String,
+    val name: String?,
+    val avatarUrl: String?,
+)
+
+// The Reaction table's own unique constraint is [postId, userId, emoji]
+// - a user really can hold more than one distinct emoji reaction on the
+// same post server-side - but the website's own PostCard.tsx models
+// "your reaction" as a single value (userReaction, picked via
+// data.find(...) - the first match), never a set. PostCard mirrors that
+// same single-value client treatment rather than inventing multi-select
+// support the real UI doesn't actually have.
+data class Reaction(
+    val id: String,
+    val emoji: String,
+    val user: ReactionUser,
+)
+
+data class ReactionToggleRequest(val emoji: String)
+
+data class ReactionToggleResponse(val reaction: Reaction?)
+
 data class CreatePostRequest(val content: String, val quotePostId: String? = null)
 
 data class UpdatePostRequest(val content: String)
@@ -110,6 +134,15 @@ interface PostsApi {
     // enforcement as delete/edit, server-side.
     @POST("posts/{id}/pin")
     suspend fun togglePin(@Path("id") postId: String): PinToggleResponse
+
+    // Bare JSON array, not {items: ...} - see src/app/api/posts/[id]/
+    // reaction/route.ts's GET handler, which returns prisma.reaction.
+    // findMany(...) directly.
+    @GET("posts/{id}/reaction")
+    suspend fun getReactions(@Path("id") postId: String): List<Reaction>
+
+    @POST("posts/{id}/reaction")
+    suspend fun toggleReaction(@Path("id") postId: String, @Body request: ReactionToggleRequest): ReactionToggleResponse
 
     // The website only lets a post's own author delete it - enforced
     // server-side (403 for anyone else), not just hidden client-side -
