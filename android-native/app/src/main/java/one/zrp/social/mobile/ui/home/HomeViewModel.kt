@@ -165,6 +165,26 @@ class HomeViewModel(private val repository: PostsRepository) : ViewModel() {
         }
     }
 
+    // Updates the edited post's content in both tabs' cached state, not
+    // just the active one - the same post can legitimately appear in
+    // both For You and Following. Applies the submitted content
+    // locally (post.copy) rather than replacing with the server's
+    // returned object: PUT /posts/{id} never carries a liked/reposted/
+    // bookmarked flag (same as GET /posts/{id} - see Post's own KDoc),
+    // so swapping in that object wholesale would silently reset those
+    // already-known client-side flags back to "unknown" on this post.
+    fun editPost(postId: String, content: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            repository.updatePost(postId, content)
+                .onSuccess {
+                    _forYou.update { it.copy(posts = it.posts.map { post -> if (post.id == postId) post.copy(content = content) else post }) }
+                    _following.update { it.copy(posts = it.posts.map { post -> if (post.id == postId) post.copy(content = content) else post }) }
+                    onResult(Result.success(Unit))
+                }
+                .onFailure { onResult(Result.failure(it)) }
+        }
+    }
+
     private fun applyOptimisticBookmark(post: Post): Post {
         return post.copy(bookmarked = post.bookmarked != true)
     }

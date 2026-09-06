@@ -232,6 +232,21 @@ class ProfileViewModel(
         }
     }
 
+    // Applies the submitted content locally (post.copy) rather than
+    // replacing with the server's returned object - PUT /posts/{id}
+    // never carries a liked/reposted/bookmarked flag, so swapping in
+    // that object wholesale would reset those already-known flags.
+    fun editPost(postId: String, content: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            repository.updatePost(postId, content)
+                .onSuccess {
+                    _state.update { it.copy(posts = it.posts.map { post -> if (post.id == postId) post.copy(content = content) else post }) }
+                    onResult(Result.success(Unit))
+                }
+                .onFailure { onResult(Result.failure(it)) }
+        }
+    }
+
     private fun applyOptimisticBookmark(post: Post): Post {
         return post.copy(bookmarked = post.bookmarked != true)
     }

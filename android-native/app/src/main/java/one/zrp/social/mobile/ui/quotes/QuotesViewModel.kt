@@ -128,6 +128,23 @@ class QuotesViewModel(private val repository: PostsRepository, private val postI
         }
     }
 
+    // Applies the submitted content locally (post.copy) rather than
+    // replacing with the server's returned object - PUT /posts/{id}
+    // never carries a liked/reposted/bookmarked flag, so swapping in
+    // that object wholesale would reset those already-known flags.
+    fun editPost(quotePostId: String, content: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            repository.updatePost(quotePostId, content)
+                .onSuccess {
+                    _state.update {
+                        it.copy(posts = it.posts.map { post -> if (post.id == quotePostId) post.copy(content = content) else post })
+                    }
+                    onResult(Result.success(Unit))
+                }
+                .onFailure { onResult(Result.failure(it)) }
+        }
+    }
+
     fun reportPost(quotePostId: String, reason: String, details: String?, onResult: (Result<Unit>) -> Unit) {
         viewModelScope.launch {
             onResult(repository.reportPost(quotePostId, reason, details))

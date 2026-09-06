@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.data.SearchRepository
+import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.network.SearchUser
 import one.zrp.social.mobile.ui.components.Avatar
@@ -72,6 +73,9 @@ fun SearchScreen(
     var reportError by remember { mutableStateOf<String?>(null) }
     var deletingPostId by remember { mutableStateOf<String?>(null) }
     var isDeletingPost by remember { mutableStateOf(false) }
+    var editingPostId by remember { mutableStateOf<String?>(null) }
+    var isSubmittingEdit by remember { mutableStateOf(false) }
+    var editError by remember { mutableStateOf<String?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         OutlinedTextField(
@@ -112,6 +116,10 @@ fun SearchScreen(
                     reportError = null
                 },
                 onDeleteClick = { postId -> deletingPostId = postId },
+                onEditClick = { postId ->
+                    editingPostId = postId
+                    editError = null
+                },
                 onQuoteClick = onOpenQuotePost,
                 onViewReposts = onOpenReposts,
                 onViewQuotes = onOpenQuotes,
@@ -162,6 +170,26 @@ fun SearchScreen(
             dismissButton = {
                 TextButton(onClick = { deletingPostId = null }, enabled = !isDeletingPost) {
                     Text("Cancel")
+                }
+            },
+        )
+    }
+
+    val editPostId = editingPostId
+    val editPostContent = state.posts.find { it.id == editPostId }?.content
+    if (editPostId != null && editPostContent != null) {
+        EditPostDialog(
+            initialContent = editPostContent,
+            isSubmitting = isSubmittingEdit,
+            error = editError,
+            onDismiss = { editingPostId = null },
+            onSubmit = { content ->
+                isSubmittingEdit = true
+                viewModel.editPost(editPostId, content) { result ->
+                    isSubmittingEdit = false
+                    result
+                        .onSuccess { editingPostId = null }
+                        .onFailure { editError = it.message }
                 }
             },
         )
@@ -235,6 +263,7 @@ private fun SearchResultsContent(
     onBookmarkClick: (String) -> Unit,
     onReportClick: (String) -> Unit,
     onDeleteClick: (String) -> Unit,
+    onEditClick: (String) -> Unit,
     onQuoteClick: (String) -> Unit,
     onViewReposts: (String) -> Unit,
     onViewQuotes: (String) -> Unit,
@@ -295,6 +324,7 @@ private fun SearchResultsContent(
                     onReportClick = onReportClick,
                     isOwnPost = state.ownUserId != null && post.author.id == state.ownUserId,
                     onDeleteClick = onDeleteClick,
+                    onEditClick = onEditClick,
                     onQuoteClick = onQuoteClick,
                     onViewReposts = onViewReposts,
                     onViewQuotes = onViewQuotes,

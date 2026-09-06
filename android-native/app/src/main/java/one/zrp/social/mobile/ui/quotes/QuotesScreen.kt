@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.data.PostsRepository
+import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.home.PostCard
 
@@ -60,6 +61,9 @@ fun QuotesScreen(
     var reportError by remember { mutableStateOf<String?>(null) }
     var deletingPostId by remember { mutableStateOf<String?>(null) }
     var isDeletingPost by remember { mutableStateOf(false) }
+    var editingPostId by remember { mutableStateOf<String?>(null) }
+    var isSubmittingEdit by remember { mutableStateOf(false) }
+    var editError by remember { mutableStateOf<String?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -125,6 +129,10 @@ fun QuotesScreen(
                             },
                             isOwnPost = state.ownUserId != null && post.author.id == state.ownUserId,
                             onDeleteClick = { quotePostId -> deletingPostId = quotePostId },
+                            onEditClick = { quotePostId ->
+                                editingPostId = quotePostId
+                                editError = null
+                            },
                             onQuoteClick = onOpenQuotePost,
                             onViewReposts = onOpenReposts,
                             onViewQuotes = onOpenQuotes,
@@ -193,6 +201,26 @@ fun QuotesScreen(
             dismissButton = {
                 TextButton(onClick = { deletingPostId = null }, enabled = !isDeletingPost) {
                     Text("Cancel")
+                }
+            },
+        )
+    }
+
+    val editPostId = editingPostId
+    val editPostContent = state.posts.find { it.id == editPostId }?.content
+    if (editPostId != null && editPostContent != null) {
+        EditPostDialog(
+            initialContent = editPostContent,
+            isSubmitting = isSubmittingEdit,
+            error = editError,
+            onDismiss = { editingPostId = null },
+            onSubmit = { content ->
+                isSubmittingEdit = true
+                viewModel.editPost(editPostId, content) { result ->
+                    isSubmittingEdit = false
+                    result
+                        .onSuccess { editingPostId = null }
+                        .onFailure { editError = it.message }
                 }
             },
         )

@@ -139,6 +139,23 @@ class BookmarksViewModel(private val repository: BookmarksRepository) : ViewMode
         }
     }
 
+    // Applies the submitted content locally (post.copy) rather than
+    // replacing with the server's returned object - PUT /posts/{id}
+    // never carries a liked/reposted/bookmarked flag, so swapping in
+    // that object wholesale would reset those already-known flags
+    // (every post here is definitionally bookmarked; losing that would
+    // read as un-bookmarked until the next refresh).
+    fun editPost(postId: String, content: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            repository.updatePost(postId, content)
+                .onSuccess {
+                    _state.update { it.copy(posts = it.posts.map { post -> if (post.id == postId) post.copy(content = content) else post }) }
+                    onResult(Result.success(Unit))
+                }
+                .onFailure { onResult(Result.failure(it)) }
+        }
+    }
+
     private fun applyOptimisticLike(post: Post): Post {
         val wasLiked = post.liked == true
         return post.copy(

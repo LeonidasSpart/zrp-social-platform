@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Flag
@@ -74,6 +75,7 @@ fun PostCard(
     onReportClick: (String) -> Unit = {},
     isOwnPost: Boolean = false,
     onDeleteClick: (String) -> Unit = {},
+    onEditClick: (String) -> Unit = {},
     onQuoteClick: (String) -> Unit = {},
     onViewReposts: (String) -> Unit = {},
     onViewQuotes: (String) -> Unit = {},
@@ -128,9 +130,9 @@ fun PostCard(
                         )
                     }
 
-                    // The website's shared PostCard.tsx shows Delete for
-                    // the post's own author and Report for everyone else,
-                    // on every screen it renders on (Home, Profile,
+                    // The website's shared PostCard.tsx shows Edit+Delete
+                    // for the post's own author and Report for everyone
+                    // else, on every screen it renders on (Home, Profile,
                     // Bookmarks, Search, post detail, hashtag, explore) -
                     // isOwnPost mirrors that same isAuthor check
                     // everywhere this PostCard is used too, each screen's
@@ -138,6 +140,14 @@ fun PostCard(
                     // GET /auth/session the same way ProfileViewModel
                     // already did.
                     if (isOwnPost) {
+                        IconButton(onClick = { onEditClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
+                            Icon(
+                                imageVector = Icons.Filled.Edit,
+                                contentDescription = "Edit post",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(IconSize.sm),
+                            )
+                        }
                         IconButton(onClick = { onDeleteClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
                             Icon(
                                 imageVector = Icons.Filled.DeleteOutline,

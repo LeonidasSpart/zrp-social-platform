@@ -58,6 +58,7 @@ import coil.compose.AsyncImage
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.home.PostCard
@@ -127,6 +128,9 @@ fun ProfileScreen(
                 var reportError by remember { mutableStateOf<String?>(null) }
                 var deletingPostId by remember { mutableStateOf<String?>(null) }
                 var isDeletingPost by remember { mutableStateOf(false) }
+                var editingPostId by remember { mutableStateOf<String?>(null) }
+                var isSubmittingEdit by remember { mutableStateOf(false) }
+                var editError by remember { mutableStateOf<String?>(null) }
 
                 val listState = rememberLazyListState()
 
@@ -177,6 +181,10 @@ fun ProfileScreen(
                             },
                             isOwnPost = state.isOwnProfile,
                             onDeleteClick = { postId -> deletingPostId = postId },
+                            onEditClick = { postId ->
+                                editingPostId = postId
+                                editError = null
+                            },
                             onQuoteClick = onOpenQuotePost,
                             onViewReposts = onOpenReposts,
                             onViewQuotes = onOpenQuotes,
@@ -242,6 +250,26 @@ fun ProfileScreen(
                         dismissButton = {
                             TextButton(onClick = { deletingPostId = null }, enabled = !isDeletingPost) {
                                 Text("Cancel")
+                            }
+                        },
+                    )
+                }
+
+                val editPostId = editingPostId
+                val editPostContent = state.posts.find { it.id == editPostId }?.content
+                if (editPostId != null && editPostContent != null) {
+                    EditPostDialog(
+                        initialContent = editPostContent,
+                        isSubmitting = isSubmittingEdit,
+                        error = editError,
+                        onDismiss = { editingPostId = null },
+                        onSubmit = { content ->
+                            isSubmittingEdit = true
+                            viewModel.editPost(editPostId, content) { result ->
+                                isSubmittingEdit = false
+                                result
+                                    .onSuccess { editingPostId = null }
+                                    .onFailure { editError = it.message }
                             }
                         },
                     )
