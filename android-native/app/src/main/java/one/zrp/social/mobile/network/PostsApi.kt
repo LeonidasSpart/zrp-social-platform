@@ -67,7 +67,7 @@ data class RepostResponse(val reposted: Boolean)
 
 data class BookmarkResponse(val bookmarked: Boolean)
 
-data class CreatePostRequest(val content: String)
+data class CreatePostRequest(val content: String, val quotePostId: String? = null)
 
 data class CreatePostResponse(val post: Post)
 
@@ -113,4 +113,12 @@ interface PostsApi {
     // an untested native upload flow in the same change.
     @POST("posts")
     suspend fun createPost(@Body request: CreatePostRequest): CreatePostResponse
+
+    // Unlike createPost's {post: ...} envelope, GET /posts/{id} returns
+    // the raw post object directly - the same real single-post fetch
+    // the website's quote-post preview and post-detail page both use
+    // (src/app/api/posts/[id]/route.ts), quotePost included one level
+    // deep exactly like the list endpoints' own Post.quotePost field.
+    @GET("posts/{id}")
+    suspend fun getPost(@Path("id") postId: String): Post
 }

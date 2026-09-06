@@ -3,8 +3,10 @@ package one.zrp.social.mobile.ui.home
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +23,8 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -70,6 +74,7 @@ fun PostCard(
     onReportClick: (String) -> Unit = {},
     isOwnPost: Boolean = false,
     onDeleteClick: (String) -> Unit = {},
+    onQuoteClick: (String) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -172,6 +177,14 @@ fun PostCard(
                     )
                 }
 
+                val quotedPost = post.quotePost
+                if (quotedPost != null) {
+                    QuotedPostPreview(
+                        quotedPost = quotedPost,
+                        onClick = { onClick(quotedPost.id) },
+                    )
+                }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -184,13 +197,11 @@ fun PostCard(
                         contentDescription = "Comments",
                         onClick = { onCommentClick(post.id) },
                     )
-                    PostStat(
-                        icon = Icons.Filled.Repeat,
+                    RepostStat(
                         count = post._count.reposts,
-                        contentDescription = "Repost",
-                        tint = ZrpGreen,
-                        active = post.reposted == true,
-                        onClick = { onRepostClick(post.id) },
+                        reposted = post.reposted == true,
+                        onRepostToggle = { onRepostClick(post.id) },
+                        onQuoteClick = { onQuoteClick(post.id) },
                     )
                     LikeStat(
                         liked = post.liked == true,
@@ -237,6 +248,119 @@ private fun PostStat(
             style = MaterialTheme.typography.bodySmall,
             color = resolvedTint,
         )
+    }
+}
+
+// The website's repost control is a dropdown, not a plain toggle - tap
+// opens Repost/Undo Repost alongside Quote (src/components/PostCard.tsx's
+// repostDropdownOpen menu), since a repost and a quote-repost are two
+// different real actions on the same button, not one collapsed into
+// the other.
+@Composable
+private fun RepostStat(
+    count: Int,
+    reposted: Boolean,
+    onRepostToggle: () -> Unit,
+    onQuoteClick: () -> Unit,
+) {
+    var menuOpen by remember { mutableStateOf(false) }
+    val resolvedTint = if (reposted) ZrpGreen else MaterialTheme.colorScheme.onSurfaceVariant
+
+    Box {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.clickable { menuOpen = true },
+        ) {
+            IconButton(onClick = { menuOpen = true }, modifier = Modifier.size(TouchTarget.min)) {
+                Icon(
+                    imageVector = Icons.Filled.Repeat,
+                    contentDescription = "Repost options",
+                    tint = resolvedTint,
+                    modifier = Modifier.size(IconSize.sm),
+                )
+            }
+            Text(
+                text = formatCount(count),
+                style = MaterialTheme.typography.bodySmall,
+                color = resolvedTint,
+            )
+        }
+
+        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+            DropdownMenuItem(
+                text = { Text(if (reposted) "Undo Repost" else "Repost") },
+                onClick = {
+                    menuOpen = false
+                    onRepostToggle()
+                },
+            )
+            DropdownMenuItem(
+                text = { Text("Quote") },
+                onClick = {
+                    menuOpen = false
+                    onQuoteClick()
+                },
+            )
+        }
+    }
+}
+
+// A compact, tappable preview of the post being quoted - the same real
+// author/content/image GET /posts/{id} already nests one level deep
+// under quotePost (see Post's own KDoc), not a locally reconstructed
+// summary. Bordered rather than filled so it reads as "embedded post"
+// distinct from the quoting post's own content above it.
+@Composable
+private fun QuotedPostPreview(quotedPost: Post, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = Spacing.sm)
+            .clip(MaterialTheme.shapes.medium)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick)
+            .padding(Spacing.sm),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Avatar(
+                url = quotedPost.author.avatarUrl,
+                name = quotedPost.author.name ?: quotedPost.author.username,
+                size = 20.dp,
+            )
+            Text(
+                text = quotedPost.author.name ?: quotedPost.author.username,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = Spacing.xs),
+            )
+            VerifiedBadge(badgeType = quotedPost.author.badgeType, size = 14.dp, modifier = Modifier.padding(start = 2.dp))
+            Text(
+                text = "@${quotedPost.author.username}",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = Spacing.xs),
+            )
+        }
+        if (quotedPost.content.isNotBlank()) {
+            Text(
+                text = quotedPost.content,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 2.dp),
+                maxLines = 4,
+            )
+        }
+        val quotedPreviewUrl = quotedPost.imageUrl ?: quotedPost.imageUrls?.firstOrNull()
+        if (quotedPreviewUrl != null) {
+            AsyncImage(
+                model = quotedPreviewUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.xs)
+                    .clip(MaterialTheme.shapes.medium),
+            )
+        }
     }
 }
 
