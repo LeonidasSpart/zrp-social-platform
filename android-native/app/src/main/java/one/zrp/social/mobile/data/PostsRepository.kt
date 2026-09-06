@@ -60,9 +60,15 @@ class PostsRepository {
         }
     }
 
-    suspend fun createPost(content: String, quotePostId: String? = null): Result<Post> {
+    suspend fun createPost(content: String, quotePostId: String? = null, gifUrl: String? = null): Result<Post> {
         return try {
-            Result.success(ApiClient.postsApi.createPost(CreatePostRequest(content, quotePostId)).post)
+            val request = CreatePostRequest(
+                content = content,
+                quotePostId = quotePostId,
+                imageUrls = gifUrl?.let { listOf(it) },
+                mediaType = if (gifUrl != null) "image" else null,
+            )
+            Result.success(ApiClient.postsApi.createPost(request).post)
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't create this post. Please try again."))
         } catch (e: Exception) {

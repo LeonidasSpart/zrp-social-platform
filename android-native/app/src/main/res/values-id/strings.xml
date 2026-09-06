@@ -176,4 +176,5 @@
     <string name="hashtag_post_count">%1$d %2$s dengan tagar ini</string>
     <string name="hashtag_no_posts">Belum ada postingan dengan #%1$s.</string>
     <string name="hashtag_back_to_home">← Kembali ke beranda</string>
+    <string name="composer_add_gif">Tambah GIF</string>
 </resources>
