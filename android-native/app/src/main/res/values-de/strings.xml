@@ -92,4 +92,10 @@
     <string name="profile_unblock">Entsperren</string>
     <string name="nav_bookmarks">Lesezeichen</string>
     <string name="nav_sign_out">Abmelden</string>
+    <string name="notifications_empty">Noch keine Benachrichtigungen</string>
+    <string name="notifications_empty_desc">Wenn jemand mit dir interagiert, erscheint es hier</string>
+    <string name="notifications_liked_post_suffix">gefällt dein Beitrag</string>
+    <string name="notifications_commented_post_suffix">hat deinen Beitrag kommentiert</string>
+    <string name="notifications_started_following_suffix">folgt dir jetzt</string>
+    <string name="notifications_reposted_post_suffix">hat deinen Beitrag repostet</string>
 </resources>

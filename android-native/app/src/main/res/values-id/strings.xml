@@ -92,4 +92,10 @@
     <string name="profile_unblock">Batalkan blokir</string>
     <string name="nav_bookmarks">Markah</string>
     <string name="nav_sign_out">Keluar</string>
+    <string name="notifications_empty">Belum ada notifikasi</string>
+    <string name="notifications_empty_desc">Saat seseorang berinteraksi dengan Anda, akan muncul di sini</string>
+    <string name="notifications_liked_post_suffix">menyukai postingan Anda</string>
+    <string name="notifications_commented_post_suffix">mengomentari postingan Anda</string>
+    <string name="notifications_started_following_suffix">mulai mengikuti Anda</string>
+    <string name="notifications_reposted_post_suffix">membagikan ulang postingan Anda</string>
 </resources>

@@ -92,4 +92,10 @@
     <string name="profile_unblock">إلغاء الحظر</string>
     <string name="nav_bookmarks">المحفوظات</string>
     <string name="nav_sign_out">تسجيل الخروج</string>
+    <string name="notifications_empty">لا إشعارات بعد</string>
+    <string name="notifications_empty_desc">عندما يتفاعل شخص ما معك، سيظهر ذلك هنا</string>
+    <string name="notifications_liked_post_suffix">أُعجب بمنشورك</string>
+    <string name="notifications_commented_post_suffix">علّق على منشورك</string>
+    <string name="notifications_started_following_suffix">بدأ بمتابعتك</string>
+    <string name="notifications_reposted_post_suffix">أعاد نشر منشورك</string>
 </resources>

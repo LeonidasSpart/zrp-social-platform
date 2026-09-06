@@ -92,4 +92,10 @@
     <string name="profile_unblock">Débloquer</string>
     <string name="nav_bookmarks">Favoris</string>
     <string name="nav_sign_out">Déconnexion</string>
+    <string name="notifications_empty">Aucune notification pour le moment</string>
+    <string name="notifications_empty_desc">Lorsque quelqu\'un interagit avec vous, cela apparaîtra ici</string>
+    <string name="notifications_liked_post_suffix">a aimé votre publication</string>
+    <string name="notifications_commented_post_suffix">a commenté votre publication</string>
+    <string name="notifications_started_following_suffix">a commencé à vous suivre</string>
+    <string name="notifications_reposted_post_suffix">a repartagé votre publication</string>
 </resources>
