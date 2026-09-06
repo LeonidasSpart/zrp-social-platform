@@ -40,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.data.SearchRepository
 import one.zrp.social.mobile.network.SearchUser
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.home.PostCard
 
 /**
@@ -232,10 +233,13 @@ private fun SearchUserRow(user: SearchUser, onClick: () -> Unit) {
         Spacer(modifier = Modifier.width(12.dp))
 
         Column {
-            Text(
-                text = user.name ?: user.username,
-                style = MaterialTheme.typography.titleSmall,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = user.name ?: user.username,
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                VerifiedBadge(badgeType = user.badgeType, modifier = Modifier.padding(start = 3.dp))
+            }
             Text(
                 text = "@${user.username}",
                 style = MaterialTheme.typography.bodySmall,

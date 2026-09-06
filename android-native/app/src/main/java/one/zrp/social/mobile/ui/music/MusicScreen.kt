@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -236,12 +237,25 @@ private fun TrackCard(track: MusicTrack, isCurrent: Boolean, onClick: () -> Unit
             maxLines = 1,
             modifier = Modifier.padding(top = 6.dp),
         )
-        Text(
-            text = track.artist.displayName,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = track.artist.displayName,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+            if (track.artist.verified) {
+                Icon(
+                    imageVector = Icons.Filled.VerifiedUser,
+                    contentDescription = "Verified artist",
+                    tint = ZrpRed,
+                    modifier = Modifier
+                        .padding(start = 3.dp)
+                        .size(12.dp),
+                )
+            }
+        }
     }
 }
 
@@ -297,12 +311,25 @@ private fun MiniPlayerBar(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = track.title, style = MaterialTheme.typography.titleSmall, maxLines = 1)
-                Text(
-                    text = track.artist.displayName,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = track.artist.displayName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (track.artist.verified) {
+                        Icon(
+                            imageVector = Icons.Filled.VerifiedUser,
+                            contentDescription = "Verified artist",
+                            tint = ZrpRed,
+                            modifier = Modifier
+                                .padding(start = 3.dp)
+                                .size(11.dp),
+                        )
+                    }
+                }
             }
 
             IconButton(onClick = onLikeClick) {

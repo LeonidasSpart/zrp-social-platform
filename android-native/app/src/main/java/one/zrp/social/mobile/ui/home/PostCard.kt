@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.TouchTarget
 import one.zrp.social.mobile.ui.theme.IconSize
@@ -87,6 +88,7 @@ fun PostCard(
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                     )
+                    VerifiedBadge(badgeType = post.author.badgeType, modifier = Modifier.padding(start = 3.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "@${post.author.username}",

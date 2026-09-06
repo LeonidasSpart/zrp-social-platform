@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.network.ConversationSummary
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -124,11 +125,14 @@ private fun ConversationRow(conversation: ConversationSummary, onClick: () -> Un
         Spacer(modifier = Modifier.width(12.dp))
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = partner.name ?: partner.username,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = if (conversation.unreadCount > 0) FontWeight.Bold else FontWeight.Normal,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = partner.name ?: partner.username,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = if (conversation.unreadCount > 0) FontWeight.Bold else FontWeight.Normal,
+                )
+                VerifiedBadge(badgeType = partner.badgeType, modifier = Modifier.padding(start = 3.dp))
+            }
             Text(
                 text = preview,
                 style = MaterialTheme.typography.bodySmall,

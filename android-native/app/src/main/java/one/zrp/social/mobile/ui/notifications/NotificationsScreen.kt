@@ -40,11 +40,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.data.NotificationsRepository
 import one.zrp.social.mobile.network.AppNotification
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpBlue
 import one.zrp.social.mobile.ui.theme.ZrpGreen
@@ -177,10 +179,22 @@ private fun NotificationRow(notification: AppNotification, onAuthorClick: (Strin
         Spacer(modifier = Modifier.width(Spacing.md))
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = describeNotification(notification),
-                style = MaterialTheme.typography.bodyMedium,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = fromUser?.name ?: fromUser?.username ?: "Someone",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                VerifiedBadge(
+                    badgeType = fromUser?.badgeType,
+                    size = 14.dp,
+                    modifier = Modifier.padding(start = 3.dp, end = 3.dp),
+                )
+                Text(
+                    text = describeNotificationSuffix(notification),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
 
             val postContent = notification.post?.content
             if (!postContent.isNullOrBlank()) {
@@ -213,21 +227,25 @@ private fun NotificationRow(notification: AppNotification, onAuthorClick: (Strin
     }
 }
 
-private fun describeNotification(notification: AppNotification): String {
-    val name = notification.fromUser?.name ?: notification.fromUser?.username ?: "Someone"
+// Split into (actor name, rest of sentence) rather than one flat
+// string so the actor's real badgeType can render right after their
+// name - matching the website's notifications page, which bolds the
+// name and places VerifiedBadge directly after it, before the rest of
+// the sentence.
+private fun describeNotificationSuffix(notification: AppNotification): String {
     return when (notification.type) {
-        "like" -> "$name liked your post"
-        "comment" -> "$name commented on your post"
-        "follow" -> "$name started following you"
-        "repost" -> "$name reposted your post"
-        "mention" -> "$name mentioned you"
-        "message" -> "$name sent you a message"
-        "follow_request" -> "$name requested to follow you"
+        "like" -> "liked your post"
+        "comment" -> "commented on your post"
+        "follow" -> "started following you"
+        "repost" -> "reposted your post"
+        "mention" -> "mentioned you"
+        "message" -> "sent you a message"
+        "follow_request" -> "requested to follow you"
         // Other real notification types exist server-side (support
         // tickets, ZRP PLAY duels, Marketplace/Opportunity/Help listing
         // reviews) for features this native app hasn't built screens
         // for yet - a humanized fallback keeps them visible and honest
         // rather than hidden or misrepresented as one of the types above.
-        else -> "$name · ${notification.type.replace('_', ' ').replaceFirstChar { it.uppercase() }}"
+        else -> "· ${notification.type.replace('_', ' ').replaceFirstChar { it.uppercase() }}"
     }
 }

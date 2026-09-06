@@ -32,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.data.CommentsRepository
 import one.zrp.social.mobile.network.Comment
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
 
@@ -171,6 +172,7 @@ private fun CommentRow(comment: Comment) {
                     text = comment.author.name ?: comment.author.username,
                     style = MaterialTheme.typography.titleSmall,
                 )
+                VerifiedBadge(badgeType = comment.author.badgeType, modifier = Modifier.padding(start = 3.dp))
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "· ${formatRelativeTime(comment.createdAt)}",

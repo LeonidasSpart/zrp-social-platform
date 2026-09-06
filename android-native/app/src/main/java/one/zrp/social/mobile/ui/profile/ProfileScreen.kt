@@ -47,6 +47,7 @@ import coil.compose.AsyncImage
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.home.PostCard
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -261,11 +262,18 @@ private fun ProfileHeader(
         }
 
         Column(modifier = Modifier.padding(start = Spacing.lg, end = Spacing.lg, top = Spacing.sm)) {
-            Text(
-                text = profile.name ?: profile.username,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = profile.name ?: profile.username,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+                VerifiedBadge(
+                    badgeType = profile.badgeType,
+                    size = 20.dp,
+                    modifier = Modifier.padding(start = Spacing.xs),
+                )
+            }
             Text(
                 text = "@${profile.username}",
                 style = MaterialTheme.typography.bodyMedium,
