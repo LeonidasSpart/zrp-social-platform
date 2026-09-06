@@ -78,6 +78,17 @@ import java.util.Locale
  * feed markup, but showing the exact same real fields (author, media,
  * counts, like state) the website's post cards render, from the same
  * backend response.
+ *
+ * Localization audit note: every visible string in this file was
+ * cross-referenced against the real PostCard.tsx. None need a
+ * translated resource - each one is either a byte-for-byte match of
+ * web's own hardcoded, untranslated copy (Pin/Unpin, Show original/
+ * Show translation, Translation unavailable, Undo Repost/Repost/Quote,
+ * the reposts/quotes counts) or a native-only accessibility label
+ * (Edit/Delete/Report post, Comments, Add reaction, Like/Unlike,
+ * Bookmark, Repost options) that web's own icon-only buttons have no
+ * aria-label/title for either - confirmed by reading the component
+ * directly rather than assumed.
  */
 @Composable
 fun PostCard(
