@@ -71,4 +71,12 @@
     <string name="action_reply">Përgjigju</string>
     <string name="feed_for_you">Për ju</string>
     <string name="feed_following">Duke ndjekur</string>
+    <string name="search_placeholder">Kërko përdorues, postime, hashtags...</string>
+    <string name="search_users_tab">Përdoruesit (%1$d)</string>
+    <string name="search_posts_tab">Postimet (%1$d)</string>
+    <string name="search_no_users">Nuk u gjet asnjë përdorues.</string>
+    <string name="search_no_posts">Nuk u gjet asnjë postim.</string>
+    <string name="home_trending_on_zrp">Në trend në ZRP</string>
+    <string name="right_panel_who_to_follow">Kë të ndiqni</string>
+    <string name="home_discover_music">Zbulo muzikë të re</string>
 </resources>

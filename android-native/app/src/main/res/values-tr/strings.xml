@@ -71,4 +71,12 @@
     <string name="action_reply">Yanıtla</string>
     <string name="feed_for_you">Senin için</string>
     <string name="feed_following">Takip Edilenler</string>
+    <string name="search_placeholder">Kullanıcı, gönderi, hashtag ara...</string>
+    <string name="search_users_tab">Kullanıcılar (%1$d)</string>
+    <string name="search_posts_tab">Gönderiler (%1$d)</string>
+    <string name="search_no_users">Kullanıcı bulunamadı.</string>
+    <string name="search_no_posts">Gönderi bulunamadı.</string>
+    <string name="home_trending_on_zrp">ZRP\'de gündemde</string>
+    <string name="right_panel_who_to_follow">Takip edilecekler</string>
+    <string name="home_discover_music">Yeni müzik keşfet</string>
 </resources>

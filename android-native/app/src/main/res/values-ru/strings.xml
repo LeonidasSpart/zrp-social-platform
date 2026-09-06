@@ -71,4 +71,12 @@
     <string name="action_reply">Ответить</string>
     <string name="feed_for_you">Для вас</string>
     <string name="feed_following">Подписки</string>
+    <string name="search_placeholder">поиск пользователей, публикаций, хэштегов...</string>
+    <string name="search_users_tab">пользователей (%1$d)</string>
+    <string name="search_posts_tab">публикаций (%1$d)</string>
+    <string name="search_no_users">Пользователи не найдены.</string>
+    <string name="search_no_posts">Публикации не найдены.</string>
+    <string name="home_trending_on_zrp">В тренде на ZRP</string>
+    <string name="right_panel_who_to_follow">На кого подписаться</string>
+    <string name="home_discover_music">Открыть новую музыку</string>
 </resources>

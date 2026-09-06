@@ -71,4 +71,12 @@
     <string name="action_reply">回复</string>
     <string name="feed_for_you">为你推荐</string>
     <string name="feed_following">正在关注</string>
+    <string name="search_placeholder">搜索 用户, 帖子, 话题标签...</string>
+    <string name="search_users_tab">用户 (%1$d)</string>
+    <string name="search_posts_tab">帖子 (%1$d)</string>
+    <string name="search_no_users">未找到用户。</string>
+    <string name="search_no_posts">未找到帖子。</string>
+    <string name="home_trending_on_zrp">ZRP 热门话题</string>
+    <string name="right_panel_who_to_follow">推荐关注</string>
+    <string name="home_discover_music">发现新音乐</string>
 </resources>

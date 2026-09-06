@@ -38,9 +38,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.SearchRepository
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
@@ -82,7 +84,7 @@ fun SearchScreen(
         OutlinedTextField(
             value = state.query,
             onValueChange = { viewModel.onQueryChange(it) },
-            placeholder = { Text("Search ZRP") },
+            placeholder = { Text(stringResource(R.string.search_placeholder)) },
             singleLine = true,
             leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
             trailingIcon = {
@@ -149,6 +151,8 @@ fun SearchScreen(
 
     val deletePostId = deletingPostId
     if (deletePostId != null) {
+        // English-only on purpose - matches PostCard.tsx's own hardcoded,
+        // untranslated delete-confirmation dialog (see HomeScreen.kt).
         AlertDialog(
             onDismissRequest = { if (!isDeletingPost) deletingPostId = null },
             title = { Text("Delete post?") },
@@ -220,7 +224,7 @@ private fun DiscoverContent(
         if (state.trendingHashtags.isNotEmpty()) {
             item {
                 Text(
-                    text = "Trending",
+                    text = stringResource(R.string.home_trending_on_zrp),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -242,7 +246,7 @@ private fun DiscoverContent(
         if (state.suggestedUsers.isNotEmpty()) {
             item {
                 Text(
-                    text = "Suggested for you",
+                    text = stringResource(R.string.right_panel_who_to_follow),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -278,45 +282,62 @@ private fun SearchResultsContent(
         return
     }
 
-    if (state.users.isEmpty() && state.posts.isEmpty()) {
+    if (state.error != null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(
-                text = state.error ?: "No results found.",
-                color = if (state.error != null) {
-                    MaterialTheme.colorScheme.error
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
+                text = state.error,
+                color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(24.dp),
             )
         }
         return
     }
 
+    // Always shows both sections with their real counts and per-section
+    // empty copy (search.usersTab/noUsers, search.postsTab/noPosts) -
+    // matching the website's own /search page, which keeps both tabs
+    // visible (e.g. "Users (0)") rather than hiding a section outright
+    // when only the other type matched.
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        if (state.users.isNotEmpty()) {
+        item {
+            Text(
+                text = stringResource(R.string.search_users_tab, state.users.size),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+        }
+        if (state.users.isEmpty()) {
             item {
                 Text(
-                    text = "Users",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    text = stringResource(R.string.search_no_users),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
+        } else {
             items(state.users, key = { it.id }) { user ->
                 SearchUserRow(user = user, onClick = { onAuthorClick(user.username) })
             }
         }
 
-        if (state.posts.isNotEmpty()) {
+        item {
+            Text(
+                text = stringResource(R.string.search_posts_tab, state.posts.size),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+        }
+        if (state.posts.isEmpty()) {
             item {
                 Text(
-                    text = "Posts",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    text = stringResource(R.string.search_no_posts),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
+        } else {
             itemsIndexed(state.posts, key = { _, post -> post.id }) { _, post ->
                 PostCard(
                     post = post,
@@ -385,7 +406,7 @@ private fun MusicEntryRow(onClick: () -> Unit) {
             modifier = Modifier.size(28.dp),
         )
         Spacer(modifier = Modifier.width(12.dp))
-        Text(text = "ZRP Music", style = MaterialTheme.typography.titleSmall)
+        Text(text = stringResource(R.string.home_discover_music), style = MaterialTheme.typography.titleSmall)
     }
 }
 
