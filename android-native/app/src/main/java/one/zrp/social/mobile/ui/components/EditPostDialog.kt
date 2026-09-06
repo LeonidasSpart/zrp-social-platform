@@ -30,12 +30,13 @@ fun EditPostDialog(
     error: String?,
     onDismiss: () -> Unit,
     onSubmit: (content: String) -> Unit,
+    title: String = "Edit post",
 ) {
     var content by remember { mutableStateOf(initialContent) }
 
     AlertDialog(
         onDismissRequest = { if (!isSubmitting) onDismiss() },
-        title = { Text("Edit post") },
+        title = { Text(title) },
         text = {
             Column {
                 OutlinedTextField(

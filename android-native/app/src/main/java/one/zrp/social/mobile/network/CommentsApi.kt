@@ -1,8 +1,10 @@
 package one.zrp.social.mobile.network
 
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -39,11 +41,17 @@ data class CommentsPage(val comments: List<Comment>?, val nextCursor: String?)
 
 data class CreateCommentRequest(val content: String, val parentId: String? = null)
 
+data class UpdateCommentRequest(val content: String)
+
 /**
  * The same real threaded-comment system the website's post detail view
  * uses - GET /posts/{id}/comments (top-level page + their full reply
- * subtrees) and POST to add a new one. No separate native comment
- * store, no invented reply UI beyond what the backend already returns.
+ * subtrees), POST to add a new one (top-level or a reply, via
+ * parentId), and the same real like/repost/bookmark/edit/delete actions
+ * CommentItem.tsx exposes per comment. LikeResponse/RepostResponse/
+ * BookmarkResponse are PostsApi's own types, reused as-is since
+ * /comments/{id}/like|repost|bookmark return the exact same
+ * {liked|reposted|bookmarked: boolean} shape as their post equivalents.
  */
 interface CommentsApi {
     @GET("posts/{id}/comments")
@@ -51,4 +59,26 @@ interface CommentsApi {
 
     @POST("posts/{id}/comments")
     suspend fun createComment(@Path("id") postId: String, @Body request: CreateCommentRequest): Comment
+
+    @POST("comments/{id}/like")
+    suspend fun toggleLike(@Path("id") commentId: String): LikeResponse
+
+    @POST("comments/{id}/repost")
+    suspend fun toggleRepost(@Path("id") commentId: String): RepostResponse
+
+    @POST("comments/{id}/bookmark")
+    suspend fun toggleBookmark(@Path("id") commentId: String): BookmarkResponse
+
+    // Same author-only + plan-length-limit enforcement as post editing,
+    // server-side (src/app/api/comments/[id]/route.ts's PUT handler).
+    // Returns the raw updated comment (no envelope, no replies/liked/
+    // reposted/bookmarked - the same PUT/GET asymmetry Post already has).
+    @PUT("comments/{id}")
+    suspend fun updateComment(@Path("id") commentId: String, @Body request: UpdateCommentRequest): Comment
+
+    // Deleting a comment cascades to every reply beneath it server-side
+    // (Comment's self-relation onDelete: Cascade) - the same real
+    // behavior the website's own handleDelete triggers.
+    @DELETE("comments/{id}")
+    suspend fun deleteComment(@Path("id") commentId: String)
 }
