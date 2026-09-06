@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsOff
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -58,10 +59,12 @@ import coil.compose.AsyncImage
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.home.PostCard
 import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.ui.theme.ZrpBlue
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.ui.theme.ZrpWhite
 import one.zrp.social.mobile.util.formatCount
@@ -127,6 +130,9 @@ fun ProfileScreen(
                 var reportError by remember { mutableStateOf<String?>(null) }
                 var deletingPostId by remember { mutableStateOf<String?>(null) }
                 var isDeletingPost by remember { mutableStateOf(false) }
+                var editingPostId by remember { mutableStateOf<String?>(null) }
+                var isSubmittingEdit by remember { mutableStateOf(false) }
+                var editError by remember { mutableStateOf<String?>(null) }
 
                 val listState = rememberLazyListState()
 
@@ -164,7 +170,59 @@ fun ProfileScreen(
                         )
                     }
 
-                    itemsIndexed(state.posts, key = { _, post -> post.id }) { _, post ->
+                    val pinnedPost = state.pinnedPost
+                    if (pinnedPost != null) {
+                        item(key = "pinned-${pinnedPost.id}") {
+                            Column {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(start = Spacing.lg, top = Spacing.sm),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.PushPin,
+                                        contentDescription = null,
+                                        tint = ZrpBlue,
+                                        modifier = Modifier.size(14.dp),
+                                    )
+                                    Text(
+                                        text = "Pinned",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = ZrpBlue,
+                                        modifier = Modifier.padding(start = Spacing.xs),
+                                    )
+                                }
+                                PostCard(
+                                    post = pinnedPost,
+                                    onLikeClick = { postId -> viewModel.toggleLike(postId) },
+                                    onCommentClick = onOpenComments,
+                                    onRepostClick = { postId -> viewModel.toggleRepost(postId) },
+                                    onBookmarkClick = { postId -> viewModel.toggleBookmark(postId) },
+                                    onReportClick = { postId ->
+                                        reportingPostId = postId
+                                        reportError = null
+                                    },
+                                    isOwnPost = state.isOwnProfile,
+                                    onDeleteClick = { postId -> deletingPostId = postId },
+                                    onEditClick = { postId ->
+                                        editingPostId = postId
+                                        editError = null
+                                    },
+                                    onQuoteClick = onOpenQuotePost,
+                                    onViewReposts = onOpenReposts,
+                                    onViewQuotes = onOpenQuotes,
+                                    onClick = onOpenComments,
+                                    onAuthorClick = onAuthorClick,
+                                    showPinOption = state.isOwnProfile,
+                                    isPinned = true,
+                                    onPinClick = { postId -> viewModel.togglePin(postId) },
+                                )
+                                HorizontalDivider()
+                            }
+                        }
+                    }
+
+                    val nonPinnedPosts = if (pinnedPost != null) state.posts.filterNot { it.id == pinnedPost.id } else state.posts
+                    itemsIndexed(nonPinnedPosts, key = { _, post -> post.id }) { _, post ->
                         PostCard(
                             post = post,
                             onLikeClick = { postId -> viewModel.toggleLike(postId) },
@@ -177,11 +235,18 @@ fun ProfileScreen(
                             },
                             isOwnPost = state.isOwnProfile,
                             onDeleteClick = { postId -> deletingPostId = postId },
+                            onEditClick = { postId ->
+                                editingPostId = postId
+                                editError = null
+                            },
                             onQuoteClick = onOpenQuotePost,
                             onViewReposts = onOpenReposts,
                             onViewQuotes = onOpenQuotes,
                             onClick = onOpenComments,
                             onAuthorClick = onAuthorClick,
+                            showPinOption = state.isOwnProfile,
+                            isPinned = false,
+                            onPinClick = { postId -> viewModel.togglePin(postId) },
                         )
                     }
 
@@ -242,6 +307,26 @@ fun ProfileScreen(
                         dismissButton = {
                             TextButton(onClick = { deletingPostId = null }, enabled = !isDeletingPost) {
                                 Text("Cancel")
+                            }
+                        },
+                    )
+                }
+
+                val editPostId = editingPostId
+                val editPostContent = (state.posts.find { it.id == editPostId } ?: state.pinnedPost?.takeIf { it.id == editPostId })?.content
+                if (editPostId != null && editPostContent != null) {
+                    EditPostDialog(
+                        initialContent = editPostContent,
+                        isSubmitting = isSubmittingEdit,
+                        error = editError,
+                        onDismiss = { editingPostId = null },
+                        onSubmit = { content ->
+                            isSubmittingEdit = true
+                            viewModel.editPost(editPostId, content) { result ->
+                                isSubmittingEdit = false
+                                result
+                                    .onSuccess { editingPostId = null }
+                                    .onFailure { editError = it.message }
                             }
                         },
                     )

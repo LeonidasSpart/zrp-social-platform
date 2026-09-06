@@ -4,6 +4,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -67,7 +68,11 @@ data class RepostResponse(val reposted: Boolean)
 
 data class BookmarkResponse(val bookmarked: Boolean)
 
+data class PinToggleResponse(val pinned: Boolean)
+
 data class CreatePostRequest(val content: String, val quotePostId: String? = null)
+
+data class UpdatePostRequest(val content: String)
 
 data class CreatePostResponse(val post: Post)
 
@@ -98,12 +103,34 @@ interface PostsApi {
     @POST("posts/{id}/bookmark")
     suspend fun toggleBookmark(@Path("id") postId: String): BookmarkResponse
 
+    // Pinning is single-slot per user (User.pinnedPostId), not a list -
+    // toggling a post that's already pinned clears it, toggling any
+    // other post replaces whatever was pinned before (see
+    // src/app/api/posts/[id]/pin/route.ts). Same 403-for-non-author
+    // enforcement as delete/edit, server-side.
+    @POST("posts/{id}/pin")
+    suspend fun togglePin(@Path("id") postId: String): PinToggleResponse
+
     // The website only lets a post's own author delete it - enforced
     // server-side (403 for anyone else), not just hidden client-side -
     // so this is safe to expose from any PostCard; the backend is the
     // real gate.
     @DELETE("posts/{id}")
     suspend fun deletePost(@Path("id") postId: String)
+
+    // Text-only, matching the website's own EditPostModal exactly - it
+    // never sends imageUrl either, and the backend only touches that
+    // field when the request body explicitly includes it (see
+    // src/app/api/posts/[id]/route.ts's "imageUrl" in body check), so
+    // omitting it here is what keeps an edited post's existing image
+    // intact rather than silently clearing it. Same 403-for-non-author
+    // and plan-length-limit enforcement as delete/create - server-side,
+    // not just hidden client-side. Returns the raw updated post object,
+    // the same shape GET /posts/{id} returns (no {post: ...} envelope).
+    // There is no "edited" indicator anywhere on the website (no
+    // isEdited/editedAt field exists), so none is added here either.
+    @PUT("posts/{id}")
+    suspend fun updatePost(@Path("id") postId: String, @Body request: UpdatePostRequest): Post
 
     // Text-only for now - the same JSON body shape POST /api/posts
     // accepts for content, just without imageUrl/imageUrls. Media

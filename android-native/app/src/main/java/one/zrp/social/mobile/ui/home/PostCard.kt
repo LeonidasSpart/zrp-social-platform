@@ -19,10 +19,13 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -74,9 +77,17 @@ fun PostCard(
     onReportClick: (String) -> Unit = {},
     isOwnPost: Boolean = false,
     onDeleteClick: (String) -> Unit = {},
+    onEditClick: (String) -> Unit = {},
     onQuoteClick: (String) -> Unit = {},
     onViewReposts: (String) -> Unit = {},
     onViewQuotes: (String) -> Unit = {},
+    // Pin to profile - the website only offers this from the Profile
+    // screen itself (showPinOption there is isOwnProfile; every other
+    // surface that renders PostCard - Home, Search, Bookmarks, Quotes -
+    // never passes it), so it defaults off everywhere else too.
+    showPinOption: Boolean = false,
+    isPinned: Boolean = false,
+    onPinClick: (String) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -128,9 +139,9 @@ fun PostCard(
                         )
                     }
 
-                    // The website's shared PostCard.tsx shows Delete for
-                    // the post's own author and Report for everyone else,
-                    // on every screen it renders on (Home, Profile,
+                    // The website's shared PostCard.tsx shows Edit+Delete
+                    // for the post's own author and Report for everyone
+                    // else, on every screen it renders on (Home, Profile,
                     // Bookmarks, Search, post detail, hashtag, explore) -
                     // isOwnPost mirrors that same isAuthor check
                     // everywhere this PostCard is used too, each screen's
@@ -138,6 +149,24 @@ fun PostCard(
                     // GET /auth/session the same way ProfileViewModel
                     // already did.
                     if (isOwnPost) {
+                        if (showPinOption) {
+                            IconButton(onClick = { onPinClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
+                                Icon(
+                                    imageVector = if (isPinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
+                                    contentDescription = if (isPinned) "Unpin from profile" else "Pin to profile",
+                                    tint = if (isPinned) ZrpBlue else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(IconSize.sm),
+                                )
+                            }
+                        }
+                        IconButton(onClick = { onEditClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
+                            Icon(
+                                imageVector = Icons.Filled.Edit,
+                                contentDescription = "Edit post",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(IconSize.sm),
+                            )
+                        }
                         IconButton(onClick = { onDeleteClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
                             Icon(
                                 imageVector = Icons.Filled.DeleteOutline,

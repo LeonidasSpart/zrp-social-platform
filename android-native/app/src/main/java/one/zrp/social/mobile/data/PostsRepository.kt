@@ -9,6 +9,7 @@ import one.zrp.social.mobile.network.LikeResponse
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.PostsPage
 import one.zrp.social.mobile.network.RepostResponse
+import one.zrp.social.mobile.network.UpdatePostRequest
 import one.zrp.social.mobile.network.zrpErrorMessage
 import retrofit2.HttpException
 
@@ -80,5 +81,15 @@ class PostsRepository {
     suspend fun getQuotes(postId: String, cursor: String?): Result<PostsPage> = runCatching {
         val page = ApiClient.postsApi.getQuotes(postId, cursor)
         PostsPage(posts = page.items ?: emptyList(), nextCursor = page.nextCursor)
+    }
+
+    suspend fun updatePost(postId: String, content: String): Result<Post> {
+        return try {
+            Result.success(ApiClient.postsApi.updatePost(postId, UpdatePostRequest(content)))
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't save this post. Please try again."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
     }
 }
