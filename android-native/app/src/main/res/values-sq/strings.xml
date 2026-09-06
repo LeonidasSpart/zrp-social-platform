@@ -177,4 +177,6 @@
     <string name="hashtag_no_posts">Nuk ka postime me #%1$s ende.</string>
     <string name="hashtag_back_to_home">← Kthehu te Kreu</string>
     <string name="composer_add_gif">Shto GIF</string>
+    <string name="composer_schedule">Planifiko</string>
+    <string name="composer_schedule_on">Planifikimi aktiv</string>
 </resources>

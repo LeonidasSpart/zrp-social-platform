@@ -99,11 +99,22 @@ data class ReactionToggleResponse(val reaction: Reaction?)
 // normal image-typed URL from the API's point of view, not a distinct
 // media kind of its own (isGifMedia on read-back is what recognizes it
 // as a GIF, from its real .gif extension, not from this field).
+// scheduledAt is sent as a naive "yyyy-MM-ddTHH:mm" wall-clock string
+// with no timezone offset - deliberately matching the exact raw value
+// an HTML <input type="datetime-local"> submits on the website (see
+// PostComposer.tsx), because src/app/api/posts/route.ts parses it with
+// a plain `new Date(scheduledAt)`, which treats a timezone-less string
+// as local time in the *server's* timezone, not the poster's. That's a
+// real quirk of the website's own behavior, not a native bug to fix -
+// sending anything else (e.g. a real UTC ISO string) would schedule at
+// a different real-world moment than the same picked date/time does on
+// web.
 data class CreatePostRequest(
     val content: String,
     val quotePostId: String? = null,
     val imageUrls: List<String>? = null,
     val mediaType: String? = null,
+    val scheduledAt: String? = null,
 )
 
 data class UpdatePostRequest(val content: String)

@@ -1,6 +1,7 @@
 package one.zrp.social.mobile.ui.create
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,14 +15,25 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,6 +49,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import java.util.TimeZone
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.Avatar
@@ -64,6 +80,7 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * button only shows for the default composer, matching that real
  * distinction rather than adding a feature the quote flow doesn't have.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
     val viewModel: CreatePostViewModel = viewModel(
@@ -71,6 +88,12 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
     )
     val state by viewModel.state.collectAsState()
     var showGifPicker by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    // Holds the UTC-midnight millis DatePicker returns for the chosen
+    // calendar day while the follow-up TimePicker step is still open -
+    // combined with the picked hour/minute once that dialog confirms.
+    var pendingDateMillis by remember { mutableStateOf<Long?>(null) }
 
     LaunchedEffect(state.posted) {
         if (state.posted) {
@@ -184,6 +207,51 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
             }
         }
 
+        if (quotePostId == null) {
+            // Matches PostComposer.tsx's own schedule section: a
+            // pill-style toggle (Clock icon + "Schedule"/"Scheduling
+            // on") plus, once toggled on, the picked date/time itself.
+            // QuotePostModal.tsx has no scheduling of its own (confirmed
+            // by reading the component), so this whole row is hidden
+            // for the quote-post variant, matching that real absence.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.sm),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                val isScheduling = state.isScheduling
+                val scheduleColors = if (isScheduling) {
+                    ButtonDefaults.outlinedButtonColors(contentColor = ZrpRed)
+                } else {
+                    ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                OutlinedButton(
+                    onClick = {
+                        viewModel.onToggleSchedule()
+                        if (!isScheduling) showDatePicker = true
+                    },
+                    enabled = !state.isPosting,
+                    colors = scheduleColors,
+                ) {
+                    Icon(Icons.Filled.Schedule, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.size(6.dp))
+                    Text(if (isScheduling) stringResource(R.string.composer_schedule_on) else stringResource(R.string.composer_schedule))
+                }
+
+                val scheduledAtMillis = state.scheduledAtMillis
+                if (isScheduling && scheduledAtMillis != null) {
+                    Text(
+                        text = SimpleDateFormat("MMM d, yyyy · h:mm a", Locale.getDefault()).format(scheduledAtMillis),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.clip(MaterialTheme.shapes.small).clickable { showDatePicker = true }.padding(4.dp),
+                    )
+                }
+            }
+        }
+
         if (state.error != null) {
             Text(
                 text = state.error ?: "",
@@ -225,7 +293,9 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
 
             Button(
                 onClick = { viewModel.submit() },
-                enabled = (state.content.isNotBlank() || selectedGif != null) && !state.isPosting,
+                enabled = (state.content.isNotBlank() || selectedGif != null) &&
+                    !(state.isScheduling && state.scheduledAtMillis == null) &&
+                    !state.isPosting,
                 colors = ButtonDefaults.buttonColors(containerColor = ZrpRed),
             ) {
                 if (state.isPosting) {
@@ -250,6 +320,98 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
             onSelect = { gif ->
                 viewModel.onGifSelected(gif)
                 showGifPicker = false
+            },
+        )
+    }
+
+    // Android has no single widget matching HTML's <input
+    // type="datetime-local">, so the real datetime-local value web
+    // collects in one field is built here from two native Material3
+    // steps in sequence - a date step, then a time step. Cancelling
+    // either step turns scheduling back off rather than leaving the
+    // toggle stuck on with nothing picked.
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState()
+        DatePickerDialog(
+            onDismissRequest = {
+                showDatePicker = false
+                if (state.isScheduling && state.scheduledAtMillis == null) viewModel.onToggleSchedule()
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val millis = datePickerState.selectedDateMillis
+                    showDatePicker = false
+                    if (millis != null) {
+                        pendingDateMillis = millis
+                        showTimePicker = true
+                    } else if (state.isScheduling && state.scheduledAtMillis == null) {
+                        viewModel.onToggleSchedule()
+                    }
+                }) {
+                    Text(stringResource(android.R.string.ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDatePicker = false
+                    if (state.isScheduling && state.scheduledAtMillis == null) viewModel.onToggleSchedule()
+                }) {
+                    Text(stringResource(android.R.string.cancel))
+                }
+            },
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    if (showTimePicker) {
+        val timePickerState = rememberTimePickerState()
+        AlertDialog(
+            onDismissRequest = {
+                showTimePicker = false
+                if (state.isScheduling && state.scheduledAtMillis == null) viewModel.onToggleSchedule()
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val dateMillis = pendingDateMillis
+                    showTimePicker = false
+                    if (dateMillis != null) {
+                        // DatePicker returns the chosen calendar day as
+                        // UTC-midnight millis regardless of device
+                        // timezone; combined here with the chosen
+                        // hour/minute in the device's own timezone to
+                        // produce the actual local wall-clock instant
+                        // the user picked.
+                        val utcCal = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                        utcCal.timeInMillis = dateMillis
+                        val localCal = Calendar.getInstance()
+                        localCal.set(
+                            utcCal.get(Calendar.YEAR),
+                            utcCal.get(Calendar.MONTH),
+                            utcCal.get(Calendar.DAY_OF_MONTH),
+                            timePickerState.hour,
+                            timePickerState.minute,
+                            0,
+                        )
+                        localCal.set(Calendar.MILLISECOND, 0)
+                        viewModel.onScheduledAtSelected(localCal.timeInMillis)
+                    }
+                }) {
+                    Text(stringResource(android.R.string.ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showTimePicker = false
+                    if (state.isScheduling && state.scheduledAtMillis == null) viewModel.onToggleSchedule()
+                }) {
+                    Text(stringResource(android.R.string.cancel))
+                }
+            },
+            text = {
+                Surface {
+                    TimePicker(state = timePickerState)
+                }
             },
         )
     }

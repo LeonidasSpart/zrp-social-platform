@@ -177,4 +177,6 @@
     <string name="hashtag_no_posts">Aún no hay publicaciones con #%1$s.</string>
     <string name="hashtag_back_to_home">← Volver al inicio</string>
     <string name="composer_add_gif">Añadir GIF</string>
+    <string name="composer_schedule">Programar</string>
+    <string name="composer_schedule_on">Programación activada</string>
 </resources>

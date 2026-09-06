@@ -177,4 +177,6 @@
     <string name="hashtag_no_posts">暂无带有 #%1$s 的帖子。</string>
     <string name="hashtag_back_to_home">← 返回首页</string>
     <string name="composer_add_gif">添加 GIF</string>
+    <string name="composer_schedule">安排</string>
+    <string name="composer_schedule_on">计划发布于</string>
 </resources>
