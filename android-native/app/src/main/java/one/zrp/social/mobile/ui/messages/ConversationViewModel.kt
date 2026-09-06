@@ -23,13 +23,19 @@ data class ConversationUiState(
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
     val isSending: Boolean = false,
+    val replyingTo: ChatMessage? = null,
+    val editingMessageId: String? = null,
+    val isSavingEdit: Boolean = false,
+    val editError: String? = null,
     val error: String? = null,
 )
 
 /**
  * Backs a single conversation - the real message history with one
  * partner (GET /messages/{userId}, which also marks their messages
- * read server-side) and real sending (POST /messages).
+ * read server-side), real sending (POST /messages, with an optional
+ * real reply target), and the same real edit/delete/react actions
+ * ChatInterface.tsx exposes per message.
  */
 class ConversationViewModel(
     private val repository: MessagesRepository,
@@ -49,16 +55,79 @@ class ConversationViewModel(
 
     fun refresh() = load(isInitial = false)
 
+    fun startReply(message: ChatMessage) {
+        _state.update { it.copy(replyingTo = message) }
+    }
+
+    fun cancelReply() {
+        _state.update { it.copy(replyingTo = null) }
+    }
+
+    fun startEdit(message: ChatMessage) {
+        _state.update { it.copy(editingMessageId = message.id, editError = null) }
+    }
+
+    fun cancelEdit() {
+        _state.update { it.copy(editingMessageId = null, editError = null) }
+    }
+
+    fun saveEdit(messageId: String, content: String, onResult: (Result<Unit>) -> Unit) {
+        _state.update { it.copy(isSavingEdit = true, editError = null) }
+        viewModelScope.launch {
+            repository.editMessage(messageId, content)
+                .onSuccess { updated ->
+                    _state.update {
+                        it.copy(
+                            isSavingEdit = false,
+                            editingMessageId = null,
+                            messages = it.messages.map { m -> if (m.id == messageId) updated else m },
+                        )
+                    }
+                    onResult(Result.success(Unit))
+                }
+                .onFailure { error ->
+                    _state.update { it.copy(isSavingEdit = false, editError = error.message) }
+                    onResult(Result.failure(error))
+                }
+        }
+    }
+
+    fun deleteMessage(messageId: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            repository.deleteMessage(messageId)
+                .onSuccess {
+                    _state.update { it.copy(messages = it.messages.filterNot { m -> m.id == messageId }) }
+                    onResult(Result.success(Unit))
+                }
+                .onFailure { onResult(Result.failure(it)) }
+        }
+    }
+
+    fun toggleReaction(messageId: String, emoji: String) {
+        viewModelScope.launch {
+            repository.toggleReaction(messageId, emoji).onSuccess { response ->
+                _state.update {
+                    it.copy(
+                        messages = it.messages.map { m ->
+                            if (m.id == messageId) m.copy(reactions = response.reactions) else m
+                        },
+                    )
+                }
+            }
+        }
+    }
+
     fun send() {
         val content = _state.value.draft.trim()
         if (content.isEmpty() || _state.value.isSending) return
+        val replyToId = _state.value.replyingTo?.id
 
         _state.update { it.copy(isSending = true, error = null) }
         viewModelScope.launch {
-            repository.sendMessage(partnerId, content)
+            repository.sendMessage(partnerId, content, replyToId)
                 .onSuccess { message ->
                     _state.update {
-                        it.copy(isSending = false, draft = "", messages = it.messages + message)
+                        it.copy(isSending = false, draft = "", replyingTo = null, messages = it.messages + message)
                     }
                 }
                 .onFailure { error ->
