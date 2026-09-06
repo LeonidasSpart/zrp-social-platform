@@ -4,6 +4,7 @@ import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.BookmarkResponse
 import one.zrp.social.mobile.network.CreatePostRequest
 import one.zrp.social.mobile.network.CreateReportRequest
+import one.zrp.social.mobile.network.FollowListPage
 import one.zrp.social.mobile.network.LikeResponse
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.PostsPage
@@ -70,5 +71,14 @@ class PostsRepository {
 
     suspend fun getPost(postId: String): Result<Post> = runCatching {
         ApiClient.postsApi.getPost(postId)
+    }
+
+    suspend fun getReposts(postId: String, cursor: String?): Result<FollowListPage> = runCatching {
+        ApiClient.postsApi.getReposts(postId, cursor)
+    }
+
+    suspend fun getQuotes(postId: String, cursor: String?): Result<PostsPage> = runCatching {
+        val page = ApiClient.postsApi.getQuotes(postId, cursor)
+        PostsPage(posts = page.items ?: emptyList(), nextCursor = page.nextCursor)
     }
 }

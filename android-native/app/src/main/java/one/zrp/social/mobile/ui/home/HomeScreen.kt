@@ -49,6 +49,8 @@ fun HomeScreen(
     onOpenStoryViewer: (userId: String) -> Unit,
     onCreateStory: () -> Unit,
     onOpenQuotePost: (postId: String) -> Unit = {},
+    onOpenReposts: (postId: String) -> Unit = {},
+    onOpenQuotes: (postId: String) -> Unit = {},
 ) {
     val viewModel: HomeViewModel = viewModel(
         factory = remember { HomeViewModelFactory(PostsRepository()) },
@@ -133,6 +135,8 @@ fun HomeScreen(
                                 isOwnPost = ownUserId != null && post.author.id == ownUserId,
                                 onDeleteClick = { postId -> deletingPostId = postId },
                                 onQuoteClick = onOpenQuotePost,
+                                onViewReposts = onOpenReposts,
+                                onViewQuotes = onOpenQuotes,
                                 onClick = onOpenComments,
                                 onAuthorClick = onAuthorClick,
                             )
