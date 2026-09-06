@@ -115,9 +115,10 @@ fun NotificationsScreen(
                 }
                 grouped.isEmpty() -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        if (state.error != null) {
+                        val error = state.error
+                        if (error != null) {
                             Text(
-                                text = state.error,
+                                text = error,
                                 color = MaterialTheme.colorScheme.error,
                                 modifier = Modifier.padding(24.dp),
                             )
