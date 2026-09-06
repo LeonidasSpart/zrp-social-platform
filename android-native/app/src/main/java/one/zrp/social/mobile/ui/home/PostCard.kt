@@ -3,6 +3,7 @@ package one.zrp.social.mobile.ui.home
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,16 +13,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
@@ -50,9 +56,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.network.ApiClient
@@ -162,6 +171,14 @@ fun PostCard(
     var userReaction by remember(post.id) { mutableStateOf<String?>(null) }
     var reactionsLoading by remember(post.id) { mutableStateOf(true) }
     var showAddReactionDialog by remember(post.id) { mutableStateOf(false) }
+
+    // Matches PostCard.tsx's own galleryImages precedence: the real,
+    // multi-image imageUrls array when the post has one, else the single
+    // legacy imageUrl wrapped as a one-item list.
+    val galleryImages = remember(post.id, post.imageUrls, post.imageUrl) {
+        post.imageUrls?.takeIf { it.isNotEmpty() } ?: listOfNotNull(post.imageUrl)
+    }
+    var lightboxIndex by remember(post.id) { mutableStateOf<Int?>(null) }
 
     suspend fun refreshReactions() {
         try {
@@ -302,16 +319,11 @@ fun PostCard(
                     )
                 }
 
-                val previewUrl = post.imageUrl ?: post.imageUrls?.firstOrNull()
-                if (previewUrl != null) {
-                    AsyncImage(
-                        model = previewUrl,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = Spacing.sm)
-                            .clip(MaterialTheme.shapes.medium),
+                if (galleryImages.isNotEmpty()) {
+                    PostImageGallery(
+                        images = galleryImages,
+                        onImageClick = { index -> lightboxIndex = index },
+                        modifier = Modifier.padding(top = Spacing.sm),
                     )
                 }
 
@@ -440,7 +452,130 @@ fun PostCard(
             )
         }
 
+        val openLightboxIndex = lightboxIndex
+        if (openLightboxIndex != null) {
+            ImageLightbox(
+                images = galleryImages,
+                initialIndex = openLightboxIndex,
+                onDismiss = { lightboxIndex = null },
+            )
+        }
+
         HorizontalDivider(modifier = Modifier.padding(top = Spacing.md))
+    }
+}
+
+// The same real image collage PostCard.tsx renders for a multi-image
+// post (2 side by side, 3 as one tall + two stacked, 4 as a 2x2 grid,
+// capped at 4 images even if more were uploaded) - previously native
+// only ever showed post.imageUrl ?: post.imageUrls?.firstOrNull(),
+// silently dropping every image after the first for any multi-image
+// post. A single-image post keeps the original full-width treatment.
+@Composable
+private fun PostImageGallery(
+    images: List<String>,
+    onImageClick: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (images.size == 1) {
+        AsyncImage(
+            model = images[0],
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.medium)
+                .clickable { onImageClick(0) },
+        )
+        return
+    }
+
+    val shown = images.take(4)
+    val gap = 2.dp
+
+    Box(modifier = modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium)) {
+        when (shown.size) {
+            2 -> Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
+                GalleryTile(shown[0], Modifier.weight(1f).aspectRatio(1f)) { onImageClick(0) }
+                GalleryTile(shown[1], Modifier.weight(1f).aspectRatio(1f)) { onImageClick(1) }
+            }
+            3 -> Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
+                GalleryTile(shown[0], Modifier.weight(1f).aspectRatio(0.5f)) { onImageClick(0) }
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(gap)) {
+                    GalleryTile(shown[1], Modifier.fillMaxWidth().aspectRatio(1f)) { onImageClick(1) }
+                    GalleryTile(shown[2], Modifier.fillMaxWidth().aspectRatio(1f)) { onImageClick(2) }
+                }
+            }
+            else -> Column(verticalArrangement = Arrangement.spacedBy(gap)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
+                    GalleryTile(shown[0], Modifier.weight(1f).aspectRatio(1f)) { onImageClick(0) }
+                    GalleryTile(shown[1], Modifier.weight(1f).aspectRatio(1f)) { onImageClick(1) }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
+                    GalleryTile(shown[2], Modifier.weight(1f).aspectRatio(1f)) { onImageClick(2) }
+                    GalleryTile(shown[3], Modifier.weight(1f).aspectRatio(1f)) { onImageClick(3) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GalleryTile(image: String, modifier: Modifier, onClick: () -> Unit) {
+    AsyncImage(
+        model = image,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = modifier.clickable(onClick = onClick),
+    )
+}
+
+// The same full-screen viewer PostCard.tsx's own image lightbox offers -
+// swipe between every real image in the post (mobile web relies on the
+// same touch-swipe gesture too; its prev/next chevron buttons are
+// desktop-only, "hidden sm:flex", so a swipeable pager alone is genuine
+// parity with the actual mobile experience, not a reduced substitute).
+// "Close image" matches the real, untranslated aria-label="Close image"
+// web's own lightbox close button carries.
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun ImageLightbox(images: List<String>, initialIndex: Int, onDismiss: () -> Unit) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        val pagerState = rememberPagerState(initialPage = initialIndex) { images.size }
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+            HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+                AsyncImage(
+                    model = images[page],
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter)
+                    .padding(Spacing.md),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (images.size > 1) {
+                    Text(
+                        text = "${pagerState.currentPage + 1} / ${images.size}",
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                } else {
+                    Spacer(modifier = Modifier.size(1.dp))
+                }
+                IconButton(onClick = onDismiss) {
+                    Icon(Icons.Filled.Close, contentDescription = "Close image", tint = Color.White)
+                }
+            }
+        }
     }
 }
 
