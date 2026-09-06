@@ -15,14 +15,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MailOutline
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -40,7 +38,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -48,6 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.network.UserProfile
+import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.home.PostCard
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
@@ -194,22 +192,7 @@ private fun ProfileHeader(
                 .padding(16.dp),
             verticalAlignment = Alignment.Top,
         ) {
-            if (profile.avatarUrl != null) {
-                AsyncImage(
-                    model = profile.avatarUrl,
-                    contentDescription = profile.username,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(72.dp)
-                        .clip(CircleShape),
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Filled.Person,
-                    contentDescription = profile.username,
-                    modifier = Modifier.size(72.dp),
-                )
-            }
+            Avatar(url = profile.avatarUrl, name = profile.name ?: profile.username, size = 72.dp)
 
             Spacer(modifier = Modifier.width(16.dp))
 

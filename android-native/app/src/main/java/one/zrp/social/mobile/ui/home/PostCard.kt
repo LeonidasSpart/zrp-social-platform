@@ -9,13 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -27,10 +25,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import one.zrp.social.mobile.network.Post
+import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.theme.ZrpGreen
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.formatCount
 import one.zrp.social.mobile.util.formatRelativeTime
 
 /**
@@ -55,25 +57,12 @@ fun PostCard(
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Row(verticalAlignment = Alignment.Top) {
-            if (post.author.avatarUrl != null) {
-                AsyncImage(
-                    model = post.author.avatarUrl,
-                    contentDescription = post.author.username,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .clickable { onAuthorClick(post.author.username) },
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Filled.Person,
-                    contentDescription = post.author.username,
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clickable { onAuthorClick(post.author.username) },
-                )
-            }
+            Avatar(
+                url = post.author.avatarUrl,
+                name = post.author.name ?: post.author.username,
+                size = 48.dp,
+                modifier = Modifier.clickable { onAuthorClick(post.author.username) },
+            )
 
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -85,6 +74,7 @@ fun PostCard(
                     Text(
                         text = post.author.name ?: post.author.username,
                         style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
@@ -137,7 +127,8 @@ fun PostCard(
                         icon = Icons.Filled.Repeat,
                         count = post._count.reposts,
                         contentDescription = "Repost",
-                        tint = if (post.reposted == true) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = ZrpGreen,
+                        active = post.reposted == true,
                         onClick = { onRepostClick(post.id) },
                     )
                     LikeStat(
@@ -160,6 +151,10 @@ fun PostCard(
 // lands the tap instead of missing a tiny hitbox.
 private val StatTouchTargetSize = 48.dp
 
+// Each stat's accent color only shows once it's actually active (liked/
+// reposted) - matching the website's action bar, where comment=blue,
+// repost=green and like=red are hover/active accents on top of a
+// neutral gray resting state, not permanent icon colors.
 @Composable
 private fun PostStat(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
@@ -167,20 +162,22 @@ private fun PostStat(
     contentDescription: String,
     onClick: () -> Unit,
     tint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    active: Boolean = false,
 ) {
+    val resolvedTint = if (active) tint else MaterialTheme.colorScheme.onSurfaceVariant
     Row(verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = onClick, modifier = Modifier.size(StatTouchTargetSize)) {
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
-                tint = tint,
+                tint = resolvedTint,
                 modifier = Modifier.size(18.dp),
             )
         }
         Text(
-            text = count.toString(),
+            text = formatCount(count),
             style = MaterialTheme.typography.bodySmall,
-            color = tint,
+            color = resolvedTint,
         )
     }
 }
@@ -197,7 +194,7 @@ private fun LikeStat(liked: Boolean, count: Int, onClick: () -> Unit) {
             )
         }
         Text(
-            text = count.toString(),
+            text = formatCount(count),
             style = MaterialTheme.typography.bodySmall,
             color = if (liked) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
         )

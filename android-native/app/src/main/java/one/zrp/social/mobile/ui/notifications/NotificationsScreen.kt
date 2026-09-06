@@ -13,16 +13,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,13 +27,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import one.zrp.social.mobile.data.NotificationsRepository
 import one.zrp.social.mobile.network.AppNotification
+import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.util.formatRelativeTime
 
 /**
@@ -120,22 +114,11 @@ private fun NotificationRow(notification: AppNotification, onAuthorClick: (Strin
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.Top,
     ) {
-        if (fromUser?.avatarUrl != null) {
-            AsyncImage(
-                model = fromUser.avatarUrl,
-                contentDescription = fromUser.username,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape),
-            )
-        } else {
-            Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = null,
-                modifier = Modifier.size(40.dp),
-            )
-        }
+        Avatar(
+            url = fromUser?.avatarUrl,
+            name = fromUser?.name ?: fromUser?.username ?: "?",
+            size = 40.dp,
+        )
 
         Spacer(modifier = Modifier.width(12.dp))
 

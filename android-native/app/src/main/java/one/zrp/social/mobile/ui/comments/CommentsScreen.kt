@@ -11,10 +11,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -29,13 +27,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import one.zrp.social.mobile.data.CommentsRepository
 import one.zrp.social.mobile.network.Comment
+import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
 
@@ -161,22 +157,11 @@ private fun CommentRow(comment: Comment) {
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.Top,
     ) {
-        if (comment.author.avatarUrl != null) {
-            AsyncImage(
-                model = comment.author.avatarUrl,
-                contentDescription = comment.author.username,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape),
-            )
-        } else {
-            Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = comment.author.username,
-                modifier = Modifier.size(36.dp),
-            )
-        }
+        Avatar(
+            url = comment.author.avatarUrl,
+            name = comment.author.name ?: comment.author.username,
+            size = 36.dp,
+        )
 
         Spacer(modifier = Modifier.width(10.dp))
 
