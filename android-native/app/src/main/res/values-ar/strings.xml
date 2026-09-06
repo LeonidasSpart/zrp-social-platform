@@ -102,4 +102,10 @@
     <string name="stories_add_story">إضافة قصة</string>
     <string name="stories_share_story">مشاركة القصة</string>
     <string name="stories_whats_on_your_mind">بم تفكر؟</string>
+    <string name="reposts_title">إعادات نشر</string>
+    <string name="reposts_count">%1$d إعادات نشر</string>
+    <string name="reposts_empty">لا توجد إعادة نشر بعد.</string>
+    <string name="quotes_title">اقتباسات</string>
+    <string name="quotes_count">%1$d اقتباسات</string>
+    <string name="quotes_empty">لا توجد اقتباسات بعد.</string>
 </resources>

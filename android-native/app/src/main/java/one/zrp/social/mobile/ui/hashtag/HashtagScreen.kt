@@ -159,6 +159,8 @@ fun HashtagScreen(
 
     val deletePostId = deletingPostId
     if (deletePostId != null) {
+        // English-only on purpose - matches PostCard.tsx's own hardcoded,
+        // untranslated delete-confirmation dialog (see HomeScreen.kt).
         AlertDialog(
             onDismissRequest = { if (!isDeletingPost) deletingPostId = null },
             title = { Text("Delete post?") },

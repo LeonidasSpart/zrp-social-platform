@@ -102,4 +102,10 @@
     <string name="stories_add_story">Добавить историю</string>
     <string name="stories_share_story">Поделиться историей</string>
     <string name="stories_whats_on_your_mind">О чём вы думаете?</string>
+    <string name="reposts_title">репостов</string>
+    <string name="reposts_count">%1$d репостов</string>
+    <string name="reposts_empty">Пока нет репостов.</string>
+    <string name="quotes_title">цитат</string>
+    <string name="quotes_count">%1$d цитат</string>
+    <string name="quotes_empty">Пока нет цитат.</string>
 </resources>
