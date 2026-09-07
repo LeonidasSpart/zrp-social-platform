@@ -253,6 +253,44 @@ enforcement remains the real boundary; the header is defense in depth.
 
 ---
 
+## Build toolchain
+
+App Store Connect has refused uploads built with anything below **Xcode 26
+and an iOS 26 SDK since 28 April 2026**
+([Apple, Upcoming Requirements](https://developer.apple.com/news/upcoming-requirements/)):
+
+> "Apps uploaded to App Store Connect must be built with Xcode 26 or later
+> using an SDK for iOS 26, iPadOS 26, tvOS 26, visionOS 26, or watchOS 26."
+
+The CI workflow originally pinned `runs-on: macos-15` and selected no Xcode
+at all, so every build silently used that image's *default* - Xcode 16.4
+with the iOS 18.5 SDK. Those builds compiled correctly and were entirely
+useless as evidence of submittability.
+
+`ios-native-build.yml` now:
+
+1. **Selects** the highest installed Xcode with major version >= 26, rather
+   than hardcoding a path - the image's exact point release moves with
+   every image bump. If no such Xcode exists it **fails the job** and
+   prints what is installed. It never falls back to an older toolchain.
+2. **Reports** `xcodebuild -version`, both `xcrun --show-sdk-version`
+   values, and `sw_vers` verbatim, so the toolchain is readable straight
+   from the log instead of inferred from an `-sdk` path.
+3. **Asserts** Xcode, iOS device SDK and iOS Simulator SDK are all major
+   version >= 26, failing with a specific reason otherwise. This gate was
+   tested against the old 16.4 / 18.5 toolchain to confirm it rejects it.
+4. **Builds for device** (`generic/platform=iOS`) as well as the simulator.
+   An App Store archive compiles against the *device* SDK, so that build is
+   what actually demonstrates the app compiles the way a submission would.
+
+`IPHONEOS_DEPLOYMENT_TARGET` stays at 17.0. Deployment target and build SDK
+are independent axes: building against the iOS 26 SDK does not drop iOS 17
+support.
+
+Signing, archiving and export remain Phase 19 - this module has no
+provisioning profile of its own yet, and Sign in with Apple and push are
+both still blocked server-side (B2, B3 below).
+
 ## Blocked items
 
 ### B1. Native OAuth (Google / Apple)
@@ -345,5 +383,5 @@ here. **No fake local notifications will stand in for this.**
 | 16 | Settings, moderation, account deletion | ⬜ |
 | 17 | Localization (11 languages) + accessibility | ⬜ |
 | 18 | Performance + security pass | ⬜ |
-| 19 | App Store preparation | ⬜ |
+| 19 | App Store preparation | 🔶 toolchain now Xcode 26 / iOS 26 SDK-gated; signing, archive and export still pending |
 | 20 | Final parity audit | ⬜ |

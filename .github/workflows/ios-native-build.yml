@@ -70,24 +70,162 @@ jobs:
           echo "No Android references in the iOS module."
 
   build:
-    name: Build (iOS Simulator)
+    name: Build (Xcode 26 / iOS 26 SDK)
     runs-on: macos-15
     needs: static-checks
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Show toolchain
+      # ── Toolchain selection ────────────────────────────────────────
+      # The runner image ships several Xcode versions and makes one of
+      # them the default. On macos-15 that default is Xcode 16.4, which
+      # carries the iOS 18.5 SDK - and Apple has refused App Store
+      # Connect uploads built with anything below Xcode 26 / the iOS 26
+      # SDK since 28 April 2026. Nothing here previously selected a
+      # version, so every build silently used that non-submittable
+      # default.
+      #
+      # This picks the highest installed Xcode whose major version is 26
+      # or greater, rather than hardcoding a path: the image's exact
+      # point release changes with every image bump, and a pinned
+      # /Applications/Xcode_26.3.app would break the day it moves. If no
+      # such Xcode exists on the runner it FAILS the job and prints what
+      # is actually installed - it must never fall back to an older
+      # toolchain, because a green build on Xcode 16 is a build that
+      # cannot be submitted.
+      - name: Select Xcode 26 or later
         run: |
+          set -euo pipefail
+
+          best_dir=""
+          best_version=""
+          best_rank=-1
+
+          for app in /Applications/Xcode*.app; do
+            [ -d "$app" ] || continue
+            version="$(/usr/bin/defaults read "$app/Contents/Info" CFBundleShortVersionString 2>/dev/null || true)"
+            [ -n "$version" ] || continue
+
+            major="${version%%.*}"
+            case "$major" in ''|*[!0-9]*) continue ;; esac
+            [ "$major" -ge 26 ] || continue
+
+            # Written as `if` rather than `[ ... ] && x=y`: under
+            # `set -e` a false test at statement level aborts the job,
+            # which would turn a plain "26" (no minor component) into a
+            # spurious build failure.
+            rest="${version#*.}"
+            if [ "$rest" = "$version" ]; then
+              rest="0.0"
+            fi
+            minor="${rest%%.*}"
+            case "$minor" in ''|*[!0-9]*) minor=0 ;; esac
+            patch="${rest#*.}"
+            if [ "$patch" = "$rest" ]; then
+              patch="0"
+            fi
+            case "$patch" in ''|*[!0-9]*) patch=0 ;; esac
+
+            # A single comparable integer avoids relying on `sort -V`,
+            # which is not dependable on BSD/macOS.
+            rank=$(( major * 10000 + minor * 100 + patch ))
+            if [ "$rank" -gt "$best_rank" ]; then
+              best_rank="$rank"
+              best_dir="$app/Contents/Developer"
+              best_version="$version"
+            fi
+          done
+
+          if [ -z "$best_dir" ]; then
+            echo "::error::No Xcode 26 or later is installed on this runner. Apple has required Xcode 26+ with an iOS 26 SDK for App Store Connect uploads since 2026-04-28, so this build cannot produce a submittable app. Installed Xcode versions are listed below; move this job to a runner image that provides Xcode 26+."
+            for app in /Applications/Xcode*.app; do
+              [ -d "$app" ] || continue
+              echo "  $app -> $(/usr/bin/defaults read "$app/Contents/Info" CFBundleShortVersionString 2>/dev/null || echo unknown)"
+            done
+            exit 1
+          fi
+
+          echo "Selected Xcode $best_version at $best_dir"
+          sudo xcode-select --switch "$best_dir"
+          echo "DEVELOPER_DIR=$best_dir" >> "$GITHUB_ENV"
+
+      # ── Toolchain evidence ─────────────────────────────────────────
+      # Printed verbatim so the exact Xcode, both iOS SDKs and the macOS
+      # version are readable straight from the CI log, rather than being
+      # inferred from an -sdk path buried in the compiler invocation.
+      - name: Report toolchain
+        run: |
+          echo "── xcodebuild -version ─────────────────────────────"
           xcodebuild -version
+          echo "── xcrun --sdk iphoneos --show-sdk-version ─────────"
+          xcrun --sdk iphoneos --show-sdk-version
+          echo "── xcrun --sdk iphonesimulator --show-sdk-version ──"
+          xcrun --sdk iphonesimulator --show-sdk-version
+          echo "── sw_vers ────────────────────────────────────────"
+          sw_vers
+          echo "── swift --version ────────────────────────────────"
           swift --version
 
-      # Unsigned simulator build: this module has no App Store listing or
-      # provisioning profile of its own yet (see ios-native/PARITY.md -
-      # Sign in with Apple and push both remain blocked server-side), so
-      # there is nothing real to sign against. Signing is configured in
-      # Phase 19, and this workflow gains a device/archive job then.
-      - name: Build (Debug)
+      # A hard gate, not a printout. If a future runner image changes its
+      # default, drops Xcode 26, or ships an SDK below 26, this fails
+      # here with a specific reason instead of producing another green
+      # build that could not be submitted.
+      - name: Assert App Store toolchain requirements
+        run: |
+          set -euo pipefail
+
+          xcode_version="$(xcodebuild -version | head -n1 | awk '{print $2}')"
+          device_sdk="$(xcrun --sdk iphoneos --show-sdk-version)"
+          simulator_sdk="$(xcrun --sdk iphonesimulator --show-sdk-version)"
+
+          fail=0
+          check() {
+            local label="$1" value="$2" minimum="$3"
+            local major="${value%%.*}"
+            if [ -z "$major" ] || [ -n "${major//[0-9]/}" ]; then
+              echo "::error::Could not parse $label version from '$value'."
+              fail=1
+              return
+            fi
+            if [ "$major" -lt "$minimum" ]; then
+              echo "::error::$label is $value, below the required $minimum. Apple has required Xcode 26+ with an iOS 26 SDK for App Store Connect uploads since 2026-04-28."
+              fail=1
+            else
+              echo "OK: $label $value (>= $minimum)"
+            fi
+          }
+
+          check "Xcode" "$xcode_version" 26
+          check "iOS device SDK" "$device_sdk" 26
+          check "iOS Simulator SDK" "$simulator_sdk" 26
+
+          [ "$fail" -eq 0 ] || exit 1
+
+      # ── Builds ─────────────────────────────────────────────────────
+      # Unsigned: this module has no provisioning profile of its own yet
+      # (see ios-native/PARITY.md - Sign in with Apple and push both
+      # remain blocked server-side), so there is nothing real to sign
+      # against. Signing and archiving are configured in Phase 19.
+      #
+      # The device build matters beyond the simulator ones: an App Store
+      # archive compiles against the iOS *device* SDK, so this is what
+      # actually proves the app builds against iOS 26 the way a
+      # submission would.
+      - name: Build for device (iOS 26 SDK, unsigned)
+        working-directory: ios-native
+        run: |
+          xcodebuild build \
+            -project ZRPSocial.xcodeproj \
+            -scheme ZRPSocial \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS=""
+
+      - name: Build (Debug, Simulator)
         working-directory: ios-native
         run: |
           xcodebuild build \
@@ -102,7 +240,7 @@ jobs:
       # optimization and without DEBUG, which surfaces a different class of
       # error (and every `#if DEBUG` branch that would otherwise never be
       # type-checked in CI).
-      - name: Build (Release)
+      - name: Build (Release, Simulator)
         working-directory: ios-native
         run: |
           xcodebuild build \
