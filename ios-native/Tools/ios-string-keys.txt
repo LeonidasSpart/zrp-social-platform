@@ -20,6 +20,12 @@ bookmarks.empty
 bookmarks.emptyDesc
 bookmarks.replyingTo
 nav.more
+nav.aboutZrp
+footer.legalHeading
+footer.termsOfService
+footer.privacyPolicy
+footer.helpCenter
+help.footer.guidelines
 nav.marketplace
 nav.settings
 nav.signOut

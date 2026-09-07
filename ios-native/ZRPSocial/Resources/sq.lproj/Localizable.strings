@@ -13,6 +13,12 @@
 "bookmarks.emptyDesc" = "Ruani postimet dhe komentet që dëshironi t'i rioxhoni duke klikuar ikonën e ruajtjes.";
 "bookmarks.replyingTo" = "Duke iu përgjigjur";
 "nav.more" = "Më shumë";
+"nav.aboutZrp" = "Rreth ZRP";
+"footer.legalHeading" = "Ligjore";
+"footer.termsOfService" = "Kushtet e Shërbimit";
+"footer.privacyPolicy" = "Politika e Privatësisë";
+"footer.helpCenter" = "Qendra e Ndihmës";
+"help.footer.guidelines" = "Udhëzimet e Komunitetit";
 "nav.marketplace" = "Marketplace";
 "nav.settings" = "Cilësimet";
 "nav.signOut" = "Dil";

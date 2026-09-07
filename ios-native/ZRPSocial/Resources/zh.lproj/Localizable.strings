@@ -13,6 +13,12 @@
 "bookmarks.emptyDesc" = "点击收藏图标，保存你想稍后再次查看的帖子和评论。";
 "bookmarks.replyingTo" = "回复";
 "nav.more" = "更多";
+"nav.aboutZrp" = "关于 ZRP";
+"footer.legalHeading" = "法律信息";
+"footer.termsOfService" = "服务条款";
+"footer.privacyPolicy" = "隐私政策";
+"footer.helpCenter" = "帮助中心";
+"help.footer.guidelines" = "社区准则";
 "nav.marketplace" = "市场";
 "nav.settings" = "设置";
 "nav.signOut" = "退出登录";

@@ -13,6 +13,12 @@
 "bookmarks.emptyDesc" = "احفظ المنشورات والتعليقات التي تريد الرجوع إليها بالنقر على أيقونة الإشارة المرجعية.";
 "bookmarks.replyingTo" = "الرد على";
 "nav.more" = "المزيد";
+"nav.aboutZrp" = "عن ZRP";
+"footer.legalHeading" = "قانوني";
+"footer.termsOfService" = "شروط الخدمة";
+"footer.privacyPolicy" = "سياسة الخصوصية";
+"footer.helpCenter" = "مركز المساعدة";
+"help.footer.guidelines" = "إرشادات المجتمع";
 "nav.marketplace" = "السوق";
 "nav.settings" = "الإعدادات";
 "nav.signOut" = "تسجيل الخروج";

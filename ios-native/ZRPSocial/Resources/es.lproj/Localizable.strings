@@ -13,6 +13,12 @@
 "bookmarks.emptyDesc" = "Guarda publicaciones y comentarios que quieras volver a ver haciendo clic en el icono de marcador.";
 "bookmarks.replyingTo" = "En respuesta a";
 "nav.more" = "Más";
+"nav.aboutZrp" = "Acerca de ZRP";
+"footer.legalHeading" = "Legal";
+"footer.termsOfService" = "Términos de servicio";
+"footer.privacyPolicy" = "Política de privacidad";
+"footer.helpCenter" = "Centro de ayuda";
+"help.footer.guidelines" = "Normas de la Comunidad";
 "nav.marketplace" = "Marketplace";
 "nav.settings" = "Configuración";
 "nav.signOut" = "Cerrar sesión";

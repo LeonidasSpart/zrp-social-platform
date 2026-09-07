@@ -13,6 +13,12 @@
 "bookmarks.emptyDesc" = "Speichere Beiträge und Kommentare, die du später erneut ansehen möchtest, indem du auf das Lesezeichen-Symbol klickst.";
 "bookmarks.replyingTo" = "Antwort an";
 "nav.more" = "Mehr";
+"nav.aboutZrp" = "Über ZRP";
+"footer.legalHeading" = "Rechtliches";
+"footer.termsOfService" = "Nutzungsbedingungen";
+"footer.privacyPolicy" = "Datenschutzerklärung";
+"footer.helpCenter" = "Hilfe-Center";
+"help.footer.guidelines" = "Community-Richtlinien";
 "nav.marketplace" = "Marktplatz";
 "nav.settings" = "Einstellungen";
 "nav.signOut" = "Abmelden";

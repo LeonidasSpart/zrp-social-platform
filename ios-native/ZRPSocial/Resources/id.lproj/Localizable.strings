@@ -13,6 +13,12 @@
 "bookmarks.emptyDesc" = "Simpan postingan dan komentar yang ingin Anda kunjungi kembali dengan mengklik ikon markah.";
 "bookmarks.replyingTo" = "Membalas";
 "nav.more" = "Lainnya";
+"nav.aboutZrp" = "Tentang ZRP";
+"footer.legalHeading" = "Legal";
+"footer.termsOfService" = "Ketentuan Layanan";
+"footer.privacyPolicy" = "Kebijakan Privasi";
+"footer.helpCenter" = "Pusat Bantuan";
+"help.footer.guidelines" = "Pedoman Komunitas";
 "nav.marketplace" = "Marketplace";
 "nav.settings" = "Pengaturan";
 "nav.signOut" = "Keluar";

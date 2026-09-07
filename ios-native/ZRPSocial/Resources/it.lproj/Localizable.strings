@@ -13,6 +13,12 @@
 "bookmarks.emptyDesc" = "Salva i post e i commenti che vuoi rivedere cliccando sull'icona dei preferiti.";
 "bookmarks.replyingTo" = "In risposta a";
 "nav.more" = "Altro";
+"nav.aboutZrp" = "Informazioni su ZRP";
+"footer.legalHeading" = "Legale";
+"footer.termsOfService" = "Termini di servizio";
+"footer.privacyPolicy" = "Informativa sulla privacy";
+"footer.helpCenter" = "Centro assistenza";
+"help.footer.guidelines" = "Linee guida della community";
 "nav.marketplace" = "Marketplace";
 "nav.settings" = "Impostazioni";
 "nav.signOut" = "Esci";

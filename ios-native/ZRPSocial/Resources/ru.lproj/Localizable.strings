@@ -13,6 +13,12 @@
 "bookmarks.emptyDesc" = "Сохраняйте публикации и комментарии, к которым хотите вернуться, нажимая значок закладки.";
 "bookmarks.replyingTo" = "Ответ пользователю";
 "nav.more" = "Ещё";
+"nav.aboutZrp" = "О ZRP";
+"footer.legalHeading" = "Правовая информация";
+"footer.termsOfService" = "Условия использования";
+"footer.privacyPolicy" = "Политика конфиденциальности";
+"footer.helpCenter" = "Центр помощи";
+"help.footer.guidelines" = "Правила сообщества";
 "nav.marketplace" = "Маркетплейс";
 "nav.settings" = "Настройки";
 "nav.signOut" = "Выйти";
