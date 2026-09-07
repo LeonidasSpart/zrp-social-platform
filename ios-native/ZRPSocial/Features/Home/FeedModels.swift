@@ -42,6 +42,25 @@ struct PostInteraction: Equatable {
     /// bookmark flags do.
     var contentOverride: String?
 
+    /// The translated text, once the route has returned one. Kept here
+    /// with the rest of a post's per-viewer state so a post translated
+    /// in the timeline is still translated when opened, and so a refresh
+    /// does not throw the translation away.
+    var translation: String?
+
+    /// Whether the translation is being shown in place of the original.
+    /// Separate from `translation` so "Show original" can hide it
+    /// without discarding it and paying for a second call.
+    var isShowingTranslation = false
+
+    /// True while the route is being called, so the control can show
+    /// progress and refuse a second tap.
+    var isTranslating = false
+
+    /// Set when a translation attempt failed, for one line under the
+    /// post. Not an error state for the whole card.
+    var translationFailed = false
+
     init(post: Post) {
         liked = post.liked ?? false
         likeCount = post.counts.likes

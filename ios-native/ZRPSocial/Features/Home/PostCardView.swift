@@ -34,6 +34,11 @@ struct PostCardView: View {
     /// item can say Pin or Unpin. Only meaningful alongside `onPin`.
     var isPinned: Bool = false
 
+    /// Shows or hides a translation of this post. `nil` where no session
+    /// exists: the route answers 401 without one, so the item would only
+    /// ever fail.
+    var onTranslate: (() -> Void)?
+
     @State private var isConfirmingDelete = false
     @State private var isReporting = false
     @EnvironmentObject private var navigator: Navigator
@@ -57,6 +62,7 @@ struct PostCardView: View {
                     onMention: { navigator.push(.profile(username: $0)) }
                 )
             }
+            translation
             media
             linkPreview
             quotedPost
@@ -149,6 +155,22 @@ struct PostCardView: View {
                     Label { Text(.iosPostCopyLink) } icon: { Image(systemName: "link") }
                 }
             }
+            // In the menu rather than under every post, which is where
+            // the website puts it: a permanent "Show translation" line on
+            // every card in a timeline is a lot of chrome on a phone.
+            // Recorded as a deliberate difference in PARITY.md.
+            if let onTranslate, !post.content.isEmpty {
+                Button(action: onTranslate) {
+                    Label {
+                        Text(interaction.isShowingTranslation
+                            ? L10nKey.iosPostShowOriginal
+                            : L10nKey.iosPostShowTranslation)
+                    } icon: {
+                        Image(systemName: "globe")
+                    }
+                }
+                .disabled(interaction.isTranslating)
+            }
             if isOwnPost {
                 // Editing and deletion are both author-only and enforced
                 // server-side with a 403; these items only hide what the
@@ -200,6 +222,36 @@ struct PostCardView: View {
         let urls = post.galleryImageURLs
         if !urls.isEmpty {
             MediaGalleryView(imageURLs: urls, isVideo: PostMedia.isVideo(post))
+        }
+    }
+
+    /// The translated text, when one has been fetched and is showing.
+    ///
+    /// Rendered beside the original rather than replacing it - the same
+    /// as the website - so a reader can see both and judge the
+    /// translation. A failure gets one quiet line, not an alert: a post
+    /// nobody could translate is still perfectly readable.
+    @ViewBuilder
+    private var translation: some View {
+        if interaction.isTranslating {
+            ProgressView()
+                .tint(ZrpColor.onSurfaceMuted)
+        } else if interaction.translationFailed {
+            Text(.iosPostTranslationUnavailable)
+                .font(.caption)
+                .foregroundStyle(ZrpColor.onSurfaceMuted)
+        } else if interaction.isShowingTranslation, let text = interaction.translation {
+            Text(verbatim: text)
+                .font(.body)
+                .foregroundStyle(ZrpColor.onSurface)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.leading, ZrpSpacing.md)
+                .overlay(alignment: .leading) {
+                    Rectangle()
+                        .fill(ZrpColor.outline)
+                        .frame(width: 2)
+                        .accessibilityHidden(true)
+                }
         }
     }
 

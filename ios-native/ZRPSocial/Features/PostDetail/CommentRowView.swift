@@ -20,6 +20,10 @@ struct CommentRowView: View {
     var onRepost: () -> Void
     var onBookmark: () -> Void
 
+    /// `nil` for a signed-out reader: the translate route answers 401
+    /// without a session, so the item would only ever fail.
+    var onTranslate: (() -> Void)?
+
     @EnvironmentObject private var navigator: Navigator
     @State private var isConfirmingDelete = false
     @State private var isReporting = false
@@ -48,6 +52,7 @@ struct CommentRowView: View {
                     .font(.subheadline)
                     .foregroundStyle(ZrpColor.onSurface)
                     .fixedSize(horizontal: false, vertical: true)
+                translation
                 actions
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -123,6 +128,19 @@ struct CommentRowView: View {
                         Label { Text(.reportModalTitle) } icon: { Image(systemName: "flag") }
                     }
                 }
+
+                if let onTranslate, !comment.content.isEmpty {
+                    Button(action: onTranslate) {
+                        Label {
+                            Text(interaction.isShowingTranslation
+                                ? L10nKey.iosPostShowOriginal
+                                : L10nKey.iosPostShowTranslation)
+                        } icon: {
+                            Image(systemName: "globe")
+                        }
+                    }
+                    .disabled(interaction.isTranslating)
+                }
             } label: {
                 Image(systemName: "ellipsis")
                     .font(.caption)
@@ -131,6 +149,32 @@ struct CommentRowView: View {
                     .contentShape(Rectangle())
             }
             .accessibilityLabel(Text(.iosA11yPostOptions))
+        }
+    }
+
+    /// The translation, shown beside the original rather than replacing
+    /// it, as on the website and on a post card.
+    @ViewBuilder
+    private var translation: some View {
+        if interaction.isTranslating {
+            ProgressView()
+                .tint(ZrpColor.onSurfaceMuted)
+        } else if interaction.translationFailed {
+            Text(.iosPostTranslationUnavailable)
+                .font(.caption)
+                .foregroundStyle(ZrpColor.onSurfaceMuted)
+        } else if interaction.isShowingTranslation, let text = interaction.translation {
+            Text(verbatim: text)
+                .font(.subheadline)
+                .foregroundStyle(ZrpColor.onSurface)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.leading, ZrpSpacing.md)
+                .overlay(alignment: .leading) {
+                    Rectangle()
+                        .fill(ZrpColor.outline)
+                        .frame(width: 2)
+                        .accessibilityHidden(true)
+                }
         }
     }
 

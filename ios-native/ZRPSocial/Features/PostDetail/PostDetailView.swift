@@ -13,6 +13,7 @@ struct PostDetailView: View {
     @EnvironmentObject private var session: SessionController
     @EnvironmentObject private var interactions: PostInteractionStore
     @EnvironmentObject private var navigator: Navigator
+    @EnvironmentObject private var language: LanguageController
     @StateObject private var viewModel: PostDetailViewModel
 
     @FocusState private var isComposerFocused: Bool
@@ -82,7 +83,8 @@ struct PostDetailView: View {
                     onLike: { Task { await interactions.toggleLike(post) } },
                     onRepost: { Task { await interactions.toggleRepost(post) } },
                     onBookmark: { Task { await interactions.toggleBookmark(post) } },
-                    onDelete: { Task { await interactions.deletePost(post) } }
+                    onDelete: { Task { await interactions.deletePost(post) } },
+                    onTranslate: translateAction(for: post)
                 )
                 .onAppear { interactions.countView(post) }
 
@@ -141,6 +143,20 @@ struct PostDetailView: View {
                     commentRows
                 }
             }
+        }
+    }
+
+    /// Translating requires a session - the route answers 401 without
+    /// one - so the item is not offered to a signed-out reader.
+    private func translateAction(for post: Post) -> (() -> Void)? {
+        guard session.currentUser != nil else { return nil }
+        return { interactions.toggleTranslation(post, to: language.effectiveCode) }
+    }
+
+    private func translateAction(for comment: Comment) -> (() -> Void)? {
+        guard session.currentUser != nil else { return nil }
+        return {
+            Task { await viewModel.toggleTranslation(comment, to: language.effectiveCode) }
         }
     }
 
@@ -231,7 +247,8 @@ struct PostDetailView: View {
                     },
                     onDelete: { Task { await viewModel.delete(entry.comment) } },
                     onRepost: { Task { await viewModel.toggleRepost(entry.comment) } },
-                    onBookmark: { Task { await viewModel.toggleBookmark(entry.comment) } }
+                    onBookmark: { Task { await viewModel.toggleBookmark(entry.comment) } },
+                    onTranslate: translateAction(for: entry.comment)
                 )
                 .task {
                     // Paging is by top-level thread, so only a root

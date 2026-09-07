@@ -35,6 +35,7 @@ struct PostListView<Header: View>: View {
 
     @EnvironmentObject private var session: SessionController
     @EnvironmentObject private var interactions: PostInteractionStore
+    @EnvironmentObject private var language: LanguageController
 
     // The quote composer and the edit sheet live here rather than on
     // each card: a sheet presented from inside a `LazyVStack` row is
@@ -42,6 +43,15 @@ struct PostListView<Header: View>: View {
     @State private var quoting: Post?
     @State private var editing: Post?
     @State private var editDraft = ""
+
+    /// Translating requires a session - the route answers 401 without
+    /// one - so the item is not offered to a signed-out reader. The
+    /// target language is whatever the app is currently displayed in,
+    /// which is what the website sends too.
+    private func translateAction(for post: Post) -> (() -> Void)? {
+        guard session.currentUser != nil else { return nil }
+        return { interactions.toggleTranslation(post, to: language.effectiveCode) }
+    }
 
     /// Posts deleted this session are filtered here rather than removed
     /// from each screen's own array, so one delete is reflected
@@ -69,7 +79,8 @@ struct PostListView<Header: View>: View {
                         editing = post
                     },
                     onPin: onPin.map { pin in { pin(post) } },
-                    isPinned: post.id == pinnedPostId
+                    isPinned: post.id == pinnedPostId,
+                    onTranslate: translateAction(for: post)
                 )
                 .onAppear {
                     onAppear(post)

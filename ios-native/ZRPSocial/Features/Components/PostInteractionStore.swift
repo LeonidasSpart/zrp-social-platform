@@ -38,9 +38,14 @@ final class PostInteractionStore: ObservableObject {
     private var countedViewIDs: Set<String> = []
 
     private let repository: PostsRepositoryProtocol
+    private let translations: TranslationRepositoryProtocol
 
-    init(repository: PostsRepositoryProtocol = PostsRepository()) {
+    init(
+        repository: PostsRepositoryProtocol = PostsRepository(),
+        translations: TranslationRepositoryProtocol = TranslationRepository()
+    ) {
         self.repository = repository
+        self.translations = translations
     }
 
     /// Counts one view of a post, at most once per app run.
@@ -66,6 +71,52 @@ final class PostInteractionStore: ObservableObject {
         }
     }
 
+    /// Shows or hides a translation of a post, fetching it the first
+    /// time.
+    ///
+    /// A second tap only toggles: the route is rate limited to 30 calls
+    /// a minute and its answer will not have changed, so re-asking for
+    /// text already translated would spend someone's quota on nothing.
+    func toggleTranslation(_ post: Post, to targetLang: String) {
+        var state = interaction(for: post)
+        guard !state.isTranslating else { return }
+
+        if state.translation != nil {
+            state.isShowingTranslation.toggle()
+            interactions[post.id] = state
+            return
+        }
+
+        let text = displayContent(for: post)
+        // The route refuses anything longer with a 400. Checked here so
+        // an over-long post is not sent only to come back as an error.
+        guard
+            !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+            text.count <= TranslationRepository.maxTextLength
+        else {
+            state.translationFailed = true
+            interactions[post.id] = state
+            return
+        }
+
+        state.isTranslating = true
+        state.translationFailed = false
+        interactions[post.id] = state
+
+        Task { [weak self] in
+            guard let self else { return }
+            var settled = interactions[post.id] ?? state
+            do {
+                settled.translation = try await translations.translate(text, to: targetLang)
+                settled.isShowingTranslation = true
+            } catch {
+                settled.translationFailed = true
+            }
+            settled.isTranslating = false
+            interactions[post.id] = settled
+        }
+    }
+
     func interaction(for post: Post) -> PostInteraction {
         interactions[post.id] ?? PostInteraction(post: post)
     }
@@ -85,6 +136,8 @@ final class PostInteractionStore: ObservableObject {
                 // The view route's answer is newer than any page that
                 // was in flight alongside it.
                 seeded.viewCount = max(seeded.viewCount, existing.viewCount)
+                seeded.translation = existing.translation
+                seeded.isShowingTranslation = existing.isShowingTranslation
                 // A refresh that returns the pre-edit text must not undo
                 // an edit the server has already accepted.
                 seeded.contentOverride = existing.contentOverride

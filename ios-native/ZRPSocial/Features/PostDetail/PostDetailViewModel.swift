@@ -21,6 +21,14 @@ struct CommentInteraction: Equatable {
     /// optimistic counts race against each other.
     var isMutating: Bool = false
 
+    /// Translation state, the same three fields a post carries and for
+    /// the same reasons: the fetched text is kept so hiding it does not
+    /// discard it, and a failure is one quiet line rather than an alert.
+    var translation: String?
+    var isShowingTranslation = false
+    var isTranslating = false
+    var translationFailed = false
+
     init(comment: Comment) {
         liked = comment.liked ?? false
         likeCount = comment.counts.likes
@@ -59,15 +67,18 @@ final class PostDetailViewModel: ObservableObject {
     private var cursor: String?
     private let postsRepository: PostsRepositoryProtocol
     private let commentsRepository: CommentsRepositoryProtocol
+    private let translations: TranslationRepositoryProtocol
 
     init(
         postId: String,
         postsRepository: PostsRepositoryProtocol = PostsRepository(),
-        commentsRepository: CommentsRepositoryProtocol = CommentsRepository()
+        commentsRepository: CommentsRepositoryProtocol = CommentsRepository(),
+        translations: TranslationRepositoryProtocol = TranslationRepository()
     ) {
         self.postId = postId
         self.postsRepository = postsRepository
         self.commentsRepository = commentsRepository
+        self.translations = translations
     }
 
     var post: Post? {
@@ -303,6 +314,46 @@ final class PostDetailViewModel: ObservableObject {
             if case ApiError.cancelled = error { return }
             errorMessage = (error as? ApiError)?.userFacingMessage
         }
+    }
+
+    /// Shows or hides a translation of one comment.
+    ///
+    /// The same rules as a post's: the route needs a session, is rate
+    /// limited, and refuses text over 2000 characters, so a second tap
+    /// only toggles what has already been fetched.
+    func toggleTranslation(_ comment: Comment, to targetLang: String) async {
+        var state = interaction(for: comment)
+        guard !state.isTranslating else { return }
+
+        if state.translation != nil {
+            state.isShowingTranslation.toggle()
+            commentInteractions[comment.id] = state
+            return
+        }
+
+        let text = comment.content
+        guard
+            !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+            text.count <= TranslationRepository.maxTextLength
+        else {
+            state.translationFailed = true
+            commentInteractions[comment.id] = state
+            return
+        }
+
+        state.isTranslating = true
+        state.translationFailed = false
+        commentInteractions[comment.id] = state
+
+        var settled = commentInteractions[comment.id] ?? state
+        do {
+            settled.translation = try await translations.translate(text, to: targetLang)
+            settled.isShowingTranslation = true
+        } catch {
+            settled.translationFailed = true
+        }
+        settled.isTranslating = false
+        commentInteractions[comment.id] = settled
     }
 
     /// Author-only, enforced server-side with a 403.

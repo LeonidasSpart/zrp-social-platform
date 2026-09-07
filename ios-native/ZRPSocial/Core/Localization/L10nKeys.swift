@@ -1230,6 +1230,12 @@ enum L10nKey: String, CaseIterable {
     case iosPostUnpin = "ios.post.unpin"
     /// en: "Views"
     case iosA11yViews = "ios.a11y.views"
+    /// en: "Show translation"
+    case iosPostShowTranslation = "ios.post.showTranslation"
+    /// en: "Show original"
+    case iosPostShowOriginal = "ios.post.showOriginal"
+    /// en: "Translation unavailable right now."
+    case iosPostTranslationUnavailable = "ios.post.translationUnavailable"
 }
 
 extension L10nKey {

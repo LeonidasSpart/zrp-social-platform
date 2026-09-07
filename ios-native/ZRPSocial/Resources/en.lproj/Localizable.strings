@@ -615,3 +615,6 @@
 "ios.post.pin" = "Pin to profile";
 "ios.post.unpin" = "Unpin from profile";
 "ios.a11y.views" = "Views";
+"ios.post.showTranslation" = "Show translation";
+"ios.post.showOriginal" = "Show original";
+"ios.post.translationUnavailable" = "Translation unavailable right now.";
