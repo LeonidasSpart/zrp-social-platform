@@ -82,6 +82,11 @@
     <string name="chat_connection_error">خطأ في الاتصال:</string>
     <string name="chat_mic_camera_error">تعذر الوصول إلى الميكروفون/الكاميرا:</string>
     <string name="chat_missing_caller_id">لا يمكن قبول المكالمة: معرّف المتصل مفقود</string>
+    <string name="chat_err_file_too_large">الملف كبير جدًا. الحد الأقصى {size} ميغابايت.</string>
+    <string name="chat_err_invalid_file_type">نوع ملف غير صالح. يُسمح فقط بـ JPEG وPNG وGIF وWebP.</string>
+    <string name="chat_err_image_upload_failed">صورة رفع تعذر:</string>
+    <string name="chat_err_upload_failed_retry">فشل رفع الملف. يرجى المحاولة مرة أخرى.</string>
+    <string name="chat_err_send_failed">تعذر to إرسال: {error}</string>
     <string name="action_edit">تعديل</string>
     <string name="action_reply">رد</string>
     <string name="feed_for_you">لك</string>

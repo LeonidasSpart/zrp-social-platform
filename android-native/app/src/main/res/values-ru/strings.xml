@@ -82,6 +82,11 @@
     <string name="chat_connection_error">Ошибка соединения:</string>
     <string name="chat_mic_camera_error">Не удалось получить доступ к микрофону/камере:</string>
     <string name="chat_missing_caller_id">Невозможно принять: отсутствует идентификатор вызывающего</string>
+    <string name="chat_err_file_too_large">Файл слишком большой. Максимум {size} МБ.</string>
+    <string name="chat_err_invalid_file_type">Недопустимый тип файла. Разрешены только JPEG, PNG, GIF и WebP.</string>
+    <string name="chat_err_image_upload_failed">изображение загрузка Не удалось:</string>
+    <string name="chat_err_upload_failed_retry">Не удалось загрузить файл. Пожалуйста, попробуйте снова.</string>
+    <string name="chat_err_send_failed">Не удалось в отправить: {error}</string>
     <string name="action_edit">Изменить</string>
     <string name="action_reply">Ответить</string>
     <string name="feed_for_you">Для вас</string>

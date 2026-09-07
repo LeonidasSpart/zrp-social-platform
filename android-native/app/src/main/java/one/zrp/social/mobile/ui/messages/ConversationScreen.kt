@@ -1,7 +1,9 @@
 package one.zrp.social.mobile.ui.messages
 
 import android.Manifest
+import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -24,6 +26,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Close
@@ -36,6 +39,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -137,6 +141,20 @@ fun ConversationScreen(
             arrayOf(Manifest.permission.RECORD_AUDIO)
         }
         callPermissionLauncher.launch(permissions)
+    }
+
+    // Matches ChatInterface.tsx's own handleImageUpload - same real
+    // chatImage UploadThing router, same 4MB/JPEG-PNG-GIF-WebP limits
+    // (see ConversationViewModel.onImagePicked).
+    val contentResolver = context.contentResolver
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri != null) {
+            val (name, size) = queryFileNameAndSize(contentResolver, uri)
+            val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
+            viewModel.onImagePicked(contentResolver, uri, name, mimeType, size)
+        }
     }
 
     if (callState.phase != CallPhase.IDLE) {
@@ -343,12 +361,44 @@ fun ConversationScreen(
             }
         }
 
+        if (state.isUploadingImage) {
+            LinearProgressIndicator(
+                progress = { state.imageUploadProgress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
+                color = ZrpRed,
+            )
+        }
+
+        val imageError = state.imageError
+        if (imageError != null) {
+            Text(
+                text = chatImageErrorMessage(imageError),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+            )
+        }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            IconButton(
+                onClick = {
+                    imagePickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                },
+                enabled = !state.isUploadingImage,
+            ) {
+                // "Attach image" stays English-only on purpose - matches
+                // ChatInterface.tsx's own hardcoded, untranslated
+                // aria-label ("Attach file") on its Paperclip button.
+                Icon(Icons.Filled.AttachFile, contentDescription = "Attach image")
+            }
+
             OutlinedTextField(
                 value = state.draft,
                 onValueChange = { viewModel.onDraftChange(it) },
@@ -435,6 +485,37 @@ fun ConversationScreen(
             },
         )
     }
+}
+
+/**
+ * Maps ConversationViewModel's ChatImageError (which cannot resolve
+ * Android string resources itself) to a real translated string,
+ * mirroring CreateStoryScreen's own storyMediaErrorMessage() and
+ * CallScreen's own callErrorMessage(). The {size}/{error} placeholders
+ * match how ChatInterface.tsx's own t("chat.errFileTooLarge", {size})
+ * and t("chat.errSendFailed", {error}) interpolate.
+ */
+@Composable
+private fun chatImageErrorMessage(error: ChatImageError): String = when (error) {
+    is ChatImageError.FileTooLarge ->
+        stringResource(R.string.chat_err_file_too_large).replace("{size}", error.maxMb.toString())
+    is ChatImageError.InvalidType -> stringResource(R.string.chat_err_invalid_file_type)
+    is ChatImageError.UploadFailed ->
+        stringResource(R.string.chat_err_image_upload_failed) + " " + error.detail
+}
+
+private fun queryFileNameAndSize(contentResolver: android.content.ContentResolver, uri: android.net.Uri): Pair<String, Long> {
+    var name = "upload"
+    var size = 0L
+    contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+        if (cursor.moveToFirst()) {
+            if (nameIndex >= 0) name = cursor.getString(nameIndex) ?: name
+            if (sizeIndex >= 0) size = cursor.getLong(sizeIndex)
+        }
+    }
+    return name to size
 }
 
 // The corner nearest the sender's own side of the screen stays sharp -

@@ -82,6 +82,11 @@
     <string name="chat_connection_error">Gabim në lidhje:</string>
     <string name="chat_mic_camera_error">Nuk mund të qaseshin mikrofonat/kamera:</string>
     <string name="chat_missing_caller_id">Nuk mund të pranohet: mungon ID e telefonuesit</string>
+    <string name="chat_err_file_too_large">Skedari është tepër i madh. Maksimumi {size}MB.</string>
+    <string name="chat_err_invalid_file_type">Lloj skedari i pavlefshëm. Lejohen vetëm JPEG, PNG, GIF, dhe WebP.</string>
+    <string name="chat_err_image_upload_failed">Ngarkimi i imazhit dështoi:</string>
+    <string name="chat_err_upload_failed_retry">Ngarkimi dështoi. Ju lutemi riprovojeni.</string>
+    <string name="chat_err_send_failed">Dërgimi dështoi: {error}</string>
     <string name="action_edit">Ndrysho</string>
     <string name="action_reply">Përgjigju</string>
     <string name="feed_for_you">Për ju</string>

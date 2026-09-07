@@ -82,6 +82,11 @@
     <string name="chat_connection_error">Bağlantı hatası:</string>
     <string name="chat_mic_camera_error">Mikrofona/kameraya erişilemedi:</string>
     <string name="chat_missing_caller_id">Kabul edilemiyor: arayan kimliği eksik</string>
+    <string name="chat_err_file_too_large">Dosya çok büyük. Maksimum {size}MB.</string>
+    <string name="chat_err_invalid_file_type">Geçersiz dosya türü. Yalnızca JPEG, PNG, GIF ve WebP\'ye izin verilir.</string>
+    <string name="chat_err_image_upload_failed">Resim yükleme başarısız oldu:</string>
+    <string name="chat_err_upload_failed_retry">Yükleme başarısız oldu. Lütfen tekrar deneyin.</string>
+    <string name="chat_err_send_failed">Gönderilemedi: {error}</string>
     <string name="action_edit">Düzenle</string>
     <string name="action_reply">Yanıtla</string>
     <string name="feed_for_you">Senin için</string>

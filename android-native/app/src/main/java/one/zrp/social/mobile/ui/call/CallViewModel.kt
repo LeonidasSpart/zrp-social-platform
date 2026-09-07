@@ -219,8 +219,13 @@ class CallViewModel(
                     }
                 }, MediaConstraints())
 
-                onIceGatheringComplete = {
-                    val local = pc.localDescription ?: return@onIceGatheringComplete
+                // Explicitly labeled - this lambda is assigned via "=" (not
+                // passed as a named call argument), so Kotlin never creates
+                // an implicit "onIceGatheringComplete" label for it; only
+                // a label the lambda itself declares can be targeted by
+                // return@.
+                onIceGatheringComplete = gatherOffer@{
+                    val local = pc.localDescription ?: return@gatherOffer
                     val signal = JsonObject().apply {
                         addProperty("type", local.type.canonicalForm())
                         addProperty("sdp", local.description)
@@ -269,12 +274,12 @@ class CallViewModel(
                     SessionDescription(SessionDescription.Type.fromCanonicalForm(type), sdp),
                 )
 
-                onIceGatheringComplete = {
-                    val local = pc.localDescription ?: return@onIceGatheringComplete
+                onIceGatheringComplete = gatherAnswer@{
+                    val local = pc.localDescription ?: return@gatherAnswer
                     val callerId = otherPartyId
                     if (callerId == null) {
                         _state.update { it.copy(error = CallError.MissingCallerId) }
-                        return@onIceGatheringComplete
+                        return@gatherAnswer
                     }
                     val signalOut = JsonObject().apply {
                         addProperty("type", local.type.canonicalForm())

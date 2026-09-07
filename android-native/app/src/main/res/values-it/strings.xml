@@ -82,6 +82,11 @@
     <string name="chat_connection_error">Errore di connessione:</string>
     <string name="chat_mic_camera_error">Impossibile accedere a microfono/fotocamera:</string>
     <string name="chat_missing_caller_id">Impossibile accettare: ID chiamante mancante</string>
+    <string name="chat_err_file_too_large">File troppo grande. Max {size}MB.</string>
+    <string name="chat_err_invalid_file_type">Tipo di file non valido. Sono ammessi solo JPEG, PNG, GIF e WebP.</string>
+    <string name="chat_err_image_upload_failed">Caricamento immagine non riuscito:</string>
+    <string name="chat_err_upload_failed_retry">Caricamento non riuscito. Riprova.</string>
+    <string name="chat_err_send_failed">Impossibile inviare: {error}</string>
     <string name="action_edit">Modifica</string>
     <string name="action_reply">Rispondi</string>
     <string name="feed_for_you">Per te</string>

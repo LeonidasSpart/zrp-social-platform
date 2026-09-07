@@ -82,6 +82,11 @@
     <string name="chat_connection_error">Kesalahan koneksi:</string>
     <string name="chat_mic_camera_error">Tidak dapat mengakses mikrofon/kamera:</string>
     <string name="chat_missing_caller_id">Tidak dapat menerima: ID penelepon tidak ada</string>
+    <string name="chat_err_file_too_large">File terlalu besar. Maksimal {size}MB.</string>
+    <string name="chat_err_invalid_file_type">Jenis file tidak valid. Hanya JPEG, PNG, GIF, dan WebP yang diizinkan.</string>
+    <string name="chat_err_image_upload_failed">Gagal mengunggah gambar:</string>
+    <string name="chat_err_upload_failed_retry">Unggahan gagal. Silakan coba lagi.</string>
+    <string name="chat_err_send_failed">Gagal mengirim: {error}</string>
     <string name="action_edit">Edit</string>
     <string name="action_reply">Balas</string>
     <string name="feed_for_you">Untuk Anda</string>
