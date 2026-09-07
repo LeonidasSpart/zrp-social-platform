@@ -1,0 +1,38 @@
+{
+  "_comment": [
+    "iOS-only strings with no counterpart in the web app's translation",
+    "dictionary - mostly VoiceOver labels and platform-specific wording",
+    "that has no web equivalent to borrow.",
+    "",
+    "These are emitted into en.lproj ONLY, deliberately. iOS falls back to",
+    "the development language for any key missing from the active .lproj,",
+    "so a French user sees correct French for every shared key and English",
+    "for these few until they are translated in Phase 17. That is honest",
+    "fallback behaviour - it is NOT the same as shipping machine-invented",
+    "translations, which this project does not do."
+  ],
+  "strings": {
+    "ios.a11y.bookmark": "Bookmark",
+    "ios.a11y.removeBookmark": "Remove bookmark",
+    "ios.a11y.unlike": "Unlike",
+    "ios.a11y.undoRepost": "Undo repost",
+    "ios.a11y.postOptions": "Post options",
+    "ios.a11y.avatarOf": "Profile picture of {name}",
+    "ios.a11y.imageCount": "Image {index} of {total}",
+    "ios.a11y.refreshFeed": "Refresh feed",
+    "ios.post.copyLink": "Copy link",
+    "ios.post.quote": "Quote",
+    "ios.post.deleteConfirmTitle": "Delete post?",
+    "ios.post.deleteConfirmMessage": "This cannot be undone.",
+    "ios.error.offlineTitle": "No connection",
+    "ios.error.genericTitle": "Something went wrong",
+    "ios.session.signedOutTitle": "Signed out",
+    "ios.badge.verified": "Verified account",
+    "ios.badge.organization": "Verified organization",
+    "ios.badge.government": "Government official",
+    "ios.badge.team": "ZRP Team",
+    "ios.badge.journalist": "Verified Journalist",
+    "ios.a11y.playVideo": "Play video",
+    "ios.media.close": "Close"
+  }
+}

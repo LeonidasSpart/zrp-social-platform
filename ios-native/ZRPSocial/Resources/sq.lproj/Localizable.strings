@@ -1,0 +1,49 @@
+/* ZRP Social - GENERATED FILE, DO NOT EDIT BY HAND.
+   Produced by ios-native/Tools/generate-localizations.py from the
+   web app's own dictionary (src/lib/translations.ts), which is the
+   single source of truth for ZRP copy. Language: sq. */
+
+"nav.home" = "Kreu";
+"nav.search" = "Kërko";
+"nav.notifications" = "Njoftimet";
+"nav.messages" = "Mesazhet";
+"nav.profile" = "Profili";
+"nav.bookmarks" = "Ruajtur";
+"nav.settings" = "Cilësimet";
+"nav.signOut" = "Dil";
+"auth.welcomeTitle" = "ZRP Social";
+"auth.signInSubtitle" = "Hyni për t'u bashkuar me komunitetin";
+"auth.emailOrUsername" = "Email ose emri i përdoruesit";
+"auth.emailOrUsernamePlaceholder" = "ju@shembull.com ose emri_përdoruesit";
+"auth.password" = "Fjalëkalimi";
+"auth.signIn" = "Hyr";
+"auth.signingIn" = "Duke hyrë...";
+"auth.forgotPassword" = "Harruat fjalëkalimin?";
+"auth.noAccount" = "Nuk keni një llogari?";
+"auth.signUp" = "Regjistrohu";
+"auth.errSomethingWrong" = "Diçka shkoi gabim";
+"auth.errTryAgain" = "Diçka shkoi gabim. Ju lutemi riprovojeni.";
+"auth.errSessionExpired" = "Sesioni yt nuk është më i vlefshëm. Ju lutemi hyni përsëri.";
+"auth.errBanned" = "Llogaria juaj është pezulluar. Ju lutemi kontaktoni mbështetjen.";
+"feed.forYou" = "Për ju";
+"feed.following" = "Duke ndjekur";
+"feed.retry" = "Riprovo";
+"feed.tryAgain" = "Riprovo";
+"feed.noPosts" = "Nuk ka postime ende.";
+"feed.followSomeone" = "Ndiqni dikë për të parë postimet e tyre këtu.";
+"feed.checkBackLater" = "Rikthehuni më vonë për përmbajtje kryesore.";
+"feed.loadingMore" = "Duke ngarkuar më shumë...";
+"feed.endOfFeed" = "Keni arritur në fund të furnizimit. 🎉";
+"feed.offline" = "Jeni pa lidhje me internetin. Ju lutemi kontrolloni lidhjen tuaj.";
+"home.emptyFollowingTitle" = "Furnizimi juaj i ndjekjes po ju pret.";
+"home.emptyFollowingSubtitle" = "Zbuloni njerëz, muzikë dhe tema për të ndjekur.";
+"action.like" = "Pëlqe";
+"action.repost" = "Ripubliko";
+"action.reply" = "Përgjigju";
+"action.delete" = "Fshi";
+"action.cancel" = "Anulo";
+"action.retry" = "Riprovo";
+"action.loading" = "Duke u ngarkuar...";
+"profile.share" = "Shpërndaj";
+"bookmarks.title" = "Të ruajturat";
+"postDetail.errLoadFailed" = "Ngarkimi i postimit dështoi";

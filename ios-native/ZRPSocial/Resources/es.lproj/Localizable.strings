@@ -1,0 +1,49 @@
+/* ZRP Social - GENERATED FILE, DO NOT EDIT BY HAND.
+   Produced by ios-native/Tools/generate-localizations.py from the
+   web app's own dictionary (src/lib/translations.ts), which is the
+   single source of truth for ZRP copy. Language: es. */
+
+"nav.home" = "Inicio";
+"nav.search" = "Buscar";
+"nav.notifications" = "Notificaciones";
+"nav.messages" = "Mensajes";
+"nav.profile" = "Perfil";
+"nav.bookmarks" = "Marcadores";
+"nav.settings" = "Configuración";
+"nav.signOut" = "Cerrar sesión";
+"auth.welcomeTitle" = "ZRP Social";
+"auth.signInSubtitle" = "Inicia sesión para unirte a la comunidad";
+"auth.emailOrUsername" = "Correo electrónico o nombre de usuario";
+"auth.emailOrUsernamePlaceholder" = "tu@ejemplo.com o nombre de usuario";
+"auth.password" = "Contraseña";
+"auth.signIn" = "Iniciar sesión";
+"auth.signingIn" = "Iniciando sesión...";
+"auth.forgotPassword" = "¿Olvidaste tu contraseña?";
+"auth.noAccount" = "¿No tienes una cuenta?";
+"auth.signUp" = "Regístrate";
+"auth.errSomethingWrong" = "Algo salió mal";
+"auth.errTryAgain" = "Algo salió mal. Inténtalo de nuevo.";
+"auth.errSessionExpired" = "Tu sesión ya no es válida. Vuelve a iniciar sesión.";
+"auth.errBanned" = "Tu cuenta ha sido bloqueada. Contacta con soporte.";
+"feed.forYou" = "Para ti";
+"feed.following" = "Siguiendo";
+"feed.retry" = "Reintentar";
+"feed.tryAgain" = "Intentar de nuevo";
+"feed.noPosts" = "Aún no hay publicaciones.";
+"feed.followSomeone" = "Sigue a alguien para ver sus publicaciones aquí.";
+"feed.checkBackLater" = "Vuelve más tarde para ver contenido en tendencia.";
+"feed.loadingMore" = "Cargando más...";
+"feed.endOfFeed" = "Has llegado al final del feed. 🎉";
+"feed.offline" = "Estás sin conexión. Comprueba tu conexión a internet.";
+"home.emptyFollowingTitle" = "Tu feed de Siguiendo te está esperando.";
+"home.emptyFollowingSubtitle" = "Descubre personas, música y temas para seguir.";
+"action.like" = "Me gusta";
+"action.repost" = "Republicar";
+"action.reply" = "Responder";
+"action.delete" = "Eliminar";
+"action.cancel" = "Cancelar";
+"action.retry" = "Reintentar";
+"action.loading" = "Cargando...";
+"profile.share" = "Compartir";
+"bookmarks.title" = "Marcadores";
+"postDetail.errLoadFailed" = "Error al cargar la publicación";

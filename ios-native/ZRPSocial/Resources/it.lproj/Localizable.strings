@@ -1,0 +1,49 @@
+/* ZRP Social - GENERATED FILE, DO NOT EDIT BY HAND.
+   Produced by ios-native/Tools/generate-localizations.py from the
+   web app's own dictionary (src/lib/translations.ts), which is the
+   single source of truth for ZRP copy. Language: it. */
+
+"nav.home" = "Home";
+"nav.search" = "Cerca";
+"nav.notifications" = "Notifiche";
+"nav.messages" = "Messaggi";
+"nav.profile" = "Profilo";
+"nav.bookmarks" = "Preferiti";
+"nav.settings" = "Impostazioni";
+"nav.signOut" = "Esci";
+"auth.welcomeTitle" = "ZRP Social";
+"auth.signInSubtitle" = "Accedi per entrare a far parte della community";
+"auth.emailOrUsername" = "Email o nome utente";
+"auth.emailOrUsernamePlaceholder" = "tu@esempio.com o nome utente";
+"auth.password" = "Password";
+"auth.signIn" = "Accedi";
+"auth.signingIn" = "Accesso...";
+"auth.forgotPassword" = "Password dimenticata?";
+"auth.noAccount" = "Non hai un account?";
+"auth.signUp" = "Registrati";
+"auth.errSomethingWrong" = "Qualcosa è andato storto";
+"auth.errTryAgain" = "Qualcosa è andato storto. Riprova.";
+"auth.errSessionExpired" = "La tua sessione non è più valida. Accedi di nuovo.";
+"auth.errBanned" = "Il tuo account è stato bannato. Contatta il supporto.";
+"feed.forYou" = "Per te";
+"feed.following" = "Seguiti";
+"feed.retry" = "Riprova";
+"feed.tryAgain" = "Riprova";
+"feed.noPosts" = "Ancora nessun post.";
+"feed.followSomeone" = "Segui qualcuno per vedere i loro post qui.";
+"feed.checkBackLater" = "Torna più tardi per contenuti di tendenza.";
+"feed.loadingMore" = "Caricamento...";
+"feed.endOfFeed" = "Hai raggiunto la fine del feed. 🎉";
+"feed.offline" = "Sei offline. Controlla la tua connessione internet.";
+"home.emptyFollowingTitle" = "Il tuo feed Following ti aspetta.";
+"home.emptyFollowingSubtitle" = "Scopri persone, musica e argomenti da seguire.";
+"action.like" = "Mi piace";
+"action.repost" = "Repost";
+"action.reply" = "Rispondi";
+"action.delete" = "Elimina";
+"action.cancel" = "Annulla";
+"action.retry" = "Riprova";
+"action.loading" = "Caricamento...";
+"profile.share" = "Condividi";
+"bookmarks.title" = "Preferiti";
+"postDetail.errLoadFailed" = "Impossibile caricare il post";

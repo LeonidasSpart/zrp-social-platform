@@ -1,0 +1,64 @@
+# Keys the native iOS app pulls from the web app's own translation
+# dictionary (src/lib/translations.ts). One key per line; blank lines and
+# "#" comments ignored.
+#
+# Every key listed here MUST exist in that file's `en` block - the
+# generator fails loudly if one does not, so a key renamed on web can
+# never silently degrade to a raw key string on iOS.
+#
+# Add a key here the moment an iOS view needs it. Do not hardcode a
+# user-facing string in a SwiftUI view.
+
+# ── Navigation ──────────────────────────────────────────────────────
+nav.home
+nav.search
+nav.notifications
+nav.messages
+nav.profile
+nav.bookmarks
+nav.settings
+nav.signOut
+
+# ── Authentication ──────────────────────────────────────────────────
+auth.welcomeTitle
+auth.signInSubtitle
+auth.emailOrUsername
+auth.emailOrUsernamePlaceholder
+auth.password
+auth.signIn
+auth.signingIn
+auth.forgotPassword
+auth.noAccount
+auth.signUp
+auth.errSomethingWrong
+auth.errTryAgain
+auth.errSessionExpired
+auth.errBanned
+
+# ── Feed ────────────────────────────────────────────────────────────
+feed.forYou
+feed.following
+feed.retry
+feed.tryAgain
+feed.noPosts
+feed.followSomeone
+feed.checkBackLater
+feed.loadingMore
+feed.endOfFeed
+feed.offline
+home.emptyFollowingTitle
+home.emptyFollowingSubtitle
+
+# ── Post actions ────────────────────────────────────────────────────
+action.like
+action.repost
+action.reply
+action.delete
+action.cancel
+action.retry
+action.loading
+profile.share
+
+# ── Misc ────────────────────────────────────────────────────────────
+bookmarks.title
+postDetail.errLoadFailed

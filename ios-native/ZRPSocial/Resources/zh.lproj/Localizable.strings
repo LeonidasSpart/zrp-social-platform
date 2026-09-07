@@ -1,0 +1,49 @@
+/* ZRP Social - GENERATED FILE, DO NOT EDIT BY HAND.
+   Produced by ios-native/Tools/generate-localizations.py from the
+   web app's own dictionary (src/lib/translations.ts), which is the
+   single source of truth for ZRP copy. Language: zh. */
+
+"nav.home" = "首页";
+"nav.search" = "搜索";
+"nav.notifications" = "通知";
+"nav.messages" = "私信";
+"nav.profile" = "个人资料";
+"nav.bookmarks" = "收藏";
+"nav.settings" = "设置";
+"nav.signOut" = "退出登录";
+"auth.welcomeTitle" = "ZRP 社交";
+"auth.signInSubtitle" = "登录以加入社区";
+"auth.emailOrUsername" = "邮箱或用户名";
+"auth.emailOrUsernamePlaceholder" = "you@example.com 或用户名";
+"auth.password" = "密码";
+"auth.signIn" = "登录";
+"auth.signingIn" = "正在登录...";
+"auth.forgotPassword" = "忘记密码？";
+"auth.noAccount" = "还没有账户？";
+"auth.signUp" = "注册";
+"auth.errSomethingWrong" = "出错了";
+"auth.errTryAgain" = "出错了，请重试。";
+"auth.errSessionExpired" = "您的登录状态已失效,请重新登录。";
+"auth.errBanned" = "你的账户已被封禁，请联系客服。";
+"feed.forYou" = "为你推荐";
+"feed.following" = "正在关注";
+"feed.retry" = "重试";
+"feed.tryAgain" = "重试";
+"feed.noPosts" = "暂无帖子。";
+"feed.followSomeone" = "关注他人以在此查看他们的帖子。";
+"feed.checkBackLater" = "请稍后回来查看热门内容。";
+"feed.loadingMore" = "正在加载更多...";
+"feed.endOfFeed" = "你已经看完了全部内容。🎉";
+"feed.offline" = "你已离线，请检查网络连接。";
+"home.emptyFollowingTitle" = "你的关注动态正在等你。";
+"home.emptyFollowingSubtitle" = "发现值得关注的人、音乐和话题。";
+"action.like" = "点赞";
+"action.repost" = "转发";
+"action.reply" = "回复";
+"action.delete" = "删除";
+"action.cancel" = "取消";
+"action.retry" = "重试";
+"action.loading" = "加载中...";
+"profile.share" = "分享";
+"bookmarks.title" = "收藏";
+"postDetail.errLoadFailed" = "加载帖子失败";

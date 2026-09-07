@@ -1,0 +1,55 @@
+import SwiftUI
+
+/// Decides what the app shows: the launch state, sign-in, or the app
+/// itself. The single place auth state turns into navigation.
+struct RootView: View {
+
+    @EnvironmentObject private var session: SessionController
+
+    var body: some View {
+        Group {
+            switch session.state {
+            case .restoring:
+                launchState
+            case .signedOut:
+                LoginView()
+                    .transition(.opacity)
+            case .signedIn:
+                SignedInView()
+                    .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: session.state)
+        .task {
+            // Runs once per launch. Verifies any stored token against the
+            // real session endpoint before showing signed-in UI, so a
+            // revoked or outlived session never produces an app that looks
+            // authenticated and then fails every request.
+            await session.restore()
+        }
+    }
+
+    private var launchState: some View {
+        ZStack {
+            ZrpColor.background.ignoresSafeArea()
+            Image("ZrpLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 96, height: 96)
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+/// The signed-in app.
+///
+/// Home is the only destination that exists today, so this is
+/// deliberately *not* a `TabView`. A tab bar whose Search, Notifications,
+/// Messages, and Profile tabs all opened empty screens would be four dead
+/// controls; those tabs appear in the phases that make them real (see
+/// ios-native/PARITY.md).
+struct SignedInView: View {
+    var body: some View {
+        HomeView()
+    }
+}

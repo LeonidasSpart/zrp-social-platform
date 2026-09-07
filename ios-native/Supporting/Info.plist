@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>ZRP Social</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+
+	<!--
+	  Declared false because the app uses only HTTPS/TLS via URLSession -
+	  the "exempt" standard-cryptography case. It carries no custom or
+	  proprietary encryption. This is what removes the export-compliance
+	  question on every App Store Connect upload; revisit it only if the
+	  app ever ships non-exempt cryptography of its own.
+	-->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+
+	<!--
+	  No ATS exceptions. Every request goes to https://zrp.one, and media
+	  comes from HTTPS CDN URLs the API returns. Nothing here needs
+	  NSAllowsArbitraryLoads, and it must never be added to work around a
+	  TLS failure.
+	-->
+
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchBackground</string>
+	</dict>
+
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+
+	<!--
+	  iPhone is portrait-only (the feed, composer, and story surfaces are
+	  all designed as a single portrait column, matching the web app's
+	  mobile layout). iPad rotates freely because Split View and Slide
+	  Over both require it, and the iPad layouts are genuinely responsive
+	  rather than a scaled-up phone UI.
+	-->
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UIRequiresFullScreen</key>
+	<false/>
+
+	<!--
+	  Usage-description strings and UIBackgroundModes are deliberately
+	  absent. Nothing shipped so far opens the camera, the photo library,
+	  the microphone, or plays background audio, and Apple rejects
+	  permissions an app does not actually exercise. Each key is added in
+	  the phase that first genuinely needs it:
+	    Phase 7  media upload      -> NSPhotoLibraryUsageDescription,
+	                                  NSCameraUsageDescription
+	    Phase 9  video stories     -> NSMicrophoneUsageDescription
+	    Phase 11 push              -> UIBackgroundModes: remote-notification
+	    Phase 13 music player      -> UIBackgroundModes: audio
+	  See ios-native/PARITY.md for the phase plan.
+	-->
+</dict>
+</plist>

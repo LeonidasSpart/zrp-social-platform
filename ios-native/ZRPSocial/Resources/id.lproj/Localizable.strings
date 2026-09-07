@@ -1,0 +1,49 @@
+/* ZRP Social - GENERATED FILE, DO NOT EDIT BY HAND.
+   Produced by ios-native/Tools/generate-localizations.py from the
+   web app's own dictionary (src/lib/translations.ts), which is the
+   single source of truth for ZRP copy. Language: id. */
+
+"nav.home" = "Beranda";
+"nav.search" = "Cari";
+"nav.notifications" = "Notifikasi";
+"nav.messages" = "Pesan";
+"nav.profile" = "Profil";
+"nav.bookmarks" = "Markah";
+"nav.settings" = "Pengaturan";
+"nav.signOut" = "Keluar";
+"auth.welcomeTitle" = "ZRP Social";
+"auth.signInSubtitle" = "Masuk untuk bergabung dengan komunitas";
+"auth.emailOrUsername" = "Email atau Nama Pengguna";
+"auth.emailOrUsernamePlaceholder" = "you@example.com atau nama pengguna";
+"auth.password" = "Kata Sandi";
+"auth.signIn" = "Masuk";
+"auth.signingIn" = "Sedang masuk...";
+"auth.forgotPassword" = "Lupa kata sandi?";
+"auth.noAccount" = "Belum punya akun?";
+"auth.signUp" = "Daftar";
+"auth.errSomethingWrong" = "Terjadi kesalahan";
+"auth.errTryAgain" = "Terjadi kesalahan. Silakan coba lagi.";
+"auth.errSessionExpired" = "Sesi Anda tidak lagi valid. Silakan masuk kembali.";
+"auth.errBanned" = "Akun Anda telah diblokir. Silakan hubungi dukungan.";
+"feed.forYou" = "Untuk Anda";
+"feed.following" = "Mengikuti";
+"feed.retry" = "Coba Lagi";
+"feed.tryAgain" = "Coba lagi";
+"feed.noPosts" = "Belum ada postingan.";
+"feed.followSomeone" = "Ikuti seseorang untuk melihat postingan mereka di sini.";
+"feed.checkBackLater" = "Kunjungi lagi nanti untuk konten yang sedang tren.";
+"feed.loadingMore" = "Memuat lebih banyak...";
+"feed.endOfFeed" = "Anda telah mencapai akhir feed. 🎉";
+"feed.offline" = "Anda sedang offline. Silakan periksa koneksi internet Anda.";
+"home.emptyFollowingTitle" = "Feed Mengikuti Anda sedang menunggu.";
+"home.emptyFollowingSubtitle" = "Temukan orang, musik, dan topik untuk diikuti.";
+"action.like" = "Suka";
+"action.repost" = "Bagikan Ulang";
+"action.reply" = "Balas";
+"action.delete" = "Hapus";
+"action.cancel" = "Batal";
+"action.retry" = "Coba Lagi";
+"action.loading" = "Memuat...";
+"profile.share" = "Bagikan";
+"bookmarks.title" = "Markah";
+"postDetail.errLoadFailed" = "Gagal memuat postingan";

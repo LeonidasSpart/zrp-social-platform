@@ -1,0 +1,75 @@
+/* ZRP Social - GENERATED FILE, DO NOT EDIT BY HAND.
+   Produced by ios-native/Tools/generate-localizations.py from the
+   web app's own dictionary (src/lib/translations.ts), which is the
+   single source of truth for ZRP copy. Language: en. */
+
+"nav.home" = "Home";
+"nav.search" = "Search";
+"nav.notifications" = "Notifications";
+"nav.messages" = "Messages";
+"nav.profile" = "Profile";
+"nav.bookmarks" = "Bookmarks";
+"nav.settings" = "Settings";
+"nav.signOut" = "Sign Out";
+"auth.welcomeTitle" = "ZRP Social";
+"auth.signInSubtitle" = "Sign in to join the community";
+"auth.emailOrUsername" = "Email or Username";
+"auth.emailOrUsernamePlaceholder" = "you@example.com or username";
+"auth.password" = "Password";
+"auth.signIn" = "Sign in";
+"auth.signingIn" = "Signing in...";
+"auth.forgotPassword" = "Forgot password?";
+"auth.noAccount" = "Don't have an account?";
+"auth.signUp" = "Sign up";
+"auth.errSomethingWrong" = "Something went wrong";
+"auth.errTryAgain" = "Something went wrong. Please try again.";
+"auth.errSessionExpired" = "Your session is no longer valid. Please sign in again.";
+"auth.errBanned" = "Your account has been banned. Please contact support.";
+"feed.forYou" = "For you";
+"feed.following" = "Following";
+"feed.retry" = "Retry";
+"feed.tryAgain" = "Try again";
+"feed.noPosts" = "No posts yet.";
+"feed.followSomeone" = "Follow someone to see their posts here.";
+"feed.checkBackLater" = "Check back later for trending content.";
+"feed.loadingMore" = "Loading more...";
+"feed.endOfFeed" = "You've reached the end of the feed. 🎉";
+"feed.offline" = "You are offline. Please check your internet connection.";
+"home.emptyFollowingTitle" = "Your Following feed is waiting for you.";
+"home.emptyFollowingSubtitle" = "Discover people, music and topics to follow.";
+"action.like" = "Like";
+"action.repost" = "Repost";
+"action.reply" = "Reply";
+"action.delete" = "Delete";
+"action.cancel" = "Cancel";
+"action.retry" = "Retry";
+"action.loading" = "Loading...";
+"profile.share" = "Share";
+"bookmarks.title" = "Bookmarks";
+"postDetail.errLoadFailed" = "Failed to load post";
+
+/* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
+   into the development language only - other languages fall back
+   here until these are translated. */
+"ios.a11y.bookmark" = "Bookmark";
+"ios.a11y.removeBookmark" = "Remove bookmark";
+"ios.a11y.unlike" = "Unlike";
+"ios.a11y.undoRepost" = "Undo repost";
+"ios.a11y.postOptions" = "Post options";
+"ios.a11y.avatarOf" = "Profile picture of {name}";
+"ios.a11y.imageCount" = "Image {index} of {total}";
+"ios.a11y.refreshFeed" = "Refresh feed";
+"ios.post.copyLink" = "Copy link";
+"ios.post.quote" = "Quote";
+"ios.post.deleteConfirmTitle" = "Delete post?";
+"ios.post.deleteConfirmMessage" = "This cannot be undone.";
+"ios.error.offlineTitle" = "No connection";
+"ios.error.genericTitle" = "Something went wrong";
+"ios.session.signedOutTitle" = "Signed out";
+"ios.badge.verified" = "Verified account";
+"ios.badge.organization" = "Verified organization";
+"ios.badge.government" = "Government official";
+"ios.badge.team" = "ZRP Team";
+"ios.badge.journalist" = "Verified Journalist";
+"ios.a11y.playVideo" = "Play video";
+"ios.media.close" = "Close";

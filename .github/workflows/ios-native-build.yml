@@ -1,0 +1,114 @@
+name: Native iOS App Build
+
+# Builds the ZRP Social native iOS app (ios-native/) - the genuine
+# Swift/SwiftUI app being built alongside, and eventually replacing, the
+# Capacitor WebView shell (ios/), which is produced by the web release
+# tooling and is untouched by this workflow.
+#
+# Completely independent of the Android pipelines. The path filters below
+# never match android-native/** or android/**, and this workflow shares no
+# secrets, no runner, and no job with android-native-build.yml or
+# android-release.yml - a change here can never affect an Android build,
+# and an Android change never triggers this.
+#
+# Runs on GitHub's macOS infrastructure because Xcode is the only thing
+# that can compile an iOS app, and it is not available in every
+# development environment. The static checks in the first job run
+# anywhere, so contract drift and localization mistakes are caught in
+# seconds rather than after a ten-minute macOS build.
+on:
+  workflow_dispatch: {}
+  pull_request:
+    paths:
+      - "ios-native/**"
+      - ".github/workflows/ios-native-build.yml"
+  push:
+    branches: [main]
+    paths:
+      - "ios-native/**"
+      - ".github/workflows/ios-native-build.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    name: Static checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # The iOS app's .strings files and its L10nKey enum are generated
+      # from the web app's own translation dictionary
+      # (src/lib/translations.ts), which is the single source of truth for
+      # ZRP copy in all 11 supported languages. This fails if the
+      # committed output no longer matches that source - which is exactly
+      # what would happen if a key were renamed on web, or if someone
+      # hand-edited a generated file.
+      - name: Verify generated localizations are current
+        working-directory: ios-native
+        run: python3 Tools/generate-localizations.py --check
+
+      - name: Validate sources, plists and asset catalog
+        working-directory: ios-native
+        run: python3 Tools/validate-sources.py
+
+      # Hard guarantee of the isolation this module promises: the iOS
+      # module must never contain a path into the Android project.
+      - name: Assert no Android coupling
+        run: |
+          if grep -rn --exclude-dir=.git -e 'android-native' -e '\.\./android' ios-native/ZRPSocial ios-native/Supporting 2>/dev/null; then
+            echo "::error::ios-native must not reference the Android module."
+            exit 1
+          fi
+          echo "No Android references in the iOS module."
+
+  build:
+    name: Build (iOS Simulator)
+    runs-on: macos-15
+    needs: static-checks
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      # Unsigned simulator build: this module has no App Store listing or
+      # provisioning profile of its own yet (see ios-native/PARITY.md -
+      # Sign in with Apple and push both remain blocked server-side), so
+      # there is nothing real to sign against. Signing is configured in
+      # Phase 19, and this workflow gains a device/archive job then.
+      - name: Build (Debug)
+        working-directory: ios-native
+        run: |
+          xcodebuild build \
+            -project ZRPSocial.xcodeproj \
+            -scheme ZRPSocial \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+
+      # Release is built too, not just Debug: it compiles with whole-module
+      # optimization and without DEBUG, which surfaces a different class of
+      # error (and every `#if DEBUG` branch that would otherwise never be
+      # type-checked in CI).
+      - name: Build (Release)
+        working-directory: ios-native
+        run: |
+          xcodebuild build \
+            -project ZRPSocial.xcodeproj \
+            -scheme ZRPSocial \
+            -configuration Release \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO

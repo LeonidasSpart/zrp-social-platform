@@ -1,0 +1,49 @@
+/* ZRP Social - GENERATED FILE, DO NOT EDIT BY HAND.
+   Produced by ios-native/Tools/generate-localizations.py from the
+   web app's own dictionary (src/lib/translations.ts), which is the
+   single source of truth for ZRP copy. Language: tr. */
+
+"nav.home" = "Ana Sayfa";
+"nav.search" = "Ara";
+"nav.notifications" = "Bildirimler";
+"nav.messages" = "Mesajlar";
+"nav.profile" = "Profil";
+"nav.bookmarks" = "Yer İmleri";
+"nav.settings" = "Ayarlar";
+"nav.signOut" = "Çıkış Yap";
+"auth.welcomeTitle" = "ZRP Social";
+"auth.signInSubtitle" = "Topluluğa katılmak için giriş yapın";
+"auth.emailOrUsername" = "E-posta veya Kullanıcı Adı";
+"auth.emailOrUsernamePlaceholder" = "you@example.com veya kullanıcı adı";
+"auth.password" = "Şifre";
+"auth.signIn" = "Giriş yap";
+"auth.signingIn" = "Giriş yapılıyor...";
+"auth.forgotPassword" = "Şifrenizi mi unuttunuz?";
+"auth.noAccount" = "Hesabınız yok mu?";
+"auth.signUp" = "Kaydol";
+"auth.errSomethingWrong" = "Bir şeyler ters gitti";
+"auth.errTryAgain" = "Bir şeyler ters gitti. Lütfen tekrar deneyin.";
+"auth.errSessionExpired" = "Oturumunuz artık geçerli değil. Lütfen tekrar giriş yapın.";
+"auth.errBanned" = "Hesabınız yasaklandı. Lütfen destek ekibiyle iletişime geçin.";
+"feed.forYou" = "Senin için";
+"feed.following" = "Takip Edilenler";
+"feed.retry" = "Yeniden Dene";
+"feed.tryAgain" = "Tekrar dene";
+"feed.noPosts" = "Henüz gönderi yok.";
+"feed.followSomeone" = "Gönderilerini burada görmek için birini takip edin.";
+"feed.checkBackLater" = "Popüler içerikler için daha sonra tekrar kontrol edin.";
+"feed.loadingMore" = "Daha fazlası yükleniyor...";
+"feed.endOfFeed" = "Akışın sonuna ulaştınız. 🎉";
+"feed.offline" = "Çevrimdışısınız. Lütfen internet bağlantınızı kontrol edin.";
+"home.emptyFollowingTitle" = "Takip edilenler akışın seni bekliyor.";
+"home.emptyFollowingSubtitle" = "Takip edilecek kişileri, müziği ve konuları keşfet.";
+"action.like" = "Beğen";
+"action.repost" = "Yeniden Paylaş";
+"action.reply" = "Yanıtla";
+"action.delete" = "Sil";
+"action.cancel" = "İptal";
+"action.retry" = "Yeniden Dene";
+"action.loading" = "Yükleniyor...";
+"profile.share" = "Paylaş";
+"bookmarks.title" = "Yer İmleri";
+"postDetail.errLoadFailed" = "Gönderi yüklenemedi";

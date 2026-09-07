@@ -1,0 +1,49 @@
+/* ZRP Social - GENERATED FILE, DO NOT EDIT BY HAND.
+   Produced by ios-native/Tools/generate-localizations.py from the
+   web app's own dictionary (src/lib/translations.ts), which is the
+   single source of truth for ZRP copy. Language: ar. */
+
+"nav.home" = "الرئيسية";
+"nav.search" = "بحث";
+"nav.notifications" = "الإشعارات";
+"nav.messages" = "الرسائل";
+"nav.profile" = "الملف الشخصي";
+"nav.bookmarks" = "المحفوظات";
+"nav.settings" = "الإعدادات";
+"nav.signOut" = "تسجيل الخروج";
+"auth.welcomeTitle" = "ZRP اجتماعي";
+"auth.signInSubtitle" = "سجّل الدخول للانضمام إلى المجتمع";
+"auth.emailOrUsername" = "البريد الإلكتروني أو اسم المستخدم";
+"auth.emailOrUsernamePlaceholder" = "you@example.com أو اسم المستخدم";
+"auth.password" = "كلمة المرور";
+"auth.signIn" = "تسجيل الدخول";
+"auth.signingIn" = "جارٍ تسجيل الدخول...";
+"auth.forgotPassword" = "هل نسيت كلمة المرور؟";
+"auth.noAccount" = "ليس لديك حساب؟";
+"auth.signUp" = "إنشاء حساب";
+"auth.errSomethingWrong" = "حدث خطأ ما";
+"auth.errTryAgain" = "حدث خطأ ما. يرجى المحاولة مرة أخرى.";
+"auth.errSessionExpired" = "لم تعد جلستك صالحة. يرجى تسجيل الدخول مرة أخرى.";
+"auth.errBanned" = "تم حظر حسابك. يرجى التواصل مع الدعم.";
+"feed.forYou" = "لك";
+"feed.following" = "المتابَعون";
+"feed.retry" = "إعادة المحاولة";
+"feed.tryAgain" = "حاول مرة أخرى";
+"feed.noPosts" = "لا توجد منشورات بعد.";
+"feed.followSomeone" = "تابع شخصًا لترى منشوراته هنا.";
+"feed.checkBackLater" = "عد لاحقًا لرؤية المحتوى الرائج.";
+"feed.loadingMore" = "جارٍ تحميل المزيد...";
+"feed.endOfFeed" = "لقد وصلت إلى نهاية الخلاصة. 🎉";
+"feed.offline" = "أنت غير متصل. يرجى التحقق من اتصال الإنترنت.";
+"home.emptyFollowingTitle" = "موجز المتابَعين ينتظرك.";
+"home.emptyFollowingSubtitle" = "اكتشف أشخاصاً وموسيقى ومواضيع لمتابعتها.";
+"action.like" = "إعجاب";
+"action.repost" = "إعادة نشر";
+"action.reply" = "رد";
+"action.delete" = "حذف";
+"action.cancel" = "إلغاء";
+"action.retry" = "إعادة المحاولة";
+"action.loading" = "جارٍ التحميل...";
+"profile.share" = "مشاركة";
+"bookmarks.title" = "الإشارات المرجعية";
+"postDetail.errLoadFailed" = "تعذر تحميل المنشور";

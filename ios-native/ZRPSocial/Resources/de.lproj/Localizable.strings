@@ -1,0 +1,49 @@
+/* ZRP Social - GENERATED FILE, DO NOT EDIT BY HAND.
+   Produced by ios-native/Tools/generate-localizations.py from the
+   web app's own dictionary (src/lib/translations.ts), which is the
+   single source of truth for ZRP copy. Language: de. */
+
+"nav.home" = "Startseite";
+"nav.search" = "Suche";
+"nav.notifications" = "Benachrichtigungen";
+"nav.messages" = "Nachrichten";
+"nav.profile" = "Profil";
+"nav.bookmarks" = "Lesezeichen";
+"nav.settings" = "Einstellungen";
+"nav.signOut" = "Abmelden";
+"auth.welcomeTitle" = "ZRP Social";
+"auth.signInSubtitle" = "Melde dich an, um der Community beizutreten";
+"auth.emailOrUsername" = "E-Mail oder Benutzername";
+"auth.emailOrUsernamePlaceholder" = "du@beispiel.com oder Benutzername";
+"auth.password" = "Passwort";
+"auth.signIn" = "Anmelden";
+"auth.signingIn" = "Anmeldung...";
+"auth.forgotPassword" = "Passwort vergessen?";
+"auth.noAccount" = "Noch kein Konto?";
+"auth.signUp" = "Registrieren";
+"auth.errSomethingWrong" = "Etwas ist schiefgelaufen";
+"auth.errTryAgain" = "Etwas ist schiefgelaufen. Bitte versuche es erneut.";
+"auth.errSessionExpired" = "Deine Sitzung ist nicht mehr gültig. Bitte melde dich erneut an.";
+"auth.errBanned" = "Dein Konto wurde gesperrt. Bitte kontaktiere den Support.";
+"feed.forYou" = "Für dich";
+"feed.following" = "Folge ich";
+"feed.retry" = "Wiederholen";
+"feed.tryAgain" = "Erneut versuchen";
+"feed.noPosts" = "Noch keine Beiträge.";
+"feed.followSomeone" = "Folge jemandem, um hier Beiträge zu sehen.";
+"feed.checkBackLater" = "Schau später wieder vorbei für angesagte Inhalte.";
+"feed.loadingMore" = "Wird geladen...";
+"feed.endOfFeed" = "Du hast das Ende des Feeds erreicht. 🎉";
+"feed.offline" = "Du bist offline. Bitte überprüfe deine Internetverbindung.";
+"home.emptyFollowingTitle" = "Dein Abonnements-Feed wartet auf dich.";
+"home.emptyFollowingSubtitle" = "Entdecke Personen, Musik und Themen zum Folgen.";
+"action.like" = "Gefällt mir";
+"action.repost" = "Repost";
+"action.reply" = "Antworten";
+"action.delete" = "Löschen";
+"action.cancel" = "Abbrechen";
+"action.retry" = "Erneut versuchen";
+"action.loading" = "Wird geladen...";
+"profile.share" = "Teilen";
+"bookmarks.title" = "Lesezeichen";
+"postDetail.errLoadFailed" = "Beitrag konnte nicht geladen werden";

@@ -1,0 +1,49 @@
+/* ZRP Social - GENERATED FILE, DO NOT EDIT BY HAND.
+   Produced by ios-native/Tools/generate-localizations.py from the
+   web app's own dictionary (src/lib/translations.ts), which is the
+   single source of truth for ZRP copy. Language: ru. */
+
+"nav.home" = "Главная";
+"nav.search" = "Поиск";
+"nav.notifications" = "Уведомления";
+"nav.messages" = "Сообщения";
+"nav.profile" = "Профиль";
+"nav.bookmarks" = "Закладки";
+"nav.settings" = "Настройки";
+"nav.signOut" = "Выйти";
+"auth.welcomeTitle" = "ZRP социальная";
+"auth.signInSubtitle" = "Войдите, чтобы присоединиться к сообществу";
+"auth.emailOrUsername" = "Эл. почта или имя пользователя";
+"auth.emailOrUsernamePlaceholder" = "you@example.com или имя пользователя";
+"auth.password" = "Пароль";
+"auth.signIn" = "Войти";
+"auth.signingIn" = "Вход...";
+"auth.forgotPassword" = "Забыли пароль?";
+"auth.noAccount" = "Нет аккаунта?";
+"auth.signUp" = "Зарегистрироваться";
+"auth.errSomethingWrong" = "Что-то пошло не так";
+"auth.errTryAgain" = "Что-то пошло не так. Попробуйте снова.";
+"auth.errSessionExpired" = "Ваша сессия больше не действительна. Пожалуйста, войдите снова.";
+"auth.errBanned" = "Ваш аккаунт заблокирован. Пожалуйста, свяжитесь с поддержкой.";
+"feed.forYou" = "Для вас";
+"feed.following" = "Подписки";
+"feed.retry" = "Повторить";
+"feed.tryAgain" = "Попробовать снова";
+"feed.noPosts" = "Пока нет постов.";
+"feed.followSomeone" = "Подпишитесь на кого-нибудь, чтобы видеть посты здесь.";
+"feed.checkBackLater" = "Загляните позже, чтобы увидеть популярный контент.";
+"feed.loadingMore" = "Загрузка...";
+"feed.endOfFeed" = "Вы дошли до конца ленты. 🎉";
+"feed.offline" = "Вы не в сети. Проверьте подключение к интернету.";
+"home.emptyFollowingTitle" = "Ваша лента Подписки ждёт вас.";
+"home.emptyFollowingSubtitle" = "Найдите людей, музыку и темы, на которые можно подписаться.";
+"action.like" = "Нравится";
+"action.repost" = "Репост";
+"action.reply" = "Ответить";
+"action.delete" = "Удалить";
+"action.cancel" = "Отмена";
+"action.retry" = "Повторить";
+"action.loading" = "Загрузка...";
+"profile.share" = "Поделиться";
+"bookmarks.title" = "Закладки";
+"postDetail.errLoadFailed" = "Не удалось загрузить публикацию";

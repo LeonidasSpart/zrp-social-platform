@@ -1,0 +1,284 @@
+#!/usr/bin/env python3
+"""
+Static checks that run without Xcode.
+
+Xcode is the only thing that can truly compile this app, so CI builds it
+on macOS. These checks exist because they catch the specific classes of
+mistake that are cheap to make and expensive to discover on a macOS
+runner ten minutes later:
+
+  1. A localization key used in Swift that does not exist in L10nKey,
+     which would be a build error.
+  2. A user-facing string literal hardcoded in a view instead of going
+     through L10n.
+  3. Unbalanced braces / brackets in a Swift file.
+  4. Malformed plists or asset-catalog JSON.
+  5. Any accidental reference to the Android module from iOS sources.
+
+Run from ios-native/:  python3 Tools/validate-sources.py
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import plistlib
+import re
+import sys
+
+IOS_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+SOURCE_ROOT = os.path.join(IOS_ROOT, "ZRPSocial")
+GENERATED_KEYS = os.path.join(SOURCE_ROOT, "Core", "Localization", "L10nKeys.swift")
+
+failures: list[str] = []
+
+
+def fail(message: str) -> None:
+    failures.append(message)
+
+
+def swift_files() -> list[str]:
+    found = []
+    for base, _dirs, files in os.walk(SOURCE_ROOT):
+        for name in files:
+            if name.endswith(".swift"):
+                found.append(os.path.join(base, name))
+    return sorted(found)
+
+
+def check_localization_keys(paths: list[str]) -> None:
+    with open(GENERATED_KEYS, encoding="utf-8") as handle:
+        generated = handle.read()
+    known = set(re.findall(r"^\s*case (\w+) = \"", generated, re.M))
+    if not known:
+        fail("L10nKeys.swift declares no cases - did the generator run?")
+        return
+
+    # `.someKey` appearing as an argument to Text(...) or L10n.string(...),
+    # plus explicit `L10nKey.someKey` references.
+    used: set[tuple[str, str]] = set()
+    for path in paths:
+        if path == GENERATED_KEYS:
+            continue
+        with open(path, encoding="utf-8") as handle:
+            source = handle.read()
+        for match in re.finditer(r"L10nKey\.(\w+)", source):
+            # Static helpers on L10nKey, not cases.
+            if match.group(1) in {"supportedLanguageCodes", "rightToLeftLanguageCodes", "allCases"}:
+                continue
+            used.add((match.group(1), path))
+        for match in re.finditer(r"(?:Text|L10n\.string)\(\s*\.(\w+)", source):
+            used.add((match.group(1), path))
+        for match in re.finditer(r"label:\s*\.(\w+)\)", source):
+            used.add((match.group(1), path))
+
+    for key, path in sorted(used):
+        if key not in known:
+            fail(
+                f"{os.path.relpath(path, IOS_ROOT)}: uses L10n key '.{key}' "
+                "which is not in L10nKeys.swift (add it to "
+                "Tools/ios-string-keys.txt or ios-extra-strings.json and re-run "
+                "the generator)"
+            )
+
+
+# Literals that are legitimately not user-facing copy: SF Symbol names,
+# asset names, format fragments, API field values.
+ALLOWED_LITERAL = re.compile(
+    r"^(?:"
+    r"[a-z0-9]+(?:\.[a-z0-9]+)+"          # sf symbols / reverse-dns
+    r"|[A-Za-z]+[A-Za-z0-9_]*"            # single identifiers e.g. "ZrpLogo"
+    r"|https?://\S*"
+    r"|[\s%@{}()\[\]/:,.\-_=#&?+*!|<>0-9]*"
+    r")$"
+)
+
+
+def check_hardcoded_strings(paths: list[str]) -> None:
+    for path in paths:
+        if os.sep + "Core" + os.sep in path or os.sep + "Models" + os.sep in path:
+            continue
+        with open(path, encoding="utf-8") as handle:
+            lines = handle.readlines()
+        for number, line in enumerate(lines, start=1):
+            stripped = line.strip()
+            if stripped.startswith("//") or stripped.startswith("///"):
+                continue
+            # Only Text(verbatim:) with a literal is a real risk - every
+            # other literal in a view is a symbol or an asset name.
+            for literal in re.findall(r'Text\(verbatim:\s*"([^"]*)"\)', line):
+                if literal and not ALLOWED_LITERAL.match(literal):
+                    fail(
+                        f"{os.path.relpath(path, IOS_ROOT)}:{number}: hardcoded "
+                        f'user-facing string "{literal}" - route it through L10n'
+                    )
+
+
+def strip_swift_noise(source: str) -> str:
+    """Blank out comments and string literals, preserving everything else.
+
+    A regex pass cannot do this correctly in either order: stripping
+    comments first mangles the "https://..." inside a string literal, and
+    stripping strings first mangles a quote inside a comment. A single
+    left-to-right scan is the only way to get it right, so brace counting
+    is not thrown off by punctuation that was never code.
+    """
+    out: list[str] = []
+    index = 0
+    length = len(source)
+
+    while index < length:
+        char = source[index]
+        pair = source[index:index + 2]
+        triple = source[index:index + 3]
+
+        if triple == '"""':
+            end = source.find('"""', index + 3)
+            index = length if end == -1 else end + 3
+            continue
+
+        if char == '"':
+            index += 1
+            while index < length:
+                if source[index] == "\\":
+                    index += 2
+                    continue
+                if source[index] == '"':
+                    index += 1
+                    break
+                if source[index] == "\n":
+                    break
+                index += 1
+            continue
+
+        if pair == "//":
+            end = source.find("\n", index)
+            index = length if end == -1 else end
+            continue
+
+        if pair == "/*":
+            end = source.find("*/", index + 2)
+            index = length if end == -1 else end + 2
+            continue
+
+        out.append(char)
+        index += 1
+
+    return "".join(out)
+
+
+def check_balanced(paths: list[str]) -> None:
+    pairs = {"}": "{", ")": "(", "]": "["}
+    for path in paths:
+        with open(path, encoding="utf-8") as handle:
+            source = strip_swift_noise(handle.read())
+
+        stack: list[str] = []
+        broken = False
+        for char in source:
+            if char in "{([":
+                stack.append(char)
+            elif char in pairs:
+                if not stack or stack[-1] != pairs[char]:
+                    fail(f"{os.path.relpath(path, IOS_ROOT)}: unbalanced '{char}'")
+                    broken = True
+                    break
+                stack.pop()
+        if not broken and stack:
+            fail(
+                f"{os.path.relpath(path, IOS_ROOT)}: "
+                f"{len(stack)} unclosed '{stack[-1]}'"
+            )
+
+
+def check_plists() -> None:
+    for relative in (
+        os.path.join("Supporting", "Info.plist"),
+        os.path.join("Supporting", "ZRPSocial.entitlements"),
+        os.path.join("ZRPSocial", "PrivacyInfo.xcprivacy"),
+    ):
+        path = os.path.join(IOS_ROOT, relative)
+        if not os.path.exists(path):
+            fail(f"missing {relative}")
+            continue
+        try:
+            with open(path, "rb") as handle:
+                plistlib.load(handle)
+        except Exception as exc:  # noqa: BLE001 - report whatever plistlib says
+            fail(f"{relative}: invalid plist ({exc})")
+
+
+def check_asset_catalog() -> None:
+    catalog = os.path.join(SOURCE_ROOT, "Assets.xcassets")
+    if not os.path.isdir(catalog):
+        fail("Assets.xcassets is missing")
+        return
+    for base, _dirs, files in os.walk(catalog):
+        for name in files:
+            if name != "Contents.json":
+                continue
+            path = os.path.join(base, name)
+            try:
+                with open(path, encoding="utf-8") as handle:
+                    json.load(handle)
+            except json.JSONDecodeError as exc:
+                fail(f"{os.path.relpath(path, IOS_ROOT)}: invalid JSON ({exc})")
+
+
+def check_no_android_references(paths: list[str]) -> None:
+    """The iOS module must never reach into the Android project."""
+    for path in paths + [os.path.join(IOS_ROOT, "Tools", "generate-localizations.py")]:
+        with open(path, encoding="utf-8") as handle:
+            source = handle.read()
+        if "android-native" in source or "android/" in source:
+            fail(
+                f"{os.path.relpath(path, IOS_ROOT)}: references the Android "
+                "module - iOS must stay independent of it"
+            )
+
+
+def check_localizations_complete() -> None:
+    resources = os.path.join(SOURCE_ROOT, "Resources")
+    expected = {"en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id"}
+    if not os.path.isdir(resources):
+        fail("ZRPSocial/Resources is missing - run the localization generator")
+        return
+    present = {
+        name[: -len(".lproj")]
+        for name in os.listdir(resources)
+        if name.endswith(".lproj")
+    }
+    missing = expected - present
+    if missing:
+        fail(
+            "missing .lproj bundles for ZRP's supported languages: "
+            + ", ".join(sorted(missing))
+        )
+
+
+def main() -> int:
+    paths = swift_files()
+    if not paths:
+        fail("no Swift sources found")
+        return 1
+
+    check_localization_keys(paths)
+    check_hardcoded_strings(paths)
+    check_balanced(paths)
+    check_plists()
+    check_asset_catalog()
+    check_no_android_references(paths)
+    check_localizations_complete()
+
+    if failures:
+        print(f"validate-sources: {len(failures)} problem(s)\n")
+        for problem in failures:
+            print(f"  - {problem}")
+        return 1
+
+    print(f"validate-sources: OK ({len(paths)} Swift files)")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
