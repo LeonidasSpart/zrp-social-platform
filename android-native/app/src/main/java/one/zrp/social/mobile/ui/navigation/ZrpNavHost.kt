@@ -66,6 +66,7 @@ import one.zrp.social.mobile.ui.music.PlaylistsScreen
 import one.zrp.social.mobile.ui.notifications.NotificationsScreen
 import one.zrp.social.mobile.ui.aid.AidDetailScreen
 import one.zrp.social.mobile.ui.aid.AidFormScreen
+import one.zrp.social.mobile.ui.aid.AidOffersScreen
 import one.zrp.social.mobile.ui.aid.AidScreen
 import one.zrp.social.mobile.ui.aid.MyAidCampaignsScreen
 import one.zrp.social.mobile.ui.opportunity.MyApplicationsScreen
@@ -141,6 +142,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToAidCampaign: (String) -> Unit = { id -> navController.navigate("aid/campaign/$id") }
     val goToNewCampaign: () -> Unit = { navController.navigate("aid/new") }
     val goToMyCampaigns: () -> Unit = { navController.navigate("aid/my-campaigns") }
+    val goToAidOffers: (String) -> Unit = { id -> navController.navigate("aid/campaign/$id/offers") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -562,6 +564,20 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                         campaignId = id,
                         onBack = { navController.popBackStack() },
                         onOpenOrganizer = goToProfile,
+                        onOpenOffers = { goToAidOffers(id) },
+                    )
+                }
+            }
+            composable(
+                route = "aid/campaign/{id}/offers",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    AidOffersScreen(
+                        campaignId = id,
+                        onBack = { navController.popBackStack() },
+                        onOpenOfferer = goToProfile,
                     )
                 }
             }

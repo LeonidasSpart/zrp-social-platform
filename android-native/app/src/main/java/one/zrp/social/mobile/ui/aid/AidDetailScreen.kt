@@ -17,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
@@ -58,7 +59,12 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * "Review Offers" link, since that screen is a later native phase.
  */
 @Composable
-fun AidDetailScreen(campaignId: String, onBack: () -> Unit, onOpenOrganizer: (String) -> Unit) {
+fun AidDetailScreen(
+    campaignId: String,
+    onBack: () -> Unit,
+    onOpenOrganizer: (String) -> Unit,
+    onOpenOffers: () -> Unit,
+) {
     val viewModel: AidDetailViewModel = viewModel(
         factory = remember { AidDetailViewModelFactory(campaignId, AidRepository()) },
     )
@@ -260,8 +266,16 @@ fun AidDetailScreen(campaignId: String, onBack: () -> Unit, onOpenOrganizer: (St
                     }
 
                     if (isOwner) {
-                        // Review Offers is a later native phase - no owner-only
-                        // action shown here yet.
+                        Button(
+                            onClick = onOpenOffers,
+                            modifier = Modifier.padding(top = Spacing.lg),
+                        ) {
+                            Icon(Icons.Filled.Inbox, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Text(
+                                text = stringResource(R.string.aid_review_offers),
+                                modifier = Modifier.padding(start = 6.dp),
+                            )
+                        }
                     } else {
                         if (offerableNeeds.isNotEmpty() && !state.offerSent) {
                             Column(
