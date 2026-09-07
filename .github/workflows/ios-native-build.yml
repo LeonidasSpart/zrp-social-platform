@@ -68,6 +68,15 @@ jobs:
         working-directory: ios-native
         run: python3 Tools/verify-artist-contract.py
 
+      # PARITY.md is the document this whole module is judged against, so
+      # it must not be allowed to become prose that drifted from the
+      # code. This checks the two claims that can be falsified: every
+      # route it names exists, and every row it marks IMPLEMENTED is
+      # backed by iOS code that actually calls that route.
+      - name: Audit the parity matrix against the code
+        working-directory: ios-native
+        run: python3 Tools/audit-parity.py
+
       # Hard guarantee of the isolation this module promises: the iOS
       # module must never contain a path into the Android project.
       - name: Assert no Android coupling

@@ -57,7 +57,7 @@ called and the real response being handled.
 | Onboarding | `POST /api/user/onboarding-complete` | ✅ | ✅ | ⬜ | MISSING (Phase 3b) |
 | Google sign-in | NextAuth `google` provider (web OAuth) | ✅ | ❌ | ❌ | BLOCKED — [B1](#b1-native-oauth-google--apple) |
 | **Sign in with Apple** | NextAuth `apple` provider (web OAuth, Services ID) | ✅ (if env configured) | n/a | ❌ | **BLOCKED — [B2](#b2-sign-in-with-apple-native)** |
-| Account deletion | `POST /api/user/delete`, `/api/user/delete/confirm`, `GET /api/user/delete-status` | ✅ | ✅ | ⬜ | MISSING (Phase 16) |
+| Account deletion | `POST /api/user/delete`, `/api/user/delete/confirm`, `GET /api/user/delete-status` | ✅ | ✅ | ✅ both paths — see [Settings](#settings) | IMPLEMENTED |
 
 ### Feed & posts
 
@@ -223,7 +223,7 @@ called and the real response being handled.
 | Delete listing | `DELETE /api/listings/{id}` | ✅ | ⬜ | ✅ | IMPLEMENTED |
 | Contact seller | existing messaging + prefilled draft | ✅ | ✅ | ✅ same opening line and listing link the web composes | IMPLEMENTED |
 | Listing video | `videoUrl` on the listing | ✅ | ⬜ | 🔶 an existing video is preserved on edit, but none can be added yet | PARTIAL (Phase 15b) |
-| Report a listing | `POST /api/reports` | ✅ | ✅ | ⬜ | MISSING (Phase 16) |
+| Report a listing | `POST /api/reports` (`listingId`) | ✅ | ✅ | ✅ from the listing detail screen | IMPLEMENTED |
 | Purchase flow | — **none exists** (price informational, deals close off-platform) | n/a | n/a | n/a | n/a — must never be invented |
 
 ### Moderation & safety
@@ -547,4 +547,4 @@ here. **No fake local notifications will stand in for this.**
 | 17 | Localization (11 languages) + accessibility | ✅ in-app language picker (11 languages, RTL), locale-aware formatting, Dynamic Type pass with a CI rule |
 | 18 | Performance + security pass | ✅ downsampling image loader with a decoded cache, path-segment escaping, no silent URL fallback; logging/Keychain/ATS audited clean |
 | 19 | App Store preparation | 🔶 archive + bundle verification in CI, privacy manifest corrected and CI-enforced, export options ready — signing BLOCKED (S1), bundle id needs a decision (S2) |
-| 20 | Final parity audit | ⬜ |
+| 20 | Final parity audit | ✅ this matrix is machine-checked in CI (`Tools/audit-parity.py`): every route it names exists, every IMPLEMENTED row is backed by a real iOS call site |
