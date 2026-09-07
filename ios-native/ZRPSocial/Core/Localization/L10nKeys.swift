@@ -74,6 +74,8 @@ enum L10nKey: String, CaseIterable {
     case authSignUp = "auth.signUp"
     /// en: "Something went wrong"
     case authErrSomethingWrong = "auth.errSomethingWrong"
+    /// en: "or"
+    case authOr = "auth.or"
     /// en: "Something went wrong. Please try again."
     case authErrTryAgain = "auth.errTryAgain"
     /// en: "Your session is no longer valid. Please sign in again."

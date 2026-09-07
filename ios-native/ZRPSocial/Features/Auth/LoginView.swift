@@ -89,7 +89,29 @@ struct LoginView: View {
             )
 
             submitButton
+            divider
+            AppleSignInButton { message in viewModel.showError(message) }
         }
+    }
+
+    /// The "or" rule the website's own login page draws between the
+    /// password form and the third-party buttons.
+    private var divider: some View {
+        HStack(spacing: ZrpSpacing.md) {
+            line
+            Text(.authOr)
+                .font(.footnote)
+                .foregroundStyle(ZrpColor.onSurfaceMuted)
+            line
+        }
+        .accessibilityHidden(true)
+    }
+
+    private var line: some View {
+        Rectangle()
+            .fill(ZrpColor.outline)
+            .frame(height: 1)
+            .frame(maxWidth: .infinity)
     }
 
     @ViewBuilder

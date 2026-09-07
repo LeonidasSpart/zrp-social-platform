@@ -46,6 +46,7 @@ called and the real response being handled.
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
 | Email/username + password login | `POST /api/mobile/auth/login` | via NextAuth Credentials | ✅ | ✅ | IMPLEMENTED |
+| Sign in with Apple (native) | `POST /api/mobile/auth/apple` | via NextAuth Apple provider (web redirect) | n/a | ✅ native `ASAuthorizationAppleIDCredential`, server-verified | IMPLEMENTED |
 | Session restore on launch | `GET /api/auth/session` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Secure session storage | — | httpOnly cookie | EncryptedSharedPreferences | Keychain (`kSecAttrAccessibleAfterFirstUnlock`) | IMPLEMENTED |
 | Logout / session teardown | — (local + `DELETE /api/push/fcm`) | ✅ | ✅ | ✅ (local; push teardown pending Phase 11) | PARTIAL |
@@ -563,11 +564,48 @@ OAuth URL in a system browser, leaving the session as an httpOnly cookie
 inside the browser/WebView, which a real native app cannot read. That is
 still the only path for Apple.
 
-### B2. Sign in with Apple (native)
+### B2. Sign in with Apple (native) — RESOLVED (server + client), Apple portal outstanding
 
 Apple requires Sign in with Apple in any app that offers third-party
-sign-in. This is therefore an **App Store submission blocker**, not a
-nice-to-have.
+sign-in, so this was an **App Store submission blocker**.
+
+**Both gaps below are now closed.**
+
+`POST /api/mobile/auth/apple` verifies the identity token against Apple's
+published JWKS with Node's own crypto — no new dependency, the same
+choice `apple-client-secret.ts` already made — checking `alg` (pinned to
+RS256, never read from the header), the signature, `iss`, `aud`, `exp`,
+`iat`, and the SHA-256 `nonce` claim against the raw nonce the app kept.
+It then reuses `findOrCreateOAuthUser`, the exact function NextAuth's own
+`signIn` callback uses, and returns the same
+`{sessionToken, cookieName, expiresInSeconds, user}` envelope as the
+password and Google routes.
+
+Both audiences are accepted: the bundle ID `one.zrp.social` for the
+native flow and `APPLE_CLIENT_ID` (the Services ID) for the web one.
+`APPLE_NATIVE_CLIENT_ID` overrides the former if the bundle ID ever
+changes.
+
+On identity key: this links on **email**, not `sub`. That is deliberate —
+it is what the website's own Apple provider does through
+`findOrCreateOAuthUser`, so an account created by signing in with Apple on
+the web is the same account when signing in with Apple on iOS. A private
+relay address is stable per app, so it works as a key; keying on `sub`
+instead would silently split those two into different accounts.
+
+Apple's name arrives only on the first authorization, so the app sends it
+beside the token; `findOrCreateOAuthUser` only uses a name when creating,
+which is exactly that one time. Username generation is
+`generateUniqueUsername`, already shared with the web flow — no new rule
+was invented.
+
+**What remains is outside this repository:** "Sign In with Apple" must be
+enabled for the `one.zrp.social` App ID in the Apple Developer portal.
+The entitlement is declared in `Supporting/ZRPSocial.entitlements`; until
+the portal capability exists a *signed* build cannot provision. Unsigned
+CI builds are unaffected.
+
+The original finding, for the record:
 
 Two concrete gaps:
 

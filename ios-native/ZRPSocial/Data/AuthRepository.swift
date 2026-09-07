@@ -7,6 +7,7 @@ import Foundation
 /// ViewModels never construct an `Endpoint` and never see a raw response.
 protocol AuthRepositoryProtocol: Sendable {
     func login(identifier: String, password: String) async throws -> CurrentUser
+    func loginWithApple(_ credential: AppleSignInCredential) async throws -> CurrentUser
     func restoreSession() async throws -> CurrentUser?
     func logout() async
     func register(_ request: RegistrationRequest) async throws
@@ -79,6 +80,54 @@ struct AuthRepository: AuthRepositoryProtocol {
                 body: LoginRequest(
                     identifier: identifier.trimmingCharacters(in: .whitespacesAndNewlines),
                     password: password
+                ),
+                // The whole point of this call is to obtain a session, so
+                // it must not require one.
+                requiresAuth: false
+            )
+        )
+
+        sessionStore.save(token: response.sessionToken, cookieName: response.cookieName)
+        return CurrentUser(from: response.user)
+    }
+
+    private struct AppleLoginRequest: Encodable {
+        struct FullName: Encodable {
+            let givenName: String?
+            let familyName: String?
+        }
+
+        let identityToken: String
+        let nonce: String
+        /// Omitted entirely when Apple sent no name - which is every
+        /// sign-in after the first. An empty object would be noise.
+        let fullName: FullName?
+    }
+
+    /// `POST /api/mobile/auth/apple`.
+    ///
+    /// Sends the identity token exactly as Apple issued it, plus the raw
+    /// nonce this attempt used. The route verifies the signature against
+    /// Apple's published keys, checks issuer, audience, expiry and that
+    /// nonce, and only then mints the same NextAuth session token the
+    /// password and Google logins return. Nothing about the identity is
+    /// asserted from here.
+    func loginWithApple(_ credential: AppleSignInCredential) async throws -> CurrentUser {
+        let name: AppleLoginRequest.FullName? =
+            credential.givenName == nil && credential.familyName == nil
+                ? nil
+                : AppleLoginRequest.FullName(
+                    givenName: credential.givenName,
+                    familyName: credential.familyName
+                )
+
+        let response: LoginResponse = try await client.send(
+            try Endpoint.post(
+                "mobile/auth/apple",
+                body: AppleLoginRequest(
+                    identityToken: credential.identityToken,
+                    nonce: credential.nonce,
+                    fullName: name
                 ),
                 // The whole point of this call is to obtain a session, so
                 // it must not require one.

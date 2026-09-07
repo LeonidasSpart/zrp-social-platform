@@ -33,6 +33,7 @@
 "auth.noAccount" = "Noch kein Konto?";
 "auth.signUp" = "Registrieren";
 "auth.errSomethingWrong" = "Etwas ist schiefgelaufen";
+"auth.or" = "oder";
 "auth.errTryAgain" = "Etwas ist schiefgelaufen. Bitte versuche es erneut.";
 "auth.errSessionExpired" = "Deine Sitzung ist nicht mehr gültig. Bitte melde dich erneut an.";
 "auth.errBanned" = "Dein Konto wurde gesperrt. Bitte kontaktiere den Support.";

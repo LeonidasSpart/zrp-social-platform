@@ -33,6 +33,7 @@
 "auth.noAccount" = "Belum punya akun?";
 "auth.signUp" = "Daftar";
 "auth.errSomethingWrong" = "Terjadi kesalahan";
+"auth.or" = "atau";
 "auth.errTryAgain" = "Terjadi kesalahan. Silakan coba lagi.";
 "auth.errSessionExpired" = "Sesi Anda tidak lagi valid. Silakan masuk kembali.";
 "auth.errBanned" = "Akun Anda telah diblokir. Silakan hubungi dukungan.";

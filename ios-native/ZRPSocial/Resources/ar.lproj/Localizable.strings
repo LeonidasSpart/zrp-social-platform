@@ -33,6 +33,7 @@
 "auth.noAccount" = "ليس لديك حساب؟";
 "auth.signUp" = "إنشاء حساب";
 "auth.errSomethingWrong" = "حدث خطأ ما";
+"auth.or" = "أو";
 "auth.errTryAgain" = "حدث خطأ ما. يرجى المحاولة مرة أخرى.";
 "auth.errSessionExpired" = "لم تعد جلستك صالحة. يرجى تسجيل الدخول مرة أخرى.";
 "auth.errBanned" = "تم حظر حسابك. يرجى التواصل مع الدعم.";

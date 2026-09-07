@@ -42,6 +42,7 @@ auth.forgotPassword
 auth.noAccount
 auth.signUp
 auth.errSomethingWrong
+auth.or
 auth.errTryAgain
 auth.errSessionExpired
 auth.errBanned

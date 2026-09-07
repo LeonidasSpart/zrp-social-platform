@@ -33,6 +33,7 @@
 "auth.noAccount" = "Nuk keni një llogari?";
 "auth.signUp" = "Regjistrohu";
 "auth.errSomethingWrong" = "Diçka shkoi gabim";
+"auth.or" = "ose";
 "auth.errTryAgain" = "Diçka shkoi gabim. Ju lutemi riprovojeni.";
 "auth.errSessionExpired" = "Sesioni yt nuk është më i vlefshëm. Ju lutemi hyni përsëri.";
 "auth.errBanned" = "Llogaria juaj është pezulluar. Ju lutemi kontaktoni mbështetjen.";

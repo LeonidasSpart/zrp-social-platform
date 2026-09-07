@@ -33,6 +33,7 @@
 "auth.noAccount" = "Hesabınız yok mu?";
 "auth.signUp" = "Kaydol";
 "auth.errSomethingWrong" = "Bir şeyler ters gitti";
+"auth.or" = "veya";
 "auth.errTryAgain" = "Bir şeyler ters gitti. Lütfen tekrar deneyin.";
 "auth.errSessionExpired" = "Oturumunuz artık geçerli değil. Lütfen tekrar giriş yapın.";
 "auth.errBanned" = "Hesabınız yasaklandı. Lütfen destek ekibiyle iletişime geçin.";

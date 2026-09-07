@@ -33,6 +33,7 @@
 "auth.noAccount" = "Vous n'avez pas de compte ?";
 "auth.signUp" = "S'inscrire";
 "auth.errSomethingWrong" = "Une erreur est survenue";
+"auth.or" = "ou";
 "auth.errTryAgain" = "Une erreur est survenue. Veuillez réessayer.";
 "auth.errSessionExpired" = "Votre session n'est plus valide. Veuillez vous reconnecter.";
 "auth.errBanned" = "Votre compte a été banni. Veuillez contacter le support.";

@@ -33,6 +33,7 @@
 "auth.noAccount" = "Non hai un account?";
 "auth.signUp" = "Registrati";
 "auth.errSomethingWrong" = "Qualcosa è andato storto";
+"auth.or" = "o";
 "auth.errTryAgain" = "Qualcosa è andato storto. Riprova.";
 "auth.errSessionExpired" = "La tua sessione non è più valida. Accedi di nuovo.";
 "auth.errBanned" = "Il tuo account è stato bannato. Contatta il supporto.";

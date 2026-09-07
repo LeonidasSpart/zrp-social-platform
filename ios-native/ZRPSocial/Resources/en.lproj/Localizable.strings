@@ -33,6 +33,7 @@
 "auth.noAccount" = "Don't have an account?";
 "auth.signUp" = "Sign up";
 "auth.errSomethingWrong" = "Something went wrong";
+"auth.or" = "or";
 "auth.errTryAgain" = "Something went wrong. Please try again.";
 "auth.errSessionExpired" = "Your session is no longer valid. Please sign in again.";
 "auth.errBanned" = "Your account has been banned. Please contact support.";
