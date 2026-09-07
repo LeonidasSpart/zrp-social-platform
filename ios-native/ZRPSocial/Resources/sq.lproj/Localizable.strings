@@ -9,6 +9,13 @@
 "nav.messages" = "Mesazhet";
 "nav.profile" = "Profili";
 "nav.bookmarks" = "Ruajtur";
+"nav.shorts" = "Shorts";
+"shorts.noShortsYet" = "Ende nuk ka Shorts. Bëhu i pari që poston një.";
+"shorts.like" = "Pëlqe";
+"shorts.repost" = "Riposto";
+"shorts.share" = "Shpërndaj";
+"shorts.mute" = "Hesht zërin";
+"shorts.unmute" = "Aktivizo zërin";
 "bookmarks.empty" = "Nuk ka të ruajtura ende";
 "bookmarks.emptyDesc" = "Ruani postimet dhe komentet që dëshironi t'i rioxhoni duke klikuar ikonën e ruajtjes.";
 "bookmarks.replyingTo" = "Duke iu përgjigjur";

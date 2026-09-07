@@ -16,6 +16,13 @@ nav.notifications
 nav.messages
 nav.profile
 nav.bookmarks
+nav.shorts
+shorts.noShortsYet
+shorts.like
+shorts.repost
+shorts.share
+shorts.mute
+shorts.unmute
 bookmarks.empty
 bookmarks.emptyDesc
 bookmarks.replyingTo

@@ -9,6 +9,13 @@
 "nav.messages" = "Сообщения";
 "nav.profile" = "Профиль";
 "nav.bookmarks" = "Закладки";
+"nav.shorts" = "Shorts";
+"shorts.noShortsYet" = "Пока нет роликов Shorts. Станьте первым, кто опубликует.";
+"shorts.like" = "Нравится";
+"shorts.repost" = "Репост";
+"shorts.share" = "Поделиться";
+"shorts.mute" = "Выключить звук";
+"shorts.unmute" = "Включить звук";
 "bookmarks.empty" = "Закладок пока нет";
 "bookmarks.emptyDesc" = "Сохраняйте публикации и комментарии, к которым хотите вернуться, нажимая значок закладки.";
 "bookmarks.replyingTo" = "Ответ пользователю";

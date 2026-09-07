@@ -9,6 +9,13 @@
 "nav.messages" = "Messages";
 "nav.profile" = "Profil";
 "nav.bookmarks" = "Favoris";
+"nav.shorts" = "Shorts";
+"shorts.noShortsYet" = "Pas encore de Shorts. Soyez le premier à en publier un.";
+"shorts.like" = "J'aime";
+"shorts.repost" = "Reposter";
+"shorts.share" = "Partager";
+"shorts.mute" = "Couper le son";
+"shorts.unmute" = "Activer le son";
 "bookmarks.empty" = "Aucun favori pour le moment";
 "bookmarks.emptyDesc" = "Enregistrez les publications et commentaires que vous souhaitez revoir en cliquant sur l'icône de favori.";
 "bookmarks.replyingTo" = "En réponse à";

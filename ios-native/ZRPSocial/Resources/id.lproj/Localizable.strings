@@ -9,6 +9,13 @@
 "nav.messages" = "Pesan";
 "nav.profile" = "Profil";
 "nav.bookmarks" = "Markah";
+"nav.shorts" = "Shorts";
+"shorts.noShortsYet" = "Belum ada Shorts. Jadilah yang pertama memposting.";
+"shorts.like" = "Suka";
+"shorts.repost" = "Posting ulang";
+"shorts.share" = "Bagikan";
+"shorts.mute" = "Bisukan";
+"shorts.unmute" = "Aktifkan suara";
 "bookmarks.empty" = "Belum ada markah";
 "bookmarks.emptyDesc" = "Simpan postingan dan komentar yang ingin Anda kunjungi kembali dengan mengklik ikon markah.";
 "bookmarks.replyingTo" = "Membalas";

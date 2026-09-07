@@ -93,6 +93,8 @@ struct RouteDestinationView: View {
             TrustPassportView(username: username)
         case .bookmarks:
             BookmarksView()
+        case .shorts(let startId):
+            ShortsView(startId: startId)
         case .listingConversation(let partner, let draft):
             ConversationView(
                 partner: partner,

@@ -173,6 +173,18 @@ struct PostCardView: View {
                 }
                 .disabled(interaction.isTranslating)
             }
+            // A video post can be watched in the Shorts feed, opened on
+            // this one. The card's own tap still goes to the full-screen
+            // viewer, which is where scrubbing and AirPlay live - Shorts
+            // is a swipe feed and has neither, so this is an addition
+            // rather than a replacement.
+            if PostMedia.isVideo(post) {
+                Button {
+                    navigator.push(.shorts(startId: post.id))
+                } label: {
+                    Label { Text(.navShorts) } icon: { Image(systemName: "play.rectangle") }
+                }
+            }
             if isOwnPost {
                 // Editing and deletion are both author-only and enforced
                 // server-side with a 403; these items only hide what the

@@ -9,6 +9,13 @@
 "nav.messages" = "Mesajlar";
 "nav.profile" = "Profil";
 "nav.bookmarks" = "Yer İmleri";
+"nav.shorts" = "Shorts";
+"shorts.noShortsYet" = "Henüz Short yok. İlk paylaşan siz olun.";
+"shorts.like" = "Beğen";
+"shorts.repost" = "Yeniden paylaş";
+"shorts.share" = "Paylaş";
+"shorts.mute" = "Sessize al";
+"shorts.unmute" = "Sesi aç";
 "bookmarks.empty" = "Henüz yer imi yok";
 "bookmarks.emptyDesc" = "Yer imi simgesine tıklayarak tekrar görmek istediğiniz gönderileri ve yorumları kaydedin.";
 "bookmarks.replyingTo" = "Yanıtlanan";

@@ -9,6 +9,13 @@
 "nav.messages" = "الرسائل";
 "nav.profile" = "الملف الشخصي";
 "nav.bookmarks" = "المحفوظات";
+"nav.shorts" = "Shorts";
+"shorts.noShortsYet" = "لا توجد مقاطع قصيرة بعد. كن أول من ينشر واحدًا.";
+"shorts.like" = "إعجاب";
+"shorts.repost" = "إعادة نشر";
+"shorts.share" = "مشاركة";
+"shorts.mute" = "كتم الصوت";
+"shorts.unmute" = "تفعيل الصوت";
 "bookmarks.empty" = "لا توجد إشارات مرجعية بعد";
 "bookmarks.emptyDesc" = "احفظ المنشورات والتعليقات التي تريد الرجوع إليها بالنقر على أيقونة الإشارة المرجعية.";
 "bookmarks.replyingTo" = "الرد على";

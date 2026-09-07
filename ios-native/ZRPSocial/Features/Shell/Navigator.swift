@@ -61,6 +61,9 @@ enum Route: Hashable {
     case appeals
     case trustPassport(username: String)
     case bookmarks
+    /// ZRP Shorts. `startId` opens the feed on one particular video -
+    /// what tapping a video elsewhere in the app leads to.
+    case shorts(startId: String?)
 }
 
 /// Owns the navigation stack's path.

@@ -73,6 +73,12 @@ enum DeepLink {
             // destination until the thread route accepts a handle.
             return DeepLinkTarget(.messages)
 
+        case "shorts":
+            // The website's /shorts is the feed; a post id after it opens
+            // that video, which is exactly what the route's own startId
+            // parameter is for.
+            return DeepLinkTarget(.home, .shorts(startId: second))
+
         case "bookmarks":
             return DeepLinkTarget(.home, .bookmarks)
         case "settings":

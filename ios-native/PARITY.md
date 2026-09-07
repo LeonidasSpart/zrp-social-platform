@@ -99,6 +99,7 @@ called and the real response being handled.
 | GIF rendering | — | ✅ | ✅ | ✅ animated, with the file's own per-frame timing; a single-frame GIF falls back to the still path, which is what it is | IMPLEMENTED |
 | Inline video playback | — | ✅ | ✅ (ExoPlayer) | ✅ muted, looping, autoplaying at the website's own 0.6 visibility threshold, through **one** shared player rather than one per card; tapping opens the full-screen viewer, where the controls are | IMPLEMENTED |
 | Full-screen media viewer | — | ✅ | ✅ | ✅ (paged, pinch zoom, AVKit video) | IMPLEMENTED |
+| ZRP Shorts (vertical video feed) | `GET /api/videos` (`cursor`, `limit`, `startId`) | ✅ `/shorts` | ✅ `ShortsScreen` | ✅ one video per screen, paged vertically, looping and muted until asked; reached from Home's More menu, from a video post's menu (opening on that video via `startId`), and from a `/shorts` link | IMPLEMENTED |
 | Image/video/GIF upload | UploadThing `postMedia` router (`/api/uploadthing`) | ✅ | ✅ | ✅ (streamed from disk, real progress, cancel, resume-aware retry) | IMPLEMENTED |
 | GIF picker (Giphy, proxied) | `GET /api/gifs/search`, `/api/gifs/trending` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Avatar / cover upload | `POST /api/user/update-avatar`, `POST /api/user/update-cover` — both reject any URL not on UploadThing's hosts, so the file must be uploaded first and its URL handed over | ✅ | ✅ | ✅ from Edit profile and from onboarding | IMPLEMENTED |
@@ -270,7 +271,8 @@ called and the real response being handled.
 | --- | --- |
 | Admin console (`/api/admin/**`, 40+ routes) | STAFF/ADMIN — server-role gated. |
 | Tips, plan upgrade, premium-post purchase, help/charity contribution | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
-| Play, Opportunity, Aid/Help, News, Journalist, Ads, Careers, Investors, Press, Transparency, Shorts, AI chat, API keys, Team, Support tickets | WEB-ONLY today — Android has no surface for any of them either. Not iOS regressions. |
+| Ads, Careers, Investors, Press, Transparency, API keys, Team | WEB-ONLY — Android has no surface for any of them either. |
+| Play, Opportunity, Aid/Help, News, Journalist, Creator Studio, AI chat, Support tickets, Explore | **NOT out of scope — outstanding iOS work.** The 2026-09-07 audit corrected an earlier claim here: Android *does* ship all of these natively. They are genuine iOS gaps, not deliberate omissions. |
 
 ---
 
