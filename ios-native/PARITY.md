@@ -150,13 +150,17 @@ called and the real response being handled.
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
-| Conversation list | `GET /api/messages` | ✅ | ✅ | ⬜ | MISSING (Phase 10) |
-| Thread + pagination | `GET /api/messages/{userId}` | ✅ | ✅ | ⬜ | MISSING (Phase 10) |
-| Send message | `POST /api/messages` | ✅ | ✅ | ⬜ | MISSING (Phase 10) |
-| Edit / delete message | `/api/messages/edit/{id}`, `/delete/{id}` | ✅ | ✅ | ⬜ | MISSING (Phase 10) |
-| Reactions | `POST /api/messages/reaction/{id}` | ✅ | ✅ | ⬜ | MISSING (Phase 10) |
-| Unread badge | `GET /api/messages/unread` | ✅ | ✅ | ⬜ | MISSING (Phase 10) |
-| Realtime | Socket.io (`server.js`) | ✅ | ❌ polling | ❌ polling planned | PARTIAL (by design) |
+| Conversation list | `GET /api/messages` (bare array; partner, last message, unread count) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Thread | `GET /api/messages/{userId}` — **unpaginated**, see [L1](#l1-message-threads-are-unpaginated) | ✅ | ✅ | ✅ (no paging UI, because there is nothing to page) | IMPLEMENTED |
+| Send message | `POST /api/messages` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Edit / delete message | `PUT /api/messages/edit/{id}`, `DELETE /delete/{id}` | ✅ | ✅ | ✅ (sender-only, 403-enforced) | IMPLEMENTED |
+| Reactions | `POST /api/messages/reaction/{id}` — one per person; same emoji removes, different replaces | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Unread badge | `GET /api/messages/unread` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Realtime | Socket.io (`server.js`) | ✅ | ❌ polling | ❌ 6s polling while a thread is open | PARTIAL (by design) |
+| Read receipts | side effect of `GET /api/messages/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Reply to a message | `POST /api/messages` + `replyToId` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Delete a conversation | `DELETE /api/messages/conversation/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Image attachments | `POST /api/messages` + `imageUrl` (UploadThing `chatImage`) | ✅ | ✅ | ⬜ | MISSING (Phase 10b) |
 
 ### Notifications
 
@@ -293,6 +297,26 @@ Signing, archiving and export remain Phase 19 - this module has no
 provisioning profile of its own yet, and Sign in with Apple and push are
 both still blocked server-side (B2, B3 below).
 
+## Known backend limitations
+
+### L1. Message threads are unpaginated
+
+`GET /api/messages/{userId}` runs a `findMany` with no `take`, no cursor
+and no limit: it returns **every message ever exchanged** with that user,
+oldest first, with each message's sender, `replyTo` and reactions
+included. A long-running conversation therefore transfers its entire
+history on every open - and, because the client polls while a thread is
+open, on every poll.
+
+This is not something a client can fix. The iOS app deliberately shows no
+"load more" control, since there is nothing to page, and polls at a
+deliberately unaggressive 6 seconds to limit the cost. Adding `cursor`
+and `limit` to that route (defaulting to the newest N, as the comments
+route already does) would fix it for web, Android and iOS at once.
+
+Noted, not worked around. No client-side change was made that would mask
+it.
+
 ## Blocked items
 
 ### B1. Native OAuth (Google / Apple)
@@ -376,7 +400,7 @@ here. **No fake local notifications will stand in for this.**
 | 7 | Post composer + media upload + viewer | ✅ done — 7b (scheduling, quote entry point, camera capture) pending |
 | 8 | Comments, replies, quotes, edit | ✅ done — 8b (reactions, comment repost/bookmark, reposts & quotes lists, translation) pending |
 | 9 | Stories | ✅ done |
-| 10 | Messages | ⬜ |
+| 10 | Messages | ✅ done — attachments and conversation search pending (10b) |
 | 11 | Notifications (+ push, pending B3) | ⬜ |
 | 12 | Search + hashtags | 🔶 hashtag timeline done; search pending |
 | 13 | Music + background player | ⬜ |

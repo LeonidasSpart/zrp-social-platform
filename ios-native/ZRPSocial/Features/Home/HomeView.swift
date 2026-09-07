@@ -16,6 +16,7 @@ struct HomeView: View {
     @StateObject private var stories = StoriesViewModel()
     @State private var isCreatingStory = false
     @State private var openStory: StoryPresentation?
+    @StateObject private var unread = UnreadBadgeViewModel()
 
     var body: some View {
         NavigationStack(path: $navigator.path) {
@@ -40,6 +41,10 @@ struct HomeView: View {
                     HashtagView(tag: tag)
                 case .followList(let username, let kind):
                     FollowListView(kind: kind, username: username)
+                case .messages:
+                    MessagesListView()
+                case .conversation(let partner):
+                    ConversationView(partner: partner, viewerId: session.currentUser?.id)
                 }
             }
         }
@@ -69,6 +74,7 @@ struct HomeView: View {
             viewModel.attach(interactions: interactions)
             viewModel.loadIfNeeded(viewModel.selectedTab)
             await stories.load()
+            await unread.refresh()
         }
         .onChange(of: viewModel.selectedTab) { _, tab in
             viewModel.loadIfNeeded(tab)
@@ -138,6 +144,29 @@ struct HomeView: View {
                 .scaledToFit()
                 .frame(width: 26, height: 26)
                 .accessibilityHidden(true)
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            Button {
+                navigator.push(.messages)
+            } label: {
+                Image(systemName: "bubble.left.and.bubble.right")
+                    .overlay(alignment: .topTrailing) {
+                        // A real count from GET /api/messages/unread -
+                        // never a placeholder dot.
+                        if unread.messageCount > 0 {
+                            Circle()
+                                .fill(ZrpColor.red)
+                                .frame(width: 8, height: 8)
+                                .offset(x: 4, y: -2)
+                        }
+                    }
+            }
+            .accessibilityLabel(Text(.messagesTitle))
+            .accessibilityValue(
+                Text(verbatim: unread.messageCount > 0
+                    ? CountFormatting.exact(unread.messageCount)
+                    : "")
+            )
         }
         ToolbarItem(placement: .topBarTrailing) {
             Menu {

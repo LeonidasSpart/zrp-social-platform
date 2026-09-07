@@ -84,6 +84,7 @@
 "stories.yourStory" = "قصتك";
 "stories.addStory" = "إضافة قصة";
 "stories.whatsOnYourMind" = "بم تفكر؟";
+"stories.image" = "صورة";
 "stories.uploading" = "جارٍ الرفع...";
 "stories.shareStory" = "مشاركة القصة";
 "stories.expiryNote" = "تختفي القصص بعد 24 ساعة. الحد الأقصى لحجم الملف: 16 ميجابايت.";
@@ -91,3 +92,12 @@
 "stories.errUnsupportedType" = "يتم دعم الصور ومقاطع الفيديو فقط.";
 "stories.errEmptyContent" = "يرجى إضافة محتوى أو ملف وسائط.";
 "stories.errCreateFailed" = "فشل إنشاء القصة. يرجى المحاولة مرة أخرى.";
+"messages.title" = "الرسائل";
+"messages.noMessagesYet" = "لا رسائل بعد.";
+"messages.startConversation" = "ابدأ محادثة مع شخص ما!";
+"messages.you" = "أنت: {msg}";
+"messages.deleteConversation" = "حذف محادثة";
+"messages.deleteConfirm" = "حذف هذه المحادثة؟ سيتم حذف جميع الرسائل.";
+"messages.errDeleteFailed" = "تعذر to حذف محادثة";
+"chat.deleteMessage" = "حذف رسالة";
+"chat.deleteMessageConfirm" = "هل أنت متأكد أنك تريد حذف هذه الرسالة؟";

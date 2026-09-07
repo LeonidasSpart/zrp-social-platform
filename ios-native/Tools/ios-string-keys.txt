@@ -109,6 +109,7 @@ action.edit
 stories.yourStory
 stories.addStory
 stories.whatsOnYourMind
+stories.image
 stories.uploading
 stories.shareStory
 stories.expiryNote
@@ -116,3 +117,14 @@ stories.errFileTooLarge
 stories.errUnsupportedType
 stories.errEmptyContent
 stories.errCreateFailed
+
+# ── Messages (Phase 10) ─────────────────────────────────────────────
+messages.title
+messages.noMessagesYet
+messages.startConversation
+messages.you
+messages.deleteConversation
+messages.deleteConfirm
+messages.errDeleteFailed
+chat.deleteMessage
+chat.deleteMessageConfirm

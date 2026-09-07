@@ -84,6 +84,7 @@
 "stories.yourStory" = "Kisahmu";
 "stories.addStory" = "Tambah Kisah";
 "stories.whatsOnYourMind" = "Apa yang Anda pikirkan?";
+"stories.image" = "Gambar";
 "stories.uploading" = "Mengunggah...";
 "stories.shareStory" = "Bagikan Kisah";
 "stories.expiryNote" = "Kisah menghilang setelah 24 jam. Ukuran file maksimum: 16MB.";
@@ -91,3 +92,12 @@
 "stories.errUnsupportedType" = "Hanya gambar dan video yang didukung.";
 "stories.errEmptyContent" = "Silakan tambahkan konten atau file media.";
 "stories.errCreateFailed" = "Gagal membuat kisah. Silakan coba lagi.";
+"messages.title" = "Pesan";
+"messages.noMessagesYet" = "Belum ada pesan.";
+"messages.startConversation" = "Mulai percakapan dengan seseorang!";
+"messages.you" = "Anda: {msg}";
+"messages.deleteConversation" = "Hapus percakapan";
+"messages.deleteConfirm" = "Hapus percakapan ini? Semua pesan akan dihapus.";
+"messages.errDeleteFailed" = "Gagal menghapus percakapan";
+"chat.deleteMessage" = "Hapus pesan";
+"chat.deleteMessageConfirm" = "Apakah Anda yakin ingin menghapus pesan ini?";

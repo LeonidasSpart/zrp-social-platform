@@ -84,6 +84,7 @@
 "stories.yourStory" = "Deine Story";
 "stories.addStory" = "Story hinzufügen";
 "stories.whatsOnYourMind" = "Was gibt's Neues?";
+"stories.image" = "Bild";
 "stories.uploading" = "Wird hochgeladen...";
 "stories.shareStory" = "Story teilen";
 "stories.expiryNote" = "Storys verschwinden nach 24 Stunden. Maximale Dateigröße: 16 MB.";
@@ -91,3 +92,12 @@
 "stories.errUnsupportedType" = "Nur Bilder und Videos werden unterstützt.";
 "stories.errEmptyContent" = "Bitte füge Inhalt oder eine Mediendatei hinzu.";
 "stories.errCreateFailed" = "Story konnte nicht erstellt werden. Bitte versuche es erneut.";
+"messages.title" = "Nachrichten";
+"messages.noMessagesYet" = "Noch keine Nachrichten.";
+"messages.startConversation" = "Starte eine Unterhaltung mit jemandem!";
+"messages.you" = "Du: {msg}";
+"messages.deleteConversation" = "Unterhaltung löschen";
+"messages.deleteConfirm" = "Diese Unterhaltung löschen? Alle Nachrichten werden entfernt.";
+"messages.errDeleteFailed" = "Löschen der Unterhaltung fehlgeschlagen";
+"chat.deleteMessage" = "Nachricht löschen";
+"chat.deleteMessageConfirm" = "Möchtest du diese Nachricht wirklich löschen?";

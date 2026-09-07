@@ -17,6 +17,8 @@ enum Route: Hashable {
     case profile(username: String)
     case hashtag(tag: String)
     case followList(username: String, kind: FollowListKind)
+    case messages
+    case conversation(partner: PostAuthor)
 }
 
 /// Owns the navigation stack's path.

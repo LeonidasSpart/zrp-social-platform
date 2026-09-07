@@ -84,6 +84,7 @@
 "stories.yourStory" = "你的动态";
 "stories.addStory" = "添加动态";
 "stories.whatsOnYourMind" = "你在想什么?";
+"stories.image" = "图片";
 "stories.uploading" = "上传中...";
 "stories.shareStory" = "分享动态";
 "stories.expiryNote" = "动态将在 24 小时后消失。文件大小上限:16MB。";
@@ -91,3 +92,12 @@
 "stories.errUnsupportedType" = "仅支持图片和视频。";
 "stories.errEmptyContent" = "请添加文字内容或媒体文件。";
 "stories.errCreateFailed" = "创建动态失败,请重试。";
+"messages.title" = "私信";
+"messages.noMessagesYet" = "无 消息 还.";
+"messages.startConversation" = "开始和某人聊天吧！";
+"messages.you" = "你: {msg}";
+"messages.deleteConversation" = "删除 对话";
+"messages.deleteConfirm" = "删除此对话？所有消息都将被删除。";
+"messages.errDeleteFailed" = "失败 to 删除 对话";
+"chat.deleteMessage" = "删除 消息";
+"chat.deleteMessageConfirm" = "你确定要删除这条消息吗？";

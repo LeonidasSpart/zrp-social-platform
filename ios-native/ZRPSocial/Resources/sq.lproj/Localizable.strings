@@ -84,6 +84,7 @@
 "stories.yourStory" = "Storia jote";
 "stories.addStory" = "Shto Storie";
 "stories.whatsOnYourMind" = "Çfarë po mendon?";
+"stories.image" = "Foto";
 "stories.uploading" = "Duke ngarkuar...";
 "stories.shareStory" = "Shpërndaj Storien";
 "stories.expiryNote" = "Storiet zhduken pas 24 orësh. Madhësia maksimale e skedarit: 16MB.";
@@ -91,3 +92,12 @@
 "stories.errUnsupportedType" = "Mbështeten vetëm imazhet dhe videot.";
 "stories.errEmptyContent" = "Ju lutemi shtoni përmbajtje ose një skedar media.";
 "stories.errCreateFailed" = "Krijimi i storjes dështoi. Ju lutemi provoni përsëri.";
+"messages.title" = "Mesazhet";
+"messages.noMessagesYet" = "Nuk ka mesazhe ende.";
+"messages.startConversation" = "Filloni një bisedë me dikë!";
+"messages.you" = "Ju: {msg}";
+"messages.deleteConversation" = "Fshi bisedën";
+"messages.deleteConfirm" = "Të fshihet kjo bisedë? Të gjitha mesazhet do të hiqen.";
+"messages.errDeleteFailed" = "Fshirja e bisedës dështoi";
+"chat.deleteMessage" = "Fshi mesazhin";
+"chat.deleteMessageConfirm" = "Jeni të sigurt që dëshironi ta fshini këtë mesazh?";
