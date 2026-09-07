@@ -837,6 +837,30 @@
     <string name="shorts_share_post_by">Post by %1$s</string>
     <string name="shorts_comment">Comments</string>
     <string name="shorts_discover_entry">Discover Shorts</string>
+    <string name="shorts_upload_close">Close</string>
+    <string name="shorts_upload_remove_video">Remove video</string>
+    <string name="shorts_upload_choose_video">Choose a video</string>
+    <string name="shorts_upload_formats_hint">MP4, WebM, MOV and other video formats</string>
+    <string name="shorts_upload_up_to_mb">Up to %1$dMB</string>
+    <string name="shorts_upload_caption_placeholder">Write a caption...</string>
+    <string name="shorts_upload_posting">Posting...</string>
+    <string name="shorts_upload_post_short">Post Short</string>
+    <string name="shorts_upload_err_gif_not_allowed">GIF files cannot be posted as Shorts. Please choose a video file.</string>
+    <string name="shorts_upload_err_not_video">Please choose a real video file such as MP4 or WebM.</string>
+    <string name="shorts_upload_err_too_large">Video must be under %1$dMB on your plan.</string>
+    <string name="shorts_upload_err_choose_video_first">Choose a video first.</string>
+    <string name="shorts_upload_err_gif_simple">GIF files cannot be posted as Shorts.</string>
+    <string name="shorts_upload_err_only_real_video">Only real video files can be posted as Shorts.</string>
+    <string name="shorts_upload_err_upload_failed_no_file">Upload failed. No file was returned.</string>
+    <string name="shorts_upload_err_upload_failed_no_url">Upload failed. No media URL was returned.</string>
+    <string name="shorts_upload_err_uploaded_gif">The uploaded file was detected as a GIF and cannot be posted as a Short.</string>
+    <string name="shorts_upload_err_failed_publish">Failed to publish Short.</string>
+    <string name="shorts_upload_err_published_gif">The published media was detected as a GIF and was not added to Shorts.</string>
+    <string name="shorts_upload_err_generic">Something went wrong while uploading. Please check your connection and try again.</string>
+    <string name="shorts_upload_err_upload_failed_detailed">The upload didn\'t complete, likely due to a connection issue or the file being too large for your plan. Check your connection and try again.</string>
+    <string name="shorts_upload_err_too_large_plan">This video is too large for your plan. Try a smaller file or upgrade your plan.</string>
+    <string name="shorts_upload_err_url_gen_failed">Couldn\'t start the upload - this is usually a temporary connection issue. Please try again.</string>
+    <string name="shorts_upload_err_internal_server">Something went wrong on our end while uploading. Please try again in a moment.</string>
     <!-- "Shorts" is a proper noun, left untranslated in every one of web's own 11 language blocks (nav.shorts) - present only here so every locale falls back to this single default value. -->
     <string name="shorts_title">Shorts</string>
 </resources>

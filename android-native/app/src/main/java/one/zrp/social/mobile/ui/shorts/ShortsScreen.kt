@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Favorite
@@ -29,6 +30,8 @@ import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -77,9 +80,8 @@ import one.zrp.social.mobile.util.formatCount
  * video feed against the same real GET /api/videos (filtered video
  * posts, same Post shape and cursor pagination as every other feed)
  * and like/repost/comment interaction model PostCard already uses
- * elsewhere. "Post a Short" (upload) is a later phase, the same
- * staged-deferral every other feature epic in this app used for its
- * own phase 1.
+ * elsewhere, plus "Post a Short" (ShortsUploadDialog) - the same real
+ * upload-then-POST-/api/posts flow ShortUploadModal.tsx drives.
  */
 @Composable
 fun ShortsScreen(onBack: () -> Unit, onOpenComments: (String) -> Unit, onAuthorClick: (String) -> Unit) {
@@ -88,9 +90,20 @@ fun ShortsScreen(onBack: () -> Unit, onOpenComments: (String) -> Unit, onAuthorC
     )
     val state by viewModel.state.collectAsState()
     val pagerState = rememberPagerState(pageCount = { state.posts.size })
+    var showUpload by remember { mutableStateOf(false) }
 
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect { page -> viewModel.setCurrentIndex(page) }
+    }
+
+    // Matches handleUploaded's own requestAnimationFrame(() =>
+    // containerRef.current?.scrollTo({ top: 0 })): jump the pager back
+    // to the just-uploaded Short at the top of the feed.
+    LaunchedEffect(state.uploadedPostId) {
+        if (state.uploadedPostId != null) {
+            pagerState.scrollToPage(0)
+            viewModel.consumeUploadedPost()
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
@@ -100,7 +113,16 @@ fun ShortsScreen(onBack: () -> Unit, onOpenComments: (String) -> Unit, onAuthorC
             }
         } else if (state.posts.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = stringResource(R.string.shorts_no_shorts_yet), color = Color.White, modifier = Modifier.padding(32.dp))
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = stringResource(R.string.shorts_no_shorts_yet), color = Color.White, modifier = Modifier.padding(32.dp))
+                    Button(
+                        onClick = { showUpload = true },
+                        colors = ButtonDefaults.buttonColors(containerColor = ZrpRed),
+                    ) {
+                        Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Text(text = stringResource(R.string.shorts_post_a_short), modifier = Modifier.padding(start = 6.dp))
+                    }
+                }
             }
         } else {
             VerticalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
@@ -137,6 +159,11 @@ fun ShortsScreen(onBack: () -> Unit, onOpenComments: (String) -> Unit, onAuthorC
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
             )
+            // Always visible (not gated on posts being present), matching
+            // shorts/page.tsx's own top-right Plus button.
+            IconButton(onClick = { showUpload = true }) {
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.shorts_post_a_short), tint = Color.White)
+            }
             if (state.posts.isNotEmpty()) {
                 IconButton(onClick = viewModel::toggleMuted) {
                     Icon(
@@ -149,6 +176,16 @@ fun ShortsScreen(onBack: () -> Unit, onOpenComments: (String) -> Unit, onAuthorC
                 Box(modifier = Modifier.size(48.dp))
             }
         }
+    }
+
+    if (showUpload) {
+        ShortsUploadDialog(
+            onDismiss = { showUpload = false },
+            onPosted = { post ->
+                viewModel.onShortUploaded(post)
+                showUpload = false
+            },
+        )
     }
 }
 
