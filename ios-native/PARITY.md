@@ -252,7 +252,7 @@ called and the real response being handled.
 | Data export | `GET /api/settings/export-data` | ✅ | ⬜ | ✅ downloaded to a file and handed to the share sheet | IMPLEMENTED |
 | Account (email, username, profile fields) | `/api/user`, `/api/user/email`, `/username` | ✅ | ✅ | ⬜ | MISSING (Phase 16b) |
 | Email preferences | `/api/user/email-preferences` | ✅ | ⬜ | ⬜ | MISSING (Phase 16b) |
-| Language (11 languages, `ar` RTL) | client-side preference | ✅ | ✅ | ⬜ | MISSING (Phase 17) |
+| Language (11 languages, `ar` RTL) | client-side preference | ✅ | ✅ | ✅ in-app picker, generated from the web's `SUPPORTED_LANGUAGES`; sets locale and layout direction | IMPLEMENTED |
 | Plan / limits | `GET /api/user/plan`, `src/lib/limits.ts` | ✅ | ✅ | 🔶 composer and listing forms pre-check what the server enforces; the server's own limit message is shown verbatim | PARTIAL (by design) |
 | Plan upgrade / monetisation / wallet surfaces | web billing | ✅ | ✅ | ❌ deliberately absent — see [Store policy constraint](#store-policy-constraint) | OUT OF SCOPE |
 
@@ -492,7 +492,7 @@ here. **No fake local notifications will stand in for this.**
 | 14 | Music Studio | ✅ gate, apply, artist profile, upload/publish, track + album management, reorder |
 | 15 | Marketplace | ✅ browse, detail, favorites, create/edit/delete, my listings, contact seller |
 | 16 | Settings, moderation, account deletion | ✅ settings hub, privacy, password, blocked/muted lists, reporting, data export, account deletion (both paths) |
-| 17 | Localization (11 languages) + accessibility | ⬜ |
+| 17 | Localization (11 languages) + accessibility | ✅ in-app language picker (11 languages, RTL), locale-aware formatting, Dynamic Type pass with a CI rule |
 | 18 | Performance + security pass | ⬜ |
 | 19 | App Store preparation | 🔶 toolchain now Xcode 26 / iOS 26 SDK-gated; signing, archive and export still pending |
 | 20 | Final parity audit | ⬜ |

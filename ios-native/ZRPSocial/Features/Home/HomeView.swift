@@ -97,6 +97,8 @@ struct HomeView: View {
                     DataExportView()
                 case .deleteAccount:
                     DeleteAccountView()
+                case .languagePicker:
+                    LanguagePickerView()
                 case .listingConversation(let partner, let draft):
                     ConversationView(
                         partner: partner,

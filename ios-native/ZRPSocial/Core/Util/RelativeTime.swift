@@ -10,20 +10,47 @@ import Foundation
 /// locale and calendar rather than a hardcoded format.
 enum RelativeTime {
 
-    private static let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter
-    }()
+    /// `DateFormatter` is expensive to build, so these are cached - but
+    /// cached **per locale**, not once for the process. The in-app
+    /// language picker can change the active locale while the app is
+    /// running, and a formatter built before that change would keep
+    /// printing month names in the previous language forever.
+    nonisolated(unsafe) private static var formatterCache: [String: DateFormatter] = [:]
+    private static let cacheLock = NSLock()
 
-    private static let sameYearFormatter: DateFormatter = {
+    private static func formatter(
+        _ id: String,
+        build: (DateFormatter) -> Void
+    ) -> DateFormatter {
+        let locale = L10n.activeLocale
+        let key = "\(id)|\(locale.identifier)"
+
+        cacheLock.lock()
+        defer { cacheLock.unlock() }
+
+        if let cached = formatterCache[key] { return cached }
+
         let formatter = DateFormatter()
-        // Locale-appropriate day+month ordering rather than a fixed
-        // "MMM d", which reads wrong in most of ZRP's 11 languages.
-        formatter.setLocalizedDateFormatFromTemplate("MMMd")
+        formatter.locale = locale
+        build(formatter)
+        formatterCache[key] = formatter
         return formatter
-    }()
+    }
+
+    private static var dateFormatter: DateFormatter {
+        formatter("medium") { formatter in
+            formatter.dateStyle = .medium
+            formatter.timeStyle = .none
+        }
+    }
+
+    private static var sameYearFormatter: DateFormatter {
+        formatter("sameYear") { formatter in
+            // Locale-appropriate day+month ordering rather than a fixed
+            // "MMM d", which reads wrong in most of ZRP's 11 languages.
+            formatter.setLocalizedDateFormatFromTemplate("MMMd")
+        }
+    }
 
     static func compact(from date: Date, now: Date = Date()) -> String {
         let seconds = now.timeIntervalSince(date)
@@ -53,9 +80,10 @@ enum RelativeTime {
     /// The full, spelled-out timestamp for VoiceOver, where the compact
     /// form ("3h") would be read as meaningless.
     static func accessible(from date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .long
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
+        formatter("accessible") { formatter in
+            formatter.dateStyle = .long
+            formatter.timeStyle = .short
+        }
+        .string(from: date)
     }
 }

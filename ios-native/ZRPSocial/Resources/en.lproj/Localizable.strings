@@ -414,6 +414,7 @@
 "transparency.reasonHateSpeech" = "Hate speech";
 "transparency.reasonImpersonation" = "Impersonation";
 "transparency.reasonOther" = "Other";
+"nav.language" = "Language";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back
@@ -501,3 +502,5 @@
 "ios.music.explicit" = "Explicit";
 "ios.music.playlistsEmpty" = "No playlists yet";
 "ios.music.playlistsEmptyBody" = "Playlists you create on ZRP appear here.";
+"ios.language.systemDefault" = "System language";
+"ios.language.systemDefaultNote" = "Follows the language set in iOS Settings. Choose a language below to use it in ZRP only.";

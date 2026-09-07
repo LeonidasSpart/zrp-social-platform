@@ -77,7 +77,11 @@ struct MusicStudioTracksView: View {
                     // rather than looking identical to a live one.
                     if !track.isPublished {
                         Text(verbatim: track.status)
-                            .font(.system(size: 9, weight: .bold))
+                            // .caption2 rather than a fixed 9pt: a
+                            // hardcoded size never scales with Dynamic
+                            // Type, and this badge is the only thing
+                            // saying a track is not published.
+                            .font(.caption2.weight(.bold))
                             .padding(.horizontal, 4)
                             .padding(.vertical, 1)
                             .background(ZrpColor.surfaceHighest)

@@ -200,6 +200,7 @@ enum ListingPriceFormat {
     /// "$1,250,000" is the useful form and the cents are noise.
     static func string(_ amount: Double, currency: String) -> String {
         var format = FloatingPointFormatStyle<Double>.Currency(code: currency)
+            .locale(L10n.activeLocale)
         format = format.precision(.fractionLength(0))
         return amount.formatted(format)
     }

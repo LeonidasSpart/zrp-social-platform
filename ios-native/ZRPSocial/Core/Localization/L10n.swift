@@ -43,6 +43,17 @@ enum L10n {
         )
     }
 
+    /// The locale that dates, numbers and currencies should format in.
+    ///
+    /// Not `Locale.current`: once someone picks a language in the app,
+    /// iOS still reports the *system* locale, so a Turkish-speaking
+    /// person on an English phone would read Turkish copy next to
+    /// English month names. Formatters call this instead. It follows the
+    /// system whenever no language has been chosen, which is the default.
+    static var activeLocale: Locale {
+        overrideBundle == nil ? .autoupdatingCurrent : Locale(identifier: activeLanguageCode)
+    }
+
     /// Point lookups at a specific language bundle, or pass `nil` to
     /// return to the system language. Returns `false` if that language
     /// is not bundled, leaving the previous selection untouched.

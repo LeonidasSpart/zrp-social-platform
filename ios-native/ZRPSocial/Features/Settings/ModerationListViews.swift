@@ -221,6 +221,6 @@ enum ModerationDateFormat {
     /// A plain calendar date in the viewer's locale - these lines say
     /// when something happened, not how long ago.
     static func day(_ date: Date) -> String {
-        date.formatted(.dateTime.year().month().day())
+        date.formatted(.dateTime.locale(L10n.activeLocale).year().month().day())
     }
 }

@@ -414,3 +414,4 @@
 "transparency.reasonHateSpeech" = "Разжигание ненависти";
 "transparency.reasonImpersonation" = "Выдача себя за другого";
 "transparency.reasonOther" = "Другое";
+"nav.language" = "Язык";

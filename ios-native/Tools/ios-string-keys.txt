@@ -449,3 +449,4 @@ transparency.reasonMisinformation
 transparency.reasonHateSpeech
 transparency.reasonImpersonation
 transparency.reasonOther
+nav.language

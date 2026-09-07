@@ -231,6 +231,42 @@ def check_asset_catalog() -> None:
                 fail(f"{os.path.relpath(path, IOS_ROOT)}: invalid JSON ({exc})")
 
 
+def check_dynamic_type(paths: list[str]) -> None:
+    """Text must never use a hardcoded point size.
+
+    SwiftUI's `.font(.system(size: N))` is a FIXED size - unlike a text
+    style such as `.caption2`, it stays N points at every Dynamic Type
+    setting, including the accessibility sizes. Two badges shipped that
+    way and were unreadable for anyone using large text.
+
+    Only `Text` is checked. A literal size on an `Image` glyph is
+    normally correct: those are sized to fit a fixed container, the
+    button around them carries the VoiceOver label, and scaling them
+    would break the layout rather than help anyone.
+    """
+    pattern = re.compile(r"\.font\(\s*\.system\(size:\s*\d")
+    for path in paths:
+        with open(path, encoding="utf-8") as handle:
+            lines = handle.read().split("\n")
+        for index, line in enumerate(lines):
+            if not pattern.search(line):
+                continue
+            # Walk back to whatever this modifier is attached to.
+            owner = ""
+            for previous in range(index, max(-1, index - 6), -1):
+                stripped = lines[previous].strip()
+                if stripped.startswith("."):
+                    continue
+                owner = stripped
+                break
+            if "Text(" in owner:
+                fail(
+                    f"{os.path.relpath(path, IOS_ROOT)}:{index + 1}: Text uses a "
+                    "hardcoded .system(size:) - it will not scale with Dynamic "
+                    "Type. Use a text style such as .caption2."
+                )
+
+
 def check_no_android_references(paths: list[str]) -> None:
     """The iOS module must never reach into the Android project."""
     for path in paths + [os.path.join(IOS_ROOT, "Tools", "generate-localizations.py")]:
@@ -273,6 +309,7 @@ def main() -> int:
     check_balanced(paths)
     check_plists()
     check_asset_catalog()
+    check_dynamic_type(paths)
     check_no_android_references(paths)
     check_localizations_complete()
 

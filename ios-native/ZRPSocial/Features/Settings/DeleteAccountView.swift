@@ -110,7 +110,12 @@ struct DeleteAccountView: View {
                  .deleteAccountBullet4, .deleteAccountBullet5],
                 id: \.rawValue
             ) { bullet in
-                Label { Text(bullet) } icon: { Image(systemName: "circle.fill").font(.system(size: 5)) }
+                Label { Text(bullet) } icon: {
+                    // Decorative bullet: the sentence is the content.
+                    Image(systemName: "circle.fill")
+                        .font(.system(size: 5))
+                        .accessibilityHidden(true)
+                }
                     .font(.footnote)
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
             }

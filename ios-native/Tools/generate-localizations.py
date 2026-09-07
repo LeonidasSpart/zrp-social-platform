@@ -89,6 +89,33 @@ def parse_translations() -> tuple[list[str], dict[str, dict[str, str]]]:
     return languages, table
 
 
+def parse_language_metadata(source: str) -> tuple[list[tuple[str, str]], list[str]]:
+    """Read SUPPORTED_LANGUAGES and RTL_LANGUAGES from translations.ts.
+
+    These are the web app's own declarations. Restating either on the
+    iOS side would let the picker drift - offering a language with no
+    strings, or failing to mirror the interface for a new RTL one.
+    """
+    block = re.search(
+        r"export const SUPPORTED_LANGUAGES[^=]*=\s*\[(.*?)\];", source, re.S
+    )
+    if not block:
+        sys.exit("error: SUPPORTED_LANGUAGES not found in translations.ts")
+    labels = re.findall(
+        r'\{\s*code:\s*"([^"]+)"\s*,\s*label:\s*"((?:[^"\\]|\\.)*)"\s*\}', block.group(1)
+    )
+    if not labels:
+        sys.exit("error: could not parse any entries from SUPPORTED_LANGUAGES")
+
+    rtl_block = re.search(r"export const RTL_LANGUAGES[^=]*=\s*\[(.*?)\];", source, re.S)
+    if not rtl_block:
+        sys.exit("error: RTL_LANGUAGES not found in translations.ts")
+    rtl = re.findall(r'"([^"]+)"', rtl_block.group(1))
+
+    decoded = [(code, json.loads(f'"{label}"')) for code, label in labels]
+    return decoded, rtl
+
+
 def load_wanted_keys() -> list[str]:
     keys: list[str] = []
     with open(KEYS_FILE, encoding="utf-8") as handle:
@@ -185,20 +212,46 @@ def render_swift(keys: list[str], extras: dict[str, str], en: dict[str, str]) ->
     lines.append("}")
     lines.append("")
     lines.append("extension L10nKey {")
-    lines.append("    /// The 11 languages ZRP officially supports, in the same order")
-    lines.append("    /// as the web app's SUPPORTED_LANGUAGES.")
+    lines.append("    /// The languages ZRP officially supports, in the same order as")
+    lines.append("    /// the web app's SUPPORTED_LANGUAGES.")
     lines.append("    static let supportedLanguageCodes: [String] = [")
     lines.append("        " + ", ".join(f'"{code}"' for code in SUPPORTED_ORDER))
     lines.append("    ]")
     lines.append("")
-    lines.append("    /// Arabic is ZRP's only right-to-left language (matches the web")
-    lines.append("    /// app's RTL_LANGUAGES).")
-    lines.append('    static let rightToLeftLanguageCodes: Set<String> = ["ar"]')
+    lines.append("    /// ZRP's right-to-left languages, read from the web app's own")
+    lines.append("    /// RTL_LANGUAGES rather than restated here.")
+    lines.append("    static let rightToLeftLanguageCodes: Set<String> = [")
+    lines.append("        " + ", ".join(f'"{code}"' for code in RTL_ORDER))
+    lines.append("    ]")
+    lines.append("}")
+    lines.append("")
+    lines.append("/// One selectable language.")
+    lines.append("///")
+    lines.append("/// Generated from `SUPPORTED_LANGUAGES` in src/lib/translations.ts, so")
+    lines.append("/// the picker cannot list a language the app has no strings for, and")
+    lines.append("/// the names are the web app's own - each written in its own")
+    lines.append("/// language, which is how a person finds theirs in a list they")
+    lines.append("/// cannot otherwise read.")
+    lines.append("struct ZrpLanguage: Identifiable, Equatable {")
+    lines.append("    let code: String")
+    lines.append("    let nativeName: String")
+    lines.append("")
+    lines.append("    var id: String { code }")
+    lines.append("    var isRightToLeft: Bool { L10nKey.rightToLeftLanguageCodes.contains(code) }")
+    lines.append("")
+    lines.append("    static let all: [ZrpLanguage] = [")
+    for code, label in SUPPORTED_LABELS:
+        lines.append(
+            f'        ZrpLanguage(code: "{code}", nativeName: {json.dumps(label, ensure_ascii=False)}),'
+        )
+    lines.append("    ]")
     lines.append("}")
     return "\n".join(lines) + "\n"
 
 
 SUPPORTED_ORDER: list[str] = []
+SUPPORTED_LABELS: list[tuple[str, str]] = []
+RTL_ORDER: list[str] = []
 
 
 def main() -> int:
@@ -212,6 +265,18 @@ def main() -> int:
 
     languages, table = parse_translations()
     SUPPORTED_ORDER[:] = languages
+
+    with open(TRANSLATIONS_TS, encoding="utf-8") as handle:
+        labels, rtl = parse_language_metadata(handle.read())
+    SUPPORTED_LABELS[:] = labels
+    RTL_ORDER[:] = rtl
+
+    declared = {code for code, _ in labels}
+    if declared != set(languages):
+        sys.exit(
+            "error: SUPPORTED_LANGUAGES and the translation blocks disagree: "
+            f"{sorted(declared ^ set(languages))}"
+        )
 
     if DEV_LANGUAGE not in table:
         sys.exit(f"error: development language '{DEV_LANGUAGE}' missing from translations.ts")

@@ -15,7 +15,7 @@ enum CountFormatting {
         formatter.numberStyle = .decimal
         formatter.maximumFractionDigits = 1
         formatter.minimumFractionDigits = 0
-        formatter.locale = .current
+        formatter.locale = L10n.activeLocale
 
         if value < 1_000_000 {
             let scaled = Double(value) / 1_000
@@ -32,7 +32,7 @@ enum CountFormatting {
     static func exact(_ value: Int) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
-        formatter.locale = .current
+        formatter.locale = L10n.activeLocale
         return formatter.string(from: NSNumber(value: value)) ?? "\(value)"
     }
 }

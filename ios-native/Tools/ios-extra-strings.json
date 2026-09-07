@@ -94,6 +94,8 @@
     "ios.a11y.unlikeTrack": "Unlike track",
     "ios.music.explicit": "Explicit",
     "ios.music.playlistsEmpty": "No playlists yet",
-    "ios.music.playlistsEmptyBody": "Playlists you create on ZRP appear here."
+    "ios.music.playlistsEmptyBody": "Playlists you create on ZRP appear here.",
+    "ios.language.systemDefault": "System language",
+    "ios.language.systemDefaultNote": "Follows the language set in iOS Settings. Choose a language below to use it in ZRP only."
   }
 }

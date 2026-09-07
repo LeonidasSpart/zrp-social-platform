@@ -836,6 +836,8 @@ enum L10nKey: String, CaseIterable {
     case transparencyReasonImpersonation = "transparency.reasonImpersonation"
     /// en: "Other"
     case transparencyReasonOther = "transparency.reasonOther"
+    /// en: "Language"
+    case navLanguage = "nav.language"
     /// en: "Bookmark"
     case iosA11yBookmark = "ios.a11y.bookmark"
     /// en: "Remove bookmark"
@@ -1002,16 +1004,51 @@ enum L10nKey: String, CaseIterable {
     case iosMusicPlaylistsEmpty = "ios.music.playlistsEmpty"
     /// en: "Playlists you create on ZRP appear here."
     case iosMusicPlaylistsEmptyBody = "ios.music.playlistsEmptyBody"
+    /// en: "System language"
+    case iosLanguageSystemDefault = "ios.language.systemDefault"
+    /// en: "Follows the language set in iOS Settings. Choose a language below to use it in ZRP only."
+    case iosLanguageSystemDefaultNote = "ios.language.systemDefaultNote"
 }
 
 extension L10nKey {
-    /// The 11 languages ZRP officially supports, in the same order
-    /// as the web app's SUPPORTED_LANGUAGES.
+    /// The languages ZRP officially supports, in the same order as
+    /// the web app's SUPPORTED_LANGUAGES.
     static let supportedLanguageCodes: [String] = [
         "en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id"
     ]
 
-    /// Arabic is ZRP's only right-to-left language (matches the web
-    /// app's RTL_LANGUAGES).
-    static let rightToLeftLanguageCodes: Set<String> = ["ar"]
+    /// ZRP's right-to-left languages, read from the web app's own
+    /// RTL_LANGUAGES rather than restated here.
+    static let rightToLeftLanguageCodes: Set<String> = [
+        "ar"
+    ]
+}
+
+/// One selectable language.
+///
+/// Generated from `SUPPORTED_LANGUAGES` in src/lib/translations.ts, so
+/// the picker cannot list a language the app has no strings for, and
+/// the names are the web app's own - each written in its own
+/// language, which is how a person finds theirs in a list they
+/// cannot otherwise read.
+struct ZrpLanguage: Identifiable, Equatable {
+    let code: String
+    let nativeName: String
+
+    var id: String { code }
+    var isRightToLeft: Bool { L10nKey.rightToLeftLanguageCodes.contains(code) }
+
+    static let all: [ZrpLanguage] = [
+        ZrpLanguage(code: "en", nativeName: "English"),
+        ZrpLanguage(code: "fr", nativeName: "Français"),
+        ZrpLanguage(code: "de", nativeName: "Deutsch"),
+        ZrpLanguage(code: "it", nativeName: "Italiano"),
+        ZrpLanguage(code: "sq", nativeName: "Shqip"),
+        ZrpLanguage(code: "es", nativeName: "Español"),
+        ZrpLanguage(code: "ru", nativeName: "Русский"),
+        ZrpLanguage(code: "ar", nativeName: "العربية"),
+        ZrpLanguage(code: "zh", nativeName: "中文"),
+        ZrpLanguage(code: "tr", nativeName: "Türkçe"),
+        ZrpLanguage(code: "id", nativeName: "Bahasa Indonesia"),
+    ]
 }

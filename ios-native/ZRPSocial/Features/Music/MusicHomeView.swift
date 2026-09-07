@@ -329,7 +329,10 @@ struct TrackRowView: View {
                                 .lineLimit(1)
                             if track.explicit {
                                 Text(verbatim: "E")
-                                    .font(.system(size: 9, weight: .bold))
+                                    // Scales with Dynamic Type; a fixed
+                                    // 9pt would stay 9pt at every
+                                    // accessibility text size.
+                                    .font(.caption2.weight(.bold))
                                     .padding(.horizontal, 3)
                                     .background(ZrpColor.surfaceHighest)
                                     .foregroundStyle(ZrpColor.onSurfaceMuted)

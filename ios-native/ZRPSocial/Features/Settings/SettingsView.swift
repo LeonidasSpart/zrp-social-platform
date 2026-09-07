@@ -12,6 +12,12 @@ struct SettingsView: View {
     var body: some View {
         List {
             Section {
+                NavigationLink(value: Route.languagePicker) {
+                    Label { Text(.navLanguage) } icon: { Image(systemName: "globe") }
+                }
+            }
+
+            Section {
                 NavigationLink(value: Route.privacySettings) {
                     Label { Text(.settingsPrivacySettings) } icon: { Image(systemName: "hand.raised") }
                 }
