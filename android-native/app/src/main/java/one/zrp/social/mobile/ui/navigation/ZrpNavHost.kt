@@ -31,12 +31,14 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.NotificationsRepository
 import one.zrp.social.mobile.network.MobileUser
 import one.zrp.social.mobile.ui.admin.AdminDashboardScreen
 import one.zrp.social.mobile.ui.admin.AdminPostsScreen
 import one.zrp.social.mobile.ui.admin.AdminReportsScreen
 import one.zrp.social.mobile.ui.admin.AdminUsersScreen
+import one.zrp.social.mobile.ui.legal.LegalWebViewScreen
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
@@ -205,6 +207,9 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
     val goToAdminReports: () -> Unit = { navController.navigate("admin/reports") }
     val goToAdminUsers: () -> Unit = { navController.navigate("admin/users") }
     val goToAdminPosts: () -> Unit = { navController.navigate("admin/posts") }
+    val goToTerms: () -> Unit = { navController.navigate("legal/terms") }
+    val goToPrivacyPolicy: () -> Unit = { navController.navigate("legal/privacy") }
+    val goToGuidelines: () -> Unit = { navController.navigate("legal/guidelines") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
@@ -840,6 +845,30 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onOpenSupport = goToSupportTickets,
                     isStaff = isStaff,
                     onOpenAdmin = goToAdmin,
+                    onOpenTerms = goToTerms,
+                    onOpenPrivacyPolicy = goToPrivacyPolicy,
+                    onOpenGuidelines = goToGuidelines,
+                )
+            }
+            composable("legal/terms") {
+                LegalWebViewScreen(
+                    url = "https://zrp.one/terms",
+                    title = stringResource(R.string.legal_terms),
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("legal/privacy") {
+                LegalWebViewScreen(
+                    url = "https://zrp.one/privacy",
+                    title = stringResource(R.string.legal_privacy),
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("legal/guidelines") {
+                LegalWebViewScreen(
+                    url = "https://zrp.one/guidelines",
+                    title = stringResource(R.string.legal_guidelines),
+                    onBack = { navController.popBackStack() },
                 )
             }
             composable("admin") {

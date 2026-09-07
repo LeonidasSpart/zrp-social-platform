@@ -1226,4 +1226,9 @@
     <string name="admin_posts_previous">Anterior</string>
     <string name="admin_posts_next">Siguiente</string>
     <string name="admin_posts_page_of">Página %1$s de %2$s</string>
+    <!-- Legal pages (Terms/Privacy/Guidelines) - link labels only, content lives in an in-app WebView pointed at the real zrp.one pages -->
+    <string name="legal_section_title">Legal</string>
+    <string name="legal_terms">Términos de servicio</string>
+    <string name="legal_privacy">Política de privacidad</string>
+    <string name="legal_guidelines">Normas de la Comunidad</string>
 </resources>

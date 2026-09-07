@@ -1226,4 +1226,9 @@
     <string name="admin_posts_previous">Sebelumnya</string>
     <string name="admin_posts_next">Berikutnya</string>
     <string name="admin_posts_page_of">Halaman %1$s dari %2$s</string>
+    <!-- Legal pages (Terms/Privacy/Guidelines) - link labels only, content lives in an in-app WebView pointed at the real zrp.one pages -->
+    <string name="legal_section_title">Legal</string>
+    <string name="legal_terms">Ketentuan Layanan</string>
+    <string name="legal_privacy">Kebijakan Privasi</string>
+    <string name="legal_guidelines">Pedoman Komunitas</string>
 </resources>

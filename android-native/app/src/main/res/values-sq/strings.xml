@@ -1226,4 +1226,9 @@
     <string name="admin_posts_previous">Mëparshme</string>
     <string name="admin_posts_next">Tjetra</string>
     <string name="admin_posts_page_of">Faqja %1$s nga %2$s</string>
+    <!-- Legal pages (Terms/Privacy/Guidelines) - link labels only, content lives in an in-app WebView pointed at the real zrp.one pages -->
+    <string name="legal_section_title">Ligjore</string>
+    <string name="legal_terms">Kushtet e Shërbimit</string>
+    <string name="legal_privacy">Politika e Privatësisë</string>
+    <string name="legal_guidelines">Udhëzimet e Komunitetit</string>
 </resources>
