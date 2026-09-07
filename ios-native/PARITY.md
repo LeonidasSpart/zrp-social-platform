@@ -57,7 +57,7 @@ called and the real response being handled.
 | Forgot password — request | `POST /api/auth/forgot-password` | ✅ | ✅ | ✅ answers the same way whether or not the address exists, as the route intends | IMPLEMENTED |
 | Reset password — complete | `POST /api/auth/reset-password` | ✅ | ✅ | ⬜ completed through the emailed link on the web; no route accepts a code typed into an app | MISSING (by design) |
 | Onboarding | `POST /api/user/onboarding-complete`, `PUT /api/user/profile`, `POST /api/user/update-avatar`, `GET /api/users/suggested` | ✅ | ✅ | ✅ profile, avatar, follow suggestions; every step skippable | IMPLEMENTED |
-| Google sign-in | NextAuth `google` provider (web OAuth) | ✅ | ❌ | ❌ | BLOCKED — [B1](#b1-native-oauth-google--apple) |
+| Google sign-in | `POST /api/mobile/auth/google` (added on `main` by PR #115) verifies a Google ID token and mints the same NextAuth JWT; the website still uses the NextAuth `google` web provider | ✅ | ✅ Credential Manager | ⬜ backend no longer blocks it — obtaining the ID token on iOS is outstanding client-side work, not built here | MISSING (was [B1](#b1-native-oauth--google-now-unblocked-server-side-apple-still-blocked)) |
 | **Sign in with Apple** | NextAuth `apple` provider (web OAuth, Services ID) | ✅ (if env configured) | n/a | ❌ | **BLOCKED — [B2](#b2-sign-in-with-apple-native)** |
 | Account deletion | `POST /api/user/delete`, `/api/user/delete/confirm`, `GET /api/user/delete-status` | ✅ | ✅ | ✅ both paths — see [Settings](#settings) | IMPLEMENTED |
 
@@ -538,19 +538,30 @@ Not changed from the iOS side either way: `capacitor.config.ts` and
 
 ## Blocked items
 
-### B1. Native OAuth (Google / Apple)
+### B1. Native OAuth — **Google now UNBLOCKED server-side; Apple still blocked**
 
-`src/lib/auth.ts` registers Google and Apple as **NextAuth web OAuth
-providers**. The only native-friendly credential exchange that exists is
-`POST /api/mobile/auth/login`, which takes an identifier + password and
-mints a NextAuth-format JWT. There is no route that accepts an OAuth
-credential from a native client and returns that same token.
+This entry was written when neither provider had a native token-exchange
+route. **That changed on `main` while this branch was in flight**: PR #115
+added `POST /api/mobile/auth/google`, which verifies a Google ID token
+against the same `GOOGLE_CLIENT_ID` the website's provider trusts, hands
+account linking to the same `findOrCreateOAuthUser` NextAuth's own
+`signIn` callback uses, and mints a NextAuth-format JWT on the same
+30-day schedule as `POST /api/mobile/auth/login`.
 
-The Capacitor shell works around this (`src/lib/nativeAuth.ts`) by opening
-the web OAuth URL in a system browser — but that leaves the session as an
-httpOnly cookie inside the browser/WebView, which a real native app cannot
-read. **A native Swift client has no way to obtain a session token from
-either provider today.**
+So the backend half of Google sign-in exists now, and it is provider-shaped
+rather than Android-shaped — nothing in that route is Android-specific.
+**What remains for iOS is client-side work, not a backend blocker:**
+obtaining a Google ID token on iOS and posting it to that route. It is
+outstanding rather than blocked, and is not built in this branch.
+
+Apple is unchanged and still blocked — see B2. `src/lib/auth.ts` still
+registers it only as a NextAuth **web** OAuth provider, and no route
+accepts an `ASAuthorization` credential.
+
+The Capacitor shell's workaround (`src/lib/nativeAuth.ts`) opens the web
+OAuth URL in a system browser, leaving the session as an httpOnly cookie
+inside the browser/WebView, which a real native app cannot read. That is
+still the only path for Apple.
 
 ### B2. Sign in with Apple (native)
 
