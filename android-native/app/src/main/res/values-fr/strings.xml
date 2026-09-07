@@ -334,4 +334,24 @@
     <string name="music_liked_empty_title">Aucun morceau aimé pour l\'instant</string>
     <string name="music_liked_empty_body">Appuyez sur le coeur d\'un morceau pour l\'enregistrer ici.</string>
     <string name="music_history_empty_title">Aucun historique d\'écoute pour l\'instant</string>
-    <string name="music_history_empty_body">Les morceaux que vous écoutez apparaîtront ici.</string></resources>
+    <string name="music_history_empty_body">Les morceaux que vous écoutez apparaîtront ici.</string>
+    <!-- Music Studio: Artist Profile -->
+    <string name="music_shell_studio_label">Studio Musique</string>
+    <string name="music_shell_studio_eyebrow">Outils créateurs</string>
+    <string name="music_shell_studio_description">Publiez votre musique directement sur ZRP.</string>
+    <string name="music_shell_gate_title">Studio Musique - Statut Artiste ou Créateur requis</string>
+    <string name="music_shell_gate_body">Écouter ZRP Music est ouvert à tous. Publier de la musique nécessite un statut Créateur approuvé ou un profil d\'Artiste Musical vérifié.</string>
+    <string name="music_shell_pending_verification">Votre profil d\'artiste a été soumis et est en attente de vérification par l\'équipe ZRP.</string>
+    <string name="music_shell_apply_intro_prefix">Créez un profil d\'artiste pour demander la vérification Artiste Musical, ou</string>
+    <string name="music_shell_apply_intro_link">demandez le statut Créateur</string>
+    <string name="music_shell_apply_intro_suffix">depuis vos paramètres.</string>
+    <string name="music_shell_artist_name_placeholder">Nom d\'artiste</string>
+    <string name="music_shell_apply_submit">Postuler comme artiste</string>
+    <string name="music_shell_apply_submitting">Envoi en cours...</string>
+    <string name="music_studio_bio_placeholder">Bio (facultatif)</string>
+    <string name="music_studio_saving">Enregistrement...</string>
+    <string name="music_studio_save">Enregistrer</string>
+    <string name="music_studio_artist_profile_saved">Profil d\'artiste enregistré.</string>
+    <string name="music_studio_change_banner">Changer la bannière</string>
+    <string name="music_studio_uploading">Envoi en cours...</string>
+    <string name="music_studio_change_avatar">Changer l\'avatar</string></resources>

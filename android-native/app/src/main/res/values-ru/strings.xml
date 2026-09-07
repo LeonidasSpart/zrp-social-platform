@@ -334,4 +334,24 @@
     <string name="music_liked_empty_title">Понравившихся треков пока нет</string>
     <string name="music_liked_empty_body">Нажмите на сердечко у трека, чтобы сохранить его здесь.</string>
     <string name="music_history_empty_title">Истории прослушивания пока нет</string>
-    <string name="music_history_empty_body">Треки, которые вы слушаете, будут отображаться здесь.</string></resources>
+    <string name="music_history_empty_body">Треки, которые вы слушаете, будут отображаться здесь.</string>
+    <!-- Music Studio: Artist Profile -->
+    <string name="music_shell_studio_label">Музыкальная студия</string>
+    <string name="music_shell_studio_eyebrow">Инструменты для авторов</string>
+    <string name="music_shell_studio_description">Публикуйте свою музыку прямо в ZRP.</string>
+    <string name="music_shell_gate_title">Музыкальная студия - требуется статус Артиста или Автора</string>
+    <string name="music_shell_gate_body">Слушать ZRP Music может любой пользователь. Для публикации музыки требуется одобренный статус Автора или подтвержденный профиль Музыкального артиста.</string>
+    <string name="music_shell_pending_verification">Ваш профиль артиста отправлен и ожидает проверки сотрудниками ZRP.</string>
+    <string name="music_shell_apply_intro_prefix">Создайте профиль артиста, чтобы подать заявку на подтверждение статуса Музыкального артиста, или</string>
+    <string name="music_shell_apply_intro_link">подайте заявку на статус Автора</string>
+    <string name="music_shell_apply_intro_suffix">в настройках.</string>
+    <string name="music_shell_artist_name_placeholder">Имя артиста</string>
+    <string name="music_shell_apply_submit">Подать заявку как артист</string>
+    <string name="music_shell_apply_submitting">Отправка...</string>
+    <string name="music_studio_bio_placeholder">Биография (необязательно)</string>
+    <string name="music_studio_saving">Сохранение...</string>
+    <string name="music_studio_save">Сохранить</string>
+    <string name="music_studio_artist_profile_saved">Профиль исполнителя сохранён.</string>
+    <string name="music_studio_change_banner">Изменить баннер</string>
+    <string name="music_studio_uploading">Загрузка...</string>
+    <string name="music_studio_change_avatar">Изменить аватар</string></resources>

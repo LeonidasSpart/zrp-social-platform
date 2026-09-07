@@ -334,4 +334,24 @@
     <string name="music_liked_empty_title">暂无喜欢的歌曲</string>
     <string name="music_liked_empty_body">点击任意歌曲的心形图标即可保存到这里。</string>
     <string name="music_history_empty_title">暂无收听记录</string>
-    <string name="music_history_empty_body">你播放过的歌曲会显示在这里。</string></resources>
+    <string name="music_history_empty_body">你播放过的歌曲会显示在这里。</string>
+    <!-- Music Studio: Artist Profile -->
+    <string name="music_shell_studio_label">音乐工作室</string>
+    <string name="music_shell_studio_eyebrow">创作者工具</string>
+    <string name="music_shell_studio_description">直接在 ZRP 上发布你的音乐。</string>
+    <string name="music_shell_gate_title">音乐工作室 - 需要艺人或创作者身份</string>
+    <string name="music_shell_gate_body">收听 ZRP Music 对所有人开放。发布音乐需要获批的创作者身份或已认证的音乐艺人资料。</string>
+    <string name="music_shell_pending_verification">你的艺人资料已提交，正在等待 ZRP 工作人员审核。</string>
+    <string name="music_shell_apply_intro_prefix">创建艺人资料以申请音乐艺人认证，或</string>
+    <string name="music_shell_apply_intro_link">申请创作者身份</string>
+    <string name="music_shell_apply_intro_suffix">（在设置中操作）。</string>
+    <string name="music_shell_artist_name_placeholder">艺人名称</string>
+    <string name="music_shell_apply_submit">申请成为艺人</string>
+    <string name="music_shell_apply_submitting">正在提交...</string>
+    <string name="music_studio_bio_placeholder">简介（可选）</string>
+    <string name="music_studio_saving">保存中...</string>
+    <string name="music_studio_save">保存</string>
+    <string name="music_studio_artist_profile_saved">艺人资料已保存。</string>
+    <string name="music_studio_change_banner">更换横幅</string>
+    <string name="music_studio_uploading">上传中...</string>
+    <string name="music_studio_change_avatar">更换头像</string></resources>

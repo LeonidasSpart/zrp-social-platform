@@ -334,4 +334,24 @@
     <string name="music_liked_empty_title">Belum ada lagu yang disukai</string>
     <string name="music_liked_empty_body">Ketuk ikon hati pada lagu mana pun untuk menyimpannya di sini.</string>
     <string name="music_history_empty_title">Belum ada riwayat mendengarkan</string>
-    <string name="music_history_empty_body">Lagu yang kamu putar akan muncul di sini.</string></resources>
+    <string name="music_history_empty_body">Lagu yang kamu putar akan muncul di sini.</string>
+    <!-- Music Studio: Artist Profile -->
+    <string name="music_shell_studio_label">Music Studio</string>
+    <string name="music_shell_studio_eyebrow">Alat untuk kreator</string>
+    <string name="music_shell_studio_description">Publikasikan musikmu langsung ke ZRP.</string>
+    <string name="music_shell_gate_title">Music Studio - Diperlukan status Artis atau Kreator</string>
+    <string name="music_shell_gate_body">Mendengarkan ZRP Music terbuka untuk semua orang. Mempublikasikan musik memerlukan status Kreator yang disetujui atau profil Artis Musik yang terverifikasi.</string>
+    <string name="music_shell_pending_verification">Profil artismu telah dikirim dan sedang menunggu verifikasi dari tim ZRP.</string>
+    <string name="music_shell_apply_intro_prefix">Buat profil artis untuk mengajukan verifikasi Artis Musik, atau</string>
+    <string name="music_shell_apply_intro_link">ajukan status Kreator</string>
+    <string name="music_shell_apply_intro_suffix">dari pengaturanmu.</string>
+    <string name="music_shell_artist_name_placeholder">Nama artis</string>
+    <string name="music_shell_apply_submit">Daftar sebagai artis</string>
+    <string name="music_shell_apply_submitting">Mengirim...</string>
+    <string name="music_studio_bio_placeholder">Bio (opsional)</string>
+    <string name="music_studio_saving">Menyimpan...</string>
+    <string name="music_studio_save">Simpan</string>
+    <string name="music_studio_artist_profile_saved">Profil artis tersimpan.</string>
+    <string name="music_studio_change_banner">Ganti banner</string>
+    <string name="music_studio_uploading">Mengunggah...</string>
+    <string name="music_studio_change_avatar">Ganti avatar</string></resources>

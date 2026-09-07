@@ -334,4 +334,24 @@
     <string name="music_liked_empty_title">Todavía no hay canciones que te gusten</string>
     <string name="music_liked_empty_body">Toca el corazón de cualquier canción para guardarla aquí.</string>
     <string name="music_history_empty_title">Todavía no hay historial de reproducción</string>
-    <string name="music_history_empty_body">Las canciones que reproduzcas aparecerán aquí.</string></resources>
+    <string name="music_history_empty_body">Las canciones que reproduzcas aparecerán aquí.</string>
+    <!-- Music Studio: Artist Profile -->
+    <string name="music_shell_studio_label">Estudio Musical</string>
+    <string name="music_shell_studio_eyebrow">Herramientas para creadores</string>
+    <string name="music_shell_studio_description">Publica tu música directamente en ZRP.</string>
+    <string name="music_shell_gate_title">Estudio Musical - Se requiere estado de Artista o Creador</string>
+    <string name="music_shell_gate_body">Escuchar ZRP Music está abierto a todos. Publicar música requiere un estado de Creador aprobado o un perfil de Artista Musical verificado.</string>
+    <string name="music_shell_pending_verification">Tu perfil de artista ha sido enviado y está a la espera de verificación por parte del equipo de ZRP.</string>
+    <string name="music_shell_apply_intro_prefix">Crea un perfil de artista para solicitar la verificación como Artista Musical, o</string>
+    <string name="music_shell_apply_intro_link">solicita el estado de Creador</string>
+    <string name="music_shell_apply_intro_suffix">desde tu configuración.</string>
+    <string name="music_shell_artist_name_placeholder">Nombre artístico</string>
+    <string name="music_shell_apply_submit">Postularme como artista</string>
+    <string name="music_shell_apply_submitting">Enviando...</string>
+    <string name="music_studio_bio_placeholder">Biografía (opcional)</string>
+    <string name="music_studio_saving">Guardando...</string>
+    <string name="music_studio_save">Guardar</string>
+    <string name="music_studio_artist_profile_saved">Perfil de artista guardado.</string>
+    <string name="music_studio_change_banner">Cambiar banner</string>
+    <string name="music_studio_uploading">Subiendo...</string>
+    <string name="music_studio_change_avatar">Cambiar avatar</string></resources>

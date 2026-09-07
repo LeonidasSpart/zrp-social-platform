@@ -334,4 +334,24 @@
     <string name="music_liked_empty_title">Henüz beğenilen şarkı yok</string>
     <string name="music_liked_empty_body">Buraya kaydetmek için herhangi bir şarkının kalp simgesine dokun.</string>
     <string name="music_history_empty_title">Henüz dinleme geçmişi yok</string>
-    <string name="music_history_empty_body">Çaldığın şarkılar burada görünecek.</string></resources>
+    <string name="music_history_empty_body">Çaldığın şarkılar burada görünecek.</string>
+    <!-- Music Studio: Artist Profile -->
+    <string name="music_shell_studio_label">Müzik Stüdyosu</string>
+    <string name="music_shell_studio_eyebrow">İçerik üretici araçları</string>
+    <string name="music_shell_studio_description">Müziğini doğrudan ZRP\'ye yayınla.</string>
+    <string name="music_shell_gate_title">Müzik Stüdyosu - Sanatçı veya İçerik Üreticisi statüsü gerekli</string>
+    <string name="music_shell_gate_body">ZRP Music\'i dinlemek herkese açıktır. Müzik yayınlamak, onaylanmış bir İçerik Üreticisi statüsü veya doğrulanmış bir Müzik Sanatçısı profili gerektirir.</string>
+    <string name="music_shell_pending_verification">Sanatçı profilin gönderildi ve ZRP ekibi tarafından doğrulanmayı bekliyor.</string>
+    <string name="music_shell_apply_intro_prefix">Müzik Sanatçısı doğrulaması için başvurmak üzere bir sanatçı profili oluştur veya</string>
+    <string name="music_shell_apply_intro_link">İçerik Üreticisi statüsüne başvur</string>
+    <string name="music_shell_apply_intro_suffix">ayarlarından.</string>
+    <string name="music_shell_artist_name_placeholder">Sanatçı adı</string>
+    <string name="music_shell_apply_submit">Sanatçı olarak başvur</string>
+    <string name="music_shell_apply_submitting">Gönderiliyor...</string>
+    <string name="music_studio_bio_placeholder">Biyografi (isteğe bağlı)</string>
+    <string name="music_studio_saving">Kaydediliyor...</string>
+    <string name="music_studio_save">Kaydet</string>
+    <string name="music_studio_artist_profile_saved">Sanatçı profili kaydedildi.</string>
+    <string name="music_studio_change_banner">Banner\'ı değiştir</string>
+    <string name="music_studio_uploading">Yükleniyor...</string>
+    <string name="music_studio_change_avatar">Avatarı değiştir</string></resources>
