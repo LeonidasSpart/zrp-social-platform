@@ -162,6 +162,11 @@ struct HomeView: View {
                     Label { Text(.navBookmarks) } icon: { Image(systemName: "bookmark") }
                 }
                 Button {
+                    navigator.push(.creatorStudio)
+                } label: {
+                    Label { Text(.navCreatorStudio) } icon: { Image(systemName: "chart.bar") }
+                }
+                Button {
                     navigator.push(.settings)
                 } label: {
                     Label { Text(.settingsTitle) } icon: { Image(systemName: "gearshape") }

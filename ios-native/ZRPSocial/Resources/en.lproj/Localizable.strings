@@ -9,6 +9,7 @@
 "nav.messages" = "Messages";
 "nav.profile" = "Profile";
 "nav.bookmarks" = "Bookmarks";
+"nav.creatorStudio" = "Creator Studio";
 "nav.shorts" = "Shorts";
 "nav.news" = "News";
 "nav.aiAssistant" = "ZRP AI";
@@ -747,6 +748,23 @@
 "trust.unavailableTitle" = "Trust Passport unavailable";
 "trust.notFoundFallback" = "This account could not be found.";
 "trust.errUnableToLoad" = "Unable to load this Trust Passport.";
+"creatorDash.studioTitle" = "Creator Studio";
+"creatorDash.tabContent" = "Content";
+"creatorDash.tabAudience" = "Audience";
+"contentPerf.views" = "Views";
+"contentPerf.likes" = "Likes";
+"contentPerf.comments" = "Comments";
+"contentPerf.reposts" = "Reposts";
+"contentPerf.engagementTitle" = "Engagement, last 30 days";
+"contentPerf.engagementSubtitle" = "Likes, comments, and reposts across all your posts.";
+"contentPerf.topPostsTitle" = "Top posts";
+"contentPerf.noPostsYet" = "No posts yet.";
+"contentPerf.mediaPostFallback" = "(media post)";
+"audienceGrowth.totalFollowers" = "Total followers";
+"audienceGrowth.newLast30Days" = "New, last 30 days";
+"audienceGrowth.followerGrowthTitle" = "Follower growth";
+"audienceGrowth.followerGrowthSubtitle" = "Total followers over the last 30 days.";
+"audienceGrowth.newFollowersPerDayTitle" = "New followers per day";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back

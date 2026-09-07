@@ -343,6 +343,32 @@ called and the real response being handled.
 | Plan / limits | `GET /api/user/plan`, `src/lib/limits.ts` | ✅ | ✅ | 🔶 composer and listing forms pre-check what the server enforces; the server's own limit message is shown verbatim | PARTIAL (by design) |
 | Plan upgrade / monetisation / wallet surfaces | web billing | ✅ | ✅ | ❌ deliberately absent — see [Store policy constraint](#store-policy-constraint) | OUT OF SCOPE |
 
+### Creator Studio
+
+| Feature | Backend | Web | Android | iOS | Status |
+| --- | --- | --- | --- | --- | --- |
+| Content performance | `GET /api/creator/studio` → `content` (30-day totals, daily engagement trend, top 5 posts ranked server-side by `likes + comments*2 + reposts*3`) | ✅ | ⬜ | ✅ totals, trend chart and the ranked posts, each opening the post | IMPLEMENTED |
+| Audience growth | same route → `audience` (total followers, new in window, daily curve) | ✅ | ⬜ | ✅ | IMPLEMENTED |
+| Earnings / Overview tab | `GET /api/creator/dashboard`, `POST /api/creator/withdraw` | ✅ | ⬜ | ❌ deliberately absent — see [Store policy constraint](#store-policy-constraint) | OUT OF SCOPE |
+
+The route is signed-in only and scoped to the caller by the session — there
+is no user parameter, so it can only ever return the viewer's own numbers.
+It is **not** role-gated: any account sees its own statistics, exactly as on
+the website.
+
+Two figures are the server's approximations and are shown as sent rather
+than recomputed. `topPosts` arrives pre-ranked, so the weighting is not
+written down a second time on the client where the two could drift. And the
+follower curve is reconstructed by working backwards from today's total
+without subtracting unfollows inside the window — the route says so in its
+own comment, and re-deriving it here would not make it more accurate, only
+differently wrong.
+
+Day keys (`YYYY-MM-DD`) come from `toISOString().slice(0, 10)`, a **UTC**
+boundary, and are displayed as strings. Parsing them into local `Date`s
+would shift a day for anyone west of UTC and make the axis labels disagree
+with the server's own buckets.
+
 ### Deliberately out of scope for the consumer iOS app
 
 | Area | Reason |
@@ -353,7 +379,6 @@ called and the real response being handled.
 | **Ads** (`/api/ads/**`) | Campaign creation is ad *spend* — money leaving an advertiser's account for placement. That is a commerce surface with the same store-policy exposure as the payment routes above, and it is a desk task besides. Android has no surface for it either. |
 | **Journalist** (`/api/journalist/**`) | **Outstanding, and narrow.** Every route is behind `requireJournalistRole()`, so the only part most people could use is the application form. The rest is an article editor with a draft/review/publish workflow — a professional writing tool, and a poor fit for a phone. Worth building when journalists ask for it, not before. |
 | **Creator Studio** — earnings half (`/api/creator/dashboard`, `/withdraw`) | Balance, tips, premium revenue and withdrawals are the monetisation surface the row above already excludes. |
-| **Creator Studio** — analytics half (`/api/creator/studio`) | **Outstanding iOS work**, and genuinely in scope: content performance and audience growth over 30 days, with no money in it. iOS already has a narrower analytics tab on its own profile (`/api/user/posts/stats`, last 20 posts), so this is a richer version of something that exists rather than a missing capability. |
 
 ---
 

@@ -77,6 +77,9 @@ enum Route: Hashable {
     case play
     case playChallenge(id: String)
     case playLeaderboard
+    /// Creator Studio - the analytics half only. The website's earnings
+    /// tab is excluded by store policy; see `CreatorStudioView`.
+    case creatorStudio
 }
 
 /// Owns the navigation stack's path.

@@ -121,6 +121,8 @@ struct RouteDestinationView: View {
             PlayChallengeView(challengeId: id)
         case .playLeaderboard:
             PlayLeaderboardView()
+        case .creatorStudio:
+            CreatorStudioView()
         case .listingConversation(let partner, let draft):
             ConversationView(
                 partner: partner,

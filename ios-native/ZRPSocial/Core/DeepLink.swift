@@ -118,6 +118,13 @@ enum DeepLink {
 
         case "bookmarks":
             return DeepLinkTarget(.home, .bookmarks)
+
+        case "creator":
+            // Only /creator/dashboard exists on the web, and it opens on
+            // the earnings tab this app does not have. The link lands on
+            // the analytics that *is* here rather than on nothing.
+            guard second == "dashboard" || second == nil else { return nil }
+            return DeepLinkTarget(.profile, .creatorStudio)
         case "settings":
             return DeepLinkTarget(.home, .settings)
 
