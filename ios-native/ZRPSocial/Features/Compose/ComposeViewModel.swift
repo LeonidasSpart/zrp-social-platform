@@ -39,7 +39,14 @@ struct Attachment: Identifiable, Equatable {
         id = UUID()
         media = nil
         remoteURL = gif.url
-        state = .uploaded(UploadedMedia(url: gif.url, type: "image", isGif: true))
+        // A GIF from the picker is a third-party URL ZRP never
+        // stored, so it genuinely has no UploadThing key. Passing
+        // `nil` explicitly says that, rather than relying on a
+        // default: a `let` optional gets no default in the
+        // memberwise initialiser.
+        state = .uploaded(
+            UploadedMedia(url: gif.url, type: "image", isGif: true, key: nil)
+        )
     }
 
     var isVideo: Bool { media?.isVideo ?? false }

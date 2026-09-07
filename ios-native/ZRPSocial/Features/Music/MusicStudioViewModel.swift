@@ -389,7 +389,8 @@ final class MusicStudioViewModel: ObservableObject {
     }
 
     private func uploadMessage(for error: Error) -> String {
-        if case UploadThingClient.UploadError.presignFailed(let message) = error,
+        if let uploadError = error as? UploadThingClient.UploadError,
+           case .presignFailed(let message) = uploadError,
            let message, !message.isEmpty {
             // The uploader's middleware rejects with the publish gate's
             // own wording, which is exactly what the person needs to see.
