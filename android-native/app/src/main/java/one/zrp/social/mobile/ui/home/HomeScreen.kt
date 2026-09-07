@@ -51,7 +51,6 @@ import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.stories.StoriesRail
-import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
@@ -89,7 +88,74 @@ fun HomeScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            StoriesRail(onOpenViewer = onOpenStoryViewer, onCreateStory = onCreateStory)
+            // A real, always-visible manual refresh affordance - page.tsx's
+            // own floating "Refresh feed" button (aria-label="Refresh feed",
+            // untranslated on web too, a translucent circular button
+            // positioned over the top of the page, spinning while
+            // refreshing) - not just the pull-to-refresh gesture below,
+            // which someone who doesn't know the gesture exists would
+            // otherwise have no way to trigger.
+            //
+            // Aligned within a Box scoped to just the stories rail's own
+            // height (not the whole screen, and not the feed content
+            // below) so it always floats over the stories row - the same
+            // real area web's own button overlays - rather than drifting
+            // onto the tab row or the first post depending on content
+            // length. StoriesRail's own endContentPadding reserves scroll
+            // clearance so the last story avatar is never hidden under it,
+            // matching how web's StoriesBar wrapper reserves `pr-8` for
+            // the exact same reason.
+            Box(modifier = Modifier.fillMaxWidth()) {
+                StoriesRail(
+                    onOpenViewer = onOpenStoryViewer,
+                    onCreateStory = onCreateStory,
+                    endContentPadding = 44.dp,
+                )
+
+                val rotation = if (state.isRefreshing) {
+                    val angle by rememberInfiniteTransition(label = "refreshSpin").animateFloat(
+                        initialValue = 0f,
+                        targetValue = 360f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(durationMillis = 800, easing = LinearEasing),
+                            repeatMode = RepeatMode.Restart,
+                        ),
+                        label = "refreshSpinAngle",
+                    )
+                    angle
+                } else {
+                    0f
+                }
+
+                // IconButton (not the Surface) owns the clickable bounds
+                // here, so Compose's own 48dp-minimum touch target applies
+                // in full - a fixed-size Surface wrapping the IconButton
+                // instead would clip that minimum down to the visual
+                // circle's own size, under Android's accessibility touch
+                // target floor.
+                IconButton(
+                    onClick = { viewModel.refresh(activeTab) },
+                    enabled = !state.isRefreshing,
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.9f),
+                        modifier = Modifier.size(36.dp),
+                    ) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                            Icon(
+                                imageVector = Icons.Filled.Refresh,
+                                contentDescription = "Refresh feed",
+                                tint = if (state.isRefreshing) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .size(18.dp)
+                                    .rotate(rotation),
+                            )
+                        }
+                    }
+                }
+            }
 
             TabRow(selectedTabIndex = if (activeTab == FeedTab.FOR_YOU) 0 else 1) {
                 Tab(
@@ -263,56 +329,6 @@ fun HomeScreen(
                     state = pullRefreshState,
                     modifier = Modifier.align(Alignment.TopCenter),
                 )
-
-                // A real, always-visible manual refresh affordance -
-                // page.tsx's own floating "Refresh feed" button (fixed
-                // top-right over the feed, aria-label="Refresh feed",
-                // untranslated on web too, w-9 h-9 rounded-full with a
-                // translucent background and a spin animation while
-                // refreshing) - not just the pull-to-refresh gesture
-                // above, which someone who doesn't know the gesture
-                // exists would otherwise have no way to trigger. Matches
-                // web's own circular translucent-background treatment
-                // (rather than a bare icon with no surface) precisely so
-                // it reads as a floating button over the feed instead of
-                // blending into - or looking misplaced against - the
-                // post content underneath it.
-                // The infinite transition only exists while refreshing -
-                // otherwise it would keep recomposing this button forever
-                // in the background for an animation nothing is showing.
-                val rotation = if (state.isRefreshing) {
-                    val angle by rememberInfiniteTransition(label = "refreshSpin").animateFloat(
-                        initialValue = 0f,
-                        targetValue = 360f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(durationMillis = 800, easing = LinearEasing),
-                            repeatMode = RepeatMode.Restart,
-                        ),
-                        label = "refreshSpinAngle",
-                    )
-                    angle
-                } else {
-                    0f
-                }
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.9f),
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(top = Spacing.md, end = Spacing.md)
-                        .size(36.dp),
-                ) {
-                    IconButton(onClick = { viewModel.refresh(activeTab) }, enabled = !state.isRefreshing) {
-                        Icon(
-                            imageVector = Icons.Filled.Refresh,
-                            contentDescription = "Refresh feed",
-                            tint = if (state.isRefreshing) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier
-                                .size(18.dp)
-                                .rotate(rotation),
-                        )
-                    }
-                }
             }
         }
     }

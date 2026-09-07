@@ -221,11 +221,21 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
     // one the website's own parseContent uses) - no spaces or reserved
     // path characters, so this never needs URL-encoding.
     val goToHashtag: (String) -> Unit = { tag -> navController.navigate("hashtag/$tag") }
+    // Deliberately no saveState/restoreState here (see ZrpBottomBar's own
+    // onClick, which has the identical fix and KDoc explaining why) -
+    // this app's NavHost is one flat graph of ~86 sibling destinations,
+    // not per-tab nested graphs, so that Google-sample pattern's
+    // save/restore keys off whatever entry happened to be on top of the
+    // stack rather than a tab-scoped back stack. Concretely: post from
+    // Create after having drilled Home -> Search -> Profile would
+    // restore *Profile*, not the feed, because Profile (not Home) was
+    // the last entry saved under the graph's start-destination id. A
+    // clean popUpTo(inclusive = false) always lands on the real Home
+    // feed, which is what "go home after posting" means.
     val goHome: () -> Unit = {
         navController.navigate(ZrpDestination.Home.route) {
-            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+            popUpTo(navController.graph.findStartDestination().id) { inclusive = false }
             launchSingleTop = true
-            restoreState = true
         }
     }
 
@@ -1103,12 +1113,33 @@ private fun ZrpBottomBar(
                     } else {
                         onOtherTabSelected()
                     }
+                    // No saveState/restoreState: the Google sample this
+                    // pattern comes from assumes each bottom-tab
+                    // destination is its own NESTED navigation graph, so
+                    // "save state on popUpTo the graph's start, restore
+                    // it on the way back" scopes cleanly per tab. This
+                    // NavHost is one FLAT graph instead - every screen
+                    // (Profile, Messages, Settings, Music, all ~86 of
+                    // them) is a sibling destination in the same graph,
+                    // not nested under a tab. So saveState here doesn't
+                    // save "this tab's back stack" - it saves whatever
+                    // NavBackStackEntry happens to sit at the graph's
+                    // start-destination position, which can be a screen
+                    // reached from a completely different tab (e.g.
+                    // Home -> Search -> Profile, then tapping Home: the
+                    // saved/restored state is keyed to that position and
+                    // can bring Profile back instead of the feed on a
+                    // later restoreState=true navigate). A plain
+                    // popUpTo(start){inclusive=false} always clears back
+                    // to a real, fresh instance of the tapped tab -
+                    // trading "remember scroll position across tab
+                    // switches" for actually landing on the right screen,
+                    // which this flat graph shape requires.
                     navController.navigate(destination.route) {
                         popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
+                            inclusive = false
                         }
                         launchSingleTop = true
-                        restoreState = true
                     }
                 },
                 icon = {

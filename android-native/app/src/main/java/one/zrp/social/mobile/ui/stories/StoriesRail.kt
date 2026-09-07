@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
@@ -46,6 +47,11 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 fun StoriesRail(
     onOpenViewer: (userId: String) -> Unit,
     onCreateStory: () -> Unit,
+    // Reserves trailing scroll clearance so the last story avatar never
+    // sits under a floating overlay (HomeScreen's manual refresh button
+    // today) - the same real problem web's own StoriesBar section works
+    // around with a literal `pr-8` on its wrapper for the same reason.
+    endContentPadding: Dp = 0.dp,
 ) {
     val viewModel: StoriesViewModel = viewModel(
         factory = remember { StoriesViewModelFactory(StoriesRepository()) },
@@ -59,7 +65,7 @@ fun StoriesRail(
 
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+        contentPadding = PaddingValues(start = 12.dp, top = 8.dp, end = 12.dp + endContentPadding, bottom = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
