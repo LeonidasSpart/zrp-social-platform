@@ -259,4 +259,39 @@
     <string name="music_queue_up_next">التالي (%1$d)</string>
     <string name="music_queue_play_now_aria">تشغيل %1$s الآن</string>
     <string name="music_queue_remove_aria">إزالة %1$s من قائمة الانتظار</string>
+    <!-- Music Phase 2: Artists + Album detail -->
+    <string name="music_artists_title">الفنانون</string>
+    <string name="music_artists_search_placeholder">ابحث عن فنانين...</string>
+    <string name="music_artists_none_found">لم يتم العثور على فنانين</string>
+    <string name="music_artist_detail_not_found">لم يتم العثور على الفنان</string>
+    <string name="music_artist_detail_following">متابَع</string>
+    <string name="music_artist_detail_follow">متابعة</string>
+    <string name="music_artist_detail_albums_heading">الألبومات</string>
+    <string name="music_artist_detail_tracks_heading">المقاطع</string>
+    <string name="music_artist_detail_no_tracks">لا توجد مقاطع منشورة بعد</string>
+    <string name="music_artist_detail_singles_heading">الأغاني المنفردة</string>
+    <string name="music_album_detail_not_found">لم يتم العثور على الألبوم</string>
+    <string name="music_album_detail_eyebrow">ألبوم</string>
+    <string name="music_album_detail_no_tracks">لا توجد مقاطع منشورة في هذا الألبوم بعد</string>
+    <string name="music_album_detail_released_label">تاريخ الإصدار</string>
+    <string name="music_common_play_all">تشغيل الكل</string>
+    <string name="music_common_shuffle">تشغيل عشوائي</string>
+    <string name="music_common_add_to_queue">إضافة إلى قائمة الانتظار</string>
+    <string name="music_common_play_next">التشغيل التالي</string>
+    <string name="music_track_empty_default_title">لا يوجد شيء هنا بعد</string>
+    <string name="music_duration_minutes">%1$d د</string>
+    <string name="music_duration_hours_minutes">%1$d س %2$d د</string>
+    <string name="music_duration_hours_only">%1$d س</string>
+    <string name="music_shell_play_track_aria">تشغيل %1$s</string>
+    <string name="music_track_pause_aria">إيقاف %1$s مؤقتًا</string>
+    <plurals name="music_count_tracks">
+        <item quantity="one">%1$d مقطع</item>
+        <item quantity="other">%1$d مقطع</item>
+    </plurals>
+    <plurals name="music_count_followers">
+        <item quantity="one">%1$d متابع</item>
+        <item quantity="other">%1$d متابع</item>
+    </plurals>
+    <string name="music_shell_latest_albums_heading">أحدث الألبومات</string>
+    <string name="music_shell_popular_artists_heading">فنانون مشهورون</string>
 </resources>

@@ -3,6 +3,8 @@ package one.zrp.social.mobile.network
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 data class MusicArtistRef(
     val id: String,
@@ -82,6 +84,65 @@ data class MusicPlaylistSummary(
 
 data class MusicGenre(val genre: String, val count: Int)
 
+data class MusicCount(val tracks: Int = 0, val followers: Int = 0)
+
+data class MusicTrackCount(val tracks: Int = 0)
+
+// ─── Artists list (GET /music/artists) ──────────────────────────────
+data class MusicArtistListItem(
+    val id: String,
+    val displayName: String,
+    val avatarUrl: String?,
+    val verified: Boolean = false,
+    val _count: MusicCount = MusicCount(),
+)
+
+// ─── Artist detail (GET /music/artists/{id}) ────────────────────────
+// A distinct, richer album shape from MusicAlbumSummary's own (no
+// nested `artist` here - it's redundant, we're already on that
+// artist's own page - but a real, separate _count.tracks the home
+// response's album shape doesn't carry).
+data class MusicArtistAlbumRef(
+    val id: String,
+    val title: String,
+    val coverUrl: String?,
+    val releaseDate: String?,
+    val totalDurationSec: Int = 0,
+    val _count: MusicTrackCount = MusicTrackCount(),
+)
+
+data class MusicArtistDetail(
+    val id: String,
+    val displayName: String,
+    val bio: String?,
+    val avatarUrl: String?,
+    val bannerUrl: String?,
+    val verified: Boolean = false,
+    val isFollowing: Boolean = false,
+    // Owner-only affordances (Edit Profile, per-track delete, the
+    // Studio deep links) aren't rendered yet - Music Studio doesn't
+    // exist natively yet (a later phase), so every visitor sees this
+    // screen in its real read-only "visitor" mode regardless of
+    // isOwner, rather than a broken owner affordance that goes nowhere.
+    val isOwner: Boolean = false,
+    val albums: List<MusicArtistAlbumRef> = emptyList(),
+    val tracks: List<MusicTrack> = emptyList(),
+    val _count: MusicCount = MusicCount(),
+)
+
+data class MusicFollowToggleResponse(val following: Boolean)
+
+// ─── Album detail (GET /music/albums/{id}) ──────────────────────────
+data class MusicAlbumDetail(
+    val id: String,
+    val title: String,
+    val description: String?,
+    val coverUrl: String?,
+    val releaseDate: String?,
+    val artist: MusicArtistRef,
+    val tracks: List<MusicTrack> = emptyList(),
+)
+
 /**
  * The same real ZRP Music catalogue the website's Music home page
  * uses. Artist/album/playlist detail, Discover, History, Liked and
@@ -103,6 +164,18 @@ interface MusicApi {
 
     @POST("music/tracks/like")
     suspend fun toggleLike(@Body request: MusicLikeRequest): MusicLikeResponse
+
+    @GET("music/artists")
+    suspend fun getArtists(@Query("q") query: String? = null): List<MusicArtistListItem>
+
+    @GET("music/artists/{id}")
+    suspend fun getArtistDetail(@Path("id") id: String): MusicArtistDetail
+
+    @POST("music/artists/{id}/follow")
+    suspend fun toggleArtistFollow(@Path("id") id: String): MusicFollowToggleResponse
+
+    @GET("music/albums/{id}")
+    suspend fun getAlbumDetail(@Path("id") id: String): MusicAlbumDetail
 }
 
 data class MusicHomeResponse(

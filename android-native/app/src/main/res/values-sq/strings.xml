@@ -259,4 +259,39 @@
     <string name="music_queue_up_next">Në vijim (%1$d)</string>
     <string name="music_queue_play_now_aria">Luaj %1$s tani</string>
     <string name="music_queue_remove_aria">Hiq %1$s nga radha</string>
+    <!-- Music Phase 2: Artists + Album detail -->
+    <string name="music_artists_title">Artistë</string>
+    <string name="music_artists_search_placeholder">Kërko artistë...</string>
+    <string name="music_artists_none_found">Nuk u gjetën artistë</string>
+    <string name="music_artist_detail_not_found">Artisti nuk u gjet</string>
+    <string name="music_artist_detail_following">Po ndjek</string>
+    <string name="music_artist_detail_follow">Ndiq</string>
+    <string name="music_artist_detail_albums_heading">Albume</string>
+    <string name="music_artist_detail_tracks_heading">Këngë</string>
+    <string name="music_artist_detail_no_tracks">Ende pa këngë të publikuara</string>
+    <string name="music_artist_detail_singles_heading">Singëll</string>
+    <string name="music_album_detail_not_found">Albumi nuk u gjet</string>
+    <string name="music_album_detail_eyebrow">Album</string>
+    <string name="music_album_detail_no_tracks">Ende pa këngë të publikuara në këtë album</string>
+    <string name="music_album_detail_released_label">Botuar më</string>
+    <string name="music_common_play_all">Luaj të gjitha</string>
+    <string name="music_common_shuffle">Përzierje</string>
+    <string name="music_common_add_to_queue">Shto në radhë</string>
+    <string name="music_common_play_next">Luaj më pas</string>
+    <string name="music_track_empty_default_title">Ende asgjë këtu</string>
+    <string name="music_duration_minutes">%1$d min</string>
+    <string name="music_duration_hours_minutes">%1$d orë %2$d min</string>
+    <string name="music_duration_hours_only">%1$d orë</string>
+    <string name="music_shell_play_track_aria">Luaj %1$s</string>
+    <string name="music_track_pause_aria">Vër në pauzë %1$s</string>
+    <plurals name="music_count_tracks">
+        <item quantity="one">%1$d këngë</item>
+        <item quantity="other">%1$d këngë</item>
+    </plurals>
+    <plurals name="music_count_followers">
+        <item quantity="one">%1$d ndjekës</item>
+        <item quantity="other">%1$d ndjekës</item>
+    </plurals>
+    <string name="music_shell_latest_albums_heading">Albumet e Fundit</string>
+    <string name="music_shell_popular_artists_heading">Artistët Popullorë</string>
 </resources>

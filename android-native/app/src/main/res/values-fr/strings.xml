@@ -259,4 +259,39 @@
     <string name="music_queue_up_next">À suivre (%1$d)</string>
     <string name="music_queue_play_now_aria">Lire %1$s maintenant</string>
     <string name="music_queue_remove_aria">Retirer %1$s de la file d\'attente</string>
+    <!-- Music Phase 2: Artists + Album detail -->
+    <string name="music_artists_title">Artistes</string>
+    <string name="music_artists_search_placeholder">Rechercher des artistes...</string>
+    <string name="music_artists_none_found">Aucun artiste trouvé</string>
+    <string name="music_artist_detail_not_found">Artiste introuvable</string>
+    <string name="music_artist_detail_following">Abonné</string>
+    <string name="music_artist_detail_follow">Suivre</string>
+    <string name="music_artist_detail_albums_heading">Albums</string>
+    <string name="music_artist_detail_tracks_heading">Morceaux</string>
+    <string name="music_artist_detail_no_tracks">Aucun morceau publié pour l\'instant</string>
+    <string name="music_artist_detail_singles_heading">Singles</string>
+    <string name="music_album_detail_not_found">Album introuvable</string>
+    <string name="music_album_detail_eyebrow">Album</string>
+    <string name="music_album_detail_no_tracks">Aucun morceau publié dans cet album pour l\'instant</string>
+    <string name="music_album_detail_released_label">Sorti le</string>
+    <string name="music_common_play_all">Tout lire</string>
+    <string name="music_common_shuffle">Aléatoire</string>
+    <string name="music_common_add_to_queue">Ajouter à la file d\'attente</string>
+    <string name="music_common_play_next">Lire ensuite</string>
+    <string name="music_track_empty_default_title">Rien ici pour le moment</string>
+    <string name="music_duration_minutes">%1$d min</string>
+    <string name="music_duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="music_duration_hours_only">%1$d h</string>
+    <string name="music_shell_play_track_aria">Lire %1$s</string>
+    <string name="music_track_pause_aria">Mettre %1$s en pause</string>
+    <plurals name="music_count_tracks">
+        <item quantity="one">%1$d morceau</item>
+        <item quantity="other">%1$d morceaux</item>
+    </plurals>
+    <plurals name="music_count_followers">
+        <item quantity="one">%1$d abonné</item>
+        <item quantity="other">%1$d abonnés</item>
+    </plurals>
+    <string name="music_shell_latest_albums_heading">Derniers albums</string>
+    <string name="music_shell_popular_artists_heading">Artistes populaires</string>
 </resources>

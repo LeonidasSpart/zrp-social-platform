@@ -259,4 +259,39 @@
     <string name="music_queue_up_next">Berikutnya (%1$d)</string>
     <string name="music_queue_play_now_aria">Putar %1$s sekarang</string>
     <string name="music_queue_remove_aria">Hapus %1$s dari antrean</string>
+    <!-- Music Phase 2: Artists + Album detail -->
+    <string name="music_artists_title">Artis</string>
+    <string name="music_artists_search_placeholder">Cari artis...</string>
+    <string name="music_artists_none_found">Tidak ada artis yang ditemukan</string>
+    <string name="music_artist_detail_not_found">Artis tidak ditemukan</string>
+    <string name="music_artist_detail_following">Mengikuti</string>
+    <string name="music_artist_detail_follow">Ikuti</string>
+    <string name="music_artist_detail_albums_heading">Album</string>
+    <string name="music_artist_detail_tracks_heading">Lagu</string>
+    <string name="music_artist_detail_no_tracks">Belum ada lagu yang dipublikasikan</string>
+    <string name="music_artist_detail_singles_heading">Single</string>
+    <string name="music_album_detail_not_found">Album tidak ditemukan</string>
+    <string name="music_album_detail_eyebrow">Album</string>
+    <string name="music_album_detail_no_tracks">Belum ada lagu yang dipublikasikan di album ini</string>
+    <string name="music_album_detail_released_label">Dirilis</string>
+    <string name="music_common_play_all">Putar semua</string>
+    <string name="music_common_shuffle">Acak</string>
+    <string name="music_common_add_to_queue">Tambahkan ke antrean</string>
+    <string name="music_common_play_next">Putar berikutnya</string>
+    <string name="music_track_empty_default_title">Belum ada apa-apa di sini</string>
+    <string name="music_duration_minutes">%1$d mnt</string>
+    <string name="music_duration_hours_minutes">%1$d jam %2$d mnt</string>
+    <string name="music_duration_hours_only">%1$d jam</string>
+    <string name="music_shell_play_track_aria">Putar %1$s</string>
+    <string name="music_track_pause_aria">Jeda %1$s</string>
+    <plurals name="music_count_tracks">
+        <item quantity="one">%1$d lagu</item>
+        <item quantity="other">%1$d lagu</item>
+    </plurals>
+    <plurals name="music_count_followers">
+        <item quantity="one">%1$d pengikut</item>
+        <item quantity="other">%1$d pengikut</item>
+    </plurals>
+    <string name="music_shell_latest_albums_heading">Album Terbaru</string>
+    <string name="music_shell_popular_artists_heading">Artis Populer</string>
 </resources>

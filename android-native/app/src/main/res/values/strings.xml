@@ -275,4 +275,39 @@
     <string name="music_queue_up_next">Up next (%1$d)</string>
     <string name="music_queue_play_now_aria">Play %1$s now</string>
     <string name="music_queue_remove_aria">Remove %1$s from queue</string>
+    <!-- Music Phase 2: Artists + Album detail -->
+    <string name="music_artists_title">Artists</string>
+    <string name="music_artists_search_placeholder">Search artists...</string>
+    <string name="music_artists_none_found">No artists found</string>
+    <string name="music_artist_detail_not_found">Artist not found</string>
+    <string name="music_artist_detail_following">Following</string>
+    <string name="music_artist_detail_follow">Follow</string>
+    <string name="music_artist_detail_albums_heading">Albums</string>
+    <string name="music_artist_detail_tracks_heading">Tracks</string>
+    <string name="music_artist_detail_no_tracks">No published tracks yet</string>
+    <string name="music_artist_detail_singles_heading">Singles</string>
+    <string name="music_album_detail_not_found">Album not found</string>
+    <string name="music_album_detail_eyebrow">Album</string>
+    <string name="music_album_detail_no_tracks">No published tracks in this album yet</string>
+    <string name="music_album_detail_released_label">Released</string>
+    <string name="music_common_play_all">Play all</string>
+    <string name="music_common_shuffle">Shuffle</string>
+    <string name="music_common_add_to_queue">Add to queue</string>
+    <string name="music_common_play_next">Play next</string>
+    <string name="music_track_empty_default_title">Nothing here yet</string>
+    <string name="music_duration_minutes">%1$d min</string>
+    <string name="music_duration_hours_minutes">%1$d hr %2$d min</string>
+    <string name="music_duration_hours_only">%1$d hr</string>
+    <string name="music_shell_play_track_aria">Play %1$s</string>
+    <string name="music_track_pause_aria">Pause %1$s</string>
+    <plurals name="music_count_tracks">
+        <item quantity="one">%1$d track</item>
+        <item quantity="other">%1$d tracks</item>
+    </plurals>
+    <plurals name="music_count_followers">
+        <item quantity="one">%1$d follower</item>
+        <item quantity="other">%1$d followers</item>
+    </plurals>
+    <string name="music_shell_latest_albums_heading">Latest Albums</string>
+    <string name="music_shell_popular_artists_heading">Popular Artists</string>
 </resources>
