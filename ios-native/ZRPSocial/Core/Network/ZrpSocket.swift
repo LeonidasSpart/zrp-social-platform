@@ -32,7 +32,7 @@ struct SocketEvent: Equatable {
 /// carries: `server.js` verifies it in the handshake and derives the
 /// user id from it, so a client cannot join anyone else's room.
 @MainActor
-final class ZrpSocket: NSObject, ObservableObject {
+final class ZrpSocket: ObservableObject {
 
     static let shared = ZrpSocket()
 
@@ -54,9 +54,7 @@ final class ZrpSocket: NSObject, ObservableObject {
         string: "wss://zrp.one/api/socket.io/?EIO=4&transport=websocket"
     )!
 
-    private override init() {
-        super.init()
-    }
+    private init() {}
 
     // MARK: - Subscription
 
@@ -145,36 +143,58 @@ final class ZrpSocket: NSObject, ObservableObject {
 
     // MARK: - Receiving
 
-    private func receiveNext() {
-        task?.receive { [weak self] result in
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                switch result {
-                case .success(let message):
-                    switch message {
-                    case .string(let text):
-                        self.handle(frame: text)
-                    case .data(let data):
-                        // The server sends text frames; a binary one would
-                        // be a Socket.IO binary attachment, which no ZRP
-                        // event uses.
-                        if let text = String(data: data, encoding: .utf8) {
-                            self.handle(frame: text)
-                        }
-                    @unknown default:
-                        break
-                    }
-                    self.receiveNext()
+    /// What one received frame amounts to, reduced to something safe to
+    /// hand across to the main actor.
+    private enum Incoming: Sendable {
+        case frame(String)
+        case ignored
+        case failed
+    }
 
-                case .failure:
-                    // Every disconnection looks the same from here - a
-                    // dropped network, a server restart, a token the
-                    // server stopped accepting. Backing off and retrying
-                    // is right for all of them; a signed-out client stops
-                    // because `connect()` refuses without a session.
-                    self.scheduleReconnect()
+    private func receiveNext() {
+        task?.receive { result in
+            // This completion runs off the main actor and its payload is
+            // not `Sendable`, so the frame is reduced to a value here and
+            // only that value crosses over.
+            let incoming: Incoming
+            switch result {
+            case .success(let message):
+                switch message {
+                case .string(let text):
+                    incoming = .frame(text)
+                case .data(let data):
+                    // The server sends text frames; a binary one would be
+                    // a Socket.IO binary attachment, which no ZRP event
+                    // uses.
+                    incoming = String(data: data, encoding: .utf8)
+                        .map(Incoming.frame) ?? .ignored
+                @unknown default:
+                    incoming = .ignored
                 }
+            case .failure:
+                incoming = .failed
             }
+
+            Task { @MainActor [weak self] in
+                self?.receive(incoming)
+            }
+        }
+    }
+
+    private func receive(_ incoming: Incoming) {
+        switch incoming {
+        case .frame(let text):
+            handle(frame: text)
+            receiveNext()
+        case .ignored:
+            receiveNext()
+        case .failed:
+            // Every disconnection looks the same from here - a dropped
+            // network, a server restart, a token the server stopped
+            // accepting. Backing off and retrying is right for all of
+            // them; a signed-out client stops because `connect()` refuses
+            // without a session.
+            scheduleReconnect()
         }
     }
 

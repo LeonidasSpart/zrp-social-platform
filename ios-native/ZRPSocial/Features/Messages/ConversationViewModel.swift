@@ -98,17 +98,18 @@ final class ConversationViewModel: ObservableObject {
 
     private func startPolling() {
         pollTask?.cancel()
+        // Inherits this view model's main-actor isolation, so the
+        // socket's connection state can be read directly each time round
+        // rather than being sampled once when the loop started.
         pollTask = Task { [weak self] in
             while !Task.isCancelled {
-                let interval = await MainActor.run { [weak self] in
-                    guard let self else { return Duration.seconds(6) }
-                    return self.socket.isConnected
-                        ? self.connectedPollInterval
-                        : self.disconnectedPollInterval
-                }
+                guard let self else { return }
+                let interval = self.socket.isConnected
+                    ? self.connectedPollInterval
+                    : self.disconnectedPollInterval
                 try? await Task.sleep(for: interval)
                 guard !Task.isCancelled else { return }
-                await self?.load(showLoading: false)
+                await self.load(showLoading: false)
             }
         }
     }
