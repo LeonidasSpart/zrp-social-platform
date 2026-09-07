@@ -109,6 +109,7 @@
     "ios.post.addReaction": "Add a reaction",
     "ios.post.reactions": "Reactions",
     "ios.post.pin": "Pin to profile",
-    "ios.post.unpin": "Unpin from profile"
+    "ios.post.unpin": "Unpin from profile",
+    "ios.a11y.views": "Views"
   }
 }

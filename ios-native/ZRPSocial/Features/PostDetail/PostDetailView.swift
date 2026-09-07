@@ -84,6 +84,7 @@ struct PostDetailView: View {
                     onBookmark: { Task { await interactions.toggleBookmark(post) } },
                     onDelete: { Task { await interactions.deletePost(post) } }
                 )
+                .onAppear { interactions.countView(post) }
 
                 // Reactions live on the detail screen rather than every
                 // feed card: each post costs its own request for the

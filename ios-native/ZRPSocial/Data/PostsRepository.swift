@@ -64,6 +64,7 @@ protocol PostsRepositoryProtocol: Sendable {
     func toggleReaction(postId: String, emoji: String) async throws -> Bool
     func quotes(postId: String, cursor: String?) async throws -> PostsPage
     func togglePin(postId: String) async throws -> Bool
+    func countView(postId: String) async throws -> Int?
 }
 
 /// One emoji reaction on a post, from `GET /api/posts/{id}/reaction`.
@@ -214,6 +215,23 @@ struct PostsRepository: PostsRepositoryProtocol {
             Endpoint.post("posts/\(Endpoint.segment(postId))/pin")
         )
         return response.pinned
+    }
+
+    // MARK: - Views
+
+    /// `POST /api/posts/{id}/view` increments the tally and answers the
+    /// new total.
+    ///
+    /// No session required, and no server-side dedupe: every call
+    /// increments. It answers `{views: null}` with a **200** for a post
+    /// that no longer exists rather than a 404, which is why the return
+    /// is optional - `nil` means "counted nothing", not "failed".
+    func countView(postId: String) async throws -> Int? {
+        struct Response: Decodable { let views: Int? }
+        let response: Response = try await client.send(
+            Endpoint.post("posts/\(Endpoint.segment(postId))/view")
+        )
+        return response.views
     }
 
     // MARK: - Quotes

@@ -19,6 +19,14 @@ struct PostInteraction: Equatable {
     var repostCount: Int
     var bookmarked: Bool?
 
+    /// How many times the post has been viewed.
+    ///
+    /// Not a per-viewer flag like the others: it is a public tally the
+    /// list routes send with the post. It lives here rather than being
+    /// read off `Post` because counting a view returns the new total,
+    /// which then has to show wherever that post appears.
+    var viewCount: Int
+
     /// True while a toggle is in flight, so the control can be disabled
     /// rather than letting a double tap send two racing requests.
     var isMutating: Bool = false
@@ -40,6 +48,11 @@ struct PostInteraction: Equatable {
         reposted = nil
         repostCount = post.counts.reposts
         bookmarked = nil
+        // The following feed omits `views` entirely, so a missing value
+        // is zero here rather than a distinct "unknown": there is no
+        // per-viewer meaning to preserve, and a tally the server did not
+        // send is one the card simply cannot show.
+        viewCount = post.views ?? 0
     }
 }
 

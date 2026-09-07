@@ -58,6 +58,7 @@ struct PostCardView: View {
                 )
             }
             media
+            linkPreview
             quotedPost
             actionBar
         }
@@ -202,6 +203,27 @@ struct PostCardView: View {
         }
     }
 
+    /// The unfurled card for a link in the post.
+    ///
+    /// Only when the post carries no image of its own, matching the
+    /// website: a post that already shows media does not also get a
+    /// second picture from whatever it happens to link to.
+    ///
+    /// `linkUrl` first, then the first URL in the text. The website
+    /// resolves it in exactly that order, and the extractor here is a
+    /// port of its own so the two agree on which link a post unfurls.
+    @ViewBuilder
+    private var linkPreview: some View {
+        if post.galleryImageURLs.isEmpty {
+            let displayed = interaction.contentOverride ?? post.content
+            let target = post.linkUrl.flatMap { $0.isEmpty ? nil : $0 }
+                ?? FirstURL.first(in: displayed)
+            if let target {
+                LinkPreviewCard(url: target)
+            }
+        }
+    }
+
     @ViewBuilder
     private var quotedPost: some View {
         if let quoted = post.quotePost {
@@ -336,6 +358,25 @@ struct PostCardView: View {
                     : L10n.string(.actionLike),
                 action: onLike
             )
+
+            Spacer(minLength: 0)
+
+            // A public tally, not a control: the route counts a view on
+            // display, and there is nothing here for a reader to press.
+            HStack(spacing: ZrpSpacing.xs) {
+                Image(systemName: "chart.bar")
+                    .font(.subheadline)
+                if let text = CountFormatting.compact(interaction.viewCount) {
+                    Text(verbatim: text)
+                        .font(.footnote)
+                        .monospacedDigit()
+                }
+            }
+            .foregroundStyle(ZrpColor.onSurfaceMuted)
+            .frame(minHeight: ZrpMetrics.minTouchTarget)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(.iosA11yViews))
+            .accessibilityValue(Text(verbatim: CountFormatting.exact(interaction.viewCount)))
 
             Spacer(minLength: 0)
 

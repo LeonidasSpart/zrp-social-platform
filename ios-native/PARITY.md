@@ -83,10 +83,10 @@ called and the real response being handled.
 | Reposts list | `GET /api/posts/{id}/reposts` → `{items,nextCursor}` of users | ✅ | ✅ | ✅ reached from the post's repost count; shares one screen with followers/following, which answer the same shape | IMPLEMENTED |
 | Quotes list | `GET /api/posts/{id}/quotes` → `{items,nextCursor}` of posts | ✅ | ✅ | ✅ reached from the post's quote count, rendered with the standard post card | IMPLEMENTED |
 | Share sheet | — (client-side, `zrp.one/post/{id}`) | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Post views | `POST /api/posts/{id}/view` | ✅ | ⬜ | ⬜ | MISSING |
+| Post views | `POST /api/posts/{id}/view` → `{views}`; increments unconditionally, no server-side dedupe | ✅ | ⬜ | ✅ counted once per post per app run (the process-lifetime equivalent of the website's `sessionStorage` guard) and shown on the card | IMPLEMENTED |
 | Polls | `POST /api/polls/{id}/vote` | ✅ | ⬜ | ⬜ | MISSING |
 | Inline translation | `POST /api/translate` | ✅ | ✅ | ⬜ | MISSING (Phase 8b) |
-| Link previews | `GET /api/link-preview` | ✅ | ⬜ | ⬜ | MISSING |
+| Link previews | `GET /api/link-preview?url=…` → a fully-null shape with a **200** for a link it could not read, not an error | ✅ | ⬜ | ✅ shown only when the post carries no image of its own and the route returned a title or an image, matching the web; the URL is `linkUrl` first then the first URL in the text, using a port of the website's own extractor so both platforms unfurl the same link | IMPLEMENTED |
 
 ### Media
 

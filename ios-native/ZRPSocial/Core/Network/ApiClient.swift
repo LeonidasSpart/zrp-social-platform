@@ -178,6 +178,15 @@ final class ApiClient: @unchecked Sendable {
         }
         if !queryItems.isEmpty {
             components.queryItems = queryItems
+            // `URLComponents` leaves `+` unescaped in a query value, and
+            // the server reads the query with WHATWG rules, where `+`
+            // decodes to a space. A value carrying a literal plus - a URL
+            // being handed to the link-preview route, a search term -
+            // would therefore arrive altered. Names are all literals
+            // here, so any `+` left at this point came from a value and
+            // has to be escaped.
+            components.percentEncodedQuery = components.percentEncodedQuery?
+                .replacingOccurrences(of: "+", with: "%2B")
         }
 
         guard let url = components.url else {

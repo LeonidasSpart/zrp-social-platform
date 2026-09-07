@@ -26,10 +26,44 @@ final class PostInteractionStore: ObservableObject {
     /// timeline.
     @Published var actionError: String?
 
+    /// Posts whose view this app run has already counted.
+    ///
+    /// `POST /api/posts/{id}/view` increments unconditionally - there is
+    /// no server-side dedupe at all - so the client is the only thing
+    /// stopping a scroll back and forth from inflating the number. The
+    /// website guards it with `sessionStorage`; the process-lifetime
+    /// equivalent here is this set, which is deliberately NOT persisted:
+    /// a new session counts a new view, exactly as a new browser tab
+    /// does.
+    private var countedViewIDs: Set<String> = []
+
     private let repository: PostsRepositoryProtocol
 
     init(repository: PostsRepositoryProtocol = PostsRepository()) {
         self.repository = repository
+    }
+
+    /// Counts one view of a post, at most once per app run.
+    ///
+    /// Silent on failure, and deliberately so: the route itself answers
+    /// `{views: null}` with a 200 for a post that no longer exists
+    /// rather than an error, because a view tally is not worth
+    /// interrupting anyone over. The count is only replaced when the
+    /// server actually reports a number.
+    func countView(_ post: Post) {
+        guard !countedViewIDs.contains(post.id) else { return }
+        countedViewIDs.insert(post.id)
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                guard let views = try await repository.countView(postId: post.id) else { return }
+                var updated = interactions[post.id] ?? PostInteraction(post: post)
+                updated.viewCount = views
+                interactions[post.id] = updated
+            } catch {
+                // Deliberately swallowed - see the doc comment above.
+            }
+        }
     }
 
     func interaction(for post: Post) -> PostInteraction {
@@ -48,6 +82,9 @@ final class PostInteractionStore: ObservableObject {
             if let existing = interactions[post.id] {
                 seeded.reposted = existing.reposted
                 seeded.bookmarked = existing.bookmarked
+                // The view route's answer is newer than any page that
+                // was in flight alongside it.
+                seeded.viewCount = max(seeded.viewCount, existing.viewCount)
                 // A refresh that returns the pre-edit text must not undo
                 // an edit the server has already accepted.
                 seeded.contentOverride = existing.contentOverride

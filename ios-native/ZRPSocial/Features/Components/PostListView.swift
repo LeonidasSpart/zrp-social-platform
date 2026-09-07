@@ -71,7 +71,13 @@ struct PostListView<Header: View>: View {
                     onPin: onPin.map { pin in { pin(post) } },
                     isPinned: post.id == pinnedPostId
                 )
-                .onAppear { onAppear(post) }
+                .onAppear {
+                    onAppear(post)
+                    // Counted here rather than inside the card so the
+                    // card stays free of the store; the two screens that
+                    // build a card both already hold it.
+                    interactions.countView(post)
+                }
             }
 
             footer
