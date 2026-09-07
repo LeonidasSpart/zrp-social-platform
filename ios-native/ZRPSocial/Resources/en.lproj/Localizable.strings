@@ -699,3 +699,5 @@
 "ios.profile.analyticsComments" = "Comments";
 "ios.profile.analyticsReposts" = "Reposts";
 "ios.music.airPlay" = "AirPlay and output";
+"ios.a11y.mute" = "Mute";
+"ios.a11y.unmute" = "Unmute";

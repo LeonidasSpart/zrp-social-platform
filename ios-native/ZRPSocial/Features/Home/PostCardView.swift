@@ -225,7 +225,8 @@ struct PostCardView: View {
             MediaGalleryView(
                 imageURLs: urls,
                 isVideo: PostMedia.isVideo(post),
-                isGif: PostMedia.isGif(url: urls.first, mediaType: post.mediaType)
+                isGif: PostMedia.isGif(url: urls.first, mediaType: post.mediaType),
+                inlineVideoId: post.id
             )
         }
     }

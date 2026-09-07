@@ -25,6 +25,12 @@ struct ZRPSocialApp: App {
     /// chosen language rather than flashing the system one.
     @StateObject private var language = LanguageController()
 
+    /// Decides which video in a timeline plays, and owns the single
+    /// player that plays it - see `FeedVideoCoordinator`. App-wide so
+    /// scrolling from one timeline to another cannot leave two videos
+    /// running.
+    @StateObject private var feedVideos = FeedVideoCoordinator()
+
     var body: some Scene {
         WindowGroup {
             RootView()
@@ -33,6 +39,7 @@ struct ZRPSocialApp: App {
                 .environmentObject(musicPlayer)
                 .environmentObject(musicLikes)
                 .environmentObject(language)
+                .environmentObject(feedVideos)
                 // Rebuilt outright when the language changes. Strings
                 // resolve through L10n at call time, so SwiftUI has no
                 // dependency to invalidate and would otherwise keep

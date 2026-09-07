@@ -1398,6 +1398,10 @@ enum L10nKey: String, CaseIterable {
     case iosProfileAnalyticsReposts = "ios.profile.analyticsReposts"
     /// en: "AirPlay and output"
     case iosMusicAirPlay = "ios.music.airPlay"
+    /// en: "Mute"
+    case iosA11yMute = "ios.a11y.mute"
+    /// en: "Unmute"
+    case iosA11yUnmute = "ios.a11y.unmute"
 }
 
 extension L10nKey {

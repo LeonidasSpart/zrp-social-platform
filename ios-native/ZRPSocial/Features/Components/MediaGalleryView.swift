@@ -24,6 +24,12 @@ struct MediaGalleryView: View {
     /// re-derived here so a gallery and its card never disagree.
     var isGif: Bool = false
 
+    /// Identifies the post this media belongs to, so the one shared
+    /// video player can be handed to whichever card is most on screen.
+    /// `nil` where inline playback does not apply - a quoted post's
+    /// media, which is a preview rather than a place to watch something.
+    var inlineVideoId: String?
+
     var cornerRadius: CGFloat = ZrpRadius.md
 
     @State private var page = 0
@@ -45,7 +51,17 @@ struct MediaGalleryView: View {
         if imageURLs.isEmpty {
             EmptyView()
         } else if isVideo, let first = imageURLs.first {
-            videoPoster(url: first)
+            if let inlineVideoId {
+                InlineVideoView(id: inlineVideoId, url: first) {
+                    presentation = MediaPresentation(
+                        urls: [first],
+                        isVideo: true,
+                        startIndex: 0
+                    )
+                }
+            } else {
+                videoPoster(url: first)
+            }
         } else if imageURLs.count == 1 {
             imageButton(url: imageURLs[0], index: 0)
         } else {
