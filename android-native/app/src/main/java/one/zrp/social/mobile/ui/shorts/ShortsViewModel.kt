@@ -21,6 +21,13 @@ data class ShortsUiState(
     val currentIndex: Int = 0,
     val muted: Boolean = true,
     val ownUserId: String? = null,
+    // Set right after a Short is uploaded, so ShortsScreen knows to
+    // scroll the pager back to page 0 - matches shorts/page.tsx's own
+    // handleUploaded, which prepends the new post, resets activeIndex
+    // to 0, and scrolls the feed container back to the top. Consumed
+    // once via consumeUploadedPost(), the same one-shot event pattern
+    // CreatePostViewModel's own posted flag uses.
+    val uploadedPostId: String? = null,
 )
 
 /**
@@ -70,6 +77,23 @@ class ShortsViewModel(private val repository: PostsRepository) : ViewModel() {
     }
 
     fun toggleMuted() = _state.update { it.copy(muted = !it.muted) }
+
+    // Matches handleUploaded: prepend the freshly posted Short with
+    // liked/reposted reset to false (a brand-new post the poster hasn't
+    // liked or reposted yet), jump back to the top of the feed.
+    fun onShortUploaded(post: Post) {
+        _state.update {
+            it.copy(
+                posts = listOf(post.copy(liked = false, reposted = false)) + it.posts,
+                currentIndex = 0,
+                uploadedPostId = post.id,
+            )
+        }
+    }
+
+    fun consumeUploadedPost() {
+        _state.update { it.copy(uploadedPostId = null) }
+    }
 
     /** A post whose video failed to play is dropped, matching the web player's own onError handler. */
     fun removeBrokenPost(postId: String) {
