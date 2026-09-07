@@ -32,6 +32,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import one.zrp.social.mobile.data.NotificationsRepository
+import one.zrp.social.mobile.network.MobileUser
+import one.zrp.social.mobile.ui.admin.AdminDashboardScreen
+import one.zrp.social.mobile.ui.admin.AdminPostsScreen
+import one.zrp.social.mobile.ui.admin.AdminReportsScreen
+import one.zrp.social.mobile.ui.admin.AdminUsersScreen
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
@@ -121,8 +126,10 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * routes themselves.
  */
 @Composable
-fun ZrpNavHost(onLogout: () -> Unit) {
+fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
     val navController = rememberNavController()
+    val isStaff = currentUser?.role == "ADMIN" || currentUser?.role == "MODERATOR"
+    val isAdminRole = currentUser?.role == "ADMIN"
     val goToProfile: (String) -> Unit = { username -> navController.navigate("profile/$username") }
     val goToTrustPassport: (String) -> Unit = { username -> navController.navigate("trust/$username") }
     val goToConversation: (partnerId: String, partnerUsername: String) -> Unit = { partnerId, partnerUsername ->
@@ -194,6 +201,10 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToSupportTickets: () -> Unit = { navController.navigate("support/tickets") }
     val goToNewTicket: () -> Unit = { navController.navigate("support/new") }
     val goToTicketDetail: (String) -> Unit = { id -> navController.navigate("support/tickets/$id") }
+    val goToAdmin: () -> Unit = { navController.navigate("admin") }
+    val goToAdminReports: () -> Unit = { navController.navigate("admin/reports") }
+    val goToAdminUsers: () -> Unit = { navController.navigate("admin/users") }
+    val goToAdminPosts: () -> Unit = { navController.navigate("admin/posts") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
@@ -826,7 +837,26 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenCreator = goToCreator,
                     onOpenJournalist = goToJournalist,
                     onOpenSupport = goToSupportTickets,
+                    isStaff = isStaff,
+                    onOpenAdmin = goToAdmin,
                 )
+            }
+            composable("admin") {
+                AdminDashboardScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenUsers = goToAdminUsers,
+                    onOpenPosts = goToAdminPosts,
+                    onOpenReports = goToAdminReports,
+                )
+            }
+            composable("admin/reports") {
+                AdminReportsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/users") {
+                AdminUsersScreen(isAdmin = isAdminRole, onBack = { navController.popBackStack() })
+            }
+            composable("admin/posts") {
+                AdminPostsScreen(onBack = { navController.popBackStack() })
             }
             composable("creator") {
                 CreatorScreen(

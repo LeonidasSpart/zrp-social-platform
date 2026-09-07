@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CreditCard
@@ -68,6 +69,16 @@ import one.zrp.social.mobile.ui.theme.Spacing
  * real translated "nav.journalist" string (nav_journalist) rather
  * than an untranslated literal.
  *
+ * Admin routes to AdminDashboardScreen (the native surface onto
+ * /admin) - only rendered when isStaff is true (the caller's role is
+ * ADMIN or MODERATOR, resolved from the real signed-in session; see
+ * ZrpNavHost's own isStaff). A normal user never sees this row at all,
+ * matching the master directive's "normal users must NOT see admin
+ * controls" - though every admin API call is still independently
+ * enforced server-side (requireStaff/requireAdmin) regardless of what
+ * this client shows, so that check is the actual authorization
+ * boundary, not this one.
+ *
  * Every label here is a string resource with real translations for
  * all 11 official ZRP languages (extracted from the website's own
  * src/lib/translations.ts) - see the per-language values directories
@@ -87,6 +98,8 @@ fun SettingsScreen(
     onOpenCreator: () -> Unit,
     onOpenJournalist: () -> Unit,
     onOpenSupport: () -> Unit,
+    isStaff: Boolean = false,
+    onOpenAdmin: () -> Unit = {},
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -115,6 +128,9 @@ fun SettingsScreen(
         SettingsRow(icon = Icons.Filled.CreditCard, label = "Monetization", onClick = onOpenCreator)
         SettingsRow(icon = Icons.Filled.Newspaper, label = stringResource(R.string.nav_journalist), onClick = onOpenJournalist)
         SettingsRow(icon = Icons.Filled.SupportAgent, label = stringResource(R.string.support_tickets_page_title), onClick = onOpenSupport)
+        if (isStaff) {
+            SettingsRow(icon = Icons.Filled.AdminPanelSettings, label = stringResource(R.string.admin_nav_label), onClick = onOpenAdmin)
+        }
     }
 }
 

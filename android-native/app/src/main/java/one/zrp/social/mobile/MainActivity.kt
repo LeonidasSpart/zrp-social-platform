@@ -104,7 +104,7 @@ fun ZrpSocialApp() {
                             onFinished = { authViewModel.onOnboardingFinished() },
                         )
                     } else {
-                        ZrpNavHost(onLogout = { authViewModel.logout() })
+                        ZrpNavHost(onLogout = { authViewModel.logout() }, currentUser = currentAuthState.user)
                     }
                 }
             }
