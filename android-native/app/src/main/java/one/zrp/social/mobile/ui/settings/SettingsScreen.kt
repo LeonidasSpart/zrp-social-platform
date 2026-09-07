@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -37,10 +38,18 @@ import one.zrp.social.mobile.ui.theme.Spacing
  * Android/iOS.
  *
  * Only categories this slice genuinely backs with real native screens
- * are listed - Monetization (payment-restricted on native builds),
- * Notifications (email preferences), and Support are real web features
- * left for a later slice rather than linked to a screen that doesn't
- * exist yet. See SettingsRepository's KDoc for the full breakdown.
+ * are listed - Notifications (email preferences) and Support are real
+ * web features left for a later slice rather than linked to a screen
+ * that doesn't exist yet. See SettingsRepository's KDoc for the full
+ * breakdown.
+ *
+ * Monetization routes to CreatorScreen (the native Creator Studio) -
+ * NOT payment-restricted itself, despite the name: only tip-sending
+ * and premium-post purchasing are (see CreatorApi's own KDoc), and
+ * neither of those lives on this screen at all. "Monetization" stays
+ * an untranslated literal here for the same reason Account and
+ * Security do below - the website's own CATEGORIES array hardcodes
+ * that exact label untranslated too.
  *
  * Every label here is a string resource with real translations for
  * all 11 official ZRP languages (extracted from the website's own
@@ -58,6 +67,7 @@ fun SettingsScreen(
     onOpenSecurity: () -> Unit,
     onOpenPrivacy: () -> Unit,
     onOpenLanguage: () -> Unit,
+    onOpenCreator: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -82,6 +92,8 @@ fun SettingsScreen(
         SettingsRow(icon = Icons.Filled.Lock, label = stringResource(R.string.settings_security), onClick = onOpenSecurity)
         SettingsRow(icon = Icons.Filled.Shield, label = stringResource(R.string.settings_privacy_safety), onClick = onOpenPrivacy)
         SettingsRow(icon = Icons.Filled.Language, label = stringResource(R.string.nav_language), onClick = onOpenLanguage)
+        // "Monetization" stays English-only - see this file's own KDoc.
+        SettingsRow(icon = Icons.Filled.CreditCard, label = "Monetization", onClick = onOpenCreator)
     }
 }
 
