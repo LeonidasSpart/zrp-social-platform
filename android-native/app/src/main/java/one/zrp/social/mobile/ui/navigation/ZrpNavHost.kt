@@ -39,6 +39,9 @@ import one.zrp.social.mobile.ui.followlist.FollowListMode
 import one.zrp.social.mobile.ui.followlist.FollowListScreen
 import one.zrp.social.mobile.ui.hashtag.HashtagScreen
 import one.zrp.social.mobile.ui.home.HomeScreen
+import one.zrp.social.mobile.ui.marketplace.ListingDetailScreen
+import one.zrp.social.mobile.ui.marketplace.ListingFavoritesScreen
+import one.zrp.social.mobile.ui.marketplace.MarketplaceScreen
 import one.zrp.social.mobile.ui.messages.ConversationScreen
 import one.zrp.social.mobile.ui.messages.MessagesScreen
 import one.zrp.social.mobile.ui.moderation.ModerationListMode
@@ -109,6 +112,9 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToMusicLiked: () -> Unit = { navController.navigate("music/liked") }
     val goToMusicHistory: () -> Unit = { navController.navigate("music/history") }
     val goToMusicStudio: () -> Unit = { navController.navigate("music/studio") }
+    val goToMarketplace: () -> Unit = { navController.navigate("marketplace") }
+    val goToListing: (String) -> Unit = { id -> navController.navigate("marketplace/listing/$id") }
+    val goToMarketplaceFavorites: () -> Unit = { navController.navigate("marketplace/favorites") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -191,6 +197,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                 SearchScreen(
                     onAuthorClick = goToProfile,
                     onOpenMusic = goToMusic,
+                    onOpenMarketplace = goToMarketplace,
                     onOpenComments = goToComments,
                     onOpenQuotePost = goToQuotePost,
                     onOpenReposts = goToReposts,
@@ -403,6 +410,33 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                         onArtistClick = goToMusicArtist,
                     )
                 }
+            }
+            composable("marketplace") {
+                MarketplaceScreen(
+                    onBack = { navController.popBackStack() },
+                    onListingClick = goToListing,
+                    onOpenFavorites = goToMarketplaceFavorites,
+                )
+            }
+            composable(
+                route = "marketplace/listing/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    ListingDetailScreen(
+                        listingId = id,
+                        onBack = { navController.popBackStack() },
+                        onOpenSeller = goToProfile,
+                        onMessageSeller = goToConversation,
+                    )
+                }
+            }
+            composable("marketplace/favorites") {
+                ListingFavoritesScreen(
+                    onBack = { navController.popBackStack() },
+                    onListingClick = goToListing,
+                )
             }
             composable("bookmarks") {
                 BookmarksScreen(

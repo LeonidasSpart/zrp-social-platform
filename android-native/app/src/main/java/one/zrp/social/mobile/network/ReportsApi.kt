@@ -14,6 +14,7 @@ import retrofit2.http.POST
 data class CreateReportRequest(
     val postId: String? = null,
     val commentId: String? = null,
+    val listingId: String? = null,
     val reason: String,
     val details: String? = null,
 )

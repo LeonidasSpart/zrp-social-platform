@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -61,6 +62,7 @@ import one.zrp.social.mobile.ui.home.PostCard
 fun SearchScreen(
     onAuthorClick: (String) -> Unit,
     onOpenMusic: () -> Unit,
+    onOpenMarketplace: () -> Unit,
     onOpenComments: (postId: String) -> Unit,
     onOpenQuotePost: (postId: String) -> Unit = {},
     onOpenReposts: (postId: String) -> Unit = {},
@@ -105,6 +107,7 @@ fun SearchScreen(
                 onAuthorClick = onAuthorClick,
                 onHashtagClick = { tag -> viewModel.onHashtagClick(tag) },
                 onOpenMusic = onOpenMusic,
+                onOpenMarketplace = onOpenMarketplace,
             )
         } else {
             SearchResultsContent(
@@ -208,6 +211,7 @@ private fun DiscoverContent(
     onAuthorClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onOpenMusic: () -> Unit,
+    onOpenMarketplace: () -> Unit,
 ) {
     if (state.isLoadingDiscover) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -219,6 +223,9 @@ private fun DiscoverContent(
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
             MusicEntryRow(onClick = onOpenMusic)
+        }
+        item {
+            MarketplaceEntryRow(onClick = onOpenMarketplace)
         }
 
         if (state.trendingHashtags.isNotEmpty()) {
@@ -407,6 +414,25 @@ private fun MusicEntryRow(onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(text = stringResource(R.string.home_discover_music), style = MaterialTheme.typography.titleSmall)
+    }
+}
+
+@Composable
+private fun MarketplaceEntryRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.ShoppingCart,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text = stringResource(R.string.marketplace_discover_entry), style = MaterialTheme.typography.titleSmall)
     }
 }
 
