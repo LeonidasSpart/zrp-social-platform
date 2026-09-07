@@ -43,6 +43,38 @@ struct CreatePostRequest: Encodable {
     let imageUrls: [String]?
     let mediaType: String?
     let quotePostId: String?
+
+    /// A poll to create alongside the post.
+    ///
+    /// The route creates one only when `options.length > 1`; it does no
+    /// plan check of its own. `isPoll` rides along beside it because the
+    /// website sends both, and sending only half of a pair the server
+    /// reads is how the two clients drift.
+    var poll: NewPoll?
+    var isPoll: Bool { poll != nil }
+
+    struct NewPoll: Encodable, Equatable {
+        let question: String
+        let options: [String]
+
+        /// Omitted for a poll that never closes, which is what the
+        /// website sends when no end date is chosen.
+        let expiresAt: Date?
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case content, imageUrls, mediaType, quotePostId, poll, isPoll
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(content, forKey: .content)
+        try container.encodeIfPresent(imageUrls, forKey: .imageUrls)
+        try container.encodeIfPresent(mediaType, forKey: .mediaType)
+        try container.encodeIfPresent(quotePostId, forKey: .quotePostId)
+        try container.encodeIfPresent(poll, forKey: .poll)
+        try container.encode(isPoll, forKey: .isPoll)
+    }
 }
 
 /// `POST /api/posts` answers 201 with the created post wrapped in an
@@ -65,6 +97,7 @@ protocol PostsRepositoryProtocol: Sendable {
     func quotes(postId: String, cursor: String?) async throws -> PostsPage
     func togglePin(postId: String) async throws -> Bool
     func countView(postId: String) async throws -> Int?
+    func votePoll(pollId: String, optionIndex: Int) async throws
 }
 
 /// One emoji reaction on a post, from `GET /api/posts/{id}/reaction`.
@@ -215,6 +248,25 @@ struct PostsRepository: PostsRepositoryProtocol {
             Endpoint.post("posts/\(Endpoint.segment(postId))/pin")
         )
         return response.pinned
+    }
+
+    // MARK: - Polls
+
+    /// `POST /api/polls/{id}/vote`.
+    ///
+    /// One vote per person, permanently: a second attempt is refused
+    /// with a 400 "Already voted", as is a vote on a poll past its
+    /// `expiresAt` ("Poll has ended"). It answers `{success: true}` and
+    /// nothing else - no updated tally - so the caller applies the +1 the
+    /// route just made rather than reading counts back.
+    func votePoll(pollId: String, optionIndex: Int) async throws {
+        struct Request: Encodable { let optionIndex: Int }
+        try await client.sendIgnoringResponse(
+            try Endpoint.post(
+                "polls/\(Endpoint.segment(pollId))/vote",
+                body: Request(optionIndex: optionIndex)
+            )
+        )
     }
 
     // MARK: - Views

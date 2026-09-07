@@ -123,10 +123,78 @@ final class ComposeViewModel: ObservableObject {
 
     var canPost: Bool {
         guard !isPosting, !isOverCharacterLimit, allUploadsSettled else { return false }
+        // A poll builder that is open but not yet valid blocks posting,
+        // rather than quietly publishing a post with the poll dropped.
+        if isBuildingPoll, newPoll == nil { return false }
         let hasText = !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         // A quote is publishable with no text of its own - the quoted
-        // post is the content, exactly as on web.
-        return hasText || !attachments.isEmpty || quotedPost != nil
+        // post is the content, exactly as on web. So is a poll: its
+        // question becomes the post's text.
+        return hasText || !attachments.isEmpty || quotedPost != nil || newPoll != nil
+    }
+
+    // MARK: - Poll
+
+    /// Whether the poll builder is open. Closing it discards the poll,
+    /// which is why the fields are cleared here rather than left to be
+    /// silently included later.
+    @Published var isBuildingPoll = false {
+        didSet {
+            guard !isBuildingPoll else { return }
+            pollQuestion = ""
+            pollOptions = ["", ""]
+            pollExpiry = nil
+        }
+    }
+
+    @Published var pollQuestion = ""
+    @Published var pollOptions: [String] = ["", ""]
+
+    /// When the poll closes. `nil` means it never does, which is what
+    /// the route stores for an absent `expiresAt`.
+    @Published var pollExpiry: Date?
+
+    /// The website's own numbers, which come from its limits table's
+    /// defaults - no plan actually overrides them, and the route itself
+    /// caps nothing beyond requiring more than one option.
+    static let pollMaxOptions = 6
+    static let pollQuestionMaxLength = 200
+    static let pollOptionMaxLength = 60
+
+    var canAddPollOption: Bool { pollOptions.count < Self.pollMaxOptions }
+
+    /// Two options is the floor: the route creates a poll only when
+    /// there is more than one, and a poll with a single answer is not a
+    /// question.
+    var canRemovePollOption: Bool { pollOptions.count > 2 }
+
+    func addPollOption() {
+        guard canAddPollOption else { return }
+        pollOptions.append("")
+    }
+
+    func removePollOption(at index: Int) {
+        guard canRemovePollOption, pollOptions.indices.contains(index) else { return }
+        pollOptions.remove(at: index)
+    }
+
+    /// The poll to send, or `nil` when what has been typed is not yet a
+    /// poll: a question and at least two non-empty options, matching the
+    /// website's `isPollValid`.
+    var newPoll: CreatePostRequest.NewPoll? {
+        guard isBuildingPoll else { return nil }
+        let question = pollQuestion.trimmingCharacters(in: .whitespacesAndNewlines)
+        let options = pollOptions
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        guard !question.isEmpty, options.count >= 2 else { return nil }
+        return CreatePostRequest.NewPoll(
+            question: String(question.prefix(Self.pollQuestionMaxLength)),
+            options: options
+                .prefix(Self.pollMaxOptions)
+                .map { String($0.prefix(Self.pollOptionMaxLength)) },
+            expiresAt: pollExpiry
+        )
     }
 
     // MARK: - Attachments
@@ -276,11 +344,17 @@ final class ComposeViewModel: ObservableObject {
         // singular `imageUrl` is legacy, and the server derives it from
         // the array's first entry. Matching that exactly is what keeps a
         // post composed here rendering identically on web.
+        let poll = newPoll
+        let typed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         let request = CreatePostRequest(
-            content: text.trimmingCharacters(in: .whitespacesAndNewlines),
+            content: typed.isEmpty ? (poll?.question ?? typed) : typed,
             imageUrls: uploaded.isEmpty ? nil : uploaded.map(\.url),
             mediaType: uploaded.first?.type,
-            quotePostId: quotedPost?.id
+            quotePostId: quotedPost?.id,
+            // A poll post with no text of its own carries the question
+            // as its content - what the website sends, so the post reads
+            // the same in a timeline on either platform.
+            poll: poll
         )
 
         do {

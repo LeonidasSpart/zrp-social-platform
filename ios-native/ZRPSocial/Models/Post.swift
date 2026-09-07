@@ -95,9 +95,16 @@ struct Post: Decodable, Identifiable, Equatable, Hashable {
     let commentsEnabled: Bool?
     let linkUrl: String?
 
+    /// The attached poll, when the post has one AND the route selected
+    /// it. The following feed and the single-post route do; the explore
+    /// feed does not select polls at all, so a poll post arrives there
+    /// with this `nil` - which is a backend gap, not a post without a
+    /// poll. Recorded in PARITY.md.
+    let poll: Poll?
+
     private enum CodingKeys: String, CodingKey {
         case id, content, createdAt, author, imageUrl, imageUrls, mediaType
-        case views, quotePost, liked, commentsEnabled, linkUrl
+        case views, quotePost, liked, commentsEnabled, linkUrl, poll
         case counts = "_count"
     }
 

@@ -63,6 +63,7 @@ struct PostCardView: View {
                 )
             }
             translation
+            poll
             media
             linkPreview
             quotedPost
@@ -222,6 +223,19 @@ struct PostCardView: View {
         let urls = post.galleryImageURLs
         if !urls.isEmpty {
             MediaGalleryView(imageURLs: urls, isVideo: PostMedia.isVideo(post))
+        }
+    }
+
+    /// The attached poll.
+    ///
+    /// Present only where the route selected it. The explore feed does
+    /// not, so a poll post in For You shows without its poll until it is
+    /// opened - a backend gap recorded in PARITY.md, not something the
+    /// client can fill in without inventing a request per card.
+    @ViewBuilder
+    private var poll: some View {
+        if let poll = post.poll {
+            PollCard(poll: poll)
         }
     }
 

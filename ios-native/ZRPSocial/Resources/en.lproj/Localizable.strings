@@ -621,3 +621,12 @@
 "ios.a11y.addPhoto" = "Add a photo";
 "ios.a11y.removeAttachment" = "Remove attachment";
 "ios.a11y.messagePhoto" = "Photo";
+"ios.poll.votes" = "votes";
+"ios.poll.ended" = "Ended";
+"ios.poll.ends" = "Ends {date}";
+"ios.compose.addPoll" = "Add a poll";
+"ios.compose.pollQuestion" = "Ask a question";
+"ios.compose.pollOption" = "Option";
+"ios.compose.addPollOption" = "Add option";
+"ios.compose.removePollOption" = "Remove option";
+"ios.compose.pollEnds" = "Set an end date";

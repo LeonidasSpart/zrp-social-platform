@@ -84,7 +84,8 @@ called and the real response being handled.
 | Quotes list | `GET /api/posts/{id}/quotes` → `{items,nextCursor}` of posts | ✅ | ✅ | ✅ reached from the post's quote count, rendered with the standard post card | IMPLEMENTED |
 | Share sheet | — (client-side, `zrp.one/post/{id}`) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Post views | `POST /api/posts/{id}/view` → `{views}`; increments unconditionally, no server-side dedupe | ✅ | ⬜ | ✅ counted once per post per app run (the process-lifetime equivalent of the website's `sessionStorage` guard) and shown on the card | IMPLEMENTED |
-| Polls | `POST /api/polls/{id}/vote` | ✅ | ⬜ | ⬜ | MISSING |
+| Polls — vote | `POST /api/polls/{id}/vote` → `{success}` only; one vote per person, permanent (400 "Already voted"), refused after `expiresAt` (400 "Poll has ended") | ✅ | ⬜ | ✅ results revealed only after voting or after the poll closes, matching the web; the +1 the route just made is applied locally since it reports no tally | IMPLEMENTED |
+| Polls — create | `POST /api/posts` + `poll: {question, options, expiresAt?}` and `isPoll`; the route creates one whenever `options.length > 1` and does **no** plan check | ✅ | ⬜ | ✅ 2–6 options, question ≤200 and option ≤60 characters (the website's own defaults — its `canCreatePoll` gate reads feature keys that `getFeatureStatus` never sets, so it is on for everyone); a poll post with no text of its own carries the question as its content, as on the web | IMPLEMENTED |
 | Inline translation | `POST /api/translate` (session required, 30/min, 2000-char cap; MyMemory with `autodetect` as the source, and it reports no detected language) | ✅ | ✅ | ✅ posts and comments, target = the app's current language; offered from the post/comment menu rather than as a permanent line under every card as on the web, and not offered at all when signed out since the route answers 401 | IMPLEMENTED |
 | Link previews | `GET /api/link-preview?url=…` → a fully-null shape with a **200** for a link it could not read, not an error | ✅ | ⬜ | ✅ shown only when the post carries no image of its own and the route returned a title or an image, matching the web; the URL is `linkUrl` first then the first URL in the text, using a port of the website's own extractor so both platforms unfurl the same link | IMPLEMENTED |
 
@@ -362,6 +363,23 @@ and keeps whatever it already knows, so the heart is right whenever any
 other surface has reported it. Attaching `liked` there the same way the
 album route does (one `musicLike.findMany` over the playlist's track ids)
 would fix it for web, Android and iOS at once.
+
+Noted, not worked around.
+
+### L3. The explore feed does not select polls
+
+`GET /api/posts?tab=following` and `GET /api/posts/{id}` both `include`
+the post's `poll` (with the viewer's own vote rows). `GET /api/posts/explore`
+does not select it at all, so a poll post arriving in **For You** carries
+no poll — indistinguishable, in the payload, from a post that never had
+one.
+
+The visible effect is the same on every client: the same post shows its
+poll in Following and on its own screen, and nothing in For You. iOS does
+not paper over this — there is no way to, short of a second request per
+card to find out whether a poll exists. Adding the same `include` block
+the following feed already uses would fix it for web, Android and iOS at
+once.
 
 Noted, not worked around.
 

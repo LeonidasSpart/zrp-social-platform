@@ -32,6 +32,7 @@ struct ComposeView: View {
                 VStack(alignment: .leading, spacing: ZrpSpacing.lg) {
                     editor
                     quotedPreview
+                    pollBuilder
                     attachmentsSection
                 }
                 .padding(ZrpSpacing.lg)
@@ -134,7 +135,10 @@ struct ComposeView: View {
     }
 
     private var hasUnsavedWork: Bool {
-        !viewModel.text.isEmpty || !viewModel.attachments.isEmpty
+        !viewModel.text.isEmpty
+            || !viewModel.attachments.isEmpty
+            || !viewModel.pollQuestion.isEmpty
+            || viewModel.pollOptions.contains { !$0.isEmpty }
     }
 
     // MARK: - Sections
@@ -202,6 +206,16 @@ struct ComposeView: View {
             .disabled(!viewModel.canAddMoreMedia)
             .accessibilityLabel(Text(.composerAddGif))
 
+            Button {
+                viewModel.isBuildingPoll.toggle()
+            } label: {
+                Image(systemName: viewModel.isBuildingPoll ? "chart.bar.fill" : "chart.bar")
+                    .font(.title3)
+                    .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                    .contentShape(Rectangle())
+            }
+            .accessibilityLabel(Text(.iosComposeAddPoll))
+
             Spacer()
 
             characterCounter
@@ -210,6 +224,126 @@ struct ComposeView: View {
         .padding(.horizontal, ZrpSpacing.lg)
         .padding(.vertical, ZrpSpacing.sm)
         .background(.bar)
+    }
+
+    /// The poll builder.
+    ///
+    /// Closing it discards the poll outright rather than keeping fields
+    /// that would be silently sent later. Two options is the floor - the
+    /// route creates a poll only when there is more than one - and six
+    /// the ceiling, which is the website's own default.
+    @ViewBuilder
+    private var pollBuilder: some View {
+        if viewModel.isBuildingPoll {
+            VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
+                TextField(
+                    L10n.string(.iosComposePollQuestion),
+                    text: $viewModel.pollQuestion,
+                    axis: .vertical
+                )
+                .font(.subheadline)
+                .lineLimit(1...3)
+                .padding(ZrpSpacing.md)
+                .background(ZrpColor.surfaceElevated)
+                .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.sm, style: .continuous))
+
+                // Indexed rather than by value: two options may legally
+                // hold the same text, and identity by content would then
+                // collapse them into one row. The bounds check guards the
+                // frame in which a removal has happened but the list has
+                // not yet been re-evaluated.
+                ForEach(Array(viewModel.pollOptions.indices), id: \.self) { index in
+                    if viewModel.pollOptions.indices.contains(index) {
+                        HStack(spacing: ZrpSpacing.sm) {
+                            TextField(
+                                L10n.string(.iosComposePollOption),
+                                text: $viewModel.pollOptions[index]
+                            )
+                            .font(.subheadline)
+                            .padding(ZrpSpacing.md)
+                            .background(ZrpColor.surfaceElevated)
+                            .clipShape(
+                                RoundedRectangle(cornerRadius: ZrpRadius.sm, style: .continuous)
+                            )
+
+                            if viewModel.canRemovePollOption {
+                                Button {
+                                    viewModel.removePollOption(at: index)
+                                } label: {
+                                    Image(systemName: "minus.circle")
+                                        .foregroundStyle(ZrpColor.onSurfaceMuted)
+                                        .frame(
+                                            width: ZrpMetrics.minTouchTarget,
+                                            height: ZrpMetrics.minTouchTarget
+                                        )
+                                        .contentShape(Rectangle())
+                                }
+                                .accessibilityLabel(Text(.iosComposeRemovePollOption))
+                            }
+                        }
+                    }
+                }
+
+                if viewModel.canAddPollOption {
+                    Button {
+                        viewModel.addPollOption()
+                    } label: {
+                        Label {
+                            Text(.iosComposeAddPollOption)
+                        } icon: {
+                            Image(systemName: "plus.circle")
+                        }
+                        .font(.subheadline)
+                        .frame(minHeight: ZrpMetrics.minTouchTarget)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(ZrpColor.red)
+                }
+
+                // An end date is optional: a poll with no `expiresAt`
+                // never closes, which is what the route stores when the
+                // field is absent.
+                Toggle(isOn: pollExpiryBinding) {
+                    Text(.iosComposePollEnds)
+                        .font(.subheadline)
+                }
+                .tint(ZrpColor.red)
+
+                if viewModel.pollExpiry != nil {
+                    DatePicker(
+                        selection: Binding(
+                            get: { viewModel.pollExpiry ?? Self.defaultPollExpiry },
+                            set: { viewModel.pollExpiry = $0 }
+                        ),
+                        in: Date()...,
+                        displayedComponents: [.date, .hourAndMinute]
+                    ) {
+                        Text(.iosComposePollEnds)
+                    }
+                    .labelsHidden()
+                }
+            }
+            .padding(ZrpSpacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .overlay(
+                RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous)
+                    .strokeBorder(ZrpColor.outline, lineWidth: 1)
+            )
+        }
+    }
+
+    /// A day out, which is the span most polls want and a sane starting
+    /// point for the picker.
+    private static var defaultPollExpiry: Date {
+        Date().addingTimeInterval(24 * 60 * 60)
+    }
+
+    private var pollExpiryBinding: Binding<Bool> {
+        Binding(
+            get: { viewModel.pollExpiry != nil },
+            set: { viewModel.pollExpiry = $0 ? Self.defaultPollExpiry : nil }
+        )
     }
 
     private var characterCounter: some View {

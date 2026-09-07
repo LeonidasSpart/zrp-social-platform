@@ -75,6 +75,39 @@ struct PostInteraction: Equatable {
     }
 }
 
+/// A poll's state for one viewer: what the server sent, plus whatever
+/// this session has done to it.
+struct PollVote: Equatable {
+
+    /// Option index (as the string key JSON uses) to vote count.
+    var counts: [String: Int]
+
+    /// The option this viewer chose, or `nil` if they have not voted.
+    var chosenOption: Int?
+
+    var isVoting = false
+
+    /// The server's own words when a vote is refused - "Already voted",
+    /// "Poll has ended". Shown verbatim; they are real rules, not bugs.
+    var errorMessage: String?
+
+    init(poll: Poll) {
+        counts = poll.votes
+        chosenOption = poll.userVote
+    }
+
+    var total: Int { counts.values.reduce(0, +) }
+
+    func count(forOption index: Int) -> Int { counts["\(index)"] ?? 0 }
+
+    /// Whole percent of the total, or zero when nobody has voted -
+    /// matching the website's own rounding.
+    func percent(forOption index: Int) -> Int {
+        guard total > 0 else { return 0 }
+        return Int((Double(count(forOption: index)) / Double(total) * 100).rounded())
+    }
+}
+
 /// One feed tab's paging state.
 struct FeedState {
 

@@ -37,6 +37,14 @@ final class PostInteractionStore: ObservableObject {
     /// does.
     private var countedViewIDs: Set<String> = []
 
+    /// Poll votes cast in this session, keyed by poll id.
+    ///
+    /// Held apart from `interactions` because a poll belongs to a post
+    /// but is identified by its own id, and because the vote route
+    /// answers `{success: true}` with no tally - so the +1 it just made
+    /// is applied here rather than read back.
+    @Published private(set) var pollVotes: [String: PollVote] = [:]
+
     private let repository: PostsRepositoryProtocol
     private let translations: TranslationRepositoryProtocol
 
@@ -114,6 +122,43 @@ final class PostInteractionStore: ObservableObject {
             }
             settled.isTranslating = false
             interactions[post.id] = settled
+        }
+    }
+
+    /// The poll's state as the viewer should see it: the server's, plus
+    /// any vote cast in this session.
+    func state(for poll: Poll) -> PollVote {
+        pollVotes[poll.id] ?? PollVote(poll: poll)
+    }
+
+    /// Casts a vote. One per person, permanently - the route refuses a
+    /// second with a 400 - so this is not a toggle and offers no undo.
+    func vote(on poll: Poll, optionIndex: Int) {
+        var state = self.state(for: poll)
+        guard state.chosenOption == nil, !state.isVoting, !poll.hasEnded else { return }
+
+        state.isVoting = true
+        state.errorMessage = nil
+        pollVotes[poll.id] = state
+
+        Task { [weak self] in
+            guard let self else { return }
+            var settled = pollVotes[poll.id] ?? state
+            do {
+                try await repository.votePoll(pollId: poll.id, optionIndex: optionIndex)
+                settled.chosenOption = optionIndex
+                // The route increments by exactly one; applying that is
+                // reporting what it did, not guessing at a total.
+                settled.counts["\(optionIndex)"] = (settled.counts["\(optionIndex)"] ?? 0) + 1
+            } catch {
+                // "Already voted" and "Poll has ended" are both real
+                // rules the server states better than the client could.
+                settled.errorMessage = (error as? ApiError)?.serverMessage
+                    ?? (error as? ApiError)?.userFacingMessage
+                    ?? L10n.string(.authErrTryAgain)
+            }
+            settled.isVoting = false
+            pollVotes[poll.id] = settled
         }
     }
 
