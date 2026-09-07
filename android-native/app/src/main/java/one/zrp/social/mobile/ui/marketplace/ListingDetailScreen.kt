@@ -64,9 +64,8 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 /**
  * A single listing - the same real image carousel, description, seller
  * card, and favorite/share/report/contact-seller actions as
- * ListingDetailPage. The owner-only "Edit Listing" link isn't shown -
- * that screen doesn't exist natively yet - so an owner just sees the
- * listing itself without a broken affordance.
+ * ListingDetailPage, including the owner-only "Edit Listing" link in
+ * place of Contact Seller (matching web's own isOwner branch exactly).
  */
 @Composable
 fun ListingDetailScreen(
@@ -74,6 +73,7 @@ fun ListingDetailScreen(
     onBack: () -> Unit,
     onOpenSeller: (String) -> Unit,
     onMessageSeller: (userId: String, username: String) -> Unit,
+    onEditListing: (String) -> Unit,
 ) {
     val viewModel: ListingDetailViewModel = viewModel(
         factory = remember { ListingDetailViewModelFactory(listingId, MarketplaceRepository()) },
@@ -343,7 +343,16 @@ fun ListingDetailScreen(
                             )
                         }
 
-                        if (!isOwner) {
+                        if (isOwner) {
+                            OutlinedButton(
+                                onClick = { onEditListing(listing.id) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = Spacing.md),
+                            ) {
+                                Text(stringResource(R.string.marketplace_edit_listing))
+                            }
+                        } else {
                             Button(
                                 onClick = { onMessageSeller(listing.seller.id, listing.seller.username) },
                                 modifier = Modifier
