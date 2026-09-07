@@ -1,10 +1,12 @@
 package one.zrp.social.mobile.ui.play
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.SportsMartialArts
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -39,11 +42,17 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
  * ZRP PLAY home - ported from PlayHomePage.tsx: hero, own XP bar (when
- * signed in and a profile already exists), today's daily challenge,
- * and a trending-challenges grid.
+ * signed in and a profile already exists), incoming duel invites,
+ * today's daily challenge, active duels, and a trending-challenges
+ * grid.
  */
 @Composable
-fun PlayScreen(onBack: () -> Unit, onChallengeClick: (String) -> Unit) {
+fun PlayScreen(
+    onBack: () -> Unit,
+    onChallengeClick: (String) -> Unit,
+    onOpenDuel: (String) -> Unit,
+    onOpenDuels: () -> Unit,
+) {
     val viewModel: PlayViewModel = viewModel(
         factory = remember { PlayViewModelFactory(PlayRepository()) },
     )
@@ -58,6 +67,10 @@ fun PlayScreen(onBack: () -> Unit, onChallengeClick: (String) -> Unit) {
         ) {
             IconButton(onClick = onBack) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(onClick = onOpenDuels) {
+                Icon(Icons.Filled.SportsMartialArts, contentDescription = stringResource(R.string.play_my_duels))
             }
         }
 
@@ -102,6 +115,27 @@ fun PlayScreen(onBack: () -> Unit, onChallengeClick: (String) -> Unit) {
                         xpForLevel = profile.xpForLevel,
                         modifier = Modifier.padding(top = 16.dp),
                     )
+                }
+            }
+
+            if (state.pendingDuels.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.play_incoming_duels),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 24.dp, bottom = 12.dp),
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    state.pendingDuels.forEach { duel ->
+                        DuelCardView(
+                            duel = duel,
+                            ownUserId = state.ownUserId,
+                            onClick = onOpenDuel,
+                            onAccept = { id -> viewModel.respondToDuel(id, true) },
+                            onDecline = { id -> viewModel.respondToDuel(id, false) },
+                            busy = state.busyDuelId == duel.id,
+                        )
+                    }
                 }
             }
 
@@ -156,6 +190,34 @@ fun PlayScreen(onBack: () -> Unit, onChallengeClick: (String) -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(vertical = 16.dp),
                 )
+            }
+
+            if (state.activeDuels.isNotEmpty()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 24.dp, bottom = 12.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.play_active_duels),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        text = stringResource(R.string.play_view_duels),
+                        color = ZrpRed,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.clickable(onClick = onOpenDuels),
+                    )
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    state.activeDuels.take(3).forEach { duel ->
+                        DuelCardView(duel = duel, ownUserId = state.ownUserId, onClick = onOpenDuel)
+                    }
+                }
             }
 
             Text(

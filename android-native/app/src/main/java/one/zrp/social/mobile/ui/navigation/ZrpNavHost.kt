@@ -76,6 +76,8 @@ import one.zrp.social.mobile.ui.opportunity.OpportunityDetailScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityFormScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityScreen
 import one.zrp.social.mobile.ui.play.PlayChallengeScreen
+import one.zrp.social.mobile.ui.play.PlayDuelDetailScreen
+import one.zrp.social.mobile.ui.play.PlayDuelsScreen
 import one.zrp.social.mobile.ui.play.PlayScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
 import one.zrp.social.mobile.ui.quotes.QuotesScreen
@@ -147,6 +149,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToAidOffers: (String) -> Unit = { id -> navController.navigate("aid/campaign/$id/offers") }
     val goToPlay: () -> Unit = { navController.navigate("play") }
     val goToPlayChallenge: (String) -> Unit = { id -> navController.navigate("play/challenge/$id") }
+    val goToPlayDuels: () -> Unit = { navController.navigate("play/duels") }
+    val goToPlayDuel: (String) -> Unit = { id -> navController.navigate("play/duel/$id") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -605,17 +609,44 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                 PlayScreen(
                     onBack = { navController.popBackStack() },
                     onChallengeClick = goToPlayChallenge,
+                    onOpenDuel = goToPlayDuel,
+                    onOpenDuels = goToPlayDuels,
                 )
             }
             composable(
-                route = "play/challenge/{id}",
+                route = "play/challenge/{id}?duelId={duelId}",
+                arguments = listOf(
+                    navArgument("id") { type = NavType.StringType },
+                    navArgument("duelId") { type = NavType.StringType; nullable = true; defaultValue = null },
+                ),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                val duelId = backStackEntry.arguments?.getString("duelId")
+                if (id != null) {
+                    PlayChallengeScreen(
+                        challengeId = id,
+                        duelId = duelId,
+                        onBack = { navController.popBackStack() },
+                        onViewDuels = goToPlayDuels,
+                    )
+                }
+            }
+            composable("play/duels") {
+                PlayDuelsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenDuel = goToPlayDuel,
+                )
+            }
+            composable(
+                route = "play/duel/{id}",
                 arguments = listOf(navArgument("id") { type = NavType.StringType }),
             ) { backStackEntry ->
                 val id = backStackEntry.arguments?.getString("id")
                 if (id != null) {
-                    PlayChallengeScreen(
-                        challengeId = id,
+                    PlayDuelDetailScreen(
+                        duelId = id,
                         onBack = { navController.popBackStack() },
+                        onPlay = { challengeId, playDuelId -> navController.navigate("play/challenge/$challengeId?duelId=${Uri.encode(playDuelId)}") },
                     )
                 }
             }
