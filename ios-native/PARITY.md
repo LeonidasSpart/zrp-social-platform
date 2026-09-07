@@ -109,7 +109,7 @@ called and the real response being handled.
 | Replies / media / likes / reposts tabs | `/replies`, `/media`, `/likes`, `/reposts` | ✅ | 🔶 | ⬜ | MISSING (Phase 6b) |
 | Follow / unfollow (+ request for private) | `POST /api/users/{username}/follow` | ✅ | ✅ | ✅ (all three outcomes: followed, unfollowed, request pending) | IMPLEMENTED |
 | Followers / Following lists | `/followers`, `/following` → `{items,nextCursor}` | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Edit profile | `PUT /api/user/profile` | ✅ | ✅ | ⬜ | MISSING (Phase 6b) |
+| Edit profile | `PUT /api/user/profile`, `POST /api/user/update-avatar`, `POST /api/user/update-cover` | ✅ | ✅ | ✅ loads the real profile first, so blanks it never read cannot erase a bio | IMPLEMENTED |
 | Suggested users | `GET /api/users/suggested` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Private-account gating | every content route returns `{items: []}`, not 403 | ✅ | 🔶 | ✅ (explains the account is private instead of showing "no posts") | IMPLEMENTED |
 | Trust profile | `GET /api/users/{username}/trust` | ✅ | ⬜ | ⬜ | MISSING |
@@ -233,12 +233,12 @@ called and the real response being handled.
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
 | Report post / comment / listing | `POST /api/reports` | ✅ | ✅ | ✅ posts and listings; the site's exact stored reason strings | IMPLEMENTED |
-| Report a comment | `POST /api/reports` (`commentId`) | ✅ | ✅ | ⬜ modelled and reachable, not yet wired into the comment row | MISSING (Phase 16b) |
+| Report a comment | `POST /api/reports` (`commentId`) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Block / unblock | `POST /api/users/{username}/block` | ✅ | ✅ | ✅ toggle from the blocked list | IMPLEMENTED |
 | Blocked list | `GET /api/users/blocked` (bare array) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Mute / unmute | `GET/POST /api/users/mute` | ✅ | ✅ | ✅ toggle from the muted list | IMPLEMENTED |
 | Muted list | `GET /api/users/muted` (bare array) | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Block / mute **from a profile** | same routes | ✅ | ✅ | ⬜ lists manage existing entries; no entry point on a profile yet | MISSING (Phase 16b) |
+| Block / mute **from a profile** | same routes | ✅ | ✅ | ✅ not offered on your own profile, which the routes refuse anyway | IMPLEMENTED |
 | Appeals | `POST /api/appeals` | ✅ | ⬜ | ⬜ | MISSING |
 | Feed-level block/mute filtering | server-side in `/api/posts/explore` | ✅ | ✅ | ✅ (inherited from server) | IMPLEMENTED |
 
@@ -252,7 +252,7 @@ called and the real response being handled.
 | Account deletion — 30-day schedule / cancel | `GET /api/user/delete-status`, `POST /api/user/delete` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Account deletion — immediate and permanent | `POST /api/user/delete/confirm` | ✅ | ✅ | ✅ typed DELETE gate, as on web | IMPLEMENTED |
 | Data export | `GET /api/settings/export-data` | ✅ | ⬜ | ✅ downloaded to a file and handed to the share sheet | IMPLEMENTED |
-| Account (email, username, profile fields) | `/api/user`, `/api/user/email`, `/username` | ✅ | ✅ | ⬜ | MISSING (Phase 16b) |
+| Account (email, username) | `GET/PUT /api/user/username`, `PUT /api/user/email` | ✅ | ✅ | ✅ 30-day username cooldown surfaced before typing; email change states that it needs verification | IMPLEMENTED |
 | Email preferences | `/api/user/email-preferences` | ✅ | ⬜ | ⬜ | MISSING (Phase 16b) |
 | Language (11 languages, `ar` RTL) | client-side preference | ✅ | ✅ | ✅ in-app picker, generated from the web's `SUPPORTED_LANGUAGES`; sets locale and layout direction | IMPLEMENTED |
 | Plan / limits | `GET /api/user/plan`, `src/lib/limits.ts` | ✅ | ✅ | 🔶 composer and listing forms pre-check what the server enforces; the server's own limit message is shown verbatim | PARTIAL (by design) |

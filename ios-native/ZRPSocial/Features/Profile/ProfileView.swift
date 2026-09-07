@@ -5,6 +5,7 @@ struct ProfileView: View {
 
     @EnvironmentObject private var session: SessionController
     @EnvironmentObject private var interactions: PostInteractionStore
+    @State private var moderationNotice: String?
     @StateObject private var viewModel: ProfileViewModel
 
     init(username: String) {
@@ -26,6 +27,25 @@ struct ProfileView: View {
                         .accessibilityLabel(Text(.profileShare))
                     }
                 }
+
+                // Blocking and muting yourself is refused server-side
+                // (400), so the menu is not offered on your own profile.
+                if let profile = viewModel.profile,
+                   profile.id != session.currentUser?.id {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Menu {
+                            Button { moderate(.block(profile.username)) } label: {
+                                Label { Text(.blockedTitle) } icon: { Image(systemName: "nosign") }
+                            }
+                            Button { moderate(.mute(profile.id)) } label: {
+                                Label { Text(.mutedTitle) } icon: { Image(systemName: "speaker.slash") }
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
+                        }
+                        .accessibilityLabel(Text(.iosA11yPostOptions))
+                    }
+                }
             }
             .task {
                 viewModel.attach(interactions: interactions)
@@ -42,6 +62,17 @@ struct ProfileView: View {
                 Button { viewModel.followNotice = nil } label: { Text(.actionCancel) }
             } message: {
                 Text(verbatim: viewModel.followNotice ?? "")
+            }
+            .alert(
+                Text(.reportModalTitle),
+                isPresented: Binding(
+                    get: { moderationNotice != nil },
+                    set: { if !$0 { moderationNotice = nil } }
+                )
+            ) {
+                Button { moderationNotice = nil } label: { Text(.actionCancel) }
+            } message: {
+                Text(verbatim: moderationNotice ?? "")
             }
     }
 
@@ -118,4 +149,37 @@ struct ProfileView: View {
             onToggleFollow: { Task { await viewModel.toggleFollow() } }
         )
     }
+
+    private enum ModerationAction {
+        case block(String)
+        case mute(String)
+    }
+
+    /// Both routes are toggles that return the state the server settled
+    /// on, so this reports what actually happened rather than assuming
+    /// the action applied.
+    private func moderate(_ action: ModerationAction) {
+        Task {
+            let repository = SettingsRepository()
+            do {
+                switch action {
+                case .block(let username):
+                    let blocked = try await repository.toggleBlock(username: username)
+                    moderationNotice = L10n.string(blocked ? .blockedTitle : .blockedUnblock)
+                case .mute(let userId):
+                    let muted = try await repository.toggleMute(userId: userId)
+                    moderationNotice = L10n.string(muted ? .mutedTitle : .mutedUnmute)
+                }
+                // Blocking severs the follow graph in both directions
+                // server-side, so the profile is refetched rather than
+                // left showing a stale follow state.
+                await viewModel.refresh()
+            } catch {
+                moderationNotice = (error as? ApiError)?.serverMessage
+                    ?? L10n.string(.settingsErrSomethingWrong)
+            }
+        }
+    }
+
+
 }

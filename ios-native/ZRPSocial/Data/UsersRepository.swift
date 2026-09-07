@@ -34,6 +34,10 @@ protocol UsersRepositoryProtocol: Sendable {
     func updateProfile(_ request: ProfileUpdateRequest) async throws
     func setAvatar(url: String) async throws
     func completeOnboarding() async throws
+    func setCover(url: String) async throws
+    func usernameStatus() async throws -> UsernameStatus
+    func changeUsername(_ username: String) async throws
+    func changeEmail(currentPassword: String, newEmail: String) async throws
     func followList(
         _ kind: FollowListKind,
         username: String,
@@ -63,6 +67,29 @@ struct ProfileUpdateRequest: Encodable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case name, bio, location, website
+    }
+}
+
+/// `GET /api/user/username` - the current username and how long until it
+/// can change again.
+///
+/// The route allows one change every 30 days and reports the remaining
+/// days itself, so the screen states the wait instead of letting someone
+/// type a new name and be refused.
+struct UsernameStatus: Decodable, Equatable {
+    let username: String
+    let cooldownDays: Int
+
+    var canChange: Bool { cooldownDays <= 0 }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        username = try container.decodeIfPresent(String.self, forKey: .username) ?? ""
+        cooldownDays = try container.decodeIfPresent(Int.self, forKey: .cooldownDays) ?? 0
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case username, cooldownDays
     }
 }
 
@@ -157,5 +184,48 @@ struct UsersRepository: UsersRepositoryProtocol {
     /// re-reads the session afterwards rather than assuming it locally.
     func completeOnboarding() async throws {
         try await client.sendIgnoringResponse(Endpoint.post("user/onboarding-complete"))
+    }
+
+    /// Points the account at an already-uploaded cover image.
+    ///
+    /// The route rejects any URL that is not on UploadThing's hosts, so
+    /// the image must go through the uploader first - which is what the
+    /// app does anyway.
+    func setCover(url: String) async throws {
+        struct Request: Encodable { let coverUrl: String }
+        try await client.sendIgnoringResponse(
+            try Endpoint.post("user/update-cover", body: Request(coverUrl: url))
+        )
+    }
+
+    func usernameStatus() async throws -> UsernameStatus {
+        try await client.send(Endpoint.get("user/username"))
+    }
+
+    /// One change per 30 days, enforced server-side. Letters, numbers and
+    /// underscores only, 3-20 characters - the same rules registration
+    /// applies.
+    func changeUsername(_ username: String) async throws {
+        struct Request: Encodable { let username: String }
+        try await client.sendIgnoringResponse(
+            try Endpoint.put("user/username", body: Request(username: username))
+        )
+    }
+
+    /// Changing an email requires the current password and does **not**
+    /// take effect immediately: the route sends a verification link to
+    /// the new address and only switches once it is opened. The screen
+    /// says so rather than implying the change is done.
+    func changeEmail(currentPassword: String, newEmail: String) async throws {
+        struct Request: Encodable {
+            let currentPassword: String
+            let newEmail: String
+        }
+        try await client.sendIgnoringResponse(
+            try Endpoint.put(
+                "user/email",
+                body: Request(currentPassword: currentPassword, newEmail: newEmail)
+            )
+        )
     }
 }

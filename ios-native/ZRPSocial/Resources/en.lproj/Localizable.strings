@@ -463,6 +463,40 @@
 "settings.errAvatarUploadFailedGeneric" = "Failed to save avatar";
 "settings.uploading" = "Uploading...";
 "settings.cityPlaceholder" = "Search for a city...";
+"settings.profile" = "Profile";
+"settings.updateProfile" = "Update Profile";
+"settings.displayName" = "Display Name";
+"settings.bio" = "Bio";
+"settings.bioPlaceholder" = "Tell us about yourself...";
+"settings.website" = "Website";
+"settings.websitePlaceholder" = "https://your-website.com";
+"settings.city" = "City";
+"settings.country" = "Country";
+"settings.countryPlaceholder" = "Country";
+"settings.profilePicture" = "Profile Picture";
+"settings.successProfileUpdated" = "Profile updated successfully!";
+"settings.errProfileUpdateFailed" = "Failed to update profile";
+"settings.usernameTitle" = "Username";
+"settings.currentUsername" = "Current Username";
+"settings.newUsername" = "New Username";
+"settings.newUsernamePlaceholder" = "New username";
+"settings.usernameHint" = "Username must be 3-20 characters. Can only be changed once every 30 days.";
+"settings.cooldownNote" = "⏳ You can change your username again in {n} days";
+"settings.changeUsername" = "Change Username";
+"settings.successUsernameUpdated" = "Username updated successfully! You can change it again in 30 days.";
+"settings.errUsernameUpdateFailed" = "Failed to update username";
+"settings.errUsernameSame" = "New username is the same as current";
+"settings.changeEmail" = "Change Email";
+"settings.currentEmail" = "Current Email";
+"settings.newEmail" = "New Email";
+"settings.newEmailPlaceholder" = "Enter new email address";
+"settings.emailVerifyNote" = "A verification link will be sent to the new email address. You must click it to confirm the change.";
+"settings.sendVerificationEmail" = "Send Verification Email";
+"settings.sending" = "Sending...";
+"settings.accountInfo" = "Account Info";
+"settings.uploadProfilePicNote" = "Upload a profile picture. Max 2MB.";
+"settings.errAvatarSaveFailed" = "Failed to save avatar URL";
+"settings.successAvatarUpdated" = "Avatar updated successfully!";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back

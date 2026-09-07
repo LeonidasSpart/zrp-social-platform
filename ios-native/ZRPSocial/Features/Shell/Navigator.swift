@@ -51,6 +51,8 @@ enum Route: Hashable {
     case dataExport
     case deleteAccount
     case languagePicker
+    case editProfile
+    case accountSettings
 }
 
 /// Owns the navigation stack's path.

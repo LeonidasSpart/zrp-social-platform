@@ -20,6 +20,7 @@ struct CommentRowView: View {
 
     @EnvironmentObject private var navigator: Navigator
     @State private var isConfirmingDelete = false
+    @State private var isReporting = false
 
     /// Indentation stops growing after four levels. Deeper replies stay
     /// readable on a 320-point screen instead of collapsing into a
@@ -62,6 +63,9 @@ struct CommentRowView: View {
             Button(role: .destructive) { onDelete() } label: { Text(.actionDelete) }
             Button(role: .cancel) {} label: { Text(.actionCancel) }
         }
+        .sheet(isPresented: $isReporting) {
+            ReportSheet(target: .comment(comment.id))
+        }
     }
 
     private var header: some View {
@@ -97,11 +101,11 @@ struct CommentRowView: View {
                     Text(verbatim: RelativeTime.accessible(from: comment.createdAt))
                 )
 
-            if isOwnComment {
-                // Editing and deleting are author-only and enforced
-                // server-side with a 403; this menu only hides what the
-                // backend would refuse anyway.
-                Menu {
+            Menu {
+                if isOwnComment {
+                    // Editing and deleting are author-only and enforced
+                    // server-side with a 403; this menu only hides what
+                    // the backend would refuse anyway.
                     Button { onEdit() } label: {
                         Label { Text(.actionEdit) } icon: { Image(systemName: "pencil") }
                     }
@@ -110,15 +114,21 @@ struct CommentRowView: View {
                     } label: {
                         Label { Text(.actionDelete) } icon: { Image(systemName: "trash") }
                     }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.caption)
-                        .foregroundStyle(ZrpColor.onSurfaceMuted)
-                        .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
-                        .contentShape(Rectangle())
+                } else {
+                    // Reporting your own comment is meaningless when you
+                    // can simply delete it.
+                    Button { isReporting = true } label: {
+                        Label { Text(.reportModalTitle) } icon: { Image(systemName: "flag") }
+                    }
                 }
-                .accessibilityLabel(Text(.iosA11yPostOptions))
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.caption)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                    .contentShape(Rectangle())
             }
+            .accessibilityLabel(Text(.iosA11yPostOptions))
         }
     }
 

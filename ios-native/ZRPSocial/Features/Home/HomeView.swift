@@ -99,6 +99,10 @@ struct HomeView: View {
                     DeleteAccountView()
                 case .languagePicker:
                     LanguagePickerView()
+                case .editProfile:
+                    EditProfileView()
+                case .accountSettings:
+                    AccountSettingsView()
                 case .listingConversation(let partner, let draft):
                     ConversationView(
                         partner: partner,

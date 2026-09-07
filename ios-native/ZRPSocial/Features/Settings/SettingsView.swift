@@ -12,6 +12,12 @@ struct SettingsView: View {
     var body: some View {
         List {
             Section {
+                NavigationLink(value: Route.editProfile) {
+                    Label { Text(.settingsProfile) } icon: { Image(systemName: "person.crop.circle") }
+                }
+                NavigationLink(value: Route.accountSettings) {
+                    Label { Text(.settingsAccountInfo) } icon: { Image(systemName: "at") }
+                }
                 NavigationLink(value: Route.languagePicker) {
                     Label { Text(.navLanguage) } icon: { Image(systemName: "globe") }
                 }
