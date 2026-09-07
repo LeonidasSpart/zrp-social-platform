@@ -105,6 +105,7 @@ protocol UsersRepositoryProtocol: Sendable {
     func changeEmail(currentPassword: String, newEmail: String) async throws
     func userList(_ source: UserListSource, cursor: String?) async throws -> FollowListPage
     func hashtagPosts(tag: String) async throws -> [Post]
+    func trustPassport(username: String) async throws -> TrustPassport
 }
 
 /// `PUT /api/user/profile` - the route onboarding and the profile editor
@@ -232,6 +233,16 @@ struct UsersRepository: UsersRepositoryProtocol {
     /// that rather than showing a "load more" that has nothing to load.
     func hashtagPosts(tag: String) async throws -> [Post] {
         try await client.send(Endpoint.get("posts/hashtag/\(escaped(tag))"))
+    }
+
+    /// `GET /api/users/{username}/trust`.
+    ///
+    /// Every point and the total are computed server-side - the route's
+    /// own comment says a client must never calculate the score - so
+    /// nothing is derived here beyond the ring's fraction, which is the
+    /// reported score over the reported maximum.
+    func trustPassport(username: String) async throws -> TrustPassport {
+        try await client.send(Endpoint.get("users/\(escaped(username))/trust"))
     }
 
     /// Usernames and hashtags reach these methods from post text, so they

@@ -59,6 +59,7 @@ enum Route: Hashable {
     case accountSettings
     case emailPreferences
     case appeals
+    case trustPassport(username: String)
 }
 
 /// Owns the navigation stack's path.

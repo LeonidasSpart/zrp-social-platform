@@ -526,6 +526,30 @@
 "appeals.statusUpheld" = "Upheld";
 "appeals.statusOverturned" = "Overturned";
 "adminReports.actionOther" = "Other";
+"trust.headerTitle" = "ZRP Trust Passport";
+"trust.headerSubtitle" = "Transparent trust signals";
+"trust.outOf100" = "/ 100";
+"trust.scoreFootnote" = "Score is automatically calculated from available ZRP trust signals.";
+"trust.statPosts" = "Posts";
+"trust.statFollowers" = "Followers";
+"trust.statOnZrp" = "On ZRP";
+"trust.accountHistoryTitle" = "Account history";
+"trust.joinedIn" = "Joined ZRP in {date}.";
+"trust.accountAgeLabel" = "Account age:";
+"trust.daysSuffix" = "{days} days.";
+"trust.accountAgeFootnote" = "Account age is automatically calculated from the original account creation date.";
+"trust.trustSignalsTitle" = "Trust signals";
+"trust.trustSignalsSubtitle" = "Public signals used to calculate this passport.";
+"trust.additionalSignalsHeading" = "Additional Signals";
+"trust.additionalSignalsNote" = "These don't affect the score above - they're shown separately as extra context.";
+"trust.whatItMeansTitle" = "What the Trust Passport means";
+"trust.whatItMeansDesc" = "The Trust Passport provides a transparent view of positive account signals available on ZRP. It is not an identity verification system and does not guarantee a person's identity, intentions, or future behavior.";
+"trust.transparencyNotice" = "The ZRP Trust Passport is based on account and community signals available on ZRP. Scores are automatically recalculated when the underlying account information or activity changes. The passport does not expose email addresses, IP addresses, private messages, moderation reports, or other private account information.";
+"trust.privateAccountTitle" = "Private account";
+"trust.privateAccountDesc" = "Some profile activity is intentionally private. The Trust Passport does not expose private account information.";
+"trust.unavailableTitle" = "Trust Passport unavailable";
+"trust.notFoundFallback" = "This account could not be found.";
+"trust.errUnableToLoad" = "Unable to load this Trust Passport.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back

@@ -109,6 +109,8 @@ struct HomeView: View {
                     EmailPreferencesView()
                 case .appeals:
                     AppealsView()
+                case .trustPassport(let username):
+                    TrustPassportView(username: username)
                 case .listingConversation(let partner, let draft):
                     ConversationView(
                         partner: partner,

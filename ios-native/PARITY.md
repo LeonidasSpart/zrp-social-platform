@@ -115,7 +115,7 @@ called and the real response being handled.
 | Edit profile | `PUT /api/user/profile`, `POST /api/user/update-avatar`, `POST /api/user/update-cover` | ✅ | ✅ | ✅ loads the real profile first, so blanks it never read cannot erase a bio | IMPLEMENTED |
 | Suggested users | `GET /api/users/suggested` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Private-account gating | every content route returns `{items: []}`, not 403 | ✅ | 🔶 | ✅ (explains the account is private instead of showing "no posts") | IMPLEMENTED |
-| Trust profile | `GET /api/users/{username}/trust` | ✅ | ⬜ | ⬜ | MISSING |
+| Trust Passport | `GET /api/users/{username}/trust` — score, level, per-signal points and the breakdown are all computed server-side; the route's own comment says a client must never calculate them | ✅ | ⬜ | ✅ reached from any profile's menu; nothing is derived beyond the ring's fraction (reported score ÷ reported maximum), and signal titles arrive in English because the route hardcodes them — see L5 | IMPLEMENTED |
 
 ### Discovery
 
@@ -367,6 +367,23 @@ album route does (one `musicLike.findMany` over the playlist's track ids)
 would fix it for web, Android and iOS at once.
 
 Noted, not worked around.
+
+### L5. The Trust Passport's signal text is hardcoded English
+
+`GET /api/users/{username}/trust` builds its `breakdown` and `signals`
+with English `title` and `description` strings written into the route
+("Email verified", "Positive profile completeness signals."), and the
+level's own `levelLabel` likewise. None of them exist in
+`src/lib/translations.ts`, so there is nothing to translate against.
+
+The website has the same limitation: it translates its own chrome and
+renders the route's strings as they arrive. iOS does the same rather
+than inventing a dictionary for values the backend can add to at any
+time — a guessed label is worse than an untranslated one on a screen
+whose whole point is transparency.
+
+Moving those strings into the shared dictionary, or having the route
+send keys rather than prose, would fix it for every client at once.
 
 ### L4. The email-preference setting is enforced but unreachable
 

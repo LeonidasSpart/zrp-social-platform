@@ -5,6 +5,7 @@ struct ProfileView: View {
 
     @EnvironmentObject private var session: SessionController
     @EnvironmentObject private var interactions: PostInteractionStore
+    @EnvironmentObject private var navigator: Navigator
     @State private var moderationNotice: String?
     @StateObject private var viewModel: ProfileViewModel
 
@@ -28,17 +29,43 @@ struct ProfileView: View {
                     }
                 }
 
-                // Blocking and muting yourself is refused server-side
-                // (400), so the menu is not offered on your own profile.
-                if let profile = viewModel.profile,
-                   profile.id != session.currentUser?.id {
+                // The menu is offered on every profile now that it
+                // carries the Trust Passport, which reads the same for
+                // any account. Its moderation items are still gated
+                // below.
+                if let profile = viewModel.profile {
                     ToolbarItem(placement: .topBarTrailing) {
                         Menu {
-                            Button { moderate(.block(profile.username)) } label: {
-                                Label { Text(.blockedTitle) } icon: { Image(systemName: "nosign") }
+                            // The Trust Passport is public and reads the
+                            // same for any account, including your own.
+                            Button {
+                                navigator.push(.trustPassport(username: profile.username))
+                            } label: {
+                                Label {
+                                    Text(.trustHeaderTitle)
+                                } icon: {
+                                    Image(systemName: "checkmark.seal")
+                                }
                             }
-                            Button { moderate(.mute(profile.id)) } label: {
-                                Label { Text(.mutedTitle) } icon: { Image(systemName: "speaker.slash") }
+
+                            // Blocking and muting yourself is refused
+                            // server-side (400), so neither is offered on
+                            // your own profile.
+                            if profile.id != session.currentUser?.id {
+                                Button { moderate(.block(profile.username)) } label: {
+                                    Label {
+                                        Text(.blockedTitle)
+                                    } icon: {
+                                        Image(systemName: "nosign")
+                                    }
+                                }
+                                Button { moderate(.mute(profile.id)) } label: {
+                                    Label {
+                                        Text(.mutedTitle)
+                                    } icon: {
+                                        Image(systemName: "speaker.slash")
+                                    }
+                                }
                             }
                         } label: {
                             Image(systemName: "ellipsis.circle")
