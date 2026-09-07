@@ -36,7 +36,7 @@ import coil.compose.AsyncImage
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.network.ListingSummary
 import one.zrp.social.mobile.ui.theme.Spacing
-import ZrpRed
+import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
  * Ported from src/components/ListingCard.tsx - same cover image, video

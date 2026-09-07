@@ -90,7 +90,7 @@ fun MarketplaceScreen(onBack: () -> Unit, onListingClick: (String) -> Unit, onOp
             text = stringResource(R.string.marketplace_hero_subtitle),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 16.dp, bottom = 8.dp),
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
         )
 
         Row(
