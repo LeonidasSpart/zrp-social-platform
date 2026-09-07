@@ -118,6 +118,12 @@
 "messages.deleteConversation" = "删除 对话";
 "messages.deleteConfirm" = "删除此对话？所有消息都将被删除。";
 "messages.errDeleteFailed" = "失败 to 删除 对话";
+"chat.typing" = "正在输入...";
+"chat.contactProfile" = "个人资料";
+"chat.contactMore" = "更多";
+"chat.block" = "屏蔽";
+"chat.sharedMedia" = "共享媒体";
+"chat.noSharedMedia" = "暂无共享照片";
 "chat.deleteMessage" = "删除 消息";
 "chat.deleteMessageConfirm" = "你确定要删除这条消息吗？";
 "notifications.title" = "通知";

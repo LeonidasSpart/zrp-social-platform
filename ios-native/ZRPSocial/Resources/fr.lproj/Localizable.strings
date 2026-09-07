@@ -118,6 +118,12 @@
 "messages.deleteConversation" = "Supprimer la conversation";
 "messages.deleteConfirm" = "Supprimer cette conversation ? Tous les messages seront supprimés.";
 "messages.errDeleteFailed" = "Échec de la suppression de la conversation";
+"chat.typing" = "En train d'écrire...";
+"chat.contactProfile" = "Profil";
+"chat.contactMore" = "Plus";
+"chat.block" = "Bloquer";
+"chat.sharedMedia" = "Médias partagés";
+"chat.noSharedMedia" = "Aucune photo partagée pour l'instant";
 "chat.deleteMessage" = "Supprimer le message";
 "chat.deleteMessageConfirm" = "Voulez-vous vraiment supprimer ce message ?";
 "notifications.title" = "Notifications";

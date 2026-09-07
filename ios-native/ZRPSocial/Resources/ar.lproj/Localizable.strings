@@ -118,6 +118,12 @@
 "messages.deleteConversation" = "حذف محادثة";
 "messages.deleteConfirm" = "حذف هذه المحادثة؟ سيتم حذف جميع الرسائل.";
 "messages.errDeleteFailed" = "تعذر to حذف محادثة";
+"chat.typing" = "يكتب...";
+"chat.contactProfile" = "الملف الشخصي";
+"chat.contactMore" = "المزيد";
+"chat.block" = "حظر";
+"chat.sharedMedia" = "الوسائط المشتركة";
+"chat.noSharedMedia" = "لا توجد صور مشتركة بعد";
 "chat.deleteMessage" = "حذف رسالة";
 "chat.deleteMessageConfirm" = "هل أنت متأكد أنك تريد حذف هذه الرسالة؟";
 "notifications.title" = "الإشعارات";

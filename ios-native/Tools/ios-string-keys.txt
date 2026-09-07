@@ -145,6 +145,12 @@ messages.you
 messages.deleteConversation
 messages.deleteConfirm
 messages.errDeleteFailed
+chat.typing
+chat.contactProfile
+chat.contactMore
+chat.block
+chat.sharedMedia
+chat.noSharedMedia
 chat.deleteMessage
 chat.deleteMessageConfirm
 

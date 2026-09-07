@@ -118,6 +118,12 @@
 "messages.deleteConversation" = "Fshi bisedën";
 "messages.deleteConfirm" = "Të fshihet kjo bisedë? Të gjitha mesazhet do të hiqen.";
 "messages.errDeleteFailed" = "Fshirja e bisedës dështoi";
+"chat.typing" = "Duke shkruar...";
+"chat.contactProfile" = "Profili";
+"chat.contactMore" = "Më shumë";
+"chat.block" = "Blloko";
+"chat.sharedMedia" = "Media të ndara";
+"chat.noSharedMedia" = "Ende pa foto të ndara";
 "chat.deleteMessage" = "Fshi mesazhin";
 "chat.deleteMessageConfirm" = "Jeni të sigurt që dëshironi ta fshini këtë mesazh?";
 "notifications.title" = "Njoftimet";

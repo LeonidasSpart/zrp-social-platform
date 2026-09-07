@@ -118,6 +118,12 @@
 "messages.deleteConversation" = "Hapus percakapan";
 "messages.deleteConfirm" = "Hapus percakapan ini? Semua pesan akan dihapus.";
 "messages.errDeleteFailed" = "Gagal menghapus percakapan";
+"chat.typing" = "Sedang mengetik...";
+"chat.contactProfile" = "Profil";
+"chat.contactMore" = "Lainnya";
+"chat.block" = "Blokir";
+"chat.sharedMedia" = "Media yang dibagikan";
+"chat.noSharedMedia" = "Belum ada foto yang dibagikan";
 "chat.deleteMessage" = "Hapus pesan";
 "chat.deleteMessageConfirm" = "Apakah Anda yakin ingin menghapus pesan ini?";
 "notifications.title" = "Notifikasi";

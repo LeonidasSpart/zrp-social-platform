@@ -118,6 +118,12 @@
 "messages.deleteConversation" = "Sohbeti sil";
 "messages.deleteConfirm" = "Bu sohbet silinsin mi? Tüm mesajlar kaldırılacaktır.";
 "messages.errDeleteFailed" = "Sohbet silinemedi";
+"chat.typing" = "Yazıyor...";
+"chat.contactProfile" = "Profil";
+"chat.contactMore" = "Daha fazla";
+"chat.block" = "Engelle";
+"chat.sharedMedia" = "Paylaşılan medya";
+"chat.noSharedMedia" = "Henüz paylaşılan fotoğraf yok";
 "chat.deleteMessage" = "Mesajı sil";
 "chat.deleteMessageConfirm" = "Bu mesajı silmek istediğinizden emin misiniz?";
 "notifications.title" = "Bildirimler";

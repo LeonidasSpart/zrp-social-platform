@@ -18,6 +18,8 @@ struct ConversationView: View {
     /// chat offers.
     private let quickReactions = ["👍", "❤️", "😂", "😮", "😢", "🙏"]
 
+    @State private var isShowingContact = false
+
     init(partner: PostAuthor, viewerId: String?, initialDraft: String = "") {
         _viewModel = StateObject(
             wrappedValue: ConversationViewModel(
@@ -34,9 +36,32 @@ struct ConversationView: View {
             .navigationTitle(Text(verbatim: viewModel.partner.displayName))
             .navigationBarTitleDisplayMode(.inline)
             .safeAreaInset(edge: .bottom) { composer }
+            // The server's own `user-typing` relay, not a local guess.
+            .overlay(alignment: .top) { typingIndicator }
+            .onChange(of: viewModel.draft) { _, text in
+                guard !text.isEmpty else { return }
+                viewModel.reportTyping()
+            }
             .onChange(of: pickerSelection) { _, items in
                 guard !items.isEmpty else { return }
                 Task { await loadPickedImage(items) }
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { isShowingContact = true } label: {
+                        AvatarView(
+                            url: viewModel.partner.avatarUrl,
+                            displayName: viewModel.partner.displayName,
+                            size: 28
+                        )
+                    }
+                    .accessibilityLabel(
+                        Text(.iosA11yOpenProfile, ["name": viewModel.partner.displayName])
+                    )
+                }
+            }
+            .sheet(isPresented: $isShowingContact) {
+                ChatContactSheet(partner: viewModel.partner, messages: viewModel.messages)
             }
             .task { await viewModel.start() }
             .onDisappear { viewModel.stop() }
@@ -113,6 +138,21 @@ struct ConversationView: View {
                 guard let last = viewModel.messages.last else { return }
                 proxy.scrollTo(last.id, anchor: .bottom)
             }
+        }
+    }
+
+    @ViewBuilder
+    private var typingIndicator: some View {
+        if viewModel.partnerIsTyping {
+            Text(.chatTyping)
+                .font(.caption)
+                .foregroundStyle(ZrpColor.onSurfaceMuted)
+                .padding(.horizontal, ZrpSpacing.md)
+                .padding(.vertical, ZrpSpacing.xs)
+                .background(ZrpColor.surfaceElevated, in: Capsule())
+                .padding(.top, ZrpSpacing.sm)
+                .transition(.opacity)
+                .animation(.easeInOut(duration: 0.15), value: viewModel.partnerIsTyping)
         }
     }
 

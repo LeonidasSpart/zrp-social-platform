@@ -104,6 +104,9 @@ final class SessionController: ObservableObject {
     }
 
     func signOut() async {
+        // Before the token goes: a socket authenticated as this viewer
+        // must not outlive them on a shared device.
+        ZrpSocket.shared.disconnect()
         await repository.logout()
         expiryNotice = nil
         state = .signedOut
@@ -111,6 +114,7 @@ final class SessionController: ObservableObject {
 
     private func handleSessionExpired() {
         guard state != .signedOut else { return }
+        ZrpSocket.shared.disconnect()
         state = .signedOut
         expiryNotice = L10n.string(.authErrSessionExpired)
     }

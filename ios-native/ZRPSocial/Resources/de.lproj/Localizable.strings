@@ -118,6 +118,12 @@
 "messages.deleteConversation" = "Unterhaltung löschen";
 "messages.deleteConfirm" = "Diese Unterhaltung löschen? Alle Nachrichten werden entfernt.";
 "messages.errDeleteFailed" = "Löschen der Unterhaltung fehlgeschlagen";
+"chat.typing" = "Tippt gerade...";
+"chat.contactProfile" = "Profil";
+"chat.contactMore" = "Mehr";
+"chat.block" = "Blockieren";
+"chat.sharedMedia" = "Geteilte Medien";
+"chat.noSharedMedia" = "Noch keine geteilten Fotos";
 "chat.deleteMessage" = "Nachricht löschen";
 "chat.deleteMessageConfirm" = "Möchtest du diese Nachricht wirklich löschen?";
 "notifications.title" = "Benachrichtigungen";
