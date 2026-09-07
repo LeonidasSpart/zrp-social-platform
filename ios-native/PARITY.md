@@ -156,7 +156,7 @@ called and the real response being handled.
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
 | Conversation list | `GET /api/messages` (bare array; partner, last message, unread count) | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Thread | `GET /api/messages/{userId}` — **unpaginated**, see [L1](#l1-message-threads-are-unpaginated) | ✅ | ✅ | ✅ (no paging UI, because there is nothing to page) | IMPLEMENTED |
+| Thread | `GET /api/messages/{userId}` — now cursor-paginated (`?cursor=`/`?limit=`), see [L1](#l1-message-threads-are-unpaginated) | ✅ | ✅ | ⬜ backend no longer blocks it — a "load older messages" control is outstanding client-side work, not built here | IMPLEMENTED |
 | Send message | `POST /api/messages` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Edit / delete message | `PUT /api/messages/edit/{id}`, `DELETE /delete/{id}` | ✅ | ✅ | ✅ (sender-only, 403-enforced) | IMPLEMENTED |
 | Reactions | `POST /api/messages/reaction/{id}` — one per person; same emoji removes, different replaces | ✅ | ✅ | ✅ | IMPLEMENTED |
@@ -331,23 +331,33 @@ both still blocked server-side (B2, B3 below).
 
 ## Known backend limitations
 
-### L1. Message threads are unpaginated
+### L1. Message threads are unpaginated - **FIXED server-side**
 
-`GET /api/messages/{userId}` runs a `findMany` with no `take`, no cursor
-and no limit: it returns **every message ever exchanged** with that user,
-oldest first, with each message's sender, `replyTo` and reactions
-included. A long-running conversation therefore transfers its entire
-history on every open - and, because the client polls while a thread is
-open, on every poll.
+`GET /api/messages/{userId}` used to run a `findMany` with no `take`, no
+cursor and no limit: it returned **every message ever exchanged** with
+that user, oldest first, with each message's sender, `replyTo` and
+reactions included. A long-running conversation therefore transferred its
+entire history on every open - and, because the client polls while a
+thread is open, on every poll.
 
-This is not something a client can fix. The iOS app deliberately shows no
-"load more" control, since there is nothing to page, and polls at a
-deliberately unaggressive 6 seconds to limit the cost. Adding `cursor`
-and `limit` to that route (defaulting to the newest N, as the comments
-route already does) would fix it for web, Android and iOS at once.
+The route now accepts `src/lib/pagination.ts`'s standard `?cursor=`/
+`?limit=` params, the same convention every other paginated route in this
+app uses, ordered newest-first internally and reversed back to
+chronological order in the response. It stays **request-shape backward
+compatible**: a request with neither param (what web's `ChatInterface.tsx`
+and the shipped Android app both still send) gets the newest page as a
+bare array - byte-for-byte the old response shape, just capped at 100
+messages instead of unbounded - while a request that supplies `cursor`
+and/or `limit` gets the `{items, nextCursor}` envelope every other
+paginated route already returns. Opening a conversation still marks the
+whole thread's unread messages read regardless of page size, unchanged
+from before.
 
-Noted, not worked around. No client-side change was made that would mask
-it.
+What remains is client-side, not a backend blocker: a "load older
+messages" control that calls this with `cursor`/`limit` once a thread's
+history exceeds one page. Not built here - the iOS app's own explanation
+above ("no paging UI, because there is nothing to page") no longer holds
+now that there's something to page.
 
 ### L2. `GET /api/music/playlists/{id}` does not report per-track `liked`
 
