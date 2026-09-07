@@ -503,3 +503,12 @@
 "quotes.title" = "引用";
 "quotes.empty" = "暂无引用。";
 "quotes.count" = "{n} 引用";
+"profile.replies" = "回复";
+"profile.media" = "媒体";
+"profile.likes" = "点赞";
+"profile.reposts" = "转发";
+"profile.noReplies" = "暂无回复。";
+"profile.noMedia" = "暂无媒体。";
+"profile.noLikes" = "暂无点赞。";
+"profile.noReposts" = "暂无转发。";
+"profile.pinned" = "已置顶";

@@ -19,6 +19,15 @@ struct PostListView<Header: View>: View {
     /// host can show it without a refetch.
     var onCreated: (Post) -> Void = { _ in }
 
+    /// Called to pin or unpin one of the viewer's own posts. `nil` on
+    /// every list except a profile's own, where a pin is meaningful and
+    /// its result is visible.
+    var onPin: ((Post) -> Void)?
+
+    /// The author's currently pinned post, so the menu can offer Unpin
+    /// on it and Pin on the rest.
+    var pinnedPostId: String?
+
     /// Rendered above the first post - a profile header, a hashtag
     /// summary, or nothing. Generic rather than type-erased so a header
     /// costs nothing when a screen does not have one.
@@ -58,7 +67,9 @@ struct PostListView<Header: View>: View {
                     onEdit: {
                         editDraft = interactions.displayContent(for: post)
                         editing = post
-                    }
+                    },
+                    onPin: onPin.map { pin in { pin(post) } },
+                    isPinned: post.id == pinnedPostId
                 )
                 .onAppear { onAppear(post) }
             }

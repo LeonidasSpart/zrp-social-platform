@@ -503,3 +503,12 @@
 "quotes.title" = "اقتباسات";
 "quotes.empty" = "لا توجد اقتباسات بعد.";
 "quotes.count" = "{n} اقتباسات";
+"profile.replies" = "الردود";
+"profile.media" = "الوسائط";
+"profile.likes" = "الإعجابات";
+"profile.reposts" = "إعادات النشر";
+"profile.noReplies" = "لا توجد ردود بعد.";
+"profile.noMedia" = "لا توجد وسائط بعد.";
+"profile.noLikes" = "لا توجد إعجابات بعد.";
+"profile.noReposts" = "لا توجد إعادات نشر بعد.";
+"profile.pinned" = "مثبّت";

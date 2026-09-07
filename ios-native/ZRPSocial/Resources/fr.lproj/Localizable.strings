@@ -503,3 +503,12 @@
 "quotes.title" = "Citations";
 "quotes.empty" = "Aucune citation pour le moment.";
 "quotes.count" = "{n} citations";
+"profile.replies" = "Réponses";
+"profile.media" = "Médias";
+"profile.likes" = "J'aime";
+"profile.reposts" = "Republications";
+"profile.noReplies" = "Aucune réponse pour le moment.";
+"profile.noMedia" = "Aucun média pour le moment.";
+"profile.noLikes" = "Aucun j'aime pour le moment.";
+"profile.noReposts" = "Aucune republication pour le moment.";
+"profile.pinned" = "Épinglé";

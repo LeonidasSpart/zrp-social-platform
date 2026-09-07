@@ -503,6 +503,15 @@
 "quotes.title" = "Quotes";
 "quotes.empty" = "No quotes yet.";
 "quotes.count" = "{n} quotes";
+"profile.replies" = "Replies";
+"profile.media" = "Media";
+"profile.likes" = "Likes";
+"profile.reposts" = "Reposts";
+"profile.noReplies" = "No replies yet.";
+"profile.noMedia" = "No media yet.";
+"profile.noLikes" = "No likes yet.";
+"profile.noReposts" = "No reposts yet.";
+"profile.pinned" = "Pinned";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back
@@ -603,3 +612,5 @@
 "ios.auth.verifyOnWebNote" = "The link opens in your browser and signs you in here once you return.";
 "ios.post.addReaction" = "Add a reaction";
 "ios.post.reactions" = "Reactions";
+"ios.post.pin" = "Pin to profile";
+"ios.post.unpin" = "Unpin from profile";

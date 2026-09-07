@@ -538,3 +538,12 @@ reposts.count
 quotes.title
 quotes.empty
 quotes.count
+profile.replies
+profile.media
+profile.likes
+profile.reposts
+profile.noReplies
+profile.noMedia
+profile.noLikes
+profile.noReposts
+profile.pinned

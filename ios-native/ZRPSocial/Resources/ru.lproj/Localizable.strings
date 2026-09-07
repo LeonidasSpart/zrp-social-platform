@@ -503,3 +503,12 @@
 "quotes.title" = "цитат";
 "quotes.empty" = "Пока нет цитат.";
 "quotes.count" = "{n} цитат";
+"profile.replies" = "Ответы";
+"profile.media" = "Медиа";
+"profile.likes" = "Отметки «Нравится»";
+"profile.reposts" = "Репосты";
+"profile.noReplies" = "Пока нет ответов.";
+"profile.noMedia" = "Пока нет медиа.";
+"profile.noLikes" = "Пока нет отметок «Нравится».";
+"profile.noReposts" = "Пока нет репостов.";
+"profile.pinned" = "Закреплено";

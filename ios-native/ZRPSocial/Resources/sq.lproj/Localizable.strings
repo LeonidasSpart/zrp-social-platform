@@ -503,3 +503,12 @@
 "quotes.title" = "Citimet";
 "quotes.empty" = "Nuk ka citime ende.";
 "quotes.count" = "{n} citime";
+"profile.replies" = "Përgjigje";
+"profile.media" = "Media";
+"profile.likes" = "Pëlqime";
+"profile.reposts" = "Ripublikimet";
+"profile.noReplies" = "Nuk ka përgjigje ende.";
+"profile.noMedia" = "Nuk ka media ende.";
+"profile.noLikes" = "Nuk ka pëlqime ende.";
+"profile.noReposts" = "Nuk ka ripublikime ende.";
+"profile.pinned" = "Fiksuar";

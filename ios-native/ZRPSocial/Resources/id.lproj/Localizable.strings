@@ -503,3 +503,12 @@
 "quotes.title" = "Kutipan";
 "quotes.empty" = "Belum ada kutipan.";
 "quotes.count" = "{n} kutipan";
+"profile.replies" = "Balasan";
+"profile.media" = "Media";
+"profile.likes" = "Suka";
+"profile.reposts" = "Repost";
+"profile.noReplies" = "Belum ada balasan.";
+"profile.noMedia" = "Belum ada media.";
+"profile.noLikes" = "Belum ada yang disukai.";
+"profile.noReposts" = "Belum ada repost.";
+"profile.pinned" = "Disematkan";

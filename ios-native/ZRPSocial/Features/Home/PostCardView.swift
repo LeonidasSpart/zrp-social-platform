@@ -24,6 +24,16 @@ struct PostCardView: View {
     var onQuote: () -> Void = {}
     var onEdit: () -> Void = {}
 
+    /// Pinning is offered only where a pin is meaningful and its result
+    /// is visible - a profile. `nil` everywhere else, which is why this
+    /// is an optional closure rather than a no-op default: an item that
+    /// does nothing is worse than no item.
+    var onPin: (() -> Void)?
+
+    /// Whether this post is the author's currently pinned one, so the
+    /// item can say Pin or Unpin. Only meaningful alongside `onPin`.
+    var isPinned: Bool = false
+
     @State private var isConfirmingDelete = false
     @State private var isReporting = false
     @EnvironmentObject private var navigator: Navigator
@@ -144,6 +154,18 @@ struct PostCardView: View {
                 // backend would refuse anyway.
                 Button(action: onEdit) {
                     Label { Text(.actionEdit) } icon: { Image(systemName: "pencil") }
+                }
+                if let onPin {
+                    // One pin per account: pinning another post replaces
+                    // this one server-side, which is what the website
+                    // does too.
+                    Button(action: onPin) {
+                        Label {
+                            Text(isPinned ? L10nKey.iosPostUnpin : L10nKey.iosPostPin)
+                        } icon: {
+                            Image(systemName: isPinned ? "pin.slash" : "pin")
+                        }
+                    }
                 }
                 Button(role: .destructive) {
                     isConfirmingDelete = true

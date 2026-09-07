@@ -63,6 +63,7 @@ protocol PostsRepositoryProtocol: Sendable {
     func reactions(postId: String) async throws -> [PostReaction]
     func toggleReaction(postId: String, emoji: String) async throws -> Bool
     func quotes(postId: String, cursor: String?) async throws -> PostsPage
+    func togglePin(postId: String) async throws -> Bool
 }
 
 /// One emoji reaction on a post, from `GET /api/posts/{id}/reaction`.
@@ -197,6 +198,22 @@ struct PostsRepository: PostsRepositoryProtocol {
         )
         // `{reaction: null}` means it was removed.
         return response.reaction != nil
+    }
+
+    // MARK: - Pin
+
+    /// `POST /api/posts/{id}/pin` toggles the author's single pinned
+    /// post and answers `{pinned}`.
+    ///
+    /// One pin per ACCOUNT, not per post: pinning a second post replaces
+    /// the first server-side, silently. Author-only, refused with a 403
+    /// for anyone else.
+    func togglePin(postId: String) async throws -> Bool {
+        struct Response: Decodable { let pinned: Bool }
+        let response: Response = try await client.send(
+            Endpoint.post("posts/\(Endpoint.segment(postId))/pin")
+        )
+        return response.pinned
     }
 
     // MARK: - Quotes

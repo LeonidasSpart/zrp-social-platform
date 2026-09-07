@@ -503,3 +503,12 @@
 "quotes.title" = "Citas";
 "quotes.empty" = "Aún no hay citas.";
 "quotes.count" = "{n} citas";
+"profile.replies" = "Respuestas";
+"profile.media" = "Multimedia";
+"profile.likes" = "Me gusta";
+"profile.reposts" = "Republicaciones";
+"profile.noReplies" = "Aún no hay respuestas.";
+"profile.noMedia" = "Aún no hay contenido multimedia.";
+"profile.noLikes" = "Aún no hay Me gusta.";
+"profile.noReposts" = "Aún no hay republicaciones.";
+"profile.pinned" = "Fijado";

@@ -46,9 +46,55 @@ enum UserListSource: Hashable {
     }
 }
 
+/// The tabs on a profile that list POSTS.
+///
+/// Four routes with four different underlying queries - authored posts,
+/// reposts, posts carrying media, liked posts - that all answer the same
+/// `{items, nextCursor}` envelope of post rows, so one loader serves all
+/// four. Replies are deliberately NOT here: that route returns a
+/// different shape entirely (see `ProfileReply`).
+enum ProfilePostsTab: String, CaseIterable, Hashable {
+    case posts
+    case reposts
+    case media
+    case likes
+
+    var titleKey: L10nKey {
+        switch self {
+        case .posts: return .profilePosts
+        case .reposts: return .profileReposts
+        case .media: return .profileMedia
+        case .likes: return .profileLikes
+        }
+    }
+
+    var emptyKey: L10nKey {
+        switch self {
+        case .posts: return .profileNoPosts
+        case .reposts: return .profileNoReposts
+        case .media: return .profileNoMedia
+        case .likes: return .profileNoLikes
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .posts: return "square.stack"
+        case .reposts: return "arrow.2.squarepath"
+        case .media: return "photo"
+        case .likes: return "heart"
+        }
+    }
+}
+
 protocol UsersRepositoryProtocol: Sendable {
     func profile(username: String) async throws -> UserProfile
-    func posts(username: String, cursor: String?) async throws -> PostsPage
+    func tabPosts(
+        _ tab: ProfilePostsTab,
+        username: String,
+        cursor: String?
+    ) async throws -> PostsPage
+    func replies(username: String, cursor: String?) async throws -> ProfileRepliesPage
     func toggleFollow(username: String) async throws -> FollowToggleResponse
     func updateProfile(_ request: ProfileUpdateRequest) async throws
     func setAvatar(url: String) async throws
@@ -120,21 +166,47 @@ struct UsersRepository: UsersRepositoryProtocol {
         try await client.send(Endpoint.get("users/\(escaped(username))"))
     }
 
-    /// `GET /api/users/{username}/posts`.
+    /// The four post-listing profile tabs.
     ///
-    /// Note the envelope: this route answers `{items, nextCursor}`, not
-    /// the `{posts, nextCursor}` the feed routes use. Decoding it with
+    /// Note the envelope: these routes answer `{items, nextCursor}`, not
+    /// the `{posts, nextCursor}` the feed routes use. Decoding one with
     /// the feed's type is a real bug the Android app hit and documented,
     /// so the two shapes stay distinct and are mapped here instead.
     ///
     /// A private account the viewer cannot see returns `{items: [], …}`
     /// rather than a 403 - the caller distinguishes that from a genuinely
     /// empty profile via `UserProfile.isContentVisible(toViewerId:)`.
-    func posts(username: String, cursor: String?) async throws -> PostsPage {
+    ///
+    /// All four answer the same envelope of post rows with `author`,
+    /// `_count` and the viewer's `liked`. Their
+    /// cursors are NOT interchangeable - `likes` and `reposts` page on
+    /// the join row rather than on the post - which is why each tab keeps
+    /// its own cursor rather than sharing one.
+    func tabPosts(
+        _ tab: ProfilePostsTab,
+        username: String,
+        cursor: String?
+    ) async throws -> PostsPage {
         let page: PostItemsPage = try await client.send(
-            Endpoint.get("users/\(escaped(username))/posts", query: [("cursor", cursor)])
+            Endpoint.get(
+                "users/\(escaped(username))/\(tab.rawValue)",
+                query: [("cursor", cursor)]
+            )
         )
         return PostsPage(posts: page.items ?? [], nextCursor: page.nextCursor)
+    }
+
+    /// `GET /api/users/{username}/replies`.
+    ///
+    /// The one profile tab that is not a list of posts: the route
+    /// assembles its own row from a comment plus the post it replies to,
+    /// with no counts and no viewer flags. Modelled as its own type
+    /// rather than squeezed into `Post`, which would mean inventing
+    /// zeroes for fields the route never sends.
+    func replies(username: String, cursor: String?) async throws -> ProfileRepliesPage {
+        try await client.send(
+            Endpoint.get("users/\(escaped(username))/replies", query: [("cursor", cursor)])
+        )
     }
 
     func toggleFollow(username: String) async throws -> FollowToggleResponse {
