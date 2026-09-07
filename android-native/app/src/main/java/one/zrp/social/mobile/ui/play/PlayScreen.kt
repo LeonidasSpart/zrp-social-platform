@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.SportsMartialArts
 import androidx.compose.material3.Button
@@ -43,8 +45,12 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 /**
  * ZRP PLAY home - ported from PlayHomePage.tsx: hero, own XP bar (when
  * signed in and a profile already exists), incoming duel invites,
- * today's daily challenge, active duels, and a trending-challenges
- * grid.
+ * today's daily challenge, active duels, a trending-challenges grid,
+ * and a leaderboard snippet. Web has no Achievements entry point on
+ * this page either (the /play/achievements page itself is real but
+ * unlinked from any web nav); the top-bar icon here is a reasonable
+ * native affordance to that same real, functional page. Create
+ * Challenge is still deferred to the later challenge-creation phase.
  */
 @Composable
 fun PlayScreen(
@@ -52,6 +58,9 @@ fun PlayScreen(
     onChallengeClick: (String) -> Unit,
     onOpenDuel: (String) -> Unit,
     onOpenDuels: () -> Unit,
+    onOpenLeaderboard: () -> Unit,
+    onOpenAchievements: () -> Unit,
+    onOpenProfile: (String) -> Unit,
 ) {
     val viewModel: PlayViewModel = viewModel(
         factory = remember { PlayViewModelFactory(PlayRepository()) },
@@ -69,6 +78,12 @@ fun PlayScreen(
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Spacer(modifier = Modifier.weight(1f))
+            IconButton(onClick = onOpenAchievements) {
+                Icon(Icons.Filled.MilitaryTech, contentDescription = stringResource(R.string.play_achievements))
+            }
+            IconButton(onClick = onOpenLeaderboard) {
+                Icon(Icons.Filled.EmojiEvents, contentDescription = stringResource(R.string.play_leaderboard))
+            }
             IconButton(onClick = onOpenDuels) {
                 Icon(Icons.Filled.SportsMartialArts, contentDescription = stringResource(R.string.play_my_duels))
             }
@@ -244,6 +259,42 @@ fun PlayScreen(
                     items(state.trending, key = { it.id }) { challenge ->
                         ChallengeCardView(challenge = challenge, onClick = { onChallengeClick(challenge.id) })
                     }
+                }
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 12.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.play_leaderboard),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    text = stringResource(R.string.play_view_leaderboard),
+                    color = ZrpRed,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.clickable(onClick = onOpenLeaderboard),
+                )
+            }
+            if (state.topLeaderboard.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.play_no_leaderboard_data),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 24.dp),
+                )
+            } else {
+                Column(modifier = Modifier.padding(bottom = 24.dp)) {
+                    LeaderboardTableView(
+                        entries = state.topLeaderboard,
+                        ownUserId = state.ownUserId,
+                        onEntryClick = onOpenProfile,
+                    )
                 }
             }
         }
