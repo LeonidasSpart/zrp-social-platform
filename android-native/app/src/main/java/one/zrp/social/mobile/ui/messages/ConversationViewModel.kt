@@ -2,6 +2,10 @@ package one.zrp.social.mobile.ui.messages
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
+import io.socket.client.Socket
+import io.socket.emitter.Emitter
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -9,12 +13,28 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.MessagesRepository
+import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.ChatMessage
+import one.zrp.social.mobile.network.MessageReaction
+import one.zrp.social.mobile.network.SocketMessageDeletedPayload
+import one.zrp.social.mobile.network.SocketMessageEditedPayload
+import one.zrp.social.mobile.network.SocketMessagePreview
+import one.zrp.social.mobile.network.SocketMessageReadPayload
+import one.zrp.social.mobile.network.SocketReactionUpdatedPayload
+import one.zrp.social.mobile.network.SocketTypingPayload
+import one.zrp.social.mobile.network.ZrpSocket
+import org.json.JSONArray
+import org.json.JSONObject
 
-// The website receives new messages over a live socket push; this app
-// doesn't have a native socket client yet (see MessagesApi's KDoc), so
-// a plain interval poll of the same real endpoint is the honest,
-// fully-testable substitute until one is built and verified.
+// The website receives new messages over a live socket push (see
+// ZrpSocket's own KDoc for why this app now opens the same real
+// connection). It also keeps its own 5-second poll of the same REST
+// endpoint running the whole time regardless (ChatInterface.tsx's own
+// `setInterval(fetchMessages, 5000)`, alongside its socket listeners) -
+// this matches that exact belt-and-suspenders design rather than
+// replacing it: the poll is what fills in anything a socket event only
+// carries partially (see SocketMessagePreview) and covers any event
+// dropped by a flaky connection.
 private const val POLL_INTERVAL_MS = 5000L
 
 data class ConversationUiState(
@@ -28,14 +48,19 @@ data class ConversationUiState(
     val isSavingEdit: Boolean = false,
     val editError: String? = null,
     val error: String? = null,
+    val partnerTyping: Boolean = false,
+    val socketConnected: Boolean = false,
 )
 
 /**
  * Backs a single conversation - the real message history with one
  * partner (GET /messages/{userId}, which also marks their messages
  * read server-side), real sending (POST /messages, with an optional
- * real reply target), and the same real edit/delete/react actions
- * ChatInterface.tsx exposes per message.
+ * real reply target), the same real edit/delete/react actions
+ * ChatInterface.tsx exposes per message, and now the same real-time
+ * Socket.IO push (server.js) the website's own ChatInterface.tsx uses -
+ * connected on init, disconnected in onCleared() so a live handshake
+ * never outlives the screen that opened it.
  */
 class ConversationViewModel(
     private val repository: MessagesRepository,
@@ -44,13 +69,125 @@ class ConversationViewModel(
     private val _state = MutableStateFlow(ConversationUiState())
     val state: StateFlow<ConversationUiState> = _state.asStateFlow()
 
+    private val gson = Gson()
+    private var socket: Socket? = null
+    private var typingJob: Job? = null
+    private var isTypingLocally = false
+
     init {
         load(isInitial = true)
         pollForNewMessages()
+        connectSocket()
+    }
+
+    private fun connectSocket() {
+        val tokenStore = ApiClient.getTokenStore()
+        val liveSocket = ZrpSocket.connect(tokenStore)
+        socket = liveSocket
+
+        liveSocket.on(Socket.EVENT_CONNECT, Emitter.Listener { _state.update { it.copy(socketConnected = true) } })
+        liveSocket.on(Socket.EVENT_DISCONNECT, Emitter.Listener { _state.update { it.copy(socketConnected = false) } })
+        liveSocket.on(Socket.EVENT_CONNECT_ERROR, Emitter.Listener { _state.update { it.copy(socketConnected = false) } })
+
+        liveSocket.on("receive-message", Emitter.Listener { args ->
+            val preview = parsePayload(args, SocketMessagePreview::class.java) ?: return@Listener
+            if (preview.senderId != partnerId) return@Listener
+
+            _state.update { current ->
+                if (current.messages.any { it.id == preview.id }) current
+                else current.copy(messages = current.messages + preview.toChatMessage())
+            }
+
+            liveSocket.emit("mark-read", JSONObject().put("messageId", preview.id))
+        })
+
+        liveSocket.on("message-sent", Emitter.Listener { args ->
+            val preview = parsePayload(args, SocketMessagePreview::class.java) ?: return@Listener
+            _state.update { current ->
+                current.copy(messages = current.messages.map { if (it.id == preview.id) preview.toChatMessage() else it })
+            }
+        })
+
+        liveSocket.on("user-typing", Emitter.Listener { args ->
+            val payload = parsePayload(args, SocketTypingPayload::class.java) ?: return@Listener
+            if (payload.userId == partnerId) {
+                _state.update { it.copy(partnerTyping = payload.isTyping) }
+            }
+        })
+
+        liveSocket.on("message-read", Emitter.Listener { args ->
+            val payload = parsePayload(args, SocketMessageReadPayload::class.java) ?: return@Listener
+            _state.update { current ->
+                current.copy(
+                    messages = current.messages.map { if (it.id == payload.messageId) it.copy(read = true) else it },
+                )
+            }
+        })
+
+        liveSocket.on("message-deleted", Emitter.Listener { args ->
+            val payload = parsePayload(args, SocketMessageDeletedPayload::class.java) ?: return@Listener
+            _state.update { current -> current.copy(messages = current.messages.filterNot { it.id == payload.messageId }) }
+        })
+
+        liveSocket.on("message-edited", Emitter.Listener { args ->
+            val payload = parsePayload(args, SocketMessageEditedPayload::class.java) ?: return@Listener
+            _state.update { current ->
+                current.copy(messages = current.messages.map { if (it.id == payload.message.id) payload.message else it })
+            }
+        })
+
+        liveSocket.on("reaction-updated", Emitter.Listener { args ->
+            val payload = parsePayload(args, SocketReactionUpdatedPayload::class.java) ?: return@Listener
+            _state.update { current ->
+                current.copy(
+                    messages = current.messages.map {
+                        if (it.id == payload.messageId) it.copy(reactions = payload.reactions) else it
+                    },
+                )
+            }
+        })
+    }
+
+    private fun <T> parsePayload(args: Array<out Any>, type: Class<T>): T? {
+        val json = args.getOrNull(0) as? JSONObject ?: return null
+        return try {
+            gson.fromJson(json.toString(), type)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    override fun onCleared() {
+        socket?.let { liveSocket ->
+            liveSocket.off(Socket.EVENT_CONNECT)
+            liveSocket.off(Socket.EVENT_DISCONNECT)
+            liveSocket.off(Socket.EVENT_CONNECT_ERROR)
+            liveSocket.off("receive-message")
+            liveSocket.off("message-sent")
+            liveSocket.off("user-typing")
+            liveSocket.off("message-read")
+            liveSocket.off("message-deleted")
+            liveSocket.off("message-edited")
+            liveSocket.off("reaction-updated")
+            liveSocket.disconnect()
+        }
+        socket = null
     }
 
     fun onDraftChange(text: String) {
         _state.update { it.copy(draft = text) }
+
+        val liveSocket = socket ?: return
+        if (!isTypingLocally) {
+            isTypingLocally = true
+            liveSocket.emit("typing", JSONObject().put("receiverId", partnerId).put("isTyping", true))
+        }
+        typingJob?.cancel()
+        typingJob = viewModelScope.launch {
+            delay(1000)
+            isTypingLocally = false
+            liveSocket.emit("typing", JSONObject().put("receiverId", partnerId).put("isTyping", false))
+        }
     }
 
     fun refresh() = load(isInitial = false)
@@ -83,6 +220,7 @@ class ConversationViewModel(
                             messages = it.messages.map { m -> if (m.id == messageId) updated else m },
                         )
                     }
+                    emitEditMessage(updated)
                     onResult(Result.success(Unit))
                 }
                 .onFailure { error ->
@@ -97,6 +235,10 @@ class ConversationViewModel(
             repository.deleteMessage(messageId)
                 .onSuccess {
                     _state.update { it.copy(messages = it.messages.filterNot { m -> m.id == messageId }) }
+                    socket?.emit(
+                        "delete-message",
+                        JSONObject().put("messageId", messageId).put("receiverId", partnerId),
+                    )
                     onResult(Result.success(Unit))
                 }
                 .onFailure { onResult(Result.failure(it)) }
@@ -113,7 +255,42 @@ class ConversationViewModel(
                         },
                     )
                 }
+                emitReactionUpdate(messageId, response.reactions)
             }
+        }
+    }
+
+    // Wraps Gson<->org.json conversion so a malformed round-trip can never
+    // crash the caller - the REST call it follows already succeeded and
+    // already updated local state, so a failed real-time relay just means
+    // the other participant picks the same change up on their own next
+    // 5-second poll instead, exactly like a dropped/offline socket would.
+    private fun emitEditMessage(updated: ChatMessage) {
+        val liveSocket = socket ?: return
+        try {
+            liveSocket.emit(
+                "edit-message",
+                JSONObject()
+                    .put("message", JSONObject(gson.toJson(updated)))
+                    .put("receiverId", partnerId),
+            )
+        } catch (e: Exception) {
+            // Swallowed - see this function's own KDoc.
+        }
+    }
+
+    private fun emitReactionUpdate(messageId: String, reactions: List<MessageReaction>) {
+        val liveSocket = socket ?: return
+        try {
+            liveSocket.emit(
+                "message-reaction",
+                JSONObject()
+                    .put("messageId", messageId)
+                    .put("reactions", JSONArray(gson.toJson(reactions)))
+                    .put("receiverId", partnerId),
+            )
+        } catch (e: Exception) {
+            // Swallowed - see emitEditMessage's KDoc.
         }
     }
 
@@ -129,6 +306,13 @@ class ConversationViewModel(
                     _state.update {
                         it.copy(isSending = false, draft = "", replyingTo = null, messages = it.messages + message)
                     }
+                    socket?.emit(
+                        "send-message",
+                        JSONObject()
+                            .put("receiverId", partnerId)
+                            .put("content", content)
+                            .put("messageId", message.id),
+                    )
                 }
                 .onFailure { error ->
                     _state.update {

@@ -67,6 +67,9 @@
     <string name="chat_say_hello">قل مرحبًا لـ %1$s!</string>
     <string name="chat_delete_message">حذف رسالة</string>
     <string name="chat_delete_message_confirm">هل أنت متأكد أنك تريد حذف هذه الرسالة؟</string>
+    <string name="chat_live">مباشر</string>
+    <string name="chat_offline">غير متصل</string>
+    <string name="chat_typing">يكتب...</string>
     <string name="action_edit">تعديل</string>
     <string name="action_reply">رد</string>
     <string name="feed_for_you">لك</string>

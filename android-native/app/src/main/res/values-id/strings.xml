@@ -67,6 +67,9 @@
     <string name="chat_say_hello">Sapa %1$s!</string>
     <string name="chat_delete_message">Hapus pesan</string>
     <string name="chat_delete_message_confirm">Apakah Anda yakin ingin menghapus pesan ini?</string>
+    <string name="chat_live">Langsung</string>
+    <string name="chat_offline">Offline</string>
+    <string name="chat_typing">Sedang mengetik...</string>
     <string name="action_edit">Edit</string>
     <string name="action_reply">Balas</string>
     <string name="feed_for_you">Untuk Anda</string>

@@ -67,6 +67,9 @@
     <string name="chat_say_hello">%1$s kişisine merhaba deyin!</string>
     <string name="chat_delete_message">Mesajı sil</string>
     <string name="chat_delete_message_confirm">Bu mesajı silmek istediğinizden emin misiniz?</string>
+    <string name="chat_live">Canlı</string>
+    <string name="chat_offline">Çevrimdışı</string>
+    <string name="chat_typing">Yazıyor...</string>
     <string name="action_edit">Düzenle</string>
     <string name="action_reply">Yanıtla</string>
     <string name="feed_for_you">Senin için</string>
