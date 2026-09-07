@@ -39,6 +39,19 @@ data class MusicTrack(
     val artist: MusicArtistRef,
     val album: MusicAlbumRef?,
     val liked: Boolean = false,
+    // Present on the wire for every GET/PATCH response (Prisma never
+    // narrows the row), but only actually read by Music Studio's own
+    // Tracks tab (a track owner managing their own catalogue) - every
+    // other real screen already gets this exact same MusicTrack shape,
+    // so these are added here rather than duplicating a near-identical
+    // "StudioTrack" type.
+    val description: String? = null,
+    val status: String? = null,
+    val explicit: Boolean = false,
+    val coverKey: String? = null,
+    val audioKey: String? = null,
+    val albumId: String? = null,
+    val trackNumber: Int? = null,
 )
 
 data class RecordPlayRequest(
@@ -191,6 +204,30 @@ data class ToggleTrackInPlaylistResponse(val added: Boolean)
 
 data class ReorderPlaylistRequest(val orderedIds: List<String>)
 
+// ─── Music Studio: Tracks (POST /music/tracks, GET /music/tracks
+// ?mine=true, PATCH/DELETE /music/tracks/{id}) - Studio phase B. ────
+data class CreateTrackRequest(
+    val title: String,
+    val genre: String? = null,
+    val explicit: Boolean = false,
+    val audioUrl: String,
+    val audioKey: String? = null,
+    val coverUrl: String? = null,
+    val coverKey: String? = null,
+    val durationSec: Int? = null,
+    val artistId: String,
+)
+
+data class UpdateTrackRequest(
+    val title: String? = null,
+    val description: String? = null,
+    val genre: String? = null,
+    val explicit: Boolean? = null,
+    val coverUrl: String? = null,
+    val coverKey: String? = null,
+    val albumId: String? = null,
+)
+
 // ─── Library (GET /music/library) - backs History + Liked ──────────
 // Only `.track` is ever read off a MusicLike/MusicHistory row by
 // either real page (history/page.tsx dedupes by entry.track.id and
@@ -237,10 +274,10 @@ data class SaveArtistProfileRequest(
  * added screen by screen in later phases rather than all at once, so
  * every home-screen link (Popular Artists, Latest Albums, Your
  * Playlists, the quick-nav tiles) only appears once its real
- * destination screen exists natively. Track publishing (the Music
- * Studio / artist upload flow) goes through the same UploadThing
- * presigned-upload path as post/story media, so it has the same
- * native-upload scope decision as PostsApi.createPost.
+ * destination screen exists natively. Track publishing (Music Studio's
+ * Tracks tab) goes through the same real UploadThing presigned-upload
+ * protocol as post/story media (MediaUploadRepository, against the real
+ * "musicTrack" slug) rather than a bespoke upload path.
  */
 interface MusicApi {
     @GET("music/home")
@@ -257,6 +294,25 @@ interface MusicApi {
 
     @GET("music/albums")
     suspend fun getAlbums(@Query("q") query: String? = null): List<MusicAlbumSummary>
+
+    // The Studio Tracks tab's own album-assignment dropdown - the same
+    // real "mine=true" shape as getAlbums's own public list (Prisma
+    // include is identical either way), just scoped to the signed-in
+    // artist's own albums.
+    @GET("music/albums")
+    suspend fun getMyAlbums(@Query("mine") mine: Boolean = true, @Query("limit") limit: Int = 100): List<MusicAlbumSummary>
+
+    @POST("music/tracks")
+    suspend fun createTrack(@Body request: CreateTrackRequest): MusicTrack
+
+    @GET("music/tracks")
+    suspend fun getMyTracks(@Query("mine") mine: Boolean = true, @Query("limit") limit: Int = 100): List<MusicTrack>
+
+    @PATCH("music/tracks/{id}")
+    suspend fun updateTrack(@Path("id") id: String, @Body request: UpdateTrackRequest): MusicTrack
+
+    @DELETE("music/tracks/{id}")
+    suspend fun deleteTrack(@Path("id") id: String)
 
     @GET("music/artists/{id}")
     suspend fun getArtistDetail(@Path("id") id: String): MusicArtistDetail

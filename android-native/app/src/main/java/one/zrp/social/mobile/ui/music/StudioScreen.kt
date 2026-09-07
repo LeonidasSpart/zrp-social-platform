@@ -8,6 +8,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,7 +38,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,13 +57,15 @@ import one.zrp.social.mobile.data.MusicRepository
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
+private enum class StudioTab { TRACKS, ARTIST }
+
 /**
- * The Music Studio's Artist Profile tab - the same real GET
- * /music/access gate + GET/POST /music/artists MusicStudio.tsx's own
- * !access?.allowed branch and ArtistTab use. Tracks/Albums management
- * (that same component's other two tabs) are their own later phases,
- * so this screen goes straight into Artist Profile once access is
- * allowed rather than showing a tab bar with two dead tabs.
+ * The Music Studio - the same real GET /music/access gate MusicStudio.tsx's
+ * own !access?.allowed branch uses, then a real 2-tab bar (Tracks,
+ * Artist Profile) once allowed. Albums management (that same
+ * component's third tab) is its own later phase, so it isn't shown
+ * here yet - only tabs with a real, working destination are ever
+ * rendered.
  */
 @Composable
 fun StudioScreen(onBack: () -> Unit) {
@@ -68,6 +74,7 @@ fun StudioScreen(onBack: () -> Unit) {
     )
     val state by viewModel.state.collectAsState()
     val contentResolver = LocalContext.current.contentResolver
+    var tab by remember { mutableStateOf(StudioTab.TRACKS) }
 
     val avatarPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -138,14 +145,40 @@ fun StudioScreen(onBack: () -> Unit) {
                 }
             }
             else -> {
-                ArtistProfileForm(
-                    state = state,
-                    onDisplayNameChange = viewModel::onDisplayNameChange,
-                    onBioChange = viewModel::onBioChange,
-                    onChangeAvatar = { avatarPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
-                    onChangeBanner = { bannerPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
-                    onSave = viewModel::save,
-                )
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    ) {
+                        FilterChip(
+                            selected = tab == StudioTab.TRACKS,
+                            onClick = { tab = StudioTab.TRACKS },
+                            label = { Text(stringResource(R.string.music_studio_tab_tracks)) },
+                        )
+                        FilterChip(
+                            selected = tab == StudioTab.ARTIST,
+                            onClick = { tab = StudioTab.ARTIST },
+                            label = { Text(stringResource(R.string.music_studio_tab_artist)) },
+                        )
+                    }
+                    HorizontalDivider()
+
+                    when (tab) {
+                        StudioTab.TRACKS -> TracksTabContent()
+                        StudioTab.ARTIST -> {
+                            ArtistProfileForm(
+                                state = state,
+                                onDisplayNameChange = viewModel::onDisplayNameChange,
+                                onBioChange = viewModel::onBioChange,
+                                onChangeAvatar = { avatarPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                                onChangeBanner = { bannerPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                                onSave = viewModel::save,
+                            )
+                        }
+                    }
+                }
             }
         }
     }
