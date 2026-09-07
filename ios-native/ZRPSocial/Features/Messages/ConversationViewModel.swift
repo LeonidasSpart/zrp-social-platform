@@ -17,10 +17,19 @@ final class ConversationViewModel: ObservableObject {
     @Published var replyTarget: Message?
     @Published var errorMessage: String?
 
+    /// A picture chosen but not yet sent. Held here rather than uploaded
+    /// on selection so someone can change their mind without having
+    /// already put the file on UploadThing.
+    @Published var pendingImage: PickedMedia?
+
+    /// Upload progress, 0…1, while a chosen picture is being sent.
+    @Published private(set) var uploadProgress: Double?
+
     let partner: PostAuthor
     let viewerId: String?
 
     private let repository: MessagesRepositoryProtocol
+    private let uploads: UploadThingClient
     private var pollTask: Task<Void, Never>?
 
     /// How often the open thread refetches.
@@ -36,11 +45,13 @@ final class ConversationViewModel: ObservableObject {
         partner: PostAuthor,
         viewerId: String?,
         initialDraft: String = "",
-        repository: MessagesRepositoryProtocol = MessagesRepository()
+        repository: MessagesRepositoryProtocol = MessagesRepository(),
+        uploads: UploadThingClient = UploadThingClient()
     ) {
         self.partner = partner
         self.viewerId = viewerId
         self.repository = repository
+        self.uploads = uploads
         // Pre-filled, never auto-sent. "Contact Seller" in the
         // marketplace opens this thread with the same opening line and
         // listing link the website composes - the person still reads it,
@@ -96,17 +107,54 @@ final class ConversationViewModel: ObservableObject {
 
     // MARK: - Sending
 
+    /// Sendable when there is text OR a picture. The route accepts an
+    /// empty `content` only alongside an `imageUrl` and refuses both
+    /// empty with a 400, so this mirrors its rule exactly rather than
+    /// letting someone press send into a refusal.
+    var canSend: Bool {
+        !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || pendingImage != nil
+    }
+
     func send() async {
         let content = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !content.isEmpty, !isSending else { return }
+        guard canSend, !isSending else { return }
 
         isSending = true
-        defer { isSending = false }
+        defer {
+            isSending = false
+            uploadProgress = nil
+        }
+
+        // Uploaded first, and only on send: the message route stores a
+        // URL, so the file has to exist before it is referenced. A failed
+        // upload stops here rather than sending the text alone and
+        // silently dropping the picture.
+        var uploadedImageUrl: String?
+        if let pendingImage {
+            uploadProgress = 0
+            do {
+                let uploaded = try await uploads.upload(
+                    pendingImage.asUploadCandidate(),
+                    to: .chatImage,
+                    onProgress: { [weak self] progress in
+                        Task { @MainActor in self?.uploadProgress = progress }
+                    }
+                )
+                uploadedImageUrl = uploaded.url
+            } catch UploadThingClient.UploadError.cancelled {
+                return
+            } catch {
+                errorMessage = (error as? ApiError)?.userFacingMessage
+                    ?? L10n.string(.authErrTryAgain)
+                return
+            }
+        }
 
         do {
             let sent = try await repository.send(
                 to: partner.id,
                 content: content,
+                imageUrl: uploadedImageUrl,
                 replyToId: replyTarget?.id
             )
             // Appended from the route's own 201 response rather than
@@ -116,6 +164,7 @@ final class ConversationViewModel: ObservableObject {
             }
             draft = ""
             replyTarget = nil
+            pendingImage = nil
         } catch let error as ApiError {
             // A 403 here is a real rule - the recipient's privacy
             // settings or a block - and the server says it better than

@@ -1,3 +1,4 @@
+import PhotosUI
 import SwiftUI
 import UIKit
 
@@ -8,6 +9,7 @@ struct ConversationView: View {
     @StateObject private var viewModel: ConversationViewModel
 
     @FocusState private var isComposerFocused: Bool
+    @State private var pickerSelection: [PhotosPickerItem] = []
     @State private var editing: Message?
     @State private var editDraft = ""
 
@@ -32,6 +34,10 @@ struct ConversationView: View {
             .navigationTitle(Text(verbatim: viewModel.partner.displayName))
             .navigationBarTitleDisplayMode(.inline)
             .safeAreaInset(edge: .bottom) { composer }
+            .onChange(of: pickerSelection) { _, items in
+                guard !items.isEmpty else { return }
+                Task { await loadPickedImage(items) }
+            }
             .task { await viewModel.start() }
             .onDisappear { viewModel.stop() }
             .sheet(item: $editing) { message in
@@ -131,7 +137,28 @@ struct ConversationView: View {
                 .padding(.top, ZrpSpacing.sm)
             }
 
+            if let pending = viewModel.pendingImage {
+                pendingImageRow(pending)
+            }
+
             HStack(alignment: .bottom, spacing: ZrpSpacing.md) {
+                // One picture per message: the route stores a single
+                // `imageUrl`, so offering a multi-select would promise
+                // something it cannot keep.
+                PhotosPicker(
+                    selection: $pickerSelection,
+                    maxSelectionCount: 1,
+                    matching: .images
+                ) {
+                    Image(systemName: "photo")
+                        .font(.title3)
+                        .foregroundStyle(ZrpColor.onSurfaceMuted)
+                        .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                        .contentShape(Rectangle())
+                }
+                .disabled(viewModel.isSending)
+                .accessibilityLabel(Text(.iosA11yAddPhoto))
+
                 TextField(
                     L10n.string(.iosChatMessagePlaceholder),
                     text: $viewModel.draft,
@@ -157,16 +184,61 @@ struct ConversationView: View {
                             .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
                     }
                 }
-                .disabled(
-                    viewModel.isSending
-                        || viewModel.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                )
+                .disabled(viewModel.isSending || !viewModel.canSend)
                 .accessibilityLabel(Text(.iosA11ySendMessage))
             }
             .padding(.horizontal, ZrpSpacing.lg)
             .padding(.vertical, ZrpSpacing.sm)
         }
         .background(.bar)
+    }
+
+    /// The chosen picture, before it is sent.
+    ///
+    /// Shown from the local file rather than uploaded on selection, so
+    /// changing your mind costs nothing and puts nothing on UploadThing.
+    /// Progress appears here once sending starts.
+    private func pendingImageRow(_ media: PickedMedia) -> some View {
+        HStack(spacing: ZrpSpacing.md) {
+            AttachmentThumbnail(fileURL: media.url, remoteURL: nil, isVideo: false, side: 44)
+
+            if let progress = viewModel.uploadProgress {
+                ProgressView(value: progress)
+                    .tint(ZrpColor.red)
+            } else {
+                Text(verbatim: media.fileName)
+                    .font(.caption)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    .lineLimit(1)
+            }
+
+            Spacer(minLength: 0)
+
+            Button {
+                viewModel.pendingImage?.discard()
+                viewModel.pendingImage = nil
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                    .contentShape(Rectangle())
+            }
+            .disabled(viewModel.isSending)
+            .accessibilityLabel(Text(.iosA11yRemoveAttachment))
+        }
+        .padding(.horizontal, ZrpSpacing.lg)
+        .padding(.top, ZrpSpacing.sm)
+    }
+
+    /// Copies the chosen file out of the picker's short-lived sandbox,
+    /// which `PickedMedia` does as part of loading, so the upload can
+    /// still read it when send is pressed.
+    private func loadPickedImage(_ items: [PhotosPickerItem]) async {
+        defer { pickerSelection = [] }
+        guard let item = items.first else { return }
+        guard let media = try? await item.loadTransferable(type: PickedMedia.self) else { return }
+        viewModel.pendingImage?.discard()
+        viewModel.pendingImage = media
     }
 
     private func editSheet(for message: Message) -> some View {
@@ -256,9 +328,25 @@ private struct MessageBubble: View {
     }
 
     private var bubble: some View {
-        Text(verbatim: message.content)
-            .font(.subheadline)
-            .foregroundStyle(isOwn ? .white : ZrpColor.onSurface)
+        VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
+            // The route accepts a picture with no text at all, so the
+            // text line is drawn only when there is text - otherwise a
+            // picture-only message would carry an empty caption strip.
+            if let imageUrl = message.imageUrl, !imageUrl.isEmpty {
+                RemoteImage(url: imageUrl, targetSize: 320) {
+                    Rectangle().fill(ZrpColor.surfaceHighest)
+                }
+                .aspectRatio(contentMode: .fit)
+                .frame(maxWidth: 240, maxHeight: 320)
+                .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous))
+                .accessibilityLabel(Text(.iosA11yMessagePhoto))
+            }
+            if !message.content.isEmpty {
+                Text(verbatim: message.content)
+                    .font(.subheadline)
+                    .foregroundStyle(isOwn ? .white : ZrpColor.onSurface)
+            }
+        }
             .padding(.horizontal, ZrpSpacing.md)
             .padding(.vertical, ZrpSpacing.sm)
             .background(isOwn ? ZrpColor.red : ZrpColor.surfaceElevated)
@@ -284,8 +372,23 @@ private struct MessageBubble: View {
                     }
                 }
             }
-            .accessibilityLabel(Text(verbatim: message.content))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(verbatim: accessibleBody))
             .accessibilityHint(Text(.iosA11yMessageOptions))
+    }
+
+    /// What VoiceOver reads for the bubble.
+    ///
+    /// A message may legitimately have no text at all - the route
+    /// accepts a picture alone - and reading an empty string would leave
+    /// the bubble silent.
+    private var accessibleBody: String {
+        let hasImage = message.imageUrl?.isEmpty == false
+        if message.content.isEmpty {
+            return hasImage ? L10n.string(.iosA11yMessagePhoto) : ""
+        }
+        guard hasImage else { return message.content }
+        return "\(L10n.string(.iosA11yMessagePhoto)). \(message.content)"
     }
 
     private func replyContext(_ replyTo: RepliedMessage) -> some View {

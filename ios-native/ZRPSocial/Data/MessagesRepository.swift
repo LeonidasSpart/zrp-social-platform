@@ -3,7 +3,12 @@ import Foundation
 protocol MessagesRepositoryProtocol: Sendable {
     func conversations() async throws -> [ConversationSummary]
     func thread(with userId: String) async throws -> [Message]
-    func send(to userId: String, content: String, replyToId: String?) async throws -> Message
+    func send(
+        to userId: String,
+        content: String,
+        imageUrl: String?,
+        replyToId: String?
+    ) async throws -> Message
     func edit(messageId: String, content: String) async throws -> Message
     func delete(messageId: String) async throws
     func react(messageId: String, emoji: String) async throws -> [MessageReaction]
@@ -22,6 +27,7 @@ struct MessagesRepository: MessagesRepositoryProtocol {
     private struct SendRequest: Encodable {
         let receiverId: String
         let content: String
+        let imageUrl: String?
         let replyToId: String?
     }
 
@@ -59,11 +65,24 @@ struct MessagesRepository: MessagesRepositoryProtocol {
     /// A 403 here is a real product rule, not a bug - the route refuses
     /// messages the recipient's privacy settings or a block disallow, and
     /// its message is shown verbatim.
-    func send(to userId: String, content: String, replyToId: String?) async throws -> Message {
+    /// The route accepts an empty `content` **only** when there is an
+    /// `imageUrl`, and refuses both-empty with a 400 - which is why the
+    /// caller must not treat a picture as optional decoration on text.
+    func send(
+        to userId: String,
+        content: String,
+        imageUrl: String?,
+        replyToId: String?
+    ) async throws -> Message {
         try await client.send(
             try Endpoint.post(
                 "messages",
-                body: SendRequest(receiverId: userId, content: content, replyToId: replyToId)
+                body: SendRequest(
+                    receiverId: userId,
+                    content: content,
+                    imageUrl: imageUrl,
+                    replyToId: replyToId
+                )
             )
         )
     }
