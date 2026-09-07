@@ -78,6 +78,13 @@ data class MusicAlbumSummary(
     // only actually rendered by the Albums list screen, which also
     // shows track count.
     val _count: MusicTrackCount = MusicTrackCount(),
+    // Present on the wire for every GET/PATCH response (Prisma never
+    // narrows the row), but only actually read by Music Studio's own
+    // Albums tab (an album owner managing their own catalogue) - every
+    // other real screen already gets this exact same summary shape.
+    val description: String? = null,
+    val coverKey: String? = null,
+    val releaseDate: String? = null,
 )
 
 data class MusicArtistSummary(
@@ -226,7 +233,50 @@ data class UpdateTrackRequest(
     val coverUrl: String? = null,
     val coverKey: String? = null,
     val albumId: String? = null,
+    // Album-membership ordering (Studio's Albums tab: add-to-album sets
+    // it to the album's next position, reorder rewrites it for every
+    // track in the album). null is a real, intentional value here too -
+    // it's how removeTrack() clears the position when albumId is
+    // cleared - but Gson never sends an unset Kotlin null over the wire
+    // either way (see ApiClient's default Gson, no serializeNulls()),
+    // so a caller that never touches this field behaves exactly as
+    // before this was added.
+    val trackNumber: Int? = null,
 )
+
+// ─── Music Studio: Albums (POST /music/albums, PATCH/DELETE
+// /music/albums/{id}, POST /music/albums/{id}/reorder) - Studio phase C.
+data class CreateAlbumRequest(
+    val artistId: String,
+    val title: String,
+    val description: String? = null,
+    val coverUrl: String? = null,
+    val coverKey: String? = null,
+    val releaseDate: String? = null,
+)
+
+// POST /music/albums returns the raw created MusicAlbum row (no
+// `artist`/`_count` include, unlike every other album response) - kept
+// as its own lean shape rather than reusing MusicAlbumSummary, whose
+// non-null `artist` field would otherwise silently deserialize to null.
+data class CreatedAlbum(
+    val id: String,
+    val title: String,
+    val description: String? = null,
+    val coverUrl: String? = null,
+    val coverKey: String? = null,
+    val releaseDate: String? = null,
+)
+
+data class UpdateAlbumRequest(
+    val title: String? = null,
+    val description: String? = null,
+    val coverUrl: String? = null,
+    val coverKey: String? = null,
+    val releaseDate: String? = null,
+)
+
+data class ReorderAlbumTracksRequest(val orderedTrackIds: List<String>)
 
 // ─── Library (GET /music/library) - backs History + Liked ──────────
 // Only `.track` is ever read off a MusicLike/MusicHistory row by
@@ -313,6 +363,18 @@ interface MusicApi {
 
     @DELETE("music/tracks/{id}")
     suspend fun deleteTrack(@Path("id") id: String)
+
+    @POST("music/albums")
+    suspend fun createAlbum(@Body request: CreateAlbumRequest): CreatedAlbum
+
+    @PATCH("music/albums/{id}")
+    suspend fun updateAlbum(@Path("id") id: String, @Body request: UpdateAlbumRequest): MusicAlbumSummary
+
+    @DELETE("music/albums/{id}")
+    suspend fun deleteAlbum(@Path("id") id: String)
+
+    @POST("music/albums/{id}/reorder")
+    suspend fun reorderAlbumTracks(@Path("id") id: String, @Body request: ReorderAlbumTracksRequest)
 
     @GET("music/artists/{id}")
     suspend fun getArtistDetail(@Path("id") id: String): MusicArtistDetail

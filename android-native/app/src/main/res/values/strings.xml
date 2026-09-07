@@ -400,4 +400,30 @@
     <string name="music_studio_delete_track">Delete Track</string>
     <string name="music_studio_title_required">Title is required</string>
     <string name="music_studio_change_cover">Change cover</string>
-    <string name="music_studio_description_placeholder">Description (optional)</string></resources>
+    <string name="music_studio_description_placeholder">Description (optional)</string>
+    <!-- Music Studio: Albums tab (phase C) -->
+    <string name="music_studio_manage">Manage</string>
+    <string name="music_studio_add">Add</string>
+    <string name="music_studio_my_albums">My Albums</string>
+    <string name="music_studio_create_album">Create Album</string>
+    <string name="music_studio_no_albums_yet">You haven\'t created any albums yet.</string>
+    <string name="music_studio_delete_album">Delete Album</string>
+    <string name="music_studio_album_title_placeholder">Album title</string>
+    <string name="music_studio_release_date">Release date</string>
+    <string name="music_studio_add_cover">Add cover</string>
+    <string name="music_studio_manage_album">Manage Album</string>
+    <string name="music_studio_tracks_in_album">Tracks in this album</string>
+    <string name="music_studio_no_tracks_in_album">No tracks in this album yet.</string>
+    <string name="music_studio_move_up">Move up</string>
+    <string name="music_studio_move_down">Move down</string>
+    <string name="music_studio_remove_from_album">Remove from album</string>
+    <string name="music_studio_add_existing_tracks">Add existing tracks</string>
+    <string name="music_studio_delete_album_title">Delete album</string>
+    <string name="music_studio_delete_album_body">Delete "%1$s"? Its tracks will NOT be deleted - they\'ll stay published and simply become unassigned from this album.</string>
+    <string name="music_studio_album_created_msg">Album created.</string>
+    <string name="music_studio_album_updated_msg">Album updated.</string>
+    <string name="music_studio_album_deleted_msg">Album deleted. Your tracks were kept and remain available.</string>
+    <string name="music_studio_track_deleted_msg">Track deleted.</string>
+    <string name="music_studio_track_updated_msg">Track updated.</string>
+    <string name="music_studio_tab_albums">Albums</string>
+</resources>

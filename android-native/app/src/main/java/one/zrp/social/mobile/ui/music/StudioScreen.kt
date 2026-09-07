@@ -57,15 +57,12 @@ import one.zrp.social.mobile.data.MusicRepository
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
-private enum class StudioTab { TRACKS, ARTIST }
+private enum class StudioTab { TRACKS, ALBUMS, ARTIST }
 
 /**
  * The Music Studio - the same real GET /music/access gate MusicStudio.tsx's
- * own !access?.allowed branch uses, then a real 2-tab bar (Tracks,
- * Artist Profile) once allowed. Albums management (that same
- * component's third tab) is its own later phase, so it isn't shown
- * here yet - only tabs with a real, working destination are ever
- * rendered.
+ * own !access?.allowed branch uses, then the same real 3-tab bar
+ * (Tracks, Albums, Artist Profile) once allowed.
  */
 @Composable
 fun StudioScreen(onBack: () -> Unit) {
@@ -158,6 +155,11 @@ fun StudioScreen(onBack: () -> Unit) {
                             label = { Text(stringResource(R.string.music_studio_tab_tracks)) },
                         )
                         FilterChip(
+                            selected = tab == StudioTab.ALBUMS,
+                            onClick = { tab = StudioTab.ALBUMS },
+                            label = { Text(stringResource(R.string.music_studio_tab_albums)) },
+                        )
+                        FilterChip(
                             selected = tab == StudioTab.ARTIST,
                             onClick = { tab = StudioTab.ARTIST },
                             label = { Text(stringResource(R.string.music_studio_tab_artist)) },
@@ -167,6 +169,7 @@ fun StudioScreen(onBack: () -> Unit) {
 
                     when (tab) {
                         StudioTab.TRACKS -> TracksTabContent()
+                        StudioTab.ALBUMS -> AlbumsTabContent()
                         StudioTab.ARTIST -> {
                             ArtistProfileForm(
                                 state = state,

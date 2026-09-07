@@ -239,6 +239,10 @@ class TracksViewModel(
                 durationSec = current.durationSec,
                 artistId = artistId,
             ).onSuccess {
+                // Matches MusicStudio.tsx's own publish() exactly: no
+                // success message here - the reset form and the reloaded
+                // My Tracks list below are the only real confirmation on
+                // web too. message is only ever set for edit/delete.
                 _state.update {
                     it.copy(
                         isPublishing = false,
@@ -250,7 +254,6 @@ class TracksViewModel(
                         coverPick = null,
                         pendingAudioUrl = null,
                         pendingCoverUrl = null,
-                        message = "published",
                     )
                 }
                 loadTracks()

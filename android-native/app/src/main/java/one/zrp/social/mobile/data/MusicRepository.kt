@@ -1,8 +1,10 @@
 package one.zrp.social.mobile.data
 
 import one.zrp.social.mobile.network.ApiClient
+import one.zrp.social.mobile.network.CreateAlbumRequest
 import one.zrp.social.mobile.network.CreatePlaylistRequest
 import one.zrp.social.mobile.network.CreateTrackRequest
+import one.zrp.social.mobile.network.CreatedAlbum
 import one.zrp.social.mobile.network.MusicAccess
 import one.zrp.social.mobile.network.MusicAlbumDetail
 import one.zrp.social.mobile.network.MusicAlbumSummary
@@ -18,9 +20,11 @@ import one.zrp.social.mobile.network.MusicPlaylistListItem
 import one.zrp.social.mobile.network.MusicTrack
 import one.zrp.social.mobile.network.MyArtistProfile
 import one.zrp.social.mobile.network.RecordPlayRequest
+import one.zrp.social.mobile.network.ReorderAlbumTracksRequest
 import one.zrp.social.mobile.network.ReorderPlaylistRequest
 import one.zrp.social.mobile.network.SaveArtistProfileRequest
 import one.zrp.social.mobile.network.ToggleTrackInPlaylistRequest
+import one.zrp.social.mobile.network.UpdateAlbumRequest
 import one.zrp.social.mobile.network.UpdatePlaylistRequest
 import one.zrp.social.mobile.network.UpdateTrackRequest
 
@@ -156,13 +160,14 @@ class MusicRepository {
 
     suspend fun updateTrack(
         id: String,
-        title: String?,
-        description: String?,
-        genre: String?,
-        explicit: Boolean?,
-        coverUrl: String?,
-        coverKey: String?,
-        albumId: String?,
+        title: String? = null,
+        description: String? = null,
+        genre: String? = null,
+        explicit: Boolean? = null,
+        coverUrl: String? = null,
+        coverKey: String? = null,
+        albumId: String? = null,
+        trackNumber: Int? = null,
     ): Result<MusicTrack> = runCatching {
         ApiClient.musicApi.updateTrack(
             id,
@@ -174,11 +179,60 @@ class MusicRepository {
                 coverUrl = coverUrl,
                 coverKey = coverKey,
                 albumId = albumId,
+                trackNumber = trackNumber,
             ),
         )
     }
 
     suspend fun deleteTrack(id: String): Result<Unit> = runCatching {
         ApiClient.musicApi.deleteTrack(id)
+    }
+
+    suspend fun createAlbum(
+        artistId: String,
+        title: String,
+        description: String?,
+        coverUrl: String?,
+        coverKey: String?,
+        releaseDate: String?,
+    ): Result<CreatedAlbum> = runCatching {
+        ApiClient.musicApi.createAlbum(
+            CreateAlbumRequest(
+                artistId = artistId,
+                title = title,
+                description = description,
+                coverUrl = coverUrl,
+                coverKey = coverKey,
+                releaseDate = releaseDate,
+            ),
+        )
+    }
+
+    suspend fun updateAlbum(
+        id: String,
+        title: String? = null,
+        description: String? = null,
+        coverUrl: String? = null,
+        coverKey: String? = null,
+        releaseDate: String? = null,
+    ): Result<MusicAlbumSummary> = runCatching {
+        ApiClient.musicApi.updateAlbum(
+            id,
+            UpdateAlbumRequest(
+                title = title,
+                description = description,
+                coverUrl = coverUrl,
+                coverKey = coverKey,
+                releaseDate = releaseDate,
+            ),
+        )
+    }
+
+    suspend fun deleteAlbum(id: String): Result<Unit> = runCatching {
+        ApiClient.musicApi.deleteAlbum(id)
+    }
+
+    suspend fun reorderAlbumTracks(id: String, orderedTrackIds: List<String>): Result<Unit> = runCatching {
+        ApiClient.musicApi.reorderAlbumTracks(id, ReorderAlbumTracksRequest(orderedTrackIds))
     }
 }

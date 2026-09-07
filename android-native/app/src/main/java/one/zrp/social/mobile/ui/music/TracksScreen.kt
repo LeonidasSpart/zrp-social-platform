@@ -46,6 +46,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +63,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import kotlinx.coroutines.delay
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MusicRepository
 import one.zrp.social.mobile.network.MusicAlbumSummary
@@ -123,10 +125,33 @@ fun TracksTabContent() {
         }
     }
 
+    LaunchedEffect(state.message) {
+        if (state.message != null) {
+            delay(3000)
+            viewModel.consumeMessage()
+        }
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(Spacing.lg),
     ) {
+        val messageRes = when (state.message) {
+            "updated" -> R.string.music_studio_track_updated_msg
+            "deleted" -> R.string.music_studio_track_deleted_msg
+            else -> null
+        }
+        if (messageRes != null) {
+            item {
+                Text(
+                    text = stringResource(messageRes),
+                    color = ZrpRed,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = Spacing.sm),
+                )
+            }
+        }
         item {
             UploadCard(
                 state = state,
