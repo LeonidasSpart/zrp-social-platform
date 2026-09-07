@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.MusicRepository
 import one.zrp.social.mobile.network.MusicAlbumSummary
 import one.zrp.social.mobile.network.MusicArtistSummary
+import one.zrp.social.mobile.network.MusicPlaylistSummary
 import one.zrp.social.mobile.network.MusicTrack
 
 data class MusicUiState(
@@ -20,6 +21,7 @@ data class MusicUiState(
     val likedPreview: List<MusicTrack> = emptyList(),
     val latestAlbums: List<MusicAlbumSummary> = emptyList(),
     val popularArtists: List<MusicArtistSummary> = emptyList(),
+    val yourPlaylists: List<MusicPlaylistSummary> = emptyList(),
     val error: String? = null,
 )
 
@@ -54,6 +56,7 @@ class MusicViewModel(private val repository: MusicRepository, private val player
                             likedPreview = home.likedPreview,
                             latestAlbums = home.latestAlbums,
                             popularArtists = home.popularArtists,
+                            yourPlaylists = home.yourPlaylists,
                             isLoading = false,
                         )
                     }

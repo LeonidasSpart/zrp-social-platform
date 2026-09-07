@@ -51,6 +51,8 @@ import one.zrp.social.mobile.ui.music.MusicPlayerViewModel
 import one.zrp.social.mobile.ui.music.MusicPlayerViewModelFactory
 import one.zrp.social.mobile.ui.music.MusicQueueScreen
 import one.zrp.social.mobile.ui.music.MusicScreen
+import one.zrp.social.mobile.ui.music.PlaylistDetailScreen
+import one.zrp.social.mobile.ui.music.PlaylistsScreen
 import one.zrp.social.mobile.ui.notifications.NotificationsScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
 import one.zrp.social.mobile.ui.quotes.QuotesScreen
@@ -94,6 +96,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToMusicArtist: (String) -> Unit = { id -> navController.navigate("music/artists/$id") }
     val goToMusicAlbums: () -> Unit = { navController.navigate("music/albums") }
     val goToMusicAlbum: (String) -> Unit = { id -> navController.navigate("music/albums/$id") }
+    val goToMusicPlaylists: () -> Unit = { navController.navigate("music/playlists") }
+    val goToMusicPlaylist: (String) -> Unit = { id -> navController.navigate("music/playlists/$id") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -306,8 +310,10 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenQueue = goToMusicQueue,
                     onOpenArtists = goToMusicArtists,
                     onOpenAlbums = goToMusicAlbums,
+                    onOpenPlaylists = goToMusicPlaylists,
                     onArtistClick = goToMusicArtist,
                     onAlbumClick = goToMusicAlbum,
+                    onPlaylistClick = goToMusicPlaylist,
                 )
             }
             composable("music/queue") {
@@ -318,6 +324,22 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             }
             composable("music/albums") {
                 AlbumsScreen(onBack = { navController.popBackStack() }, onAlbumClick = goToMusicAlbum)
+            }
+            composable("music/playlists") {
+                PlaylistsScreen(onBack = { navController.popBackStack() }, onPlaylistClick = goToMusicPlaylist)
+            }
+            composable(
+                route = "music/playlists/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    PlaylistDetailScreen(
+                        playlistId = id,
+                        player = musicPlayerViewModel,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
             }
             composable(
                 route = "music/artists/{id}",

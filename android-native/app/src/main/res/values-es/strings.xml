@@ -297,4 +297,25 @@
     <string name="music_albums_title">Álbumes</string>
     <string name="music_albums_search_placeholder">Buscar álbumes...</string>
     <string name="music_albums_none_found">No se encontraron álbumes</string>
+    <!-- Music Phase 4: Playlists -->
+    <string name="music_playlists_title">Tus playlists</string>
+    <string name="music_playlists_new_playlist">Nueva playlist</string>
+    <string name="music_playlists_name_placeholder">Nombre de la playlist</string>
+    <string name="music_playlists_create">Crear</string>
+    <string name="music_playlists_cancel_aria">Cancelar</string>
+    <string name="music_playlists_empty_title">Todavía no hay playlists</string>
+    <string name="music_playlists_empty_body">Crea tu primera playlist para empezar a organizar canciones.</string>
+    <string name="music_playlist_detail_not_found">Playlist no encontrada</string>
+    <string name="music_playlist_detail_back_to_playlists">Volver a las playlists</string>
+    <string name="music_playlist_detail_public">Playlist pública</string>
+    <string name="music_playlist_detail_private">Playlist privada</string>
+    <string name="music_playlist_detail_rename_aria">Cambiar nombre de la playlist</string>
+    <string name="music_playlist_detail_save_aria">Guardar nombre</string>
+    <string name="music_playlist_detail_delete">Eliminar</string>
+    <string name="music_playlist_detail_delete_confirm">¿Eliminar \"%1$s\"? Esta acción no se puede deshacer.</string>
+    <string name="music_playlist_detail_empty_title">Todavía no hay canciones en esta playlist</string>
+    <string name="music_playlist_detail_empty_body">Añade canciones desde Descubrir, un artista o un álbum.</string>
+    <string name="music_playlist_detail_move_up_aria">Mover hacia arriba</string>
+    <string name="music_playlist_detail_move_down_aria">Mover hacia abajo</string>
+    <string name="music_playlist_detail_remove_track_aria">Quitar %1$s de la playlist</string>
 </resources>
