@@ -11,6 +11,8 @@ import SwiftUI
 struct MainTabView: View {
 
     @EnvironmentObject private var player: MusicPlayer
+    @EnvironmentObject private var deepLinks: DeepLinkInbox
+    @Environment(\.openURL) private var openURL
 
     @StateObject private var router = AppRouter()
     /// Lives here rather than in Home so the Notifications and Messages
@@ -40,6 +42,13 @@ struct MainTabView: View {
         }
         .task {
             await unread.refresh()
+            // A link that arrived before anyone was signed in has been
+            // waiting; this is the first moment it has somewhere to go.
+            consumePendingLink()
+        }
+        .onChange(of: deepLinks.pending) { _, url in
+            guard url != nil else { return }
+            consumePendingLink()
         }
         // Coming back to Messages or Notifications is the moment the
         // badge is most likely to be wrong, so the counts are refetched
@@ -47,6 +56,20 @@ struct MainTabView: View {
         .onChange(of: router.selectedTab) { _, tab in
             guard tab == .messages || tab == .notifications else { return }
             Task { await unread.refresh() }
+        }
+    }
+
+    /// Opens whatever link is waiting.
+    ///
+    /// A ZRP link the app has no screen for is handed to the system
+    /// rather than swallowed: a page this app has not built yet should
+    /// open on the web, not silently do nothing.
+    private func consumePendingLink() {
+        guard let url = deepLinks.take() else { return }
+        if let target = DeepLink.target(for: url) {
+            router.open(target)
+        } else {
+            openURL(url)
         }
     }
 

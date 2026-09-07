@@ -59,7 +59,8 @@ struct PostCardView: View {
                 LinkifiedText(
                     content: displayed,
                     onHashtag: { navigator.push(.hashtag(tag: $0)) },
-                    onMention: { navigator.push(.profile(username: $0)) }
+                    onMention: { navigator.push(.profile(username: $0)) },
+                    onZrpLink: { navigator.push($0) }
                 )
             }
             translation

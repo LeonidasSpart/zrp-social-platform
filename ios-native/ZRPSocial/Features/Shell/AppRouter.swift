@@ -93,6 +93,20 @@ final class AppRouter: ObservableObject {
         navigator(for: tab).push(route)
     }
 
+    /// Opens what a deep link, or a notification, names.
+    ///
+    /// The tab is selected first and then popped to its root, so a link
+    /// always lands on the thing it names rather than on top of whatever
+    /// that tab happened to be showing.
+    func open(_ target: DeepLinkTarget) {
+        selectedTab = target.tab
+        let navigator = navigator(for: target.tab)
+        navigator.popToRoot()
+        if let route = target.route {
+            navigator.push(route)
+        }
+    }
+
     /// The iOS convention: tapping the tab you are already on returns to
     /// the top of that tab.
     func popToRoot(_ tab: MainTab) {

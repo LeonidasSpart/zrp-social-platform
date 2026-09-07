@@ -26,6 +26,23 @@
 
 	  Push notifications (aps-environment) are likewise deferred to Phase
 	  11 and are blocked on B3 - see PARITY.md.
+
+	  Universal links are the third: DeepLink.swift maps every ZRP web
+	  path this app has a screen for, ZRPSocialApp receives them through
+	  onOpenURL, and the tab shell opens them - that half is done and is
+	  already used for zrp.one links tapped inside a post. What is
+	  missing is entirely outside the code:
+
+	      <key>com.apple.developer.associated-domains</key>
+	      <array><string>applinks:zrp.one</string></array>
+
+	  plus public/.well-known/apple-app-site-association naming
+	  "TEAMID.one.zrp.social". The Team ID does not exist yet - there is
+	  no Apple Developer account for this app - and an invented one would
+	  produce a file Apple silently refuses to honour, which is worse
+	  than no file at all. Android's equivalent
+	  (public/.well-known/assetlinks.json) is real because its signing
+	  certificate exists.
 	-->
 </dict>
 </plist>
