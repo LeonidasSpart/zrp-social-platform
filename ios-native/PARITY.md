@@ -493,6 +493,6 @@ here. **No fake local notifications will stand in for this.**
 | 15 | Marketplace | ✅ browse, detail, favorites, create/edit/delete, my listings, contact seller |
 | 16 | Settings, moderation, account deletion | ✅ settings hub, privacy, password, blocked/muted lists, reporting, data export, account deletion (both paths) |
 | 17 | Localization (11 languages) + accessibility | ✅ in-app language picker (11 languages, RTL), locale-aware formatting, Dynamic Type pass with a CI rule |
-| 18 | Performance + security pass | ⬜ |
+| 18 | Performance + security pass | ✅ downsampling image loader with a decoded cache, path-segment escaping, no silent URL fallback; logging/Keychain/ATS audited clean |
 | 19 | App Store preparation | 🔶 toolchain now Xcode 26 / iOS 26 SDK-gated; signing, archive and export still pending |
 | 20 | Final parity audit | ⬜ |

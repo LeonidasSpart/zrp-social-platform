@@ -98,7 +98,10 @@ struct UsersRepository: UsersRepositoryProtocol {
     /// are not guaranteed to be path-safe. Encoding here rather than
     /// trusting the caller keeps a stray character from silently
     /// producing a request against a different path.
+    /// One shared segment encoder for the whole app - see
+    /// `Endpoint.segment`. The previous local version allowed `/`, which
+    /// a single path component must not contain.
     private func escaped(_ value: String) -> String {
-        value.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? value
+        Endpoint.segment(value)
     }
 }

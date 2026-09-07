@@ -19,6 +19,10 @@ struct AttachmentThumbnail: View {
 
     @State private var image: UIImage?
 
+    /// Environment scale rather than `UIScreen.main`, matching
+    /// `RemoteImage` - one screen is an assumption, not a fact.
+    @Environment(\.displayScale) private var displayScale
+
     var body: some View {
         Group {
             if let remoteURL, let url = URL(string: remoteURL) {
@@ -58,7 +62,7 @@ struct AttachmentThumbnail: View {
         // 56-point preview the composer does not depend on.
         guard !isVideo else { return }
 
-        let pixelSize = Int(side * (UIScreen.main.scale))
+        let pixelSize = Int(side * displayScale)
         let decoded = await Task.detached(priority: .userInitiated) { () -> UIImage? in
             guard let source = CGImageSourceCreateWithURL(fileURL as CFURL, nil) else {
                 return nil

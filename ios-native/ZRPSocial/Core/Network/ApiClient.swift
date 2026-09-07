@@ -161,10 +161,14 @@ final class ApiClient: @unchecked Sendable {
         // "posts/explore" resolves to https://zrp.one/api/posts/explore.
         // A path must therefore never start with "/", which would reset
         // it to the domain root.
-        guard var components = URLComponents(
-            url: URL(string: endpoint.path, relativeTo: baseURL) ?? baseURL,
-            resolvingAgainstBaseURL: true
-        ) else {
+        // A path that will not parse must fail loudly. Falling back to
+        // `baseURL` here would send the request to /api/ instead - a
+        // different route, with a plausible-looking response, for a
+        // request nobody made.
+        guard
+            let resolved = URL(string: endpoint.path, relativeTo: baseURL),
+            var components = URLComponents(url: resolved, resolvingAgainstBaseURL: true)
+        else {
             throw ApiError.transport(underlying: "Malformed path \(endpoint.path)")
         }
 

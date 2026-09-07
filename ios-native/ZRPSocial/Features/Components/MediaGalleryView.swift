@@ -87,19 +87,14 @@ struct MediaGalleryView: View {
                 startIndex: index
             )
         } label: {
-            AsyncImage(url: URL(string: url)) { phase in
-                switch phase {
-                case .success(let image):
-                    image.resizable().scaledToFill()
-                case .failure:
-                    placeholder(systemImage: "photo")
-                case .empty:
-                    ZrpColor.surfaceElevated
-                        .overlay(ProgressView().tint(ZrpColor.onSurfaceMuted))
-                @unknown default:
-                    placeholder(systemImage: "photo")
-                }
+            // The feed's heaviest images. Downsampled to roughly the
+            // card's own height rather than decoded at the 4032px the
+            // camera produced - the single biggest memory saving in a
+            // scrolling timeline.
+            RemoteImage(url: url, targetSize: 320) {
+                placeholder(systemImage: "photo")
             }
+            .scaledToFill()
             .frame(maxWidth: .infinity)
             .aspectRatio(4.0 / 3.0, contentMode: .fill)
             .clipped()

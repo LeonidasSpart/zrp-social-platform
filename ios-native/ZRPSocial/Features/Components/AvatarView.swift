@@ -9,30 +9,15 @@ struct AvatarView: View {
     var size: CGFloat = ZrpMetrics.avatarMedium
 
     var body: some View {
-        Group {
-            if let url, let parsed = URL(string: url), !url.isEmpty {
-                AsyncImage(url: parsed) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image.resizable().scaledToFill()
-                    case .failure:
-                        // A broken avatar URL falls back to initials
-                        // rather than an empty grey box.
-                        initials
-                    case .empty:
-                        ZrpColor.surfaceHighest
-                    @unknown default:
-                        initials
-                    }
-                }
-            } else {
-                initials
-            }
-        }
-        .frame(width: size, height: size)
-        .clipShape(Circle())
-        .overlay(Circle().strokeBorder(ZrpColor.outline, lineWidth: 0.5))
-        .accessibilityLabel(Text(.iosA11yAvatarOf, ["name": displayName]))
+        // `RemoteImage` resolves a nil or empty URL to its placeholder
+        // itself, so there is no outer branch here - one path, one
+        // fallback, and initials whether the URL is missing or broken.
+        RemoteImage(url: url, targetSize: size) { initials }
+            .scaledToFill()
+            .frame(width: size, height: size)
+            .clipShape(Circle())
+            .overlay(Circle().strokeBorder(ZrpColor.outline, lineWidth: 0.5))
+            .accessibilityLabel(Text(.iosA11yAvatarOf, ["name": displayName]))
     }
 
     private var initials: some View {

@@ -44,14 +44,11 @@ struct ProfileHeaderView: View {
     private var cover: some View {
         ZStack(alignment: .bottomLeading) {
             Group {
-                if let coverUrl = profile.coverUrl, let url = URL(string: coverUrl) {
-                    AsyncImage(url: url) { phase in
-                        if case .success(let image) = phase {
-                            image.resizable().scaledToFill()
-                        } else {
-                            ZrpColor.surfaceHighest
-                        }
+                if let coverUrl = profile.coverUrl, !coverUrl.isEmpty {
+                    RemoteImage(url: coverUrl, targetSize: 200) {
+                        ZrpColor.surfaceHighest
                     }
+                    .scaledToFill()
                 } else {
                     // No cover is the common case, so it gets a deliberate
                     // brand treatment rather than an empty grey band.

@@ -244,7 +244,7 @@ struct SettingsRepository: SettingsRepositoryProtocol {
     func toggleBlock(username: String) async throws -> Bool {
         struct Response: Decodable { let blocked: Bool }
         let response: Response = try await client.send(
-            Endpoint.post("users/\(username)/block")
+            Endpoint.post("users/\(Endpoint.segment(username))/block")
         )
         return response.blocked
     }

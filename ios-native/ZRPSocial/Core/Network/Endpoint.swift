@@ -41,6 +41,24 @@ struct Endpoint {
         self.requiresAuth = requiresAuth
     }
 
+    /// Percent-encodes one path **segment**.
+    ///
+    /// `.urlPathAllowed` is the wrong set for this: it permits `/`, `;`
+    /// and `=`, so a value containing a slash would silently split into
+    /// extra path segments and address a different route. Segments are
+    /// restricted to unreserved characters instead, which is what a
+    /// single component may legally contain.
+    ///
+    /// Applied to every interpolated component, not only the obviously
+    /// user-controlled ones. Server-generated ids need no escaping
+    /// today, but "which of these is user input" is exactly the
+    /// judgement that rots as routes are added.
+    static func segment(_ value: String) -> String {
+        var allowed = CharacterSet.alphanumerics
+        allowed.insert(charactersIn: "-._~")
+        return value.addingPercentEncoding(withAllowedCharacters: allowed) ?? value
+    }
+
     static func get(
         _ path: String,
         query: [(String, String?)] = [],

@@ -100,17 +100,8 @@ struct TrackArtworkView: View {
 
     var body: some View {
         Group {
-            if let url, let parsed = URL(string: url), !url.isEmpty {
-                AsyncImage(url: parsed) { phase in
-                    if case .success(let image) = phase {
-                        image.resizable().scaledToFill()
-                    } else {
-                        placeholder
-                    }
-                }
-            } else {
-                placeholder
-            }
+            RemoteImage(url: url, targetSize: side) { placeholder }
+                .scaledToFill()
         }
         .frame(width: side, height: side)
         .clipped()

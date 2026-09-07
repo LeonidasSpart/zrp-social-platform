@@ -303,17 +303,11 @@ struct ListingImageView: View {
 
     var body: some View {
         Group {
-            if let url, let parsed = URL(string: url), !url.isEmpty {
-                AsyncImage(url: parsed) { phase in
-                    if case .success(let image) = phase {
-                        image.resizable().scaledToFill()
-                    } else {
-                        placeholder
-                    }
-                }
-            } else {
-                placeholder
-            }
+            // Sized by height rather than width: a listing card is
+            // full-bleed horizontally, so height is the dimension that
+            // actually bounds how many pixels are needed.
+            RemoteImage(url: url, targetSize: height) { placeholder }
+                .scaledToFill()
         }
         .frame(maxWidth: .infinity)
         .frame(height: height)
