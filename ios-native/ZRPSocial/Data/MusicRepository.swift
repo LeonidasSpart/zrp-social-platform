@@ -18,6 +18,16 @@ protocol MusicRepositoryProtocol: Sendable {
     func album(id: String) async throws -> MusicAlbumDetail
     func playlists() async throws -> [MusicPlaylist]
     func playlist(id: String) async throws -> MusicPlaylistDetail
+    func createPlaylist(name: String, description: String?, isPublic: Bool) async throws -> MusicPlaylist
+    func updatePlaylist(
+        id: String,
+        name: String?,
+        description: ArtistProfileField,
+        isPublic: Bool?
+    ) async throws -> MusicPlaylist
+    func deletePlaylist(id: String) async throws
+    func togglePlaylistTrack(playlistId: String, trackId: String) async throws -> Bool
+    func reorderPlaylist(id: String, orderedEntryIds: [String]) async throws
     func library() async throws -> MusicLibrary
 }
 
@@ -152,7 +162,109 @@ struct MusicRepository: MusicRepositoryProtocol {
     }
 
     func playlist(id: String) async throws -> MusicPlaylistDetail {
-        try await client.send(Endpoint.get("music/playlists/\(id)"))
+        try await client.send(Endpoint.get("music/playlists/\(Endpoint.segment(id))"))
+    }
+
+    /// `POST /api/music/playlists`. The name is required (400 without
+    /// one) and truncated server-side to 100 characters; `isPublic`
+    /// defaults to true when omitted, which is why it is sent explicitly
+    /// rather than left out.
+    func createPlaylist(
+        name: String,
+        description: String?,
+        isPublic: Bool
+    ) async throws -> MusicPlaylist {
+        struct Request: Encodable {
+            let name: String
+            let description: String?
+            let isPublic: Bool
+        }
+        return try await client.send(
+            try Endpoint.post(
+                "music/playlists",
+                body: Request(name: name, description: description, isPublic: isPublic)
+            )
+        )
+    }
+
+    /// `PATCH /api/music/playlists/{id}`, owner-only (404 otherwise -
+    /// the route does not distinguish "not yours" from "not there").
+    ///
+    /// Key-presence semantics, exactly like the artist profile route: a
+    /// field the body omits is left alone, an explicit `null` clears it,
+    /// a value sets it. `ArtistProfileField` already encodes those three
+    /// states, so it is reused rather than re-invented.
+    func updatePlaylist(
+        id: String,
+        name: String?,
+        description: ArtistProfileField,
+        isPublic: Bool?
+    ) async throws -> MusicPlaylist {
+        struct Request: Encodable {
+            let name: String?
+            let description: ArtistProfileField
+            let isPublic: Bool?
+
+            enum CodingKeys: String, CodingKey {
+                case name, description, isPublic
+            }
+
+            func encode(to encoder: Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                try container.encodeIfPresent(name, forKey: .name)
+                try container.encodeIfPresent(isPublic, forKey: .isPublic)
+                switch description {
+                case .unchanged: break
+                case .clear: try container.encodeNil(forKey: .description)
+                case .value(let text): try container.encode(text, forKey: .description)
+                }
+            }
+        }
+        return try await client.send(
+            try Endpoint.patch(
+                "music/playlists/\(Endpoint.segment(id))",
+                body: Request(name: name, description: description, isPublic: isPublic)
+            )
+        )
+    }
+
+    func deletePlaylist(id: String) async throws {
+        try await client.sendIgnoringResponse(
+            Endpoint.delete("music/playlists/\(Endpoint.segment(id))")
+        )
+    }
+
+    /// `POST /api/music/playlists/{id}` with a `trackId` is a **toggle**,
+    /// not an add: a track already in the playlist is removed. It answers
+    /// `{added}` with the state it settled on, which is what the caller
+    /// reports rather than assuming.
+    func togglePlaylistTrack(playlistId: String, trackId: String) async throws -> Bool {
+        struct Request: Encodable { let trackId: String }
+        struct Response: Decodable { let added: Bool }
+        let response: Response = try await client.send(
+            try Endpoint.post(
+                "music/playlists/\(Endpoint.segment(playlistId))",
+                body: Request(trackId: trackId)
+            )
+        )
+        return response.added
+    }
+
+    /// `POST /api/music/playlists/{id}/reorder`.
+    ///
+    /// Takes the ids of the playlist's **join rows** - `MusicPlaylistEntry.id` -
+    /// not track ids. The route filters the list against the rows that
+    /// actually belong to this playlist and refuses an empty result with
+    /// a 400, so sending track ids would fail rather than silently
+    /// scramble another playlist.
+    func reorderPlaylist(id: String, orderedEntryIds: [String]) async throws {
+        struct Request: Encodable { let orderedIds: [String] }
+        try await client.sendIgnoringResponse(
+            try Endpoint.post(
+                "music/playlists/\(Endpoint.segment(id))/reorder",
+                body: Request(orderedIds: orderedEntryIds)
+            )
+        )
     }
 
     /// The one music route with an envelope: `{likes, history,

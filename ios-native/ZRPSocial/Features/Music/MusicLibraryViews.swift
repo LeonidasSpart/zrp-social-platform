@@ -128,6 +128,7 @@ struct MusicPlaylistsView: View {
     @StateObject private var viewModel = MusicListViewModel<MusicPlaylist> { _ in
         try await MusicRepository().playlists()
     }
+    @State private var isCreating = false
 
     var body: some View {
         Group {
@@ -138,6 +139,8 @@ struct MusicPlaylistsView: View {
                 TimelineStateView.error(error) { Task { await viewModel.run() } }
             case .loaded:
                 if viewModel.items.isEmpty {
+                    // The toolbar's + is still there, so an account with
+                    // no playlists is not a dead end.
                     TimelineStateView.empty(
                         systemImage: "music.note.list",
                         title: .iosMusicPlaylistsEmpty,
@@ -151,6 +154,20 @@ struct MusicPlaylistsView: View {
         .background(ZrpColor.background.ignoresSafeArea())
         .navigationTitle(Text(.musicNavPlaylistsTitle))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { isCreating = true } label: { Image(systemName: "plus") }
+                    .accessibilityLabel(Text(.iosPlaylistNew))
+            }
+        }
+        .sheet(isPresented: $isCreating) {
+            // Re-read rather than inserting the returned playlist: the
+            // list route is the only thing that knows the order it wants
+            // them in.
+            MusicPlaylistEditView(existing: nil) { _ in
+                Task { await viewModel.run() }
+            }
+        }
         .task { await viewModel.loadIfNeeded() }
     }
 
@@ -199,8 +216,12 @@ struct MusicPlaylistDetailView: View {
 
     @EnvironmentObject private var player: MusicPlayer
     @EnvironmentObject private var likes: MusicLikeStore
+    @EnvironmentObject private var navigator: Navigator
     @State private var detail: MusicPlaylistDetail?
     @State private var loadError: ApiError?
+    @State private var isEditing = false
+    @State private var isCurating = false
+    @State private var isConfirmingDelete = false
 
     private let repository = MusicRepository()
 
@@ -217,7 +238,85 @@ struct MusicPlaylistDetailView: View {
         .background(ZrpColor.background.ignoresSafeArea())
         .navigationTitle(Text(verbatim: detail?.name ?? ""))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            // Every write route here is owner-only and answers 404 for
+            // anyone else, so the menu is offered only to the owner -
+            // which the detail route itself reports.
+            if let detail, detail.isOwner {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button { isEditing = true } label: {
+                            Label { Text(.iosPlaylistEdit) } icon: { Image(systemName: "pencil") }
+                        }
+                        Button { isCurating = true } label: {
+                            Label {
+                                Text(.iosPlaylistCurate)
+                            } icon: {
+                                Image(systemName: "arrow.up.arrow.down")
+                            }
+                        }
+                        .disabled(detail.entries.isEmpty)
+                        Button(role: .destructive) {
+                            isConfirmingDelete = true
+                        } label: {
+                            Label { Text(.iosPlaylistDelete) } icon: { Image(systemName: "trash") }
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                    .accessibilityLabel(Text(.iosA11yPostOptions))
+                }
+            }
+        }
+        .sheet(isPresented: $isEditing) {
+            MusicPlaylistEditView(existing: detail.map(playlistSummary)) { _ in
+                Task { await load() }
+            }
+        }
+        .sheet(isPresented: $isCurating) {
+            MusicPlaylistCurateView(
+                playlistId: playlistId,
+                entries: detail?.entries ?? []
+            ) {
+                Task { await load() }
+            }
+        }
+        .confirmationDialog(
+            Text(.iosPlaylistDelete),
+            isPresented: $isConfirmingDelete,
+            titleVisibility: .visible
+        ) {
+            Button(role: .destructive) { Task { await deletePlaylist() } } label: {
+                Text(.actionDelete)
+            }
+            Button(role: .cancel) {} label: { Text(.actionCancel) }
+        } message: {
+            Text(.iosPlaylistDeleteConfirm)
+        }
         .task { await load() }
+    }
+
+    /// The detail route returns the playlist's fields inline rather than
+    /// nested, so the editor's summary is built from them rather than
+    /// fetched again.
+    private func playlistSummary(_ detail: MusicPlaylistDetail) -> MusicPlaylist {
+        MusicPlaylist(
+            id: detail.id,
+            name: detail.name,
+            description: detail.description,
+            coverUrl: detail.coverUrl,
+            isPublic: detail.isPublic
+        )
+    }
+
+    private func deletePlaylist() async {
+        do {
+            try await repository.deletePlaylist(id: playlistId)
+            // The screen is showing something that no longer exists.
+            navigator.pop()
+        } catch {
+            loadError = error as? ApiError ?? .transport(underlying: "\(error)")
+        }
     }
 
     private func load() async {

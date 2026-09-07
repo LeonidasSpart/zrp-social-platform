@@ -188,7 +188,9 @@ called and the real response being handled.
 | Artists / artist detail / follow | `/api/music/artists`, `/{id}`, `/{id}/follow` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Albums / album detail | `/api/music/albums`, `/{id}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Playlists (browse + detail) | `/api/music/playlists`, `/{id}` | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Playlist create / add track / reorder | `POST /api/music/playlists`, `/{id}/tracks`, `/{id}/reorder` | ✅ | ✅ | ⬜ read-only on iOS today | MISSING (Phase 14) |
+| Playlist create / edit / delete | `POST /api/music/playlists`; `PATCH` and `DELETE /api/music/playlists/{id}` (owner-only, 404 for anyone else) | ✅ | ✅ | ✅ the PATCH reads by key presence, so an emptied description is sent as an explicit null — a deliberate clear, not an omission | IMPLEMENTED |
+| Playlist add / remove a track | `POST /api/music/playlists/{id}` + `trackId` → `{added}`; it is a **toggle**, not an add — a track already in the playlist is removed | ✅ | ✅ | ✅ from Now Playing (a screen that is never recycled, so its sheet cannot be torn down mid-presentation as one raised from a lazy row would be), and by swipe in the curate sheet | IMPLEMENTED |
+| Playlist reorder | `POST /api/music/playlists/{id}/reorder` + `orderedIds` — the **join-row** ids, not track ids | ✅ | ✅ | ✅ drag to reorder in a modal `List`, which is what gives `onMove` at all — the detail screen's `LazyVStack` has no move gesture | IMPLEMENTED |
 | Track like | `POST /api/music/tracks/like` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Play reporting + duration backfill | `POST /api/music/tracks/play` | ✅ | ✅ | ✅ (reports AVPlayer's real decoded duration, repairing tracks stored without one) | IMPLEMENTED |
 | Liked / library / history pages | `GET /api/music/library` | ✅ | ✅ | ✅ full Liked and History pages | IMPLEMENTED |
@@ -584,7 +586,7 @@ here. **No fake local notifications will stand in for this.**
 | 7 | Post composer + media upload + viewer | ✅ done — 7b scheduling and polls done; camera capture still pending |
 | 8 | Comments, replies, quotes, edit | ✅ done — 8b complete (reactions, comment repost/bookmark, reposts & quotes lists, inline translation) |
 | 9 | Stories | ✅ done |
-| 10 | Messages | ✅ done — 10b image attachments done; conversation search still pending |
+| 10 | Messages | ✅ done — 10b image attachments done. Conversation search was listed here in error: the website has none either (no search box on `/messages`, and no route behind one), so there is nothing to reach parity with |
 | 11 | Notifications | ✅ in-app list done — device push remains BLOCKED (B3) |
 | 12 | Search + hashtags | ✅ done |
 | 13 | Music + background player | ✅ 13a (engine, background audio, lock screen, home) and 13b (discover, artists, albums, playlists, liked, history, queue) done |

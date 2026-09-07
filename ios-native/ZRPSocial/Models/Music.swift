@@ -356,6 +356,12 @@ struct MusicPlaylistDetail: Decodable, Equatable {
     let name: String
     let description: String?
     let coverUrl: String?
+
+    /// The route spreads the playlist row into its response, so this is
+    /// the same column the list route reports. Optional for the same
+    /// reason it is there: an older row may predate the column.
+    let isPublic: Bool?
+
     let isOwner: Bool
     let entries: [MusicPlaylistEntry]
 
@@ -367,12 +373,13 @@ struct MusicPlaylistDetail: Decodable, Equatable {
         name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
         description = try container.decodeIfPresent(String.self, forKey: .description)
         coverUrl = try container.decodeIfPresent(String.self, forKey: .coverUrl)
+        isPublic = try container.decodeIfPresent(Bool.self, forKey: .isPublic)
         isOwner = try container.decodeIfPresent(Bool.self, forKey: .isOwner) ?? false
         entries = try container.decodeIfPresent([MusicPlaylistEntry].self, forKey: .entries) ?? []
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, name, description, coverUrl, isOwner
+        case id, name, description, coverUrl, isPublic, isOwner
         // The route names this `tracks`, but each element is a join row
         // rather than a track - mapping it to `entries` keeps that
         // distinction visible at every use site.

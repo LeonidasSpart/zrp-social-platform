@@ -12,6 +12,14 @@ struct NowPlayingView: View {
     @State private var scrubTarget: Double?
     @State private var isScrubbing = false
 
+    /// The track being added to a playlist. Presented from here rather
+    /// than from a track row: this screen is a single view that is never
+    /// recycled, so a sheet raised from it cannot be torn down
+    /// mid-presentation the way one raised from inside a lazy list is.
+    @State private var addingToPlaylist: MusicTrack?
+
+    @EnvironmentObject private var session: SessionController
+
     var body: some View {
         NavigationStack {
             VStack(spacing: ZrpSpacing.xl) {
@@ -35,6 +43,20 @@ struct NowPlayingView: View {
                     }
                     .accessibilityLabel(Text(.musicPlayerCloseAria))
                 }
+
+                // Playlists are the viewer's own, so the route needs a
+                // session and this is not offered without one.
+                if let current = player.current, session.currentUser != nil {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button { addingToPlaylist = current } label: {
+                            Image(systemName: "text.badge.plus")
+                        }
+                        .accessibilityLabel(Text(.iosPlaylistAddTo))
+                    }
+                }
+            }
+            .sheet(item: $addingToPlaylist) { track in
+                MusicAddToPlaylistView(track: track)
             }
         }
     }

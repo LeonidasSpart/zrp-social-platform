@@ -632,3 +632,12 @@
 "ios.compose.pollEnds" = "Set an end date";
 "ios.compose.schedule" = "Schedule";
 "ios.compose.scheduleNote" = "The post publishes at this time on your device's clock.";
+"ios.playlist.new" = "New playlist";
+"ios.playlist.edit" = "Edit playlist";
+"ios.playlist.name" = "Name";
+"ios.playlist.description" = "Description";
+"ios.playlist.public" = "Anyone can see this playlist";
+"ios.playlist.curate" = "Reorder and remove";
+"ios.playlist.addTo" = "Add to playlist";
+"ios.playlist.delete" = "Delete playlist";
+"ios.playlist.deleteConfirm" = "This playlist and its track order are removed. The tracks themselves are not.";
