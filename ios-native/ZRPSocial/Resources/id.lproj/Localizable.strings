@@ -112,3 +112,11 @@
 "notifications.listingApprovedSuffix" = "menyetujui listingan marketplace Anda";
 "notifications.listingRejectedSuffix" = "tidak menyetujui listingan marketplace Anda";
 "notifications.listingRemovedSuffix" = "menghapus listingan marketplace Anda";
+"search.placeholder" = "Cari pengguna, postingan, tagar...";
+"search.usersTab" = "Pengguna ({n})";
+"search.postsTab" = "Postingan ({n})";
+"search.noUsers" = "Pengguna tidak ditemukan.";
+"search.noPosts" = "Postingan tidak ditemukan.";
+"home.trendingOnZrp" = "Sedang tren di ZRP";
+"explore.postCount" = "{n} postingan";
+"nav.explore" = "Jelajahi";

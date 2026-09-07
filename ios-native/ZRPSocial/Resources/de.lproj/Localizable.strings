@@ -112,3 +112,11 @@
 "notifications.listingApprovedSuffix" = "hat Ihre Marktplatzanzeige genehmigt";
 "notifications.listingRejectedSuffix" = "hat Ihre Marktplatzanzeige nicht genehmigt";
 "notifications.listingRemovedSuffix" = "hat Ihre Marktplatzanzeige entfernt";
+"search.placeholder" = "Nutzer, Beiträge, Hashtags suchen...";
+"search.usersTab" = "Nutzer ({n})";
+"search.postsTab" = "Beiträge ({n})";
+"search.noUsers" = "Keine Nutzer gefunden.";
+"search.noPosts" = "Keine Beiträge gefunden.";
+"home.trendingOnZrp" = "Trends auf ZRP";
+"explore.postCount" = "{n} Beiträge";
+"nav.explore" = "Entdecken";

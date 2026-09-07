@@ -112,3 +112,11 @@
 "notifications.listingApprovedSuffix" = "ha approvato il tuo annuncio sul marketplace";
 "notifications.listingRejectedSuffix" = "non ha approvato il tuo annuncio sul marketplace";
 "notifications.listingRemovedSuffix" = "ha rimosso il tuo annuncio sul marketplace";
+"search.placeholder" = "Cerca utenti, post, hashtag...";
+"search.usersTab" = "Utenti ({n})";
+"search.postsTab" = "Post ({n})";
+"search.noUsers" = "Nessun utente trovato.";
+"search.noPosts" = "Nessun post trovato.";
+"home.trendingOnZrp" = "Di tendenza su ZRP";
+"explore.postCount" = "{n} post";
+"nav.explore" = "Esplora";

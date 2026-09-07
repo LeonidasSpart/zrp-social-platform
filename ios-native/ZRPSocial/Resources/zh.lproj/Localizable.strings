@@ -112,3 +112,11 @@
 "notifications.listingApprovedSuffix" = "批准了您的市场商品";
 "notifications.listingRejectedSuffix" = "未批准您的市场商品";
 "notifications.listingRemovedSuffix" = "下架了您的市场商品";
+"search.placeholder" = "搜索 用户, 帖子, 话题标签...";
+"search.usersTab" = "用户 ({n})";
+"search.postsTab" = "帖子 ({n})";
+"search.noUsers" = "未找到用户。";
+"search.noPosts" = "未找到帖子。";
+"home.trendingOnZrp" = "ZRP 热门话题";
+"explore.postCount" = "{n} 帖子";
+"nav.explore" = "探索";

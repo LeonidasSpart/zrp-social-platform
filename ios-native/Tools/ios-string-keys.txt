@@ -141,3 +141,13 @@ notifications.appealResolvedSuffix
 notifications.listingApprovedSuffix
 notifications.listingRejectedSuffix
 notifications.listingRemovedSuffix
+
+# ── Search (Phase 12) ───────────────────────────────────────────────
+search.placeholder
+search.usersTab
+search.postsTab
+search.noUsers
+search.noPosts
+home.trendingOnZrp
+explore.postCount
+nav.explore

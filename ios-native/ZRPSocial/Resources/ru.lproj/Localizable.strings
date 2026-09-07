@@ -112,3 +112,11 @@
 "notifications.listingApprovedSuffix" = "одобрил(а) ваше объявление на маркетплейсе";
 "notifications.listingRejectedSuffix" = "не одобрил(а) ваше объявление на маркетплейсе";
 "notifications.listingRemovedSuffix" = "удалил(а) ваше объявление на маркетплейсе";
+"search.placeholder" = "поиск пользователей, публикаций, хэштегов...";
+"search.usersTab" = "пользователей ({n})";
+"search.postsTab" = "публикаций ({n})";
+"search.noUsers" = "Пользователи не найдены.";
+"search.noPosts" = "Публикации не найдены.";
+"home.trendingOnZrp" = "В тренде на ZRP";
+"explore.postCount" = "{n} публикаций";
+"nav.explore" = "Обзор";

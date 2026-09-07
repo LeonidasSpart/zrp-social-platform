@@ -108,7 +108,7 @@ called and the real response being handled.
 | Follow / unfollow (+ request for private) | `POST /api/users/{username}/follow` | ✅ | ✅ | ✅ (all three outcomes: followed, unfollowed, request pending) | IMPLEMENTED |
 | Followers / Following lists | `/followers`, `/following` → `{items,nextCursor}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Edit profile | `PUT /api/user/profile` | ✅ | ✅ | ⬜ | MISSING (Phase 6b) |
-| Suggested users | `GET /api/users/suggested` | ✅ | ✅ | ⬜ | MISSING (Phase 12) |
+| Suggested users | `GET /api/users/suggested` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Private-account gating | every content route returns `{items: []}`, not 403 | ✅ | 🔶 | ✅ (explains the account is private instead of showing "no posts") | IMPLEMENTED |
 | Trust profile | `GET /api/users/{username}/trust` | ✅ | ⬜ | ⬜ | MISSING |
 
@@ -116,11 +116,11 @@ called and the real response being handled.
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
-| Search (users + posts) | `GET /api/search?q=&type=all` (min 2 chars) | ✅ | ✅ | ⬜ | MISSING (Phase 12) |
-| Trending hashtags | `GET /api/hashtags/trending` | ✅ | ✅ | ⬜ | MISSING (Phase 12) |
+| Search (users + posts) | `GET /api/search?q=&type=all` (min 2 chars; 10 users / 20 posts, unpaginated) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Trending hashtags | `GET /api/hashtags/trending` (bare array, server-cached, limit clamped 1–50) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Hashtag timeline | `GET /api/posts/hashtag/{tag}` (bare array, 50, no pagination) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Hashtag / mention tap-through in post text | — | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Explore / trending pages | `GET /api/posts/explore` | ✅ | 🔶 (For You tab) | 🔶 (For You tab) | PARTIAL |
+| Explore / trending pages | `GET /api/posts/explore` | ✅ | 🔶 (For You tab) | 🔶 For You tab + a discover surface (trending tags, suggested people) | PARTIAL |
 
 ### Comments & replies
 
@@ -404,7 +404,7 @@ here. **No fake local notifications will stand in for this.**
 | 9 | Stories | ✅ done |
 | 10 | Messages | ✅ done — attachments and conversation search pending (10b) |
 | 11 | Notifications | ✅ in-app list done — device push remains BLOCKED (B3) |
-| 12 | Search + hashtags | 🔶 hashtag timeline done; search pending |
+| 12 | Search + hashtags | ✅ done |
 | 13 | Music + background player | ⬜ |
 | 14 | Music Studio | ⬜ |
 | 15 | Marketplace | ⬜ |

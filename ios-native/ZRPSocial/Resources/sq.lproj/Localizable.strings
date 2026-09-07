@@ -112,3 +112,11 @@
 "notifications.listingApprovedSuffix" = "miratoi shpalljen tuaj në marketplace";
 "notifications.listingRejectedSuffix" = "nuk e miratoi shpalljen tuaj në marketplace";
 "notifications.listingRemovedSuffix" = "hoqi shpalljen tuaj në marketplace";
+"search.placeholder" = "Kërko përdorues, postime, hashtags...";
+"search.usersTab" = "Përdoruesit ({n})";
+"search.postsTab" = "Postimet ({n})";
+"search.noUsers" = "Nuk u gjet asnjë përdorues.";
+"search.noPosts" = "Nuk u gjet asnjë postim.";
+"home.trendingOnZrp" = "Në trend në ZRP";
+"explore.postCount" = "{n} postime";
+"nav.explore" = "Eksploro";

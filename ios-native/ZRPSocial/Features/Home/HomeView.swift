@@ -47,6 +47,8 @@ struct HomeView: View {
                     ConversationView(partner: partner, viewerId: session.currentUser?.id)
                 case .notifications:
                     NotificationsView { unread.clearNotificationCount() }
+                case .search:
+                    SearchView()
                 }
             }
         }
@@ -146,6 +148,14 @@ struct HomeView: View {
                 .scaledToFit()
                 .frame(width: 26, height: 26)
                 .accessibilityHidden(true)
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            Button {
+                navigator.push(.search)
+            } label: {
+                Image(systemName: "magnifyingglass")
+            }
+            .accessibilityLabel(Text(.navSearch))
         }
         ToolbarItem(placement: .topBarTrailing) {
             Button {

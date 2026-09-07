@@ -112,3 +112,11 @@
 "notifications.listingApprovedSuffix" = "وافق على إعلانك في السوق";
 "notifications.listingRejectedSuffix" = "لم يوافق على إعلانك في السوق";
 "notifications.listingRemovedSuffix" = "أزال إعلانك في السوق";
+"search.placeholder" = "بحث مستخدمون, منشورات, وسوم...";
+"search.usersTab" = "مستخدمون ({n})";
+"search.postsTab" = "منشورات ({n})";
+"search.noUsers" = "لم يتم العثور على مستخدمين.";
+"search.noPosts" = "لم يتم العثور على منشورات.";
+"home.trendingOnZrp" = "الأكثر رواجاً على ZRP";
+"explore.postCount" = "{n} منشورات";
+"nav.explore" = "استكشاف";

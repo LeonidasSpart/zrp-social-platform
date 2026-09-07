@@ -112,3 +112,11 @@
 "notifications.listingApprovedSuffix" = "pazar yeri ilanınızı onayladı";
 "notifications.listingRejectedSuffix" = "pazar yeri ilanınızı onaylamadı";
 "notifications.listingRemovedSuffix" = "pazar yeri ilanınızı kaldırdı";
+"search.placeholder" = "Kullanıcı, gönderi, hashtag ara...";
+"search.usersTab" = "Kullanıcılar ({n})";
+"search.postsTab" = "Gönderiler ({n})";
+"search.noUsers" = "Kullanıcı bulunamadı.";
+"search.noPosts" = "Gönderi bulunamadı.";
+"home.trendingOnZrp" = "ZRP'de gündemde";
+"explore.postCount" = "{n} gönderi";
+"nav.explore" = "Keşfet";

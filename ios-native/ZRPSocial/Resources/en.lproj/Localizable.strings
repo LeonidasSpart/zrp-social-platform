@@ -112,6 +112,14 @@
 "notifications.listingApprovedSuffix" = "approved your marketplace listing";
 "notifications.listingRejectedSuffix" = "didn't approve your marketplace listing";
 "notifications.listingRemovedSuffix" = "removed your marketplace listing";
+"search.placeholder" = "Search users, posts, hashtags...";
+"search.usersTab" = "Users ({n})";
+"search.postsTab" = "Posts ({n})";
+"search.noUsers" = "No users found.";
+"search.noPosts" = "No posts found.";
+"home.trendingOnZrp" = "Trending on ZRP";
+"explore.postCount" = "{n} posts";
+"nav.explore" = "Explore";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back
@@ -186,3 +194,5 @@
 "ios.chat.reply" = "Reply";
 "ios.notifications.messageSuffix" = "sent you a message";
 "ios.notifications.followRequestSuffix" = "requested to follow you";
+"ios.search.minLength" = "Type at least 2 characters to search.";
+"ios.search.suggestedTitle" = "Suggested for you";
