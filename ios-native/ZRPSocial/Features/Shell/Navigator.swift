@@ -72,6 +72,8 @@ enum Route: Hashable {
     case aiChat
     case aid
     case aidCampaign(id: String)
+    case opportunity
+    case opportunityDetail(id: String)
 }
 
 /// Owns the navigation stack's path.

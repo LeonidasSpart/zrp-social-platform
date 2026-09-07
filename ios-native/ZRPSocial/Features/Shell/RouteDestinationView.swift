@@ -111,6 +111,10 @@ struct RouteDestinationView: View {
             AidView()
         case .aidCampaign(let id):
             AidCampaignView(campaignId: id)
+        case .opportunity:
+            OpportunityView()
+        case .opportunityDetail(let id):
+            OpportunityDetailView(listingId: id)
         case .listingConversation(let partner, let draft):
             ConversationView(
                 partner: partner,
