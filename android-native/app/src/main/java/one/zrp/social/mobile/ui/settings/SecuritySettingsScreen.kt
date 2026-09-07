@@ -58,7 +58,7 @@ fun SecuritySettingsScreen(onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.nav_back))
             }
             Text(
                 text = stringResource(R.string.settings_security),
@@ -167,7 +167,7 @@ private fun PasswordField(
             IconButton(onClick = { visible = !visible }) {
                 Icon(
                     imageVector = if (visible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                    contentDescription = if (visible) "Hide password" else "Show password",
+                    contentDescription = stringResource(if (visible) R.string.action_hide_password else R.string.action_show_password),
                 )
             }
         },

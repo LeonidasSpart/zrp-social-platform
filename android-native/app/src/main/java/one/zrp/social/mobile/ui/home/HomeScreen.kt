@@ -89,12 +89,13 @@ fun HomeScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             // A real, always-visible manual refresh affordance - page.tsx's
-            // own floating "Refresh feed" button (aria-label="Refresh feed",
-            // untranslated on web too, a translucent circular button
-            // positioned over the top of the page, spinning while
+            // own floating "Refresh feed" button (a translucent circular
+            // button positioned over the top of the page, spinning while
             // refreshing) - not just the pull-to-refresh gesture below,
             // which someone who doesn't know the gesture exists would
-            // otherwise have no way to trigger.
+            // otherwise have no way to trigger. Web hardcodes its own
+            // aria-label in English; translated here as native-only
+            // supporting copy instead.
             //
             // Aligned within a Box scoped to just the stories rail's own
             // height (not the whole screen, and not the feed content
@@ -146,7 +147,7 @@ fun HomeScreen(
                         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                             Icon(
                                 imageVector = Icons.Filled.Refresh,
-                                contentDescription = "Refresh feed",
+                                contentDescription = stringResource(R.string.home_refresh_feed_cd),
                                 tint = if (state.isRefreshing) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier
                                     .size(18.dp)
@@ -271,14 +272,10 @@ fun HomeScreen(
 
                     val deletePostId = deletingPostId
                     if (deletePostId != null) {
-                        // "Delete Post?"/"This action cannot be undone."/"Cancel"/"Delete"
-                        // stay English-only here on purpose - PostCard.tsx's own delete
-                        // confirmation dialog hardcodes those same words untranslated too,
-                        // so this matches real web behavior rather than being a native gap.
                         AlertDialog(
                             onDismissRequest = { if (!isDeletingPost) deletingPostId = null },
-                            title = { Text("Delete post?") },
-                            text = { Text("This can't be undone.") },
+                            title = { Text(stringResource(R.string.post_delete_confirm_title)) },
+                            text = { Text(stringResource(R.string.post_delete_confirm_body)) },
                             confirmButton = {
                                 if (isDeletingPost) {
                                     CircularProgressIndicator(modifier = Modifier.size(20.dp))
@@ -291,13 +288,13 @@ fun HomeScreen(
                                             result.onFailure { /* left visible; the row itself still shows the post on failure */ }
                                         }
                                     }) {
-                                        Text("Delete", color = MaterialTheme.colorScheme.error)
+                                        Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
                                     }
                                 }
                             },
                             dismissButton = {
                                 TextButton(onClick = { deletingPostId = null }, enabled = !isDeletingPost) {
-                                    Text("Cancel")
+                                    Text(stringResource(R.string.action_cancel))
                                 }
                             },
                         )
@@ -310,7 +307,8 @@ fun HomeScreen(
                             initialContent = editPostContent,
                             isSubmitting = isSubmittingEdit,
                             error = editError,
-                            onDismiss = { editingPostId = null },
+                            title = stringResource(R.string.post_edit_dialog_title),
+            onDismiss = { editingPostId = null },
                             onSubmit = { content ->
                                 isSubmittingEdit = true
                                 viewModel.editPost(editPostId, content) { result ->

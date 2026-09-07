@@ -62,6 +62,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -76,6 +77,7 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.ReactionToggleRequest
@@ -356,7 +358,7 @@ fun PostCard(
                             IconButton(onClick = { onPinClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
                                 Icon(
                                     imageVector = if (isPinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
-                                    contentDescription = if (isPinned) "Unpin from profile" else "Pin to profile",
+                                    contentDescription = stringResource(if (isPinned) R.string.post_unpin_cd else R.string.post_pin_cd),
                                     tint = if (isPinned) ZrpBlue else MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(IconSize.sm),
                                 )
@@ -365,7 +367,7 @@ fun PostCard(
                         IconButton(onClick = { onEditClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
                             Icon(
                                 imageVector = Icons.Filled.Edit,
-                                contentDescription = "Edit post",
+                                contentDescription = stringResource(R.string.post_edit_cd),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(IconSize.sm),
                             )
@@ -373,7 +375,7 @@ fun PostCard(
                         IconButton(onClick = { onDeleteClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
                             Icon(
                                 imageVector = Icons.Filled.DeleteOutline,
-                                contentDescription = "Delete post",
+                                contentDescription = stringResource(R.string.post_delete_cd),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(IconSize.sm),
                             )
@@ -382,7 +384,7 @@ fun PostCard(
                         IconButton(onClick = { onReportClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
                             Icon(
                                 imageVector = Icons.Filled.Flag,
-                                contentDescription = "Report post",
+                                contentDescription = stringResource(R.string.post_report_cd),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(IconSize.sm),
                             )
@@ -481,7 +483,7 @@ fun PostCard(
                     PostStat(
                         icon = Icons.Filled.ChatBubbleOutline,
                         count = post._count.comments,
-                        contentDescription = "Comments",
+                        contentDescription = stringResource(R.string.post_comments_cd),
                         onClick = { onCommentClick(post.id) },
                     )
                     RepostStat(
@@ -523,7 +525,7 @@ fun PostCard(
                         IconButton(onClick = { showAddReactionDialog = true }, modifier = Modifier.size(TouchTarget.min)) {
                             Icon(
                                 imageVector = Icons.Filled.Add,
-                                contentDescription = "Add reaction",
+                                contentDescription = stringResource(R.string.post_add_reaction_cd),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(IconSize.sm),
                             )
@@ -660,7 +662,7 @@ private fun ImageLightbox(images: List<String>, initialIndex: Int, onDismiss: ()
                     Spacer(modifier = Modifier.size(1.dp))
                 }
                 IconButton(onClick = onDismiss) {
-                    Icon(Icons.Filled.Close, contentDescription = "Close image", tint = Color.White)
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.post_close_image_cd), tint = Color.White)
                 }
             }
         }
@@ -747,7 +749,7 @@ private fun PostVideoPlayer(url: String, onOpenViewer: () -> Unit, modifier: Mod
         ) {
             Icon(
                 imageVector = if (isMuted) Icons.Filled.VolumeOff else Icons.Filled.VolumeUp,
-                contentDescription = if (isMuted) "Unmute video" else "Mute video",
+                contentDescription = stringResource(if (isMuted) R.string.post_unmute_video_cd else R.string.post_mute_video_cd),
                 tint = Color.White,
             )
         }
@@ -811,7 +813,7 @@ private fun RepostStat(
             IconButton(onClick = { menuOpen = true }, modifier = Modifier.size(TouchTarget.min)) {
                 Icon(
                     imageVector = Icons.Filled.Repeat,
-                    contentDescription = "Repost options",
+                    contentDescription = stringResource(R.string.post_repost_options_cd),
                     tint = resolvedTint,
                     modifier = Modifier.size(IconSize.sm),
                 )
@@ -825,14 +827,14 @@ private fun RepostStat(
 
         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
             DropdownMenuItem(
-                text = { Text(if (reposted) "Undo Repost" else "Repost") },
+                text = { Text(stringResource(if (reposted) R.string.action_undo_repost else R.string.action_repost)) },
                 onClick = {
                     menuOpen = false
                     onRepostToggle()
                 },
             )
             DropdownMenuItem(
-                text = { Text("Quote") },
+                text = { Text(stringResource(R.string.post_quote_action)) },
                 onClick = {
                     menuOpen = false
                     onQuoteClick()
@@ -840,14 +842,14 @@ private fun RepostStat(
             )
             HorizontalDivider()
             DropdownMenuItem(
-                text = { Text("${formatCount(count)} reposts", style = MaterialTheme.typography.labelSmall) },
+                text = { Text(stringResource(R.string.post_reposts_count, formatCount(count)), style = MaterialTheme.typography.labelSmall) },
                 onClick = {
                     menuOpen = false
                     onViewReposts()
                 },
             )
             DropdownMenuItem(
-                text = { Text("${formatCount(quoteCount)} quotes", style = MaterialTheme.typography.labelSmall) },
+                text = { Text(stringResource(R.string.post_quotes_count, formatCount(quoteCount)), style = MaterialTheme.typography.labelSmall) },
                 onClick = {
                     menuOpen = false
                     onViewQuotes()
@@ -940,7 +942,7 @@ private fun LikeStat(liked: Boolean, count: Int, onClick: () -> Unit) {
         IconButton(onClick = onClick, modifier = Modifier.size(TouchTarget.min)) {
             Icon(
                 imageVector = if (liked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                contentDescription = if (liked) "Unlike" else "Like",
+                contentDescription = stringResource(if (liked) R.string.action_unlike else R.string.action_like),
                 tint = if (liked) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .size(IconSize.sm)
@@ -962,7 +964,7 @@ private fun BookmarkButton(bookmarked: Boolean, onClick: () -> Unit) {
     IconButton(onClick = onClick, modifier = Modifier.size(TouchTarget.min)) {
         Icon(
             imageVector = if (bookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
-            contentDescription = if (bookmarked) "Remove bookmark" else "Bookmark",
+            contentDescription = stringResource(if (bookmarked) R.string.action_remove_bookmark else R.string.action_bookmark),
             tint = if (bookmarked) ZrpBlue else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(IconSize.sm),
         )

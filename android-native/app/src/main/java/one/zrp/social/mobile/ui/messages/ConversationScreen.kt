@@ -231,10 +231,10 @@ fun ConversationScreen(
             }
 
             IconButton(onClick = { requestCall(isVideo = false) }) {
-                Icon(Icons.Filled.Call, contentDescription = "Voice call")
+                Icon(Icons.Filled.Call, contentDescription = stringResource(R.string.message_voice_call_cd))
             }
             IconButton(onClick = { requestCall(isVideo = true) }) {
-                Icon(Icons.Filled.Videocam, contentDescription = "Video call")
+                Icon(Icons.Filled.Videocam, contentDescription = stringResource(R.string.message_video_call_cd))
             }
         }
         HorizontalDivider()
@@ -356,7 +356,7 @@ fun ConversationScreen(
                 IconButton(onClick = { viewModel.cancelReply() }) {
                     // "Cancel reply" stays English-only on purpose - matches
                     // ChatInterface.tsx's own hardcoded, untranslated aria-label.
-                    Icon(Icons.Filled.Close, contentDescription = "Cancel reply")
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.comment_cancel_reply_cd))
                 }
             }
         }
@@ -393,10 +393,7 @@ fun ConversationScreen(
                 },
                 enabled = !state.isUploadingImage,
             ) {
-                // "Attach image" stays English-only on purpose - matches
-                // ChatInterface.tsx's own hardcoded, untranslated
-                // aria-label ("Attach file") on its Paperclip button.
-                Icon(Icons.Filled.AttachFile, contentDescription = "Attach image")
+                Icon(Icons.Filled.AttachFile, contentDescription = stringResource(R.string.message_attach_image_cd))
             }
 
             OutlinedTextField(
@@ -416,12 +413,9 @@ fun ConversationScreen(
                 if (state.isSending) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                 } else {
-                    // "Send message" stays English-only on purpose - matches
-                    // ChatInterface.tsx's own hardcoded, untranslated aria-label
-                    // (aria-label="Send message" on its send button).
                     Icon(
                         imageVector = Icons.Filled.Send,
-                        contentDescription = "Send message",
+                        contentDescription = stringResource(R.string.message_send_cd),
                         tint = ZrpRed,
                     )
                 }
@@ -439,7 +433,7 @@ fun ConversationScreen(
             initialContent = editMessageContent,
             isSubmitting = state.isSavingEdit,
             error = state.editError,
-            title = "Edit message",
+            title = stringResource(R.string.message_edit_dialog_title),
             onDismiss = { viewModel.cancelEdit() },
             onSubmit = { content -> viewModel.saveEdit(editMessageId, content) { } },
         )
@@ -659,11 +653,10 @@ private fun MessageBubble(
                     text = { Text(stringResource(R.string.action_reply)) },
                     onClick = { menuOpen = false; onReplyClick() },
                 )
-                // "React" has no web equivalent to translate from - ChatInterface.tsx's
-                // own reaction-picker trigger is an icon-only button with a hardcoded,
-                // untranslated aria-label ("React"), so this matches real web behavior
-                // rather than being a native-only gap.
-                DropdownMenuItem(text = { Text("React") }, onClick = { menuOpen = false; onAddReactionClick() })
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.reaction_react_action)) },
+                    onClick = { menuOpen = false; onAddReactionClick() },
+                )
                 if (isOwnMessage) {
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.action_edit)) },

@@ -60,7 +60,7 @@ fun ArtistsScreen(onBack: () -> Unit, onArtistClick: (String) -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.nav_back))
             }
             Text(
                 text = stringResource(R.string.music_artists_title),

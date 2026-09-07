@@ -79,7 +79,7 @@ fun TicketDetailScreen(ticketId: String, onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.nav_back))
             }
             Text(
                 text = state.ticket?.subject ?: stringResource(R.string.support_tickets_page_title),
