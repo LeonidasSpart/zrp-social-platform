@@ -92,6 +92,8 @@
     "ios.music.emptyBody": "Published tracks will appear here.",
     "ios.a11y.likeTrack": "Like track",
     "ios.a11y.unlikeTrack": "Unlike track",
-    "ios.music.explicit": "Explicit"
+    "ios.music.explicit": "Explicit",
+    "ios.music.playlistsEmpty": "No playlists yet",
+    "ios.music.playlistsEmptyBody": "Playlists you create on ZRP appear here."
   }
 }

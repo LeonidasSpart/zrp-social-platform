@@ -148,6 +148,31 @@
 "music.liked.title" = "Liked Music";
 "music.albums.title" = "Albums";
 "music.artists.title" = "Artists";
+"music.count.tracksOther" = "{count} tracks";
+"music.discover.browseByGenre" = "Browse by genre";
+"music.discover.allTracks" = "All tracks";
+"music.discover.searchPlaceholder" = "Search songs, artists, genres...";
+"music.discover.noTracksTitle" = "No tracks found";
+"music.discover.noTracksBody" = "Try a different search or genre.";
+"music.artists.searchPlaceholder" = "Search artists...";
+"music.artists.noneFound" = "No artists found";
+"music.albums.searchPlaceholder" = "Search albums...";
+"music.albums.noneFound" = "No albums found";
+"music.artistDetail.follow" = "Follow";
+"music.artistDetail.following" = "Following";
+"music.artistDetail.tracksHeading" = "Tracks";
+"music.artistDetail.albumsHeading" = "Albums";
+"music.artistDetail.noTracks" = "No published tracks yet";
+"music.artistDetail.notFound" = "Artist not found";
+"music.albumDetail.noTracks" = "No published tracks in this album yet";
+"music.albumDetail.notFound" = "Album not found";
+"music.liked.emptyTitle" = "No liked tracks yet";
+"music.liked.emptyBody" = "Tap the heart on any track to save it here.";
+"music.history.emptyTitle" = "No listening history yet";
+"music.history.emptyBody" = "Tracks you play will show up here.";
+"music.queue.upNext" = "Up next ({count})";
+"music.nav.queueTitle" = "Your Queue";
+"music.shell.seeAll" = "See all";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back
@@ -233,3 +258,5 @@
 "ios.a11y.likeTrack" = "Like track";
 "ios.a11y.unlikeTrack" = "Unlike track";
 "ios.music.explicit" = "Explicit";
+"ios.music.playlistsEmpty" = "No playlists yet";
+"ios.music.playlistsEmptyBody" = "Playlists you create on ZRP appear here.";

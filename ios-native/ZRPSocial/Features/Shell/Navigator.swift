@@ -22,6 +22,16 @@ enum Route: Hashable {
     case notifications
     case search
     case music
+    case musicDiscover
+    case musicArtists
+    case musicAlbums
+    case musicPlaylists
+    case musicArtist(id: String)
+    case musicAlbum(id: String)
+    case musicPlaylist(id: String)
+    case musicLiked
+    case musicHistory
+    case musicQueue
 }
 
 /// Owns the navigation stack's path.

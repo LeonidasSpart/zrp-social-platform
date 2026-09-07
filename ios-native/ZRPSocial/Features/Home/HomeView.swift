@@ -51,6 +51,26 @@ struct HomeView: View {
                     SearchView()
                 case .music:
                     MusicHomeView()
+                case .musicDiscover:
+                    MusicDiscoverView()
+                case .musicArtists:
+                    MusicArtistsView()
+                case .musicAlbums:
+                    MusicAlbumsView()
+                case .musicPlaylists:
+                    MusicPlaylistsView()
+                case .musicArtist(let id):
+                    MusicArtistDetailView(artistId: id)
+                case .musicAlbum(let id):
+                    MusicAlbumDetailView(albumId: id)
+                case .musicPlaylist(let id):
+                    MusicPlaylistDetailView(playlistId: id)
+                case .musicLiked:
+                    MusicLibraryListView(kind: .liked)
+                case .musicHistory:
+                    MusicLibraryListView(kind: .history)
+                case .musicQueue:
+                    MusicQueueView()
                 }
             }
         }

@@ -138,6 +138,30 @@ final class MusicPlayer: ObservableObject {
         updateNowPlaying()
     }
 
+    /// Stops playback and empties the queue.
+    ///
+    /// Called when the session ends: what the previous viewer was
+    /// listening to must not keep playing - or stay on the lock screen -
+    /// for whoever signs in next. The outgoing track is still reported
+    /// first, so a listen already earned is not lost.
+    func reset() {
+        reportPlayIfNeeded(completed: false)
+        player.pause()
+        player.replaceCurrentItem(with: nil)
+        isPlaying = false
+        isExpanded = false
+        current = nil
+        queue = []
+        unshuffledQueue = []
+        currentIndex = 0
+        elapsed = 0
+        duration = 0
+        secondsHeard = 0
+        lastObservedTime = 0
+        hasReportedPlay = false
+        updateNowPlaying()
+    }
+
     func next() {
         // Repeat-one still advances on an explicit skip: the listener
         // asked for the next track, not for the same one again.

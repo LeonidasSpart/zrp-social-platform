@@ -179,14 +179,15 @@ called and the real response being handled.
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
 | Music home | `GET /api/music/home` (8 sections in one response) | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Discover / genres | `GET /api/music/genres` | ✅ | ✅ | ⬜ | MISSING (Phase 13b) |
-| Artists / artist detail / follow | `/api/music/artists`, `/{id}`, `/{id}/follow` | ✅ | ✅ | ⬜ | MISSING (Phase 13b) |
-| Albums / album detail | `/api/music/albums`, `/{id}` | ✅ | ✅ | ⬜ | MISSING (Phase 13b) |
-| Playlists (+ reorder) | `/api/music/playlists`, `/{id}`, `/{id}/reorder` | ✅ | ✅ | ⬜ | MISSING (Phase 13b) |
+| Discover / genres | `GET /api/music/genres`, `GET /api/music/tracks` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Artists / artist detail / follow | `/api/music/artists`, `/{id}`, `/{id}/follow` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Albums / album detail | `/api/music/albums`, `/{id}` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Playlists (browse + detail) | `/api/music/playlists`, `/{id}` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Playlist create / add track / reorder | `POST /api/music/playlists`, `/{id}/tracks`, `/{id}/reorder` | ✅ | ✅ | ⬜ read-only on iOS today | MISSING (Phase 14) |
 | Track like | `POST /api/music/tracks/like` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Play reporting + duration backfill | `POST /api/music/tracks/play` | ✅ | ✅ | ✅ (reports AVPlayer's real decoded duration, repairing tracks stored without one) | IMPLEMENTED |
-| Liked / library / history pages | `GET /api/music/library` | ✅ | ✅ | 🔶 home previews only; full pages pending 13b | PARTIAL |
-| Queue | client-side | ✅ | ✅ | 🔶 real queue drives playback; dedicated queue screen pending 13b | PARTIAL |
+| Liked / library / history pages | `GET /api/music/library` | ✅ | ✅ | ✅ full Liked and History pages | IMPLEMENTED |
+| Queue | client-side | ✅ | ✅ | ✅ dedicated queue screen driven by the live `MusicPlayer` queue, not a copy of it | IMPLEMENTED |
 | Mini + expanded player, seek, shuffle, repeat | client-side | ✅ | ✅ | ✅ (persistent across navigation) | IMPLEMENTED |
 | Background audio | `UIBackgroundModes: audio` + `AVAudioSession .playback` | n/a | ✅ | ✅ | IMPLEMENTED |
 | Lock screen / Now Playing | `MPNowPlayingInfoCenter` + `MPRemoteCommandCenter` | n/a | ✅ | ✅ (title, artist, album, artwork, scrubbing) | IMPLEMENTED |
@@ -324,6 +325,25 @@ route already does) would fix it for web, Android and iOS at once.
 Noted, not worked around. No client-side change was made that would mask
 it.
 
+### L2. `GET /api/music/playlists/{id}` does not report per-track `liked`
+
+Every other route that returns music tracks tells the caller whether the
+signed-in viewer has liked each one: `/api/music/home`, `/api/music/tracks`
+(line 104), `/api/music/artists/{id}` and `/api/music/albums/{id}` all
+attach a `liked` boolean. The playlist detail route does not - it returns
+the join rows and their tracks with no like state at all.
+
+The visible effect is the same on every client: a track opened from a
+playlist shows an empty heart even when the viewer has liked it, until
+some other screen loads the same track. iOS does **not** paper over this
+by assuming `false`; `MusicLikeStore` treats a missing flag as "unknown"
+and keeps whatever it already knows, so the heart is right whenever any
+other surface has reported it. Attaching `liked` there the same way the
+album route does (one `musicLike.findMany` over the playlist's track ids)
+would fix it for web, Android and iOS at once.
+
+Noted, not worked around.
+
 ## Blocked items
 
 ### B1. Native OAuth (Google / Apple)
@@ -410,7 +430,7 @@ here. **No fake local notifications will stand in for this.**
 | 10 | Messages | ✅ done — attachments and conversation search pending (10b) |
 | 11 | Notifications | ✅ in-app list done — device push remains BLOCKED (B3) |
 | 12 | Search + hashtags | ✅ done |
-| 13 | Music + background player | ✅ 13a done (engine, background audio, lock screen, home) — 13b (discover, artists, albums, playlists, queue screen) pending |
+| 13 | Music + background player | ✅ 13a (engine, background audio, lock screen, home) and 13b (discover, artists, albums, playlists, liked, history, queue) done |
 | 14 | Music Studio | ⬜ |
 | 15 | Marketplace | ⬜ |
 | 16 | Settings, moderation, account deletion | ⬜ |

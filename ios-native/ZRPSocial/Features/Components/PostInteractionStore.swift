@@ -61,6 +61,15 @@ final class PostInteractionStore: ObservableObject {
         }
     }
 
+    /// Called when the session ends. Everything here is one viewer's
+    /// relationship to a post, so it must not survive into the next
+    /// viewer's session on a shared device.
+    func clear() {
+        interactions.removeAll()
+        deletedPostIDs.removeAll()
+        actionError = nil
+    }
+
     // MARK: - Toggles
 
     /// Each toggle route flips state server-side and returns the result,

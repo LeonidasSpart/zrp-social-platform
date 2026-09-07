@@ -9,6 +9,16 @@ protocol MusicRepositoryProtocol: Sendable {
         secondsPlayed: Int,
         completed: Bool
     ) async throws
+    func genres() async throws -> [MusicGenre]
+    func tracks(query: String?, limit: Int) async throws -> [MusicTrack]
+    func artists(query: String?, sort: String, limit: Int) async throws -> [MusicArtist]
+    func artist(id: String) async throws -> MusicArtistDetail
+    func toggleArtistFollow(id: String) async throws -> Bool
+    func albums(query: String?, limit: Int) async throws -> [MusicAlbum]
+    func album(id: String) async throws -> MusicAlbumDetail
+    func playlists() async throws -> [MusicPlaylist]
+    func playlist(id: String) async throws -> MusicPlaylistDetail
+    func library() async throws -> MusicLibrary
 }
 
 struct MusicRepository: MusicRepositoryProtocol {
@@ -76,5 +86,79 @@ struct MusicRepository: MusicRepositoryProtocol {
                 )
             )
         )
+    }
+
+    // MARK: - Browse
+    //
+    // These five list routes all return **bare arrays**, not envelopes -
+    // unlike `/music/library`, which is the one exception. Verified route
+    // by route rather than assumed consistent across the music surface.
+
+    func genres() async throws -> [MusicGenre] {
+        try await client.send(Endpoint.get("music/genres"))
+    }
+
+    func tracks(query: String?, limit: Int = 30) async throws -> [MusicTrack] {
+        try await client.send(
+            Endpoint.get("music/tracks", query: [
+                ("q", query?.isEmpty == false ? query : nil),
+                ("limit", "\(limit)"),
+            ])
+        )
+    }
+
+    /// `sort` is `"name"` (default) or `"popular"`; the route clamps
+    /// `limit` to 100.
+    func artists(query: String?, sort: String = "name", limit: Int = 50) async throws -> [MusicArtist] {
+        try await client.send(
+            Endpoint.get("music/artists", query: [
+                ("q", query?.isEmpty == false ? query : nil),
+                ("sort", sort),
+                ("limit", "\(limit)"),
+            ])
+        )
+    }
+
+    /// The artist plus its albums, tracks, and the viewer's follow state
+    /// in one object - no separate follow-status call needed.
+    func artist(id: String) async throws -> MusicArtistDetail {
+        try await client.send(Endpoint.get("music/artists/\(id)"))
+    }
+
+    func toggleArtistFollow(id: String) async throws -> Bool {
+        struct FollowResponse: Decodable { let following: Bool? }
+        let response: FollowResponse = try await client.send(
+            Endpoint.post("music/artists/\(id)/follow")
+        )
+        return response.following ?? false
+    }
+
+    func albums(query: String?, limit: Int = 50) async throws -> [MusicAlbum] {
+        try await client.send(
+            Endpoint.get("music/albums", query: [
+                ("q", query?.isEmpty == false ? query : nil),
+                ("limit", "\(limit)"),
+            ])
+        )
+    }
+
+    func album(id: String) async throws -> MusicAlbumDetail {
+        try await client.send(Endpoint.get("music/albums/\(id)"))
+    }
+
+    /// The viewer's own playlists. Requires a session (401 otherwise).
+    func playlists() async throws -> [MusicPlaylist] {
+        try await client.send(Endpoint.get("music/playlists"))
+    }
+
+    func playlist(id: String) async throws -> MusicPlaylistDetail {
+        try await client.send(Endpoint.get("music/playlists/\(id)"))
+    }
+
+    /// The one music route with an envelope: `{likes, history,
+    /// artistFollows}`, each an array of join rows wrapping a track or
+    /// artist rather than the entity itself.
+    func library() async throws -> MusicLibrary {
+        try await client.send(Endpoint.get("music/library"))
     }
 }

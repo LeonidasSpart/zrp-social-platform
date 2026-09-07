@@ -16,12 +16,17 @@ struct ZRPSocialApp: App {
     /// the lock screen are driven by the same state.
     @StateObject private var musicPlayer = MusicPlayer()
 
+    /// The music counterpart of `interactions`: which tracks the viewer
+    /// has liked, shared across every screen that shows a track row.
+    @StateObject private var musicLikes = MusicLikeStore()
+
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(session)
                 .environmentObject(interactions)
                 .environmentObject(musicPlayer)
+                .environmentObject(musicLikes)
                 // ZRP is a dark-first product on web and on Android. The
                 // light palette is fully defined and correct, so the app
                 // follows the system setting rather than forcing dark -

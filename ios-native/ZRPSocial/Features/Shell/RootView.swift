@@ -5,6 +5,9 @@ import SwiftUI
 struct RootView: View {
 
     @EnvironmentObject private var session: SessionController
+    @EnvironmentObject private var interactions: PostInteractionStore
+    @EnvironmentObject private var musicLikes: MusicLikeStore
+    @EnvironmentObject private var player: MusicPlayer
 
     var body: some View {
         Group {
@@ -20,6 +23,15 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: session.state)
+        // Signing out - or a session the server has revoked, which lands
+        // in the same state - has to leave nothing of the previous viewer
+        // behind for whoever signs in next on this device.
+        .onChange(of: session.state) { _, newState in
+            guard newState == .signedOut else { return }
+            interactions.clear()
+            musicLikes.clear()
+            player.reset()
+        }
         .task {
             // Runs once per launch. Verifies any stored token against the
             // real session endpoint before showing signed-in UI, so a
