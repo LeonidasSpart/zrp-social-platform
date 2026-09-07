@@ -294,4 +294,7 @@
     </plurals>
     <string name="music_shell_latest_albums_heading">Ultimi album</string>
     <string name="music_shell_popular_artists_heading">Artisti popolari</string>
+    <string name="music_albums_title">Album</string>
+    <string name="music_albums_search_placeholder">Cerca album...</string>
+    <string name="music_albums_none_found">Nessun album trovato</string>
 </resources>

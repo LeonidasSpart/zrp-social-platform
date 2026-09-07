@@ -294,4 +294,7 @@
     </plurals>
     <string name="music_shell_latest_albums_heading">أحدث الألبومات</string>
     <string name="music_shell_popular_artists_heading">فنانون مشهورون</string>
+    <string name="music_albums_title">الألبومات</string>
+    <string name="music_albums_search_placeholder">ابحث عن ألبومات...</string>
+    <string name="music_albums_none_found">لم يتم العثور على ألبومات</string>
 </resources>

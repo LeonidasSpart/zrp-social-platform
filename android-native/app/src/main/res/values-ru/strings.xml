@@ -294,4 +294,7 @@
     </plurals>
     <string name="music_shell_latest_albums_heading">Последние альбомы</string>
     <string name="music_shell_popular_artists_heading">Популярные исполнители</string>
+    <string name="music_albums_title">Альбомы</string>
+    <string name="music_albums_search_placeholder">Поиск альбомов...</string>
+    <string name="music_albums_none_found">Альбомы не найдены</string>
 </resources>

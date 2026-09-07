@@ -76,6 +76,7 @@ fun MusicScreen(
     onBack: () -> Unit,
     onOpenQueue: () -> Unit,
     onOpenArtists: () -> Unit,
+    onOpenAlbums: () -> Unit,
     onArtistClick: (String) -> Unit,
     onAlbumClick: (String) -> Unit,
 ) {
@@ -108,11 +109,19 @@ fun MusicScreen(
         }
         HorizontalDivider()
 
-        Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             AssistChip(
                 onClick = onOpenArtists,
                 leadingIcon = { Icon(Icons.Filled.People, contentDescription = null, modifier = Modifier.size(18.dp)) },
                 label = { Text(stringResource(R.string.music_artists_title)) },
+            )
+            AssistChip(
+                onClick = onOpenAlbums,
+                leadingIcon = { Icon(Icons.Filled.Album, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                label = { Text(stringResource(R.string.music_albums_title)) },
             )
         }
 
