@@ -113,6 +113,7 @@ fun ProfileScreen(
     onOpenQuotes: (postId: String) -> Unit = {},
     onOpenHashtag: (String) -> Unit = {},
     onOpenTrustPassport: (username: String) -> Unit = {},
+    onOpenVideoViewer: (String) -> Unit = {},
 ) {
     val viewModel: ProfileViewModel = viewModel(
         factory = remember(username) { ProfileViewModelFactory(ProfileRepository(), username) },
@@ -260,6 +261,7 @@ fun ProfileScreen(
                                     onClick = onOpenComments,
                                     onAuthorClick = onAuthorClick,
                                     onHashtagClick = onOpenHashtag,
+                                    onOpenVideoViewer = onOpenVideoViewer,
                                     showPinOption = state.isOwnProfile,
                                     isPinned = true,
                                     onPinClick = { postId -> viewModel.togglePin(postId) },
@@ -293,6 +295,7 @@ fun ProfileScreen(
                             onClick = onOpenComments,
                             onAuthorClick = onAuthorClick,
                             onHashtagClick = onOpenHashtag,
+                            onOpenVideoViewer = onOpenVideoViewer,
                             showPinOption = state.isOwnProfile,
                             isPinned = false,
                             onPinClick = { postId -> viewModel.togglePin(postId) },

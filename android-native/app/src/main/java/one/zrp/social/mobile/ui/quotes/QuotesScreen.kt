@@ -54,6 +54,7 @@ fun QuotesScreen(
     onOpenReposts: (postId: String) -> Unit = {},
     onOpenQuotes: (postId: String) -> Unit = {},
     onOpenHashtag: (String) -> Unit = {},
+    onOpenVideoViewer: (String) -> Unit = {},
     onBack: () -> Unit,
 ) {
     val viewModel: QuotesViewModel = viewModel(
@@ -149,6 +150,7 @@ fun QuotesScreen(
                             onClick = onOpenComments,
                             onAuthorClick = onAuthorClick,
                             onHashtagClick = onOpenHashtag,
+                            onOpenVideoViewer = onOpenVideoViewer,
                         )
                     }
 

@@ -38,7 +38,10 @@ data class ShortsUiState(
  * elsewhere. Uploading a Short is a later phase, the same staged-
  * deferral every other feature epic this app used for its own phase 1.
  */
-class ShortsViewModel(private val repository: PostsRepository) : ViewModel() {
+class ShortsViewModel(
+    private val repository: PostsRepository,
+    private val startPostId: String? = null,
+) : ViewModel() {
     private val _state = MutableStateFlow(ShortsUiState())
     val state: StateFlow<ShortsUiState> = _state.asStateFlow()
 
@@ -52,7 +55,7 @@ class ShortsViewModel(private val repository: PostsRepository) : ViewModel() {
     private fun load() {
         _state.update { it.copy(isLoading = true) }
         viewModelScope.launch {
-            repository.getVideos()
+            repository.getVideos(startId = startPostId)
                 .onSuccess { page -> applyFreshPage(page) }
                 .onFailure { _state.update { it.copy(isLoading = false) } }
         }
@@ -164,7 +167,10 @@ class ShortsViewModel(private val repository: PostsRepository) : ViewModel() {
 
 }
 
-class ShortsViewModelFactory(private val repository: PostsRepository) : ViewModelProvider.Factory {
+class ShortsViewModelFactory(
+    private val repository: PostsRepository,
+    private val startPostId: String? = null,
+) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T = ShortsViewModel(repository) as T
+    override fun <T : ViewModel> create(modelClass: Class<T>): T = ShortsViewModel(repository, startPostId) as T
 }

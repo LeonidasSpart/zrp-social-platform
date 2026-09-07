@@ -52,6 +52,7 @@ fun HashtagScreen(
     onOpenReposts: (postId: String) -> Unit = {},
     onOpenQuotes: (postId: String) -> Unit = {},
     onOpenHashtag: (String) -> Unit = {},
+    onOpenVideoViewer: (String) -> Unit = {},
 ) {
     val viewModel: HashtagViewModel = viewModel(
         factory = remember(tag) { HashtagViewModelFactory(PostsRepository(), tag) },
@@ -141,6 +142,7 @@ fun HashtagScreen(
                             onClick = onOpenComments,
                             onAuthorClick = onAuthorClick,
                             onHashtagClick = onOpenHashtag,
+                            onOpenVideoViewer = onOpenVideoViewer,
                         )
                     }
                 }

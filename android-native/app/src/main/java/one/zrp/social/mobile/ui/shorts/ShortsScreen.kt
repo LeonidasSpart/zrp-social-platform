@@ -84,9 +84,14 @@ import one.zrp.social.mobile.util.formatCount
  * upload-then-POST-/api/posts flow ShortUploadModal.tsx drives.
  */
 @Composable
-fun ShortsScreen(onBack: () -> Unit, onOpenComments: (String) -> Unit, onAuthorClick: (String) -> Unit) {
+fun ShortsScreen(
+    onBack: () -> Unit,
+    onOpenComments: (String) -> Unit,
+    onAuthorClick: (String) -> Unit,
+    startPostId: String? = null,
+) {
     val viewModel: ShortsViewModel = viewModel(
-        factory = remember { ShortsViewModelFactory(PostsRepository()) },
+        factory = remember(startPostId) { ShortsViewModelFactory(PostsRepository(), startPostId) },
     )
     val state by viewModel.state.collectAsState()
     val pagerState = rememberPagerState(pageCount = { state.posts.size })
