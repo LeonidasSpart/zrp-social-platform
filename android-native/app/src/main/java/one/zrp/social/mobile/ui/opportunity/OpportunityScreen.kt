@@ -13,7 +13,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -36,17 +38,21 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.OpportunityRepository
 
 /**
- * ZRP OPPORTUNITY browse - ported from OpportunityHomePage.tsx: a type
- * filter row + remote-only toggle, and an infinite-scroll list of the
- * same real GET /opportunity results ListingCard renders. The Post
- * Opportunity/My Listings/My Applications entry points aren't shown yet
- * - those screens are a later native phase (create/edit listing,
- * applicants management) - so this stays browse-only rather than
- * linking to a destination that doesn't exist yet, matching how
- * ZRP Market Plus's own browse screen was staged.
+ * ZRP OPPORTUNITY browse - ported from OpportunityHomePage.tsx: Post
+ * Opportunity/My Listings entry points, a type filter row + remote-only
+ * toggle, and an infinite-scroll list of the same real GET /opportunity
+ * results ListingCard renders. My Applications isn't shown yet - that
+ * screen is a later native phase (applicants management), so this omits
+ * only that one destination rather than linking to one that doesn't
+ * exist yet.
  */
 @Composable
-fun OpportunityScreen(onBack: () -> Unit, onListingClick: (String) -> Unit) {
+fun OpportunityScreen(
+    onBack: () -> Unit,
+    onListingClick: (String) -> Unit,
+    onPostOpportunity: () -> Unit,
+    onOpenMyListings: () -> Unit,
+) {
     val viewModel: OpportunityViewModel = viewModel(
         factory = remember { OpportunityViewModelFactory(OpportunityRepository()) },
     )
@@ -70,6 +76,12 @@ fun OpportunityScreen(onBack: () -> Unit, onListingClick: (String) -> Unit) {
                     .weight(1f)
                     .padding(start = 4.dp),
             )
+            IconButton(onClick = onOpenMyListings) {
+                Icon(Icons.Filled.ListAlt, contentDescription = stringResource(R.string.opportunity_my_listings))
+            }
+            IconButton(onClick = onPostOpportunity) {
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.opportunity_post_opportunity))
+            }
         }
         Text(
             text = stringResource(R.string.opportunity_hero_subtitle),

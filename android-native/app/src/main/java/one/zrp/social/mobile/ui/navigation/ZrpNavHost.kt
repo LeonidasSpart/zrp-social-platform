@@ -64,7 +64,9 @@ import one.zrp.social.mobile.ui.music.MusicScreen
 import one.zrp.social.mobile.ui.music.PlaylistDetailScreen
 import one.zrp.social.mobile.ui.music.PlaylistsScreen
 import one.zrp.social.mobile.ui.notifications.NotificationsScreen
+import one.zrp.social.mobile.ui.opportunity.MyOpportunityListingsScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityDetailScreen
+import one.zrp.social.mobile.ui.opportunity.OpportunityFormScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
 import one.zrp.social.mobile.ui.quotes.QuotesScreen
@@ -124,6 +126,9 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToMyListings: () -> Unit = { navController.navigate("marketplace/my-listings") }
     val goToOpportunity: () -> Unit = { navController.navigate("opportunity") }
     val goToOpportunityListing: (String) -> Unit = { id -> navController.navigate("opportunity/listing/$id") }
+    val goToNewOpportunity: () -> Unit = { navController.navigate("opportunity/new") }
+    val goToEditOpportunity: (String) -> Unit = { id -> navController.navigate("opportunity/edit/$id") }
+    val goToMyOpportunityListings: () -> Unit = { navController.navigate("opportunity/my-listings") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -487,6 +492,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                 OpportunityScreen(
                     onBack = { navController.popBackStack() },
                     onListingClick = goToOpportunityListing,
+                    onPostOpportunity = goToNewOpportunity,
+                    onOpenMyListings = goToMyOpportunityListings,
                 )
             }
             composable(
@@ -499,8 +506,40 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                         listingId = id,
                         onBack = { navController.popBackStack() },
                         onOpenPoster = goToProfile,
+                        onEditListing = goToEditOpportunity,
                     )
                 }
+            }
+            composable("opportunity/new") {
+                OpportunityFormScreen(
+                    listingId = null,
+                    onBack = { navController.popBackStack() },
+                    onSaved = { id ->
+                        navController.navigate("opportunity/listing/$id") {
+                            popUpTo("opportunity") { inclusive = false }
+                        }
+                    },
+                )
+            }
+            composable(
+                route = "opportunity/edit/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    OpportunityFormScreen(
+                        listingId = id,
+                        onBack = { navController.popBackStack() },
+                        onSaved = { savedId -> navController.navigate("opportunity/listing/$savedId") { popUpTo("opportunity") { inclusive = false } } },
+                    )
+                }
+            }
+            composable("opportunity/my-listings") {
+                MyOpportunityListingsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenListing = goToOpportunityListing,
+                    onEditListing = goToEditOpportunity,
+                )
             }
             composable("bookmarks") {
                 BookmarksScreen(
