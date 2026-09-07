@@ -329,4 +329,9 @@
     <string name="music_discover_all_tracks">كل المقاطع</string>
     <string name="music_discover_no_tracks_title">لم يتم العثور على مقاطع</string>
     <string name="music_discover_no_tracks_body">جرّب بحثًا أو نوعًا موسيقيًا مختلفًا.</string>
-    <string name="music_shell_genres_heading">الأنواع</string></resources>
+    <string name="music_shell_genres_heading">الأنواع</string>
+    <!-- Music Phase 6: History + Liked -->
+    <string name="music_liked_empty_title">لا توجد مقاطع مفضلة بعد</string>
+    <string name="music_liked_empty_body">اضغط على قلب أي مقطع لحفظه هنا.</string>
+    <string name="music_history_empty_title">لا يوجد سجل استماع بعد</string>
+    <string name="music_history_empty_body">ستظهر المقاطع التي تستمع إليها هنا.</string></resources>
