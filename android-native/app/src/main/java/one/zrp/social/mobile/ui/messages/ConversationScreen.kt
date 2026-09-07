@@ -74,6 +74,7 @@ fun ConversationScreen(
     partnerId: String,
     partnerUsername: String,
     onBack: () -> Unit,
+    onOpenProfile: () -> Unit,
 ) {
     val viewModel: ConversationViewModel = viewModel(
         factory = remember(partnerId) { ConversationViewModelFactory(MessagesRepository(), partnerId) },
@@ -97,7 +98,16 @@ fun ConversationScreen(
             IconButton(onClick = onBack) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.chat_back_to_messages))
             }
-            Column(modifier = Modifier.padding(start = 4.dp)) {
+            Column(
+                modifier = Modifier
+                    .padding(start = 4.dp)
+                    // Matches ChatInterface.tsx's own header button - web
+                    // opens a ChatContactDrawer with call buttons/shared
+                    // media/a "View Profile" link; this app has none of
+                    // that yet, so the header goes straight to the real
+                    // profile instead of a drawer this app doesn't have.
+                    .clickable(onClick = onOpenProfile),
+            ) {
                 Text(
                     text = "@$partnerUsername",
                     style = MaterialTheme.typography.titleMedium,

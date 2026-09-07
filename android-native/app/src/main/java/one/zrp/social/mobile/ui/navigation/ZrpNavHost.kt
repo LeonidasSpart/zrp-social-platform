@@ -402,6 +402,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                         partnerId = userId,
                         partnerUsername = username,
                         onBack = { navController.popBackStack() },
+                        onOpenProfile = { goToProfile(username) },
                     )
                 }
             }
