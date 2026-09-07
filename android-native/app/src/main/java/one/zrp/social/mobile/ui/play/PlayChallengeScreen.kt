@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
+import one.zrp.social.mobile.data.PlayChallengeContent
 import one.zrp.social.mobile.data.PlayRepository
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
