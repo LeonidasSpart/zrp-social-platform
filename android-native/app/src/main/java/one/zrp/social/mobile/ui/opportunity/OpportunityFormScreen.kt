@@ -245,7 +245,15 @@ fun OpportunityFormScreen(listingId: String?, onBack: () -> Unit, onSaved: (Stri
                             ) {
                                 Text(text = skill, style = MaterialTheme.typography.labelSmall)
                                 IconButton(onClick = { viewModel.onRemoveSkill(skill) }, modifier = Modifier.size(20.dp)) {
-                                    Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(14.dp))
+                                    // action_delete reused as this chip's own remove-skill
+                                    // label - no web aria-label to match (this is a plain
+                                    // <button> in a skill pill on the real page) and no
+                                    // dedicated string exists for this one icon-only action.
+                                    Icon(
+                                        Icons.Filled.Close,
+                                        contentDescription = stringResource(R.string.action_delete),
+                                        modifier = Modifier.size(14.dp),
+                                    )
                                 }
                             }
                         }

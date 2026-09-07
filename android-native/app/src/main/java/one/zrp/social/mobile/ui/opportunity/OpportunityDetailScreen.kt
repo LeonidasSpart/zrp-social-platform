@@ -171,7 +171,11 @@ fun OpportunityDetailScreen(
                             }
                             if (!state.reportSent) {
                                 IconButton(onClick = viewModel::onOpenReport) {
-                                    Icon(Icons.Filled.Flag, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Icon(
+                                        Icons.Filled.Flag,
+                                        contentDescription = stringResource(R.string.report_modal_title),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
                                 }
                             }
                         }

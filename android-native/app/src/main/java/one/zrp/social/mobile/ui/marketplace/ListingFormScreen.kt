@@ -307,7 +307,7 @@ fun ListingFormScreen(listingId: String?, onBack: () -> Unit, onSaved: (String) 
                                 .padding(start = 8.dp),
                         )
                         IconButton(onClick = viewModel::onRemoveVideo) {
-                            Icon(Icons.Filled.Close, contentDescription = null)
+                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.shorts_upload_remove_video))
                         }
                     }
                 } else {

@@ -261,7 +261,11 @@ fun ListingDetailScreen(
                         }
                         if (!isOwner) {
                             IconButton(onClick = viewModel::onOpenReport, modifier = Modifier.padding(start = Spacing.xs)) {
-                                Icon(Icons.Filled.Flag, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Icon(
+                                    Icons.Filled.Flag,
+                                    contentDescription = stringResource(R.string.report_modal_title),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
                             }
                         }
                     }
