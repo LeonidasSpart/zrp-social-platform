@@ -64,10 +64,8 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 /**
  * A single opportunity listing - ported from OpportunityListingPage.tsx:
  * type badge, deadline/location/remote, compensation, skills, poster
- * card, and save/report/apply actions, plus an owner-only Edit button.
- * The owner-only "View Applicants" link isn't shown yet - that screen is
- * a later native phase (applicants management), so this omits only that
- * one destination rather than linking to one that doesn't exist yet.
+ * card, and save/report/apply actions, plus owner-only View
+ * Applicants/Edit buttons.
  */
 @Composable
 fun OpportunityDetailScreen(
@@ -75,6 +73,7 @@ fun OpportunityDetailScreen(
     onBack: () -> Unit,
     onOpenPoster: (String) -> Unit,
     onEditListing: (String) -> Unit,
+    onOpenApplicants: (String) -> Unit,
 ) {
     val viewModel: OpportunityDetailViewModel = viewModel(
         factory = remember { OpportunityDetailViewModelFactory(listingId, OpportunityRepository()) },
@@ -277,8 +276,13 @@ fun OpportunityDetailScreen(
                     Box(modifier = Modifier.padding(top = Spacing.lg, bottom = Spacing.xl)) {
                         when {
                             isOwner -> {
-                                OutlinedButton(onClick = { onEditListing(listing.id) }) {
-                                    Text(stringResource(R.string.opportunity_edit_listing))
+                                Row {
+                                    Button(onClick = { onOpenApplicants(listing.id) }) {
+                                        Text(stringResource(R.string.opportunity_view_applicants, listing._count.applications))
+                                    }
+                                    OutlinedButton(onClick = { onEditListing(listing.id) }, modifier = Modifier.padding(start = Spacing.sm)) {
+                                        Text(stringResource(R.string.opportunity_edit_listing))
+                                    }
                                 }
                             }
                             listing.externalUrl != null -> {
