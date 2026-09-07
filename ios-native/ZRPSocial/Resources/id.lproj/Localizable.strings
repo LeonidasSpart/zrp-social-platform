@@ -64,3 +64,13 @@
 "following.empty" = "Belum mengikuti siapa pun.";
 "hashtag.noPosts" = "Belum ada postingan dengan #{tag}.";
 "hashtag.errLoad" = "Gagal memuat postingan";
+"action.post" = "Kirim";
+"action.save" = "Simpan";
+"composer.placeholderDefault" = "Apa yang terjadi? Gunakan #hashtag dan @mention";
+"composer.posting" = "Mengirim...";
+"composer.postButton" = "Kirim";
+"composer.uploading" = "Mengunggah...";
+"composer.addGif" = "Tambah GIF";
+"composer.errUploadFailed" = "Unggahan gagal. Silakan coba lagi.";
+"composer.errSomethingWrong" = "Terjadi kesalahan. Periksa feed Anda untuk melihat apakah postingan Anda telah dipublikasikan.";
+"composer.errWriteSomething" = "Silakan tulis sesuatu atau ajukan pertanyaan polling.";

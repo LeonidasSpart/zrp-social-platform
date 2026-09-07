@@ -64,3 +64,13 @@
 "following.empty" = "Folgt noch niemandem.";
 "hashtag.noPosts" = "Noch keine Beiträge mit #{tag}.";
 "hashtag.errLoad" = "Beiträge konnten nicht geladen werden";
+"action.post" = "Posten";
+"action.save" = "Speichern";
+"composer.placeholderDefault" = "Was gibt's Neues? Verwende #Hashtags und @Erwähnungen";
+"composer.posting" = "Wird gepostet...";
+"composer.postButton" = "Posten";
+"composer.uploading" = "Wird hochgeladen...";
+"composer.addGif" = "GIF hinzufügen";
+"composer.errUploadFailed" = "Upload fehlgeschlagen. Bitte versuche es erneut.";
+"composer.errSomethingWrong" = "Etwas ist schiefgelaufen. Prüfe deinen Feed, ob dein Beitrag veröffentlicht wurde.";
+"composer.errWriteSomething" = "Bitte schreibe etwas oder stelle eine Umfragefrage.";

@@ -83,3 +83,15 @@ following.empty
 # ── Hashtag timeline ────────────────────────────────────────────────
 hashtag.noPosts
 hashtag.errLoad
+
+# ── Composer (Phase 7) ──────────────────────────────────────────────
+action.post
+action.save
+composer.placeholderDefault
+composer.posting
+composer.postButton
+composer.uploading
+composer.addGif
+composer.errUploadFailed
+composer.errSomethingWrong
+composer.errWriteSomething

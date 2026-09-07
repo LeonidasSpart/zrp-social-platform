@@ -64,3 +64,13 @@
 "following.empty" = "Вы пока ни на кого не подписаны.";
 "hashtag.noPosts" = "Пока нет публикаций с #{tag}.";
 "hashtag.errLoad" = "Не удалось загрузить публикации";
+"action.post" = "Опубликовать";
+"action.save" = "Сохранить";
+"composer.placeholderDefault" = "Что происходит? Используйте #хэштеги и @упоминания";
+"composer.posting" = "Публикация...";
+"composer.postButton" = "Опубликовать";
+"composer.uploading" = "Загрузка...";
+"composer.addGif" = "Добавить GIF";
+"composer.errUploadFailed" = "Не удалось загрузить файл. Пожалуйста, попробуйте снова.";
+"composer.errSomethingWrong" = "Что-то пошло не так. Проверьте ленту, чтобы убедиться, что публикация была размещена.";
+"composer.errWriteSomething" = "Пожалуйста, напишите что-нибудь или задайте вопрос в опросе.";

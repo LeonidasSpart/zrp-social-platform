@@ -26,8 +26,34 @@ enum FeedTab: String, CaseIterable, Identifiable {
     }
 }
 
+/// The body `POST /api/posts` accepts.
+///
+/// Only the fields the composer actually sends. The route also takes
+/// `linkUrl`, `poll`, `type`/`company`/`location`/`applyUrl` for
+/// recruitment posts and `articleBody` for articles - none of which the
+/// app composes yet, and all of which the server treats as absent rather
+/// than empty when omitted.
+///
+/// `mediaType` is sent as the upload's own classification, but the server
+/// re-derives and normalises it regardless (see the route's "Use ONLY the
+/// server-normalized media type" comment), so this can never make a video
+/// render as an image or vice versa.
+struct CreatePostRequest: Encodable {
+    let content: String
+    let imageUrls: [String]?
+    let mediaType: String?
+    let quotePostId: String?
+}
+
+/// `POST /api/posts` answers 201 with the created post wrapped in an
+/// envelope - unlike `GET /posts/{id}`, which returns it bare.
+struct CreatePostResponse: Decodable {
+    let post: Post
+}
+
 protocol PostsRepositoryProtocol: Sendable {
     func feed(_ tab: FeedTab, cursor: String?) async throws -> PostsPage
+    func createPost(_ request: CreatePostRequest) async throws -> Post
     func post(id: String) async throws -> Post
     func toggleLike(postId: String) async throws -> Bool
     func toggleRepost(postId: String) async throws -> Bool
@@ -58,6 +84,13 @@ struct PostsRepository: PostsRepositoryProtocol {
                 Endpoint.get("posts", query: [("tab", "following"), ("cursor", cursor)])
             )
         }
+    }
+
+    func createPost(_ request: CreatePostRequest) async throws -> Post {
+        let response: CreatePostResponse = try await client.send(
+            try Endpoint.post("posts", body: request)
+        )
+        return response.post
     }
 
     /// `GET /api/posts/{id}` returns the raw post object - no `{post: ...}`

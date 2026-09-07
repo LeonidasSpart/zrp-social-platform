@@ -64,3 +64,13 @@
 "following.empty" = "Nuk po ndiqni asnjë përdorues ende.";
 "hashtag.noPosts" = "Nuk ka postime me #{tag} ende.";
 "hashtag.errLoad" = "Ngarkimi i postimeve dështoi";
+"action.post" = "Publiko";
+"action.save" = "Ruaj";
+"composer.placeholderDefault" = "Çfarë po ndodh? Përdorni #hashtags dhe @mentions";
+"composer.posting" = "Duke publikuar...";
+"composer.postButton" = "Publiko";
+"composer.uploading" = "Duke u ngarkuar...";
+"composer.addGif" = "Shto GIF";
+"composer.errUploadFailed" = "Ngarkimi dështoi. Ju lutemi riprovojeni.";
+"composer.errSomethingWrong" = "Diçka shkoi gabim. Kontrolloni furnizimin tuaj për të parë nëse postimi u publikua.";
+"composer.errWriteSomething" = "Ju lutemi shkruani diçka ose bëni një pyetje sondazhi.";

@@ -12,6 +12,7 @@ struct HomeView: View {
     @EnvironmentObject private var interactions: PostInteractionStore
     @StateObject private var navigator = Navigator()
     @StateObject private var viewModel = HomeViewModel()
+    @State private var isComposing = false
 
     var body: some View {
         NavigationStack(path: $navigator.path) {
@@ -24,6 +25,7 @@ struct HomeView: View {
             .navigationTitle(Text(.navHome))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbarContent }
+            .overlay(alignment: .bottomTrailing) { composeButton }
             .navigationDestination(for: Route.self) { route in
                 switch route {
                 case .profile(let username):
@@ -36,6 +38,11 @@ struct HomeView: View {
             }
         }
         .environmentObject(navigator)
+        .sheet(isPresented: $isComposing) {
+            ComposeView { post in
+                viewModel.insertCreated(post, interactions: interactions)
+            }
+        }
         .task {
             viewModel.attach(interactions: interactions)
             viewModel.loadIfNeeded(viewModel.selectedTab)
@@ -54,6 +61,21 @@ struct HomeView: View {
         } message: {
             Text(verbatim: interactions.actionError ?? "")
         }
+    }
+
+    private var composeButton: some View {
+        Button {
+            isComposing = true
+        } label: {
+            Image(systemName: "square.and.pencil")
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(.white)
+                .frame(width: 56, height: 56)
+                .background(ZrpColor.red, in: Circle())
+                .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
+        }
+        .padding(ZrpSpacing.lg)
+        .accessibilityLabel(Text(.iosComposeTitle))
     }
 
     @ToolbarContentBuilder

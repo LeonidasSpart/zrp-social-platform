@@ -64,3 +64,13 @@
 "following.empty" = "你还没有关注任何人。";
 "hashtag.noPosts" = "暂无带有 #{tag} 的帖子。";
 "hashtag.errLoad" = "加载帖子失败";
+"action.post" = "发布";
+"action.save" = "保存";
+"composer.placeholderDefault" = "有什么新鲜事？使用 #话题标签 和 @提及";
+"composer.posting" = "发布中...";
+"composer.postButton" = "发布";
+"composer.uploading" = "上传中...";
+"composer.addGif" = "添加 GIF";
+"composer.errUploadFailed" = "上传失败，请重试。";
+"composer.errSomethingWrong" = "出了点问题。请检查你的信息流，确认帖子是否已发布。";
+"composer.errWriteSomething" = "请输入内容或提出一个投票问题。";

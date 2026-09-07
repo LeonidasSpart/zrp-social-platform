@@ -35,6 +35,20 @@
     "ios.a11y.playVideo": "Play video",
     "ios.media.close": "Close",
     "ios.a11y.openProfile": "Open profile of {name}",
-    "ios.a11y.followingState": "Following"
+    "ios.a11y.followingState": "Following",
+    "ios.compose.title": "New post",
+    "ios.compose.imageLimit": "Your plan allows {n} image(s) per post.",
+    "ios.compose.videoAlone": "A video cannot be combined with other media in one post.",
+    "ios.compose.videoTooLarge": "Your plan allows videos up to {size}MB.",
+    "ios.compose.addPhoto": "Add photo or video",
+    "ios.compose.removeAttachment": "Remove attachment",
+    "ios.compose.retryUpload": "Retry upload",
+    "ios.compose.gifSearch": "Search GIFs",
+    "ios.compose.gifUnavailable": "GIF search is unavailable right now.",
+    "ios.compose.discardTitle": "Discard this post?",
+    "ios.compose.discardMessage": "Your draft and any uploads will be lost.",
+    "ios.compose.discard": "Discard",
+    "ios.compose.keepEditing": "Keep editing",
+    "ios.compose.uploaded": "Uploaded"
   }
 }

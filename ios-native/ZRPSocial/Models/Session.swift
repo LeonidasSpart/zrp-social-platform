@@ -65,6 +65,11 @@ struct CurrentUser: Equatable {
     let badgeType: String?
     let onboardingCompleted: Bool
 
+    /// The subscription plan, used only to pre-check composer limits so a
+    /// user is told before uploading a file the server will reject. Never
+    /// a permission check - every limit is enforced server-side.
+    let plan: String?
+
     var displayName: String { name?.isEmpty == false ? name! : username }
 
     init(from user: MobileUser) {
@@ -74,6 +79,7 @@ struct CurrentUser: Equatable {
         avatarUrl = user.avatarUrl
         badgeType = user.badgeType
         onboardingCompleted = user.onboardingCompleted
+        plan = user.plan
     }
 
     /// Returns `nil` when the session carries no identity - either signed
@@ -87,6 +93,7 @@ struct CurrentUser: Equatable {
         name = user.name
         avatarUrl = user.avatarUrl
         badgeType = user.badgeType
+        plan = user.plan
         // NextAuth's session callback carries this, but treat an absent
         // value as "already onboarded" rather than forcing a restored
         // session back through onboarding on a field that simply was not

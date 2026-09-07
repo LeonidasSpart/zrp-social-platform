@@ -35,6 +35,24 @@ final class HomeViewModel: ObservableObject {
         self.interactions = interactions
     }
 
+    /// Places a just-created post at the top of both feeds.
+    ///
+    /// `POST /api/posts` returns the created post in full, so the
+    /// composer's result is shown immediately rather than triggering a
+    /// refetch that would also lose the reader's scroll position. A
+    /// scheduled post is not inserted: it has `status: "scheduled"` and
+    /// genuinely is not in any feed yet.
+    func insertCreated(_ post: Post, interactions: PostInteractionStore) {
+        for tab in FeedTab.allCases {
+            var state = state(for: tab)
+            guard state.phase == .loaded else { continue }
+            guard !state.posts.contains(where: { $0.id == post.id }) else { continue }
+            state.posts.insert(post, at: 0)
+            states[tab] = state
+        }
+        interactions.seed([post], replacing: true)
+    }
+
     func state(for tab: FeedTab) -> FeedState {
         states[tab] ?? FeedState()
     }

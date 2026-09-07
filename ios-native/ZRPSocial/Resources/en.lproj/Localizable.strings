@@ -64,6 +64,16 @@
 "following.empty" = "Not following anyone yet.";
 "hashtag.noPosts" = "No posts with #{tag} yet.";
 "hashtag.errLoad" = "Failed to load posts";
+"action.post" = "Post";
+"action.save" = "Save";
+"composer.placeholderDefault" = "What's happening? Use #hashtags and @mentions";
+"composer.posting" = "Posting...";
+"composer.postButton" = "Post";
+"composer.uploading" = "Uploading...";
+"composer.addGif" = "Add GIF";
+"composer.errUploadFailed" = "Upload failed. Please try again.";
+"composer.errSomethingWrong" = "Something went wrong. Check your feed to see if your post was published.";
+"composer.errWriteSomething" = "Please write something or ask a poll question.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back
@@ -92,3 +102,17 @@
 "ios.media.close" = "Close";
 "ios.a11y.openProfile" = "Open profile of {name}";
 "ios.a11y.followingState" = "Following";
+"ios.compose.title" = "New post";
+"ios.compose.imageLimit" = "Your plan allows {n} image(s) per post.";
+"ios.compose.videoAlone" = "A video cannot be combined with other media in one post.";
+"ios.compose.videoTooLarge" = "Your plan allows videos up to {size}MB.";
+"ios.compose.addPhoto" = "Add photo or video";
+"ios.compose.removeAttachment" = "Remove attachment";
+"ios.compose.retryUpload" = "Retry upload";
+"ios.compose.gifSearch" = "Search GIFs";
+"ios.compose.gifUnavailable" = "GIF search is unavailable right now.";
+"ios.compose.discardTitle" = "Discard this post?";
+"ios.compose.discardMessage" = "Your draft and any uploads will be lost.";
+"ios.compose.discard" = "Discard";
+"ios.compose.keepEditing" = "Keep editing";
+"ios.compose.uploaded" = "Uploaded";

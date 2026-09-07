@@ -64,3 +64,13 @@
 "following.empty" = "لا تتابع أي شخص بعد.";
 "hashtag.noPosts" = "لا توجد منشورات مع #{tag} بعد.";
 "hashtag.errLoad" = "تعذر تحميل المنشورات";
+"action.post" = "نشر";
+"action.save" = "حفظ";
+"composer.placeholderDefault" = "ما الجديد؟ استخدم #هاشتاغات و@إشارات";
+"composer.posting" = "جارٍ النشر...";
+"composer.postButton" = "نشر";
+"composer.uploading" = "جارٍ الرفع...";
+"composer.addGif" = "إضافة GIF";
+"composer.errUploadFailed" = "فشل رفع الملف. يرجى المحاولة مرة أخرى.";
+"composer.errSomethingWrong" = "حدث خطأ ما. تحقق من خلاصتك لمعرفة ما إذا تم نشر منشورك.";
+"composer.errWriteSomething" = "يرجى كتابة شيء أو طرح سؤال في الاستطلاع.";

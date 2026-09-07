@@ -64,3 +64,13 @@
 "following.empty" = "Henüz kimseyi takip etmiyorsunuz.";
 "hashtag.noPosts" = "#{tag} ile henüz gönderi yok.";
 "hashtag.errLoad" = "Gönderiler yüklenemedi";
+"action.post" = "Gönder";
+"action.save" = "Kaydet";
+"composer.placeholderDefault" = "Neler oluyor? #hashtag ve @bahsetme kullanın";
+"composer.posting" = "Gönderiliyor...";
+"composer.postButton" = "Gönder";
+"composer.uploading" = "Yükleniyor...";
+"composer.addGif" = "GIF Ekle";
+"composer.errUploadFailed" = "Yükleme başarısız oldu. Lütfen tekrar deneyin.";
+"composer.errSomethingWrong" = "Bir şeyler ters gitti. Gönderinizin yayınlanıp yayınlanmadığını görmek için akışınızı kontrol edin.";
+"composer.errWriteSomething" = "Lütfen bir şeyler yazın veya bir anket sorusu sorun.";

@@ -75,9 +75,9 @@ called and the real response being handled.
 | Delete own post | `DELETE /api/posts/{id}` (403 non-author, server-side) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Edit own post | `PUT /api/posts/{id}` (text only, matches web) | ✅ | ✅ | ⬜ | MISSING (Phase 8) |
 | Pin post (single slot) | `POST /api/posts/{id}/pin` | ✅ | ✅ | ⬜ | MISSING (Phase 6b) |
-| Create text post | `POST /api/posts` | ✅ | ✅ | ⬜ | MISSING (Phase 7) |
-| Scheduled posts | `POST /api/posts` + `scheduledAt` naive wall-clock | ✅ | ✅ | ⬜ | MISSING (Phase 7) |
-| Quote post | `POST /api/posts` + `quotePostId`; `GET /api/posts/{id}/quotes` | ✅ | ✅ | 🔶 renders nested quote; composing not yet | PARTIAL |
+| Create post (text) | `POST /api/posts` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Scheduled posts | `POST /api/posts` + `scheduledAt` naive wall-clock | ✅ | ✅ | ⬜ | MISSING (Phase 7b) |
+| Quote post | `POST /api/posts` + `quotePostId`; `GET /api/posts/{id}/quotes` | ✅ | ✅ | 🔶 renders nested quote; composer sends the field but has no quote entry point yet | PARTIAL |
 | Reposts list | `GET /api/posts/{id}/reposts` → `{items,nextCursor}` | ✅ | ✅ | ⬜ | MISSING (Phase 8) |
 | Share sheet | — (client-side, `zrp.one/post/{id}`) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Post views | `POST /api/posts/{id}/view` | ✅ | ⬜ | ⬜ | MISSING |
@@ -92,11 +92,11 @@ called and the real response being handled.
 | Image rendering (single) | — | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Multi-image gallery (`imageUrls`) | — | ✅ | ✅ | ✅ (paged, page dots) | IMPLEMENTED |
 | GIF rendering | — | ✅ | ✅ | 🔶 static first frame (no animation yet) | PARTIAL |
-| Inline video playback | — | ✅ | ✅ (ExoPlayer) | ⬜ | MISSING (Phase 7) |
-| Full-screen media viewer | — | ✅ | ✅ | ⬜ | MISSING (Phase 7) |
-| Image/video/GIF upload | UploadThing (`/api/uploadthing`, `/api/upload`) | ✅ | ✅ | ⬜ | MISSING (Phase 7) |
-| GIF picker (Tenor/Giphy) | `GET /api/gifs/search`, `/api/gifs/trending` | ✅ | ✅ | ⬜ | MISSING (Phase 7) |
-| Avatar / cover upload | `/api/user/update-avatar`, `/api/user/update-cover` | ✅ | ✅ | ⬜ | MISSING (Phase 7) |
+| Inline video playback | — | ✅ | ✅ (ExoPlayer) | 🔶 full-screen AVKit player; no in-feed inline playback | PARTIAL |
+| Full-screen media viewer | — | ✅ | ✅ | ✅ (paged, pinch zoom, AVKit video) | IMPLEMENTED |
+| Image/video/GIF upload | UploadThing `postMedia` router (`/api/uploadthing`) | ✅ | ✅ | ✅ (streamed from disk, real progress, cancel, resume-aware retry) | IMPLEMENTED |
+| GIF picker (Giphy, proxied) | `GET /api/gifs/search`, `/api/gifs/trending` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Avatar / cover upload | `/api/user/update-avatar`, `/api/user/update-cover` | ✅ | ✅ | ⬜ | MISSING (Phase 6b) — upload client already supports the `avatar`/`banner` slugs |
 
 ### Profiles & social graph
 
@@ -222,7 +222,7 @@ called and the real response being handled.
 | Email preferences | `/api/user/email-preferences` | ✅ | ⬜ | ⬜ | MISSING (Phase 16) |
 | Language (11 languages, `ar` RTL) | client-side preference | ✅ | ✅ | ⬜ | MISSING (Phase 17) |
 | Data export | `GET /api/settings/export-data` | ✅ | ⬜ | ⬜ | MISSING |
-| Plan / limits | `GET /api/user/plan`, `src/lib/limits.ts` | ✅ | ✅ | ⬜ | MISSING (Phase 16) |
+| Plan / limits | `GET /api/user/plan`, `src/lib/limits.ts` | ✅ | ✅ | 🔶 composer pre-checks post length, image count and video size; settings surface pending | PARTIAL |
 
 ### Deliberately out of scope for the consumer iOS app
 
@@ -332,7 +332,7 @@ here. **No fake local notifications will stand in for this.**
 | 4 | Navigation shell + deep links | 🔶 in-app routing done (profile / hashtag / follow lists); OS deep links pending |
 | 5 | Home feed (For You / Following) + interactions | ✅ done |
 | 6 | Profiles + social graph | ✅ done — 6b (edit profile, pin, extra profile tabs) pending |
-| 7 | Post composer + media upload + viewer | ⬜ |
+| 7 | Post composer + media upload + viewer | ✅ done — 7b (scheduling, quote entry point, camera capture) pending |
 | 8 | Comments, replies, quotes, reactions, edit | ⬜ |
 | 9 | Stories | ⬜ |
 | 10 | Messages | ⬜ |
