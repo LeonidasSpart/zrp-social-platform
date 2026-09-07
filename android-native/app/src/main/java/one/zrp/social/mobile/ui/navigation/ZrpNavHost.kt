@@ -91,6 +91,7 @@ import one.zrp.social.mobile.ui.quotes.QuotesScreen
 import one.zrp.social.mobile.ui.reposts.RepostsScreen
 import one.zrp.social.mobile.ui.search.SearchScreen
 import one.zrp.social.mobile.ui.creator.CreatorScreen
+import one.zrp.social.mobile.ui.trust.TrustPassportScreen
 import one.zrp.social.mobile.ui.settings.AccountSettingsScreen
 import one.zrp.social.mobile.ui.settings.DeleteAccountScreen
 import one.zrp.social.mobile.ui.settings.LanguageSettingsScreen
@@ -117,6 +118,7 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 fun ZrpNavHost(onLogout: () -> Unit) {
     val navController = rememberNavController()
     val goToProfile: (String) -> Unit = { username -> navController.navigate("profile/$username") }
+    val goToTrustPassport: (String) -> Unit = { username -> navController.navigate("trust/$username") }
     val goToConversation: (partnerId: String, partnerUsername: String) -> Unit = { partnerId, partnerUsername ->
         navController.navigate("messages/$partnerId/$partnerUsername")
     }
@@ -294,6 +296,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenReposts = goToReposts,
                     onOpenQuotes = goToQuotes,
                     onOpenHashtag = goToHashtag,
+                    onOpenTrustPassport = goToTrustPassport,
                 )
             }
             composable(
@@ -315,7 +318,22 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenReposts = goToReposts,
                     onOpenQuotes = goToQuotes,
                     onOpenHashtag = goToHashtag,
+                    onOpenTrustPassport = goToTrustPassport,
                 )
+            }
+            composable(
+                route = "trust/{username}",
+                arguments = listOf(navArgument("username") { type = NavType.StringType }),
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/trust/{username}" }),
+            ) { backStackEntry ->
+                val username = backStackEntry.arguments?.getString("username")
+                if (username != null) {
+                    TrustPassportScreen(
+                        username = username,
+                        onBack = { navController.popBackStack() },
+                        onOpenProfile = { navController.popBackStack() },
+                    )
+                }
             }
             composable(
                 route = "profile/{username}/followers",

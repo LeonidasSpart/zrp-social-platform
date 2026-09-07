@@ -99,4 +99,5 @@ object ApiClient {
     val playApi: PlayApi by lazy { retrofit.create(PlayApi::class.java) }
     val newsApi: NewsApi by lazy { retrofit.create(NewsApi::class.java) }
     val creatorApi: CreatorApi by lazy { retrofit.create(CreatorApi::class.java) }
+    val trustApi: TrustApi by lazy { retrofit.create(TrustApi::class.java) }
 }
