@@ -315,11 +315,12 @@ fun AidDetailScreen(campaignId: String, onBack: () -> Unit, onOpenOrganizer: (St
                                             .fillMaxWidth()
                                             .padding(top = Spacing.sm),
                                     )
-                                    if (state.offerError != null) {
-                                        val errorText = if (state.offerError == AidDetailViewModel.offerFailedError) {
+                                    val offerError = state.offerError
+                                    if (offerError != null) {
+                                        val errorText = if (offerError == AidDetailViewModel.offerFailedError) {
                                             stringResource(R.string.aid_err_offer_failed)
                                         } else {
-                                            state.offerError
+                                            offerError
                                         }
                                         Text(
                                             text = errorText,
