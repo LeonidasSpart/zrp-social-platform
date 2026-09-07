@@ -2,6 +2,7 @@ package one.zrp.social.mobile.data
 
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.MusicAlbumDetail
+import one.zrp.social.mobile.network.MusicAlbumSummary
 import one.zrp.social.mobile.network.MusicArtistDetail
 import one.zrp.social.mobile.network.MusicArtistListItem
 import one.zrp.social.mobile.network.MusicHomeResponse
@@ -36,5 +37,9 @@ class MusicRepository {
 
     suspend fun getAlbumDetail(id: String): Result<MusicAlbumDetail> = runCatching {
         ApiClient.musicApi.getAlbumDetail(id)
+    }
+
+    suspend fun getAlbums(query: String?): Result<List<MusicAlbumSummary>> = runCatching {
+        ApiClient.musicApi.getAlbums(query?.trim()?.takeIf { it.isNotEmpty() })
     }
 }

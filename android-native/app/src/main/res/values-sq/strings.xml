@@ -294,4 +294,7 @@
     </plurals>
     <string name="music_shell_latest_albums_heading">Albumet e Fundit</string>
     <string name="music_shell_popular_artists_heading">Artistët Popullorë</string>
+    <string name="music_albums_title">Albume</string>
+    <string name="music_albums_search_placeholder">Kërko albume...</string>
+    <string name="music_albums_none_found">Nuk u gjetën albume</string>
 </resources>

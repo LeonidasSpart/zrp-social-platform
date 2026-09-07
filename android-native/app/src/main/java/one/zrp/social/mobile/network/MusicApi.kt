@@ -58,6 +58,11 @@ data class MusicAlbumSummary(
     // tracks' durationSec in one batched groupBy) - 0 for an album with
     // no timed tracks yet, not a missing/unknown value.
     val totalDurationSec: Int = 0,
+    // Present on both GET /music/home's own latestAlbums and GET
+    // /music/albums (the same real album-summary shape either way) -
+    // only actually rendered by the Albums list screen, which also
+    // shows track count.
+    val _count: MusicTrackCount = MusicTrackCount(),
 )
 
 data class MusicArtistSummary(
@@ -167,6 +172,9 @@ interface MusicApi {
 
     @GET("music/artists")
     suspend fun getArtists(@Query("q") query: String? = null): List<MusicArtistListItem>
+
+    @GET("music/albums")
+    suspend fun getAlbums(@Query("q") query: String? = null): List<MusicAlbumSummary>
 
     @GET("music/artists/{id}")
     suspend fun getArtistDetail(@Path("id") id: String): MusicArtistDetail

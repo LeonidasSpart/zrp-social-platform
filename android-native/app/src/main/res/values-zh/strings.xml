@@ -294,4 +294,7 @@
     </plurals>
     <string name="music_shell_latest_albums_heading">最新专辑</string>
     <string name="music_shell_popular_artists_heading">热门艺人</string>
+    <string name="music_albums_title">专辑</string>
+    <string name="music_albums_search_placeholder">搜索专辑...</string>
+    <string name="music_albums_none_found">未找到专辑</string>
 </resources>

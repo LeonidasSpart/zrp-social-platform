@@ -310,4 +310,7 @@
     </plurals>
     <string name="music_shell_latest_albums_heading">Latest Albums</string>
     <string name="music_shell_popular_artists_heading">Popular Artists</string>
+    <string name="music_albums_title">Albums</string>
+    <string name="music_albums_search_placeholder">Search albums...</string>
+    <string name="music_albums_none_found">No albums found</string>
 </resources>

@@ -44,6 +44,7 @@ import one.zrp.social.mobile.ui.moderation.ModerationListMode
 import one.zrp.social.mobile.ui.moderation.ModerationListScreen
 import one.zrp.social.mobile.data.MusicRepository
 import one.zrp.social.mobile.ui.music.AlbumDetailScreen
+import one.zrp.social.mobile.ui.music.AlbumsScreen
 import one.zrp.social.mobile.ui.music.ArtistDetailScreen
 import one.zrp.social.mobile.ui.music.ArtistsScreen
 import one.zrp.social.mobile.ui.music.MusicPlayerViewModel
@@ -91,6 +92,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToMusicQueue: () -> Unit = { navController.navigate("music/queue") }
     val goToMusicArtists: () -> Unit = { navController.navigate("music/artists") }
     val goToMusicArtist: (String) -> Unit = { id -> navController.navigate("music/artists/$id") }
+    val goToMusicAlbums: () -> Unit = { navController.navigate("music/albums") }
     val goToMusicAlbum: (String) -> Unit = { id -> navController.navigate("music/albums/$id") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
@@ -303,6 +305,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onBack = { navController.popBackStack() },
                     onOpenQueue = goToMusicQueue,
                     onOpenArtists = goToMusicArtists,
+                    onOpenAlbums = goToMusicAlbums,
                     onArtistClick = goToMusicArtist,
                     onAlbumClick = goToMusicAlbum,
                 )
@@ -312,6 +315,9 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             }
             composable("music/artists") {
                 ArtistsScreen(onBack = { navController.popBackStack() }, onArtistClick = goToMusicArtist)
+            }
+            composable("music/albums") {
+                AlbumsScreen(onBack = { navController.popBackStack() }, onAlbumClick = goToMusicAlbum)
             }
             composable(
                 route = "music/artists/{id}",

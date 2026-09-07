@@ -294,4 +294,7 @@
     </plurals>
     <string name="music_shell_latest_albums_heading">En Son Albümler</string>
     <string name="music_shell_popular_artists_heading">Popüler Sanatçılar</string>
+    <string name="music_albums_title">Albümler</string>
+    <string name="music_albums_search_placeholder">Albüm ara...</string>
+    <string name="music_albums_none_found">Albüm bulunamadı</string>
 </resources>
