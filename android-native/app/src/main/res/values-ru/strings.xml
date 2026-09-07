@@ -1050,4 +1050,20 @@
     <string name="journalist_editor_upload_image">Загрузить изображение</string>
     <string name="journalist_editor_uploading">Загрузка…</string>
     <string name="nav_journalist">Журналист</string>
+    <!-- ZRP AI: chat page (ported from src/app/ai/, src/components/AI/) -->
+    <string name="ai_chat_ask_anything">Спросите ZRP AI о чём угодно</string>
+    <string name="ai_chat_charity_footer">🧡 35% дохода ZRP AI идёт на благотворительность.</string>
+    <string name="ai_chat_err_could_not_generate">⚠️ Извините, не удалось сгенерировать ответ. Попробуйте снова.</string>
+    <string name="ai_chat_err_failed_response">Не удалось получить ответ</string>
+    <string name="ai_chat_get_help_chat">Получите помощь с публикациями, узнайте о ZRP или просто пообщайтесь!</string>
+    <string name="ai_chat_input_placeholder">Спросите ZRP AI о чём угодно...</string>
+    <string name="ai_chat_new_chat">Новый чат</string>
+    <string name="ai_chat_powered_by_deepseek">Работает на DeepSeek</string>
+    <string name="ai_chat_remaining_today">осталось сегодня: %1$d</string>
+    <string name="ai_chat_suggestion_35_charity">Объяснение 35% на благотворительность</string>
+    <string name="ai_chat_suggestion_what_is_zrp">Что такое ZRP?</string>
+    <string name="ai_chat_suggestion_write_charity">Написать о благотворительности</string>
+    <string name="ai_page_powered_by">Работает на DeepSeek · С открытым исходным кодом · Прозрачно</string>
+    <string name="ai_page_subtitle">Спрашивайте что угодно. Получите помощь с публикациями, узнайте о ZRP или просто пообщайтесь.</string>
+    <string name="ai_discover_entry">Открыть ZRP AI</string>
 </resources>

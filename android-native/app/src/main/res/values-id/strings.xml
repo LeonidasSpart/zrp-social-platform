@@ -1050,4 +1050,20 @@
     <string name="journalist_editor_upload_image">Unggah gambar</string>
     <string name="journalist_editor_uploading">Mengunggah…</string>
     <string name="nav_journalist">Jurnalis</string>
+    <!-- ZRP AI: chat page (ported from src/app/ai/, src/components/AI/) -->
+    <string name="ai_chat_ask_anything">Tanyakan apa saja ke ZRP AI</string>
+    <string name="ai_chat_charity_footer">🧡 35% dari pendapatan ZRP AI disumbangkan untuk amal.</string>
+    <string name="ai_chat_err_could_not_generate">⚠️ Maaf, saya tidak dapat menghasilkan respons. Silakan coba lagi.</string>
+    <string name="ai_chat_err_failed_response">Gagal mendapatkan respons</string>
+    <string name="ai_chat_get_help_chat">Dapatkan bantuan untuk postingan, pelajari tentang ZRP, atau sekadar mengobrol!</string>
+    <string name="ai_chat_input_placeholder">Tanyakan apa saja ke ZRP AI...</string>
+    <string name="ai_chat_new_chat">Obrolan baru</string>
+    <string name="ai_chat_powered_by_deepseek">Didukung oleh DeepSeek</string>
+    <string name="ai_chat_remaining_today">%1$d tersisa hari ini</string>
+    <string name="ai_chat_suggestion_35_charity">Penjelasan 35% untuk amal</string>
+    <string name="ai_chat_suggestion_what_is_zrp">Apa itu ZRP?</string>
+    <string name="ai_chat_suggestion_write_charity">Tulis tentang amal</string>
+    <string name="ai_page_powered_by">Didukung oleh DeepSeek · Sumber terbuka · Transparan</string>
+    <string name="ai_page_subtitle">Tanyakan apa saja. Dapatkan bantuan untuk postingan, pelajari tentang ZRP, atau sekadar mengobrol.</string>
+    <string name="ai_discover_entry">Temukan ZRP AI</string>
 </resources>

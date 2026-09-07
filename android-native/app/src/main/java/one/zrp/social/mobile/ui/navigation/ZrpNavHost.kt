@@ -90,6 +90,7 @@ import one.zrp.social.mobile.ui.profile.ProfileScreen
 import one.zrp.social.mobile.ui.quotes.QuotesScreen
 import one.zrp.social.mobile.ui.reposts.RepostsScreen
 import one.zrp.social.mobile.ui.search.SearchScreen
+import one.zrp.social.mobile.ui.ai.AiChatScreen
 import one.zrp.social.mobile.ui.creator.CreatorScreen
 import one.zrp.social.mobile.ui.journalist.ArticleEditorScreen
 import one.zrp.social.mobile.ui.journalist.JournalistDashboardScreen
@@ -186,6 +187,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToJournalist: () -> Unit = { navController.navigate("journalist") }
     val goToNewArticle: () -> Unit = { navController.navigate("journalist/new") }
     val goToEditArticle: (String) -> Unit = { id -> navController.navigate("journalist/edit/$id") }
+    val goToAi: () -> Unit = { navController.navigate("ai") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
@@ -262,6 +264,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenPlay = goToPlay,
                     onOpenNews = goToNews,
                     onOpenShorts = goToShorts,
+                    onOpenAi = goToAi,
                     onOpenComments = goToComments,
                     onOpenQuotePost = goToQuotePost,
                     onOpenReposts = goToReposts,
@@ -831,6 +834,9 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onEditArticle = goToEditArticle,
                     onViewArticle = goToNewsArticle,
                 )
+            }
+            composable("ai") {
+                AiChatScreen(onBack = { navController.popBackStack() })
             }
             composable("journalist/new") {
                 ArticleEditorScreen(

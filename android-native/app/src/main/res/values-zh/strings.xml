@@ -1050,4 +1050,20 @@
     <string name="journalist_editor_upload_image">上传图片</string>
     <string name="journalist_editor_uploading">上传中…</string>
     <string name="nav_journalist">记者</string>
+    <!-- ZRP AI: chat page (ported from src/app/ai/, src/components/AI/) -->
+    <string name="ai_chat_ask_anything">向 ZRP AI 提问任何问题</string>
+    <string name="ai_chat_charity_footer">🧡 ZRP AI 收入的 35% 将捐赠给慈善机构。</string>
+    <string name="ai_chat_err_could_not_generate">⚠️ 抱歉，无法生成回复，请重试。</string>
+    <string name="ai_chat_err_failed_response">获取回复失败</string>
+    <string name="ai_chat_get_help_chat">获取帖子帮助、了解 ZRP，或随便聊聊！</string>
+    <string name="ai_chat_input_placeholder">向 ZRP AI 提问任何问题...</string>
+    <string name="ai_chat_new_chat">新建对话</string>
+    <string name="ai_chat_powered_by_deepseek">由 DeepSeek 提供支持</string>
+    <string name="ai_chat_remaining_today">今日剩余 %1$d 次</string>
+    <string name="ai_chat_suggestion_35_charity">35% 慈善捐赠说明</string>
+    <string name="ai_chat_suggestion_what_is_zrp">什么是 ZRP？</string>
+    <string name="ai_chat_suggestion_write_charity">撰写关于慈善的内容</string>
+    <string name="ai_page_powered_by">由 DeepSeek 提供支持 · 开源 · 透明</string>
+    <string name="ai_page_subtitle">问任何问题。获取帖子帮助、了解 ZRP，或随便聊聊。</string>
+    <string name="ai_discover_entry">发现 ZRP AI</string>
 </resources>
