@@ -79,6 +79,9 @@ enum DeepLink {
             // parameter is for.
             return DeepLinkTarget(.home, .shorts(startId: second))
 
+        case "news":
+            return DeepLinkTarget(.home, second.map { .newsArticle(slug: $0) } ?? .news)
+
         case "bookmarks":
             return DeepLinkTarget(.home, .bookmarks)
         case "settings":

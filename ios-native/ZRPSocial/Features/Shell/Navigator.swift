@@ -64,6 +64,8 @@ enum Route: Hashable {
     /// ZRP Shorts. `startId` opens the feed on one particular video -
     /// what tapping a video elsewhere in the app leads to.
     case shorts(startId: String?)
+    case news
+    case newsArticle(slug: String)
 }
 
 /// Owns the navigation stack's path.

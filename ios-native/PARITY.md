@@ -172,6 +172,15 @@ called and the real response being handled.
 | Delete a conversation | `DELETE /api/messages/conversation/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Image attachments | `POST /api/messages` + `imageUrl` (UploadThing `chatImage`, 4 MB); the route accepts an empty `content` **only** alongside an image and refuses both-empty with a 400 | ✅ | ✅ | ✅ one picture per message (the row stores a single `imageUrl`), uploaded on send rather than on selection, and a failed upload stops the send rather than silently dropping the picture | IMPLEMENTED |
 
+### ZRP News
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| News feed | `GET /api/news` (`category`, `cursor`, `limit`; the cursor is a `publishedAt` timestamp, not an opaque token, and an unparseable one is a 400) | ✅ | ✅ | ✅ cursor-paginated, public — the route serves it without a session, exactly as zrp.one/news does | IMPLEMENTED |
+| Category filter | same route, `?category=` against the schema's eleven `NewsArticleCategory` values | ✅ | ✅ | ✅ same eleven chips and the same "All" default; an unknown category decodes to a value that is never sent back as a filter, so a category added server-side cannot break an older build | IMPLEMENTED |
+| Article | `GET /api/news/{slug}` — reading it is what increments the view tally, server-side | ✅ | ✅ | ✅ cover, category, byline (linking to the author's profile), excerpt, body, and the original source opened in the browser | IMPLEMENTED |
+| Article body formatting | — | rich | ✅ | 🔶 rendered as stored plain text. The route defines no markup, and interpreting one would be inventing a format the backend does not have | PARTIAL (by design) |
+
 ### Notifications
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
@@ -275,7 +284,7 @@ called and the real response being handled.
 | Admin console (`/api/admin/**`, 40+ routes) | STAFF/ADMIN — server-role gated. |
 | Tips, plan upgrade, premium-post purchase, help/charity contribution | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
 | Ads, Careers, Investors, Press, Transparency, API keys, Team | WEB-ONLY — Android has no surface for any of them either. |
-| Play, Opportunity, Aid/Help, News, Journalist, Creator Studio, AI chat, Support tickets, Explore | **NOT out of scope — outstanding iOS work.** The 2026-09-07 audit corrected an earlier claim here: Android *does* ship all of these natively. They are genuine iOS gaps, not deliberate omissions. |
+| Play, Opportunity, Aid/Help, Journalist, Creator Studio, AI chat, Support tickets, Explore | **NOT out of scope — outstanding iOS work.** The 2026-09-07 audit corrected an earlier claim here: Android *does* ship all of these natively. They are genuine iOS gaps, not deliberate omissions. |
 
 ---
 

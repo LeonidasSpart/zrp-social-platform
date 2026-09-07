@@ -95,6 +95,10 @@ struct RouteDestinationView: View {
             BookmarksView()
         case .shorts(let startId):
             ShortsView(startId: startId)
+        case .news:
+            NewsView()
+        case .newsArticle(let slug):
+            NewsArticleView(slug: slug)
         case .listingConversation(let partner, let draft):
             ConversationView(
                 partner: partner,
