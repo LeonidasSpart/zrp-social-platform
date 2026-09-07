@@ -117,7 +117,7 @@ fun OpportunityCardView(listing: OpportunitySummary, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier.padding(top = 8.dp),
             ) {
-                items(listing.skills.take(4)) { skill ->
+                items(listing.skills.take(4), key = { it }) { skill ->
                     Text(
                         text = skill,
                         style = MaterialTheme.typography.labelSmall,

@@ -103,7 +103,7 @@ fun OpportunityScreen(
                     label = { Text(stringResource(R.string.opportunity_all_types)) },
                 )
             }
-            items(allOpportunityTypes) { type ->
+            items(allOpportunityTypes, key = { it }) { type ->
                 FilterChip(
                     selected = state.selectedType == type,
                     onClick = { viewModel.onTypeSelect(type) },

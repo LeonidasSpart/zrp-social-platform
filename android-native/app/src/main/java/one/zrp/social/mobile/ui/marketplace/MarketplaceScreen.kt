@@ -137,7 +137,7 @@ fun MarketplaceScreen(
                     label = { Text(stringResource(R.string.marketplace_all_categories)) },
                 )
             }
-            items(allMarketplaceCategories) { category ->
+            items(allMarketplaceCategories, key = { it }) { category ->
                 FilterChip(
                     selected = state.selectedCategory == category,
                     onClick = { viewModel.onCategorySelect(category) },

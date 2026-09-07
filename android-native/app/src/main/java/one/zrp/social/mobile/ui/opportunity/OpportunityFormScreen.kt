@@ -235,7 +235,7 @@ fun OpportunityFormScreen(listingId: String?, onBack: () -> Unit, onSaved: (Stri
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.padding(top = 8.dp),
                     ) {
-                        items(state.skills) { skill ->
+                        items(state.skills, key = { it }) { skill ->
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier

@@ -93,7 +93,7 @@ fun NewsScreen(onBack: () -> Unit, onOpenArticle: (String) -> Unit) {
                     label = { Text(stringResource(R.string.news_filter_all)) },
                 )
             }
-            items(NEWS_CATEGORIES) { category ->
+            items(NEWS_CATEGORIES, key = { it }) { category ->
                 FilterChip(
                     selected = state.selectedCategory == category,
                     onClick = { viewModel.selectCategory(category) },
