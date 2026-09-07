@@ -342,27 +342,49 @@ final class UploadThingClient: NSObject, @unchecked Sendable {
 
         let decoded = try? JSONDecoder().decode(UploadResponse.self, from: data)
 
-        // `serverData` is ZRP's own onUploadComplete result. Falling back
-        // to the transport-level `url` would lose the server's GIF and
-        // image/video classification, so a missing serverData is treated
-        // as a failure rather than papered over with a guess.
+        // `serverData` is ZRP's own onUploadComplete result, and its
+        // presence is what proves the handler ran. A missing serverData
+        // is therefore still a failure rather than something papered
+        // over with the transport-level url.
         guard
             let serverData = decoded?.serverData,
-            let mediaURL = serverData.url ?? decoded?.url,
-            let type = serverData.type
+            let mediaURL = serverData.url ?? decoded?.url
         else {
             throw UploadError.missingServerData
         }
+
+        // Only some of ZRP's completion handlers classify the file:
+        // `postMedia`, `storyMedia` and `musicTrack` return a `type`,
+        // while `avatar`, `banner` and `chatImage` return `{ url }`
+        // alone (see src/lib/uploadthing.ts). Requiring `type` therefore
+        // failed every avatar and banner upload outright.
+        //
+        // Where the server does classify, its answer is used verbatim -
+        // it is the only thing that knows about GIFs, and about the
+        // audio/image split behind the music uploader's `blob`
+        // category. Where it deliberately does not, the file's own MIME
+        // type answers the same question locally; nothing is guessed
+        // that the server had an opinion about.
+        let type = serverData.type ?? Self.mediaCategory(for: candidate.mimeType)
 
         return UploadedMedia(
             url: mediaURL,
             type: type,
             isGif: serverData.isGif ?? false,
-            // Every music completion handler returns the key; the
-            // presigned key is the same value, and is used as the
-            // fallback so this never comes back empty.
+            // `musicTrack` is the only handler that returns the storage
+            // key. For the rest, the presign response's key is that same
+            // value, so this never comes back empty for a real upload.
             key: serverData.key ?? presigned.key
         )
+    }
+
+    /// The category a route would have reported, for the routes that
+    /// report none. Matches the vocabulary ZRP's own handlers use.
+    private static func mediaCategory(for mimeType: String) -> String {
+        let lowercased = mimeType.lowercased()
+        if lowercased.hasPrefix("video/") { return "video" }
+        if lowercased.hasPrefix("audio/") { return "audio" }
+        return "image"
     }
 
     /// Asks how many bytes the ingest server already holds.

@@ -71,6 +71,14 @@ struct MusicStudioView: View {
             switch tab {
             case .upload:
                 MusicPublishView(viewModel: viewModel)
+                    // A published track is the one action whose result
+                    // lives on another tab. Moving there is the
+                    // confirmation - otherwise the only sign of success
+                    // is a form that emptied itself, which reads
+                    // identically to a form that was cleared.
+                    .onChange(of: viewModel.lastPublishedTrackId) { _, newValue in
+                        if newValue != nil { tab = .tracks }
+                    }
             case .tracks:
                 MusicStudioTracksView(viewModel: viewModel)
             case .albums:

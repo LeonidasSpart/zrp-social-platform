@@ -37,6 +37,13 @@ final class MusicStudioViewModel: ObservableObject {
     @Published var publishError: String?
     @Published var banner: Banner?
 
+    /// Set when a track is created, so the form knows to clear itself.
+    /// A signal rather than a return value, because the publish runs in
+    /// a task the view model owns - which is what makes it cancellable.
+    @Published private(set) var lastPublishedTrackId: String?
+
+    private var publishTask: Task<Void, Never>?
+
     struct Banner: Equatable, Identifiable {
         enum Kind { case success, failure }
         let id = UUID()
@@ -124,7 +131,44 @@ final class MusicStudioViewModel: ObservableObject {
     /// `audio` is required; `cover` is optional. Both go through one
     /// presign so the router's middleware sees the whole set, matching
     /// the website's single `startUpload([audio, cover])`.
-    func publish(
+    /// Starts a publish, in a task this view model owns so it can be
+    /// cancelled. A large track on a cellular connection is a long
+    /// operation, and one with no way out is worse than a slow one.
+    func beginPublish(
+        title: String,
+        genre: String,
+        explicit: Bool,
+        audio: PickedAudioFile,
+        cover: PickedMedia?,
+        artistName: String
+    ) {
+        publishTask?.cancel()
+        publishTask = Task { [weak self] in
+            await self?.publish(
+                title: title,
+                genre: genre,
+                explicit: explicit,
+                audio: audio,
+                cover: cover,
+                artistName: artistName
+            )
+        }
+    }
+
+    /// Stops an in-flight upload or publish.
+    ///
+    /// Deliberately not an error state: the person asked for this, so
+    /// the form returns to rest with no failure message. Anything
+    /// already uploaded stays in `pendingUpload`, so resuming does not
+    /// re-send it.
+    func cancelPublish() {
+        publishTask?.cancel()
+        publishTask = nil
+        publishStage = .idle
+        publishError = nil
+    }
+
+    private func publish(
         title: String,
         genre: String,
         explicit: Bool,
@@ -166,7 +210,10 @@ final class MusicStudioViewModel: ObservableObject {
             }
         } catch {
             publishStage = .idle
-            publishError = uploadMessage(for: error)
+            // A cancellation is not a failure to report back.
+            if !Self.isCancellation(error) {
+                publishError = uploadMessage(for: error)
+            }
             return
         }
 
@@ -226,12 +273,22 @@ final class MusicStudioViewModel: ObservableObject {
             tracks.insert(created, at: 0)
             pendingUpload = nil
             publishStage = .idle
-            artist = try? await repository.myArtist()
+            lastPublishedTrackId = created.id
+            // Only overwrite on success. `artist = try? ...` would set
+            // nil when the refetch merely failed, and a nil artist here
+            // is indistinguishable from "this account has no profile" -
+            // which is exactly the state the artist editor must never
+            // save from.
+            if let refreshed = try? await repository.myArtist() {
+                artist = refreshed
+            }
         } catch {
             // The upload is deliberately kept so Retry does not re-send
             // the file.
             publishStage = .idle
-            publishError = message(for: error, fallback: .musicShellPublishFailedDefault)
+            if !Self.isCancellation(error) {
+                publishError = message(for: error, fallback: .musicShellPublishFailedDefault)
+            }
         }
     }
 
@@ -247,6 +304,19 @@ final class MusicStudioViewModel: ObservableObject {
         case .unreadable, .accessDenied:
             publishError = L10n.string(.musicShellUnreadableFileError, ["name": fileName])
         }
+    }
+
+    /// Fetches the viewer's artist row fresh, for the profile editor.
+    ///
+    /// Deliberately not served from `artist`: that value can be stale or
+    /// nil after a failed background refresh, and the editor must never
+    /// populate itself with blanks it did not actually read. Throws
+    /// rather than returning nil on failure, so "no profile yet" and
+    /// "could not load" stay distinguishable.
+    func fetchArtistProfile() async throws -> MusicArtistProfile? {
+        let fetched = try await repository.myArtist()
+        artist = fetched
+        return fetched
     }
 
     // MARK: - Track and album mutations
@@ -386,6 +456,16 @@ final class MusicStudioViewModel: ObservableObject {
             return serverMessage
         }
         return L10n.string(fallback)
+    }
+
+    /// Cancellation reaches here in three shapes: Swift's own
+    /// `CancellationError`, `URLSession`'s `URLError.cancelled` from the
+    /// transfer, and `ApiError.cancelled` from the create call.
+    private static func isCancellation(_ error: Error) -> Bool {
+        if error is CancellationError { return true }
+        if let apiError = error as? ApiError, apiError == .cancelled { return true }
+        if let urlError = error as? URLError, urlError.code == .cancelled { return true }
+        return false
     }
 
     private func uploadMessage(for error: Error) -> String {

@@ -61,6 +61,22 @@ struct MusicPublishView: View {
 
                 publishButton
 
+                // Only offered while something is actually in flight -
+                // a track can be hundreds of megabytes, and there must
+                // be a way out that is not "force-quit the app".
+                if viewModel.publishStage != .idle {
+                    Button {
+                        viewModel.cancelPublish()
+                    } label: {
+                        Text(.musicStudioCancel)
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .frame(minHeight: ZrpMetrics.minTouchTarget)
+                            .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    }
+                    .buttonStyle(.plain)
+                }
+
                 Text(.musicShellUploadHint)
                     .font(.caption)
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
@@ -75,6 +91,20 @@ struct MusicPublishView: View {
             allowsMultipleSelection: false
         ) { result in
             handleAudioPick(result)
+        }
+        // Cleared on the real signal - a created track - rather than
+        // on the publish call merely returning, which also happens when
+        // it was cancelled or failed and the draft must survive.
+        .onChange(of: viewModel.lastPublishedTrackId) { _, newValue in
+            guard newValue != nil else { return }
+            audio?.discard()
+            cover?.discard()
+            audio = nil
+            cover = nil
+            coverSelection = nil
+            title = ""
+            genre = ""
+            explicit = false
         }
         .onChange(of: coverSelection) { _, item in
             guard let item else { return }
@@ -188,26 +218,14 @@ struct MusicPublishView: View {
     private var publishButton: some View {
         Button {
             guard let audio else { return }
-            Task {
-                await viewModel.publish(
-                    title: title,
-                    genre: genre,
-                    explicit: explicit,
-                    audio: audio,
-                    cover: cover,
-                    artistName: artistName
-                )
-                if viewModel.pendingUpload == nil, viewModel.publishError == nil {
-                    audio.discard()
-                    cover?.discard()
-                    self.audio = nil
-                    self.cover = nil
-                    coverSelection = nil
-                    title = ""
-                    genre = ""
-                    explicit = false
-                }
-            }
+            viewModel.beginPublish(
+                title: title,
+                genre: genre,
+                explicit: explicit,
+                audio: audio,
+                cover: cover,
+                artistName: artistName
+            )
         } label: {
             Text(buttonLabel)
                 .font(.subheadline.weight(.bold))

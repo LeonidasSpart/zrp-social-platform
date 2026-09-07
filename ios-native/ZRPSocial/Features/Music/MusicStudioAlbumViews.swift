@@ -123,7 +123,7 @@ struct MusicAlbumCreateView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: ZrpSpacing.lg) {
-                MusicCoverPickerRow(upload: $cover, addLabel: .musicStudioAddCover)
+                MusicCoverPickerRow(upload: $cover, addLabel: .musicStudioAddCover, error: $error)
 
                 MusicStudioTextField(key: .musicStudioAlbumTitlePlaceholder, text: $title)
                 MusicStudioTextField(key: .musicStudioDescriptionPlaceholder, text: $description)
@@ -239,7 +239,7 @@ struct MusicAlbumManageView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: ZrpSpacing.lg) {
-                MusicCoverPickerRow(upload: $cover, addLabel: .musicStudioChangeCover)
+                MusicCoverPickerRow(upload: $cover, addLabel: .musicStudioChangeCover, error: $error)
 
                 MusicStudioTextField(key: .musicStudioAlbumTitlePlaceholder, text: $title)
                 MusicStudioTextField(key: .musicStudioDescriptionPlaceholder, text: $description)
@@ -425,21 +425,51 @@ struct MusicStudioArtistView: View {
 
     @ObservedObject var viewModel: MusicStudioViewModel
 
+    /// Three genuinely different states. Blank fields on a *failed*
+    /// load look identical to blank fields on a real empty profile, and
+    /// saving from the first would erase a bio and images the editor
+    /// never read - so the two are never conflated here.
+    private enum LoadState: Equatable {
+        case loading
+        case loaded
+        case failed(ApiError)
+    }
+
     @State private var displayName = ""
     @State private var bio = ""
     @State private var avatar = MusicCoverUpload()
     @State private var banner = MusicCoverUpload()
     @State private var isSaving = false
-    @State private var hasLoaded = false
+    @State private var uploadError: String?
+    @State private var loadState: LoadState = .loading
 
     var body: some View {
+        switch loadState {
+        case .loading:
+            TimelineStateView.loading()
+                .task { await load() }
+        case .failed(let error):
+            TimelineStateView.error(error) { Task { await load() } }
+        case .loaded:
+            form
+        }
+    }
+
+    private var form: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: ZrpSpacing.lg) {
-                MusicCoverPickerRow(upload: $banner, addLabel: .musicStudioChangeBanner, slug: .banner)
-                MusicCoverPickerRow(upload: $avatar, addLabel: .musicStudioChangeCover, slug: .avatar)
+                MusicCoverPickerRow(upload: $banner, addLabel: .musicStudioChangeBanner, error: $uploadError, slug: .banner)
+                MusicCoverPickerRow(upload: $avatar, addLabel: .musicStudioChangeCover, error: $uploadError, slug: .avatar)
 
                 MusicStudioTextField(key: .musicShellArtistNamePlaceholder, text: $displayName)
                 MusicStudioTextField(key: .musicStudioBioPlaceholder, text: $bio)
+
+                if let uploadError {
+                    Text(verbatim: uploadError)
+                        .font(.footnote)
+                        .foregroundStyle(ZrpColor.red)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
 
                 Button {
                     save()
@@ -453,21 +483,29 @@ struct MusicStudioArtistView: View {
                         .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md))
                 }
                 .buttonStyle(.plain)
-                .disabled(isSaving || !hasLoaded || avatar.isUploading || banner.isUploading)
+                .disabled(isSaving || avatar.isUploading || banner.isUploading)
             }
             .padding(ZrpSpacing.lg)
             .frame(maxWidth: ZrpMetrics.contentMaxWidth, alignment: .leading)
             .frame(maxWidth: .infinity)
         }
-        .task {
-            guard !hasLoaded else { return }
-            if let artist = viewModel.artist {
+    }
+
+    /// Reads the artist row fresh, exactly as the website's Artist tab
+    /// does, rather than trusting a cached copy that may be stale.
+    private func load() async {
+        do {
+            if let artist = try await viewModel.fetchArtistProfile() {
                 displayName = artist.displayName
                 bio = artist.bio ?? ""
                 avatar = MusicCoverUpload(url: artist.avatarUrl ?? "", key: "")
                 banner = MusicCoverUpload(url: artist.bannerUrl ?? "", key: "")
             }
-            hasLoaded = true
+            // No profile yet is a valid answer: the blanks are then
+            // genuinely blank, and saving creates the profile.
+            loadState = .loaded
+        } catch {
+            loadState = .failed(error as? ApiError ?? .transport(underlying: "\(error)"))
         }
     }
 
@@ -517,6 +555,10 @@ struct MusicCoverPickerRow: View {
 
     @Binding var upload: MusicCoverUpload
     let addLabel: L10nKey
+    /// Where a failed upload is reported. Without it the picker looks
+    /// like it simply did nothing, which is the worst of both - the
+    /// artwork is not attached and nobody is told why.
+    @Binding var error: String?
     var slug: UploadThingClient.Slug = .musicTrack
 
     @State private var selection: PhotosPickerItem?
@@ -541,15 +583,23 @@ struct MusicCoverPickerRow: View {
             Task {
                 upload.isUploading = true
                 defer { upload.isUploading = false }
-                guard let picked = try? await item.loadTransferable(type: PickedMedia.self) else { return }
+                guard let picked = try? await item.loadTransferable(type: PickedMedia.self) else {
+                    error = L10n.string(.musicShellUploadFailedDefault)
+                    return
+                }
                 defer { picked.discard() }
-                guard let result = try? await uploader.upload(
-                    picked.asUploadCandidate(),
-                    to: slug,
-                    onProgress: { _ in }
-                ) else { return }
-                upload.url = result.url
-                upload.key = result.key ?? ""
+                do {
+                    let result = try await uploader.upload(
+                        picked.asUploadCandidate(),
+                        to: slug,
+                        onProgress: { _ in }
+                    )
+                    upload.url = result.url
+                    upload.key = result.key ?? ""
+                    error = nil
+                } catch {
+                    self.error = L10n.string(.musicShellUploadFailedDefault)
+                }
             }
         }
     }
