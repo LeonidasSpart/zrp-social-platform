@@ -169,6 +169,7 @@
 "feed.followSomeone" = "Follow someone to see their posts here.";
 "feed.checkBackLater" = "Check back later for trending content.";
 "feed.loadingMore" = "Loading more...";
+"feed.loadMore" = "Load more";
 "feed.endOfFeed" = "You've reached the end of the feed. 🎉";
 "feed.offline" = "You are offline. Please check your internet connection.";
 "home.emptyFollowingTitle" = "Your Following feed is waiting for you.";

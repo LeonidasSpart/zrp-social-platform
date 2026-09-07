@@ -17,6 +17,27 @@ final class ConversationViewModel: ObservableObject {
     @Published var replyTarget: Message?
     @Published var errorMessage: String?
 
+    /// Whether there is older history the server has not sent yet.
+    ///
+    /// This is the route's own answer, not a guess: `nextCursor` is
+    /// non-nil exactly when a page was truncated. So the "load older"
+    /// control appears only when pressing it will actually produce
+    /// something.
+    var canLoadOlder: Bool { olderCursor != nil }
+
+    @Published private(set) var isLoadingOlder = false
+    @Published private(set) var olderCursor: String?
+
+    /// Set the first time "load older" is pressed, and never unset.
+    ///
+    /// It exists so a refresh cannot walk the cursor back over history
+    /// already on screen. Once paging has begun, the cursor belongs to
+    /// wherever it has reached; a newest-page request's cursor describes
+    /// a boundary far newer than that, and letting it win would make the
+    /// button reappear at the top of a fully-read thread and then do
+    /// nothing visible when pressed.
+    private var hasPagedBack = false
+
     /// A picture chosen but not yet sent. Held here rather than uploaded
     /// on selection so someone can change their mind without having
     /// already put the file on UploadThing.
@@ -52,6 +73,9 @@ final class ConversationViewModel: ObservableObject {
     /// is the delivery mechanism.
     private let connectedPollInterval: Duration = .seconds(30)
     private let disconnectedPollInterval: Duration = .seconds(6)
+
+    /// Messages per request. The route clamps this to 100 server-side.
+    private let pageSize = 50
 
     init(
         partner: PostAuthor,
@@ -189,11 +213,22 @@ final class ConversationViewModel: ObservableObject {
     private func load(showLoading: Bool) async {
         if showLoading { phase = .loading }
         do {
-            let fetched = try await repository.thread(with: partner.id)
+            // Sized to cover everything already on screen, so a refresh
+            // re-reads the whole visible thread rather than only its
+            // newest 50 - otherwise a poll would leave anything reached
+            // through "load older" frozen at the version it had when it
+            // was fetched. Capped at the route's own server-side maximum;
+            // beyond that the older pages are merged rather than
+            // refetched, which is the one place this can hold a stale
+            // reaction until the thread is reopened.
+            let coverage = max(pageSize, min(messages.count, 100))
+            let page = try await repository.thread(
+                with: partner.id,
+                before: nil,
+                limit: coverage
+            )
             guard !Task.isCancelled else { return }
-            // Only publish when something actually changed, so a poll
-            // does not churn the list and fight the scroll position.
-            if fetched != messages { messages = fetched }
+            merge(newestPage: page)
             phase = .loaded
         } catch ApiError.cancelled {
             return
@@ -202,6 +237,81 @@ final class ConversationViewModel: ObservableObject {
             if messages.isEmpty {
                 phase = .failed(error as? ApiError ?? .transport(underlying: "\(error)"))
             }
+        }
+    }
+
+    /// Folds a freshly fetched newest page into what is already held.
+    ///
+    /// A refresh cannot simply assign: once someone has pressed "load
+    /// older", the array reaches further back than any newest-page
+    /// request returns, and assigning would silently throw that history
+    /// away under them - the list would jump and the messages they had
+    /// just scrolled up to read would vanish.
+    ///
+    /// So: everything older than the page is kept, everything the page
+    /// covers is replaced by the server's version of it. Replaced, not
+    /// merged field-by-field, because the page *is* the current truth for
+    /// that range - edits, reactions and deletions all land correctly,
+    /// including a message deleted by the other person, which simply
+    /// isn't in the new page.
+    private func merge(newestPage page: MessageThreadPage) {
+        // A page that came back empty means the conversation is empty -
+        // the newest page of a non-empty thread always has messages in
+        // it. Deleting the conversation from the other side does this.
+        guard let oldestInPage = page.items.first else {
+            messages = []
+            olderCursor = nil
+            hasPagedBack = false
+            return
+        }
+
+        let boundary = (oldestInPage.createdAt, oldestInPage.id)
+        let pageIds = Set(page.items.map(\.id))
+        let older = messages.filter { message in
+            !pageIds.contains(message.id)
+                && (message.createdAt, message.id) < boundary
+        }
+
+        let merged = older + page.items
+        // Only publish when something actually changed, so a poll does
+        // not churn the list and fight the scroll position.
+        if merged != messages { messages = merged }
+
+        // Only while paging has not begun. See `hasPagedBack`.
+        if !hasPagedBack { olderCursor = page.nextCursor }
+    }
+
+    /// Fetches the page of history before the oldest message held.
+    ///
+    /// Only reachable while `canLoadOlder`, which is the route's own
+    /// `nextCursor` rather than an assumption that there is always more.
+    func loadOlder() async {
+        guard let cursor = olderCursor, !isLoadingOlder else { return }
+        isLoadingOlder = true
+        hasPagedBack = true
+        defer { isLoadingOlder = false }
+
+        do {
+            let page = try await repository.thread(
+                with: partner.id,
+                before: cursor,
+                limit: pageSize
+            )
+            guard !Task.isCancelled else { return }
+            // Prepended by id rather than concatenated blindly: a
+            // message sent between the two requests can appear in both
+            // pages, and a duplicate row in a chat is both visible and
+            // wrong.
+            let known = Set(messages.map(\.id))
+            let fresh = page.items.filter { !known.contains($0.id) }
+            messages = fresh + messages
+            olderCursor = page.nextCursor
+        } catch ApiError.cancelled {
+            return
+        } catch let error as ApiError {
+            errorMessage = error.userFacingMessage
+        } catch {
+            errorMessage = L10n.string(.authErrTryAgain)
         }
     }
 

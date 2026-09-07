@@ -169,6 +169,7 @@
 "feed.followSomeone" = "关注他人以在此查看他们的帖子。";
 "feed.checkBackLater" = "请稍后回来查看热门内容。";
 "feed.loadingMore" = "正在加载更多...";
+"feed.loadMore" = "加载更多";
 "feed.endOfFeed" = "你已经看完了全部内容。🎉";
 "feed.offline" = "你已离线，请检查网络连接。";
 "home.emptyFollowingTitle" = "你的关注动态正在等你。";

@@ -112,3 +112,21 @@ struct MessageReactionResponse: Decodable {
 struct UnreadCountResponse: Decodable {
     let count: Int
 }
+
+/// `{items, nextCursor}` - one page of a thread, oldest first.
+///
+/// `GET /api/messages/{userId}` answers this **only** when the request
+/// carries a `cursor` or a `limit`. Without either it answers a bare
+/// array of the most recent page, which is the contract the website and
+/// the shipped Android app still rely on. This client always asks for a
+/// page, so it always gets the envelope - and with it the cursor that
+/// makes older history reachable at all.
+///
+/// `nextCursor` points *backwards* in time: the route orders newest
+/// first for paging and reverses each page into reading order before
+/// returning it, so the cursor is the id of the oldest message on this
+/// page and the next request fetches the ones before it.
+struct MessageThreadPage: Decodable {
+    let items: [Message]
+    let nextCursor: String?
+}

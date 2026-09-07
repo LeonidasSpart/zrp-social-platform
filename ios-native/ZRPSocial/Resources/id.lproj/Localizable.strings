@@ -169,6 +169,7 @@
 "feed.followSomeone" = "Ikuti seseorang untuk melihat postingan mereka di sini.";
 "feed.checkBackLater" = "Kunjungi lagi nanti untuk konten yang sedang tren.";
 "feed.loadingMore" = "Memuat lebih banyak...";
+"feed.loadMore" = "Muat lebih banyak";
 "feed.endOfFeed" = "Anda telah mencapai akhir feed. 🎉";
 "feed.offline" = "Anda sedang offline. Silakan periksa koneksi internet Anda.";
 "home.emptyFollowingTitle" = "Feed Mengikuti Anda sedang menunggu.";

@@ -346,6 +346,8 @@ enum L10nKey: String, CaseIterable {
     case feedCheckBackLater = "feed.checkBackLater"
     /// en: "Loading more..."
     case feedLoadingMore = "feed.loadingMore"
+    /// en: "Load more"
+    case feedLoadMore = "feed.loadMore"
     /// en: "You've reached the end of the feed. 🎉"
     case feedEndOfFeed = "feed.endOfFeed"
     /// en: "You are offline. Please check your internet connection."

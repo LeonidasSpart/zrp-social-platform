@@ -180,6 +180,7 @@ feed.noPosts
 feed.followSomeone
 feed.checkBackLater
 feed.loadingMore
+feed.loadMore
 feed.endOfFeed
 feed.offline
 home.emptyFollowingTitle

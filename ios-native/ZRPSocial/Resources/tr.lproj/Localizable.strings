@@ -169,6 +169,7 @@
 "feed.followSomeone" = "Gönderilerini burada görmek için birini takip edin.";
 "feed.checkBackLater" = "Popüler içerikler için daha sonra tekrar kontrol edin.";
 "feed.loadingMore" = "Daha fazlası yükleniyor...";
+"feed.loadMore" = "Daha fazla yükle";
 "feed.endOfFeed" = "Akışın sonuna ulaştınız. 🎉";
 "feed.offline" = "Çevrimdışısınız. Lütfen internet bağlantınızı kontrol edin.";
 "home.emptyFollowingTitle" = "Takip edilenler akışın seni bekliyor.";

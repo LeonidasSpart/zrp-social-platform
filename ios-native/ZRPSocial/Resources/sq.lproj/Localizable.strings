@@ -169,6 +169,7 @@
 "feed.followSomeone" = "Ndiqni dikë për të parë postimet e tyre këtu.";
 "feed.checkBackLater" = "Rikthehuni më vonë për përmbajtje kryesore.";
 "feed.loadingMore" = "Duke ngarkuar më shumë...";
+"feed.loadMore" = "Ngarko më shumë";
 "feed.endOfFeed" = "Keni arritur në fund të furnizimit. 🎉";
 "feed.offline" = "Jeni pa lidhje me internetin. Ju lutemi kontrolloni lidhjen tuaj.";
 "home.emptyFollowingTitle" = "Furnizimi juaj i ndjekjes po ju pret.";

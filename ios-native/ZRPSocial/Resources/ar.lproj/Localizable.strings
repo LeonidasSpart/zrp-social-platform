@@ -169,6 +169,7 @@
 "feed.followSomeone" = "تابع شخصًا لترى منشوراته هنا.";
 "feed.checkBackLater" = "عد لاحقًا لرؤية المحتوى الرائج.";
 "feed.loadingMore" = "جارٍ تحميل المزيد...";
+"feed.loadMore" = "تحميل المزيد";
 "feed.endOfFeed" = "لقد وصلت إلى نهاية الخلاصة. 🎉";
 "feed.offline" = "أنت غير متصل. يرجى التحقق من اتصال الإنترنت.";
 "home.emptyFollowingTitle" = "موجز المتابَعين ينتظرك.";

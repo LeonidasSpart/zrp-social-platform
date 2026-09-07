@@ -158,7 +158,7 @@ called and the real response being handled.
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
 | Conversation list | `GET /api/messages` (bare array; partner, last message, unread count) | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Thread | `GET /api/messages/{userId}` — now cursor-paginated (`?cursor=`/`?limit=`), see [L1](#l1-message-threads-are-unpaginated) | ✅ | ✅ | ⬜ backend no longer blocks it — a "load older messages" control is outstanding client-side work, not built here | IMPLEMENTED |
+| Thread | `GET /api/messages/{userId}` — now cursor-paginated (`?cursor=`/`?limit=`), see [L1](#l1-message-threads-are-unpaginated) | ✅ | ✅ | ✅ cursor-paginated with a "Load more" at the top of the thread, shown only when the route reports more history | IMPLEMENTED |
 | Send message | `POST /api/messages` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Edit / delete message | `PUT /api/messages/edit/{id}`, `DELETE /delete/{id}` | ✅ | ✅ | ✅ (sender-only, 403-enforced) | IMPLEMENTED |
 | Reactions | `POST /api/messages/reaction/{id}` — one per person; same emoji removes, different replaces | ✅ | ✅ | ✅ | IMPLEMENTED |
@@ -437,11 +437,29 @@ paginated route already returns. Opening a conversation still marks the
 whole thread's unread messages read regardless of page size, unchanged
 from before.
 
-What remains is client-side, not a backend blocker: a "load older
-messages" control that calls this with `cursor`/`limit` once a thread's
-history exceeds one page. Not built here - the iOS app's own explanation
-above ("no paging UI, because there is nothing to page") no longer holds
-now that there's something to page.
+**iOS now uses it.** `MessagesRepository.thread(with:before:limit:)`
+always sends `limit`, which is what makes the envelope - and therefore
+the cursor - available at all; a request without it would get the bare
+array and no way to reach anything before it. A "Load more" appears at
+the top of a thread exactly when `nextCursor` is non-nil, so it is the
+route's own answer about whether more exists rather than a control that
+might do nothing.
+
+Two details that make it work rather than merely exist. The scroll-to-
+bottom is keyed on the newest message's identity, not on the message
+count: prepending history changes the count, and the old rule would have
+thrown the reader straight back out of the history they had just asked
+for. And a refresh merges rather than assigns - once someone has paged
+back, the array reaches further than any newest-page request returns, so
+assigning would silently discard it. Older messages are kept, the
+newest page replaces the range it covers (which is how an edit, a
+reaction or someone else's deletion lands), and the refresh is sized to
+cover what is on screen up to the route's 100-message cap. Beyond that
+cap the older pages are merged rather than refetched, which is the one
+place a stale reaction can persist until the thread is reopened.
+
+Web and Android are unchanged and still send neither param, so both
+still get the bare-array shape they expect.
 
 ### L2. `GET /api/music/playlists/{id}` does not report per-track `liked`
 

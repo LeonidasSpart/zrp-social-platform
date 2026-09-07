@@ -169,6 +169,7 @@
 "feed.followSomeone" = "Sigue a alguien para ver sus publicaciones aquí.";
 "feed.checkBackLater" = "Vuelve más tarde para ver contenido en tendencia.";
 "feed.loadingMore" = "Cargando más...";
+"feed.loadMore" = "Cargar más";
 "feed.endOfFeed" = "Has llegado al final del feed. 🎉";
 "feed.offline" = "Estás sin conexión. Comprueba tu conexión a internet.";
 "home.emptyFollowingTitle" = "Tu feed de Siguiendo te está esperando.";
