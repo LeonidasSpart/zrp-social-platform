@@ -837,4 +837,6 @@
     <string name="shorts_share_post_by">Post by %1$s</string>
     <string name="shorts_comment">Comments</string>
     <string name="shorts_discover_entry">Discover Shorts</string>
+    <!-- "Shorts" is a proper noun, left untranslated in every one of web's own 11 language blocks (nav.shorts) - present only here so every locale falls back to this single default value. -->
+    <string name="shorts_title">Shorts</string>
 </resources>

@@ -1,8 +1,13 @@
 package one.zrp.social.mobile.ui.shorts
 
 import android.content.Intent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,25 +39,31 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import kotlinx.coroutines.delay
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.network.Post
@@ -98,23 +109,45 @@ fun ShortsScreen(onBack: () -> Unit, onOpenComments: (String) -> Unit, onAuthorC
                     post = post,
                     isActive = page == pagerState.currentPage,
                     muted = state.muted,
-                    onToggleMuted = viewModel::toggleMuted,
                     onLike = { viewModel.toggleLike(post.id) },
                     onRepost = { viewModel.toggleRepost(post.id) },
                     onComment = { onOpenComments(post.id) },
                     onAuthorClick = { onAuthorClick(post.author.username) },
+                    onPlaybackError = { viewModel.removeBrokenPost(post.id) },
                 )
             }
         }
 
-        IconButton(
-            onClick = onBack,
+        Row(
             modifier = Modifier
-                .align(Alignment.TopStart)
+                .fillMaxWidth()
+                .align(Alignment.TopCenter)
                 .statusBarsPadding()
-                .padding(8.dp),
+                .padding(horizontal = 4.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.shorts_back), tint = Color.White)
+            IconButton(onClick = onBack) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.shorts_back), tint = Color.White)
+            }
+            Text(
+                text = stringResource(R.string.shorts_title),
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center,
+            )
+            if (state.posts.isNotEmpty()) {
+                IconButton(onClick = viewModel::toggleMuted) {
+                    Icon(
+                        if (state.muted) Icons.Filled.VolumeOff else Icons.Filled.VolumeUp,
+                        contentDescription = stringResource(if (state.muted) R.string.shorts_unmute else R.string.shorts_mute),
+                        tint = Color.White,
+                    )
+                }
+            } else {
+                Box(modifier = Modifier.size(48.dp))
+            }
         }
     }
 }
@@ -125,23 +158,53 @@ private fun ShortItem(
     post: Post,
     isActive: Boolean,
     muted: Boolean,
-    onToggleMuted: () -> Unit,
     onLike: () -> Unit,
     onRepost: () -> Unit,
     onComment: () -> Unit,
     onAuthorClick: () -> Unit,
+    onPlaybackError: () -> Unit,
 ) {
     val context = LocalContext.current
     val videoUrl = post.imageUrl
+    // A tap pauses/resumes; matches shorts/page.tsx's own single-tap
+    // handler on the <video> element itself.
+    var manuallyPaused by remember(post.id) { mutableStateOf(false) }
+    var showHeartBurst by remember(post.id) { mutableStateOf(false) }
+
     Box(modifier = Modifier.fillMaxSize()) {
         if (videoUrl != null) {
             ShortVideoPlayer(
                 url = videoUrl,
-                playing = isActive,
+                playing = isActive && !manuallyPaused,
                 muted = muted,
-                onToggleMuted = onToggleMuted,
+                onTap = { manuallyPaused = !manuallyPaused },
+                onDoubleTap = {
+                    if (post.liked != true) onLike()
+                    showHeartBurst = true
+                },
+                onPlaybackError = onPlaybackError,
                 modifier = Modifier.fillMaxSize(),
             )
+        }
+
+        AnimatedVisibility(
+            visible = showHeartBurst,
+            enter = fadeIn() + scaleIn(initialScale = 0.6f),
+            exit = fadeOut(),
+            modifier = Modifier.align(Alignment.Center),
+        ) {
+            Icon(
+                Icons.Filled.Favorite,
+                contentDescription = null,
+                tint = ZrpRed,
+                modifier = Modifier.size(96.dp),
+            )
+        }
+        LaunchedEffect(showHeartBurst) {
+            if (showHeartBurst) {
+                delay(700)
+                showHeartBurst = false
+            }
         }
 
         val shareLabel = stringResource(R.string.shorts_share)
@@ -185,14 +248,6 @@ private fun ShortItem(
                 },
             ) {
                 Icon(Icons.Filled.Share, contentDescription = shareLabel, tint = Color.White, modifier = Modifier.size(28.dp))
-            }
-            IconButton(onClick = onToggleMuted) {
-                Icon(
-                    if (muted) Icons.Filled.VolumeOff else Icons.Filled.VolumeUp,
-                    contentDescription = stringResource(if (muted) R.string.shorts_unmute else R.string.shorts_mute),
-                    tint = Color.White,
-                    modifier = Modifier.size(28.dp),
-                )
             }
         }
 
@@ -241,10 +296,23 @@ private fun ShortActionButton(icon: ImageVector, tint: Color, count: Int, conten
     }
 }
 
-/** Looping, fill-screen ExoPlayer for one Short - same player-lifecycle shape as StoryViewerScreen's own StoryVideoPlayer. */
+/**
+ * Looping ExoPlayer for one Short - same player-lifecycle shape as
+ * StoryViewerScreen's own StoryVideoPlayer. Uses FIT (letterboxed),
+ * matching shorts/page.tsx's own `object-contain` video element
+ * exactly, not a cropping fill.
+ */
 @OptIn(UnstableApi::class)
 @Composable
-private fun ShortVideoPlayer(url: String, playing: Boolean, muted: Boolean, onToggleMuted: () -> Unit, modifier: Modifier = Modifier) {
+private fun ShortVideoPlayer(
+    url: String,
+    playing: Boolean,
+    muted: Boolean,
+    onTap: () -> Unit,
+    onDoubleTap: () -> Unit,
+    onPlaybackError: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
     val exoPlayer = remember(url) {
         ExoPlayer.Builder(context).build().apply {
@@ -255,7 +323,16 @@ private fun ShortVideoPlayer(url: String, playing: Boolean, muted: Boolean, onTo
     }
 
     DisposableEffect(exoPlayer) {
-        onDispose { exoPlayer.release() }
+        val listener = object : Player.Listener {
+            override fun onPlayerError(error: PlaybackException) {
+                onPlaybackError()
+            }
+        }
+        exoPlayer.addListener(listener)
+        onDispose {
+            exoPlayer.removeListener(listener)
+            exoPlayer.release()
+        }
     }
 
     LaunchedEffect(playing) {
@@ -266,14 +343,18 @@ private fun ShortVideoPlayer(url: String, playing: Boolean, muted: Boolean, onTo
         exoPlayer.volume = if (muted) 0f else 1f
     }
 
-    Box(modifier = modifier.clickable(onClick = onToggleMuted)) {
+    Box(
+        modifier = modifier.pointerInput(Unit) {
+            detectTapGestures(onTap = { onTap() }, onDoubleTap = { onDoubleTap() })
+        },
+    ) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = {
                 PlayerView(context).apply {
                     player = exoPlayer
                     useController = false
-                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                 }
             },
         )

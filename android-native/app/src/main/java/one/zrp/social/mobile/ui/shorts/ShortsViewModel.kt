@@ -20,6 +20,7 @@ data class ShortsUiState(
     val isLoadingMore: Boolean = false,
     val currentIndex: Int = 0,
     val muted: Boolean = true,
+    val ownUserId: String? = null,
 )
 
 /**
@@ -35,6 +36,9 @@ class ShortsViewModel(private val repository: PostsRepository) : ViewModel() {
     val state: StateFlow<ShortsUiState> = _state.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            repository.getOwnUserId().onSuccess { id -> _state.update { it.copy(ownUserId = id) } }
+        }
         load()
     }
 
@@ -61,12 +65,20 @@ class ShortsViewModel(private val repository: PostsRepository) : ViewModel() {
 
     fun setCurrentIndex(index: Int) {
         _state.update { it.copy(currentIndex = index) }
-        if (index >= _state.value.posts.size - 3) loadMore()
+        // Matches shorts/page.tsx's own scroll handler: `index >= videos.length - 2`.
+        if (index >= _state.value.posts.size - 2) loadMore()
     }
 
     fun toggleMuted() = _state.update { it.copy(muted = !it.muted) }
 
+    /** A post whose video failed to play is dropped, matching the web player's own onError handler. */
+    fun removeBrokenPost(postId: String) {
+        _state.update { it.copy(posts = it.posts.filter { post -> post.id != postId }) }
+    }
+
     fun toggleLike(postId: String) {
+        // Matches shorts/page.tsx's own handleLike: `if (!session) return`.
+        if (_state.value.ownUserId == null) return
         val previousPosts = _state.value.posts
         _state.update { s -> s.copy(posts = s.posts.map { if (it.id == postId) applyOptimisticLike(it) else it }) }
         viewModelScope.launch {
@@ -77,6 +89,8 @@ class ShortsViewModel(private val repository: PostsRepository) : ViewModel() {
     }
 
     fun toggleRepost(postId: String) {
+        // Matches shorts/page.tsx's own handleRepost: `if (!session) return`.
+        if (_state.value.ownUserId == null) return
         val previousPosts = _state.value.posts
         _state.update { s -> s.copy(posts = s.posts.map { if (it.id == postId) applyOptimisticRepost(it) else it }) }
         viewModelScope.launch {
