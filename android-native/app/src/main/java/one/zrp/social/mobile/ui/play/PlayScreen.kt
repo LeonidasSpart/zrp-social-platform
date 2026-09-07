@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -50,7 +51,7 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * this page either (the /play/achievements page itself is real but
  * unlinked from any web nav); the top-bar icon here is a reasonable
  * native affordance to that same real, functional page. Create
- * Challenge is still deferred to the later challenge-creation phase.
+ * Challenge mirrors web's own session-gated hero pill.
  */
 @Composable
 fun PlayScreen(
@@ -61,6 +62,7 @@ fun PlayScreen(
     onOpenLeaderboard: () -> Unit,
     onOpenAchievements: () -> Unit,
     onOpenProfile: (String) -> Unit,
+    onOpenCreateChallenge: () -> Unit,
 ) {
     val viewModel: PlayViewModel = viewModel(
         factory = remember { PlayViewModelFactory(PlayRepository()) },
@@ -78,6 +80,11 @@ fun PlayScreen(
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Spacer(modifier = Modifier.weight(1f))
+            if (state.isSignedIn) {
+                IconButton(onClick = onOpenCreateChallenge) {
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.play_create_challenge))
+                }
+            }
             IconButton(onClick = onOpenAchievements) {
                 Icon(Icons.Filled.MilitaryTech, contentDescription = stringResource(R.string.play_achievements))
             }

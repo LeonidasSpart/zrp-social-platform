@@ -77,6 +77,7 @@ import one.zrp.social.mobile.ui.opportunity.OpportunityFormScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityScreen
 import one.zrp.social.mobile.ui.play.PlayAchievementsScreen
 import one.zrp.social.mobile.ui.play.PlayChallengeScreen
+import one.zrp.social.mobile.ui.play.PlayCreateChallengeScreen
 import one.zrp.social.mobile.ui.play.PlayDuelDetailScreen
 import one.zrp.social.mobile.ui.play.PlayDuelsScreen
 import one.zrp.social.mobile.ui.play.PlayLeaderboardScreen
@@ -157,6 +158,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToPlayLeaderboard: () -> Unit = { navController.navigate("play/leaderboard") }
     val goToPlayAchievements: () -> Unit = { navController.navigate("play/achievements") }
     val goToPlayProfile: (String) -> Unit = { username -> navController.navigate("play/profile/${Uri.encode(username)}") }
+    val goToPlayCreateChallenge: () -> Unit = { navController.navigate("play/create") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -620,6 +622,17 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenLeaderboard = goToPlayLeaderboard,
                     onOpenAchievements = goToPlayAchievements,
                     onOpenProfile = goToPlayProfile,
+                    onOpenCreateChallenge = goToPlayCreateChallenge,
+                )
+            }
+            composable("play/create") {
+                PlayCreateChallengeScreen(
+                    onBack = { navController.popBackStack() },
+                    onCreated = { id ->
+                        navController.navigate("play/challenge/$id") {
+                            popUpTo("play") { inclusive = false }
+                        }
+                    },
                 )
             }
             composable("play/leaderboard") {

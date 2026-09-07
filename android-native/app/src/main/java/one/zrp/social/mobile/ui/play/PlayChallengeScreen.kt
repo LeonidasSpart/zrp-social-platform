@@ -175,10 +175,11 @@ fun PlayChallengeScreen(
 
                         val error = state.error
                         if (error != null) {
-                            val errorText = if (error == PlayChallengeViewModel.submitFailedError) {
-                                stringResource(R.string.play_err_submit_failed)
-                            } else {
-                                error
+                            val errorText = when (error) {
+                                PlayChallengeViewModel.submitFailedError -> stringResource(R.string.play_err_submit_failed)
+                                PlayChallengeViewModel.duelCreateFailedError -> stringResource(R.string.play_err_duel_create_failed)
+                                PlayChallengeViewModel.shareFailedError -> stringResource(R.string.play_err_share_failed)
+                                else -> error
                             }
                             Text(
                                 text = errorText,

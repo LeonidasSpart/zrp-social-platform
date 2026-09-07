@@ -106,7 +106,7 @@ class PlayChallengeViewModel(
             ).onSuccess {
                 _state.update { it.copy(isSharing = false, shared = true) }
             }.onFailure {
-                _state.update { it.copy(isSharing = false) }
+                _state.update { it.copy(isSharing = false, error = shareFailedError) }
             }
         }
     }
@@ -132,6 +132,7 @@ class PlayChallengeViewModel(
     companion object {
         const val submitFailedError = "submitFailed"
         const val duelCreateFailedError = "duelCreateFailed"
+        const val shareFailedError = "shareFailed"
     }
 }
 
