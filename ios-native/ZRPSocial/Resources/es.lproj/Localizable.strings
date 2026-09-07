@@ -512,3 +512,17 @@
 "profile.noLikes" = "Aún no hay Me gusta.";
 "profile.noReposts" = "Aún no hay republicaciones.";
 "profile.pinned" = "Fijado";
+"appeals.title" = "Apelaciones de moderación";
+"appeals.explanation" = "Si un moderador ha tomado una acción sobre una de tus publicaciones, comentarios o tu cuenta, puedes apelar esa decisión aquí. El equipo revisará tu apelación y te responderá.";
+"appeals.eligibleHeading" = "Acciones que puedes apelar";
+"appeals.noEligible" = "Actualmente no tienes acciones de moderación que puedas apelar.";
+"appeals.messagePlaceholder" = "Explica por qué crees que esta decisión debería reconsiderarse...";
+"appeals.submit" = "Enviar apelación";
+"appeals.fileAppeal" = "Presentar apelación";
+"appeals.filedHeading" = "Tus apelaciones";
+"appeals.noFiled" = "Aún no has presentado ninguna apelación.";
+"appeals.errSubmitFailed" = "No se pudo enviar tu apelación. Inténtalo de nuevo.";
+"appeals.statusPending" = "Pendiente";
+"appeals.statusUpheld" = "Confirmada";
+"appeals.statusOverturned" = "Revocada";
+"adminReports.actionOther" = "Otro";

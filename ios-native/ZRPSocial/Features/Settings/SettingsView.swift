@@ -44,6 +44,9 @@ struct SettingsView: View {
                 NavigationLink(value: Route.mutedUsers) {
                     Label { Text(.settingsMutedUsers) } icon: { Image(systemName: "speaker.slash") }
                 }
+                NavigationLink(value: Route.appeals) {
+                    Label { Text(.appealsTitle) } icon: { Image(systemName: "exclamationmark.bubble") }
+                }
             } footer: {
                 Text(.settingsPrivacyManageNote)
             }

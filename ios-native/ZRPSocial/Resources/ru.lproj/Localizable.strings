@@ -512,3 +512,17 @@
 "profile.noLikes" = "Пока нет отметок «Нравится».";
 "profile.noReposts" = "Пока нет репостов.";
 "profile.pinned" = "Закреплено";
+"appeals.title" = "Апелляции модерации";
+"appeals.explanation" = "Если модератор предпринял действие в отношении одного из ваших постов, комментариев или вашего аккаунта, вы можете обжаловать это решение здесь. Сотрудники рассмотрят вашу апелляцию и ответят вам.";
+"appeals.eligibleHeading" = "Действия, которые можно обжаловать";
+"appeals.noEligible" = "Сейчас у вас нет действий модерации, которые можно обжаловать.";
+"appeals.messagePlaceholder" = "Объясните, почему, по вашему мнению, это решение следует пересмотреть...";
+"appeals.submit" = "Отправить апелляцию";
+"appeals.fileAppeal" = "Подать апелляцию";
+"appeals.filedHeading" = "Ваши апелляции";
+"appeals.noFiled" = "Вы ещё не подавали апелляций.";
+"appeals.errSubmitFailed" = "Не удалось отправить апелляцию. Попробуйте ещё раз.";
+"appeals.statusPending" = "На рассмотрении";
+"appeals.statusUpheld" = "Оставлено в силе";
+"appeals.statusOverturned" = "Отменено";
+"adminReports.actionOther" = "Другое";

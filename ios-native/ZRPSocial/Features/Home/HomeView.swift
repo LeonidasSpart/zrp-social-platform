@@ -107,6 +107,8 @@ struct HomeView: View {
                     AccountSettingsView()
                 case .emailPreferences:
                     EmailPreferencesView()
+                case .appeals:
+                    AppealsView()
                 case .listingConversation(let partner, let draft):
                     ConversationView(
                         partner: partner,

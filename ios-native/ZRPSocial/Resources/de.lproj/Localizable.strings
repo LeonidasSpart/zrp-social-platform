@@ -512,3 +512,17 @@
 "profile.noLikes" = "Noch keine Gefällt-mir-Angaben.";
 "profile.noReposts" = "Noch keine Reposts.";
 "profile.pinned" = "Angeheftet";
+"appeals.title" = "Moderationseinsprüche";
+"appeals.explanation" = "Wenn ein Moderator eine Maßnahme bezüglich eines Ihrer Beiträge, Kommentare oder Ihres Kontos ergriffen hat, können Sie hier gegen diese Entscheidung Einspruch einlegen. Das Team wird Ihren Einspruch prüfen und antworten.";
+"appeals.eligibleHeading" = "Maßnahmen, gegen die Sie Einspruch einlegen können";
+"appeals.noEligible" = "Derzeit gibt es keine Moderationsmaßnahmen, gegen die Sie Einspruch einlegen können.";
+"appeals.messagePlaceholder" = "Erklären Sie, warum diese Maßnahme Ihrer Meinung nach überdacht werden sollte...";
+"appeals.submit" = "Einspruch einreichen";
+"appeals.fileAppeal" = "Einspruch einlegen";
+"appeals.filedHeading" = "Ihre Einsprüche";
+"appeals.noFiled" = "Sie haben noch keine Einsprüche eingereicht.";
+"appeals.errSubmitFailed" = "Ihr Einspruch konnte nicht übermittelt werden. Bitte versuchen Sie es erneut.";
+"appeals.statusPending" = "Ausstehend";
+"appeals.statusUpheld" = "Bestätigt";
+"appeals.statusOverturned" = "Aufgehoben";
+"adminReports.actionOther" = "Sonstiges";

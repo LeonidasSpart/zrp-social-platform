@@ -153,11 +153,10 @@ struct NotificationsView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        // A notification with no destination is not a button: several
-        // real types (moderation outcomes, listing decisions) point at
-        // surfaces this app does not have yet, and a row that did
-        // nothing when tapped would be worse than one that plainly is
-        // not tappable.
+        // A notification with no destination is not a button. That is
+        // now only an unrecognised type, or a known one whose payload is
+        // missing the thing it points at - a row that did nothing when
+        // tapped would be worse than one that plainly is not tappable.
         .disabled(destination == nil)
         .overlay(alignment: .bottom) {
             Rectangle().fill(ZrpColor.outlineFaint).frame(height: 0.5)
@@ -205,8 +204,17 @@ struct NotificationsView: View {
         case .message:
             guard let author = notification.fromUser else { return nil }
             return .conversation(partner: author)
-        case .appealResolved, .listingApproved, .listingRejected, .listingRemoved, .unknown:
-            // Appeals and marketplace listings are Phases 15 and 16.
+        case .appealResolved:
+            return .appeals
+        case .listingApproved, .listingRejected, .listingRemoved:
+            // The notification carries no listing id - it has only a
+            // `post` reference, which a listing decision does not use -
+            // so this leads to the seller's own listings, where the
+            // outcome is visible, rather than guessing at an id.
+            return .myListings
+        case .unknown:
+            // A type this app does not recognise leads nowhere rather
+            // than somewhere plausible-looking.
             return nil
         }
     }

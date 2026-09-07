@@ -512,3 +512,17 @@
 "profile.noLikes" = "Aucun j'aime pour le moment.";
 "profile.noReposts" = "Aucune republication pour le moment.";
 "profile.pinned" = "Épinglé";
+"appeals.title" = "Appels de modération";
+"appeals.explanation" = "Si un modérateur a pris une mesure concernant l'une de vos publications, l'un de vos commentaires ou votre compte, vous pouvez faire appel de cette décision ici. L'équipe l'examinera et vous répondra.";
+"appeals.eligibleHeading" = "Actions pouvant faire l'objet d'un appel";
+"appeals.noEligible" = "Vous n'avez actuellement aucune action de modération pouvant faire l'objet d'un appel.";
+"appeals.messagePlaceholder" = "Expliquez pourquoi vous pensez que cette décision devrait être reconsidérée...";
+"appeals.submit" = "Soumettre l'appel";
+"appeals.fileAppeal" = "Faire appel";
+"appeals.filedHeading" = "Vos appels";
+"appeals.noFiled" = "Vous n'avez encore déposé aucun appel.";
+"appeals.errSubmitFailed" = "Échec de l'envoi de votre appel. Veuillez réessayer.";
+"appeals.statusPending" = "En attente";
+"appeals.statusUpheld" = "Confirmée";
+"appeals.statusOverturned" = "Annulée";
+"adminReports.actionOther" = "Autre";

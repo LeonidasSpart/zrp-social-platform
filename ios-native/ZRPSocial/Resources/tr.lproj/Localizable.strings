@@ -512,3 +512,17 @@
 "profile.noLikes" = "Henüz beğeni yok.";
 "profile.noReposts" = "Henüz repost yok.";
 "profile.pinned" = "Sabitlenmiş";
+"appeals.title" = "Moderasyon İtirazları";
+"appeals.explanation" = "Bir moderatör gönderilerinizden, yorumlarınızdan veya hesabınızdan biri hakkında işlem yaptıysa, bu karara buradan itiraz edebilirsiniz. Ekip itirazınızı inceleyip yanıt verecektir.";
+"appeals.eligibleHeading" = "İtiraz edebileceğiniz işlemler";
+"appeals.noEligible" = "Şu anda itiraz edebileceğiniz herhangi bir moderasyon işlemi yok.";
+"appeals.messagePlaceholder" = "Bu kararın neden yeniden değerlendirilmesi gerektiğini açıklayın...";
+"appeals.submit" = "İtirazı Gönder";
+"appeals.fileAppeal" = "İtiraz Et";
+"appeals.filedHeading" = "İtirazlarınız";
+"appeals.noFiled" = "Henüz hiç itiraz göndermediniz.";
+"appeals.errSubmitFailed" = "İtirazınız gönderilemedi. Lütfen tekrar deneyin.";
+"appeals.statusPending" = "Beklemede";
+"appeals.statusUpheld" = "Onaylandı";
+"appeals.statusOverturned" = "Bozuldu";
+"adminReports.actionOther" = "Diğer";

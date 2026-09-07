@@ -58,6 +58,7 @@ enum Route: Hashable {
     case editProfile
     case accountSettings
     case emailPreferences
+    case appeals
 }
 
 /// Owns the navigation stack's path.

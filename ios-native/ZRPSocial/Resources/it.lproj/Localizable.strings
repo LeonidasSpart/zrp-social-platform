@@ -512,3 +512,17 @@
 "profile.noLikes" = "Ancora nessun mi piace.";
 "profile.noReposts" = "Ancora nessun repost.";
 "profile.pinned" = "In evidenza";
+"appeals.title" = "Ricorsi di moderazione";
+"appeals.explanation" = "Se un moderatore ha intrapreso un'azione su uno dei tuoi post, commenti o sul tuo account, puoi presentare ricorso qui. Il team esaminerà il tuo ricorso e ti risponderà.";
+"appeals.eligibleHeading" = "Azioni per cui puoi presentare ricorso";
+"appeals.noEligible" = "Al momento non hai azioni di moderazione per cui puoi presentare ricorso.";
+"appeals.messagePlaceholder" = "Spiega perché ritieni che questa decisione debba essere riconsiderata...";
+"appeals.submit" = "Invia ricorso";
+"appeals.fileAppeal" = "Presenta ricorso";
+"appeals.filedHeading" = "I tuoi ricorsi";
+"appeals.noFiled" = "Non hai ancora presentato alcun ricorso.";
+"appeals.errSubmitFailed" = "Impossibile inviare il ricorso. Riprova.";
+"appeals.statusPending" = "In attesa";
+"appeals.statusUpheld" = "Confermata";
+"appeals.statusOverturned" = "Annullata";
+"adminReports.actionOther" = "Altro";

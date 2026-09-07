@@ -512,3 +512,17 @@
 "profile.noLikes" = "暂无点赞。";
 "profile.noReposts" = "暂无转发。";
 "profile.pinned" = "已置顶";
+"appeals.title" = "内容审核申诉";
+"appeals.explanation" = "如果版主对您的帖子、评论或账户采取了处理措施,您可以在此对该决定提出申诉。工作人员将审核您的申诉并回复。";
+"appeals.eligibleHeading" = "可申诉的处理措施";
+"appeals.noEligible" = "您目前没有可申诉的审核处理措施。";
+"appeals.messagePlaceholder" = "请说明您认为此决定应被重新考虑的原因……";
+"appeals.submit" = "提交申诉";
+"appeals.fileAppeal" = "提出申诉";
+"appeals.filedHeading" = "您的申诉";
+"appeals.noFiled" = "您还没有提交过任何申诉。";
+"appeals.errSubmitFailed" = "申诉提交失败,请重试。";
+"appeals.statusPending" = "待处理";
+"appeals.statusUpheld" = "维持原判";
+"appeals.statusOverturned" = "已撤销";
+"adminReports.actionOther" = "其他";

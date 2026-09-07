@@ -174,7 +174,7 @@ called and the real response being handled.
 | Notification list | `GET /api/notifications` (bare array, 50 max, unpaginated) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Mark all read | `PUT /api/notifications` (all-at-once is the only granularity offered) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Unread badge | `GET /api/notifications/unread` | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Notification tap-through | — | ✅ | ✅ | 🔶 like/comment/repost → post, follow → profile, message → thread; appeal and listing outcomes have no screen yet (Phases 15/16) | PARTIAL |
+| Notification tap-through | — | ✅ | ✅ | ✅ like/comment/repost → post, follow → profile, message → thread, appeal outcome → Appeals, listing decision → My listings (the payload carries no listing id, so it leads to where the outcome is visible rather than guessing at one) | IMPLEMENTED |
 | Unrecognised notification types | — | 🔶 renders with no action phrase | 🔶 same | 🔶 same, deliberately | PARTIAL |
 | Web Push (VAPID) | `POST /api/push/subscribe` | ✅ | n/a | n/a | WEB-ONLY |
 | **Device push** | `POST/DELETE /api/push/fcm` | n/a | ✅ FCM | ❌ | **BLOCKED — [B3](#b3-ios-device-push)** |
@@ -244,7 +244,7 @@ called and the real response being handled.
 | Mute / unmute | `GET/POST /api/users/mute` | ✅ | ✅ | ✅ toggle from the muted list | IMPLEMENTED |
 | Muted list | `GET /api/users/muted` (bare array) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Block / mute **from a profile** | same routes | ✅ | ✅ | ✅ not offered on your own profile, which the routes refuse anyway | IMPLEMENTED |
-| Appeals | `POST /api/appeals` | ✅ | ⬜ | ⬜ | MISSING |
+| Appeals | `GET /api/appeals` → `{eligibleReports, appeals}` in one call; `POST /api/appeals` requires a message ≤2000 chars (400), answers 404 for a report that is not this account's actioned one, 409 for a second appeal on the same report, and is rate limited to 10 per ten minutes | ✅ | ⬜ | ✅ an entry in `eligibleReports` is appealable by construction, so nothing is re-checked before offering the button; action types are shown the way the web shows them (`post_removed` → `post removed`) because there is no dictionary of them to translate against | IMPLEMENTED |
 | Feed-level block/mute filtering | server-side in `/api/posts/explore` | ✅ | ✅ | ✅ (inherited from server) | IMPLEMENTED |
 
 ### Settings

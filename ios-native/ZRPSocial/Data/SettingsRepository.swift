@@ -22,8 +22,74 @@ protocol SettingsRepositoryProtocol: Sendable {
     func toggleScheduledDeletion() async throws -> AccountDeletionToggle
     func deleteAccountNow() async throws
     func exportData() async throws -> URL
+    func appeals() async throws -> AppealsPage
+    func submitAppeal(reportId: String, message: String) async throws
     func emailPreferences() async throws -> EmailPreferences
     func updateEmailPreferences(_ preferences: EmailPreferences) async throws -> EmailPreferences
+}
+
+// MARK: - Appeals
+
+/// `GET /api/appeals` - both halves of the appeals screen in one call.
+struct AppealsPage: Decodable, Equatable {
+
+    /// Moderation actions taken against this account that can still be
+    /// appealed. The route selects only reports that are `actioned` AND
+    /// have no appeal from this user yet, so an entry here is by
+    /// definition appealable - nothing needs re-checking client-side.
+    let eligibleReports: [AppealableAction]
+
+    /// Appeals already filed, newest first.
+    let appeals: [Appeal]
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        eligibleReports = try container
+            .decodeIfPresent([AppealableAction].self, forKey: .eligibleReports) ?? []
+        appeals = try container.decodeIfPresent([Appeal].self, forKey: .appeals) ?? []
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case eligibleReports, appeals
+    }
+}
+
+/// A moderation action that can be appealed.
+struct AppealableAction: Decodable, Identifiable, Equatable {
+    let id: String
+    let reason: String?
+
+    /// What the moderator did, in the backend's own vocabulary
+    /// (`post_removed`, `account_suspended`, …). Underscores are turned
+    /// into spaces for display, exactly as the website does - there is
+    /// no dictionary of these, so inventing labels would mean guessing
+    /// at values the backend can add to at any time.
+    let actionType: String?
+
+    let actionNote: String?
+    let actionedAt: Date?
+}
+
+/// An appeal this account has filed.
+struct Appeal: Decodable, Identifiable, Equatable {
+    let id: String
+    let message: String
+
+    /// `pending`, `upheld` or `overturned` - the three the website has
+    /// wording for. Anything else is shown verbatim rather than
+    /// mislabelled.
+    let status: String
+
+    let resolutionNote: String?
+    let resolvedAt: Date?
+    let createdAt: Date
+    let report: AppealReport?
+
+    struct AppealReport: Decodable, Equatable {
+        let id: String
+        let reason: String?
+        let actionType: String?
+    }
 }
 
 // MARK: - Email preferences
@@ -340,6 +406,30 @@ struct SettingsRepository: SettingsRepositoryProtocol {
             .appendingPathComponent("zrp-data-export.json")
         try data.write(to: url, options: .atomic)
         return url
+    }
+
+    // MARK: - Appeals
+
+    func appeals() async throws -> AppealsPage {
+        try await client.send(Endpoint.get("appeals"))
+    }
+
+    /// `POST /api/appeals`.
+    ///
+    /// Rate limited to 10 in ten minutes - appeals are meant to be rare
+    /// and deliberate. A message is required and capped at 2000
+    /// characters (400), a report that is not this account's actioned
+    /// report answers 404, and a second appeal for the same report
+    /// answers 409. All four are the server's rules, and its wording is
+    /// what the screen shows.
+    func submitAppeal(reportId: String, message: String) async throws {
+        struct Request: Encodable {
+            let reportId: String
+            let message: String
+        }
+        try await client.sendIgnoringResponse(
+            try Endpoint.post("appeals", body: Request(reportId: reportId, message: message))
+        )
     }
 
     // MARK: - Email preferences

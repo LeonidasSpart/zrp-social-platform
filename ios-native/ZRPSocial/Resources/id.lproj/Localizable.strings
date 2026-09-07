@@ -512,3 +512,17 @@
 "profile.noLikes" = "Belum ada yang disukai.";
 "profile.noReposts" = "Belum ada repost.";
 "profile.pinned" = "Disematkan";
+"appeals.title" = "Banding Moderasi";
+"appeals.explanation" = "Jika moderator telah mengambil tindakan terhadap salah satu postingan, komentar, atau akun Anda, Anda dapat mengajukan banding atas keputusan tersebut di sini. Staf akan meninjau banding Anda dan memberikan tanggapan.";
+"appeals.eligibleHeading" = "Tindakan yang dapat Anda banding";
+"appeals.noEligible" = "Saat ini Anda tidak memiliki tindakan moderasi yang dapat diajukan banding.";
+"appeals.messagePlaceholder" = "Jelaskan mengapa Anda merasa keputusan ini perlu ditinjau ulang...";
+"appeals.submit" = "Kirim Banding";
+"appeals.fileAppeal" = "Ajukan Banding";
+"appeals.filedHeading" = "Banding Anda";
+"appeals.noFiled" = "Anda belum mengajukan banding apa pun.";
+"appeals.errSubmitFailed" = "Gagal mengirim banding Anda. Silakan coba lagi.";
+"appeals.statusPending" = "Menunggu";
+"appeals.statusUpheld" = "Dipertahankan";
+"appeals.statusOverturned" = "Dibatalkan";
+"adminReports.actionOther" = "Lainnya";

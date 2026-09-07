@@ -512,3 +512,17 @@
 "profile.noLikes" = "لا توجد إعجابات بعد.";
 "profile.noReposts" = "لا توجد إعادات نشر بعد.";
 "profile.pinned" = "مثبّت";
+"appeals.title" = "طعون الإشراف";
+"appeals.explanation" = "إذا اتخذ أحد المشرفين إجراءً بشأن أحد منشوراتك أو تعليقاتك أو حسابك، يمكنك تقديم طعن في هذا القرار هنا. سيراجع الفريق طعنك ويرد عليك.";
+"appeals.eligibleHeading" = "الإجراءات التي يمكنك الطعن فيها";
+"appeals.noEligible" = "لا توجد لديك حاليًا أي إجراءات إشراف يمكن الطعن فيها.";
+"appeals.messagePlaceholder" = "اشرح سبب اعتقادك بضرورة إعادة النظر في هذا الإجراء...";
+"appeals.submit" = "إرسال الطعن";
+"appeals.fileAppeal" = "تقديم طعن";
+"appeals.filedHeading" = "طعونك";
+"appeals.noFiled" = "لم تقدم أي طعون بعد.";
+"appeals.errSubmitFailed" = "فشل إرسال طعنك. يرجى المحاولة مرة أخرى.";
+"appeals.statusPending" = "قيد الانتظار";
+"appeals.statusUpheld" = "تم تأييده";
+"appeals.statusOverturned" = "تم إلغاؤه";
+"adminReports.actionOther" = "أخرى";

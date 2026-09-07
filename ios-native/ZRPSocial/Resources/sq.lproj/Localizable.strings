@@ -512,3 +512,17 @@
 "profile.noLikes" = "Nuk ka pëlqime ende.";
 "profile.noReposts" = "Nuk ka ripublikime ende.";
 "profile.pinned" = "Fiksuar";
+"appeals.title" = "Ankesat e Moderimit";
+"appeals.explanation" = "Nëse një moderator ka ndërmarrë një veprim mbi një nga postimet, komentet ose llogarinë tuaj, mund të bëni ankesë këtu. Stafi do ta shqyrtojë ankesën tuaj dhe do t'ju përgjigjet.";
+"appeals.eligibleHeading" = "Veprime që mund t'i ankimoni";
+"appeals.noEligible" = "Aktualisht nuk keni asnjë veprim moderimi që mund të ankimohet.";
+"appeals.messagePlaceholder" = "Shpjegoni pse mendoni se ky veprim duhet rishqyrtuar...";
+"appeals.submit" = "Dërgo Ankesën";
+"appeals.fileAppeal" = "Bëj Ankesë";
+"appeals.filedHeading" = "Ankesat tuaja";
+"appeals.noFiled" = "Ende nuk keni bërë asnjë ankesë.";
+"appeals.errSubmitFailed" = "Dërgimi i ankesës dështoi. Ju lutemi provoni përsëri.";
+"appeals.statusPending" = "Në pritje";
+"appeals.statusUpheld" = "Mbajtur në fuqi";
+"appeals.statusOverturned" = "Anuluar";
+"adminReports.actionOther" = "Tjetër";
