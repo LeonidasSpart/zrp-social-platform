@@ -329,4 +329,9 @@
     <string name="music_discover_all_tracks">Të gjitha këngët</string>
     <string name="music_discover_no_tracks_title">Nuk u gjetën këngë</string>
     <string name="music_discover_no_tracks_body">Provo një kërkim ose zhanër tjetër.</string>
-    <string name="music_shell_genres_heading">Zhanret</string></resources>
+    <string name="music_shell_genres_heading">Zhanret</string>
+    <!-- Music Phase 6: History + Liked -->
+    <string name="music_liked_empty_title">Ende pa këngë të pëlqyera</string>
+    <string name="music_liked_empty_body">Prek zemrën e një kënge për ta ruajtur këtu.</string>
+    <string name="music_history_empty_title">Ende pa histori dëgjimi</string>
+    <string name="music_history_empty_body">Këngët që dëgjon do të shfaqen këtu.</string></resources>

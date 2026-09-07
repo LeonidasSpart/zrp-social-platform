@@ -8,6 +8,7 @@ import one.zrp.social.mobile.network.MusicArtistDetail
 import one.zrp.social.mobile.network.MusicArtistListItem
 import one.zrp.social.mobile.network.MusicGenre
 import one.zrp.social.mobile.network.MusicHomeResponse
+import one.zrp.social.mobile.network.MusicLibraryResponse
 import one.zrp.social.mobile.network.MusicLikeRequest
 import one.zrp.social.mobile.network.MusicLikeResponse
 import one.zrp.social.mobile.network.MusicPlaylistDetail
@@ -91,5 +92,9 @@ class MusicRepository {
 
     suspend fun searchTracks(query: String?): Result<List<MusicTrack>> = runCatching {
         ApiClient.musicApi.searchTracks(query?.trim()?.takeIf { it.isNotEmpty() })
+    }
+
+    suspend fun getLibrary(): Result<MusicLibraryResponse> = runCatching {
+        ApiClient.musicApi.getLibrary()
     }
 }

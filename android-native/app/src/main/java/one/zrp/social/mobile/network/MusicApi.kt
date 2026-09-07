@@ -191,6 +191,19 @@ data class ToggleTrackInPlaylistResponse(val added: Boolean)
 
 data class ReorderPlaylistRequest(val orderedIds: List<String>)
 
+// ─── Library (GET /music/library) - backs History + Liked ──────────
+// Only `.track` is ever read off a MusicLike/MusicHistory row by
+// either real page (history/page.tsx dedupes by entry.track.id and
+// cross-references likes the same way; liked/page.tsx just maps
+// l.track) - the row's own id/createdAt columns aren't rendered by
+// either, so they're not mapped here.
+data class MusicLibraryEntry(val track: MusicTrack)
+
+data class MusicLibraryResponse(
+    val likes: List<MusicLibraryEntry> = emptyList(),
+    val history: List<MusicLibraryEntry> = emptyList(),
+)
+
 /**
  * The same real ZRP Music catalogue the website's Music home page
  * uses. Artist/album/playlist detail, Discover, History, Liked and
@@ -266,6 +279,9 @@ interface MusicApi {
 
     @POST("music/playlists/{id}/reorder")
     suspend fun reorderPlaylist(@Path("id") id: String, @Body request: ReorderPlaylistRequest)
+
+    @GET("music/library")
+    suspend fun getLibrary(): MusicLibraryResponse
 }
 
 data class MusicHomeResponse(

@@ -345,4 +345,9 @@
     <string name="music_discover_all_tracks">All tracks</string>
     <string name="music_discover_no_tracks_title">No tracks found</string>
     <string name="music_discover_no_tracks_body">Try a different search or genre.</string>
-    <string name="music_shell_genres_heading">Genres</string></resources>
+    <string name="music_shell_genres_heading">Genres</string>
+    <!-- Music Phase 6: History + Liked -->
+    <string name="music_liked_empty_title">No liked tracks yet</string>
+    <string name="music_liked_empty_body">Tap the heart on any track to save it here.</string>
+    <string name="music_history_empty_title">No listening history yet</string>
+    <string name="music_history_empty_body">Tracks you play will show up here.</string></resources>

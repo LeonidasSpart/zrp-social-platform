@@ -329,4 +329,9 @@
     <string name="music_discover_all_tracks">Tutti i brani</string>
     <string name="music_discover_no_tracks_title">Nessun brano trovato</string>
     <string name="music_discover_no_tracks_body">Prova una ricerca o un genere diverso.</string>
-    <string name="music_shell_genres_heading">Generi</string></resources>
+    <string name="music_shell_genres_heading">Generi</string>
+    <!-- Music Phase 6: History + Liked -->
+    <string name="music_liked_empty_title">Ancora nessun brano tra i preferiti</string>
+    <string name="music_liked_empty_body">Tocca il cuore di un brano per salvarlo qui.</string>
+    <string name="music_history_empty_title">Ancora nessuna cronologia di ascolto</string>
+    <string name="music_history_empty_body">I brani che ascolti appariranno qui.</string></resources>

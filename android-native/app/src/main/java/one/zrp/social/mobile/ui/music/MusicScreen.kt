@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.QueueMusic
@@ -85,6 +86,8 @@ fun MusicScreen(
     onOpenAlbums: () -> Unit,
     onOpenPlaylists: () -> Unit,
     onOpenDiscover: () -> Unit,
+    onOpenLiked: () -> Unit,
+    onOpenHistory: () -> Unit,
     onArtistClick: (String) -> Unit,
     onAlbumClick: (String) -> Unit,
     onPlaylistClick: (String) -> Unit,
@@ -145,6 +148,16 @@ fun MusicScreen(
                 leadingIcon = { Icon(Icons.Filled.ListAlt, contentDescription = null, modifier = Modifier.size(18.dp)) },
                 label = { Text(stringResource(R.string.music_playlists_title)) },
             )
+            AssistChip(
+                onClick = onOpenLiked,
+                leadingIcon = { Icon(Icons.Filled.Favorite, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                label = { Text(stringResource(R.string.music_nav_liked_title)) },
+            )
+            AssistChip(
+                onClick = onOpenHistory,
+                leadingIcon = { Icon(Icons.Filled.History, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                label = { Text(stringResource(R.string.music_nav_history_title)) },
+            )
         }
 
         Box(
@@ -198,6 +211,7 @@ fun MusicScreen(
                                     tracks = state.recentlyPlayed,
                                     currentTrackId = playerState.currentTrack?.id,
                                     onTrackClick = { viewModel.onTrackClick(it, state.recentlyPlayed) },
+                                    onHeaderClick = onOpenHistory,
                                 )
                             }
                         }
@@ -208,12 +222,17 @@ fun MusicScreen(
                                     tracks = state.trending,
                                     currentTrackId = playerState.currentTrack?.id,
                                     onTrackClick = { viewModel.onTrackClick(it, state.trending) },
+                                    onHeaderClick = onOpenDiscover,
                                 )
                             }
                         }
                         if (state.yourPlaylists.isNotEmpty()) {
                             item {
-                                YourPlaylistsSection(playlists = state.yourPlaylists, onPlaylistClick = onPlaylistClick)
+                                YourPlaylistsSection(
+                                    playlists = state.yourPlaylists,
+                                    onPlaylistClick = onPlaylistClick,
+                                    onHeaderClick = onOpenPlaylists,
+                                )
                             }
                         }
                         if (state.likedPreview.isNotEmpty()) {
@@ -223,6 +242,7 @@ fun MusicScreen(
                                     tracks = state.likedPreview,
                                     currentTrackId = playerState.currentTrack?.id,
                                     onTrackClick = { viewModel.onTrackClick(it, state.likedPreview) },
+                                    onHeaderClick = onOpenLiked,
                                 )
                             }
                         }
@@ -233,17 +253,18 @@ fun MusicScreen(
                                     tracks = state.newReleases,
                                     currentTrackId = playerState.currentTrack?.id,
                                     onTrackClick = { viewModel.onTrackClick(it, state.newReleases) },
+                                    onHeaderClick = onOpenDiscover,
                                 )
                             }
                         }
                         if (state.latestAlbums.isNotEmpty()) {
                             item {
-                                LatestAlbumsSection(albums = state.latestAlbums, onAlbumClick = onAlbumClick)
+                                LatestAlbumsSection(albums = state.latestAlbums, onAlbumClick = onAlbumClick, onHeaderClick = onOpenAlbums)
                             }
                         }
                         if (state.popularArtists.isNotEmpty()) {
                             item {
-                                PopularArtistsSection(artists = state.popularArtists, onArtistClick = onArtistClick)
+                                PopularArtistsSection(artists = state.popularArtists, onArtistClick = onArtistClick, onHeaderClick = onOpenArtists)
                             }
                         }
                         if (state.genres.isNotEmpty()) {
@@ -277,14 +298,10 @@ private fun MusicSection(
     tracks: List<MusicTrack>,
     currentTrackId: String?,
     onTrackClick: (MusicTrack) -> Unit,
+    onHeaderClick: (() -> Unit)? = null,
 ) {
     Column {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        )
+        SectionHeading(title = title, onClick = onHeaderClick)
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -298,6 +315,24 @@ private fun MusicSection(
             }
         }
     }
+}
+
+// The website's own SectionHeading - every real home section's title
+// is itself a "see all" link to that section's own full screen (Trending/
+// New Releases -> Discover, Recently Played -> History, Liked preview
+// -> Liked, Your Playlists -> Playlists, Latest Albums -> Albums,
+// Popular Artists -> Artists). Genres is the one section whose real
+// heading isn't a link, so it's the one caller that omits onClick.
+@Composable
+private fun SectionHeading(title: String, onClick: (() -> Unit)?) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier
+            .let { if (onClick != null) it.clickable(onClick = onClick) else it }
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+    )
 }
 
 @Composable
@@ -359,14 +394,9 @@ private fun TrackCard(track: MusicTrack, isCurrent: Boolean, onClick: () -> Unit
 }
 
 @Composable
-private fun LatestAlbumsSection(albums: List<MusicAlbumSummary>, onAlbumClick: (String) -> Unit) {
+private fun LatestAlbumsSection(albums: List<MusicAlbumSummary>, onAlbumClick: (String) -> Unit, onHeaderClick: () -> Unit) {
     Column {
-        Text(
-            text = stringResource(R.string.music_shell_latest_albums_heading),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        )
+        SectionHeading(title = stringResource(R.string.music_shell_latest_albums_heading), onClick = onHeaderClick)
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -415,14 +445,9 @@ private fun LatestAlbumsSection(albums: List<MusicAlbumSummary>, onAlbumClick: (
 }
 
 @Composable
-private fun PopularArtistsSection(artists: List<MusicArtistSummary>, onArtistClick: (String) -> Unit) {
+private fun PopularArtistsSection(artists: List<MusicArtistSummary>, onArtistClick: (String) -> Unit, onHeaderClick: () -> Unit) {
     Column {
-        Text(
-            text = stringResource(R.string.music_shell_popular_artists_heading),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        )
+        SectionHeading(title = stringResource(R.string.music_shell_popular_artists_heading), onClick = onHeaderClick)
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -461,17 +486,12 @@ private fun PopularArtistsSection(artists: List<MusicArtistSummary>, onArtistCli
 }
 
 @Composable
-private fun YourPlaylistsSection(playlists: List<MusicPlaylistSummary>, onPlaylistClick: (String) -> Unit) {
+private fun YourPlaylistsSection(playlists: List<MusicPlaylistSummary>, onPlaylistClick: (String) -> Unit, onHeaderClick: () -> Unit) {
     Column {
-        Text(
-            // The real home page reuses music.nav.playlistsTitle
-            // ("Playlists") for this section's own heading too, rather
-            // than a distinct "Your Playlists" string - matched as-is.
-            text = stringResource(R.string.music_playlists_title),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        )
+        // The real home page reuses music.nav.playlistsTitle
+        // ("Playlists") for this section's own heading too, rather
+        // than a distinct "Your Playlists" string - matched as-is.
+        SectionHeading(title = stringResource(R.string.music_playlists_title), onClick = onHeaderClick)
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -517,12 +537,10 @@ private fun YourPlaylistsSection(playlists: List<MusicPlaylistSummary>, onPlayli
 @Composable
 private fun GenresSection(genres: List<MusicGenre>, onGenreClick: (String) -> Unit) {
     Column {
-        Text(
-            text = stringResource(R.string.music_shell_genres_heading),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        )
+        // Genres is the one home section whose real heading isn't a
+        // "see all" link (there's no separate full Genres screen - the
+        // chips below already show every genre), so onClick is null.
+        SectionHeading(title = stringResource(R.string.music_shell_genres_heading), onClick = null)
         // A horizontally scrolling row rather than the website's own
         // flex-wrap grid - phone width can't show more than a handful
         // of genre chips at once anyway, and every other home section

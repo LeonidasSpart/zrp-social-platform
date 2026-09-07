@@ -49,6 +49,8 @@ import one.zrp.social.mobile.ui.music.AlbumsScreen
 import one.zrp.social.mobile.ui.music.ArtistDetailScreen
 import one.zrp.social.mobile.ui.music.ArtistsScreen
 import one.zrp.social.mobile.ui.music.DiscoverScreen
+import one.zrp.social.mobile.ui.music.HistoryScreen
+import one.zrp.social.mobile.ui.music.LikedScreen
 import one.zrp.social.mobile.ui.music.MusicPlayerViewModel
 import one.zrp.social.mobile.ui.music.MusicPlayerViewModelFactory
 import one.zrp.social.mobile.ui.music.MusicQueueScreen
@@ -103,6 +105,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToMusicDiscover: (String?) -> Unit = { genre ->
         navController.navigate(if (genre != null) "music/discover?genre=${Uri.encode(genre)}" else "music/discover")
     }
+    val goToMusicLiked: () -> Unit = { navController.navigate("music/liked") }
+    val goToMusicHistory: () -> Unit = { navController.navigate("music/history") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -317,6 +321,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenAlbums = goToMusicAlbums,
                     onOpenPlaylists = goToMusicPlaylists,
                     onOpenDiscover = { goToMusicDiscover(null) },
+                    onOpenLiked = goToMusicLiked,
+                    onOpenHistory = goToMusicHistory,
                     onArtistClick = goToMusicArtist,
                     onAlbumClick = goToMusicAlbum,
                     onPlaylistClick = goToMusicPlaylist,
@@ -344,6 +350,12 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     initialGenre = backStackEntry.arguments?.getString("genre"),
                     onBack = { navController.popBackStack() },
                 )
+            }
+            composable("music/liked") {
+                LikedScreen(player = musicPlayerViewModel, onBack = { navController.popBackStack() })
+            }
+            composable("music/history") {
+                HistoryScreen(player = musicPlayerViewModel, onBack = { navController.popBackStack() })
             }
             composable(
                 route = "music/playlists/{id}",
