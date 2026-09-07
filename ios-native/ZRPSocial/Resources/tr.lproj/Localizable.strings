@@ -11,6 +11,17 @@
 "nav.bookmarks" = "Yer İmleri";
 "nav.shorts" = "Shorts";
 "nav.news" = "Haberler";
+"nav.aiAssistant" = "ZRP Yapay Zeka";
+"ai.chat.askAnything" = "ZRP AI'a her şeyi sorun";
+"ai.chat.getHelpChat" = "Gönderilerinizle ilgili yardım alın, ZRP hakkında bilgi edinin ya da sohbet edin!";
+"ai.chat.newChat" = "Yeni sohbet";
+"ai.chat.inputPlaceholder" = "ZRP AI'a her şeyi sorun...";
+"ai.chat.suggestionWhatIsZrp" = "ZRP nedir?";
+"ai.chat.suggestionWriteCharity" = "Hayır işleri hakkında yaz";
+"ai.chat.charityFooter" = "🧡 ZRP AI gelirinin %35'i hayır kurumlarına gidiyor.";
+"ai.chat.poweredByDeepseek" = "DeepSeek tarafından desteklenmektedir";
+"ai.chat.remainingToday" = "Bugün {n} kaldı";
+"ai.chat.errFailedResponse" = "Yanıt alınamadı";
 "news.categoryAll" = "Tümü";
 "news.noNewsTitle" = "Henüz haber yok";
 "news.noNewsDesc" = "Bu kategoride henüz yayınlanmış makale yok.";

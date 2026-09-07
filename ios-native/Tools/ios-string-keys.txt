@@ -18,6 +18,17 @@ nav.profile
 nav.bookmarks
 nav.shorts
 nav.news
+nav.aiAssistant
+ai.chat.askAnything
+ai.chat.getHelpChat
+ai.chat.newChat
+ai.chat.inputPlaceholder
+ai.chat.suggestionWhatIsZrp
+ai.chat.suggestionWriteCharity
+ai.chat.charityFooter
+ai.chat.poweredByDeepseek
+ai.chat.remainingToday
+ai.chat.errFailedResponse
 news.categoryAll
 news.noNewsTitle
 news.noNewsDesc

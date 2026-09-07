@@ -11,6 +11,17 @@
 "nav.bookmarks" = "Markah";
 "nav.shorts" = "Shorts";
 "nav.news" = "Berita";
+"nav.aiAssistant" = "AI ZRP";
+"ai.chat.askAnything" = "Tanyakan apa saja ke ZRP AI";
+"ai.chat.getHelpChat" = "Dapatkan bantuan untuk postingan, pelajari tentang ZRP, atau sekadar mengobrol!";
+"ai.chat.newChat" = "Obrolan baru";
+"ai.chat.inputPlaceholder" = "Tanyakan apa saja ke ZRP AI...";
+"ai.chat.suggestionWhatIsZrp" = "Apa itu ZRP?";
+"ai.chat.suggestionWriteCharity" = "Tulis tentang amal";
+"ai.chat.charityFooter" = "🧡 35% dari pendapatan ZRP AI disumbangkan untuk amal.";
+"ai.chat.poweredByDeepseek" = "Didukung oleh DeepSeek";
+"ai.chat.remainingToday" = "{n} tersisa hari ini";
+"ai.chat.errFailedResponse" = "Gagal mendapatkan respons";
 "news.categoryAll" = "Semua";
 "news.noNewsTitle" = "Belum ada berita";
 "news.noNewsDesc" = "Belum ada artikel yang diterbitkan di kategori ini.";

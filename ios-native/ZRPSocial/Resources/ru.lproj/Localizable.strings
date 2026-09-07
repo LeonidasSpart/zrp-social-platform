@@ -11,6 +11,17 @@
 "nav.bookmarks" = "Закладки";
 "nav.shorts" = "Shorts";
 "nav.news" = "Новости";
+"nav.aiAssistant" = "ИИ ZRP";
+"ai.chat.askAnything" = "Спросите ZRP AI о чём угодно";
+"ai.chat.getHelpChat" = "Получите помощь с публикациями, узнайте о ZRP или просто пообщайтесь!";
+"ai.chat.newChat" = "Новый чат";
+"ai.chat.inputPlaceholder" = "Спросите ZRP AI о чём угодно...";
+"ai.chat.suggestionWhatIsZrp" = "Что такое ZRP?";
+"ai.chat.suggestionWriteCharity" = "Написать о благотворительности";
+"ai.chat.charityFooter" = "🧡 35% дохода ZRP AI идёт на благотворительность.";
+"ai.chat.poweredByDeepseek" = "Работает на DeepSeek";
+"ai.chat.remainingToday" = "осталось сегодня: {n}";
+"ai.chat.errFailedResponse" = "Не удалось получить ответ";
 "news.categoryAll" = "Все";
 "news.noNewsTitle" = "Пока нет новостей";
 "news.noNewsDesc" = "В этой категории пока нет опубликованных статей.";

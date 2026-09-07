@@ -11,6 +11,17 @@
 "nav.bookmarks" = "收藏";
 "nav.shorts" = "Shorts";
 "nav.news" = "新闻";
+"nav.aiAssistant" = "ZRP AI";
+"ai.chat.askAnything" = "向 ZRP AI 提问任何问题";
+"ai.chat.getHelpChat" = "获取帖子帮助、了解 ZRP，或随便聊聊！";
+"ai.chat.newChat" = "新建对话";
+"ai.chat.inputPlaceholder" = "向 ZRP AI 提问任何问题...";
+"ai.chat.suggestionWhatIsZrp" = "什么是 ZRP？";
+"ai.chat.suggestionWriteCharity" = "撰写关于慈善的内容";
+"ai.chat.charityFooter" = "🧡 ZRP AI 收入的 35% 将捐赠给慈善机构。";
+"ai.chat.poweredByDeepseek" = "由 DeepSeek 提供支持";
+"ai.chat.remainingToday" = "今日剩余 {n} 次";
+"ai.chat.errFailedResponse" = "获取回复失败";
 "news.categoryAll" = "全部";
 "news.noNewsTitle" = "暂无新闻";
 "news.noNewsDesc" = "该分类下暂无已发布的文章。";

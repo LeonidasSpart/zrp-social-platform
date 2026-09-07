@@ -11,6 +11,17 @@
 "nav.bookmarks" = "Ruajtur";
 "nav.shorts" = "Shorts";
 "nav.news" = "Lajme";
+"nav.aiAssistant" = "IA e ZRP";
+"ai.chat.askAnything" = "Pyet ZRP AI çfarëdo";
+"ai.chat.getHelpChat" = "Merr ndihmë me postimet, mëso për ZRP-në, ose thjesht bisedo!";
+"ai.chat.newChat" = "Bisedë e re";
+"ai.chat.inputPlaceholder" = "Pyet ZRP AI çfarëdo...";
+"ai.chat.suggestionWhatIsZrp" = "Çfarë është ZRP?";
+"ai.chat.suggestionWriteCharity" = "Shkruaj për bamirësinë";
+"ai.chat.charityFooter" = "🧡 35% e të ardhurave të ZRP AI shkojnë për bamirësi.";
+"ai.chat.poweredByDeepseek" = "Mundësuar nga DeepSeek";
+"ai.chat.remainingToday" = "{n} të mbetura sot";
+"ai.chat.errFailedResponse" = "Marrja e përgjigjes dështoi";
 "news.categoryAll" = "Të gjitha";
 "news.noNewsTitle" = "Ende nuk ka lajme";
 "news.noNewsDesc" = "Ende nuk ka artikuj të publikuar në këtë kategori.";

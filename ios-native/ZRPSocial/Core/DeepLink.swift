@@ -79,6 +79,9 @@ enum DeepLink {
             // parameter is for.
             return DeepLinkTarget(.home, .shorts(startId: second))
 
+        case "ai":
+            return DeepLinkTarget(.home, .aiChat)
+
         case "support":
             // /support is the composer on the web and /support/tickets is
             // the list; both land on the list here, which offers the

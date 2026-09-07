@@ -11,6 +11,17 @@
 "nav.bookmarks" = "Favoris";
 "nav.shorts" = "Shorts";
 "nav.news" = "Actualités";
+"nav.aiAssistant" = "IA ZRP";
+"ai.chat.askAnything" = "Demandez n'importe quoi à ZRP AI";
+"ai.chat.getHelpChat" = "Obtenez de l'aide pour vos publications, découvrez ZRP ou discutez simplement !";
+"ai.chat.newChat" = "Nouvelle discussion";
+"ai.chat.inputPlaceholder" = "Demandez n'importe quoi à ZRP AI...";
+"ai.chat.suggestionWhatIsZrp" = "Qu'est-ce que ZRP ?";
+"ai.chat.suggestionWriteCharity" = "Écrire sur la charité";
+"ai.chat.charityFooter" = "🧡 35 % des revenus de ZRP AI sont reversés à des œuvres caritatives.";
+"ai.chat.poweredByDeepseek" = "Propulsé par DeepSeek";
+"ai.chat.remainingToday" = "{n} restants aujourd'hui";
+"ai.chat.errFailedResponse" = "Échec de l'obtention d'une réponse";
 "news.categoryAll" = "Toutes";
 "news.noNewsTitle" = "Pas encore d'actualités";
 "news.noNewsDesc" = "Il n'y a pas encore d'articles publiés dans cette catégorie.";

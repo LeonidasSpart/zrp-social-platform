@@ -11,6 +11,17 @@
 "nav.bookmarks" = "المحفوظات";
 "nav.shorts" = "Shorts";
 "nav.news" = "الأخبار";
+"nav.aiAssistant" = "ذكاء ZRP الاصطناعي";
+"ai.chat.askAnything" = "اسأل ZRP AI أي شيء";
+"ai.chat.getHelpChat" = "احصل على مساعدة في المنشورات، تعرّف على ZRP، أو تحدث فقط!";
+"ai.chat.newChat" = "محادثة جديدة";
+"ai.chat.inputPlaceholder" = "اسأل ZRP AI أي شيء...";
+"ai.chat.suggestionWhatIsZrp" = "ما هو ZRP؟";
+"ai.chat.suggestionWriteCharity" = "اكتب عن الأعمال الخيرية";
+"ai.chat.charityFooter" = "🧡 يذهب 35% من عائدات ZRP AI إلى الأعمال الخيرية.";
+"ai.chat.poweredByDeepseek" = "مدعوم بواسطة DeepSeek";
+"ai.chat.remainingToday" = "{n} متبقية اليوم";
+"ai.chat.errFailedResponse" = "فشل الحصول على رد";
 "news.categoryAll" = "الكل";
 "news.noNewsTitle" = "لا توجد أخبار بعد";
 "news.noNewsDesc" = "لا توجد مقالات منشورة في هذه الفئة بعد.";

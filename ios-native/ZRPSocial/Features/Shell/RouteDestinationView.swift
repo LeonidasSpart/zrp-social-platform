@@ -105,6 +105,8 @@ struct RouteDestinationView: View {
             SupportTicketsView()
         case .supportTicket(let id):
             SupportTicketDetailView(ticketId: id)
+        case .aiChat:
+            AiChatView()
         case .listingConversation(let partner, let draft):
             ConversationView(
                 partner: partner,

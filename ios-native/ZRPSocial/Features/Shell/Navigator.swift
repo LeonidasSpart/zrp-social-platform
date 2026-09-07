@@ -69,6 +69,7 @@ enum Route: Hashable {
     case explore
     case supportTickets
     case supportTicket(id: String)
+    case aiChat
 }
 
 /// Owns the navigation stack's path.

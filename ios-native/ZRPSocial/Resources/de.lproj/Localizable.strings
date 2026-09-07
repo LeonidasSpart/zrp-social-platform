@@ -11,6 +11,17 @@
 "nav.bookmarks" = "Lesezeichen";
 "nav.shorts" = "Shorts";
 "nav.news" = "Nachrichten";
+"nav.aiAssistant" = "ZRP KI";
+"ai.chat.askAnything" = "Frag ZRP AI alles";
+"ai.chat.getHelpChat" = "Hol dir Hilfe bei Beiträgen, erfahre mehr über ZRP oder chatte einfach!";
+"ai.chat.newChat" = "Neuer Chat";
+"ai.chat.inputPlaceholder" = "Frag ZRP AI alles...";
+"ai.chat.suggestionWhatIsZrp" = "Was ist ZRP?";
+"ai.chat.suggestionWriteCharity" = "Über wohltätige Zwecke schreiben";
+"ai.chat.charityFooter" = "🧡 35 % der ZRP-AI-Einnahmen gehen an wohltätige Zwecke.";
+"ai.chat.poweredByDeepseek" = "Unterstützt von DeepSeek";
+"ai.chat.remainingToday" = "{n} heute übrig";
+"ai.chat.errFailedResponse" = "Antwort konnte nicht abgerufen werden";
 "news.categoryAll" = "Alle";
 "news.noNewsTitle" = "Noch keine Nachrichten";
 "news.noNewsDesc" = "In dieser Kategorie wurden noch keine Artikel veröffentlicht.";
