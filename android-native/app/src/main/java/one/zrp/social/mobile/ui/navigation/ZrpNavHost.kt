@@ -91,6 +91,8 @@ import one.zrp.social.mobile.ui.quotes.QuotesScreen
 import one.zrp.social.mobile.ui.reposts.RepostsScreen
 import one.zrp.social.mobile.ui.search.SearchScreen
 import one.zrp.social.mobile.ui.creator.CreatorScreen
+import one.zrp.social.mobile.ui.journalist.ArticleEditorScreen
+import one.zrp.social.mobile.ui.journalist.JournalistDashboardScreen
 import one.zrp.social.mobile.ui.trust.TrustPassportScreen
 import one.zrp.social.mobile.ui.settings.AccountSettingsScreen
 import one.zrp.social.mobile.ui.settings.DeleteAccountScreen
@@ -181,6 +183,9 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToSettingsLanguage: () -> Unit = { navController.navigate("settings/language") }
     val goToDeleteAccount: () -> Unit = { navController.navigate("settings/delete-account") }
     val goToCreator: () -> Unit = { navController.navigate("creator") }
+    val goToJournalist: () -> Unit = { navController.navigate("journalist") }
+    val goToNewArticle: () -> Unit = { navController.navigate("journalist/new") }
+    val goToEditArticle: (String) -> Unit = { id -> navController.navigate("journalist/edit/$id") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
@@ -810,6 +815,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenPrivacy = goToSettingsPrivacy,
                     onOpenLanguage = goToSettingsLanguage,
                     onOpenCreator = goToCreator,
+                    onOpenJournalist = goToJournalist,
                 )
             }
             composable("creator") {
@@ -817,6 +823,34 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onBack = { navController.popBackStack() },
                     onOpenPost = goToComments,
                 )
+            }
+            composable("journalist") {
+                JournalistDashboardScreen(
+                    onBack = { navController.popBackStack() },
+                    onCreateArticle = goToNewArticle,
+                    onEditArticle = goToEditArticle,
+                    onViewArticle = goToNewsArticle,
+                )
+            }
+            composable("journalist/new") {
+                ArticleEditorScreen(
+                    articleId = null,
+                    onBack = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() },
+                )
+            }
+            composable(
+                route = "journalist/edit/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    ArticleEditorScreen(
+                        articleId = id,
+                        onBack = { navController.popBackStack() },
+                        onSaved = { navController.popBackStack() },
+                    )
+                }
             }
             composable("settings/language") {
                 LanguageSettingsScreen(onBack = { navController.popBackStack() })
