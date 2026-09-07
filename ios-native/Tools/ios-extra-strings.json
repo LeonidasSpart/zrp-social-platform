@@ -155,6 +155,7 @@
     "ios.profile.analyticsViews": "Views",
     "ios.profile.analyticsLikes": "Likes",
     "ios.profile.analyticsComments": "Comments",
-    "ios.profile.analyticsReposts": "Reposts"
+    "ios.profile.analyticsReposts": "Reposts",
+    "ios.music.airPlay": "AirPlay and output"
   }
 }

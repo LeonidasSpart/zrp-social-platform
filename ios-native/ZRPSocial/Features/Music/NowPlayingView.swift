@@ -169,6 +169,13 @@ struct NowPlayingView: View {
             }
             .accessibilityLabel(Text(.musicCommonRepeat))
             .accessibilityAddTraits(player.repeatMode == .off ? .isButton : [.isSelected, .isButton])
+
+            // The system's own picker, not a reimplementation: it is the
+            // only control that can enumerate and switch audio routes,
+            // and it already reflects what is currently connected.
+            RoutePickerButton()
+                .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                .accessibilityLabel(Text(.iosMusicAirPlay))
         }
         .font(.title3)
         .frame(minHeight: ZrpMetrics.minTouchTarget)

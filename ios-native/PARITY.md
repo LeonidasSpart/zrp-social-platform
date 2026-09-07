@@ -95,7 +95,7 @@ called and the real response being handled.
 | --- | --- | --- | --- | --- | --- |
 | Image rendering (single) | — | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Multi-image gallery (`imageUrls`) | — | ✅ | ✅ | ✅ (paged, page dots) | IMPLEMENTED |
-| GIF rendering | — | ✅ | ✅ | 🔶 static first frame (no animation yet) | PARTIAL |
+| GIF rendering | — | ✅ | ✅ | ✅ animated, with the file's own per-frame timing; a single-frame GIF falls back to the still path, which is what it is | IMPLEMENTED |
 | Inline video playback | — | ✅ | ✅ (ExoPlayer) | 🔶 full-screen AVKit player; no in-feed inline playback | PARTIAL |
 | Full-screen media viewer | — | ✅ | ✅ | ✅ (paged, pinch zoom, AVKit video) | IMPLEMENTED |
 | Image/video/GIF upload | UploadThing `postMedia` router (`/api/uploadthing`) | ✅ | ✅ | ✅ (streamed from disk, real progress, cancel, resume-aware retry) | IMPLEMENTED |
@@ -199,7 +199,7 @@ called and the real response being handled.
 | Background audio | `UIBackgroundModes: audio` + `AVAudioSession .playback` | n/a | ✅ | ✅ | IMPLEMENTED |
 | Lock screen / Now Playing | `MPNowPlayingInfoCenter` + `MPRemoteCommandCenter` | n/a | ✅ | ✅ (title, artist, album, artwork, scrubbing) | IMPLEMENTED |
 | Interruptions & route changes | `AVAudioSession` notifications | n/a | ✅ | ✅ (resumes only when the system says to; pauses on headphone unplug) | IMPLEMENTED |
-| AirPlay | system-provided via `AVAudioSession` | n/a | ✅ | 🔶 audio routes correctly; no explicit route picker yet | PARTIAL |
+| AirPlay | system-provided via `AVAudioSession` | n/a | ✅ | ✅ `AVRoutePickerView` on Now Playing — the only API that can enumerate and switch routes | IMPLEMENTED |
 
 ### Music Studio
 

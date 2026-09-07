@@ -18,6 +18,12 @@ struct MediaGalleryView: View {
 
     let imageURLs: [String]
     let isVideo: Bool
+
+    /// Whether this post's media is a GIF. Decided by `PostMedia`, the
+    /// same heuristic the website uses, and passed in rather than
+    /// re-derived here so a gallery and its card never disagree.
+    var isGif: Bool = false
+
     var cornerRadius: CGFloat = ZrpRadius.md
 
     @State private var page = 0
@@ -91,10 +97,18 @@ struct MediaGalleryView: View {
             // card's own height rather than decoded at the 4032px the
             // camera produced - the single biggest memory saving in a
             // scrolling timeline.
-            RemoteImage(url: url, targetSize: 320) {
-                placeholder(systemImage: "photo")
+            Group {
+                if isGif {
+                    // A GIF is decoded whole and played, not downsampled
+                    // to a still - the animation IS the content.
+                    AnimatedImage(url: url, fallbackTargetSize: 320)
+                } else {
+                    RemoteImage(url: url, targetSize: 320) {
+                        placeholder(systemImage: "photo")
+                    }
+                    .scaledToFill()
+                }
             }
-            .scaledToFill()
             .frame(maxWidth: .infinity)
             .aspectRatio(4.0 / 3.0, contentMode: .fill)
             .clipped()

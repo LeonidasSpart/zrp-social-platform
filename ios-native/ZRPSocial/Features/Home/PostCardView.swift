@@ -222,7 +222,11 @@ struct PostCardView: View {
     private var media: some View {
         let urls = post.galleryImageURLs
         if !urls.isEmpty {
-            MediaGalleryView(imageURLs: urls, isVideo: PostMedia.isVideo(post))
+            MediaGalleryView(
+                imageURLs: urls,
+                isVideo: PostMedia.isVideo(post),
+                isGif: PostMedia.isGif(url: urls.first, mediaType: post.mediaType)
+            )
         }
     }
 
@@ -342,6 +346,10 @@ struct PostCardView: View {
                     MediaGalleryView(
                         imageURLs: quotedURLs,
                         isVideo: PostMedia.isVideo(quoted),
+                        isGif: PostMedia.isGif(
+                            url: quotedURLs.first,
+                            mediaType: quoted.mediaType
+                        ),
                         cornerRadius: ZrpRadius.sm
                     )
                 }
