@@ -28,6 +28,7 @@ struct ListingComposerView: View {
     @State private var videoUrl: String?
 
     @State private var photoSelections: [PhotosPickerItem] = []
+    @State private var videoSelection: [PhotosPickerItem] = []
     @State private var uploadingCount = 0
     @State private var isSaving = false
     @State private var error: String?
@@ -74,6 +75,10 @@ struct ListingComposerView: View {
         .onChange(of: photoSelections) { _, items in
             guard !items.isEmpty else { return }
             uploadPhotos(items)
+        }
+        .onChange(of: videoSelection) { _, items in
+            guard !items.isEmpty else { return }
+            uploadVideo(items)
         }
     }
 
@@ -246,6 +251,88 @@ struct ListingComposerView: View {
                     .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md))
             }
             .disabled(uploadingCount > 0)
+
+            // One video per listing: the row stores a single `videoUrl`,
+            // so a multi-select would promise something it cannot hold.
+            // The size cap is the seller's plan's, applied by the
+            // uploader's middleware - which is why its refusal message is
+            // shown verbatim rather than a guess at the limit.
+            if let videoUrl, !videoUrl.isEmpty {
+                HStack(spacing: ZrpSpacing.md) {
+                    Image(systemName: "film")
+                        .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    Text(.iosMarketplaceVideoAttached)
+                        .font(.subheadline)
+                        .foregroundStyle(ZrpColor.onSurface)
+                    Spacer(minLength: 0)
+                    Button {
+                        // Cleared locally and then written as an explicit
+                        // null on save - the write request always sends
+                        // `videoUrl`, so removing it really removes it.
+                        self.videoUrl = nil
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(ZrpColor.onSurfaceMuted)
+                            .frame(
+                                width: ZrpMetrics.minTouchTarget,
+                                height: ZrpMetrics.minTouchTarget
+                            )
+                            .contentShape(Rectangle())
+                    }
+                    .disabled(uploadingCount > 0)
+                    .accessibilityLabel(Text(.iosA11yRemoveAttachment))
+                }
+            } else {
+                PhotosPicker(
+                    selection: $videoSelection,
+                    maxSelectionCount: 1,
+                    matching: .videos
+                ) {
+                    Label {
+                        Text(.iosMarketplaceAddVideo)
+                    } icon: {
+                        Image(systemName: "video.badge.plus")
+                    }
+                    .font(.subheadline.weight(.medium))
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: ZrpMetrics.minTouchTarget)
+                    .background(ZrpColor.surfaceElevated)
+                    .foregroundStyle(ZrpColor.onSurface)
+                    .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md))
+                }
+                .disabled(uploadingCount > 0)
+            }
+        }
+    }
+
+    // MARK: - Video
+
+    private func uploadVideo(_ items: [PhotosPickerItem]) {
+        videoSelection = []
+        guard let item = items.first else { return }
+        Task {
+            uploadingCount += 1
+            defer { uploadingCount -= 1 }
+
+            guard let media = try? await item.loadTransferable(type: PickedMedia.self) else {
+                error = L10n.string(.marketplaceErrCreateFailed)
+                return
+            }
+            defer { media.discard() }
+
+            do {
+                let uploaded = try await uploader.upload(
+                    media.asUploadCandidate(),
+                    to: .listingMedia
+                ) { _ in }
+                videoUrl = uploaded.url
+                error = nil
+            } catch UploadThingClient.UploadError.presignFailed(let message) {
+                // The plan's own wording for its video size cap.
+                error = message ?? L10n.string(.marketplaceErrCreateFailed)
+            } catch {
+                self.error = L10n.string(.marketplaceErrCreateFailed)
+            }
         }
     }
 

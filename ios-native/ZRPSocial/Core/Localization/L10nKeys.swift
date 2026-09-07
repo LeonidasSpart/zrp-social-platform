@@ -1298,6 +1298,12 @@ enum L10nKey: String, CaseIterable {
     case iosEmailPrefsMessages = "ios.emailPrefs.messages"
     /// en: "This only affects email. In-app notifications are unchanged."
     case iosEmailPrefsNote = "ios.emailPrefs.note"
+    /// en: "Add a video"
+    case iosMarketplaceAddVideo = "ios.marketplace.addVideo"
+    /// en: "Video attached"
+    case iosMarketplaceVideoAttached = "ios.marketplace.videoAttached"
+    /// en: "Play video"
+    case iosMarketplacePlayVideo = "ios.marketplace.playVideo"
 }
 
 extension L10nKey {

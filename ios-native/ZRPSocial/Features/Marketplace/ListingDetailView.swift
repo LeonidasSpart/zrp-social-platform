@@ -16,6 +16,7 @@ struct ListingDetailView: View {
     @State private var loadError: ApiError?
     @State private var isFavorited = false
     @State private var favoriteCount = 0
+    @State private var playingVideo: MediaPresentation?
     @State private var imageIndex = 0
     @State private var isDeleting = false
     @State private var confirmDelete = false
@@ -161,6 +162,39 @@ struct ListingDetailView: View {
                 .tabViewStyle(.page(indexDisplayMode: .automatic))
                 .accessibilityLabel(Text(.marketplacePhotos))
             }
+
+            // A listing's video is a separate column, not one of the
+            // photos, so it gets its own control rather than a slide in
+            // the gallery that would look like a still.
+            if let videoUrl = listing.videoUrl, !videoUrl.isEmpty {
+                Button {
+                    playingVideo = MediaPresentation(
+                        urls: [videoUrl],
+                        isVideo: true,
+                        startIndex: 0
+                    )
+                } label: {
+                    Label {
+                        Text(.iosMarketplacePlayVideo)
+                    } icon: {
+                        Image(systemName: "play.rectangle.fill")
+                    }
+                    .font(.subheadline.weight(.medium))
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: ZrpMetrics.minTouchTarget)
+                    .background(ZrpColor.surfaceElevated)
+                    .foregroundStyle(ZrpColor.onSurface)
+                    .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md))
+                }
+                .padding(.horizontal, ZrpSpacing.lg)
+            }
+        }
+        .fullScreenCover(item: $playingVideo) { item in
+            FullScreenMediaView(
+                urls: item.urls,
+                isVideo: item.isVideo,
+                startIndex: item.startIndex
+            )
         }
     }
 

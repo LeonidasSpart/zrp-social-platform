@@ -144,6 +144,9 @@
     "ios.emailPrefs.reposts": "Reposts",
     "ios.emailPrefs.mentions": "Mentions",
     "ios.emailPrefs.messages": "Messages",
-    "ios.emailPrefs.note": "This only affects email. In-app notifications are unchanged."
+    "ios.emailPrefs.note": "This only affects email. In-app notifications are unchanged.",
+    "ios.marketplace.addVideo": "Add a video",
+    "ios.marketplace.videoAttached": "Video attached",
+    "ios.marketplace.playVideo": "Play video"
   }
 }

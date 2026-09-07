@@ -229,7 +229,7 @@ called and the real response being handled.
 | My listings (all statuses + rejection reason) | `GET /api/listings/mine` | ✅ | ⬜ | ✅ | IMPLEMENTED |
 | Delete listing | `DELETE /api/listings/{id}` | ✅ | ⬜ | ✅ | IMPLEMENTED |
 | Contact seller | existing messaging + prefilled draft | ✅ | ✅ | ✅ same opening line and listing link the web composes | IMPLEMENTED |
-| Listing video | `videoUrl` on the listing | ✅ | ⬜ | 🔶 an existing video is preserved on edit, but none can be added yet | PARTIAL (Phase 15b) |
+| Listing video | `videoUrl` on the listing (one per listing — a single column, not part of `imageUrls`); size capped by the seller's plan in the UploadThing router's middleware | ✅ | ⬜ | ✅ added and removed in the composer through the `listingMedia` uploader, played full-screen from the detail; a removal is sent as an explicit null, since the write request always carries the key | IMPLEMENTED |
 | Report a listing | `POST /api/reports` (`listingId`) | ✅ | ✅ | ✅ from the listing detail screen | IMPLEMENTED |
 | Purchase flow | — **none exists** (price informational, deals close off-platform) | n/a | n/a | n/a | n/a — must never be invented |
 
