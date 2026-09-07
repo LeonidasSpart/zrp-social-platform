@@ -79,6 +79,13 @@ enum DeepLink {
             // parameter is for.
             return DeepLinkTarget(.home, .shorts(startId: second))
 
+        case "aid":
+            // /aid is the list; /aid/campaign/{id} is one campaign.
+            if second == "campaign", let id = third {
+                return DeepLinkTarget(.home, .aidCampaign(id: id))
+            }
+            return DeepLinkTarget(.home, .aid)
+
         case "ai":
             return DeepLinkTarget(.home, .aiChat)
 

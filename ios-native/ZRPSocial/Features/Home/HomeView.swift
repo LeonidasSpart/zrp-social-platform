@@ -127,6 +127,11 @@ struct HomeView: View {
                     Label { Text(.navMarketplace) } icon: { Image(systemName: "bag") }
                 }
                 Button {
+                    navigator.push(.aid)
+                } label: {
+                    Label { Text(.navHelp) } icon: { Image(systemName: "heart") }
+                }
+                Button {
                     navigator.push(.aiChat)
                 } label: {
                     Label { Text(.navAiAssistant) } icon: { Image(systemName: "sparkles") }

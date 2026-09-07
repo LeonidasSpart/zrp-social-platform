@@ -172,6 +172,18 @@ called and the real response being handled.
 | Delete a conversation | `DELETE /api/messages/conversation/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Image attachments | `POST /api/messages` + `imageUrl` (UploadThing `chatImage`, 4 MB); the route accepts an empty `content` **only** alongside an image and refuses both-empty with a 400 | ✅ | ✅ | ✅ one picture per message (the row stores a single `imageUrl`), uploaded on send rather than on selection, and a failed upload stops the send rather than silently dropping the picture | IMPLEMENTED |
 
+### ZRP HELP (Aid)
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Browse campaigns | `GET /api/help` (`category`, `needType`, cursor) | ✅ | ✅ | ✅ public — the route serves it without a session | IMPLEMENTED |
+| Category filter | same route, the five `HELP_CATEGORIES` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Campaign detail | `GET /api/help/{id}` — reading it counts a view for anyone but the organiser | ✅ | ✅ | ✅ gallery, organiser, needs, description, and progress when money is one of the needs | IMPLEMENTED |
+| Offer supplies / skills / time | `POST /api/help/{id}/offer` — accepts exactly those three, refuses `MONEY` | ✅ | ✅ | ✅ one button per need the campaign actually asks for; a money-only campaign gets none rather than a control that cannot work | IMPLEMENTED |
+| **Contribute money** | `POST /api/help/{id}/contribute` — calls `rejectNativePayment()` | ✅ | ⬜ | ❌ **deliberately absent.** Every request from this app carries `x-zrp-native-app`, so that route can only refuse it (Apple 3.1.1). A button could produce nothing but that refusal | OUT OF SCOPE (store policy) |
+| Create a campaign | `POST /api/help` — `organization` badge only | ✅ | ✅ | ⬜ the badge is granted by manual verification off the app, so a composer would refuse almost everyone who opened it. The website's own `help.orgOnlyNote` is shown instead | MISSING (by design) |
+| Raised / goal figures | serialised as decimal strings by `jsonWithDecimals` | ✅ | ✅ | ✅ shown exactly as the server formatted them; a float is derived only for the progress bar's width, never for a figure on screen | IMPLEMENTED |
+
 ### ZRP AI
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
@@ -312,7 +324,7 @@ called and the real response being handled.
 | Admin console (`/api/admin/**`, 40+ routes) | STAFF/ADMIN — server-role gated. |
 | Tips, plan upgrade, premium-post purchase, help/charity contribution | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
 | Ads, Careers, Investors, Press, Transparency, API keys, Team | WEB-ONLY — Android has no surface for any of them either. |
-| Play, Opportunity, Aid/Help, Journalist, Creator Studio | **NOT out of scope — outstanding iOS work.** The 2026-09-07 audit corrected an earlier claim here: Android *does* ship all of these natively. They are genuine iOS gaps, not deliberate omissions. |
+| Play, Opportunity, Journalist, Creator Studio | **NOT out of scope — outstanding iOS work.** The 2026-09-07 audit corrected an earlier claim here: Android *does* ship all of these natively. They are genuine iOS gaps, not deliberate omissions. |
 
 ---
 
