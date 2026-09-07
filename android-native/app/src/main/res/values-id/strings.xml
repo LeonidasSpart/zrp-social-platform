@@ -1066,4 +1066,13 @@
     <string name="ai_page_powered_by">Didukung oleh DeepSeek · Sumber terbuka · Transparan</string>
     <string name="ai_page_subtitle">Tanyakan apa saja. Dapatkan bantuan untuk postingan, pelajari tentang ZRP, atau sekadar mengobrol.</string>
     <string name="ai_discover_entry">Temukan ZRP AI</string>
+    <!-- ZRP Wallet: Solana receiving-wallet field (ported from settings/page.tsx) -->
+    <string name="settings_solana_wallet_title">Dompet Solana (untuk tip langsung)</string>
+    <string name="settings_solana_wallet_desc">Tambahkan alamat dompet Solana Anda untuk menerima tip langsung dari pengguna. Pengguna akan mengirim USDC langsung ke dompet ini: tanpa biaya platform.</string>
+    <string name="settings_wallet_address">Alamat Dompet</string>
+    <string name="settings_wallet_address_placeholder">Alamat dompet Solana Anda (mis. 4zMMC...)</string>
+    <string name="settings_wallet_address_note">Alamat ini akan ditampilkan di profil Anda untuk tip langsung.</string>
+    <string name="settings_save_wallet">Simpan Dompet</string>
+    <string name="settings_success_wallet_updated">Dompet Solana berhasil diperbarui!</string>
+    <string name="settings_err_wallet_update_failed">Gagal memperbarui alamat dompet.</string>
 </resources>

@@ -12,6 +12,8 @@ import one.zrp.social.mobile.network.ProfileUpdateRequest
 import one.zrp.social.mobile.network.ProfileUpdateResponse
 import one.zrp.social.mobile.network.SessionUser
 import one.zrp.social.mobile.network.UserProfile
+import one.zrp.social.mobile.network.UpdateWalletRequest
+import one.zrp.social.mobile.network.UpdateWalletResponse
 import one.zrp.social.mobile.network.UsernameStatusResponse
 import one.zrp.social.mobile.network.UsernameUpdateRequest
 import one.zrp.social.mobile.network.UsernameUpdateResponse
@@ -26,8 +28,11 @@ import retrofit2.HttpException
  *
  * - Covered: account info display, username change, email change,
  *   password change, profile text fields (name/bio/location/country/
- *   website), privacy toggles (public likes/following, private
- *   account), account deletion (30-day schedule/cancel + confirm).
+ *   website), the Solana receiving-wallet field (for direct tips - see
+ *   updateWallet's own KDoc for why this is fine to edit natively
+ *   despite the standing payment-restriction policy), privacy toggles
+ *   (public likes/following, private account), account deletion
+ *   (30-day schedule/cancel + confirm).
  * - NOT yet native (genuinely backend-supported, left for a follow-up
  *   slice rather than faked): avatar upload and the professional-
  *   profile category picker (both need the same native UploadThing/
@@ -35,10 +40,6 @@ import retrofit2.HttpException
  *   creation), custom profile URL (plan-gated, its own small slice),
  *   data export (needs a FileProvider + share-sheet path of its own),
  *   email notification preferences, support tickets, and appeals.
- * - Deliberately excluded per the standing native store-payment
- *   restriction: monetisation/creator dashboard and the Solana wallet
- *   field, since neither should be editable from a store-distributed
- *   native build without compliant native billing.
  */
 class SettingsRepository {
     suspend fun getOwnSession(): Result<SessionUser?> = runCatching {
@@ -62,6 +63,35 @@ class SettingsRepository {
     ): Result<ProfileUpdateResponse> = safeCall("Couldn't save your profile. Please try again.") {
         ApiClient.settingsApi.updateProfile(ProfileUpdateRequest(name, bio, location, country, website))
     }
+
+    /**
+     * Sets the account's own Solana address for *receiving* tips
+     * directly (settings.solanaWalletTitle: "Solana Wallet (for direct
+     * tips)"). This edits account metadata, not a payment: no money
+     * moves, no purchase is initiated, and the route itself
+     * (src/app/api/user/route.ts) only ever validates the address is a
+     * well-formed Solana public key before storing it. It's the same
+     * kind of payout-address field CreatorRepository's own withdraw()
+     * already sends natively (a walletAddress string for a payout
+     * request) - the standing native-payment-policy.ts restriction
+     * blocks initiating a payment IN (tips, premium purchases, plan
+     * upgrades, Aid contributions), never editing where a payment OUT
+     * should later land.
+     *
+     * settings_err_wallet_update_failed stays a real, extracted, but
+     * deliberately unused translation - it's web's own client-side
+     * fallback for when a failed response's `error` field is itself
+     * falsy, but this route (src/app/api/user/route.ts) always returns
+     * a real one on every failure path it has (400 "Invalid Solana
+     * wallet address", 401 "Unauthorized"), so zrpErrorMessage()
+     * already surfaces the real reason and this repository's own
+     * generic fallback below only ever covers an actual network
+     * failure, matching every other method in this class.
+     */
+    suspend fun updateWallet(solanaWallet: String): Result<UpdateWalletResponse> =
+        safeCall("Couldn't update your wallet address. Please try again.") {
+            ApiClient.settingsApi.updateWallet(UpdateWalletRequest(solanaWallet))
+        }
 
     suspend fun getUsernameStatus(): Result<UsernameStatusResponse> = safeCall("Couldn't check your username status.") {
         ApiClient.settingsApi.getUsernameStatus()

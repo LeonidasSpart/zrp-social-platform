@@ -1085,4 +1085,13 @@
     <string name="ai_page_powered_by">Powered by DeepSeek · Open-source · Transparent</string>
     <string name="ai_page_subtitle">Ask anything. Get help with posts, learn about ZRP, or just chat.</string>
     <string name="ai_discover_entry">Discover ZRP AI</string>
+    <!-- ZRP Wallet: Solana receiving-wallet field (ported from settings/page.tsx) -->
+    <string name="settings_solana_wallet_title">Solana Wallet (for direct tips)</string>
+    <string name="settings_solana_wallet_desc">Add your Solana wallet address to receive tips directly from users. Users will send USDC directly to this wallet: no platform fees are charged.</string>
+    <string name="settings_wallet_address">Wallet Address</string>
+    <string name="settings_wallet_address_placeholder">Your Solana wallet address (e.g., 4zMMC...)</string>
+    <string name="settings_wallet_address_note">This address will be displayed on your profile for direct tips.</string>
+    <string name="settings_save_wallet">Save Wallet</string>
+    <string name="settings_success_wallet_updated">Solana wallet updated successfully!</string>
+    <string name="settings_err_wallet_update_failed">Failed to update wallet address.</string>
 </resources>

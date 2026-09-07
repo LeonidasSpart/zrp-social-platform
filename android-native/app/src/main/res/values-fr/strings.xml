@@ -1066,4 +1066,13 @@
     <string name="ai_page_powered_by">Propulsé par DeepSeek · Open-source · Transparent</string>
     <string name="ai_page_subtitle">Demandez ce que vous voulez. Obtenez de l\'aide pour vos publications, découvrez ZRP ou discutez simplement.</string>
     <string name="ai_discover_entry">Découvrir ZRP AI</string>
+    <!-- ZRP Wallet: Solana receiving-wallet field (ported from settings/page.tsx) -->
+    <string name="settings_solana_wallet_title">Portefeuille Solana (pour les pourboires directs)</string>
+    <string name="settings_solana_wallet_desc">Ajoutez votre adresse de portefeuille Solana pour recevoir des pourboires directement des utilisateurs. Les utilisateurs enverront des USDC directement à ce portefeuille: aucuns frais de plateforme ne sont appliqués.</string>
+    <string name="settings_wallet_address">Adresse du portefeuille</string>
+    <string name="settings_wallet_address_placeholder">Votre adresse de portefeuille Solana (ex. 4zMMC...)</string>
+    <string name="settings_wallet_address_note">Cette adresse sera affichée sur votre profil pour les pourboires directs.</string>
+    <string name="settings_save_wallet">Enregistrer le portefeuille</string>
+    <string name="settings_success_wallet_updated">Portefeuille Solana mis à jour avec succès !</string>
+    <string name="settings_err_wallet_update_failed">Échec de la mise à jour de l\'adresse du portefeuille.</string>
 </resources>

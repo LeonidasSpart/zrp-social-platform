@@ -19,15 +19,23 @@ data class ProfileEditUiState(
     val isSaving: Boolean = false,
     val error: String? = null,
     val saved: Boolean = false,
+    val solanaWallet: String = "",
+    val isSavingWallet: Boolean = false,
+    val walletError: String? = null,
+    val walletSaved: Boolean = false,
 )
 
 /**
  * The Profile category's text-field form (name/bio/location/country/
- * website) - the same fields src/app/settings/page.tsx's "Profile"
- * form PUTs to /api/user. Avatar upload and the professional-profile
- * category picker are real, separate web features not covered by this
- * slice (see SettingsRepository's KDoc); this screen edits only what
- * it loads.
+ * website) plus the separate Solana receiving-wallet form below it,
+ * matching src/app/settings/page.tsx's own two independent forms (its
+ * main profile PUT and its own separate handleUpdateSolanaWallet PUT)
+ * exactly - saving one never touches the other's fields, mirroring the
+ * real route's own "only touch a field present in the request body"
+ * semantics (see SettingsApi's own KDoc). Avatar upload and the
+ * professional-profile category picker are real, separate web features
+ * not covered by this slice (see SettingsRepository's KDoc); this
+ * screen edits only what it loads.
  */
 class ProfileEditViewModel(private val repository: SettingsRepository) : ViewModel() {
     private val _state = MutableStateFlow(ProfileEditUiState())
@@ -52,6 +60,7 @@ class ProfileEditViewModel(private val repository: SettingsRepository) : ViewMod
                             location = profile.location.orEmpty(),
                             country = profile.country.orEmpty(),
                             website = profile.website.orEmpty(),
+                            solanaWallet = profile.solanaWallet.orEmpty(),
                         )
                     }
                 }
@@ -79,4 +88,21 @@ class ProfileEditViewModel(private val repository: SettingsRepository) : ViewMod
     }
 
     fun consumeSavedEvent() = _state.update { it.copy(saved = false) }
+
+    fun onSolanaWalletChange(value: String) = _state.update { it.copy(solanaWallet = value, walletSaved = false, walletError = null) }
+
+    fun saveWallet() {
+        val current = _state.value
+        if (current.isSavingWallet) return
+        _state.update { it.copy(isSavingWallet = true, walletError = null, walletSaved = false) }
+        viewModelScope.launch {
+            repository.updateWallet(current.solanaWallet.trim())
+                .onSuccess { response ->
+                    _state.update {
+                        it.copy(isSavingWallet = false, walletSaved = true, solanaWallet = response.solanaWallet.orEmpty())
+                    }
+                }
+                .onFailure { error -> _state.update { it.copy(isSavingWallet = false, walletError = error.message) } }
+        }
+    }
 }

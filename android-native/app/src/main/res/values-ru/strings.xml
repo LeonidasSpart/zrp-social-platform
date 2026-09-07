@@ -1066,4 +1066,13 @@
     <string name="ai_page_powered_by">Работает на DeepSeek · С открытым исходным кодом · Прозрачно</string>
     <string name="ai_page_subtitle">Спрашивайте что угодно. Получите помощь с публикациями, узнайте о ZRP или просто пообщайтесь.</string>
     <string name="ai_discover_entry">Открыть ZRP AI</string>
+    <!-- ZRP Wallet: Solana receiving-wallet field (ported from settings/page.tsx) -->
+    <string name="settings_solana_wallet_title">Кошелёк Solana (для прямых чаевых)</string>
+    <string name="settings_solana_wallet_desc">Добавьте адрес своего кошелька Solana, чтобы получать чаевые напрямую от пользователей. Пользователи будут отправлять USDC прямо на этот кошелёк: без комиссии платформы.</string>
+    <string name="settings_wallet_address">Адрес кошелька</string>
+    <string name="settings_wallet_address_placeholder">Адрес вашего кошелька Solana (например, 4zMMC...)</string>
+    <string name="settings_wallet_address_note">Этот адрес будет отображаться в вашем профиле для прямых чаевых.</string>
+    <string name="settings_save_wallet">Сохранить кошелёк</string>
+    <string name="settings_success_wallet_updated">Кошелёк Solana успешно обновлён!</string>
+    <string name="settings_err_wallet_update_failed">Не удалось обновить адрес кошелька.</string>
 </resources>

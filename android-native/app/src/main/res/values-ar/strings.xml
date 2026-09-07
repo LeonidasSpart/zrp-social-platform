@@ -1066,4 +1066,13 @@
     <string name="ai_page_powered_by">مدعوم بواسطة DeepSeek · مفتوح المصدر · شفاف</string>
     <string name="ai_page_subtitle">اسأل أي شيء. احصل على مساعدة في المنشورات، تعرّف على ZRP، أو تحدث فقط.</string>
     <string name="ai_discover_entry">اكتشف ZRP AI</string>
+    <!-- ZRP Wallet: Solana receiving-wallet field (ported from settings/page.tsx) -->
+    <string name="settings_solana_wallet_title">محفظة Solana (للإكراميات المباشرة)</string>
+    <string name="settings_solana_wallet_desc">أضف عنوان محفظة Solana الخاصة بك لتلقي الإكراميات مباشرة من المستخدمين. سيقوم المستخدمون بإرسال USDC مباشرة إلى هذه المحفظة: دون أي رسوم للمنصة.</string>
+    <string name="settings_wallet_address">عنوان المحفظة</string>
+    <string name="settings_wallet_address_placeholder">عنوان محفظة Solana الخاصة بك (مثال: 4zMMC...)</string>
+    <string name="settings_wallet_address_note">سيظهر هذا العنوان في ملفك الشخصي لتلقي الإكراميات مباشرة.</string>
+    <string name="settings_save_wallet">حفظ المحفظة</string>
+    <string name="settings_success_wallet_updated">تم تحديث محفظة Solana بنجاح!</string>
+    <string name="settings_err_wallet_update_failed">تعذر تحديث عنوان المحفظة.</string>
 </resources>
