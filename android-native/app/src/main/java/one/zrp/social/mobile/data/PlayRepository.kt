@@ -17,6 +17,7 @@ import one.zrp.social.mobile.network.PlayHomeResponse
 import one.zrp.social.mobile.network.PlayLeaderboardResponse
 import one.zrp.social.mobile.network.PlayProfileResponse
 import one.zrp.social.mobile.network.RespondToDuelRequest
+import one.zrp.social.mobile.network.SearchUser
 import one.zrp.social.mobile.network.SubmitAttemptRequest
 import one.zrp.social.mobile.network.SubmitAttemptResponse
 import one.zrp.social.mobile.network.TriviaContent
@@ -134,5 +135,10 @@ class PlayRepository {
 
     suspend fun getProfile(username: String): Result<PlayProfileResponse> = runCatching {
         ApiClient.playApi.getProfile(username)
+    }
+
+    /** Same real GET /search?type=users&q= OpponentSearch.tsx calls to find a duel opponent. */
+    suspend fun searchOpponents(query: String): Result<List<SearchUser>> = runCatching {
+        ApiClient.searchApi.search(query, type = "users").users
     }
 }

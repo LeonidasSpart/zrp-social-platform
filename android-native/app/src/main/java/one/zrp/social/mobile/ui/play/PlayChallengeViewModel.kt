@@ -13,6 +13,7 @@ import one.zrp.social.mobile.data.PlayRepository
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.data.parsedContent
 import one.zrp.social.mobile.network.PlayChallengeDetail
+import one.zrp.social.mobile.network.SearchUser
 import one.zrp.social.mobile.network.SubmitAttemptResponse
 
 data class PlayChallengeUiState(
@@ -26,6 +27,10 @@ data class PlayChallengeUiState(
     val error: String? = null,
     val isSharing: Boolean = false,
     val shared: Boolean = false,
+    val showDuelPanel: Boolean = false,
+    val opponent: SearchUser? = null,
+    val sendingDuel: Boolean = false,
+    val duelSent: Boolean = false,
 )
 
 /**
@@ -34,16 +39,22 @@ data class PlayChallengeUiState(
  * challenge.type, submits against the real POST
  * /play/challenges/{id}/submit (server scores against the unstripped
  * content), and shows the score/XP/streak/unlocked-achievements result.
- * Duel play (duelId) and the "Challenge a Friend" panel are a later
- * native phase - this screen only handles solo play for now.
+ * When duelId is set (played from a duel invite), submissions include
+ * it so the server can score both sides against the shared challenge;
+ * when it's null, signed-in users can challenge a friend to the same
+ * challenge via the Challenge a Friend panel, exactly like web only
+ * shows that panel outside of duel play.
  */
 class PlayChallengeViewModel(
     private val challengeId: String,
+    private val duelId: String?,
     private val repository: PlayRepository,
     private val postsRepository: PostsRepository = PostsRepository(),
 ) : ViewModel() {
     private val _state = MutableStateFlow(PlayChallengeUiState())
     val state: StateFlow<PlayChallengeUiState> = _state.asStateFlow()
+
+    val isDuelPlay: Boolean get() = duelId != null
 
     init {
         load()
@@ -64,15 +75,15 @@ class PlayChallengeViewModel(
     }
 
     fun submitTrivia(answers: List<Int>, timeMs: Long) {
-        submit { repository.submitAttempt(challengeId, answers = answers, timeMs = timeMs) }
+        submit { repository.submitAttempt(challengeId, answers = answers, timeMs = timeMs, duelId = duelId) }
     }
 
     fun submitMemory(moves: Int, matchedPairs: Int, timeMs: Long) {
-        submit { repository.submitAttempt(challengeId, moves = moves, matchedPairs = matchedPairs, timeMs = timeMs) }
+        submit { repository.submitAttempt(challengeId, moves = moves, matchedPairs = matchedPairs, timeMs = timeMs, duelId = duelId) }
     }
 
     fun submitLogic(answerIndex: Int?, answerText: String?, timeMs: Long) {
-        submit { repository.submitAttempt(challengeId, answerIndex = answerIndex, answerText = answerText, timeMs = timeMs) }
+        submit { repository.submitAttempt(challengeId, answerIndex = answerIndex, answerText = answerText, timeMs = timeMs, duelId = duelId) }
     }
 
     private fun submit(call: suspend () -> Result<SubmitAttemptResponse>) {
@@ -100,15 +111,35 @@ class PlayChallengeViewModel(
         }
     }
 
+    fun onOpenDuelPanel() {
+        _state.update { it.copy(showDuelPanel = true) }
+    }
+
+    fun onOpponentChange(user: SearchUser?) {
+        _state.update { it.copy(opponent = user) }
+    }
+
+    fun sendDuel() {
+        val opponent = _state.value.opponent ?: return
+        _state.update { it.copy(sendingDuel = true, error = null) }
+        viewModelScope.launch {
+            repository.createDuel(challengeId, opponent.id)
+                .onSuccess { _state.update { it.copy(sendingDuel = false, duelSent = true) } }
+                .onFailure { error -> _state.update { it.copy(sendingDuel = false, error = error.message ?: duelCreateFailedError) } }
+        }
+    }
+
     companion object {
         const val submitFailedError = "submitFailed"
+        const val duelCreateFailedError = "duelCreateFailed"
     }
 }
 
 class PlayChallengeViewModelFactory(
     private val challengeId: String,
+    private val duelId: String?,
     private val repository: PlayRepository,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T = PlayChallengeViewModel(challengeId, repository) as T
+    override fun <T : ViewModel> create(modelClass: Class<T>): T = PlayChallengeViewModel(challengeId, duelId, repository) as T
 }
