@@ -690,3 +690,11 @@
 "ios.marketplace.addVideo" = "Add a video";
 "ios.marketplace.videoAttached" = "Video attached";
 "ios.marketplace.playVideo" = "Play video";
+"ios.profile.analytics" = "Analytics";
+"ios.profile.analyticsEmpty" = "No posts yet to analyse.";
+"ios.profile.analyticsScope" = "Totals cover your 20 most recent posts.";
+"ios.profile.analyticsRecent" = "Recent posts";
+"ios.profile.analyticsViews" = "Views";
+"ios.profile.analyticsLikes" = "Likes";
+"ios.profile.analyticsComments" = "Comments";
+"ios.profile.analyticsReposts" = "Reposts";

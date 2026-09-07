@@ -133,10 +133,13 @@ struct ProfileView: View {
     private func loadedBody(_ profile: UserProfile) -> some View {
         ScrollView {
             if profile.isContentVisible(toViewerId: session.currentUser?.id) {
-                if let postsTab = viewModel.selectedTab.postsTab {
-                    postsTabBody(profile, tab: postsTab)
-                } else {
+                switch viewModel.selectedTab {
+                case .analytics:
+                    analyticsTabBody(profile)
+                case .replies:
                     repliesTabBody(profile)
+                default:
+                    postsTabBody(profile, tab: viewModel.selectedTab.postsTab ?? .posts)
                 }
             } else {
                 VStack(spacing: 0) {
@@ -204,6 +207,128 @@ struct ProfileView: View {
                 .padding(.top, ZrpSpacing.xxl)
             }
         }
+    }
+
+    @ViewBuilder
+    private func analyticsTabBody(_ profile: UserProfile) -> some View {
+        VStack(spacing: 0) {
+            header(profile)
+
+            switch viewModel.postStatsPhase {
+            case .idle, .loading:
+                ProgressView()
+                    .tint(ZrpColor.onSurfaceMuted)
+                    .padding(.top, ZrpSpacing.xxl)
+            case .failed(let error):
+                TimelineStateView.error(error) {
+                    Task { await viewModel.selectTab(.analytics) }
+                }
+            case .loaded:
+                if let stats = viewModel.postStats, !stats.posts.isEmpty {
+                    analytics(stats)
+                } else {
+                    TimelineStateView.empty(
+                        systemImage: "chart.bar",
+                        title: .iosProfileAnalyticsEmpty,
+                        subtitle: nil
+                    )
+                    .padding(.top, ZrpSpacing.xxl)
+                }
+            }
+        }
+    }
+
+    private func analytics(_ stats: PostStats) -> some View {
+        VStack(alignment: .leading, spacing: ZrpSpacing.lg) {
+            // The route sums over the 20 newest posts, not the account's
+            // whole history, so the scope is stated rather than letting
+            // these read as lifetime figures.
+            Text(.iosProfileAnalyticsScope)
+                .font(.caption)
+                .foregroundStyle(ZrpColor.onSurfaceMuted)
+
+            LazyVGrid(
+                columns: [GridItem(.flexible()), GridItem(.flexible())],
+                spacing: ZrpSpacing.md
+            ) {
+                statCard(.iosProfileAnalyticsViews, value: stats.totals.views, systemImage: "eye")
+                statCard(.iosProfileAnalyticsLikes, value: stats.totals.likes, systemImage: "heart")
+                statCard(
+                    .iosProfileAnalyticsComments,
+                    value: stats.totals.comments,
+                    systemImage: "bubble.left"
+                )
+                statCard(
+                    .iosProfileAnalyticsReposts,
+                    value: stats.totals.reposts,
+                    systemImage: "arrow.2.squarepath"
+                )
+            }
+
+            Text(.iosProfileAnalyticsRecent)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(ZrpColor.onSurface)
+
+            ForEach(stats.posts) { row in
+                Button {
+                    navigator.push(.postDetail(postId: row.id, preloaded: nil))
+                } label: {
+                    VStack(alignment: .leading, spacing: ZrpSpacing.xs) {
+                        Text(verbatim: row.content)
+                            .font(.subheadline)
+                            .foregroundStyle(ZrpColor.onSurface)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                        HStack(spacing: ZrpSpacing.md) {
+                            metric("eye", row.views)
+                            metric("heart", row.counts.likes)
+                            metric("bubble.left", row.counts.comments)
+                            metric("arrow.2.squarepath", row.counts.reposts)
+                            Spacer(minLength: 0)
+                            Text(verbatim: RelativeTime.compact(from: row.createdAt))
+                                .font(.caption2)
+                                .foregroundStyle(ZrpColor.onSurfaceMuted)
+                        }
+                    }
+                    .padding(ZrpSpacing.md)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous)
+                            .strokeBorder(ZrpColor.outline, lineWidth: 1)
+                    )
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityElement(children: .combine)
+            }
+        }
+        .padding(ZrpSpacing.lg)
+    }
+
+    private func statCard(_ title: L10nKey, value: Int, systemImage: String) -> some View {
+        VStack(alignment: .leading, spacing: ZrpSpacing.xs) {
+            Label { Text(title) } icon: { Image(systemName: systemImage) }
+                .font(.caption)
+                .foregroundStyle(ZrpColor.onSurfaceMuted)
+            Text(verbatim: CountFormatting.exact(value))
+                .font(.title3.weight(.bold).monospacedDigit())
+                .foregroundStyle(ZrpColor.onSurface)
+        }
+        .padding(ZrpSpacing.md)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(ZrpColor.surfaceHighest)
+        .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous))
+        .accessibilityElement(children: .combine)
+    }
+
+    private func metric(_ systemImage: String, _ value: Int) -> some View {
+        HStack(spacing: 2) {
+            Image(systemName: systemImage)
+            Text(verbatim: CountFormatting.compact(value) ?? "0")
+                .monospacedDigit()
+        }
+        .font(.caption2)
+        .foregroundStyle(ZrpColor.onSurfaceMuted)
     }
 
     /// Pinning is author-only and enforced server-side with a 403, so
@@ -296,13 +421,15 @@ struct ProfileView: View {
     /// `likes` is offered only on your own profile or when the account
     /// has left its likes public - matching the website, and matching the
     /// route, which answers an empty page rather than a 403 when they are
-    /// not. Analytics is deliberately absent: it is a whole own-profile
-    /// dashboard rather than a list, and is recorded as MISSING in
-    /// PARITY.md rather than stubbed here.
+    /// not. `analytics` is own-profile only, because its route is keyed
+    /// by the session and no route exists for anyone else's numbers.
     private func tabBar(_ profile: UserProfile) -> some View {
         let isOwnProfile = profile.id == session.currentUser?.id
         let tabs = ProfileTab.allCases.filter { tab in
-            tab != .likes || isOwnProfile || profile.publicLikes
+            // Analytics is keyed by the session server-side, so it can
+            // only ever show your own numbers.
+            if tab == .analytics { return isOwnProfile }
+            return tab != .likes || isOwnProfile || profile.publicLikes
         }
         return ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: ZrpSpacing.lg) {

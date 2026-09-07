@@ -13,27 +13,44 @@ enum ProfileTab: Hashable, CaseIterable {
     case likes
     case media
 
-    /// The post-listing route behind this tab, or `nil` for replies.
+    /// Own-profile only: `GET /api/user/posts/stats` is keyed by the
+    /// session, and there is no route for anyone else's numbers.
+    case analytics
+
+    /// The post-listing route behind this tab, or `nil` for the two that
+    /// are not post lists.
     var postsTab: ProfilePostsTab? {
         switch self {
         case .posts: return .posts
         case .reposts: return .reposts
         case .likes: return .likes
         case .media: return .media
-        case .replies: return nil
+        case .replies, .analytics: return nil
         }
     }
 
     var titleKey: L10nKey {
-        postsTab?.titleKey ?? .profileReplies
+        switch self {
+        case .replies: return .profileReplies
+        case .analytics: return .iosProfileAnalytics
+        default: return postsTab?.titleKey ?? .profilePosts
+        }
     }
 
     var emptyKey: L10nKey {
-        postsTab?.emptyKey ?? .profileNoReplies
+        switch self {
+        case .replies: return .profileNoReplies
+        case .analytics: return .iosProfileAnalyticsEmpty
+        default: return postsTab?.emptyKey ?? .profileNoPosts
+        }
     }
 
     var systemImage: String {
-        postsTab?.systemImage ?? "bubble.left"
+        switch self {
+        case .replies: return "bubble.left"
+        case .analytics: return "chart.bar"
+        default: return postsTab?.systemImage ?? "square.stack"
+        }
     }
 }
 
@@ -65,6 +82,10 @@ final class ProfileViewModel: ObservableObject {
     /// already read, so each keeps its own.
     @Published private(set) var feeds: [ProfilePostsTab: FeedState] = [:]
     @Published private(set) var repliesState = ProfileRepliesState()
+
+    /// The analytics tab's data, loaded once on first visit.
+    @Published private(set) var postStats: PostStats?
+    @Published private(set) var postStatsPhase: FeedState.Phase = .idle
 
     /// The author's pinned post, fetched separately.
     ///
@@ -102,6 +123,10 @@ final class ProfileViewModel: ObservableObject {
 
     private let repository: UsersRepositoryProtocol
     private let postsRepository: PostsRepositoryProtocol
+
+    /// The analytics route lives on the users repository; aliased so the
+    /// two uses read distinctly at the call sites.
+    private var postsStatsRepository: UsersRepositoryProtocol { repository }
     private weak var interactions: PostInteractionStore?
     private var tabTask: Task<Void, Never>?
 
@@ -163,9 +188,10 @@ final class ProfileViewModel: ObservableObject {
     func selectTab(_ tab: ProfileTab) async {
         selectedTab = tab
         let isEmpty: Bool
-        switch tab.postsTab {
-        case .some(let postsTab): isEmpty = feed(postsTab).phase == .idle
-        case .none: isEmpty = repliesState.phase == .idle
+        switch tab {
+        case .analytics: isEmpty = postStatsPhase == .idle
+        case .replies: isEmpty = repliesState.phase == .idle
+        default: isEmpty = feed(tab.postsTab ?? .posts).phase == .idle
         }
         guard isEmpty else { return }
         await loadSelectedTab(replacingExisting: true)
@@ -205,10 +231,33 @@ final class ProfileViewModel: ObservableObject {
     }
 
     private func loadSelectedTab(replacingExisting: Bool) async {
-        if let postsTab = selectedTab.postsTab {
-            await loadPosts(postsTab, replacingExisting: replacingExisting)
-        } else {
+        switch selectedTab {
+        case .analytics:
+            await loadPostStats()
+        case .replies:
             await loadReplies(replacingExisting: replacingExisting)
+        default:
+            await loadPosts(selectedTab.postsTab ?? .posts, replacingExisting: replacingExisting)
+        }
+    }
+
+    /// The analytics route is keyed by the session, so it is only ever
+    /// requested for your own profile - which is the only place the tab
+    /// is offered.
+    private func loadPostStats() async {
+        if postStats == nil { postStatsPhase = .loading }
+        do {
+            postStats = try await postsStatsRepository.postStats()
+            postStatsPhase = .loaded
+        } catch ApiError.cancelled {
+            postStatsPhase = .loaded
+        } catch {
+            guard !Task.isCancelled else { return }
+            if postStats == nil {
+                postStatsPhase = .failed(error as? ApiError ?? .transport(underlying: "\(error)"))
+            } else {
+                postStatsPhase = .loaded
+            }
         }
     }
 

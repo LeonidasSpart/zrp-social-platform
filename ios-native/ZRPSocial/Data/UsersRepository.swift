@@ -106,6 +106,7 @@ protocol UsersRepositoryProtocol: Sendable {
     func userList(_ source: UserListSource, cursor: String?) async throws -> FollowListPage
     func hashtagPosts(tag: String) async throws -> [Post]
     func trustPassport(username: String) async throws -> TrustPassport
+    func postStats() async throws -> PostStats
 }
 
 /// `PUT /api/user/profile` - the route onboarding and the profile editor
@@ -233,6 +234,18 @@ struct UsersRepository: UsersRepositoryProtocol {
     /// that rather than showing a "load more" that has nothing to load.
     func hashtagPosts(tag: String) async throws -> [Post] {
         try await client.send(Endpoint.get("posts/hashtag/\(escaped(tag))"))
+    }
+
+    /// `GET /api/user/posts/stats` - the viewer's OWN post analytics.
+    ///
+    /// Keyed by the session rather than by a username: there is no route
+    /// for anyone else's, which is why this screen exists only on your
+    /// own profile. It returns the 20 newest posts with their counts,
+    /// and totals computed over those same 20 - not over the whole
+    /// account. The screen says so rather than presenting them as
+    /// lifetime figures.
+    func postStats() async throws -> PostStats {
+        try await client.send(Endpoint.get("user/posts/stats"))
     }
 
     /// `GET /api/users/{username}/trust`.

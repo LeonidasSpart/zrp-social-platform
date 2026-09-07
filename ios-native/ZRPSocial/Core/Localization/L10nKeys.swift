@@ -1380,6 +1380,22 @@ enum L10nKey: String, CaseIterable {
     case iosMarketplaceVideoAttached = "ios.marketplace.videoAttached"
     /// en: "Play video"
     case iosMarketplacePlayVideo = "ios.marketplace.playVideo"
+    /// en: "Analytics"
+    case iosProfileAnalytics = "ios.profile.analytics"
+    /// en: "No posts yet to analyse."
+    case iosProfileAnalyticsEmpty = "ios.profile.analyticsEmpty"
+    /// en: "Totals cover your 20 most recent posts."
+    case iosProfileAnalyticsScope = "ios.profile.analyticsScope"
+    /// en: "Recent posts"
+    case iosProfileAnalyticsRecent = "ios.profile.analyticsRecent"
+    /// en: "Views"
+    case iosProfileAnalyticsViews = "ios.profile.analyticsViews"
+    /// en: "Likes"
+    case iosProfileAnalyticsLikes = "ios.profile.analyticsLikes"
+    /// en: "Comments"
+    case iosProfileAnalyticsComments = "ios.profile.analyticsComments"
+    /// en: "Reposts"
+    case iosProfileAnalyticsReposts = "ios.profile.analyticsReposts"
 }
 
 extension L10nKey {
