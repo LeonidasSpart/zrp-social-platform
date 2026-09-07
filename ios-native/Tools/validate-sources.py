@@ -231,6 +231,86 @@ def check_asset_catalog() -> None:
                 fail(f"{os.path.relpath(path, IOS_ROOT)}: invalid JSON ({exc})")
 
 
+# Required-reason APIs, mapped to the code that would be calling them.
+# Apple rejects an upload whose PrivacyInfo.xcprivacy omits a category the
+# binary actually uses (ITMS-91053).
+REQUIRED_REASON_APIS: dict[str, tuple[str, ...]] = {
+    "NSPrivacyAccessedAPICategoryUserDefaults": ("UserDefaults",),
+    "NSPrivacyAccessedAPICategoryFileTimestamp": (
+        ".modificationDate",
+        ".creationDate",
+        "contentModificationDateKey",
+        "creationDateKey",
+    ),
+    "NSPrivacyAccessedAPICategoryDiskSpace": (
+        "volumeAvailableCapacity",
+        "systemFreeSize",
+        "systemSize",
+    ),
+    "NSPrivacyAccessedAPICategorySystemBootTime": (
+        "systemUptime",
+        "mach_absolute_time",
+    ),
+    "NSPrivacyAccessedAPICategoryActiveKeyboard": ("activeInputModes",),
+}
+
+
+def check_privacy_manifest(paths: list[str]) -> None:
+    """The privacy manifest must match what the code actually calls.
+
+    This drifted once already: the manifest shipped with an empty API
+    list and a comment predicting that UserDefaults and file-timestamp
+    APIs would need declaring "the moment they are first used". Both were
+    later used, and nothing caught it. This does.
+
+    Both directions fail. An omission is an App Store rejection; a stale
+    declaration is a false statement about the app's behaviour.
+    """
+    manifest_path = os.path.join(SOURCE_ROOT, "PrivacyInfo.xcprivacy")
+    if not os.path.isfile(manifest_path):
+        fail("ZRPSocial/PrivacyInfo.xcprivacy is missing")
+        return
+
+    try:
+        with open(manifest_path, "rb") as handle:
+            manifest = plistlib.load(handle)
+    except Exception as error:  # noqa: BLE001 - reported, not raised
+        fail(f"PrivacyInfo.xcprivacy is not a valid plist: {error}")
+        return
+
+    declared = {
+        entry.get("NSPrivacyAccessedAPIType")
+        for entry in manifest.get("NSPrivacyAccessedAPITypes", [])
+    }
+
+    # Comments are stripped before matching. `Keychain.swift` explains
+    # why the token is NOT in UserDefaults, and a check that reads that
+    # sentence as usage would demand declarations for APIs the app
+    # deliberately avoids - and, worse, keep demanding them after the
+    # real call site was deleted.
+    sources = []
+    for path in paths:
+        with open(path, encoding="utf-8") as handle:
+            sources.append((path, strip_swift_noise(handle.read())))
+
+    for category, needles in REQUIRED_REASON_APIS.items():
+        users = [
+            os.path.relpath(path, IOS_ROOT)
+            for path, source in sources
+            if any(needle in source for needle in needles)
+        ]
+        if users and category not in declared:
+            fail(
+                f"PrivacyInfo.xcprivacy does not declare {category}, but it is "
+                f"used in: {', '.join(sorted(users)[:3])}"
+            )
+        if not users and category in declared:
+            fail(
+                f"PrivacyInfo.xcprivacy declares {category}, but no source uses "
+                "it - a manifest must describe what the app really does"
+            )
+
+
 def check_dynamic_type(paths: list[str]) -> None:
     """Text must never use a hardcoded point size.
 
@@ -310,6 +390,7 @@ def main() -> int:
     check_plists()
     check_asset_catalog()
     check_dynamic_type(paths)
+    check_privacy_manifest(paths)
     check_no_android_references(paths)
     check_localizations_complete()
 

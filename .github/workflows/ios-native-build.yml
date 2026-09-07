@@ -259,3 +259,62 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
+
+      # ── Archive ────────────────────────────────────────────────────
+      # An App Store submission is produced by `archive`, not `build`,
+      # and archiving exercises a genuinely different path: it runs
+      # `installapi`, bundles dSYMs, applies the Release optimisation
+      # settings to a packaged product, and validates the Info.plist and
+      # asset catalog the way a submission does. A project can build
+      # cleanly and still fail to archive.
+      #
+      # UNSIGNED, and honest about what that does and does not prove:
+      # this repository holds no Apple Developer certificate, team id or
+      # provisioning profile, so the archive here cannot be exported or
+      # uploaded. It proves the app archives; it does not prove it is
+      # signable. See ios-native/PARITY.md - "App Store submission".
+      - name: Archive (unsigned)
+        working-directory: ios-native
+        run: |
+          xcodebuild archive \
+            -project ZRPSocial.xcodeproj \
+            -scheme ZRPSocial \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/ZRPSocial.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS=""
+
+      # Proves the archive really contains an app bundle with the
+      # identity and version the store will read, rather than an empty
+      # shell that happened to exit zero.
+      - name: Inspect the archived product
+        run: |
+          set -euo pipefail
+          app="$RUNNER_TEMP/ZRPSocial.xcarchive/Products/Applications/ZRPSocial.app"
+          test -d "$app" || { echo "::error::No app bundle in the archive."; exit 1; }
+
+          plist="$app/Info.plist"
+          for key in CFBundleIdentifier CFBundleShortVersionString CFBundleVersion MinimumOSVersion; do
+            value="$(/usr/libexec/PlistBuddy -c "Print :$key" "$plist" 2>/dev/null || true)"
+            [ -n "$value" ] || { echo "::error::$key missing from the built Info.plist"; exit 1; }
+            echo "$key = $value"
+          done
+
+          # The privacy manifest must survive into the bundle - Apple
+          # reads it from there, not from the repository.
+          test -f "$app/PrivacyInfo.xcprivacy" \
+            || { echo "::error::PrivacyInfo.xcprivacy is not in the app bundle."; exit 1; }
+          echo "PrivacyInfo.xcprivacy present in the bundle."
+
+          # An app icon is required for submission and is easy to lose
+          # silently when an asset catalog is misconfigured.
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIcons" "$plist" >/dev/null 2>&1 \
+            || { echo "::error::No app icon recorded in the built Info.plist."; exit 1; }
+          echo "App icon recorded."
+
+          echo "SUPPORTED LOCALIZATIONS:"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleLocalizations" "$plist" 2>/dev/null \
+            || ls "$app" | grep '\.lproj$' | sed 's/^/  /'

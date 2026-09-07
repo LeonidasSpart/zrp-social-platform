@@ -402,6 +402,58 @@ the merged route's per-field rule and the exact bodies each iOS path
 emits, and fails if either drifts. Reverting the client to the old
 all-nulls encoder makes it fail on four checks.
 
+## App Store submission
+
+The app builds and archives against the required toolchain, and CI proves
+it on every push (see **Build toolchain**). What it cannot do here is
+**sign**.
+
+### What is verified in CI
+
+- Archives with `xcodebuild archive` on Xcode 26.3 / iOS 26.2 SDK - a
+  different path from `build`, which a project can pass while failing to
+  archive.
+- The archived bundle really contains an app, with a bundle identifier,
+  marketing version, build number and minimum OS version.
+- `PrivacyInfo.xcprivacy` survives into the bundle, where Apple reads it.
+- An app icon is recorded in the built `Info.plist`.
+- The manifest's declared required-reason APIs match what the code calls,
+  in both directions (`validate-sources.py`).
+
+### S1. Signing and upload - BLOCKED, needs an Apple Developer account
+
+This repository contains no distribution certificate, no provisioning
+profile, and no team identifier, and this environment has no App Store
+Connect access. So the archive CI produces is **unsigned**: it proves the
+app archives, not that it is signable or submittable.
+
+`Signing/ExportOptions.plist` is ready and deliberately omits `teamID`
+rather than guessing one - a wrong team id produces an export that fails
+at upload with a misleading error.
+
+To finish this, someone with the account must supply, as repository
+secrets: the Apple Distribution certificate and its password, the App
+Store provisioning profile for `one.zrp.social` (or whichever identifier
+is chosen - see S2), and an App Store Connect API key. None of that can
+be produced from inside this repo.
+
+### S2. Bundle identifier collides with the Capacitor shell - needs a decision
+
+`ios-native` and the existing Capacitor shell (`ios/App`, and
+`capacitor.config.ts`) both declare `PRODUCT_BUNDLE_IDENTIFIER =
+one.zrp.social`. **Two apps cannot share one identifier on the App
+Store.**
+
+If the native app is intended to *replace* the shell - which is what this
+module is for - then sharing the identifier is correct and the native
+build supersedes it on the next upload. That is a product decision with a
+real consequence (existing installs update to the native app), so it is
+recorded here rather than assumed. If instead both are meant to coexist,
+the native app needs its own identifier before the first upload.
+
+Not changed from the iOS side either way: `capacitor.config.ts` and
+`ios/App` belong to the web release tooling.
+
 ## Blocked items
 
 ### B1. Native OAuth (Google / Apple)
@@ -494,5 +546,5 @@ here. **No fake local notifications will stand in for this.**
 | 16 | Settings, moderation, account deletion | ✅ settings hub, privacy, password, blocked/muted lists, reporting, data export, account deletion (both paths) |
 | 17 | Localization (11 languages) + accessibility | ✅ in-app language picker (11 languages, RTL), locale-aware formatting, Dynamic Type pass with a CI rule |
 | 18 | Performance + security pass | ✅ downsampling image loader with a decoded cache, path-segment escaping, no silent URL fallback; logging/Keychain/ATS audited clean |
-| 19 | App Store preparation | 🔶 toolchain now Xcode 26 / iOS 26 SDK-gated; signing, archive and export still pending |
+| 19 | App Store preparation | 🔶 archive + bundle verification in CI, privacy manifest corrected and CI-enforced, export options ready — signing BLOCKED (S1), bundle id needs a decision (S2) |
 | 20 | Final parity audit | ⬜ |
