@@ -62,3 +62,24 @@ profile.share
 # ── Misc ────────────────────────────────────────────────────────────
 bookmarks.title
 postDetail.errLoadFailed
+
+# ── Profiles & social graph (Phase 6) ───────────────────────────────
+profile.posts
+profile.followers
+profile.following
+profile.joined
+profile.noPosts
+profile.userNotFound
+profile.protectedAccount
+profile.protectedMessage
+action.follow
+action.following
+action.unfollow
+followers.title
+followers.empty
+following.title
+following.empty
+
+# ── Hashtag timeline ────────────────────────────────────────────────
+hashtag.noPosts
+hashtag.errLoad

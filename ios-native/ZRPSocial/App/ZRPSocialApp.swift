@@ -5,10 +5,17 @@ struct ZRPSocialApp: App {
 
     @StateObject private var session = SessionController()
 
+    /// One app-wide record of the viewer's relationship to every post
+    /// they have seen. Shared so a like in the Home feed shows as a like
+    /// on the author's profile and in a hashtag timeline, without those
+    /// screens knowing about each other.
+    @StateObject private var interactions = PostInteractionStore()
+
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(session)
+                .environmentObject(interactions)
                 // ZRP is a dark-first product on web and on Android. The
                 // light palette is fully defined and correct, so the app
                 // follows the system setting rather than forcing dark -

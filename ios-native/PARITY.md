@@ -74,7 +74,7 @@ called and the real response being handled.
 | Emoji reactions | `GET/POST /api/posts/{id}/reaction` | ✅ | ✅ | ⬜ | MISSING (Phase 8) |
 | Delete own post | `DELETE /api/posts/{id}` (403 non-author, server-side) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Edit own post | `PUT /api/posts/{id}` (text only, matches web) | ✅ | ✅ | ⬜ | MISSING (Phase 8) |
-| Pin post (single slot) | `POST /api/posts/{id}/pin` | ✅ | ✅ | ⬜ | MISSING (Phase 6) |
+| Pin post (single slot) | `POST /api/posts/{id}/pin` | ✅ | ✅ | ⬜ | MISSING (Phase 6b) |
 | Create text post | `POST /api/posts` | ✅ | ✅ | ⬜ | MISSING (Phase 7) |
 | Scheduled posts | `POST /api/posts` + `scheduledAt` naive wall-clock | ✅ | ✅ | ⬜ | MISSING (Phase 7) |
 | Quote post | `POST /api/posts` + `quotePostId`; `GET /api/posts/{id}/quotes` | ✅ | ✅ | 🔶 renders nested quote; composing not yet | PARTIAL |
@@ -102,13 +102,14 @@ called and the real response being handled.
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
-| Profile header + stats | `GET /api/users/{username}` | ✅ | ✅ | ⬜ | MISSING (Phase 6) |
-| User posts tab | `GET /api/users/{username}/posts` (**`{items,nextCursor}`**) | ✅ | ✅ | ⬜ | MISSING (Phase 6) |
-| Replies / media / likes / reposts tabs | `/replies`, `/media`, `/likes`, `/reposts` | ✅ | 🔶 | ⬜ | MISSING (Phase 6) |
-| Follow / unfollow (+ request for private) | `POST /api/users/{username}/follow` | ✅ | ✅ | ⬜ | MISSING (Phase 6) |
-| Followers / Following lists | `/followers`, `/following` → `{items,nextCursor}` | ✅ | ✅ | ⬜ | MISSING (Phase 6) |
-| Edit profile | `PUT /api/user/profile` | ✅ | ✅ | ⬜ | MISSING (Phase 6) |
+| Profile header + stats | `GET /api/users/{username}` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| User posts tab | `GET /api/users/{username}/posts` (**`{items,nextCursor}`**) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Replies / media / likes / reposts tabs | `/replies`, `/media`, `/likes`, `/reposts` | ✅ | 🔶 | ⬜ | MISSING (Phase 6b) |
+| Follow / unfollow (+ request for private) | `POST /api/users/{username}/follow` | ✅ | ✅ | ✅ (all three outcomes: followed, unfollowed, request pending) | IMPLEMENTED |
+| Followers / Following lists | `/followers`, `/following` → `{items,nextCursor}` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Edit profile | `PUT /api/user/profile` | ✅ | ✅ | ⬜ | MISSING (Phase 6b) |
 | Suggested users | `GET /api/users/suggested` | ✅ | ✅ | ⬜ | MISSING (Phase 12) |
+| Private-account gating | every content route returns `{items: []}`, not 403 | ✅ | 🔶 | ✅ (explains the account is private instead of showing "no posts") | IMPLEMENTED |
 | Trust profile | `GET /api/users/{username}/trust` | ✅ | ⬜ | ⬜ | MISSING |
 
 ### Discovery
@@ -117,8 +118,8 @@ called and the real response being handled.
 | --- | --- | --- | --- | --- | --- |
 | Search (users + posts) | `GET /api/search?q=&type=all` (min 2 chars) | ✅ | ✅ | ⬜ | MISSING (Phase 12) |
 | Trending hashtags | `GET /api/hashtags/trending` | ✅ | ✅ | ⬜ | MISSING (Phase 12) |
-| Hashtag timeline | `GET /api/posts/hashtag/{tag}` (bare array, 50, no pagination) | ✅ | ✅ | ⬜ | MISSING (Phase 12) |
-| Hashtag / mention tap-through in post text | — | ✅ | ✅ | ✅ (linkified, routes pending Phase 6/12) | PARTIAL |
+| Hashtag timeline | `GET /api/posts/hashtag/{tag}` (bare array, 50, no pagination) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Hashtag / mention tap-through in post text | — | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Explore / trending pages | `GET /api/posts/explore` | ✅ | 🔶 (For You tab) | 🔶 (For You tab) | PARTIAL |
 
 ### Comments & replies
@@ -328,15 +329,15 @@ here. **No fake local notifications will stand in for this.**
 | 1 | Repository + backend + Android audit, this matrix | ✅ done |
 | 2 | iOS project foundation, theme, CI | ✅ done |
 | 3 | Auth + session (login/restore/logout) | ✅ done — 3b (signup, verify, reset, onboarding) pending |
-| 4 | Navigation shell + deep links | 🔶 tab shell done; deep links pending |
+| 4 | Navigation shell + deep links | 🔶 in-app routing done (profile / hashtag / follow lists); OS deep links pending |
 | 5 | Home feed (For You / Following) + interactions | ✅ done |
-| 6 | Profiles + social graph | ⬜ |
+| 6 | Profiles + social graph | ✅ done — 6b (edit profile, pin, extra profile tabs) pending |
 | 7 | Post composer + media upload + viewer | ⬜ |
 | 8 | Comments, replies, quotes, reactions, edit | ⬜ |
 | 9 | Stories | ⬜ |
 | 10 | Messages | ⬜ |
 | 11 | Notifications (+ push, pending B3) | ⬜ |
-| 12 | Search + hashtags | ⬜ |
+| 12 | Search + hashtags | 🔶 hashtag timeline done; search pending |
 | 13 | Music + background player | ⬜ |
 | 14 | Music Studio | ⬜ |
 | 15 | Marketplace | ⬜ |

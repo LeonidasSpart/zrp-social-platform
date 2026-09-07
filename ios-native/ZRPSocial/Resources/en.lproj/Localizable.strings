@@ -47,6 +47,23 @@
 "profile.share" = "Share";
 "bookmarks.title" = "Bookmarks";
 "postDetail.errLoadFailed" = "Failed to load post";
+"profile.posts" = "Posts";
+"profile.followers" = "Followers";
+"profile.following" = "Following";
+"profile.joined" = "Joined";
+"profile.noPosts" = "No posts yet.";
+"profile.userNotFound" = "User not found";
+"profile.protectedAccount" = "This account is private";
+"profile.protectedMessage" = "Follow this account to see their posts and profile details.";
+"action.follow" = "Follow";
+"action.following" = "Following";
+"action.unfollow" = "Unfollow";
+"followers.title" = "Followers";
+"followers.empty" = "No followers yet.";
+"following.title" = "Following";
+"following.empty" = "Not following anyone yet.";
+"hashtag.noPosts" = "No posts with #{tag} yet.";
+"hashtag.errLoad" = "Failed to load posts";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back
@@ -73,3 +90,5 @@
 "ios.badge.journalist" = "Verified Journalist";
 "ios.a11y.playVideo" = "Play video";
 "ios.media.close" = "Close";
+"ios.a11y.openProfile" = "Open profile of {name}";
+"ios.a11y.followingState" = "Following";

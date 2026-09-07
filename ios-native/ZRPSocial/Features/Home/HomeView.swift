@@ -9,10 +9,12 @@ import SwiftUI
 struct HomeView: View {
 
     @EnvironmentObject private var session: SessionController
+    @EnvironmentObject private var interactions: PostInteractionStore
+    @StateObject private var navigator = Navigator()
     @StateObject private var viewModel = HomeViewModel()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigator.path) {
             VStack(spacing: 0) {
                 tabPicker
                 Divider().overlay(ZrpColor.outline)
@@ -21,39 +23,73 @@ struct HomeView: View {
             .background(ZrpColor.background.ignoresSafeArea())
             .navigationTitle(Text(.navHome))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Image("ZrpLogo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 26, height: 26)
-                        .accessibilityHidden(true)
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        Task { await session.signOut() }
-                    } label: {
-                        Image(systemName: "rectangle.portrait.and.arrow.right")
-                            .foregroundStyle(ZrpColor.onSurfaceMuted)
-                    }
-                    .accessibilityLabel(Text(.navSignOut))
+            .toolbar { toolbarContent }
+            .navigationDestination(for: Route.self) { route in
+                switch route {
+                case .profile(let username):
+                    ProfileView(username: username)
+                case .hashtag(let tag):
+                    HashtagView(tag: tag)
+                case .followList(let username, let kind):
+                    FollowListView(kind: kind, username: username)
                 }
             }
         }
-        .task { viewModel.loadIfNeeded(viewModel.selectedTab) }
+        .environmentObject(navigator)
+        .task {
+            viewModel.attach(interactions: interactions)
+            viewModel.loadIfNeeded(viewModel.selectedTab)
+        }
         .onChange(of: viewModel.selectedTab) { _, tab in
             viewModel.loadIfNeeded(tab)
         }
         .alert(
             Text(.iosErrorGenericTitle),
             isPresented: Binding(
-                get: { viewModel.actionError != nil },
-                set: { if !$0 { viewModel.actionError = nil } }
+                get: { interactions.actionError != nil },
+                set: { if !$0 { interactions.actionError = nil } }
             )
         ) {
-            Button { viewModel.actionError = nil } label: { Text(.actionCancel) }
+            Button { interactions.actionError = nil } label: { Text(.actionCancel) }
         } message: {
-            Text(verbatim: viewModel.actionError ?? "")
+            Text(verbatim: interactions.actionError ?? "")
+        }
+    }
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            Image("ZrpLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 26, height: 26)
+                .accessibilityHidden(true)
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            Menu {
+                if let username = session.currentUser?.username {
+                    Button {
+                        navigator.push(.profile(username: username))
+                    } label: {
+                        Label { Text(.navProfile) } icon: { Image(systemName: "person") }
+                    }
+                }
+                Button(role: .destructive) {
+                    Task { await session.signOut() }
+                } label: {
+                    Label {
+                        Text(.navSignOut)
+                    } icon: {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                    }
+                }
+            } label: {
+                AvatarView(
+                    url: session.currentUser?.avatarUrl,
+                    displayName: session.currentUser?.displayName ?? "",
+                    size: 28
+                )
+            }
         }
     }
 
@@ -84,7 +120,9 @@ struct HomeView: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityAddTraits(viewModel.selectedTab == tab ? [.isSelected, .isButton] : .isButton)
+                .accessibilityAddTraits(
+                    viewModel.selectedTab == tab ? [.isSelected, .isButton] : .isButton
+                )
             }
         }
         .background(ZrpColor.background)
@@ -98,117 +136,35 @@ struct HomeView: View {
 
         switch state.phase {
         case .idle, .loading:
-            loadingState
+            TimelineStateView.loading()
         case .failed(let error):
-            errorState(error)
+            TimelineStateView.error(error) {
+                viewModel.retry(viewModel.selectedTab)
+            }
         case .loaded:
             if state.isEmpty {
-                emptyState
+                TimelineStateView.empty(
+                    systemImage: "sparkles",
+                    title: .feedNoPosts,
+                    subtitle: viewModel.selectedTab == .following
+                        ? L10nKey.feedFollowSomeone
+                        : L10nKey.feedCheckBackLater
+                )
             } else {
-                timeline(state)
-            }
-        }
-    }
-
-    private func timeline(_ state: FeedState) -> some View {
-        ScrollView {
-            LazyVStack(spacing: 0) {
-                ForEach(state.posts) { post in
-                    PostCardView(
-                        post: post,
-                        interaction: viewModel.interaction(for: post),
-                        isOwnPost: post.author.id == session.currentUser?.id,
-                        onLike: { Task { await viewModel.toggleLike(post) } },
-                        onRepost: { Task { await viewModel.toggleRepost(post) } },
-                        onBookmark: { Task { await viewModel.toggleBookmark(post) } },
-                        onDelete: { Task { await viewModel.deletePost(post) } }
+                ScrollView {
+                    PostListView(
+                        posts: state.posts,
+                        isLoadingMore: state.isLoadingMore,
+                        hasMore: state.hasMore,
+                        onAppear: {
+                            viewModel.loadMoreIfNeeded(viewModel.selectedTab, currentPost: $0)
+                        },
+                        header: { EmptyView() }
                     )
-                    .onAppear {
-                        viewModel.loadMoreIfNeeded(viewModel.selectedTab, currentPost: post)
-                    }
                 }
-
-                if state.isLoadingMore {
-                    HStack(spacing: ZrpSpacing.sm) {
-                        ProgressView().tint(ZrpColor.onSurfaceMuted)
-                        Text(.feedLoadingMore)
-                            .font(.footnote)
-                            .foregroundStyle(ZrpColor.onSurfaceMuted)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(ZrpSpacing.lg)
-                } else if !state.hasMore {
-                    Text(.feedEndOfFeed)
-                        .font(.footnote)
-                        .foregroundStyle(ZrpColor.onSurfaceMuted)
-                        .frame(maxWidth: .infinity)
-                        .padding(ZrpSpacing.xl)
-                }
-            }
-            // Caps the reading width on iPad and in landscape instead of
-            // stretching a post across a 12.9" display.
-            .frame(maxWidth: ZrpMetrics.contentMaxWidth)
-            .frame(maxWidth: .infinity)
-        }
-        .refreshable { await viewModel.refresh(viewModel.selectedTab) }
-        .scrollDismissesKeyboard(.immediately)
-    }
-
-    private var loadingState: some View {
-        VStack(spacing: ZrpSpacing.md) {
-            ProgressView().tint(ZrpColor.red)
-            Text(.actionLoading)
-                .font(.footnote)
-                .foregroundStyle(ZrpColor.onSurfaceMuted)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private func errorState(_ error: ApiError) -> some View {
-        VStack(spacing: ZrpSpacing.lg) {
-            Image(systemName: error == .offline ? "wifi.slash" : "exclamationmark.triangle")
-                .font(.largeTitle)
-                .foregroundStyle(ZrpColor.onSurfaceMuted)
-
-            Text(verbatim: error.userFacingMessage)
-                .font(.subheadline)
-                .foregroundStyle(ZrpColor.onSurfaceMuted)
-                .multilineTextAlignment(.center)
-
-            if error.isRetryable {
-                Button {
-                    viewModel.retry(viewModel.selectedTab)
-                } label: {
-                    Text(.feedTryAgain)
-                        .font(.subheadline.weight(.semibold))
-                        .padding(.horizontal, ZrpSpacing.xl)
-                        .frame(minHeight: ZrpMetrics.minTouchTarget)
-                        .background(ZrpColor.red)
-                        .foregroundStyle(.white)
-                        .clipShape(Capsule())
-                }
+                .refreshable { await viewModel.refresh(viewModel.selectedTab) }
+                .scrollDismissesKeyboard(.immediately)
             }
         }
-        .padding(ZrpSpacing.xl)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var emptyState: some View {
-        VStack(spacing: ZrpSpacing.md) {
-            Image(systemName: "sparkles")
-                .font(.largeTitle)
-                .foregroundStyle(ZrpColor.onSurfaceMuted)
-
-            Text(.feedNoPosts)
-                .font(.headline)
-                .foregroundStyle(ZrpColor.onSurface)
-
-            Text(viewModel.selectedTab == .following ? L10nKey.feedFollowSomeone : L10nKey.feedCheckBackLater)
-                .font(.subheadline)
-                .foregroundStyle(ZrpColor.onSurfaceMuted)
-                .multilineTextAlignment(.center)
-        }
-        .padding(ZrpSpacing.xl)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

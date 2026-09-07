@@ -107,7 +107,13 @@ def check_hardcoded_strings(paths: list[str]) -> None:
             # Only Text(verbatim:) with a literal is a real risk - every
             # other literal in a view is a symbol or an asset name.
             for literal in re.findall(r'Text\(verbatim:\s*"([^"]*)"\)', line):
-                if literal and not ALLOWED_LITERAL.match(literal):
+                # Strip Swift string interpolations before judging the
+                # literal. `"#\(tag)"` is punctuation plus a value, not
+                # translatable copy - a hashtag renders identically in
+                # every language. `"Hello \(name)"` still fails, because
+                # what remains is a real word.
+                bare = re.sub(r"\\\([^)]*\)", "", literal)
+                if bare and not ALLOWED_LITERAL.match(bare):
                     fail(
                         f"{os.path.relpath(path, IOS_ROOT)}:{number}: hardcoded "
                         f'user-facing string "{literal}" - route it through L10n'

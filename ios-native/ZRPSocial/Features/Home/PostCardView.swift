@@ -19,6 +19,7 @@ struct PostCardView: View {
     var onDelete: () -> Void
 
     @State private var isConfirmingDelete = false
+    @EnvironmentObject private var navigator: Navigator
 
     /// The canonical web URL for a post - what Share hands to other apps,
     /// and what "Copy link" copies. Same path the website itself uses.
@@ -30,7 +31,11 @@ struct PostCardView: View {
         VStack(alignment: .leading, spacing: ZrpSpacing.md) {
             header
             if !post.content.isEmpty {
-                LinkifiedText(content: post.content)
+                LinkifiedText(
+                    content: post.content,
+                    onHashtag: { navigator.push(.hashtag(tag: $0)) },
+                    onMention: { navigator.push(.profile(username: $0)) }
+                )
             }
             media
             quotedPost
@@ -59,31 +64,44 @@ struct PostCardView: View {
 
     private var header: some View {
         HStack(alignment: .top, spacing: ZrpSpacing.md) {
-            AvatarView(
-                url: post.author.avatarUrl,
-                displayName: post.author.displayName,
-                size: ZrpMetrics.avatarMedium
+            Button {
+                navigator.push(.profile(username: post.author.username))
+            } label: {
+                AvatarView(
+                    url: post.author.avatarUrl,
+                    displayName: post.author.displayName,
+                    size: ZrpMetrics.avatarMedium
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(
+                Text(.iosA11yOpenProfile, ["name": post.author.displayName])
             )
 
             VStack(alignment: .leading, spacing: 2) {
-                // Author identity is not tappable yet: the profile screen
-                // lands in Phase 6. Rendering it as static text is
-                // deliberate - a tappable name that goes nowhere is worse
-                // than one that plainly does not invite a tap.
-                HStack(spacing: ZrpSpacing.xs) {
-                    Text(verbatim: post.author.displayName)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(ZrpColor.onSurface)
-                        .lineLimit(1)
+                Button {
+                    navigator.push(.profile(username: post.author.username))
+                } label: {
+                    HStack(spacing: ZrpSpacing.xs) {
+                        Text(verbatim: post.author.displayName)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(ZrpColor.onSurface)
+                            .lineLimit(1)
 
-                    VerifiedBadge(badgeType: post.author.badgeType)
+                        VerifiedBadge(badgeType: post.author.badgeType)
 
-                    Text(verbatim: post.author.handle)
-                        .font(.subheadline)
-                        .foregroundStyle(ZrpColor.onSurfaceMuted)
-                        .lineLimit(1)
-                        .layoutPriority(-1)
+                        Text(verbatim: post.author.handle)
+                            .font(.subheadline)
+                            .foregroundStyle(ZrpColor.onSurfaceMuted)
+                            .lineLimit(1)
+                            .layoutPriority(-1)
+                    }
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel(
+                    Text(.iosA11yOpenProfile, ["name": post.author.displayName])
+                )
 
                 Text(verbatim: RelativeTime.compact(from: post.createdAt))
                     .font(.caption)
@@ -142,20 +160,35 @@ struct PostCardView: View {
         if let quoted = post.quotePost {
             VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
                 HStack(spacing: ZrpSpacing.sm) {
-                    AvatarView(
-                        url: quoted.author.avatarUrl,
-                        displayName: quoted.author.displayName,
-                        size: ZrpMetrics.avatarSmall
+                    Button {
+                        navigator.push(.profile(username: quoted.author.username))
+                    } label: {
+                        HStack(spacing: ZrpSpacing.sm) {
+                            AvatarView(
+                                url: quoted.author.avatarUrl,
+                                displayName: quoted.author.displayName,
+                                size: ZrpMetrics.avatarSmall
+                            )
+                            Text(verbatim: quoted.author.displayName)
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(ZrpColor.onSurface)
+                                .lineLimit(1)
+                            VerifiedBadge(badgeType: quoted.author.badgeType, size: 12)
+                            Text(verbatim: quoted.author.handle)
+                                .font(.footnote)
+                                .foregroundStyle(ZrpColor.onSurfaceMuted)
+                                .lineLimit(1)
+                                .layoutPriority(-1)
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(
+                        Text(.iosA11yOpenProfile, ["name": quoted.author.displayName])
                     )
-                    Text(verbatim: quoted.author.displayName)
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(ZrpColor.onSurface)
-                    VerifiedBadge(badgeType: quoted.author.badgeType, size: 12)
-                    Text(verbatim: quoted.author.handle)
-                        .font(.footnote)
-                        .foregroundStyle(ZrpColor.onSurfaceMuted)
-                        .lineLimit(1)
+
                     Spacer(minLength: 0)
+
                     Text(verbatim: RelativeTime.compact(from: quoted.createdAt))
                         .font(.caption2)
                         .foregroundStyle(ZrpColor.onSurfaceMuted)

@@ -33,6 +33,8 @@
     "ios.badge.team": "ZRP Team",
     "ios.badge.journalist": "Verified Journalist",
     "ios.a11y.playVideo": "Play video",
-    "ios.media.close": "Close"
+    "ios.media.close": "Close",
+    "ios.a11y.openProfile": "Open profile of {name}",
+    "ios.a11y.followingState": "Following"
   }
 }
