@@ -15,20 +15,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import one.zrp.social.mobile.R
 
 /**
  * The native equivalent of the website's EditPostModal - text-only,
  * same as the web modal (it never touches the post's image either),
  * submitting to the same real PUT /posts/{id} the server enforces
- * author-only and plan-length-limit rules on.
+ * author-only and plan-length-limit rules on. EditPostModal.tsx's own
+ * title/placeholder/Save/Cancel copy is hardcoded English with zero
+ * t() calls, so there's no web translation to source from - these are
+ * translated as native-only supporting copy instead.
  */
-// Every string below stays English on purpose: EditPostModal.tsx (the
-// website's own equivalent for editing a post) has zero t() calls
-// anywhere - title, placeholder, Save/Saving.../Cancel are all its own
-// hardcoded, untranslated copy, byte-matched here rather than sourced
-// from a translated key used elsewhere (e.g. action.cancel) that real
-// web visitors would never actually see in this dialog.
 @Composable
 fun EditPostDialog(
     initialContent: String,
@@ -48,7 +47,7 @@ fun EditPostDialog(
                 OutlinedTextField(
                     value = content,
                     onValueChange = { content = it },
-                    placeholder = { Text("What's happening?") },
+                    placeholder = { Text(stringResource(R.string.editpost_placeholder)) },
                     enabled = !isSubmitting,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -69,13 +68,13 @@ fun EditPostDialog(
                     onClick = { onSubmit(content) },
                     enabled = content.isNotBlank(),
                 ) {
-                    Text("Save")
+                    Text(stringResource(R.string.action_save))
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss, enabled = !isSubmitting) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         },
     )

@@ -61,7 +61,7 @@ fun AidOffersScreen(campaignId: String, onBack: () -> Unit, onOpenOfferer: (Stri
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.nav_back))
             }
             Text(
                 text = stringResource(R.string.aid_offers_review_title),

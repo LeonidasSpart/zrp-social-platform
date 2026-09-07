@@ -120,7 +120,7 @@ fun CreatorScreen(onBack: () -> Unit, onOpenPost: (String) -> Unit) {
                 // Matches SettingsScreen's own back button - a plain,
                 // untranslated "Back" content description, same as every
                 // other Settings sub-screen this one is reached from.
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.nav_back))
             }
             Column(modifier = Modifier.padding(start = 4.dp)) {
                 Text(text = stringResource(R.string.creator_studio_title), style = MaterialTheme.typography.titleMedium)
