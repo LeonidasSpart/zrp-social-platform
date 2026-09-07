@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -29,7 +30,10 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
@@ -64,8 +68,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -645,6 +651,20 @@ private fun ProfileHeader(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
+            // Professional category - a free-text field the account
+            // owner sets themselves (ProfileEditScreen), shown only when
+            // showCategory is also on, matching page.tsx's own
+            // `profile.category && profile.showCategory` guard exactly.
+            if (!profile.category.isNullOrBlank() && profile.showCategory) {
+                Text(
+                    text = profile.category,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = ZrpRed,
+                    modifier = Modifier.padding(top = 1.dp),
+                )
+            }
+
             if (!profile.bio.isNullOrBlank()) {
                 Text(
                     text = profile.bio,
@@ -652,6 +672,49 @@ private fun ProfileHeader(
                     modifier = Modifier.padding(top = Spacing.xs),
                 )
             }
+
+            // Location / website / joined - stacked one per line rather
+            // than page.tsx's own flex-wrap row: this app's smallest
+            // supported width (320dp) can't reliably fit two-plus of
+            // these side by side without either overflowing or wrapping
+            // mid-item, and a vertical stack can't overflow horizontally
+            // at all - the same real fields (UserProfile.location/
+            // website/createdAt), just laid out for a narrower viewport.
+            Column(modifier = Modifier.padding(top = Spacing.xs)) {
+                if (!profile.location.isNullOrBlank()) {
+                    ProfileMetaRow(icon = Icons.Filled.LocationOn, text = profile.location.removePrefix("@"))
+                }
+                if (!profile.website.isNullOrBlank()) {
+                    val uriHandler = LocalUriHandler.current
+                    val displayUrl = profile.website.removePrefix("https://").removePrefix("http://")
+                    ProfileMetaRow(
+                        icon = Icons.Filled.Link,
+                        text = displayUrl,
+                        color = ZrpRed,
+                        modifier = Modifier.clickable { uriHandler.openUri(profile.website) },
+                    )
+                }
+                ProfileMetaRow(
+                    icon = Icons.Filled.CalendarMonth,
+                    text = stringResource(R.string.profile_joined) + " " + formatProfileJoinDate(profile.createdAt),
+                )
+            }
+
+            // Charity note - a real, static fact about ZRP's business
+            // model (the same 35% used site-wide: footer.charityBadge,
+            // about.value3Desc, settings.platformFeeNote), NOT the
+            // page.tsx "impact: N meals" badge next to it on web - that
+            // number is Math.floor(Math.random() * 50) + 5, regenerated
+            // on every page load, not real per-account data. Reusing it
+            // natively would mean inventing fake data, which the master
+            // directive explicitly forbids; the honest fix is to drop
+            // it, not port a fake number faithfully.
+            Text(
+                text = stringResource(R.string.profile_charity_note, "35"),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = Spacing.xs),
+            )
         }
 
         Row(
@@ -691,10 +754,23 @@ private fun ProfileHeader(
 
             Column(modifier = Modifier.weight(1f).padding(start = Spacing.sm)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Title gets weight(fill = false) so it's measured
+                    // AFTER the badge below - the badge always renders at
+                    // its own natural, un-wrapped width, and the title
+                    // ellipsizes instead if the two don't both fit. The
+                    // reverse (title measured first, unweighted) is what
+                    // squeezed the badge's remaining width so narrow that
+                    // "Confiance" wrapped mid-word in French - the same
+                    // failure mode this needs to avoid in every one of
+                    // the 11 supported languages, not just work around it
+                    // for this one string.
                     Text(
                         text = stringResource(R.string.profile_trust_passport_title),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
                     )
                     Surface(shape = MaterialTheme.shapes.extraLarge, color = ZrpRed.copy(alpha = 0.1f), modifier = Modifier.padding(start = Spacing.xs)) {
                         Text(
@@ -702,6 +778,8 @@ private fun ProfileHeader(
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = ZrpRed,
+                            maxLines = 1,
+                            softWrap = false,
                             modifier = Modifier.padding(horizontal = Spacing.xs, vertical = 1.dp),
                         )
                     }
@@ -742,4 +820,56 @@ private fun ProfileStat(count: Int, label: String, onClick: (() -> Unit)? = null
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+}
+
+/**
+ * One icon+text line in the location/website/joined block - see the
+ * call site's own comment for why these stack vertically here instead
+ * of page.tsx's flex-wrap row.
+ */
+@Composable
+private fun ProfileMetaRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    text: String,
+    color: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.padding(top = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(14.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = color,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(start = Spacing.xs),
+        )
+    }
+}
+
+// Locale-aware month+year, e.g. "July 2026" / "juillet 2026" - unlike
+// TrustFormatting.kt's own formatTrustJoinDate (deliberately hardcoded
+// to en-US to match a DIFFERENT web page's own hardcoded
+// toLocaleDateString("en-US", ...) call), page.tsx's profile join date
+// uses `localeMap[language] || "en-US"` - it IS locale-aware there, so
+// this uses the device's current Locale (already set by Settings >
+// Language via AppCompatDelegate) rather than copying Trust's English-
+// only behavior onto a screen where web itself doesn't do that.
+private val profileIsoFormat = ThreadLocal.withInitial {
+    java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US).apply {
+        timeZone = java.util.TimeZone.getTimeZone("UTC")
+    }
+}
+
+private fun formatProfileJoinDate(iso: String): String {
+    val date = try {
+        profileIsoFormat.get()!!.parse(iso)
+    } catch (_: Exception) {
+        null
+    } ?: return ""
+    val formatter = java.text.SimpleDateFormat("MMMM yyyy", java.util.Locale.getDefault())
+    return formatter.format(date)
 }

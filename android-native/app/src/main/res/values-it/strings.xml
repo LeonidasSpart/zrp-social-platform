@@ -1231,4 +1231,7 @@
     <string name="legal_terms">Termini di servizio</string>
     <string name="legal_privacy">Informativa sulla privacy</string>
     <string name="legal_guidelines">Linee guida della community</string>
+    <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
+    <string name="profile_joined">Iscritto dal</string>
+    <string name="profile_charity_note">Il %1$s%% dei profitti va in beneficenza</string>
 </resources>
