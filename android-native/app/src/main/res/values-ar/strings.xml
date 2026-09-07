@@ -808,4 +808,16 @@
     <string name="news_category_community">المجتمع</string>
     <string name="news_title">أخبار ZRP</string>
     <string name="news_discover_entry">اكتشف ZRP News</string>
+    <!-- ZRP Shorts (native parity) -->
+    <string name="shorts_back">رجوع</string>
+    <string name="shorts_post_a_short">نشر مقطع قصير</string>
+    <string name="shorts_mute">كتم الصوت</string>
+    <string name="shorts_unmute">تفعيل الصوت</string>
+    <string name="shorts_no_shorts_yet">لا توجد مقاطع قصيرة بعد. كن أول من ينشر واحدًا.</string>
+    <string name="shorts_like">إعجاب</string>
+    <string name="shorts_repost">إعادة نشر</string>
+    <string name="shorts_share">مشاركة</string>
+    <string name="shorts_share_post_by">منشور من %1$s</string>
+    <string name="shorts_comment">التعليقات</string>
+    <string name="shorts_discover_entry">اكتشف Shorts</string>
 </resources>

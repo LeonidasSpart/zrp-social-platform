@@ -808,4 +808,16 @@
     <string name="news_category_community">Сообщество</string>
     <string name="news_title">Новости ZRP</string>
     <string name="news_discover_entry">Открыть ZRP News</string>
+    <!-- ZRP Shorts (native parity) -->
+    <string name="shorts_back">Назад</string>
+    <string name="shorts_post_a_short">Опубликовать Shorts</string>
+    <string name="shorts_mute">Выключить звук</string>
+    <string name="shorts_unmute">Включить звук</string>
+    <string name="shorts_no_shorts_yet">Пока нет роликов Shorts. Станьте первым, кто опубликует.</string>
+    <string name="shorts_like">Нравится</string>
+    <string name="shorts_repost">Репост</string>
+    <string name="shorts_share">Поделиться</string>
+    <string name="shorts_share_post_by">Публикация от %1$s</string>
+    <string name="shorts_comment">Комментарии</string>
+    <string name="shorts_discover_entry">Открыть Shorts</string>
 </resources>

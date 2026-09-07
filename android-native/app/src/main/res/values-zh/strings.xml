@@ -808,4 +808,16 @@
     <string name="news_category_community">社区</string>
     <string name="news_title">ZRP 新闻</string>
     <string name="news_discover_entry">发现 ZRP News</string>
+    <!-- ZRP Shorts (native parity) -->
+    <string name="shorts_back">返回</string>
+    <string name="shorts_post_a_short">发布短视频</string>
+    <string name="shorts_mute">静音</string>
+    <string name="shorts_unmute">取消静音</string>
+    <string name="shorts_no_shorts_yet">暂无短视频。快来发布第一个吧。</string>
+    <string name="shorts_like">点赞</string>
+    <string name="shorts_repost">转发</string>
+    <string name="shorts_share">分享</string>
+    <string name="shorts_share_post_by">来自 %1$s 的帖子</string>
+    <string name="shorts_comment">评论</string>
+    <string name="shorts_discover_entry">发现 Shorts</string>
 </resources>

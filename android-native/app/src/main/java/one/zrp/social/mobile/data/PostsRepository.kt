@@ -33,6 +33,10 @@ class PostsRepository {
         ApiClient.postsApi.getFollowingFeed(cursor = cursor)
     }
 
+    suspend fun getVideos(cursor: String? = null): Result<PostsPage> = runCatching {
+        ApiClient.postsApi.getVideos(cursor = cursor)
+    }
+
     suspend fun toggleLike(postId: String): Result<LikeResponse> = runCatching {
         ApiClient.postsApi.toggleLike(postId)
     }

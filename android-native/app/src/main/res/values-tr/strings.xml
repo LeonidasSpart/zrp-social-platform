@@ -808,4 +808,16 @@
     <string name="news_category_community">Topluluk</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">ZRP News\'i Keşfet</string>
+    <!-- ZRP Shorts (native parity) -->
+    <string name="shorts_back">Geri</string>
+    <string name="shorts_post_a_short">Short Paylaş</string>
+    <string name="shorts_mute">Sessize al</string>
+    <string name="shorts_unmute">Sesi aç</string>
+    <string name="shorts_no_shorts_yet">Henüz Short yok. İlk paylaşan siz olun.</string>
+    <string name="shorts_like">Beğen</string>
+    <string name="shorts_repost">Yeniden paylaş</string>
+    <string name="shorts_share">Paylaş</string>
+    <string name="shorts_share_post_by">%1$s kullanıcısının gönderisi</string>
+    <string name="shorts_comment">Yorumlar</string>
+    <string name="shorts_discover_entry">Shorts\'u Keşfet</string>
 </resources>
