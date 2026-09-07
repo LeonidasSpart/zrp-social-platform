@@ -38,12 +38,16 @@ android {
         targetSdkVersion 36
         // versionCode 1 ("1.0") is the existing Capacitor app's Internal
         // Testing release - confirmed via Play Console there is no
-        // Production release yet. This native app's first release is
-        // versionCode 2 so it can still be uploaded as a valid update to
-        // that same applicationId whenever it replaces the Capacitor
-        // build, per Play's per-applicationId monotonically-increasing
-        // versionCode requirement.
-        versionCode 2
+        // Production release yet. This native app's own first release
+        // was versionCode 2, per Play's per-applicationId monotonically-
+        // increasing versionCode requirement; Play Console rejected a
+        // later Internal Testing upload with "Le code de version 2 a
+        // déjà été utilisé" (versionCode 2 already used - a prior AAB
+        // with that code had already been uploaded), so this bumps to
+        // versionCode 3. versionName intentionally stays "1.0.0" - it's
+        // the human-facing label and this is still the same 1.0.0
+        // release, just a new build of it.
+        versionCode 3
         versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
