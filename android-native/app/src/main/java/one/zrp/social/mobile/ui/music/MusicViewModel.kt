@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.MusicRepository
+import one.zrp.social.mobile.network.MusicAlbumSummary
+import one.zrp.social.mobile.network.MusicArtistSummary
 import one.zrp.social.mobile.network.MusicTrack
 
 data class MusicUiState(
@@ -16,6 +18,8 @@ data class MusicUiState(
     val newReleases: List<MusicTrack> = emptyList(),
     val recentlyPlayed: List<MusicTrack> = emptyList(),
     val likedPreview: List<MusicTrack> = emptyList(),
+    val latestAlbums: List<MusicAlbumSummary> = emptyList(),
+    val popularArtists: List<MusicArtistSummary> = emptyList(),
     val error: String? = null,
 )
 
@@ -48,6 +52,8 @@ class MusicViewModel(private val repository: MusicRepository, private val player
                             newReleases = home.newReleases,
                             recentlyPlayed = home.recentlyPlayed,
                             likedPreview = home.likedPreview,
+                            latestAlbums = home.latestAlbums,
+                            popularArtists = home.popularArtists,
                             isLoading = false,
                         )
                     }

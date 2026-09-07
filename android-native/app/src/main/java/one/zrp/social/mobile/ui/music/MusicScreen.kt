@@ -24,8 +24,11 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Album
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.QueueMusic
 import androidx.compose.material.icons.filled.VerifiedUser
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -42,14 +45,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MusicRepository
+import one.zrp.social.mobile.network.MusicAlbumSummary
+import one.zrp.social.mobile.network.MusicArtistSummary
 import one.zrp.social.mobile.network.MusicTrack
+import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
@@ -62,7 +71,14 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * other Music screen.
  */
 @Composable
-fun MusicScreen(player: MusicPlayerViewModel, onBack: () -> Unit, onOpenQueue: () -> Unit) {
+fun MusicScreen(
+    player: MusicPlayerViewModel,
+    onBack: () -> Unit,
+    onOpenQueue: () -> Unit,
+    onOpenArtists: () -> Unit,
+    onArtistClick: (String) -> Unit,
+    onAlbumClick: (String) -> Unit,
+) {
     val viewModel: MusicViewModel = viewModel(
         factory = remember(player) { MusicViewModelFactory(MusicRepository(), player) },
     )
@@ -92,15 +108,25 @@ fun MusicScreen(player: MusicPlayerViewModel, onBack: () -> Unit, onOpenQueue: (
         }
         HorizontalDivider()
 
+        Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+            AssistChip(
+                onClick = onOpenArtists,
+                leadingIcon = { Icon(Icons.Filled.People, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                label = { Text(stringResource(R.string.music_artists_title)) },
+            )
+        }
+
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
         ) {
-            val hasAnyTracks = state.trending.isNotEmpty() ||
+            val hasAnyContent = state.trending.isNotEmpty() ||
                 state.newReleases.isNotEmpty() ||
                 state.recentlyPlayed.isNotEmpty() ||
-                state.likedPreview.isNotEmpty()
+                state.likedPreview.isNotEmpty() ||
+                state.latestAlbums.isNotEmpty() ||
+                state.popularArtists.isNotEmpty()
 
             when {
                 state.isLoading -> {
@@ -108,7 +134,7 @@ fun MusicScreen(player: MusicPlayerViewModel, onBack: () -> Unit, onOpenQueue: (
                         CircularProgressIndicator()
                     }
                 }
-                !hasAnyTracks -> {
+                !hasAnyContent -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         // "No tracks available yet." stays English-only on purpose -
                         // the website's own music.shell.emptyTitle/emptyBody point the
@@ -129,8 +155,8 @@ fun MusicScreen(player: MusicPlayerViewModel, onBack: () -> Unit, onOpenQueue: (
                 else -> {
                     // Section order matches MusicShell.tsx's own real
                     // home layout: Recently Played, Trending, Liked
-                    // preview, New Releases (Latest Albums/Popular
-                    // Artists/Genres/Your Playlists follow in later
+                    // preview, New Releases, Latest Albums, Popular
+                    // Artists (Genres/Your Playlists follow in later
                     // phases, once their own destination screens exist).
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         if (state.recentlyPlayed.isNotEmpty()) {
@@ -171,6 +197,16 @@ fun MusicScreen(player: MusicPlayerViewModel, onBack: () -> Unit, onOpenQueue: (
                                     currentTrackId = playerState.currentTrack?.id,
                                     onTrackClick = { viewModel.onTrackClick(it, state.newReleases) },
                                 )
+                            }
+                        }
+                        if (state.latestAlbums.isNotEmpty()) {
+                            item {
+                                LatestAlbumsSection(albums = state.latestAlbums, onAlbumClick = onAlbumClick)
+                            }
+                        }
+                        if (state.popularArtists.isNotEmpty()) {
+                            item {
+                                PopularArtistsSection(artists = state.popularArtists, onArtistClick = onArtistClick)
                             }
                         }
                     }
@@ -275,6 +311,108 @@ private fun TrackCard(track: MusicTrack, isCurrent: Boolean, onClick: () -> Unit
                         .padding(start = 3.dp)
                         .size(12.dp),
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LatestAlbumsSection(albums: List<MusicAlbumSummary>, onAlbumClick: (String) -> Unit) {
+    Column {
+        Text(
+            text = stringResource(R.string.music_shell_latest_albums_heading),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        )
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            items(albums, key = { it.id }) { album ->
+                Column(
+                    modifier = Modifier
+                        .width(130.dp)
+                        .clickable { onAlbumClick(album.id) },
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(130.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                    ) {
+                        if (album.coverUrl != null) {
+                            AsyncImage(
+                                model = album.coverUrl,
+                                contentDescription = album.title,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        } else {
+                            Icon(imageVector = Icons.Filled.Album, contentDescription = album.title, modifier = Modifier.fillMaxSize())
+                        }
+                    }
+                    Text(
+                        text = album.title,
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = Spacing.xs),
+                    )
+                    Text(
+                        text = album.artist.displayName +
+                            (if (album.totalDurationSec > 0) " • ${formatTotalDuration(album.totalDurationSec)}" else ""),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PopularArtistsSection(artists: List<MusicArtistSummary>, onArtistClick: (String) -> Unit) {
+    Column {
+        Text(
+            text = stringResource(R.string.music_shell_popular_artists_heading),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        )
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            items(artists, key = { it.id }) { artist ->
+                Column(
+                    modifier = Modifier
+                        .width(96.dp)
+                        .clickable { onArtistClick(artist.id) },
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Avatar(url = artist.avatarUrl, name = artist.displayName, size = 80.dp)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = artist.displayName,
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(top = 6.dp),
+                        )
+                        if (artist.verified) {
+                            Icon(
+                                imageVector = Icons.Filled.VerifiedUser,
+                                contentDescription = stringResource(R.string.music_verified_artist),
+                                tint = ZrpRed,
+                                modifier = Modifier
+                                    .padding(start = 3.dp, top = 6.dp)
+                                    .size(12.dp),
+                            )
+                        }
+                    }
+                }
             }
         }
     }

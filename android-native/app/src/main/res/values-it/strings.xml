@@ -259,4 +259,39 @@
     <string name="music_queue_up_next">In arrivo (%1$d)</string>
     <string name="music_queue_play_now_aria">Riproduci %1$s ora</string>
     <string name="music_queue_remove_aria">Rimuovi %1$s dalla coda</string>
+    <!-- Music Phase 2: Artists + Album detail -->
+    <string name="music_artists_title">Artisti</string>
+    <string name="music_artists_search_placeholder">Cerca artisti...</string>
+    <string name="music_artists_none_found">Nessun artista trovato</string>
+    <string name="music_artist_detail_not_found">Artista non trovato</string>
+    <string name="music_artist_detail_following">Segui già</string>
+    <string name="music_artist_detail_follow">Segui</string>
+    <string name="music_artist_detail_albums_heading">Album</string>
+    <string name="music_artist_detail_tracks_heading">Brani</string>
+    <string name="music_artist_detail_no_tracks">Ancora nessun brano pubblicato</string>
+    <string name="music_artist_detail_singles_heading">Singoli</string>
+    <string name="music_album_detail_not_found">Album non trovato</string>
+    <string name="music_album_detail_eyebrow">Album</string>
+    <string name="music_album_detail_no_tracks">Ancora nessun brano pubblicato in questo album</string>
+    <string name="music_album_detail_released_label">Uscito il</string>
+    <string name="music_common_play_all">Riproduci tutto</string>
+    <string name="music_common_shuffle">Casuale</string>
+    <string name="music_common_add_to_queue">Aggiungi alla coda</string>
+    <string name="music_common_play_next">Riproduci come prossimo</string>
+    <string name="music_track_empty_default_title">Ancora niente qui</string>
+    <string name="music_duration_minutes">%1$d min</string>
+    <string name="music_duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="music_duration_hours_only">%1$d h</string>
+    <string name="music_shell_play_track_aria">Riproduci %1$s</string>
+    <string name="music_track_pause_aria">Metti in pausa %1$s</string>
+    <plurals name="music_count_tracks">
+        <item quantity="one">%1$d brano</item>
+        <item quantity="other">%1$d brani</item>
+    </plurals>
+    <plurals name="music_count_followers">
+        <item quantity="one">%1$d follower</item>
+        <item quantity="other">%1$d follower</item>
+    </plurals>
+    <string name="music_shell_latest_albums_heading">Ultimi album</string>
+    <string name="music_shell_popular_artists_heading">Artisti popolari</string>
 </resources>

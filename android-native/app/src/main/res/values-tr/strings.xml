@@ -259,4 +259,39 @@
     <string name="music_queue_up_next">Sırada (%1$d)</string>
     <string name="music_queue_play_now_aria">%1$s şarkısını şimdi çal</string>
     <string name="music_queue_remove_aria">%1$s şarkısını sıradan kaldır</string>
+    <!-- Music Phase 2: Artists + Album detail -->
+    <string name="music_artists_title">Sanatçılar</string>
+    <string name="music_artists_search_placeholder">Sanatçı ara...</string>
+    <string name="music_artists_none_found">Sanatçı bulunamadı</string>
+    <string name="music_artist_detail_not_found">Sanatçı bulunamadı</string>
+    <string name="music_artist_detail_following">Takip ediliyor</string>
+    <string name="music_artist_detail_follow">Takip et</string>
+    <string name="music_artist_detail_albums_heading">Albümler</string>
+    <string name="music_artist_detail_tracks_heading">Şarkılar</string>
+    <string name="music_artist_detail_no_tracks">Henüz yayınlanmış şarkı yok</string>
+    <string name="music_artist_detail_singles_heading">Tekliler</string>
+    <string name="music_album_detail_not_found">Albüm bulunamadı</string>
+    <string name="music_album_detail_eyebrow">Albüm</string>
+    <string name="music_album_detail_no_tracks">Bu albümde henüz yayınlanmış şarkı yok</string>
+    <string name="music_album_detail_released_label">Yayın tarihi</string>
+    <string name="music_common_play_all">Tümünü oynat</string>
+    <string name="music_common_shuffle">Karışık çal</string>
+    <string name="music_common_add_to_queue">Sıraya ekle</string>
+    <string name="music_common_play_next">Sonraki olarak çal</string>
+    <string name="music_track_empty_default_title">Burada henüz bir şey yok</string>
+    <string name="music_duration_minutes">%1$d dk</string>
+    <string name="music_duration_hours_minutes">%1$d sa %2$d dk</string>
+    <string name="music_duration_hours_only">%1$d sa</string>
+    <string name="music_shell_play_track_aria">%1$s şarkısını çal</string>
+    <string name="music_track_pause_aria">%1$s şarkısını duraklat</string>
+    <plurals name="music_count_tracks">
+        <item quantity="one">%1$d şarkı</item>
+        <item quantity="other">%1$d şarkı</item>
+    </plurals>
+    <plurals name="music_count_followers">
+        <item quantity="one">%1$d takipçi</item>
+        <item quantity="other">%1$d takipçi</item>
+    </plurals>
+    <string name="music_shell_latest_albums_heading">En Son Albümler</string>
+    <string name="music_shell_popular_artists_heading">Popüler Sanatçılar</string>
 </resources>
