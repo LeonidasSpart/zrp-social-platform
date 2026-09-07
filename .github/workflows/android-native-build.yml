@@ -151,6 +151,26 @@ jobs:
             echo "::warning::Release signing NOT configured or the provided secrets failed validation - this .aab is UNSIGNED. Do not upload it to Google Play Console."
           fi
 
+      # A certificate's SHA-256 fingerprint is the public half of the
+      # signing key pair - the same value Play Console itself displays
+      # under App Integrity, and exactly what a
+      # https://zrp.one/.well-known/assetlinks.json needs to turn on
+      # verified Android App Links (see AndroidManifest.xml's intent-filter
+      # comment on android:autoVerify). Safe to print: unlike the keystore
+      # passwords or the .jks file itself, this is meant to be published.
+      - name: Print release certificate fingerprint (for assetlinks.json)
+        if: always()
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          KEYSTORE_PATH="$RUNNER_TEMP/zrp-native-release.keystore"
+          if [ ! -f "$KEYSTORE_PATH" ]; then
+            echo "No keystore was decoded this run - nothing to fingerprint."
+            exit 0
+          fi
+          keytool -list -v -keystore "$KEYSTORE_PATH" -alias "$ANDROID_KEY_ALIAS" -storepass "$ANDROID_KEYSTORE_PASSWORD" 2>/dev/null | grep "SHA256:"
+
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
