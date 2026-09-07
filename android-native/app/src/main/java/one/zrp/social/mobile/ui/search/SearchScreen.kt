@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.VolunteerActivism
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
@@ -67,6 +68,7 @@ fun SearchScreen(
     onOpenMarketplace: () -> Unit,
     onOpenOpportunity: () -> Unit,
     onOpenAid: () -> Unit,
+    onOpenPlay: () -> Unit,
     onOpenComments: (postId: String) -> Unit,
     onOpenQuotePost: (postId: String) -> Unit = {},
     onOpenReposts: (postId: String) -> Unit = {},
@@ -114,6 +116,7 @@ fun SearchScreen(
                 onOpenMarketplace = onOpenMarketplace,
                 onOpenOpportunity = onOpenOpportunity,
                 onOpenAid = onOpenAid,
+                onOpenPlay = onOpenPlay,
             )
         } else {
             SearchResultsContent(
@@ -220,6 +223,7 @@ private fun DiscoverContent(
     onOpenMarketplace: () -> Unit,
     onOpenOpportunity: () -> Unit,
     onOpenAid: () -> Unit,
+    onOpenPlay: () -> Unit,
 ) {
     if (state.isLoadingDiscover) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -240,6 +244,9 @@ private fun DiscoverContent(
         }
         item {
             AidEntryRow(onClick = onOpenAid)
+        }
+        item {
+            PlayEntryRow(onClick = onOpenPlay)
         }
 
         if (state.trendingHashtags.isNotEmpty()) {
@@ -485,6 +492,25 @@ private fun AidEntryRow(onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(text = stringResource(R.string.aid_discover_entry), style = MaterialTheme.typography.titleSmall)
+    }
+}
+
+@Composable
+private fun PlayEntryRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.SportsEsports,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text = stringResource(R.string.play_discover_entry), style = MaterialTheme.typography.titleSmall)
     }
 }
 
