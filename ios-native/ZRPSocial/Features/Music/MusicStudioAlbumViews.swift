@@ -549,7 +549,7 @@ struct MusicCoverPickerRow: View {
                     onProgress: { _ in }
                 ) else { return }
                 upload.url = result.url
-                upload.key = result.key
+                upload.key = result.key ?? ""
             }
         }
     }

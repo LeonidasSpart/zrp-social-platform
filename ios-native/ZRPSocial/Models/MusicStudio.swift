@@ -159,7 +159,7 @@ struct StudioAlbum: Decodable, Identifiable, Equatable {
 /// whole transfer.
 struct PendingMusicUpload: Equatable {
     let audioUrl: String
-    let audioKey: String
+    let audioKey: String?
     let coverUrl: String?
     let coverKey: String?
     let durationSec: Int?

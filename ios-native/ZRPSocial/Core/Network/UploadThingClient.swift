@@ -35,7 +35,12 @@ struct UploadedMedia: Equatable {
     /// the URL (`audioKey`, `coverKey`) so the server can delete the
     /// stored file when a track or album is deleted - without it, a
     /// deleted track leaves its audio orphaned in storage forever.
-    let key: String
+    ///
+    /// Optional because not every `UploadedMedia` came from an upload: a
+    /// GIF chosen from the GIF picker is a third-party URL that ZRP
+    /// never stored, so it genuinely has no key. The music routes accept
+    /// a null key for the same reason.
+    let key: String?
 }
 
 /// A native client for UploadThing's wire protocol.

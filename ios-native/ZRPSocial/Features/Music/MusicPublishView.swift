@@ -228,8 +228,6 @@ struct MusicPublishView: View {
             return .musicStudioUploading
         case .publishing:
             return .musicShellPublishing
-        case .checkingFile:
-            return .musicStudioCheckingFile
         case .idle:
             return viewModel.pendingUpload == nil ? .musicShellPublishTrack : .musicStudioRetryPublish
         }

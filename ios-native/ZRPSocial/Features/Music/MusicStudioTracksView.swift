@@ -255,7 +255,7 @@ struct MusicTrackEditView: View {
                 // is what returns the storage key the track row needs.
                 let uploaded = try await uploader.upload(picked.asUploadCandidate(), to: .musicTrack) { _ in }
                 coverUrl = uploaded.url
-                coverKey = uploaded.key
+                coverKey = uploaded.key ?? ""
                 error = nil
             } catch {
                 self.error = L10n.string(.musicShellUploadFailedDefault)

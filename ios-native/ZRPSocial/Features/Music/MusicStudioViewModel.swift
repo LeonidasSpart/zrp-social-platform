@@ -22,7 +22,6 @@ final class MusicStudioViewModel: ObservableObject {
     /// identical to uploading made it easy to mistake for a freeze.
     enum PublishStage: Equatable {
         case idle
-        case checkingFile
         case uploading(progress: Double)
         case publishing
     }
@@ -239,10 +238,6 @@ final class MusicStudioViewModel: ObservableObject {
     func discardPendingUpload() {
         pendingUpload = nil
         publishError = nil
-    }
-
-    func setUploadStage(_ stage: PublishStage) {
-        publishStage = stage
     }
 
     func reportPickFailure(_ error: PickedAudioFile.PickError, fileName: String) {
