@@ -9,6 +9,8 @@
 "nav.messages" = "私信";
 "nav.profile" = "个人资料";
 "nav.bookmarks" = "收藏";
+"nav.more" = "更多";
+"nav.marketplace" = "市场";
 "nav.settings" = "设置";
 "nav.signOut" = "退出登录";
 "auth.welcomeTitle" = "ZRP 社交";

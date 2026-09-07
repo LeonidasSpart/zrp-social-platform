@@ -9,6 +9,8 @@
 "nav.messages" = "الرسائل";
 "nav.profile" = "الملف الشخصي";
 "nav.bookmarks" = "المحفوظات";
+"nav.more" = "المزيد";
+"nav.marketplace" = "السوق";
 "nav.settings" = "الإعدادات";
 "nav.signOut" = "تسجيل الخروج";
 "auth.welcomeTitle" = "ZRP اجتماعي";

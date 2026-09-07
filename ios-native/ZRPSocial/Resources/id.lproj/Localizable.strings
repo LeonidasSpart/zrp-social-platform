@@ -9,6 +9,8 @@
 "nav.messages" = "Pesan";
 "nav.profile" = "Profil";
 "nav.bookmarks" = "Markah";
+"nav.more" = "Lainnya";
+"nav.marketplace" = "Marketplace";
 "nav.settings" = "Pengaturan";
 "nav.signOut" = "Keluar";
 "auth.welcomeTitle" = "ZRP Social";

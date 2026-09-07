@@ -16,6 +16,8 @@ nav.notifications
 nav.messages
 nav.profile
 nav.bookmarks
+nav.more
+nav.marketplace
 nav.settings
 nav.signOut
 

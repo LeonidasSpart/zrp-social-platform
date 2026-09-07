@@ -9,6 +9,8 @@
 "nav.messages" = "Mesajlar";
 "nav.profile" = "Profil";
 "nav.bookmarks" = "Yer İmleri";
+"nav.more" = "Daha Fazla";
+"nav.marketplace" = "Pazar Yeri";
 "nav.settings" = "Ayarlar";
 "nav.signOut" = "Çıkış Yap";
 "auth.welcomeTitle" = "ZRP Social";

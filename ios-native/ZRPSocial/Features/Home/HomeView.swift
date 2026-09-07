@@ -10,118 +10,25 @@ struct HomeView: View {
 
     @EnvironmentObject private var session: SessionController
     @EnvironmentObject private var interactions: PostInteractionStore
-    @StateObject private var navigator = Navigator()
+    @EnvironmentObject private var navigator: Navigator
+    @EnvironmentObject private var router: AppRouter
     @StateObject private var viewModel = HomeViewModel()
-    @State private var isComposing = false
     @StateObject private var stories = StoriesViewModel()
     @State private var isCreatingStory = false
     @State private var openStory: StoryPresentation?
-    @StateObject private var unread = UnreadBadgeViewModel()
 
     var body: some View {
-        NavigationStack(path: $navigator.path) {
-            VStack(spacing: 0) {
-                tabPicker
-                Divider().overlay(ZrpColor.outline)
-                storiesHeader
-                feed
-            }
-            .background(ZrpColor.background.ignoresSafeArea())
-            .navigationTitle(Text(.navHome))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { toolbarContent }
-            .overlay(alignment: .bottomTrailing) { composeButton }
-            .navigationDestination(for: Route.self) { route in
-                switch route {
-                case .postDetail(let postId, let preloaded):
-                    PostDetailView(postId: postId, preloaded: preloaded)
-                case .profile(let username):
-                    ProfileView(username: username)
-                case .hashtag(let tag):
-                    HashtagView(tag: tag)
-                case .userList(let source):
-                    UserListView(source: source)
-                case .postQuotes(let postId):
-                    PostQuotesView(postId: postId)
-                case .messages:
-                    MessagesListView()
-                case .conversation(let partner):
-                    ConversationView(partner: partner, viewerId: session.currentUser?.id)
-                case .notifications:
-                    NotificationsView { unread.clearNotificationCount() }
-                case .search:
-                    SearchView()
-                case .music:
-                    MusicHomeView()
-                case .musicDiscover:
-                    MusicDiscoverView()
-                case .musicArtists:
-                    MusicArtistsView()
-                case .musicAlbums:
-                    MusicAlbumsView()
-                case .musicPlaylists:
-                    MusicPlaylistsView()
-                case .musicArtist(let id):
-                    MusicArtistDetailView(artistId: id)
-                case .musicAlbum(let id):
-                    MusicAlbumDetailView(albumId: id)
-                case .musicPlaylist(let id):
-                    MusicPlaylistDetailView(playlistId: id)
-                case .musicLiked:
-                    MusicLibraryListView(kind: .liked)
-                case .musicHistory:
-                    MusicLibraryListView(kind: .history)
-                case .musicQueue:
-                    MusicQueueView()
-                case .musicStudio:
-                    MusicStudioView()
-                case .marketplace:
-                    MarketplaceView()
-                case .listingDetail(let id):
-                    ListingDetailView(listingId: id)
-                case .listingCompose(let listingId):
-                    ListingComposerView(listingId: listingId)
-                case .myListings:
-                    MyListingsView()
-                case .listingFavorites:
-                    ListingFavoritesView()
-                case .settings:
-                    SettingsView()
-                case .privacySettings:
-                    PrivacySettingsView()
-                case .changePassword:
-                    ChangePasswordView()
-                case .blockedUsers:
-                    ModerationListView(kind: .blocked)
-                case .mutedUsers:
-                    ModerationListView(kind: .muted)
-                case .dataExport:
-                    DataExportView()
-                case .deleteAccount:
-                    DeleteAccountView()
-                case .languagePicker:
-                    LanguagePickerView()
-                case .editProfile:
-                    EditProfileView()
-                case .accountSettings:
-                    AccountSettingsView()
-                case .emailPreferences:
-                    EmailPreferencesView()
-                case .appeals:
-                    AppealsView()
-                case .trustPassport(let username):
-                    TrustPassportView(username: username)
-                case .listingConversation(let partner, let draft):
-                    ConversationView(
-                        partner: partner,
-                        viewerId: session.currentUser?.id,
-                        initialDraft: draft
-                    )
-                }
-            }
+        VStack(spacing: 0) {
+            tabPicker
+            Divider().overlay(ZrpColor.outline)
+            storiesHeader
+            feed
         }
-        .environmentObject(navigator)
-        .sheet(isPresented: $isComposing) {
+        .background(ZrpColor.background.ignoresSafeArea())
+        .navigationTitle(Text(.navHome))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar { toolbarContent }
+        .sheet(isPresented: $router.isComposing) {
             ComposeView { post in
                 viewModel.insertCreated(post, interactions: interactions)
             }
@@ -146,7 +53,6 @@ struct HomeView: View {
             viewModel.attach(interactions: interactions)
             viewModel.loadIfNeeded(viewModel.selectedTab)
             await stories.load()
-            await unread.refresh()
         }
         .onChange(of: viewModel.selectedTab) { _, tab in
             viewModel.loadIfNeeded(tab)
@@ -193,21 +99,12 @@ struct HomeView: View {
         }
     }
 
-    private var composeButton: some View {
-        Button {
-            isComposing = true
-        } label: {
-            Image(systemName: "square.and.pencil")
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(.white)
-                .frame(width: 56, height: 56)
-                .background(ZrpColor.red, in: Circle())
-                .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
-        }
-        .padding(ZrpSpacing.lg)
-        .accessibilityLabel(Text(.iosComposeTitle))
-    }
-
+    /// Home's toolbar carries only what has no tab of its own.
+    ///
+    /// Search, Notifications, Messages and Profile moved to the tab bar;
+    /// leaving duplicates here would give every one of them two controls
+    /// with different affordances. What remains is the ZRP mark and the
+    /// destinations the tab bar has no room for.
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .topBarLeading) {
@@ -218,67 +115,7 @@ struct HomeView: View {
                 .accessibilityHidden(true)
         }
         ToolbarItem(placement: .topBarTrailing) {
-            Button {
-                navigator.push(.search)
-            } label: {
-                Image(systemName: "magnifyingglass")
-            }
-            .accessibilityLabel(Text(.navSearch))
-        }
-        ToolbarItem(placement: .topBarTrailing) {
-            Button {
-                navigator.push(.notifications)
-            } label: {
-                Image(systemName: "bell")
-                    .overlay(alignment: .topTrailing) {
-                        // A real count from GET /api/notifications/unread.
-                        if unread.notificationCount > 0 {
-                            Circle()
-                                .fill(ZrpColor.red)
-                                .frame(width: 8, height: 8)
-                                .offset(x: 4, y: -2)
-                        }
-                    }
-            }
-            .accessibilityLabel(Text(.notificationsTitle))
-            .accessibilityValue(
-                Text(verbatim: unread.notificationCount > 0
-                    ? CountFormatting.exact(unread.notificationCount)
-                    : "")
-            )
-        }
-        ToolbarItem(placement: .topBarTrailing) {
-            Button {
-                navigator.push(.messages)
-            } label: {
-                Image(systemName: "bubble.left.and.bubble.right")
-                    .overlay(alignment: .topTrailing) {
-                        // A real count from GET /api/messages/unread -
-                        // never a placeholder dot.
-                        if unread.messageCount > 0 {
-                            Circle()
-                                .fill(ZrpColor.red)
-                                .frame(width: 8, height: 8)
-                                .offset(x: 4, y: -2)
-                        }
-                    }
-            }
-            .accessibilityLabel(Text(.messagesTitle))
-            .accessibilityValue(
-                Text(verbatim: unread.messageCount > 0
-                    ? CountFormatting.exact(unread.messageCount)
-                    : "")
-            )
-        }
-        ToolbarItem(placement: .topBarTrailing) {
             Menu {
-                if let username = session.currentUser?.username {
-                    Button {
-                        navigator.push(.profile(username: username))
-                    } label: {
-                        Label { Text(.navProfile) } icon: { Image(systemName: "person") }
-                    }
-                }
                 Button {
                     navigator.push(.music)
                 } label: {
@@ -287,7 +124,7 @@ struct HomeView: View {
                 Button {
                     navigator.push(.marketplace)
                 } label: {
-                    Label { Text(.marketplaceHeroTitle) } icon: { Image(systemName: "bag") }
+                    Label { Text(.navMarketplace) } icon: { Image(systemName: "bag") }
                 }
                 Button {
                     navigator.push(.settings)
@@ -304,12 +141,9 @@ struct HomeView: View {
                     }
                 }
             } label: {
-                AvatarView(
-                    url: session.currentUser?.avatarUrl,
-                    displayName: session.currentUser?.displayName ?? "",
-                    size: 28
-                )
+                Image(systemName: "ellipsis.circle")
             }
+            .accessibilityLabel(Text(.navMore))
         }
     }
 

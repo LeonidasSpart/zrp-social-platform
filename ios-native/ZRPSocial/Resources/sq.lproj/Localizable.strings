@@ -9,6 +9,8 @@
 "nav.messages" = "Mesazhet";
 "nav.profile" = "Profili";
 "nav.bookmarks" = "Ruajtur";
+"nav.more" = "Më shumë";
+"nav.marketplace" = "Marketplace";
 "nav.settings" = "Cilësimet";
 "nav.signOut" = "Dil";
 "auth.welcomeTitle" = "ZRP Social";

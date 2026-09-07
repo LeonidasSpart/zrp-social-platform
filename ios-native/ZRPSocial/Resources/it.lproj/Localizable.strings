@@ -9,6 +9,8 @@
 "nav.messages" = "Messaggi";
 "nav.profile" = "Profilo";
 "nav.bookmarks" = "Preferiti";
+"nav.more" = "Altro";
+"nav.marketplace" = "Marketplace";
 "nav.settings" = "Impostazioni";
 "nav.signOut" = "Esci";
 "auth.welcomeTitle" = "ZRP Social";
