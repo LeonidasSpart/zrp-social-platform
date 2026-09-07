@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.HorizontalDivider
@@ -51,6 +52,16 @@ import one.zrp.social.mobile.ui.theme.Spacing
  * Security do below - the website's own CATEGORIES array hardcodes
  * that exact label untranslated too.
  *
+ * Journalist routes to JournalistDashboardScreen - the same real
+ * /journalist page the website reaches from two separate places (a
+ * Sidebar link shown only once already a journalist, and a footer
+ * link to apply otherwise), both landing on the exact same page and
+ * its own internal status branching. One entry point here is
+ * functionally equivalent regardless of the viewer's current
+ * status. Unlike "Monetization", this label uses the website's own
+ * real translated "nav.journalist" string (nav_journalist) rather
+ * than an untranslated literal.
+ *
  * Every label here is a string resource with real translations for
  * all 11 official ZRP languages (extracted from the website's own
  * src/lib/translations.ts) - see the per-language values directories
@@ -68,6 +79,7 @@ fun SettingsScreen(
     onOpenPrivacy: () -> Unit,
     onOpenLanguage: () -> Unit,
     onOpenCreator: () -> Unit,
+    onOpenJournalist: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -94,6 +106,7 @@ fun SettingsScreen(
         SettingsRow(icon = Icons.Filled.Language, label = stringResource(R.string.nav_language), onClick = onOpenLanguage)
         // "Monetization" stays English-only - see this file's own KDoc.
         SettingsRow(icon = Icons.Filled.CreditCard, label = "Monetization", onClick = onOpenCreator)
+        SettingsRow(icon = Icons.Filled.Newspaper, label = stringResource(R.string.nav_journalist), onClick = onOpenJournalist)
     }
 }
 
