@@ -52,10 +52,12 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * calling the same real, shared POST /auth/register and GET
  * /auth/check-username the website's own /signup page uses (no
  * mobile-specific registration endpoint exists, since creating an
- * account needs no session cookie). Google/Apple sign-up are real,
- * live options on web's own signup page but are a disclosed follow-up
- * here - they need a native OAuth SDK integration this slice doesn't
- * add, not a missing translation or a smaller gap.
+ * account needs no session cookie). Google sign-up shares
+ * GoogleSignInButton with LoginScreen - the same find-or-create backend
+ * call handles both a new and a returning account (see
+ * /mobile/auth/google's own comment), so there's no separate "sign up
+ * with Google" request to make. Apple sign-up remains a disclosed
+ * follow-up.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -226,6 +228,18 @@ fun SignupScreen(authViewModel: AuthViewModel, onSignIn: () -> Unit) {
                 Text(stringResource(R.string.auth_create_account))
             }
         }
+
+        Text(
+            text = stringResource(R.string.auth_or),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 16.dp),
+        )
+
+        GoogleSignInButton(
+            enabled = !state.isSubmitting,
+            onIdToken = { idToken -> authViewModel.loginWithGoogle(idToken) },
+        )
 
         Row(modifier = Modifier.padding(top = 16.dp)) {
             Text(

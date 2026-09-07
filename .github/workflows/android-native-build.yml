@@ -50,9 +50,18 @@ jobs:
           yes | sdkmanager --licenses > /dev/null || true
           sdkmanager "platform-tools" "platforms;android-36"
 
+      # GOOGLE_WEB_CLIENT_ID isn't sensitive (OAuth client IDs are public
+      # identifiers, unlike a client secret) but is still sourced from a
+      # repo secret rather than hardcoded, matching keystore.properties'
+      # own "supplied at build time, never committed" pattern - see
+      # build.gradle's own comment. An empty/unset secret still builds
+      # fine (GoogleAuth.kt's call just fails at runtime with a clear
+      # error), so this never blocks a build that doesn't need it yet.
       - name: Build debug APK
         working-directory: android-native
-        run: ./gradlew assembleDebug --no-daemon
+        env:
+          GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+        run: ./gradlew assembleDebug --no-daemon "-PGOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -141,7 +150,9 @@ jobs:
 
       - name: Build release AAB
         working-directory: android-native
-        run: ./gradlew bundleRelease --no-daemon
+        env:
+          GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+        run: ./gradlew bundleRelease --no-daemon "-PGOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID"
 
       - name: Report signing status
         run: |

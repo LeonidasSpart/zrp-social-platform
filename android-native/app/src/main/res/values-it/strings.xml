@@ -199,6 +199,7 @@
     <string name="auth_resend_verification_already_verified">Questa email è già stata verificata. Effettua l\'accesso.</string>
     <string name="auth_resend_verification_error">Impossibile inviare l\'email di verifica. Riprova.</string>
     <string name="auth_or">o</string>
+    <string name="auth_continue_with_google">Continua con Google</string>
     <string name="auth_full_name">Nome completo</string>
     <string name="auth_username">Nome utente</string>
     <string name="auth_email">Email</string>

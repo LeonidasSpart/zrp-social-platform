@@ -199,6 +199,7 @@
     <string name="auth_resend_verification_already_verified">Bu e-posta zaten doğrulanmış. Lütfen giriş yapın.</string>
     <string name="auth_resend_verification_error">Doğrulama e-postası gönderilemedi. Lütfen tekrar deneyin.</string>
     <string name="auth_or">veya</string>
+    <string name="auth_continue_with_google">Google ile devam et</string>
     <string name="auth_full_name">Ad Soyad</string>
     <string name="auth_username">Kullanıcı adı</string>
     <string name="auth_email">E-posta</string>

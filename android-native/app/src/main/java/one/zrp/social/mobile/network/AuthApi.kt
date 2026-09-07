@@ -28,6 +28,11 @@ data class LoginResponse(
     val user: MobileUser,
 )
 
+// ─── Google Sign-In (POST /mobile/auth/google) ──────────────────────
+// Same LoginResponse shape as password login - the backend mints an
+// identical session token either way (see the route's own comment).
+data class GoogleLoginRequest(val idToken: String)
+
 data class ApiErrorBody(val error: String?, val code: String? = null)
 
 // ─── Registration (POST /auth/register) ────────────────────────────
@@ -78,6 +83,9 @@ interface AuthApi {
     // POST https://zrp.one/api/mobile/auth/login.
     @POST("mobile/auth/login")
     suspend fun login(@Body request: LoginRequest): LoginResponse
+
+    @POST("mobile/auth/google")
+    suspend fun loginWithGoogle(@Body request: GoogleLoginRequest): LoginResponse
 
     // NextAuth's own built-in endpoint, not one ZRP wrote - it reads
     // whatever session cookie is attached (ApiClient's interceptor
