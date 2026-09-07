@@ -67,6 +67,9 @@
     <string name="chat_say_hello">Поздоровайтесь с %1$s!</string>
     <string name="chat_delete_message">удалить сообщение</string>
     <string name="chat_delete_message_confirm">Вы уверены, что хотите удалить это сообщение?</string>
+    <string name="chat_live">В эфире</string>
+    <string name="chat_offline">не в сети</string>
+    <string name="chat_typing">Печатает...</string>
     <string name="action_edit">Изменить</string>
     <string name="action_reply">Ответить</string>
     <string name="feed_for_you">Для вас</string>

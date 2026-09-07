@@ -67,6 +67,9 @@
     <string name="chat_say_hello">Thoni përshëndetje për %1$s!</string>
     <string name="chat_delete_message">Fshi mesazhin</string>
     <string name="chat_delete_message_confirm">Jeni të sigurt që dëshironi ta fshini këtë mesazh?</string>
+    <string name="chat_live">Direkt</string>
+    <string name="chat_offline">Pa lidhje</string>
+    <string name="chat_typing">Duke shkruar...</string>
     <string name="action_edit">Ndrysho</string>
     <string name="action_reply">Përgjigju</string>
     <string name="feed_for_you">Për ju</string>

@@ -67,6 +67,9 @@
     <string name="chat_say_hello">跟 %1$s 打个招呼吧！</string>
     <string name="chat_delete_message">删除 消息</string>
     <string name="chat_delete_message_confirm">你确定要删除这条消息吗？</string>
+    <string name="chat_live">直播</string>
+    <string name="chat_offline">离线</string>
+    <string name="chat_typing">正在输入...</string>
     <string name="action_edit">编辑</string>
     <string name="action_reply">回复</string>
     <string name="feed_for_you">为你推荐</string>

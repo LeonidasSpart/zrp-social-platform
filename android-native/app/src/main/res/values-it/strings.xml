@@ -67,6 +67,9 @@
     <string name="chat_say_hello">Saluta %1$s!</string>
     <string name="chat_delete_message">Elimina messaggio</string>
     <string name="chat_delete_message_confirm">Sei sicuro di voler eliminare questo messaggio?</string>
+    <string name="chat_live">Online</string>
+    <string name="chat_offline">Offline</string>
+    <string name="chat_typing">Sta scrivendo...</string>
     <string name="action_edit">Modifica</string>
     <string name="action_reply">Rispondi</string>
     <string name="feed_for_you">Per te</string>

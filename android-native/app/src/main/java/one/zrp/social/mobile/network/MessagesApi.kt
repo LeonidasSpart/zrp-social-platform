@@ -22,13 +22,61 @@ data class ChatMessage(
     val read: Boolean,
     val edited: Boolean = false,
     val createdAt: String,
-    val sender: PostAuthor,
-    // Present on the send-message response, absent on the conversation
-    // history fetch - see MessagesApi's own KDoc.
+    // Both nullable, and neither is ever read by the UI (ConversationScreen
+    // renders from senderId/receiverId plus the screen's own nav params
+    // instead) - kept only because the real REST responses carry them.
+    // Nullable because the real-time "receive-message"/"message-sent"
+    // socket push carries a deliberately minimal payload with neither
+    // field (see server.js's send-message handler) - the same partial
+    // state ChatInterface.tsx itself renders with until its own next
+    // 5-second poll fills the row in, not a native-only gap.
+    val sender: PostAuthor?,
     val receiver: PostAuthor?,
     val replyTo: ChatMessage?,
     val reactions: List<MessageReaction> = emptyList(),
 )
+
+// The minimal shape server.js's send-message handler actually relays
+// over "receive-message"/"message-sent" - see the handler's own
+// `message = { id, senderId, receiverId, content, createdAt, read }`
+// literal. Deserialized separately from ChatMessage (rather than trying
+// to force the same type) since Gson would otherwise leave sender,
+// receiver, edited, replyTo and reactions silently absent for a type
+// that, on the REST fetch path, always has them.
+data class SocketMessagePreview(
+    val id: String,
+    val senderId: String,
+    val receiverId: String,
+    val content: String,
+    val createdAt: String,
+    val read: Boolean,
+) {
+    fun toChatMessage() = ChatMessage(
+        id = id,
+        content = content,
+        imageUrl = null,
+        senderId = senderId,
+        receiverId = receiverId,
+        read = read,
+        edited = false,
+        createdAt = createdAt,
+        sender = null,
+        receiver = null,
+        replyTo = null,
+        reactions = emptyList(),
+    )
+}
+
+// "edit-message"/"message-reaction" relays already carry the exact shape
+// their own originating REST call returned (see edit/[id]/route.ts and
+// reaction/[id]/route.ts), so those two are deserialized straight into
+// ChatMessage/MessageReaction - only delete/read/typing need their own
+// minimal shape below.
+data class SocketMessageEditedPayload(val message: ChatMessage)
+data class SocketMessageDeletedPayload(val messageId: String)
+data class SocketMessageReadPayload(val messageId: String)
+data class SocketReactionUpdatedPayload(val messageId: String, val reactions: List<MessageReaction>)
+data class SocketTypingPayload(val userId: String, val isTyping: Boolean)
 
 data class ConversationSummary(
     val partner: PostAuthor,
