@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The same 11 official ZRP languages as SupportedLanguages.kt's
+     SUPPORTED_LANGUAGES. Lets the OS's own Settings > Apps > ZRP Social >
+     Language screen offer the same language list and stay in sync with
+     whatever LanguageSettingsScreen sets via AppCompatDelegate, instead of
+     the two ever disagreeing about what this app supports. -->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="fr" />
+    <locale android:name="de" />
+    <locale android:name="it" />
+    <locale android:name="sq" />
+    <locale android:name="es" />
+    <locale android:name="ru" />
+    <locale android:name="ar" />
+    <locale android:name="zh" />
+    <locale android:name="tr" />
+    <locale android:name="id" />
+</locale-config>
