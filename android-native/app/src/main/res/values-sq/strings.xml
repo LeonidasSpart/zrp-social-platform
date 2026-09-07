@@ -1050,4 +1050,20 @@
     <string name="journalist_editor_upload_image">Ngarko foto</string>
     <string name="journalist_editor_uploading">Duke ngarkuar…</string>
     <string name="nav_journalist">Gazetar</string>
+    <!-- ZRP AI: chat page (ported from src/app/ai/, src/components/AI/) -->
+    <string name="ai_chat_ask_anything">Pyet ZRP AI çfarëdo</string>
+    <string name="ai_chat_charity_footer">🧡 35% e të ardhurave të ZRP AI shkojnë për bamirësi.</string>
+    <string name="ai_chat_err_could_not_generate">⚠️ Na vjen keq, nuk munda të gjeneroj një përgjigje. Ju lutemi provoni përsëri.</string>
+    <string name="ai_chat_err_failed_response">Marrja e përgjigjes dështoi</string>
+    <string name="ai_chat_get_help_chat">Merr ndihmë me postimet, mëso për ZRP-në, ose thjesht bisedo!</string>
+    <string name="ai_chat_input_placeholder">Pyet ZRP AI çfarëdo...</string>
+    <string name="ai_chat_new_chat">Bisedë e re</string>
+    <string name="ai_chat_powered_by_deepseek">Mundësuar nga DeepSeek</string>
+    <string name="ai_chat_remaining_today">%1$d të mbetura sot</string>
+    <string name="ai_chat_suggestion_35_charity">Shpjegim i 35% për bamirësi</string>
+    <string name="ai_chat_suggestion_what_is_zrp">Çfarë është ZRP?</string>
+    <string name="ai_chat_suggestion_write_charity">Shkruaj për bamirësinë</string>
+    <string name="ai_page_powered_by">Mundësuar nga DeepSeek · Me burim të hapur · Transparente</string>
+    <string name="ai_page_subtitle">Pyet çfarëdo. Merr ndihmë me postimet, mëso për ZRP-në, ose thjesht bisedo.</string>
+    <string name="ai_discover_entry">Zbulo ZRP AI</string>
 </resources>

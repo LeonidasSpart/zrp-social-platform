@@ -101,4 +101,5 @@ object ApiClient {
     val creatorApi: CreatorApi by lazy { retrofit.create(CreatorApi::class.java) }
     val trustApi: TrustApi by lazy { retrofit.create(TrustApi::class.java) }
     val journalistApi: JournalistApi by lazy { retrofit.create(JournalistApi::class.java) }
+    val aiApi: AiApi by lazy { retrofit.create(AiApi::class.java) }
 }

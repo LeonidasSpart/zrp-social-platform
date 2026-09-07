@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Newspaper
@@ -73,6 +74,7 @@ fun SearchScreen(
     onOpenPlay: () -> Unit,
     onOpenNews: () -> Unit,
     onOpenShorts: () -> Unit,
+    onOpenAi: () -> Unit,
     onOpenComments: (postId: String) -> Unit,
     onOpenQuotePost: (postId: String) -> Unit = {},
     onOpenReposts: (postId: String) -> Unit = {},
@@ -123,6 +125,7 @@ fun SearchScreen(
                 onOpenPlay = onOpenPlay,
                 onOpenNews = onOpenNews,
                 onOpenShorts = onOpenShorts,
+                onOpenAi = onOpenAi,
             )
         } else {
             SearchResultsContent(
@@ -232,6 +235,7 @@ private fun DiscoverContent(
     onOpenPlay: () -> Unit,
     onOpenNews: () -> Unit,
     onOpenShorts: () -> Unit,
+    onOpenAi: () -> Unit,
 ) {
     if (state.isLoadingDiscover) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -261,6 +265,9 @@ private fun DiscoverContent(
         }
         item {
             ShortsEntryRow(onClick = onOpenShorts)
+        }
+        item {
+            AiEntryRow(onClick = onOpenAi)
         }
 
         if (state.trendingHashtags.isNotEmpty()) {
@@ -563,6 +570,25 @@ private fun ShortsEntryRow(onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(text = stringResource(R.string.shorts_discover_entry), style = MaterialTheme.typography.titleSmall)
+    }
+}
+
+@Composable
+private fun AiEntryRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.AutoAwesome,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text = stringResource(R.string.ai_discover_entry), style = MaterialTheme.typography.titleSmall)
     }
 }
 

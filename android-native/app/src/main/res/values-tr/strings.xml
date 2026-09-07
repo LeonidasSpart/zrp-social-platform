@@ -1050,4 +1050,20 @@
     <string name="journalist_editor_upload_image">Görsel yükle</string>
     <string name="journalist_editor_uploading">Yükleniyor…</string>
     <string name="nav_journalist">Gazeteci</string>
+    <!-- ZRP AI: chat page (ported from src/app/ai/, src/components/AI/) -->
+    <string name="ai_chat_ask_anything">ZRP AI\'a her şeyi sorun</string>
+    <string name="ai_chat_charity_footer">🧡 ZRP AI gelirinin %35\'i hayır kurumlarına gidiyor.</string>
+    <string name="ai_chat_err_could_not_generate">⚠️ Üzgünüz, bir yanıt oluşturamadım. Lütfen tekrar deneyin.</string>
+    <string name="ai_chat_err_failed_response">Yanıt alınamadı</string>
+    <string name="ai_chat_get_help_chat">Gönderilerinizle ilgili yardım alın, ZRP hakkında bilgi edinin ya da sohbet edin!</string>
+    <string name="ai_chat_input_placeholder">ZRP AI\'a her şeyi sorun...</string>
+    <string name="ai_chat_new_chat">Yeni sohbet</string>
+    <string name="ai_chat_powered_by_deepseek">DeepSeek tarafından desteklenmektedir</string>
+    <string name="ai_chat_remaining_today">Bugün %1$d kaldı</string>
+    <string name="ai_chat_suggestion_35_charity">%35 hayır bağışı açıklaması</string>
+    <string name="ai_chat_suggestion_what_is_zrp">ZRP nedir?</string>
+    <string name="ai_chat_suggestion_write_charity">Hayır işleri hakkında yaz</string>
+    <string name="ai_page_powered_by">DeepSeek tarafından desteklenmektedir · Açık kaynak · Şeffaf</string>
+    <string name="ai_page_subtitle">Her şeyi sorun. Gönderilerinizle ilgili yardım alın, ZRP hakkında bilgi edinin ya da sohbet edin.</string>
+    <string name="ai_discover_entry">ZRP AI\'yi Keşfet</string>
 </resources>

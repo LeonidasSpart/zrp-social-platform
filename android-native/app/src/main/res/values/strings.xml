@@ -1069,4 +1069,20 @@
     <string name="journalist_editor_upload_image">Upload image</string>
     <string name="journalist_editor_uploading">Uploading…</string>
     <string name="nav_journalist">Journalist</string>
+    <!-- ZRP AI: chat page (ported from src/app/ai/, src/components/AI/) -->
+    <string name="ai_chat_ask_anything">Ask ZRP AI anything</string>
+    <string name="ai_chat_charity_footer">🧡 35% of ZRP AI revenue goes to charity.</string>
+    <string name="ai_chat_err_could_not_generate">⚠️ Sorry, I couldn\'t generate a response. Please try again.</string>
+    <string name="ai_chat_err_failed_response">Failed to get response</string>
+    <string name="ai_chat_get_help_chat">Get help with posts, learn about ZRP, or just chat!</string>
+    <string name="ai_chat_input_placeholder">Ask ZRP AI anything...</string>
+    <string name="ai_chat_new_chat">New chat</string>
+    <string name="ai_chat_powered_by_deepseek">Powered by DeepSeek</string>
+    <string name="ai_chat_remaining_today">%1$d remaining today</string>
+    <string name="ai_chat_suggestion_35_charity">35% charity explained</string>
+    <string name="ai_chat_suggestion_what_is_zrp">What is ZRP?</string>
+    <string name="ai_chat_suggestion_write_charity">Write about charity</string>
+    <string name="ai_page_powered_by">Powered by DeepSeek · Open-source · Transparent</string>
+    <string name="ai_page_subtitle">Ask anything. Get help with posts, learn about ZRP, or just chat.</string>
+    <string name="ai_discover_entry">Discover ZRP AI</string>
 </resources>
