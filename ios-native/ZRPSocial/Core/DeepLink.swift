@@ -79,6 +79,15 @@ enum DeepLink {
             // parameter is for.
             return DeepLinkTarget(.home, .shorts(startId: second))
 
+        case "support":
+            // /support is the composer on the web and /support/tickets is
+            // the list; both land on the list here, which offers the
+            // composer. /support/tickets/{id} opens that ticket.
+            if second == "tickets", let id = third {
+                return DeepLinkTarget(.home, .supportTicket(id: id))
+            }
+            return DeepLinkTarget(.home, .supportTickets)
+
         case "explore":
             // /explore, /explore/people and /explore/trending all land on
             // the same screen here - it carries both lists.

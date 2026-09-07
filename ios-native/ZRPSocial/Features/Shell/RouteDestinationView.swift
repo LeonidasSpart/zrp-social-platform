@@ -101,6 +101,10 @@ struct RouteDestinationView: View {
             NewsArticleView(slug: slug)
         case .explore:
             ExploreView()
+        case .supportTickets:
+            SupportTicketsView()
+        case .supportTicket(let id):
+            SupportTicketDetailView(ticketId: id)
         case .listingConversation(let partner, let draft):
             ConversationView(
                 partner: partner,

@@ -172,6 +172,16 @@ called and the real response being handled.
 | Delete a conversation | `DELETE /api/messages/conversation/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Image attachments | `POST /api/messages` + `imageUrl` (UploadThing `chatImage`, 4 MB); the route accepts an empty `content` **only** alongside an image and refuses both-empty with a 400 | ✅ | ✅ | ✅ one picture per message (the row stores a single `imageUrl`), uploaded on send rather than on selection, and a failed upload stops the send rather than silently dropping the picture | IMPLEMENTED |
 
+### Support
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| My tickets | `GET /api/support/tickets` — a bare array, newest first, unpaginated | ✅ | ✅ | ✅ no paging control, because there is nothing to page | IMPLEMENTED |
+| Open a ticket | `POST /api/support/tickets` — eleven categories, and the route sets priority from the opener's plan | ✅ | ✅ | ✅ priority is deliberately **not** a field: a client choosing its own would be asking for a queue position it has no right to | IMPLEMENTED |
+| Ticket thread | `GET /api/support/tickets/{id}` — 403 for a ticket the viewer does not own | ✅ | ✅ | ✅ status, category, priority, the opening message and every reply, with support's own replies marked | IMPLEMENTED |
+| Reply | `POST /api/support/tickets/{id}/reply` — refused on a resolved or closed ticket | ✅ | ✅ | ✅ the composer is not offered on one, and the thread is refetched after a reply because a reply also moves the ticket's status server-side | IMPLEMENTED |
+| Delete a ticket | `DELETE /api/support/tickets/{id}` — only once resolved or closed | ✅ | ✅ | ✅ offered only where the route would allow it | IMPLEMENTED |
+
 ### Explore
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
@@ -293,7 +303,7 @@ called and the real response being handled.
 | Admin console (`/api/admin/**`, 40+ routes) | STAFF/ADMIN — server-role gated. |
 | Tips, plan upgrade, premium-post purchase, help/charity contribution | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
 | Ads, Careers, Investors, Press, Transparency, API keys, Team | WEB-ONLY — Android has no surface for any of them either. |
-| Play, Opportunity, Aid/Help, Journalist, Creator Studio, AI chat, Support tickets | **NOT out of scope — outstanding iOS work.** The 2026-09-07 audit corrected an earlier claim here: Android *does* ship all of these natively. They are genuine iOS gaps, not deliberate omissions. |
+| Play, Opportunity, Aid/Help, Journalist, Creator Studio, AI chat | **NOT out of scope — outstanding iOS work.** The 2026-09-07 audit corrected an earlier claim here: Android *does* ship all of these natively. They are genuine iOS gaps, not deliberate omissions. |
 
 ---
 

@@ -67,6 +67,8 @@ enum Route: Hashable {
     case news
     case newsArticle(slug: String)
     case explore
+    case supportTickets
+    case supportTicket(id: String)
 }
 
 /// Owns the navigation stack's path.

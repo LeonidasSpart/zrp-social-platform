@@ -83,6 +83,16 @@ struct SettingsView: View {
             }
 
             Section {
+                NavigationLink(value: Route.supportTickets) {
+                    Label {
+                        Text(.footerContactSupport)
+                    } icon: {
+                        Image(systemName: "lifepreserver")
+                    }
+                }
+            }
+
+            Section {
                 ForEach([WebPage.about, .help]) { page in
                     Button { openPage = page } label: {
                         Label {

@@ -30,6 +30,12 @@ enum ZrpColor {
     /// UI meaning ZRP's own palette does not already cover.
     static let green = Color(hex: 0x22C55E)
 
+    /// Tailwind `yellow-500` - the website's "awaiting reply" state on a
+    /// support ticket (`support/tickets/page.tsx` uses `text-yellow-500`).
+    /// Same reasoning as `green`: a status colour the brand palette has no
+    /// equivalent for, taken from the web rather than invented.
+    static let amber = Color(hex: 0xEAB308)
+
     // MARK: - Semantic surfaces
 
     /// The page background behind everything.
