@@ -14,7 +14,7 @@ import one.zrp.social.mobile.network.zrpErrorMessage
 import retrofit2.HttpException
 
 /**
- * The native surface onto the exact same /api/admin/** routes the
+ * The native surface onto the exact same /api/admin routes the
  * website's own /admin pages call - see AdminApi's own KDoc. Every
  * write here can still 401/403 server-side regardless of what the
  * calling screen shows (requireStaff for stats/reports/users-list/
