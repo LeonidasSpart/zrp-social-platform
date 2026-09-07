@@ -1282,6 +1282,22 @@ enum L10nKey: String, CaseIterable {
     case iosPlaylistDelete = "ios.playlist.delete"
     /// en: "This playlist and its track order are removed. The tracks themselves are not."
     case iosPlaylistDeleteConfirm = "ios.playlist.deleteConfirm"
+    /// en: "Email notifications"
+    case iosEmailPrefsTitle = "ios.emailPrefs.title"
+    /// en: "Likes"
+    case iosEmailPrefsLikes = "ios.emailPrefs.likes"
+    /// en: "Comments"
+    case iosEmailPrefsComments = "ios.emailPrefs.comments"
+    /// en: "New followers"
+    case iosEmailPrefsFollows = "ios.emailPrefs.follows"
+    /// en: "Reposts"
+    case iosEmailPrefsReposts = "ios.emailPrefs.reposts"
+    /// en: "Mentions"
+    case iosEmailPrefsMentions = "ios.emailPrefs.mentions"
+    /// en: "Messages"
+    case iosEmailPrefsMessages = "ios.emailPrefs.messages"
+    /// en: "This only affects email. In-app notifications are unchanged."
+    case iosEmailPrefsNote = "ios.emailPrefs.note"
 }
 
 extension L10nKey {

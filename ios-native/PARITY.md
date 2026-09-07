@@ -258,7 +258,7 @@ called and the real response being handled.
 | Account deletion — immediate and permanent | `POST /api/user/delete/confirm` | ✅ | ✅ | ✅ typed DELETE gate, as on web | IMPLEMENTED |
 | Data export | `GET /api/settings/export-data` | ✅ | ⬜ | ✅ downloaded to a file and handed to the share sheet | IMPLEMENTED |
 | Account (email, username) | `GET/PUT /api/user/username`, `PUT /api/user/email` | ✅ | ✅ | ✅ 30-day username cooldown surfaced before typing; email change states that it needs verification | IMPLEMENTED |
-| Email preferences | `/api/user/email-preferences` | ✅ | ⬜ | ⬜ | MISSING (Phase 16b) |
+| Email preferences | `GET`/`PUT /api/user/email-preferences` — six booleans; `PUT` merges what it is given and refuses any unknown key with a 400 | ⬜ **no web UI** (correcting an earlier error in this matrix: nothing in `src/` calls the route) | ⬜ | ✅ | IMPLEMENTED (iOS-only today) |
 | Language (11 languages, `ar` RTL) | client-side preference | ✅ | ✅ | ✅ in-app picker, generated from the web's `SUPPORTED_LANGUAGES`; sets locale and layout direction | IMPLEMENTED |
 | Plan / limits | `GET /api/user/plan`, `src/lib/limits.ts` | ✅ | ✅ | 🔶 composer and listing forms pre-check what the server enforces; the server's own limit message is shown verbatim | PARTIAL (by design) |
 | Plan upgrade / monetisation / wallet surfaces | web billing | ✅ | ✅ | ❌ deliberately absent — see [Store policy constraint](#store-policy-constraint) | OUT OF SCOPE |
@@ -367,6 +367,22 @@ album route does (one `musicLike.findMany` over the playlist's track ids)
 would fix it for web, Android and iOS at once.
 
 Noted, not worked around.
+
+### L4. The email-preference setting is enforced but unreachable
+
+`src/lib/notifications.ts` reads a user's `emailPreferences` before
+sending any notification email, and `GET`/`PUT /api/user/email-preferences`
+is a complete, working pair over it. Nothing calls that route: there is
+no UI for it anywhere in `src/`, and Android has none either.
+
+So the setting is honoured but cannot be changed by anyone. Everyone sits
+on the default - all six on - whether they want to or not.
+
+iOS now exposes it, in Settings. That is the first surface for an
+existing, enforced backend capability rather than a new one: the route,
+its six keys and its merge behaviour are used exactly as written, and
+nothing about it is invented. Web and Android would benefit from the
+same screen.
 
 ### L3. The explore feed does not select polls
 

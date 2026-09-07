@@ -27,6 +27,9 @@ struct SettingsView: View {
                 NavigationLink(value: Route.privacySettings) {
                     Label { Text(.settingsPrivacySettings) } icon: { Image(systemName: "hand.raised") }
                 }
+                NavigationLink(value: Route.emailPreferences) {
+                    Label { Text(.iosEmailPrefsTitle) } icon: { Image(systemName: "envelope") }
+                }
                 NavigationLink(value: Route.changePassword) {
                     Label { Text(.settingsChangePassword) } icon: { Image(systemName: "key") }
                 }

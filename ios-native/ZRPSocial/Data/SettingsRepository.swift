@@ -22,6 +22,45 @@ protocol SettingsRepositoryProtocol: Sendable {
     func toggleScheduledDeletion() async throws -> AccountDeletionToggle
     func deleteAccountNow() async throws
     func exportData() async throws -> URL
+    func emailPreferences() async throws -> EmailPreferences
+    func updateEmailPreferences(_ preferences: EmailPreferences) async throws -> EmailPreferences
+}
+
+// MARK: - Email preferences
+
+/// Which notifications ZRP may email about.
+///
+/// Six booleans, and exactly six: `PUT /api/user/email-preferences`
+/// refuses any key it does not recognise with a 400, so the shape here
+/// has to match the route's `defaultPreferences` exactly rather than
+/// carrying anything extra.
+///
+/// The GET defaults every field to `true` for an account that has never
+/// saved any, and - notably - answers those defaults with a 200 even
+/// when the read fails, so a decoded response is never a failure signal.
+struct EmailPreferences: Codable, Equatable {
+    var likes: Bool
+    var comments: Bool
+    var follows: Bool
+    var reposts: Bool
+    var mentions: Bool
+    var messages: Bool
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        likes = try container.decodeIfPresent(Bool.self, forKey: .likes) ?? true
+        comments = try container.decodeIfPresent(Bool.self, forKey: .comments) ?? true
+        follows = try container.decodeIfPresent(Bool.self, forKey: .follows) ?? true
+        reposts = try container.decodeIfPresent(Bool.self, forKey: .reposts) ?? true
+        mentions = try container.decodeIfPresent(Bool.self, forKey: .mentions) ?? true
+        messages = try container.decodeIfPresent(Bool.self, forKey: .messages) ?? true
+    }
+}
+
+/// `PUT` answers `{success, preferences}` rather than the bare object the
+/// GET returns - a different envelope on the same resource.
+private struct EmailPreferencesUpdateResponse: Decodable {
+    let preferences: EmailPreferences
 }
 
 // MARK: - Privacy
@@ -302,4 +341,25 @@ struct SettingsRepository: SettingsRepositoryProtocol {
         try data.write(to: url, options: .atomic)
         return url
     }
+
+    // MARK: - Email preferences
+
+    func emailPreferences() async throws -> EmailPreferences {
+        try await client.send(Endpoint.get("user/email-preferences"))
+    }
+
+    /// The route MERGES what it is given over what is stored, so sending
+    /// all six is the same as sending one - and is what this screen
+    /// does, because it loads and shows all six before saving. It
+    /// answers with the merged set, which is what the screen then shows
+    /// rather than assuming its own copy won.
+    func updateEmailPreferences(
+        _ preferences: EmailPreferences
+    ) async throws -> EmailPreferences {
+        let response: EmailPreferencesUpdateResponse = try await client.send(
+            try Endpoint.put("user/email-preferences", body: preferences)
+        )
+        return response.preferences
+    }
+
 }

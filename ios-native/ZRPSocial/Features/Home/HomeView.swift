@@ -105,6 +105,8 @@ struct HomeView: View {
                     EditProfileView()
                 case .accountSettings:
                     AccountSettingsView()
+                case .emailPreferences:
+                    EmailPreferencesView()
                 case .listingConversation(let partner, let draft):
                     ConversationView(
                         partner: partner,
