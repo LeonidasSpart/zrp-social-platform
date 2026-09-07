@@ -74,6 +74,28 @@ final class ApiClient: @unchecked Sendable {
         }
     }
 
+    /// Send a request to a route that can legitimately answer with a
+    /// bare `null` body.
+    ///
+    /// `GET /api/music/artists?mine=true` returns Prisma's `findUnique`
+    /// result directly, so an account with no artist profile gets the
+    /// four bytes `null` with a 200. That is a valid answer, not an
+    /// error - but `JSONDecoder` cannot decode a top-level `null` into
+    /// an `Optional`, so it is recognised here instead of being reported
+    /// as a broken contract.
+    func sendAllowingNull<Response: Decodable>(_ endpoint: Endpoint) async throws -> Response? {
+        let data = try await perform(endpoint)
+        let body = String(decoding: data, as: UTF8.self)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        if body.isEmpty || body == "null" { return nil }
+        do {
+            return try decoder.decode(Response.self, from: data)
+        } catch {
+            ZrpLog.error("Decode failed for \(endpoint.path) as \(Response.self)")
+            throw ApiError.decoding(underlying: String(describing: error))
+        }
+    }
+
     /// Send a request whose response body the caller does not need.
     ///
     /// Deliberately not an overload of `send` - `Data` is itself

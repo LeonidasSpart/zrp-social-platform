@@ -32,6 +32,7 @@ enum Route: Hashable {
     case musicLiked
     case musicHistory
     case musicQueue
+    case musicStudio
 }
 
 /// Owns the navigation stack's path.

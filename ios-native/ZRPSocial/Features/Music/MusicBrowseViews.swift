@@ -127,9 +127,7 @@ struct MusicArtistsView: View {
                                     }
                                 }
                                 if let counts = artist.counts {
-                                    Text(.musicCountTracksOther, [
-                                        "count": CountFormatting.exact(counts.tracks),
-                                    ])
+                                    Text(verbatim: MusicCount.tracks(counts.tracks))
                                     .font(.caption)
                                     .foregroundStyle(ZrpColor.onSurfaceMuted)
                                 }

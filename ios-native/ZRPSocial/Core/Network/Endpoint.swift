@@ -85,6 +85,19 @@ struct Endpoint {
         )
     }
 
+    static func patch<Body: Encodable>(
+        _ path: String,
+        body: Body,
+        requiresAuth: Bool = true
+    ) throws -> Endpoint {
+        Endpoint(
+            method: .patch,
+            path: path,
+            body: try JSONEncoder().encode(body),
+            requiresAuth: requiresAuth
+        )
+    }
+
     static func put(_ path: String, requiresAuth: Bool = true) -> Endpoint {
         Endpoint(method: .put, path: path, requiresAuth: requiresAuth)
     }

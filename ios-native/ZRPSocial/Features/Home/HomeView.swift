@@ -71,6 +71,8 @@ struct HomeView: View {
                     MusicLibraryListView(kind: .history)
                 case .musicQueue:
                     MusicQueueView()
+                case .musicStudio:
+                    MusicStudioView()
                 }
             }
         }

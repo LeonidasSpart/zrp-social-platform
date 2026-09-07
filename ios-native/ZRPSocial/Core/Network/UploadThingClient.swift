@@ -30,6 +30,12 @@ struct UploadedMedia: Equatable {
     /// this set, because an animated GIF is an image for ZRP's media
     /// system and must never become a video.
     let isGif: Bool
+
+    /// UploadThing's storage key. The music routes persist it alongside
+    /// the URL (`audioKey`, `coverKey`) so the server can delete the
+    /// stored file when a track or album is deleted - without it, a
+    /// deleted track leaves its audio orphaned in storage forever.
+    let key: String
 }
 
 /// A native client for UploadThing's wire protocol.
@@ -73,6 +79,15 @@ final class UploadThingClient: NSObject, @unchecked Sendable {
         case banner
         case listingMedia
         case chatImage
+
+        /// The Music Studio's uploader. Accepts one audio file (up to
+        /// 512MB), one image (8MB), and - deliberately - `blob`, because
+        /// iOS reports a generic `application/octet-stream` for files
+        /// opened through a Files provider for formats Safari cannot
+        /// decode. The router's middleware re-validates every file
+        /// against real audio/image extensions, so `blob` does not widen
+        /// what may be uploaded. See `src/lib/uploadthing.ts`.
+        case musicTrack
     }
 
     enum UploadError: Error {
@@ -129,6 +144,49 @@ final class UploadThingClient: NSObject, @unchecked Sendable {
             throw UploadError.presignFailed(nil)
         }
         return try await send(candidate, to: first, onProgress: onProgress)
+    }
+
+    /// Uploads several files through one presign call.
+    ///
+    /// The Music Studio sends a track's audio and its cover art
+    /// together, exactly as the website does (`startUpload([audio,
+    /// cover])`): one presign means the router's middleware runs once
+    /// over the whole set, so a rejected cover cannot leave a published
+    /// audio file behind.
+    ///
+    /// Transfers run one after another rather than concurrently - the
+    /// audio file can be hundreds of megabytes, and racing a second
+    /// upload against it on a cellular connection makes both slower.
+    /// `onProgress` reports progress across the whole set, weighted by
+    /// byte count, so a 40MB track followed by a 200KB cover does not
+    /// show a progress bar that jumps to 50% at the halfway file.
+    func upload(
+        _ candidates: [UploadCandidate],
+        to slug: Slug,
+        onProgress: @escaping (Double) -> Void
+    ) async throws -> [UploadedMedia] {
+        guard !candidates.isEmpty else { return [] }
+
+        let presigned = try await requestPresign(for: candidates, slug: slug)
+        guard presigned.count == candidates.count else {
+            throw UploadError.presignFailed(nil)
+        }
+
+        let totalBytes = max(1, candidates.reduce(Int64(0)) { $0 + $1.byteCount })
+        var completedBytes: Int64 = 0
+        var results: [UploadedMedia] = []
+
+        for (candidate, target) in zip(candidates, presigned) {
+            let alreadyDone = completedBytes
+            let uploaded = try await send(candidate, to: target) { fraction in
+                let bytes = Double(alreadyDone) + fraction * Double(candidate.byteCount)
+                onProgress(min(1, bytes / Double(totalBytes)))
+            }
+            completedBytes += candidate.byteCount
+            results.append(uploaded)
+        }
+
+        return results
     }
 
     // MARK: - Step 1: presign
@@ -219,6 +277,7 @@ final class UploadThingClient: NSObject, @unchecked Sendable {
         let url: String?
         let type: String?
         let isGif: Bool?
+        let key: String?
     }
 
     private struct UploadResponse: Decodable {
@@ -293,7 +352,11 @@ final class UploadThingClient: NSObject, @unchecked Sendable {
         return UploadedMedia(
             url: mediaURL,
             type: type,
-            isGif: serverData.isGif ?? false
+            isGif: serverData.isGif ?? false,
+            // Every music completion handler returns the key; the
+            // presigned key is the same value, and is used as the
+            // fallback so this never comes back empty.
+            key: serverData.key ?? presigned.key
         )
     }
 

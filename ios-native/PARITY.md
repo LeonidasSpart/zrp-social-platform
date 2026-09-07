@@ -198,10 +198,17 @@ called and the real response being handled.
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
-| Publish authorization gate | `GET /api/music/access` | ✅ | ✅ | ⬜ | MISSING (Phase 14) |
-| Artist profile create/edit | `POST /api/music/artists` | ✅ | ✅ | ⬜ | MISSING (Phase 14) |
-| Track upload + metadata | `POST /api/music/tracks` + UploadThing | ✅ | ✅ | ⬜ | MISSING (Phase 14) |
-| Album management | `POST /api/music/albums`, `/{id}/reorder` | ✅ | ✅ | ⬜ | MISSING (Phase 14) |
+| Publish authorization gate | `GET /api/music/access` | ✅ | ✅ | ✅ read to decide what to show; enforced server-side twice | IMPLEMENTED |
+| Apply as artist | `POST /api/music/artists` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Artist profile edit (name, bio, avatar, banner) | `GET /api/music/artists?mine=true`, `POST /api/music/artists` | ✅ | ✅ | ✅ loads every field before saving, see [F1](#f1-postapimusicartists-erases-bio-avatar-and-banner-on-publish) | IMPLEMENTED |
+| Track upload + publish | UploadThing `musicTrack` + `POST /api/music/tracks` | ✅ | ✅ | ✅ audio + cover in one presign; retry publishes without re-uploading | IMPLEMENTED |
+| Own tracks (any status) | `GET /api/music/tracks?mine=true` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Edit track metadata | `PATCH /api/music/tracks/{id}` | ✅ | ✅ | ✅ title, description, genre, explicit, cover, album | IMPLEMENTED |
+| Delete track | `DELETE /api/music/tracks/{id}` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Own albums | `GET /api/music/albums?mine=true` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Create / edit / delete album | `POST /api/music/albums`, `PATCH`/`DELETE /{id}` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Add / remove album tracks | `PATCH /api/music/tracks/{id}` (`albumId`) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Reorder album tracks | `POST /api/music/albums/{id}/reorder` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Artist verification | `POST /api/admin/music/artists/{id}/verify` | ✅ | ❌ | ❌ | STAFF/ADMIN |
 
 ### Marketplace
@@ -344,6 +351,44 @@ would fix it for web, Android and iOS at once.
 
 Noted, not worked around.
 
+## Reported defects in web / backend
+
+Found while auditing, per the isolation rules: reported here for their
+owners, not silently fixed from iOS.
+
+### F1. `POST /api/music/artists` erases bio, avatar and banner on publish
+
+The route is an upsert whose **update** branch writes every field
+unconditionally:
+
+```ts
+update: { displayName, bio: body.bio || null, avatarUrl: body.avatarUrl || null, bannerUrl: body.bannerUrl || null }
+```
+
+Two web call sites in `src/components/music/MusicStudio.tsx` call it with
+only a display name, or with `{}`:
+
+- `publish()` (the Upload tab) - `body: JSON.stringify({ displayName: artistName || undefined })`
+- `create()` (Create Album) - `body: JSON.stringify({})`
+
+So **every track publish and every album creation wipes an existing
+artist's bio, avatar and banner.** The Artist Profile tab avoids it by
+preloading all four fields first, and its own comment says exactly why -
+the other two paths were not given the same treatment.
+
+Suggested fix, entirely server-side and safe for all three clients: build
+the `update` object from only the keys actually present in the body
+(`...(body.bio !== undefined ? { bio: body.bio } : {})`, and so on), which
+is the pattern `PATCH /api/music/tracks/{id}` already uses in this same
+feature.
+
+**What iOS does meanwhile:** it never calls the route with fields it has
+not loaded. The artist editor loads all four first (as the web Artist tab
+does), and publishing reads the artist id from
+`GET /api/music/artists?mine=true` instead of upserting - only creating a
+profile when the account genuinely has none. Same routes, same semantics,
+no destructive write. When F1 is fixed, nothing on iOS needs to change.
+
 ## Blocked items
 
 ### B1. Native OAuth (Google / Apple)
@@ -431,7 +476,7 @@ here. **No fake local notifications will stand in for this.**
 | 11 | Notifications | ✅ in-app list done — device push remains BLOCKED (B3) |
 | 12 | Search + hashtags | ✅ done |
 | 13 | Music + background player | ✅ 13a (engine, background audio, lock screen, home) and 13b (discover, artists, albums, playlists, liked, history, queue) done |
-| 14 | Music Studio | ⬜ |
+| 14 | Music Studio | ✅ gate, apply, artist profile, upload/publish, track + album management, reorder |
 | 15 | Marketplace | ⬜ |
 | 16 | Settings, moderation, account deletion | ⬜ |
 | 17 | Localization (11 languages) + accessibility | ⬜ |

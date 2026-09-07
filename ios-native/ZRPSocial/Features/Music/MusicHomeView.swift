@@ -146,6 +146,10 @@ struct MusicHomeView: View {
                 browseChip(.musicNavPlaylistsTitle, systemImage: "music.note.list", route: .musicPlaylists)
                 browseChip(.musicLikedTitle, systemImage: "heart", route: .musicLiked)
                 browseChip(.musicHistoryTitle, systemImage: "clock.arrow.circlepath", route: .musicHistory)
+                // Always offered, not hidden behind the publish gate:
+                // the studio itself explains what publishing requires
+                // and how to apply, which is the point of opening it.
+                browseChip(.musicShellStudioLabel, systemImage: "slider.horizontal.3", route: .musicStudio)
             }
             .padding(.horizontal, ZrpSpacing.lg)
         }
