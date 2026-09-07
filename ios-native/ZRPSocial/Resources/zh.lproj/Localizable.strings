@@ -497,3 +497,9 @@
 "settings.uploadProfilePicNote" = "上传个人头像，最大 2MB。";
 "settings.errAvatarSaveFailed" = "保存头像链接失败";
 "settings.successAvatarUpdated" = "头像更新成功！";
+"reposts.title" = "转发";
+"reposts.empty" = "暂无转发。";
+"reposts.count" = "{n} 转发";
+"quotes.title" = "引用";
+"quotes.empty" = "暂无引用。";
+"quotes.count" = "{n} 引用";

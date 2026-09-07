@@ -497,3 +497,9 @@
 "settings.uploadProfilePicNote" = "Unggah foto profil. Maksimal 2MB.";
 "settings.errAvatarSaveFailed" = "Gagal menyimpan URL avatar";
 "settings.successAvatarUpdated" = "Avatar berhasil diperbarui!";
+"reposts.title" = "Postingan Ulang";
+"reposts.empty" = "Belum ada postingan ulang.";
+"reposts.count" = "{n} postingan ulang";
+"quotes.title" = "Kutipan";
+"quotes.empty" = "Belum ada kutipan.";
+"quotes.count" = "{n} kutipan";

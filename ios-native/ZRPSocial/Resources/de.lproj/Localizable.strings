@@ -497,3 +497,9 @@
 "settings.uploadProfilePicNote" = "Lade ein Profilbild hoch. Max. 2MB.";
 "settings.errAvatarSaveFailed" = "Speichern der Avatar-URL fehlgeschlagen";
 "settings.successAvatarUpdated" = "Avatar erfolgreich aktualisiert!";
+"reposts.title" = "Reposts";
+"reposts.empty" = "Noch keine Reposts.";
+"reposts.count" = "{n} Reposts";
+"quotes.title" = "Zitate";
+"quotes.empty" = "Noch keine Zitate.";
+"quotes.count" = "{n} Zitate";

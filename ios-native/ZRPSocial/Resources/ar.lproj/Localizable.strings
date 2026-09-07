@@ -497,3 +497,9 @@
 "settings.uploadProfilePicNote" = "ارفع صورة للملف الشخصي. الحد الأقصى 2 ميغابايت.";
 "settings.errAvatarSaveFailed" = "تعذر حفظ رابط الصورة الرمزية";
 "settings.successAvatarUpdated" = "تم تحديث الصورة الرمزية بنجاح!";
+"reposts.title" = "إعادات نشر";
+"reposts.empty" = "لا توجد إعادة نشر بعد.";
+"reposts.count" = "{n} إعادات نشر";
+"quotes.title" = "اقتباسات";
+"quotes.empty" = "لا توجد اقتباسات بعد.";
+"quotes.count" = "{n} اقتباسات";

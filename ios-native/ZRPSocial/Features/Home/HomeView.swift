@@ -39,8 +39,10 @@ struct HomeView: View {
                     ProfileView(username: username)
                 case .hashtag(let tag):
                     HashtagView(tag: tag)
-                case .followList(let username, let kind):
-                    FollowListView(kind: kind, username: username)
+                case .userList(let source):
+                    UserListView(source: source)
+                case .postQuotes(let postId):
+                    PostQuotesView(postId: postId)
                 case .messages:
                     MessagesListView()
                 case .conversation(let partner):

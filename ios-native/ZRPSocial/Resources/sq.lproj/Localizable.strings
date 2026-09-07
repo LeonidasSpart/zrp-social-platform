@@ -497,3 +497,9 @@
 "settings.uploadProfilePicNote" = "Ngarkoni një foto profili. Maksimumi 2MB.";
 "settings.errAvatarSaveFailed" = "Ruajtja e URL-së së fotos dështoi";
 "settings.successAvatarUpdated" = "Fotoja e profilit u përditësua me sukses!";
+"reposts.title" = "Ripublikimet";
+"reposts.empty" = "Nuk ka ripublikime ende.";
+"reposts.count" = "{n} ripublikime";
+"quotes.title" = "Citimet";
+"quotes.empty" = "Nuk ka citime ende.";
+"quotes.count" = "{n} citime";

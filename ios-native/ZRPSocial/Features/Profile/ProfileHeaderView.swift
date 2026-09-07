@@ -173,12 +173,12 @@ struct ProfileHeaderView: View {
             stat(
                 count: profile.counts.followers,
                 label: .profileFollowers,
-                route: .followList(username: profile.username, kind: .followers)
+                route: .userList(.followers(username: profile.username))
             )
             stat(
                 count: profile.counts.following,
                 label: .profileFollowing,
-                route: .followList(username: profile.username, kind: .following)
+                route: .userList(.following(username: profile.username))
             )
             Spacer(minLength: 0)
         }

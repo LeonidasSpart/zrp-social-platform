@@ -497,6 +497,12 @@
 "settings.uploadProfilePicNote" = "Upload a profile picture. Max 2MB.";
 "settings.errAvatarSaveFailed" = "Failed to save avatar URL";
 "settings.successAvatarUpdated" = "Avatar updated successfully!";
+"reposts.title" = "Reposts";
+"reposts.empty" = "No reposts yet.";
+"reposts.count" = "{n} reposts";
+"quotes.title" = "Quotes";
+"quotes.empty" = "No quotes yet.";
+"quotes.count" = "{n} quotes";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back

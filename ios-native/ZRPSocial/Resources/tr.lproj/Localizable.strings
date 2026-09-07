@@ -497,3 +497,9 @@
 "settings.uploadProfilePicNote" = "Bir profil fotoğrafı yükleyin. Maksimum 2MB.";
 "settings.errAvatarSaveFailed" = "Avatar URL'si kaydedilemedi";
 "settings.successAvatarUpdated" = "Avatar başarıyla güncellendi!";
+"reposts.title" = "Yeniden Paylaşımlar";
+"reposts.empty" = "Henüz yeniden paylaşım yok.";
+"reposts.count" = "{n} yeniden paylaşım";
+"quotes.title" = "Alıntılar";
+"quotes.empty" = "Henüz alıntı yok.";
+"quotes.count" = "{n} alıntı";

@@ -12,6 +12,7 @@ struct PostDetailView: View {
 
     @EnvironmentObject private var session: SessionController
     @EnvironmentObject private var interactions: PostInteractionStore
+    @EnvironmentObject private var navigator: Navigator
     @StateObject private var viewModel: PostDetailViewModel
 
     @FocusState private var isComposerFocused: Bool
@@ -91,6 +92,8 @@ struct PostDetailView: View {
                     .padding(.horizontal, ZrpSpacing.lg)
                     .padding(.bottom, ZrpSpacing.md)
 
+                engagementLinks(for: post)
+
                 commentsSection
             }
             .frame(maxWidth: ZrpMetrics.contentMaxWidth)
@@ -138,6 +141,74 @@ struct PostDetailView: View {
                 }
             }
         }
+    }
+
+    /// Ways into the two lists behind a post's counts.
+    ///
+    /// Each row is offered only when its count is above zero: a route
+    /// that can only answer an empty page is not a place worth sending
+    /// someone. `quotedBy` is optional on `Post` because the feed routes
+    /// omit it, but this screen's own route always selects it.
+    ///
+    /// The count sits beside a plain title rather than inside a phrase.
+    /// The shared dictionary carries only `{n} reposts` and `{n} quotes`,
+    /// with no singular form in any of the 11 languages, so composing a
+    /// sentence from them would print "1 reposts".
+    @ViewBuilder
+    private func engagementLinks(for post: Post) -> some View {
+        VStack(spacing: 0) {
+            if post.counts.reposts > 0 {
+                engagementRow(
+                    title: .repostsTitle,
+                    systemImage: "arrow.2.squarepath",
+                    count: post.counts.reposts,
+                    route: .userList(.reposts(postId: post.id))
+                )
+            }
+            if let quoted = post.counts.quotedBy, quoted > 0 {
+                engagementRow(
+                    title: .quotesTitle,
+                    systemImage: "quote.bubble",
+                    count: quoted,
+                    route: .postQuotes(postId: post.id)
+                )
+            }
+        }
+    }
+
+    private func engagementRow(
+        title: L10nKey,
+        systemImage: String,
+        count: Int,
+        route: Route
+    ) -> some View {
+        Button {
+            navigator.push(route)
+        } label: {
+            HStack(spacing: ZrpSpacing.md) {
+                Image(systemName: systemImage)
+                    .font(.footnote)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                Text(title)
+                    .font(.subheadline)
+                    .foregroundStyle(ZrpColor.onSurface)
+                Spacer(minLength: 0)
+                Text(verbatim: CountFormatting.exact(count))
+                    .font(.subheadline.monospacedDigit())
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+            }
+            .padding(.horizontal, ZrpSpacing.lg)
+            .frame(minHeight: ZrpMetrics.minTouchTarget)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(ZrpColor.outlineFaint).frame(height: 0.5)
+        }
+        .accessibilityElement(children: .combine)
     }
 
     private var commentRows: some View {

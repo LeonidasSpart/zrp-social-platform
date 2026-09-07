@@ -532,3 +532,9 @@ settings.accountInfo
 settings.uploadProfilePicNote
 settings.errAvatarSaveFailed
 settings.successAvatarUpdated
+reposts.title
+reposts.empty
+reposts.count
+quotes.title
+quotes.empty
+quotes.count

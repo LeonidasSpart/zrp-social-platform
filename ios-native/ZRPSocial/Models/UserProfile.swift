@@ -110,10 +110,32 @@ struct FollowListUser: Decodable, Identifiable, Equatable {
     let avatarUrl: String?
     let bio: String?
     let badgeType: String?
+
+    /// Whether the viewer already follows this account.
+    ///
+    /// The follow-list routes always send it. The reposts route only
+    /// attaches it when there IS a viewer and the page is non-empty, so
+    /// signed out it is absent entirely - which means "not following"
+    /// here, since a signed-out reader follows nobody.
     let isFollowing: Bool
 
     var displayName: String { name?.isEmpty == false ? name! : username }
     var handle: String { "@\(username)" }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, username, name, avatarUrl, bio, badgeType, isFollowing
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        username = try container.decode(String.self, forKey: .username)
+        name = try container.decodeIfPresent(String.self, forKey: .name)
+        avatarUrl = try container.decodeIfPresent(String.self, forKey: .avatarUrl)
+        bio = try container.decodeIfPresent(String.self, forKey: .bio)
+        badgeType = try container.decodeIfPresent(String.self, forKey: .badgeType)
+        isFollowing = try container.decodeIfPresent(Bool.self, forKey: .isFollowing) ?? false
+    }
 }
 
 struct FollowListPage: Decodable {

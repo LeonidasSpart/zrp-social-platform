@@ -497,3 +497,9 @@
 "settings.uploadProfilePicNote" = "Загрузите фото профиля. Максимум 2 МБ.";
 "settings.errAvatarSaveFailed" = "Не удалось сохранить URL аватара";
 "settings.successAvatarUpdated" = "Аватар успешно обновлён!";
+"reposts.title" = "репостов";
+"reposts.empty" = "Пока нет репостов.";
+"reposts.count" = "{n} репостов";
+"quotes.title" = "цитат";
+"quotes.empty" = "Пока нет цитат.";
+"quotes.count" = "{n} цитат";

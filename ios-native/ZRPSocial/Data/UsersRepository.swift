@@ -1,14 +1,21 @@
 import Foundation
 
-/// Which direction of the follow graph a list screen is showing.
-enum FollowListKind: Hashable {
-    case followers
-    case following
+/// A list of people, identified by where it comes from.
+///
+/// The two follow directions and "who reposted this post" answer the
+/// same `{items, nextCursor}` envelope with the same user shape, so they
+/// share one screen rather than three near-identical ones. Only the path
+/// and the wording differ, which is all this enum carries.
+enum UserListSource: Hashable {
+    case followers(username: String)
+    case following(username: String)
+    case reposts(postId: String)
 
     var titleKey: L10nKey {
         switch self {
         case .followers: return .followersTitle
         case .following: return .followingTitle
+        case .reposts: return .repostsTitle
         }
     }
 
@@ -16,13 +23,25 @@ enum FollowListKind: Hashable {
         switch self {
         case .followers: return .followersEmpty
         case .following: return .followingEmpty
+        case .reposts: return .repostsEmpty
         }
     }
 
-    fileprivate var pathComponent: String {
+    var emptySystemImage: String {
         switch self {
-        case .followers: return "followers"
-        case .following: return "following"
+        case .followers, .following: return "person.2"
+        case .reposts: return "arrow.2.squarepath"
+        }
+    }
+
+    fileprivate var path: String {
+        switch self {
+        case .followers(let username):
+            return "users/\(Endpoint.segment(username))/followers"
+        case .following(let username):
+            return "users/\(Endpoint.segment(username))/following"
+        case .reposts(let postId):
+            return "posts/\(Endpoint.segment(postId))/reposts"
         }
     }
 }
@@ -38,11 +57,7 @@ protocol UsersRepositoryProtocol: Sendable {
     func usernameStatus() async throws -> UsernameStatus
     func changeUsername(_ username: String) async throws
     func changeEmail(currentPassword: String, newEmail: String) async throws
-    func followList(
-        _ kind: FollowListKind,
-        username: String,
-        cursor: String?
-    ) async throws -> FollowListPage
+    func userList(_ source: UserListSource, cursor: String?) async throws -> FollowListPage
     func hashtagPosts(tag: String) async throws -> [Post]
 }
 
@@ -126,16 +141,15 @@ struct UsersRepository: UsersRepositoryProtocol {
         try await client.send(Endpoint.post("users/\(escaped(username))/follow"))
     }
 
-    func followList(
-        _ kind: FollowListKind,
-        username: String,
-        cursor: String?
-    ) async throws -> FollowListPage {
+    /// All three sources page the same way and return the same rows.
+    ///
+    /// A private account whose content the viewer may not see answers
+    /// `{items: [], nextCursor: null}` from every one of them rather than
+    /// a 403, so an empty page here is a legitimate result, not an error
+    /// to report.
+    func userList(_ source: UserListSource, cursor: String?) async throws -> FollowListPage {
         try await client.send(
-            Endpoint.get(
-                "users/\(escaped(username))/\(kind.pathComponent)",
-                query: [("cursor", cursor)]
-            )
+            Endpoint.get(source.path, query: [("cursor", cursor)])
         )
     }
 

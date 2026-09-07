@@ -1,7 +1,7 @@
 import SwiftUI
 
 @MainActor
-final class FollowListViewModel: ObservableObject {
+final class UserListViewModel: ObservableObject {
 
     enum Phase: Equatable {
         case idle
@@ -15,17 +15,14 @@ final class FollowListViewModel: ObservableObject {
     @Published private(set) var isLoadingMore = false
 
     private var cursor: String?
-    private let kind: FollowListKind
-    private let username: String
+    private let source: UserListSource
     private let repository: UsersRepositoryProtocol
 
     init(
-        kind: FollowListKind,
-        username: String,
+        source: UserListSource,
         repository: UsersRepositoryProtocol = UsersRepository()
     ) {
-        self.kind = kind
-        self.username = username
+        self.source = source
         self.repository = repository
     }
 
@@ -59,9 +56,8 @@ final class FollowListViewModel: ObservableObject {
         }
 
         do {
-            let page = try await repository.followList(
-                kind,
-                username: username,
+            let page = try await repository.userList(
+                source,
                 cursor: replacingExisting ? nil : cursor
             )
             if replacingExisting {
@@ -84,25 +80,21 @@ final class FollowListViewModel: ObservableObject {
     }
 }
 
-/// Followers or Following for one account.
+/// A list of people: followers, following, or whoever reposted a post.
 ///
 /// A private account the viewer cannot see answers `{items: [], …}` from
-/// both routes rather than a 403, so an empty list here is a legitimate
-/// result and is presented as the list's own empty state.
-struct FollowListView: View {
+/// every one of those routes rather than a 403, so an empty list here is
+/// a legitimate result and is presented as the list's own empty state.
+struct UserListView: View {
 
-    let kind: FollowListKind
-    let username: String
+    let source: UserListSource
 
     @EnvironmentObject private var navigator: Navigator
-    @StateObject private var viewModel: FollowListViewModel
+    @StateObject private var viewModel: UserListViewModel
 
-    init(kind: FollowListKind, username: String) {
-        self.kind = kind
-        self.username = username
-        _viewModel = StateObject(
-            wrappedValue: FollowListViewModel(kind: kind, username: username)
-        )
+    init(source: UserListSource) {
+        self.source = source
+        _viewModel = StateObject(wrappedValue: UserListViewModel(source: source))
     }
 
     var body: some View {
@@ -117,8 +109,8 @@ struct FollowListView: View {
             case .loaded:
                 if viewModel.users.isEmpty {
                     TimelineStateView.empty(
-                        systemImage: "person.2",
-                        title: kind.emptyKey,
+                        systemImage: source.emptySystemImage,
+                        title: source.emptyKey,
                         subtitle: nil
                     )
                 } else {
@@ -127,7 +119,7 @@ struct FollowListView: View {
             }
         }
         .background(ZrpColor.background.ignoresSafeArea())
-        .navigationTitle(Text(kind.titleKey))
+        .navigationTitle(Text(source.titleKey))
         .navigationBarTitleDisplayMode(.inline)
         .task { await viewModel.loadIfNeeded() }
     }

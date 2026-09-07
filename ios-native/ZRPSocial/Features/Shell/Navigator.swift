@@ -16,7 +16,11 @@ enum Route: Hashable {
     case postDetail(postId: String, preloaded: Post?)
     case profile(username: String)
     case hashtag(tag: String)
-    case followList(username: String, kind: FollowListKind)
+    case userList(UserListSource)
+    /// The posts that quote one post. Its own screen rather than a
+    /// tab, because a post can be quoted from anywhere and the list
+    /// is reached from the post itself.
+    case postQuotes(postId: String)
     case messages
     case conversation(partner: PostAuthor)
     case notifications

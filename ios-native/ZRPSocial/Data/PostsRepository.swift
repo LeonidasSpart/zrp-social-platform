@@ -62,6 +62,7 @@ protocol PostsRepositoryProtocol: Sendable {
     func updatePost(id: String, content: String) async throws -> Post
     func reactions(postId: String) async throws -> [PostReaction]
     func toggleReaction(postId: String, emoji: String) async throws -> Bool
+    func quotes(postId: String, cursor: String?) async throws -> PostsPage
 }
 
 /// One emoji reaction on a post, from `GET /api/posts/{id}/reaction`.
@@ -196,5 +197,31 @@ struct PostsRepository: PostsRepositoryProtocol {
         )
         // `{reaction: null}` means it was removed.
         return response.reaction != nil
+    }
+
+    // MARK: - Quotes
+
+    /// The posts quoting this one.
+    ///
+    /// `GET /api/posts/{id}/quotes` answers `{items, nextCursor}` - the
+    /// third envelope shape in the app - so the items are lifted into the
+    /// same `PostsPage` every other timeline uses.
+    ///
+    /// The rows carry `author`, `_count` and the viewer's `liked`. Like
+    /// every other list route they say nothing about repost or bookmark
+    /// state, which is exactly why `PostInteractionStore` keeps those two
+    /// flags locally across pages.
+    func quotes(postId: String, cursor: String?) async throws -> PostsPage {
+        struct Page: Decodable {
+            let items: [Post]?
+            let nextCursor: String?
+        }
+        let page: Page = try await client.send(
+            Endpoint.get(
+                "posts/\(Endpoint.segment(postId))/quotes",
+                query: [("cursor", cursor)]
+            )
+        )
+        return PostsPage(posts: page.items ?? [], nextCursor: page.nextCursor)
     }
 }

@@ -497,3 +497,9 @@
 "settings.uploadProfilePicNote" = "Téléversez une photo de profil. Max 2 Mo.";
 "settings.errAvatarSaveFailed" = "Échec de l'enregistrement de l'URL de l'avatar";
 "settings.successAvatarUpdated" = "Avatar mis à jour avec succès !";
+"reposts.title" = "Republications";
+"reposts.empty" = "Aucune republication pour le moment.";
+"reposts.count" = "{n} republications";
+"quotes.title" = "Citations";
+"quotes.empty" = "Aucune citation pour le moment.";
+"quotes.count" = "{n} citations";

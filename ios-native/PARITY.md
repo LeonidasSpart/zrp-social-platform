@@ -80,7 +80,8 @@ called and the real response being handled.
 | Create post (text) | `POST /api/posts` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Scheduled posts | `POST /api/posts` + `scheduledAt` naive wall-clock | ✅ | ✅ | ⬜ | MISSING (Phase 7b) |
 | Quote post | `POST /api/posts` + `quotePostId` | ✅ | ✅ | ✅ (Quote action on every post, with a preview in the composer) | IMPLEMENTED |
-| Reposts list | `GET /api/posts/{id}/reposts` → `{items,nextCursor}` | ✅ | ✅ | ⬜ | MISSING (Phase 8b) |
+| Reposts list | `GET /api/posts/{id}/reposts` → `{items,nextCursor}` of users | ✅ | ✅ | ✅ reached from the post's repost count; shares one screen with followers/following, which answer the same shape | IMPLEMENTED |
+| Quotes list | `GET /api/posts/{id}/quotes` → `{items,nextCursor}` of posts | ✅ | ✅ | ✅ reached from the post's quote count, rendered with the standard post card | IMPLEMENTED |
 | Share sheet | — (client-side, `zrp.one/post/{id}`) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Post views | `POST /api/posts/{id}/view` | ✅ | ⬜ | ⬜ | MISSING |
 | Polls | `POST /api/polls/{id}/vote` | ✅ | ⬜ | ⬜ | MISSING |
@@ -537,7 +538,7 @@ here. **No fake local notifications will stand in for this.**
 | 5 | Home feed (For You / Following) + interactions | ✅ done |
 | 6 | Profiles + social graph | ✅ done — 6b (edit profile, pin, extra profile tabs) pending |
 | 7 | Post composer + media upload + viewer | ✅ done — 7b (scheduling, quote entry point, camera capture) pending |
-| 8 | Comments, replies, quotes, edit | ✅ done — 8b done for reactions and comment repost/bookmark; reposts & quotes lists and inline translation still pending |
+| 8 | Comments, replies, quotes, edit | ✅ done — 8b done for reactions, comment repost/bookmark, and the reposts & quotes lists; inline translation still pending |
 | 9 | Stories | ✅ done |
 | 10 | Messages | ✅ done — attachments and conversation search pending (10b) |
 | 11 | Notifications | ✅ in-app list done — device push remains BLOCKED (B3) |
