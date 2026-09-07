@@ -143,9 +143,17 @@ interface PostsApi {
     // filtered to genuine video posts (mediaType === "video") server-
     // side, same Post shape and cursor pagination as every other feed.
     // limit defaults to 8, matching shorts/page.tsx's own
-    // /api/videos?limit=8 calls exactly.
+    // /api/videos?limit=8 calls exactly. startId (only honored when
+    // cursor is null, matching the real route) puts that specific post
+    // first in the returned page - the same real jump-to-this-video
+    // entry point VideoFeedViewer's own startPostId prop uses when a
+    // video post is tapped from the normal feed.
     @GET("videos")
-    suspend fun getVideos(@Query("cursor") cursor: String? = null, @Query("limit") limit: Int = 8): PostsPage
+    suspend fun getVideos(
+        @Query("cursor") cursor: String? = null,
+        @Query("startId") startId: String? = null,
+        @Query("limit") limit: Int = 8,
+    ): PostsPage
 
     @POST("posts/{id}/like")
     suspend fun toggleLike(@Path("id") postId: String): LikeResponse

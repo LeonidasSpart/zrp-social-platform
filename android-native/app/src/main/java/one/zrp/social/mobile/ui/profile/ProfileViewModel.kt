@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.UserProfile
+import one.zrp.social.mobile.network.UserReply
 
 /**
  * Which upload just failed - CreatePostScreen's own MediaValidationError
@@ -20,6 +21,26 @@ import one.zrp.social.mobile.network.UserProfile
  * Failed string.
  */
 enum class MediaUploadTarget { AVATAR, BANNER }
+
+// Matches page.tsx's own TabType - the profile page's five real content
+// tabs (analytics is a sixth, own-profile-only tab covered separately).
+enum class ProfileTab { POSTS, REPLIES, MEDIA, LIKES, REPOSTS }
+
+data class ProfileTabPostsState(
+    val posts: List<Post> = emptyList(),
+    val nextCursor: String? = null,
+    val endReached: Boolean = false,
+    val isLoading: Boolean = false,
+    val hasLoaded: Boolean = false,
+)
+
+data class ProfileRepliesState(
+    val replies: List<UserReply> = emptyList(),
+    val nextCursor: String? = null,
+    val endReached: Boolean = false,
+    val isLoading: Boolean = false,
+    val hasLoaded: Boolean = false,
+)
 
 data class ProfileUiState(
     val isOwnProfile: Boolean = false,
@@ -33,6 +54,7 @@ data class ProfileUiState(
     val nextCursor: String? = null,
     val endReached: Boolean = false,
     val isTogglingFollow: Boolean = false,
+    val isFollowRequested: Boolean = false,
     val isTogglingBlock: Boolean = false,
     val isMuted: Boolean = false,
     val isTogglingMute: Boolean = false,
@@ -40,7 +62,39 @@ data class ProfileUiState(
     val isUploadingAvatar: Boolean = false,
     val isUploadingBanner: Boolean = false,
     val mediaUploadError: MediaUploadTarget? = null,
+    val selectedTab: ProfileTab = ProfileTab.POSTS,
+    val repliesTab: ProfileRepliesState = ProfileRepliesState(),
+    val mediaTab: ProfileTabPostsState = ProfileTabPostsState(),
+    val likesTab: ProfileTabPostsState = ProfileTabPostsState(),
+    val repostsTab: ProfileTabPostsState = ProfileTabPostsState(),
+    // PostCard.tsx computes post ownership per-post
+    // (session.user.id === post.author.id), never from which profile
+    // is being viewed - it has to, since a signed-in user's own posts
+    // can surface on someone ELSE's Likes/Reposts tab (their own posts
+    // that other person liked/reposted), and that person's Likes/
+    // Reposts tabs can just as easily surface posts the signed-in user
+    // does NOT own. Matches that per-post check here instead of the
+    // per-profile isOwnProfile shortcut that only happens to be correct
+    // on the Posts tab (every post there is authored by the profile
+    // being viewed, by construction of GET /users/{username}/posts).
+    val ownUserId: String? = null,
 )
+
+// Applies a transform to a post wherever it may currently be held -
+// the flat posts list, the pinned slot, and any of the three tabs that
+// can independently hold the same Post object (media/likes/reposts) -
+// so a like/repost/bookmark/edit stays consistent no matter which tab
+// the user is looking at when they act on it.
+private fun ProfileUiState.mapPost(postId: String, transform: (Post) -> Post): ProfileUiState {
+    fun mapList(posts: List<Post>) = posts.map { if (it.id == postId) transform(it) else it }
+    return copy(
+        posts = mapList(posts),
+        pinnedPost = pinnedPost?.let { if (it.id == postId) transform(it) else it },
+        mediaTab = mediaTab.copy(posts = mapList(mediaTab.posts)),
+        likesTab = likesTab.copy(posts = mapList(likesTab.posts)),
+        repostsTab = repostsTab.copy(posts = mapList(repostsTab.posts)),
+    )
+}
 
 /**
  * Drives a single profile screen instance - either the signed-in
@@ -84,10 +138,19 @@ class ProfileViewModel(
                             profile = profile,
                             isOwnProfile = isOwnProfile,
                             isLoadingProfile = false,
+                            ownUserId = if (isOwnProfile) profile.id else it.ownUserId,
+                            selectedTab = ProfileTab.POSTS,
+                            repliesTab = ProfileRepliesState(),
+                            mediaTab = ProfileTabPostsState(),
+                            likesTab = ProfileTabPostsState(),
+                            repostsTab = ProfileTabPostsState(),
                         )
                     }
+                    if (!isOwnProfile) {
+                        loadMuteStatus(profile.id)
+                        repository.getOwnUserId().onSuccess { id -> _state.update { it.copy(ownUserId = id) } }
+                    }
                     loadPosts(username, refresh = true)
-                    if (!isOwnProfile) loadMuteStatus(profile.id)
                     val pinnedPostId = profile.pinnedPostId
                     if (pinnedPostId != null) loadPinnedPost(pinnedPostId) else _state.update { it.copy(pinnedPost = null) }
                 }
@@ -102,6 +165,20 @@ class ProfileViewModel(
     fun refreshPosts() {
         val username = resolvedUsername ?: return
         loadPosts(username, refresh = true)
+    }
+
+    // Pull-to-refresh refreshes whichever tab is on screen, not always
+    // Posts - the same "refresh what you're looking at" behavior
+    // HomeScreen's own refresh button gives the feed.
+    fun refreshSelectedTab() {
+        val username = resolvedUsername ?: return
+        when (_state.value.selectedTab) {
+            ProfileTab.POSTS -> loadPosts(username, refresh = true)
+            ProfileTab.REPLIES -> loadReplies(username, refresh = true)
+            ProfileTab.MEDIA -> loadMedia(username, refresh = true)
+            ProfileTab.LIKES -> loadLikes(username, refresh = true)
+            ProfileTab.REPOSTS -> loadReposts(username, refresh = true)
+        }
     }
 
     fun loadMore() {
@@ -130,6 +207,146 @@ class ProfileViewModel(
         }
     }
 
+    // Switching tabs never re-fetches a tab that already has content -
+    // matches page.tsx's own fetchPosts effect, which re-runs only when
+    // [username, activeTab] changes, so a tab visited once keeps its
+    // list until the next pull-to-refresh.
+    fun selectTab(tab: ProfileTab) {
+        if (_state.value.selectedTab == tab) return
+        _state.update { it.copy(selectedTab = tab) }
+        val username = resolvedUsername ?: return
+        when (tab) {
+            ProfileTab.POSTS -> Unit
+            ProfileTab.REPLIES -> if (!_state.value.repliesTab.hasLoaded) loadReplies(username, refresh = true)
+            ProfileTab.MEDIA -> if (!_state.value.mediaTab.hasLoaded) loadMedia(username, refresh = true)
+            ProfileTab.LIKES -> if (!_state.value.likesTab.hasLoaded) loadLikes(username, refresh = true)
+            ProfileTab.REPOSTS -> if (!_state.value.repostsTab.hasLoaded) loadReposts(username, refresh = true)
+        }
+    }
+
+    // Infinite-scroll continuation for whichever tab is currently
+    // selected - the LazyColumn's own near-bottom effect calls this
+    // instead of loadMore() once tabs exist, the same way page.tsx's
+    // single fetchPosts effect serves whichever activeTab is current.
+    fun loadMoreSelectedTab() {
+        val username = resolvedUsername ?: return
+        when (_state.value.selectedTab) {
+            ProfileTab.POSTS -> loadMore()
+            ProfileTab.REPLIES -> {
+                val tab = _state.value.repliesTab
+                if (!tab.isLoading && !tab.endReached && tab.nextCursor != null) loadReplies(username, refresh = false)
+            }
+            ProfileTab.MEDIA -> {
+                val tab = _state.value.mediaTab
+                if (!tab.isLoading && !tab.endReached && tab.nextCursor != null) loadMedia(username, refresh = false)
+            }
+            ProfileTab.LIKES -> {
+                val tab = _state.value.likesTab
+                if (!tab.isLoading && !tab.endReached && tab.nextCursor != null) loadLikes(username, refresh = false)
+            }
+            ProfileTab.REPOSTS -> {
+                val tab = _state.value.repostsTab
+                if (!tab.isLoading && !tab.endReached && tab.nextCursor != null) loadReposts(username, refresh = false)
+            }
+        }
+    }
+
+    private fun loadReplies(username: String, refresh: Boolean) {
+        _state.update { it.copy(repliesTab = it.repliesTab.copy(isLoading = true)) }
+        viewModelScope.launch {
+            val cursor = if (refresh) null else _state.value.repliesTab.nextCursor
+            repository.getUserReplies(username, cursor)
+                .onSuccess { page ->
+                    _state.update {
+                        it.copy(
+                            repliesTab = it.repliesTab.copy(
+                                replies = if (refresh) page.replies else it.repliesTab.replies + page.replies,
+                                nextCursor = page.nextCursor,
+                                isLoading = false,
+                                hasLoaded = true,
+                                endReached = page.nextCursor == null,
+                            ),
+                        )
+                    }
+                }
+                .onFailure { _state.update { it.copy(repliesTab = it.repliesTab.copy(isLoading = false, hasLoaded = true)) } }
+        }
+    }
+
+    private fun loadMedia(username: String, refresh: Boolean) {
+        _state.update { it.copy(mediaTab = it.mediaTab.copy(isLoading = true)) }
+        viewModelScope.launch {
+            val cursor = if (refresh) null else _state.value.mediaTab.nextCursor
+            repository.getUserMedia(username, cursor)
+                .onSuccess { page ->
+                    _state.update {
+                        it.copy(
+                            mediaTab = it.mediaTab.copy(
+                                posts = if (refresh) page.posts else it.mediaTab.posts + page.posts,
+                                nextCursor = page.nextCursor,
+                                isLoading = false,
+                                hasLoaded = true,
+                                endReached = page.nextCursor == null,
+                            ),
+                        )
+                    }
+                }
+                .onFailure { _state.update { it.copy(mediaTab = it.mediaTab.copy(isLoading = false, hasLoaded = true)) } }
+        }
+    }
+
+    private fun loadLikes(username: String, refresh: Boolean) {
+        _state.update { it.copy(likesTab = it.likesTab.copy(isLoading = true)) }
+        viewModelScope.launch {
+            val cursor = if (refresh) null else _state.value.likesTab.nextCursor
+            repository.getUserLikes(username, cursor)
+                .onSuccess { page ->
+                    _state.update {
+                        it.copy(
+                            likesTab = it.likesTab.copy(
+                                posts = if (refresh) page.posts else it.likesTab.posts + page.posts,
+                                nextCursor = page.nextCursor,
+                                isLoading = false,
+                                hasLoaded = true,
+                                endReached = page.nextCursor == null,
+                            ),
+                        )
+                    }
+                }
+                .onFailure { _state.update { it.copy(likesTab = it.likesTab.copy(isLoading = false, hasLoaded = true)) } }
+        }
+    }
+
+    private fun loadReposts(username: String, refresh: Boolean) {
+        _state.update { it.copy(repostsTab = it.repostsTab.copy(isLoading = true)) }
+        viewModelScope.launch {
+            val cursor = if (refresh) null else _state.value.repostsTab.nextCursor
+            repository.getUserReposts(username, cursor)
+                .onSuccess { page ->
+                    _state.update {
+                        it.copy(
+                            repostsTab = it.repostsTab.copy(
+                                posts = if (refresh) page.posts else it.repostsTab.posts + page.posts,
+                                nextCursor = page.nextCursor,
+                                isLoading = false,
+                                hasLoaded = true,
+                                endReached = page.nextCursor == null,
+                            ),
+                        )
+                    }
+                }
+                .onFailure { _state.update { it.copy(repostsTab = it.repostsTab.copy(isLoading = false, hasLoaded = true)) } }
+        }
+    }
+
+    // Matches page.tsx's own local-only followRequestStatus: the profile
+    // GET response never actually carries a pending-request flag (web's
+    // own `data.followRequestStatus || "none"` read is dead code, since
+    // route.ts never sets that field), so a freshly-opened private
+    // profile that already has a pending request from a previous visit
+    // shows a plain Follow button on both platforms alike until clicked
+    // again - a real web limitation this mirrors rather than "fixes"
+    // unilaterally on native only.
     fun toggleFollow() {
         val username = resolvedUsername ?: return
         val profile = _state.value.profile ?: return
@@ -142,6 +359,7 @@ class ProfileViewModel(
                     _state.update {
                         it.copy(
                             isTogglingFollow = false,
+                            isFollowRequested = result.requested,
                             profile = profile.copy(isFollowing = result.following),
                         )
                     }
@@ -153,37 +371,35 @@ class ProfileViewModel(
     }
 
     fun toggleLike(postId: String) {
-        val previousPosts = _state.value.posts
-        val previousPinned = _state.value.pinnedPost
-
-        _state.update { state ->
-            state.copy(
-                posts = state.posts.map { post -> if (post.id == postId) applyOptimisticLike(post) else post },
-                pinnedPost = state.pinnedPost?.let { if (it.id == postId) applyOptimisticLike(it) else it },
-            )
-        }
+        val previous = _state.value
+        _state.update { it.mapPost(postId, ::applyOptimisticLike) }
 
         viewModelScope.launch {
             repository.toggleLike(postId).onFailure {
-                _state.update { it.copy(posts = previousPosts, pinnedPost = previousPinned) }
+                _state.update { current -> current.copy(
+                    posts = previous.posts,
+                    pinnedPost = previous.pinnedPost,
+                    mediaTab = previous.mediaTab,
+                    likesTab = previous.likesTab,
+                    repostsTab = previous.repostsTab,
+                ) }
             }
         }
     }
 
     fun toggleRepost(postId: String) {
-        val previousPosts = _state.value.posts
-        val previousPinned = _state.value.pinnedPost
-
-        _state.update { state ->
-            state.copy(
-                posts = state.posts.map { post -> if (post.id == postId) applyOptimisticRepost(post) else post },
-                pinnedPost = state.pinnedPost?.let { if (it.id == postId) applyOptimisticRepost(it) else it },
-            )
-        }
+        val previous = _state.value
+        _state.update { it.mapPost(postId, ::applyOptimisticRepost) }
 
         viewModelScope.launch {
             repository.toggleRepost(postId).onFailure {
-                _state.update { it.copy(posts = previousPosts, pinnedPost = previousPinned) }
+                _state.update { current -> current.copy(
+                    posts = previous.posts,
+                    pinnedPost = previous.pinnedPost,
+                    mediaTab = previous.mediaTab,
+                    likesTab = previous.likesTab,
+                    repostsTab = previous.repostsTab,
+                ) }
             }
         }
     }
@@ -228,19 +444,18 @@ class ProfileViewModel(
     }
 
     fun toggleBookmark(postId: String) {
-        val previousPosts = _state.value.posts
-        val previousPinned = _state.value.pinnedPost
-
-        _state.update { state ->
-            state.copy(
-                posts = state.posts.map { post -> if (post.id == postId) applyOptimisticBookmark(post) else post },
-                pinnedPost = state.pinnedPost?.let { if (it.id == postId) applyOptimisticBookmark(it) else it },
-            )
-        }
+        val previous = _state.value
+        _state.update { it.mapPost(postId, ::applyOptimisticBookmark) }
 
         viewModelScope.launch {
             repository.toggleBookmark(postId).onFailure {
-                _state.update { it.copy(posts = previousPosts, pinnedPost = previousPinned) }
+                _state.update { current -> current.copy(
+                    posts = previous.posts,
+                    pinnedPost = previous.pinnedPost,
+                    mediaTab = previous.mediaTab,
+                    likesTab = previous.likesTab,
+                    repostsTab = previous.repostsTab,
+                ) }
             }
         }
     }
@@ -253,6 +468,9 @@ class ProfileViewModel(
                     it.copy(
                         posts = it.posts.filterNot { post -> post.id == postId },
                         pinnedPost = it.pinnedPost?.takeUnless { pinned -> pinned.id == postId },
+                        mediaTab = it.mediaTab.copy(posts = it.mediaTab.posts.filterNot { post -> post.id == postId }),
+                        likesTab = it.likesTab.copy(posts = it.likesTab.posts.filterNot { post -> post.id == postId }),
+                        repostsTab = it.repostsTab.copy(posts = it.repostsTab.posts.filterNot { post -> post.id == postId }),
                     )
                 }
             }
@@ -274,12 +492,7 @@ class ProfileViewModel(
         viewModelScope.launch {
             repository.updatePost(postId, content)
                 .onSuccess {
-                    _state.update {
-                        it.copy(
-                            posts = it.posts.map { post -> if (post.id == postId) post.copy(content = content) else post },
-                            pinnedPost = it.pinnedPost?.let { pinned -> if (pinned.id == postId) pinned.copy(content = content) else pinned },
-                        )
-                    }
+                    _state.update { it.mapPost(postId) { post -> post.copy(content = content) } }
                     onResult(Result.success(Unit))
                 }
                 .onFailure { onResult(Result.failure(it)) }

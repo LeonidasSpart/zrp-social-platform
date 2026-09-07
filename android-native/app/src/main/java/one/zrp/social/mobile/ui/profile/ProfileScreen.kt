@@ -1,5 +1,6 @@
 package one.zrp.social.mobile.ui.profile
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -32,6 +33,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.MoreVert
@@ -39,6 +41,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -50,7 +53,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -76,7 +81,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.ProfileRepository
+import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.UserProfile
+import one.zrp.social.mobile.network.UserReply
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
@@ -113,16 +120,25 @@ fun ProfileScreen(
     onOpenQuotes: (postId: String) -> Unit = {},
     onOpenHashtag: (String) -> Unit = {},
     onOpenTrustPassport: (username: String) -> Unit = {},
+    onOpenVideoViewer: (String) -> Unit = {},
 ) {
     val viewModel: ProfileViewModel = viewModel(
         factory = remember(username) { ProfileViewModelFactory(ProfileRepository(), username) },
     )
     val state by viewModel.state.collectAsState()
-    val contentResolver = LocalContext.current.contentResolver
+    val context = LocalContext.current
+    val contentResolver = context.contentResolver
 
+    val isRefreshingSelectedTab = when (state.selectedTab) {
+        ProfileTab.POSTS -> state.isRefreshingPosts
+        ProfileTab.REPLIES -> state.repliesTab.isLoading && state.repliesTab.hasLoaded
+        ProfileTab.MEDIA -> state.mediaTab.isLoading && state.mediaTab.hasLoaded
+        ProfileTab.LIKES -> state.likesTab.isLoading && state.likesTab.hasLoaded
+        ProfileTab.REPOSTS -> state.repostsTab.isLoading && state.repostsTab.hasLoaded
+    }
     val pullRefreshState = rememberPullRefreshState(
-        refreshing = state.isRefreshingPosts,
-        onRefresh = { viewModel.refreshPosts() },
+        refreshing = isRefreshingSelectedTab,
+        onRefresh = { viewModel.refreshSelectedTab() },
     )
 
     Box(
@@ -157,6 +173,37 @@ fun ProfileScreen(
                 var isSubmittingEdit by remember { mutableStateOf(false) }
                 var editError by remember { mutableStateOf<String?>(null) }
 
+                @Composable
+                fun ProfileTabPostCard(post: Post, isPinned: Boolean, showPin: Boolean) {
+                    PostCard(
+                        post = post,
+                        onLikeClick = { postId -> viewModel.toggleLike(postId) },
+                        onCommentClick = onOpenComments,
+                        onRepostClick = { postId -> viewModel.toggleRepost(postId) },
+                        onBookmarkClick = { postId -> viewModel.toggleBookmark(postId) },
+                        onReportClick = { postId ->
+                            reportingPostId = postId
+                            reportError = null
+                        },
+                        isOwnPost = post.author.id == state.ownUserId,
+                        onDeleteClick = { postId -> deletingPostId = postId },
+                        onEditClick = { postId ->
+                            editingPostId = postId
+                            editError = null
+                        },
+                        onQuoteClick = onOpenQuotePost,
+                        onViewReposts = onOpenReposts,
+                        onViewQuotes = onOpenQuotes,
+                        onClick = onOpenComments,
+                        onAuthorClick = onAuthorClick,
+                        onHashtagClick = onOpenHashtag,
+                        onOpenVideoViewer = onOpenVideoViewer,
+                        showPinOption = showPin,
+                        isPinned = isPinned,
+                        onPinClick = { postId -> viewModel.togglePin(postId) },
+                    )
+                }
+
                 val listState = rememberLazyListState()
 
                 val shouldLoadMore by remember {
@@ -167,8 +214,8 @@ fun ProfileScreen(
                     }
                 }
 
-                LaunchedEffect(shouldLoadMore) {
-                    if (shouldLoadMore) viewModel.loadMore()
+                LaunchedEffect(shouldLoadMore, state.selectedTab) {
+                    if (shouldLoadMore) viewModel.loadMoreSelectedTab()
                 }
 
                 LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
@@ -177,6 +224,7 @@ fun ProfileScreen(
                             profile = profile,
                             isOwnProfile = state.isOwnProfile,
                             isTogglingFollow = state.isTogglingFollow,
+                            isFollowRequested = state.isFollowRequested,
                             isTogglingBlock = state.isTogglingBlock,
                             isMuted = state.isMuted,
                             isTogglingMute = state.isTogglingMute,
@@ -188,6 +236,14 @@ fun ProfileScreen(
                             onLogoutClick = onLogout,
                             onMessageClick = { onMessageClick(profile.id, profile.username) },
                             onBookmarksClick = onOpenBookmarks,
+                            onShareClick = {
+                                val slug = profile.customUrl ?: profile.username
+                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_TEXT, "https://zrp.one/$slug")
+                                }
+                                context.startActivity(Intent.createChooser(shareIntent, null))
+                            },
                             onFollowersClick = { onOpenFollowers(profile.username) },
                             onFollowingClick = { onOpenFollowing(profile.username) },
                             onBlockedUsersClick = onOpenBlockedUsers,
@@ -217,97 +273,127 @@ fun ProfileScreen(
                         }
                     }
 
-                    val pinnedPost = state.pinnedPost
-                    if (pinnedPost != null) {
-                        item(key = "pinned-${pinnedPost.id}") {
-                            Column {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(start = Spacing.lg, top = Spacing.sm),
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.PushPin,
-                                        contentDescription = null,
-                                        tint = ZrpBlue,
-                                        modifier = Modifier.size(14.dp),
-                                    )
-                                    Text(
-                                        text = "Pinned",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = ZrpBlue,
-                                        modifier = Modifier.padding(start = Spacing.xs),
-                                    )
-                                }
-                                PostCard(
-                                    post = pinnedPost,
-                                    onLikeClick = { postId -> viewModel.toggleLike(postId) },
-                                    onCommentClick = onOpenComments,
-                                    onRepostClick = { postId -> viewModel.toggleRepost(postId) },
-                                    onBookmarkClick = { postId -> viewModel.toggleBookmark(postId) },
-                                    onReportClick = { postId ->
-                                        reportingPostId = postId
-                                        reportError = null
-                                    },
-                                    isOwnPost = state.isOwnProfile,
-                                    onDeleteClick = { postId -> deletingPostId = postId },
-                                    onEditClick = { postId ->
-                                        editingPostId = postId
-                                        editError = null
-                                    },
-                                    onQuoteClick = onOpenQuotePost,
-                                    onViewReposts = onOpenReposts,
-                                    onViewQuotes = onOpenQuotes,
-                                    onClick = onOpenComments,
-                                    onAuthorClick = onAuthorClick,
-                                    onHashtagClick = onOpenHashtag,
-                                    showPinOption = state.isOwnProfile,
-                                    isPinned = true,
-                                    onPinClick = { postId -> viewModel.togglePin(postId) },
-                                )
-                                HorizontalDivider()
-                            }
-                        }
-                    }
-
-                    val nonPinnedPosts = if (pinnedPost != null) state.posts.filterNot { it.id == pinnedPost.id } else state.posts
-                    itemsIndexed(nonPinnedPosts, key = { _, post -> post.id }) { _, post ->
-                        PostCard(
-                            post = post,
-                            onLikeClick = { postId -> viewModel.toggleLike(postId) },
-                            onCommentClick = onOpenComments,
-                            onRepostClick = { postId -> viewModel.toggleRepost(postId) },
-                            onBookmarkClick = { postId -> viewModel.toggleBookmark(postId) },
-                            onReportClick = { postId ->
-                                reportingPostId = postId
-                                reportError = null
-                            },
-                            isOwnPost = state.isOwnProfile,
-                            onDeleteClick = { postId -> deletingPostId = postId },
-                            onEditClick = { postId ->
-                                editingPostId = postId
-                                editError = null
-                            },
-                            onQuoteClick = onOpenQuotePost,
-                            onViewReposts = onOpenReposts,
-                            onViewQuotes = onOpenQuotes,
-                            onClick = onOpenComments,
-                            onAuthorClick = onAuthorClick,
-                            onHashtagClick = onOpenHashtag,
-                            showPinOption = state.isOwnProfile,
-                            isPinned = false,
-                            onPinClick = { postId -> viewModel.togglePin(postId) },
+                    item {
+                        ProfileTabRow(
+                            selectedTab = state.selectedTab,
+                            showLikesTab = state.isOwnProfile || profile.publicLikes,
+                            onTabSelected = { viewModel.selectTab(it) },
                         )
                     }
 
-                    if (state.isLoadingMore) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    // Matches page.tsx's own canViewPosts: a private
+                    // account's tab content (every tab, not just Posts)
+                    // is hidden from anyone but the owner or an approved
+                    // follower - the backend already enforces this
+                    // server-side (each tab endpoint returns an empty
+                    // page otherwise), this just explains the resulting
+                    // empty screen instead of showing a bare blank list.
+                    val canViewContent = state.isOwnProfile ||
+                        !profile.isPrivate ||
+                        (profile.isFollowing && !state.isFollowRequested)
+
+                    if (!canViewContent) {
+                        item { ProfileProtectedMessage() }
+                    } else {
+                        when (state.selectedTab) {
+                            ProfileTab.POSTS -> {
+                                val pinnedPost = state.pinnedPost
+                                if (pinnedPost != null) {
+                                    item(key = "pinned-${pinnedPost.id}") {
+                                        Column {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.padding(start = Spacing.lg, top = Spacing.sm),
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.PushPin,
+                                                    contentDescription = null,
+                                                    tint = ZrpBlue,
+                                                    modifier = Modifier.size(14.dp),
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.profile_pinned),
+                                                    style = MaterialTheme.typography.labelMedium,
+                                                    color = ZrpBlue,
+                                                    modifier = Modifier.padding(start = Spacing.xs),
+                                                )
+                                            }
+                                            ProfileTabPostCard(post = pinnedPost, isPinned = true, showPin = state.isOwnProfile)
+                                            HorizontalDivider()
+                                        }
+                                    }
+                                }
+
+                                val nonPinnedPosts = if (pinnedPost != null) state.posts.filterNot { it.id == pinnedPost.id } else state.posts
+                                if (nonPinnedPosts.isEmpty() && pinnedPost == null && !state.isRefreshingPosts) {
+                                    item { ProfileEmptyState(stringResource(R.string.profile_no_posts)) }
+                                }
+                                itemsIndexed(nonPinnedPosts, key = { _, post -> post.id }) { _, post ->
+                                    ProfileTabPostCard(post = post, isPinned = false, showPin = state.isOwnProfile)
+                                }
+                                if (state.isLoadingMore) {
+                                    item { ProfileTabLoadingMore() }
+                                }
+                            }
+                            ProfileTab.REPLIES -> {
+                                val tab = state.repliesTab
+                                if (!tab.hasLoaded && tab.isLoading) {
+                                    item { ProfileTabInitialLoading() }
+                                } else if (tab.replies.isEmpty() && tab.hasLoaded) {
+                                    item { ProfileEmptyState(stringResource(R.string.profile_no_replies)) }
+                                }
+                                itemsIndexed(tab.replies, key = { _, reply -> reply.id }) { _, reply ->
+                                    ReplyRow(
+                                        reply = reply,
+                                        onAuthorClick = onAuthorClick,
+                                        onOpenPost = { onOpenComments(reply.postId) },
+                                    )
+                                }
+                                if (tab.isLoading && tab.hasLoaded) {
+                                    item { ProfileTabLoadingMore() }
+                                }
+                            }
+                            ProfileTab.MEDIA -> {
+                                val tab = state.mediaTab
+                                if (!tab.hasLoaded && tab.isLoading) {
+                                    item { ProfileTabInitialLoading() }
+                                } else if (tab.posts.isEmpty() && tab.hasLoaded) {
+                                    item { ProfileEmptyState(stringResource(R.string.profile_no_media)) }
+                                }
+                                itemsIndexed(tab.posts, key = { _, post -> post.id }) { _, post ->
+                                    ProfileTabPostCard(post = post, isPinned = false, showPin = false)
+                                }
+                                if (tab.isLoading && tab.hasLoaded) {
+                                    item { ProfileTabLoadingMore() }
+                                }
+                            }
+                            ProfileTab.LIKES -> {
+                                val tab = state.likesTab
+                                if (!tab.hasLoaded && tab.isLoading) {
+                                    item { ProfileTabInitialLoading() }
+                                } else if (tab.posts.isEmpty() && tab.hasLoaded) {
+                                    item { ProfileEmptyState(stringResource(R.string.profile_no_likes)) }
+                                }
+                                itemsIndexed(tab.posts, key = { _, post -> post.id }) { _, post ->
+                                    ProfileTabPostCard(post = post, isPinned = false, showPin = false)
+                                }
+                                if (tab.isLoading && tab.hasLoaded) {
+                                    item { ProfileTabLoadingMore() }
+                                }
+                            }
+                            ProfileTab.REPOSTS -> {
+                                val tab = state.repostsTab
+                                if (!tab.hasLoaded && tab.isLoading) {
+                                    item { ProfileTabInitialLoading() }
+                                } else if (tab.posts.isEmpty() && tab.hasLoaded) {
+                                    item { ProfileEmptyState(stringResource(R.string.profile_no_reposts)) }
+                                }
+                                itemsIndexed(tab.posts, key = { _, post -> post.id }) { _, post ->
+                                    ProfileTabPostCard(post = post, isPinned = false, showPin = false)
+                                }
+                                if (tab.isLoading && tab.hasLoaded) {
+                                    item { ProfileTabLoadingMore() }
+                                }
                             }
                         }
                     }
@@ -333,12 +419,10 @@ fun ProfileScreen(
 
                 val deletePostId = deletingPostId
                 if (deletePostId != null) {
-                    // English-only on purpose - matches PostCard.tsx's own hardcoded,
-                    // untranslated delete-confirmation dialog (see HomeScreen.kt).
                     AlertDialog(
                         onDismissRequest = { if (!isDeletingPost) deletingPostId = null },
-                        title = { Text("Delete post?") },
-                        text = { Text("This can't be undone.") },
+                        title = { Text(stringResource(R.string.post_delete_confirm_title)) },
+                        text = { Text(stringResource(R.string.post_delete_confirm_body)) },
                         confirmButton = {
                             if (isDeletingPost) {
                                 CircularProgressIndicator(modifier = Modifier.size(20.dp))
@@ -351,13 +435,13 @@ fun ProfileScreen(
                                         result.onFailure { /* left visible; the row itself still shows the post on failure */ }
                                     }
                                 }) {
-                                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                                    Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
                                 }
                             }
                         },
                         dismissButton = {
                             TextButton(onClick = { deletingPostId = null }, enabled = !isDeletingPost) {
-                                Text("Cancel")
+                                Text(stringResource(R.string.action_cancel))
                             }
                         },
                     )
@@ -370,7 +454,8 @@ fun ProfileScreen(
                         initialContent = editPostContent,
                         isSubmitting = isSubmittingEdit,
                         error = editError,
-                        onDismiss = { editingPostId = null },
+                        title = stringResource(R.string.post_edit_dialog_title),
+            onDismiss = { editingPostId = null },
                         onSubmit = { content ->
                             isSubmittingEdit = true
                             viewModel.editPost(editPostId, content) { result ->
@@ -386,7 +471,7 @@ fun ProfileScreen(
         }
 
         PullRefreshIndicator(
-            refreshing = state.isRefreshingPosts,
+            refreshing = isRefreshingSelectedTab,
             state = pullRefreshState,
             modifier = Modifier.align(Alignment.TopCenter),
         )
@@ -406,6 +491,7 @@ private fun ProfileHeader(
     profile: UserProfile,
     isOwnProfile: Boolean,
     isTogglingFollow: Boolean,
+    isFollowRequested: Boolean,
     isTogglingBlock: Boolean,
     isMuted: Boolean,
     isTogglingMute: Boolean,
@@ -417,6 +503,7 @@ private fun ProfileHeader(
     onLogoutClick: () -> Unit,
     onMessageClick: () -> Unit,
     onBookmarksClick: () -> Unit,
+    onShareClick: () -> Unit,
     onAvatarPicked: (Uri) -> Unit,
     onBannerPicked: (Uri) -> Unit,
     onFollowersClick: () -> Unit,
@@ -490,6 +577,12 @@ private fun ProfileHeader(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    // Matches page.tsx's own unconditional Share Profile
+                    // button (shown on both own and other profiles alike).
+                    IconButton(onClick = onShareClick) {
+                        Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.profile_share))
+                    }
+
                     if (isOwnProfile) {
                         IconButton(onClick = onBookmarksClick) {
                             Icon(Icons.Filled.Bookmark, contentDescription = stringResource(R.string.nav_bookmarks))
@@ -570,22 +663,30 @@ private fun ProfileHeader(
 
                         Button(
                             onClick = onFollowClick,
-                            enabled = !isTogglingFollow,
+                            enabled = !isTogglingFollow && !isFollowRequested,
                             shape = MaterialTheme.shapes.large,
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (profile.isFollowing) {
+                                containerColor = if (profile.isFollowing || isFollowRequested) {
                                     MaterialTheme.colorScheme.surfaceContainerHigh
                                 } else {
                                     ZrpRed
                                 },
-                                contentColor = if (profile.isFollowing) {
+                                contentColor = if (profile.isFollowing || isFollowRequested) {
                                     MaterialTheme.colorScheme.onSurface
                                 } else {
                                     ZrpWhite
                                 },
                             ),
                         ) {
-                            Text(stringResource(if (profile.isFollowing) R.string.action_following else R.string.action_follow))
+                            Text(
+                                stringResource(
+                                    when {
+                                        isFollowRequested -> R.string.action_requested
+                                        profile.isFollowing -> R.string.action_following
+                                        else -> R.string.action_follow
+                                    },
+                                ),
+                            )
                         }
                     }
                 }
@@ -643,6 +744,16 @@ private fun ProfileHeader(
                     size = 20.dp,
                     modifier = Modifier.padding(start = Spacing.xs),
                 )
+                // Matches page.tsx's own `profile.isPrivate && !isOwnProfile`
+                // lock glyph next to the display name.
+                if (profile.isPrivate && !isOwnProfile) {
+                    Icon(
+                        imageVector = Icons.Filled.Lock,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = Spacing.xs).size(16.dp),
+                    )
+                }
             }
             Text(
                 text = "@${profile.username}",
@@ -724,7 +835,16 @@ private fun ProfileHeader(
         ) {
             ProfileStat(count = profile._count.posts, label = stringResource(R.string.profile_posts))
             ProfileStat(count = profile._count.followers, label = stringResource(R.string.profile_followers), onClick = onFollowersClick)
-            ProfileStat(count = profile._count.following, label = stringResource(R.string.profile_following), onClick = onFollowingClick)
+            // Matches page.tsx's own showFollowingCount: an account that
+            // has turned publicFollowing off hides the real number
+            // (shown as "-") from anyone but the owner.
+            val showFollowingCount = isOwnProfile || profile.publicFollowing
+            ProfileStat(
+                count = profile._count.following,
+                label = stringResource(R.string.profile_following),
+                onClick = if (showFollowingCount) onFollowingClick else null,
+                displayOverride = if (showFollowingCount) null else "-",
+            )
         }
 
         // ZRP Trust Passport - a real, public trust score built from
@@ -804,12 +924,12 @@ private fun ProfileHeader(
 }
 
 @Composable
-private fun ProfileStat(count: Int, label: String, onClick: (() -> Unit)? = null) {
+private fun ProfileStat(count: Int, label: String, onClick: (() -> Unit)? = null, displayOverride: String? = null) {
     Column(
         modifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier,
     ) {
         Text(
-            text = formatCount(count),
+            text = displayOverride ?: formatCount(count),
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.titleMedium,
         )
@@ -847,6 +967,204 @@ private fun ProfileMetaRow(
             modifier = Modifier.padding(start = Spacing.xs),
         )
     }
+}
+
+// Matches page.tsx's own tabLabelMap/visibleTabs - five tabs, Likes
+// hidden whenever showLikesTab is false (the profile owner has turned
+// publicLikes off and this isn't their own profile).
+@Composable
+private fun ProfileTabRow(
+    selectedTab: ProfileTab,
+    showLikesTab: Boolean,
+    onTabSelected: (ProfileTab) -> Unit,
+) {
+    val tabs = remember(showLikesTab) {
+        buildList {
+            add(ProfileTab.POSTS)
+            add(ProfileTab.REPLIES)
+            add(ProfileTab.MEDIA)
+            if (showLikesTab) add(ProfileTab.LIKES)
+            add(ProfileTab.REPOSTS)
+        }
+    }
+    ScrollableTabRow(selectedTabIndex = tabs.indexOf(selectedTab).coerceAtLeast(0), edgePadding = Spacing.lg) {
+        tabs.forEach { tab ->
+            Tab(
+                selected = tab == selectedTab,
+                onClick = { onTabSelected(tab) },
+                text = { Text(profileTabLabel(tab)) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun profileTabLabel(tab: ProfileTab): String = when (tab) {
+    ProfileTab.POSTS -> stringResource(R.string.profile_posts)
+    ProfileTab.REPLIES -> stringResource(R.string.profile_replies)
+    ProfileTab.MEDIA -> stringResource(R.string.profile_media)
+    ProfileTab.LIKES -> stringResource(R.string.profile_likes)
+    ProfileTab.REPOSTS -> stringResource(R.string.profile_reposts)
+}
+
+// Matches page.tsx's own renderProtectedMessage - shown across every
+// tab (not just Posts) whenever canViewPosts is false, since the
+// backend already withholds all five tabs' content the same way.
+@Composable
+private fun ProfileProtectedMessage() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = Spacing.xxl, horizontal = Spacing.lg),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(88.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Lock,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(40.dp),
+            )
+        }
+        Text(
+            text = stringResource(R.string.profile_protected_account),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = Spacing.md),
+        )
+        Text(
+            text = stringResource(R.string.profile_protected_message),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier.padding(top = Spacing.xs),
+        )
+    }
+}
+
+@Composable
+private fun ProfileEmptyState(text: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = Spacing.xxl),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text = text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun ProfileTabInitialLoading() {
+    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun ProfileTabLoadingMore() {
+    Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+    }
+}
+
+// The native equivalent of page.tsx's renderReplyItem - a comment
+// authored by the profile owner, tapping it opens the parent post
+// (the same real /post/{postId} destination web's own Link points at)
+// rather than a dedicated reply detail screen, which doesn't exist on
+// either platform.
+@Composable
+private fun ReplyRow(
+    reply: UserReply,
+    onAuthorClick: (String) -> Unit,
+    onOpenPost: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onOpenPost)
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+    ) {
+        Row(verticalAlignment = Alignment.Top) {
+            Avatar(
+                url = reply.author.avatarUrl,
+                name = reply.author.name ?: reply.author.username,
+                size = 40.dp,
+                modifier = Modifier.clickable { onAuthorClick(reply.author.username) },
+            )
+            Column(modifier = Modifier.padding(start = Spacing.sm).weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = reply.author.name ?: reply.author.username,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.clickable { onAuthorClick(reply.author.username) },
+                    )
+                    VerifiedBadge(badgeType = reply.author.badgeType, size = 16.dp, modifier = Modifier.padding(start = 2.dp))
+                }
+                Row {
+                    Text(
+                        text = "@${reply.author.username}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = " · " + formatReplyDate(reply.createdAt),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                val replyTo = reply.replyTo
+                if (replyTo != null) {
+                    Text(
+                        text = stringResource(R.string.profile_replying_to) + " @${replyTo.author.username}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
+                }
+                Text(
+                    text = reply.content,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = Spacing.xs),
+                )
+                if (reply.imageUrl != null) {
+                    AsyncImage(
+                        model = reply.imageUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                            .padding(top = Spacing.sm)
+                            .clip(MaterialTheme.shapes.medium),
+                    )
+                }
+            }
+        }
+        HorizontalDivider(modifier = Modifier.padding(top = Spacing.md))
+    }
+}
+
+// Short, locale-aware date (e.g. "Jul 12, 2026") - matches page.tsx's
+// own toLocaleDateString(localeMap[language]) call for reply timestamps,
+// a different (shorter) format than the profile header's own
+// formatProfileJoinDate month+year string.
+private fun formatReplyDate(iso: String): String {
+    val date = try {
+        profileIsoFormat.get()!!.parse(iso)
+    } catch (_: Exception) {
+        null
+    } ?: return ""
+    return java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM, java.util.Locale.getDefault()).format(date)
 }
 
 // Locale-aware month+year, e.g. "July 2026" / "juillet 2026" - unlike

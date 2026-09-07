@@ -99,7 +99,7 @@ export async function sendPushNotification(
   // delivery paths with their own subscriber lists - one having no
   // registered devices, or erroring, must never stop the other.
   try {
-    await sendFcmPush(userId, title, body);
+    await sendFcmPush(userId, title, body, url);
   } catch (err) {
     console.error("FCM push notification error:", err);
   }

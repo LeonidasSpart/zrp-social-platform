@@ -193,16 +193,14 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Captured whole, then parsed - never piped into `head`.
-          # `head -n1` closes the pipe after the first line, and
-          # xcodebuild writes its second ("Build version ...") into a
-          # closed descriptor: Foundation raises
-          # NSFileHandleOperationException rather than dying on SIGPIPE,
-          # the process aborts with 134, and `pipefail` makes that the
-          # step's exit code. It is a race, so it fails only sometimes -
-          # run 45 hit it on a toolchain that was correct.
-          xcodebuild_version="$(xcodebuild -version)"
-          xcode_version="$(printf '%s\n' "$xcodebuild_version" | awk 'NR == 1 { print $2 }')"
+          # xcodebuild's own stdout writer can throw
+          # NSFileHandleOperationException ("Broken pipe", exit 134) if the
+          # reader closes early - which `head -n1` does as soon as it has
+          # its line. Capturing the full output into a variable first (no
+          # live pipe on xcodebuild's own stdout) before feeding it to
+          # head/awk avoids that race entirely.
+          xcodebuild_version_output="$(xcodebuild -version)"
+          xcode_version="$(printf '%s\n' "$xcodebuild_version_output" | head -n1 | awk '{print $2}')"
           device_sdk="$(xcrun --sdk iphoneos --show-sdk-version)"
           simulator_sdk="$(xcrun --sdk iphonesimulator --show-sdk-version)"
 

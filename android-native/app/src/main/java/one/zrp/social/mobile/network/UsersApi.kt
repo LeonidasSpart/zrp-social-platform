@@ -107,13 +107,47 @@ data class MutedUser(
 // ProfileRepository, keeps that mismatch from recurring.
 data class UserPostsPage(val items: List<Post>?, val nextCursor: String?)
 
+// GET /users/{username}/replies has its own distinct shape - a comment
+// row, not a Post - matching the website's own separate `Reply`
+// interface (page.tsx). replyTo mirrors the parent post's author using
+// a smaller shape than ReplyAuthor since that's all the endpoint sends.
+data class ReplyAuthor(
+    val id: String,
+    val username: String,
+    val name: String?,
+    val avatarUrl: String?,
+    val badgeType: String?,
+)
+
+data class ReplyToAuthor(val username: String, val name: String?)
+
+data class ReplyToInfo(val id: String, val content: String, val author: ReplyToAuthor)
+
+data class UserReply(
+    val id: String,
+    val content: String,
+    val imageUrl: String?,
+    val createdAt: String,
+    val author: ReplyAuthor,
+    val postId: String,
+    val replyTo: ReplyToInfo?,
+)
+
+data class UserRepliesPage(val items: List<UserReply>?, val nextCursor: String?)
+
+// Mirrors PostsApi's own PostsPage - the repository-facing shape with a
+// guaranteed non-null list, mapped from UserRepliesPage the same way
+// getUserPosts maps UserPostsPage to PostsPage.
+data class RepliesPage(val replies: List<UserReply>, val nextCursor: String?)
+
 /**
  * The same profile endpoints the website itself uses - GET
  * /users/{username} for the profile header/stats, GET
  * /users/{username}/posts for their real posts (reusing PostsApi's
  * Post model, but NOT its PostsPage envelope - see UserPostsPage's
- * KDoc), and the same follow toggle. No profile data is invented
- * natively.
+ * KDoc), the same follow toggle, and the profile page's other four
+ * tabs (replies/media/likes/reposts), each backed by its own real
+ * endpoint the same way. No profile data is invented natively.
  */
 interface UsersApi {
     @GET("users/{username}")
@@ -121,6 +155,30 @@ interface UsersApi {
 
     @GET("users/{username}/posts")
     suspend fun getUserPosts(
+        @Path("username") username: String,
+        @Query("cursor") cursor: String?,
+    ): UserPostsPage
+
+    @GET("users/{username}/replies")
+    suspend fun getUserReplies(
+        @Path("username") username: String,
+        @Query("cursor") cursor: String?,
+    ): UserRepliesPage
+
+    @GET("users/{username}/media")
+    suspend fun getUserMedia(
+        @Path("username") username: String,
+        @Query("cursor") cursor: String?,
+    ): UserPostsPage
+
+    @GET("users/{username}/likes")
+    suspend fun getUserLikes(
+        @Path("username") username: String,
+        @Query("cursor") cursor: String?,
+    ): UserPostsPage
+
+    @GET("users/{username}/reposts")
+    suspend fun getUserReposts(
         @Path("username") username: String,
         @Query("cursor") cursor: String?,
     ): UserPostsPage

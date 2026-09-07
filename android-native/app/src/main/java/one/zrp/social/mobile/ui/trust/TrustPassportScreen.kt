@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
@@ -207,11 +208,20 @@ private fun TrustPassportBody(data: TrustPassportResponse, onOpenProfile: (Strin
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(Icons.Filled.Shield, contentDescription = null, modifier = Modifier.size(14.dp), tint = scoreColor)
+                    // No maxLines/softWrap here let a long translation (French
+                    // "Confiance en construction" being the reported case)
+                    // wrap mid-pill once the icon ate into the available
+                    // width - the same failure mode ProfileScreen.kt's own
+                    // trust pill already guards against with this exact
+                    // fix, applied here for the second real render location.
                     Text(
                         text = trustLevelLabel(data.passport.level),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                         color = scoreColor,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(start = Spacing.xs),
                     )
                 }

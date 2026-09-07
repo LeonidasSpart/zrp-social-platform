@@ -1,5 +1,10 @@
 package one.zrp.social.mobile.ui.messages
 
+import android.Manifest
+import android.provider.OpenableColumns
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -21,9 +26,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -31,12 +39,14 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,15 +58,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.network.ChatMessage
+import one.zrp.social.mobile.ui.call.CallPhase
+import one.zrp.social.mobile.ui.call.CallScreen
+import one.zrp.social.mobile.ui.call.CallViewModel
+import one.zrp.social.mobile.ui.call.CallViewModelFactory
 import one.zrp.social.mobile.ui.components.AddReactionDialog
+import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
+import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
@@ -81,12 +99,68 @@ fun ConversationScreen(
     )
     val state by viewModel.state.collectAsState()
 
+    val callViewModel: CallViewModel = viewModel(factory = remember { CallViewModelFactory() })
+    val callState by callViewModel.state.collectAsState()
+    val context = LocalContext.current
+
+    // Signaling is only live while this screen is open - matches
+    // page.tsx's own page-scoped setupSocket()/useEffect cleanup (see
+    // CallViewModel's own KDoc).
+    DisposableEffect(Unit) {
+        callViewModel.connectSignaling()
+        onDispose { callViewModel.disconnectSignaling() }
+    }
+
     var deletingMessageId by remember { mutableStateOf<String?>(null) }
     var isDeletingMessage by remember { mutableStateOf(false) }
     var reactingToMessageId by remember { mutableStateOf<String?>(null) }
+    var showContactPopup by remember { mutableStateOf(false) }
+    var isBlocked by remember { mutableStateOf(false) }
 
     val listState = rememberLazyListState()
     var pendingScrollIndex by remember { mutableStateOf<Int?>(null) }
+
+    // Matches getUserMedia's own browser permission prompt, asked right
+    // before a call actually starts/is accepted rather than up front.
+    var pendingVideoCall by remember { mutableStateOf(false) }
+    val callPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+    ) { granted ->
+        if (granted[Manifest.permission.RECORD_AUDIO] == true) {
+            val partner = state.partner
+            if (partner != null) {
+                callViewModel.startCall(context, partner.id, pendingVideoCall)
+            }
+        }
+    }
+    fun requestCall(isVideo: Boolean) {
+        pendingVideoCall = isVideo
+        val permissions = if (isVideo) {
+            arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA)
+        } else {
+            arrayOf(Manifest.permission.RECORD_AUDIO)
+        }
+        callPermissionLauncher.launch(permissions)
+    }
+
+    // Matches ChatInterface.tsx's own handleImageUpload - same real
+    // chatImage UploadThing router, same 4MB/JPEG-PNG-GIF-WebP limits
+    // (see ConversationViewModel.onImagePicked).
+    val contentResolver = context.contentResolver
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri != null) {
+            val (name, size) = queryFileNameAndSize(contentResolver, uri)
+            val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
+            viewModel.onImagePicked(contentResolver, uri, name, mimeType, size)
+        }
+    }
+
+    if (callState.phase != CallPhase.IDLE) {
+        CallScreen(viewModel = callViewModel, onDismiss = {})
+        return
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -98,50 +172,86 @@ fun ConversationScreen(
             IconButton(onClick = onBack) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.chat_back_to_messages))
             }
-            Column(
+
+            val partner = state.partner
+            Row(
                 modifier = Modifier
+                    .weight(1f)
                     .padding(start = 4.dp)
-                    // Matches ChatInterface.tsx's own header button - web
-                    // opens a ChatContactDrawer with call buttons/shared
-                    // media/a "View Profile" link; this app has none of
-                    // that yet, so the header goes straight to the real
-                    // profile instead of a drawer this app doesn't have.
-                    .clickable(onClick = onOpenProfile),
+                    // Matches ChatInterface.tsx's own header button - opens
+                    // the same real user-action popup web's own
+                    // ChatContactDrawer is, rather than jumping straight to
+                    // the profile.
+                    .clickable { showContactPopup = true },
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = "@$partnerUsername",
-                    style = MaterialTheme.typography.titleMedium,
+                Avatar(
+                    url = partner?.avatarUrl,
+                    name = partner?.name ?: partner?.username ?: partnerUsername,
+                    size = 36.dp,
                 )
-                // Matches ChatInterface.tsx's own header status row - a
-                // "Typing..." indicator (from the real "user-typing" socket
-                // event) takes priority over the live/offline connection
-                // dot, exactly like web's own receiverTyping-vs-socketConnected
-                // conditional.
-                if (state.partnerTyping) {
-                    Text(
-                        text = stringResource(R.string.chat_typing),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = ZrpRed,
-                    )
-                } else {
+                Column(modifier = Modifier.padding(start = Spacing.sm)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .clip(CircleShape)
-                                .background(if (state.socketConnected) Color(0xFF22C55E) else Color(0xFFEF4444)),
-                        )
                         Text(
-                            text = stringResource(if (state.socketConnected) R.string.chat_live else R.string.chat_offline),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(start = 4.dp),
+                            text = partner?.name ?: partner?.username ?: partnerUsername,
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
+                        VerifiedBadge(badgeType = partner?.badgeType, modifier = Modifier.padding(start = 3.dp))
+                    }
+                    // Matches ChatInterface.tsx's own header status row - a
+                    // "Typing..." indicator (from the real "user-typing" socket
+                    // event) takes priority over the live/offline connection
+                    // dot, exactly like web's own receiverTyping-vs-socketConnected
+                    // conditional.
+                    if (state.partnerTyping) {
+                        Text(
+                            text = stringResource(R.string.chat_typing),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = ZrpRed,
+                        )
+                    } else {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(if (state.socketConnected) Color(0xFF22C55E) else Color(0xFFEF4444)),
+                            )
+                            Text(
+                                text = stringResource(if (state.socketConnected) R.string.chat_live else R.string.chat_offline),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 4.dp),
+                            )
+                        }
                     }
                 }
             }
+
+            IconButton(onClick = { requestCall(isVideo = false) }) {
+                Icon(Icons.Filled.Call, contentDescription = stringResource(R.string.message_voice_call_cd))
+            }
+            IconButton(onClick = { requestCall(isVideo = true) }) {
+                Icon(Icons.Filled.Videocam, contentDescription = stringResource(R.string.message_video_call_cd))
+            }
         }
         HorizontalDivider()
+
+        val popupPartner = state.partner
+        if (showContactPopup && popupPartner != null) {
+            ChatContactPopup(
+                partner = popupPartner,
+                messages = state.messages,
+                isBlocked = isBlocked,
+                onDismiss = { showContactPopup = false },
+                onOpenProfile = onOpenProfile,
+                onVoiceCall = { requestCall(isVideo = false) },
+                onVideoCall = { requestCall(isVideo = true) },
+                onBlockToggled = { isBlocked = it },
+            )
+        }
 
         Box(
             modifier = Modifier
@@ -246,9 +356,29 @@ fun ConversationScreen(
                 IconButton(onClick = { viewModel.cancelReply() }) {
                     // "Cancel reply" stays English-only on purpose - matches
                     // ChatInterface.tsx's own hardcoded, untranslated aria-label.
-                    Icon(Icons.Filled.Close, contentDescription = "Cancel reply")
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.comment_cancel_reply_cd))
                 }
             }
+        }
+
+        if (state.isUploadingImage) {
+            LinearProgressIndicator(
+                progress = { state.imageUploadProgress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
+                color = ZrpRed,
+            )
+        }
+
+        val imageError = state.imageError
+        if (imageError != null) {
+            Text(
+                text = chatImageErrorMessage(imageError),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+            )
         }
 
         Row(
@@ -257,6 +387,15 @@ fun ConversationScreen(
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            IconButton(
+                onClick = {
+                    imagePickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                },
+                enabled = !state.isUploadingImage,
+            ) {
+                Icon(Icons.Filled.AttachFile, contentDescription = stringResource(R.string.message_attach_image_cd))
+            }
+
             OutlinedTextField(
                 value = state.draft,
                 onValueChange = { viewModel.onDraftChange(it) },
@@ -274,12 +413,9 @@ fun ConversationScreen(
                 if (state.isSending) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                 } else {
-                    // "Send message" stays English-only on purpose - matches
-                    // ChatInterface.tsx's own hardcoded, untranslated aria-label
-                    // (aria-label="Send message" on its send button).
                     Icon(
                         imageVector = Icons.Filled.Send,
-                        contentDescription = "Send message",
+                        contentDescription = stringResource(R.string.message_send_cd),
                         tint = ZrpRed,
                     )
                 }
@@ -297,7 +433,7 @@ fun ConversationScreen(
             initialContent = editMessageContent,
             isSubmitting = state.isSavingEdit,
             error = state.editError,
-            title = "Edit message",
+            title = stringResource(R.string.message_edit_dialog_title),
             onDismiss = { viewModel.cancelEdit() },
             onSubmit = { content -> viewModel.saveEdit(editMessageId, content) { } },
         )
@@ -343,6 +479,37 @@ fun ConversationScreen(
             },
         )
     }
+}
+
+/**
+ * Maps ConversationViewModel's ChatImageError (which cannot resolve
+ * Android string resources itself) to a real translated string,
+ * mirroring CreateStoryScreen's own storyMediaErrorMessage() and
+ * CallScreen's own callErrorMessage(). The {size}/{error} placeholders
+ * match how ChatInterface.tsx's own t("chat.errFileTooLarge", {size})
+ * and t("chat.errSendFailed", {error}) interpolate.
+ */
+@Composable
+private fun chatImageErrorMessage(error: ChatImageError): String = when (error) {
+    is ChatImageError.FileTooLarge ->
+        stringResource(R.string.chat_err_file_too_large).replace("{size}", error.maxMb.toString())
+    is ChatImageError.InvalidType -> stringResource(R.string.chat_err_invalid_file_type)
+    is ChatImageError.UploadFailed ->
+        stringResource(R.string.chat_err_image_upload_failed) + " " + error.detail
+}
+
+private fun queryFileNameAndSize(contentResolver: android.content.ContentResolver, uri: android.net.Uri): Pair<String, Long> {
+    var name = "upload"
+    var size = 0L
+    contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+        if (cursor.moveToFirst()) {
+            if (nameIndex >= 0) name = cursor.getString(nameIndex) ?: name
+            if (sizeIndex >= 0) size = cursor.getLong(sizeIndex)
+        }
+    }
+    return name to size
 }
 
 // The corner nearest the sender's own side of the screen stays sharp -
@@ -486,11 +653,10 @@ private fun MessageBubble(
                     text = { Text(stringResource(R.string.action_reply)) },
                     onClick = { menuOpen = false; onReplyClick() },
                 )
-                // "React" has no web equivalent to translate from - ChatInterface.tsx's
-                // own reaction-picker trigger is an icon-only button with a hardcoded,
-                // untranslated aria-label ("React"), so this matches real web behavior
-                // rather than being a native-only gap.
-                DropdownMenuItem(text = { Text("React") }, onClick = { menuOpen = false; onAddReactionClick() })
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.reaction_react_action)) },
+                    onClick = { menuOpen = false; onAddReactionClick() },
+                )
                 if (isOwnMessage) {
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.action_edit)) },

@@ -105,7 +105,7 @@ fun CommentsScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.nav_back))
             }
             Text(
                 text = stringResource(R.string.comments_title),
@@ -180,13 +180,17 @@ fun CommentsScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Replying to @$replyingToUsername",
+                    text = stringResource(R.string.comment_replying_to, replyingToUsername),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),
                 )
                 IconButton(onClick = { viewModel.cancelReply() }, modifier = Modifier.size(TouchTarget.min)) {
-                    Icon(Icons.Filled.Close, contentDescription = "Cancel reply", modifier = Modifier.size(IconSize.sm))
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.comment_cancel_reply_cd),
+                        modifier = Modifier.size(IconSize.sm),
+                    )
                 }
             }
         }
@@ -200,7 +204,15 @@ fun CommentsScreen(
             OutlinedTextField(
                 value = state.draft,
                 onValueChange = { viewModel.onDraftChange(it) },
-                placeholder = { Text(if (replyingToUsername != null) "Reply to @$replyingToUsername" else "Add a comment") },
+                placeholder = {
+                    Text(
+                        if (replyingToUsername != null) {
+                            stringResource(R.string.comment_reply_to_placeholder, replyingToUsername)
+                        } else {
+                            stringResource(R.string.comment_write_placeholder)
+                        },
+                    )
+                },
                 enabled = !state.isPosting,
                 modifier = Modifier.weight(1f),
             )
@@ -214,7 +226,7 @@ fun CommentsScreen(
                 if (state.isPosting) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                 } else {
-                    Icon(Icons.Filled.Send, contentDescription = "Post comment", tint = ZrpRed)
+                    Icon(Icons.Filled.Send, contentDescription = stringResource(R.string.comment_post_cd), tint = ZrpRed)
                 }
             }
         }
@@ -227,7 +239,7 @@ fun CommentsScreen(
             initialContent = editCommentContent,
             isSubmitting = isSubmittingEdit,
             error = editError,
-            title = "Edit comment",
+            title = stringResource(R.string.comment_edit_cd),
             onDismiss = { editingCommentId = null },
             onSubmit = { content ->
                 isSubmittingEdit = true
@@ -243,12 +255,15 @@ fun CommentsScreen(
 
     val deleteCommentId = deletingCommentId
     if (deleteCommentId != null) {
-        // English-only on purpose - CommentItem.tsx's own delete confirm
-        // is a plain, untranslated confirm("Delete this comment?") too.
+        // Native uses a proper dialog here rather than a browser
+        // confirm() popup (CommentItem.tsx's own equivalent, which by
+        // nature can't be styled or translated) - same real confirm
+        // step, translated properly since there's nothing web-side to
+        // literally match here.
         AlertDialog(
             onDismissRequest = { if (!isDeletingComment) deletingCommentId = null },
-            title = { Text("Delete comment?") },
-            text = { Text("This can't be undone. Any replies to it will be deleted too.") },
+            title = { Text(stringResource(R.string.comment_delete_confirm_title)) },
+            text = { Text(stringResource(R.string.comment_delete_confirm_body)) },
             confirmButton = {
                 if (isDeletingComment) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp))
@@ -261,13 +276,13 @@ fun CommentsScreen(
                             result.onFailure { /* left visible; the row itself still shows the comment on failure */ }
                         }
                     }) {
-                        Text("Delete", color = MaterialTheme.colorScheme.error)
+                        Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
                     }
                 }
             },
             dismissButton = {
                 TextButton(onClick = { deletingCommentId = null }, enabled = !isDeletingComment) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
             },
         )
@@ -394,35 +409,35 @@ private fun CommentRow(
                 CommentStat(
                     icon = if (comment.liked == true) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                     count = comment._count.likes,
-                    contentDescription = if (comment.liked == true) "Unlike" else "Like",
+                    contentDescription = stringResource(if (comment.liked == true) R.string.action_unlike else R.string.action_like),
                     tint = if (comment.liked == true) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
                     onClick = onLikeClick,
                 )
                 CommentStat(
                     icon = Icons.Filled.ChatBubbleOutline,
                     count = 0,
-                    contentDescription = "Reply",
+                    contentDescription = stringResource(R.string.action_reply),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     onClick = onReplyClick,
                 )
                 CommentStat(
                     icon = Icons.Filled.Repeat,
                     count = comment._count.reposts,
-                    contentDescription = if (comment.reposted == true) "Undo repost" else "Repost",
+                    contentDescription = stringResource(if (comment.reposted == true) R.string.comment_undo_repost_cd else R.string.comment_repost_cd),
                     tint = if (comment.reposted == true) ZrpGreen else MaterialTheme.colorScheme.onSurfaceVariant,
                     onClick = onRepostClick,
                 )
                 CommentStat(
                     icon = if (comment.bookmarked == true) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
                     count = comment._count.bookmarks,
-                    contentDescription = if (comment.bookmarked == true) "Remove bookmark" else "Bookmark",
+                    contentDescription = stringResource(if (comment.bookmarked == true) R.string.action_remove_bookmark else R.string.action_bookmark),
                     tint = if (comment.bookmarked == true) ZrpBlue else MaterialTheme.colorScheme.onSurfaceVariant,
                     onClick = onBookmarkClick,
                 )
                 IconButton(onClick = onShareClick, modifier = Modifier.size(TouchTarget.min)) {
                     Icon(
                         imageVector = Icons.Filled.Share,
-                        contentDescription = "Share",
+                        contentDescription = stringResource(R.string.action_share),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(IconSize.sm),
                     )
@@ -431,7 +446,7 @@ private fun CommentRow(
                     IconButton(onClick = onEditClick, modifier = Modifier.size(TouchTarget.min)) {
                         Icon(
                             imageVector = Icons.Filled.Edit,
-                            contentDescription = "Edit comment",
+                            contentDescription = stringResource(R.string.comment_edit_cd),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(IconSize.sm),
                         )
@@ -439,7 +454,7 @@ private fun CommentRow(
                     IconButton(onClick = onDeleteClick, modifier = Modifier.size(TouchTarget.min)) {
                         Icon(
                             imageVector = Icons.Filled.DeleteOutline,
-                            contentDescription = "Delete comment",
+                            contentDescription = stringResource(R.string.comment_delete_cd),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(IconSize.sm),
                         )

@@ -20,12 +20,11 @@ import one.zrp.social.mobile.R
  * same "any real emoji" capability the website offers, through the
  * platform's own picker rather than a second one built into the app.
  *
- * "Add a reaction" and "Emoji" stay English-only: they exist only to
- * explain this native text-field substitute, and the real
- * emoji-picker-react grid it replaces has no title or label text of
- * its own to translate from. "React" matches ChatInterface.tsx's own
- * hardcoded, untranslated aria-label="React" (same reuse as the
- * DropdownMenuItem in ConversationScreen.kt).
+ * None of this dialog's copy has a web string to source from (the
+ * emoji-picker-react grid it replaces has no title/label of its own,
+ * and ChatInterface.tsx's own "React" trigger is an icon-only button
+ * with a hardcoded, untranslated aria-label), so all of it is
+ * translated as native-only supporting copy instead.
  */
 @Composable
 fun AddReactionDialog(
@@ -36,18 +35,18 @@ fun AddReactionDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add a reaction") },
+        title = { Text(stringResource(R.string.reaction_add_title)) },
         text = {
             OutlinedTextField(
                 value = emoji,
                 onValueChange = { if (it.length <= 8) emoji = it },
-                label = { Text("Emoji") },
+                label = { Text(stringResource(R.string.reaction_emoji_label)) },
                 singleLine = true,
             )
         },
         confirmButton = {
             TextButton(onClick = { onSubmit(emoji) }, enabled = emoji.isNotBlank()) {
-                Text("React")
+                Text(stringResource(R.string.reaction_react_action))
             }
         },
         dismissButton = {

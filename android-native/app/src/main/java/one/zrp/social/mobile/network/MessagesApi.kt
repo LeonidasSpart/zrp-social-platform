@@ -87,6 +87,7 @@ data class ConversationSummary(
 data class SendMessageRequest(
     val content: String,
     val receiverId: String,
+    val imageUrl: String? = null,
     val replyToId: String? = null,
 )
 

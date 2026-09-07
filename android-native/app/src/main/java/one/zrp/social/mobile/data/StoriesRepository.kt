@@ -15,8 +15,8 @@ class StoriesRepository {
         ApiClient.storiesApi.getStories()
     }
 
-    suspend fun createStory(content: String): Result<Unit> = runCatching {
-        ApiClient.storiesApi.createStory(CreateStoryRequest(content))
+    suspend fun createStory(content: String?, mediaUrl: String? = null, mediaType: String? = null): Result<Unit> = runCatching {
+        ApiClient.storiesApi.createStory(CreateStoryRequest(content, mediaUrl, mediaType))
         Unit
     }
 

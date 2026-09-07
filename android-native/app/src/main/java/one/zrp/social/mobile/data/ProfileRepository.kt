@@ -15,6 +15,7 @@ import one.zrp.social.mobile.network.MutedUser
 import one.zrp.social.mobile.network.PostsPage
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.PinToggleResponse
+import one.zrp.social.mobile.network.RepliesPage
 import one.zrp.social.mobile.network.RepostResponse
 import one.zrp.social.mobile.network.UpdatePostRequest
 import one.zrp.social.mobile.network.UserProfile
@@ -51,6 +52,26 @@ class ProfileRepository {
 
     suspend fun getUserPosts(username: String, cursor: String?): Result<PostsPage> = runCatching {
         val page = ApiClient.usersApi.getUserPosts(username, cursor)
+        PostsPage(posts = page.items ?: emptyList(), nextCursor = page.nextCursor)
+    }
+
+    suspend fun getUserReplies(username: String, cursor: String?): Result<RepliesPage> = runCatching {
+        val page = ApiClient.usersApi.getUserReplies(username, cursor)
+        RepliesPage(replies = page.items ?: emptyList(), nextCursor = page.nextCursor)
+    }
+
+    suspend fun getUserMedia(username: String, cursor: String?): Result<PostsPage> = runCatching {
+        val page = ApiClient.usersApi.getUserMedia(username, cursor)
+        PostsPage(posts = page.items ?: emptyList(), nextCursor = page.nextCursor)
+    }
+
+    suspend fun getUserLikes(username: String, cursor: String?): Result<PostsPage> = runCatching {
+        val page = ApiClient.usersApi.getUserLikes(username, cursor)
+        PostsPage(posts = page.items ?: emptyList(), nextCursor = page.nextCursor)
+    }
+
+    suspend fun getUserReposts(username: String, cursor: String?): Result<PostsPage> = runCatching {
+        val page = ApiClient.usersApi.getUserReposts(username, cursor)
         PostsPage(posts = page.items ?: emptyList(), nextCursor = page.nextCursor)
     }
 
