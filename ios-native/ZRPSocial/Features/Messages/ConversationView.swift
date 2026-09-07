@@ -188,7 +188,7 @@ struct ConversationView: View {
                     .padding(.vertical, ZrpSpacing.sm)
             }
             .buttonStyle(.plain)
-            .foregroundStyle(ZrpColor.primary)
+            .foregroundStyle(ZrpColor.red)
         }
     }
 
