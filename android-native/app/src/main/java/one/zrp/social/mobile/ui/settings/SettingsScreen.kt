@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -39,10 +40,15 @@ import one.zrp.social.mobile.ui.theme.Spacing
  * Android/iOS.
  *
  * Only categories this slice genuinely backs with real native screens
- * are listed - Notifications (email preferences) and Support are real
- * web features left for a later slice rather than linked to a screen
- * that doesn't exist yet. See SettingsRepository's KDoc for the full
- * breakdown.
+ * are listed - Notifications (email preferences) is a real web feature
+ * left for a later slice rather than linked to a screen that doesn't
+ * exist yet. See SettingsRepository's KDoc for the full breakdown.
+ *
+ * Support routes to SupportTicketsScreen (the caller's own ticket
+ * list, itself linking to the create-ticket form) - labeled with the
+ * real translated support_tickets_page_title ("My Support Tickets")
+ * rather than a shorter invented label, since no shorter real
+ * translated nav string exists for this feature on the website either.
  *
  * Monetization routes to CreatorScreen (the native Creator Studio) -
  * NOT payment-restricted itself, despite the name: only tip-sending
@@ -80,6 +86,7 @@ fun SettingsScreen(
     onOpenLanguage: () -> Unit,
     onOpenCreator: () -> Unit,
     onOpenJournalist: () -> Unit,
+    onOpenSupport: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -107,6 +114,7 @@ fun SettingsScreen(
         // "Monetization" stays English-only - see this file's own KDoc.
         SettingsRow(icon = Icons.Filled.CreditCard, label = "Monetization", onClick = onOpenCreator)
         SettingsRow(icon = Icons.Filled.Newspaper, label = stringResource(R.string.nav_journalist), onClick = onOpenJournalist)
+        SettingsRow(icon = Icons.Filled.SupportAgent, label = stringResource(R.string.support_tickets_page_title), onClick = onOpenSupport)
     }
 }
 
