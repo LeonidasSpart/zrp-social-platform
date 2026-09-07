@@ -16,9 +16,13 @@ struct ConversationView: View {
     /// chat offers.
     private let quickReactions = ["👍", "❤️", "😂", "😮", "😢", "🙏"]
 
-    init(partner: PostAuthor, viewerId: String?) {
+    init(partner: PostAuthor, viewerId: String?, initialDraft: String = "") {
         _viewModel = StateObject(
-            wrappedValue: ConversationViewModel(partner: partner, viewerId: viewerId)
+            wrappedValue: ConversationViewModel(
+                partner: partner,
+                viewerId: viewerId,
+                initialDraft: initialDraft
+            )
         )
     }
 

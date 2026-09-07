@@ -51,6 +51,17 @@ extension ApiError {
     /// prefer this over inventing their own copy, because the backend's
     /// message is usually far more specific ("You have reached your
     /// plan's daily post limit") than anything the client could guess.
+    /// True when the server said the thing is not there.
+    ///
+    /// Some routes use 404 to mean "not available to you" rather than
+    /// "broken" - the listings detail route answers 404 for any listing
+    /// that is not ACTIVE unless you are its seller - so screens show an
+    /// empty state for this rather than an error with a retry button.
+    var isNotFound: Bool {
+        if case .notFound = self { return true }
+        return false
+    }
+
     var serverMessage: String? {
         switch self {
         case .forbidden(let message, _),

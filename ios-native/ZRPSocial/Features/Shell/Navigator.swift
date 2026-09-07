@@ -33,6 +33,16 @@ enum Route: Hashable {
     case musicHistory
     case musicQueue
     case musicStudio
+    case marketplace
+    case listingDetail(id: String)
+    case listingCompose(listingId: String?)
+    case myListings
+    case listingFavorites
+    /// A conversation opened from a listing, carrying the pre-filled
+    /// opening message. Separate from `conversation` because the draft is
+    /// part of what identifies this destination - pushing the same
+    /// partner from a listing and from the inbox are different screens.
+    case listingConversation(partner: PostAuthor, draft: String)
 }
 
 /// Owns the navigation stack's path.
@@ -47,6 +57,14 @@ final class Navigator: ObservableObject {
 
     func push(_ route: Route) {
         path.append(route)
+    }
+
+    /// Goes back one screen. Used where an action removes the thing the
+    /// current screen is showing - deleting a listing, for instance -
+    /// and staying on it would leave a view of something gone.
+    func pop() {
+        guard !path.isEmpty else { return }
+        path.removeLast()
     }
 
     func popToRoot() {

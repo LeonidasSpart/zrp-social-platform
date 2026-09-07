@@ -73,6 +73,22 @@ struct HomeView: View {
                     MusicQueueView()
                 case .musicStudio:
                     MusicStudioView()
+                case .marketplace:
+                    MarketplaceView()
+                case .listingDetail(let id):
+                    ListingDetailView(listingId: id)
+                case .listingCompose(let listingId):
+                    ListingComposerView(listingId: listingId)
+                case .myListings:
+                    MyListingsView()
+                case .listingFavorites:
+                    ListingFavoritesView()
+                case .listingConversation(let partner, let draft):
+                    ConversationView(
+                        partner: partner,
+                        viewerId: session.currentUser?.id,
+                        initialDraft: draft
+                    )
                 }
             }
         }
@@ -239,6 +255,11 @@ struct HomeView: View {
                     navigator.push(.music)
                 } label: {
                     Label { Text(.navMusic) } icon: { Image(systemName: "music.note") }
+                }
+                Button {
+                    navigator.push(.marketplace)
+                } label: {
+                    Label { Text(.marketplaceHeroTitle) } icon: { Image(systemName: "bag") }
                 }
                 Button(role: .destructive) {
                     Task { await session.signOut() }

@@ -35,11 +35,17 @@ final class ConversationViewModel: ObservableObject {
     init(
         partner: PostAuthor,
         viewerId: String?,
+        initialDraft: String = "",
         repository: MessagesRepositoryProtocol = MessagesRepository()
     ) {
         self.partner = partner
         self.viewerId = viewerId
         self.repository = repository
+        // Pre-filled, never auto-sent. "Contact Seller" in the
+        // marketplace opens this thread with the same opening line and
+        // listing link the website composes - the person still reads it,
+        // edits it, and decides to send.
+        self.draft = initialDraft
     }
 
     func isOwn(_ message: Message) -> Bool {

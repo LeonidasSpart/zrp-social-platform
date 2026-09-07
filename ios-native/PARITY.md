@@ -215,11 +215,15 @@ called and the real response being handled.
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
-| Browse / category / search | `GET /api/listings` | ✅ | ✅ | ⬜ | MISSING (Phase 15) |
-| Listing detail | `GET /api/listings/{id}` | ✅ | ✅ | ⬜ | MISSING (Phase 15) |
-| Favorites | `POST /api/listings/{id}/favorite`, `GET /api/listings/favorites` | ✅ | ✅ | ⬜ | MISSING (Phase 15) |
-| Create / edit listing | `POST /api/listings`, `PUT /api/listings/{id}` | ✅ | ⬜ | ⬜ | MISSING (Phase 15) |
-| My listings | `GET /api/listings/mine` | ✅ | ⬜ | ⬜ | MISSING (Phase 15) |
+| Browse / category / search | `GET /api/listings` | ✅ | ✅ | ✅ cursor-paged, filters, sort | IMPLEMENTED |
+| Listing detail | `GET /api/listings/{id}` | ✅ | ✅ | ✅ gallery, seller, views | IMPLEMENTED |
+| Favorites | `POST /api/listings/{id}/favorite`, `GET /api/listings/favorites` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Create / edit listing | `POST /api/listings`, `PUT /api/listings/{id}` | ✅ | ⬜ | ✅ multi-photo via UploadThing `listingMedia` | IMPLEMENTED |
+| My listings (all statuses + rejection reason) | `GET /api/listings/mine` | ✅ | ⬜ | ✅ | IMPLEMENTED |
+| Delete listing | `DELETE /api/listings/{id}` | ✅ | ⬜ | ✅ | IMPLEMENTED |
+| Contact seller | existing messaging + prefilled draft | ✅ | ✅ | ✅ same opening line and listing link the web composes | IMPLEMENTED |
+| Listing video | `videoUrl` on the listing | ✅ | ⬜ | 🔶 an existing video is preserved on edit, but none can be added yet | PARTIAL (Phase 15b) |
+| Report a listing | `POST /api/reports` | ✅ | ✅ | ⬜ | MISSING (Phase 16) |
 | Purchase flow | — **none exists** (price informational, deals close off-platform) | n/a | n/a | n/a | n/a — must never be invented |
 
 ### Moderation & safety
@@ -477,7 +481,7 @@ here. **No fake local notifications will stand in for this.**
 | 12 | Search + hashtags | ✅ done |
 | 13 | Music + background player | ✅ 13a (engine, background audio, lock screen, home) and 13b (discover, artists, albums, playlists, liked, history, queue) done |
 | 14 | Music Studio | ✅ gate, apply, artist profile, upload/publish, track + album management, reorder |
-| 15 | Marketplace | ⬜ |
+| 15 | Marketplace | ✅ browse, detail, favorites, create/edit/delete, my listings, contact seller |
 | 16 | Settings, moderation, account deletion | ⬜ |
 | 17 | Localization (11 languages) + accessibility | ⬜ |
 | 18 | Performance + security pass | ⬜ |
