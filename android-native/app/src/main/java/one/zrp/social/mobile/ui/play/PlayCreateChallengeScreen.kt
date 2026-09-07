@@ -217,7 +217,7 @@ private fun TriviaBuilder(state: PlayCreateChallengeUiState, viewModel: PlayCrea
                     )
                     if (state.questions.size > 1) {
                         IconButton(onClick = { viewModel.removeQuestion(qIndex) }) {
-                            Icon(Icons.Filled.Delete, contentDescription = null)
+                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete))
                         }
                     }
                 }

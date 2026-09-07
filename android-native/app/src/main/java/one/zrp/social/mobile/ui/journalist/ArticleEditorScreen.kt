@@ -277,7 +277,11 @@ private fun EditorFormBody(
                 Row(modifier = Modifier.padding(Spacing.md), verticalAlignment = Alignment.CenterVertically) {
                     Text(message, color = MaterialTheme.colorScheme.onErrorContainer, modifier = Modifier.weight(1f))
                     IconButton(onClick = viewModel::dismissError) {
-                        Icon(Icons.Filled.Close, contentDescription = null, tint = MaterialTheme.colorScheme.onErrorContainer)
+                        Icon(
+                            Icons.Filled.Close,
+                            contentDescription = stringResource(R.string.shorts_upload_close),
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                        )
                     }
                 }
             }

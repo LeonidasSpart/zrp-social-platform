@@ -182,7 +182,10 @@ fun AiChatScreen(onBack: () -> Unit) {
                 if (state.isSending) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                 } else {
-                    Icon(Icons.Filled.Send, contentDescription = null, tint = ZrpRed)
+                    // "Send message" stays English-only on purpose, matching
+                    // ConversationScreen's own send button - AIChat.tsx has no
+                    // aria-label on its own equivalent button either.
+                    Icon(Icons.Filled.Send, contentDescription = "Send message", tint = ZrpRed)
                 }
             }
         }
