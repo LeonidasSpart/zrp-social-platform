@@ -75,6 +75,8 @@ import one.zrp.social.mobile.ui.opportunity.OpportunityApplicantsScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityDetailScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityFormScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityScreen
+import one.zrp.social.mobile.ui.play.PlayChallengeScreen
+import one.zrp.social.mobile.ui.play.PlayScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
 import one.zrp.social.mobile.ui.quotes.QuotesScreen
 import one.zrp.social.mobile.ui.reposts.RepostsScreen
@@ -143,6 +145,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToNewCampaign: () -> Unit = { navController.navigate("aid/new") }
     val goToMyCampaigns: () -> Unit = { navController.navigate("aid/my-campaigns") }
     val goToAidOffers: (String) -> Unit = { id -> navController.navigate("aid/campaign/$id/offers") }
+    val goToPlay: () -> Unit = { navController.navigate("play") }
+    val goToPlayChallenge: (String) -> Unit = { id -> navController.navigate("play/challenge/$id") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -228,6 +232,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenMarketplace = goToMarketplace,
                     onOpenOpportunity = goToOpportunity,
                     onOpenAid = goToAid,
+                    onOpenPlay = goToPlay,
                     onOpenComments = goToComments,
                     onOpenQuotePost = goToQuotePost,
                     onOpenReposts = goToReposts,
@@ -595,6 +600,24 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onBack = { navController.popBackStack() },
                     onOpenCampaign = goToAidCampaign,
                 )
+            }
+            composable("play") {
+                PlayScreen(
+                    onBack = { navController.popBackStack() },
+                    onChallengeClick = goToPlayChallenge,
+                )
+            }
+            composable(
+                route = "play/challenge/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    PlayChallengeScreen(
+                        challengeId = id,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
             }
             composable("opportunity/new") {
                 OpportunityFormScreen(
