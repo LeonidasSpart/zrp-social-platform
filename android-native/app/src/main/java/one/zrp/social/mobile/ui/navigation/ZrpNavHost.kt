@@ -41,7 +41,9 @@ import one.zrp.social.mobile.ui.hashtag.HashtagScreen
 import one.zrp.social.mobile.ui.home.HomeScreen
 import one.zrp.social.mobile.ui.marketplace.ListingDetailScreen
 import one.zrp.social.mobile.ui.marketplace.ListingFavoritesScreen
+import one.zrp.social.mobile.ui.marketplace.ListingFormScreen
 import one.zrp.social.mobile.ui.marketplace.MarketplaceScreen
+import one.zrp.social.mobile.ui.marketplace.MyListingsScreen
 import one.zrp.social.mobile.ui.messages.ConversationScreen
 import one.zrp.social.mobile.ui.messages.MessagesScreen
 import one.zrp.social.mobile.ui.moderation.ModerationListMode
@@ -115,6 +117,9 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToMarketplace: () -> Unit = { navController.navigate("marketplace") }
     val goToListing: (String) -> Unit = { id -> navController.navigate("marketplace/listing/$id") }
     val goToMarketplaceFavorites: () -> Unit = { navController.navigate("marketplace/favorites") }
+    val goToNewListing: () -> Unit = { navController.navigate("marketplace/new") }
+    val goToEditListing: (String) -> Unit = { id -> navController.navigate("marketplace/edit/$id") }
+    val goToMyListings: () -> Unit = { navController.navigate("marketplace/my-listings") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -416,6 +421,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onBack = { navController.popBackStack() },
                     onListingClick = goToListing,
                     onOpenFavorites = goToMarketplaceFavorites,
+                    onOpenMyListings = goToMyListings,
+                    onCreateListing = goToNewListing,
                 )
             }
             composable(
@@ -429,6 +436,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                         onBack = { navController.popBackStack() },
                         onOpenSeller = goToProfile,
                         onMessageSeller = goToConversation,
+                        onEditListing = goToEditListing,
                     )
                 }
             }
@@ -436,6 +444,38 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                 ListingFavoritesScreen(
                     onBack = { navController.popBackStack() },
                     onListingClick = goToListing,
+                )
+            }
+            composable("marketplace/new") {
+                ListingFormScreen(
+                    listingId = null,
+                    onBack = { navController.popBackStack() },
+                    onSaved = { id ->
+                        navController.navigate("marketplace/listing/$id") {
+                            popUpTo("marketplace") { inclusive = false }
+                        }
+                    },
+                )
+            }
+            composable(
+                route = "marketplace/edit/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    ListingFormScreen(
+                        listingId = id,
+                        onBack = { navController.popBackStack() },
+                        onSaved = { savedId -> navController.navigate("marketplace/listing/$savedId") { popUpTo("marketplace") { inclusive = false } } },
+                    )
+                }
+            }
+            composable("marketplace/my-listings") {
+                MyListingsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenListing = goToListing,
+                    onCreateListing = goToNewListing,
+                    onEditListing = goToEditListing,
                 )
             }
             composable("bookmarks") {

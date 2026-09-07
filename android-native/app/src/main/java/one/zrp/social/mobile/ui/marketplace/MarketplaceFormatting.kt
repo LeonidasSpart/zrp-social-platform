@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Hotel
 import androidx.compose.material.icons.filled.Watch
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import one.zrp.social.mobile.R
@@ -41,6 +42,29 @@ fun categoryLabel(category: String): String = when (category) {
 
 /** Every real category in source order, for a category-chip row. */
 val allMarketplaceCategories: List<String> get() = MARKETPLACE_CATEGORIES
+
+/** Ported from src/lib/marketplace.ts's own STATUS_LABEL_KEYS - the 7 real ListingStatus values a seller's own /listings/mine can return. */
+@Composable
+fun listingStatusLabel(status: String): String = when (status) {
+    "DRAFT" -> stringResource(R.string.marketplace_status_draft)
+    "PENDING_REVIEW" -> stringResource(R.string.marketplace_status_pending_review)
+    "ACTIVE" -> stringResource(R.string.marketplace_status_active)
+    "REJECTED" -> stringResource(R.string.marketplace_status_rejected)
+    "SOLD" -> stringResource(R.string.marketplace_status_sold)
+    "EXPIRED" -> stringResource(R.string.marketplace_status_expired)
+    "REMOVED" -> stringResource(R.string.marketplace_status_removed)
+    else -> status
+}
+
+/** Ported from src/lib/marketplace.ts's own STATUS_STYLES text colors. */
+fun listingStatusColor(status: String): Color = when (status) {
+    "DRAFT", "EXPIRED" -> Color(0xFF6B7280)
+    "PENDING_REVIEW" -> Color(0xFFA16207)
+    "ACTIVE" -> Color(0xFF15803D)
+    "REJECTED", "REMOVED" -> Color(0xFFB91C1C)
+    "SOLD" -> Color(0xFF1D4ED8)
+    else -> Color(0xFF6B7280)
+}
 
 /**
  * Ported from src/lib/marketplace.ts's own formatListingPrice() -
