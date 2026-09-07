@@ -101,3 +101,14 @@
 "messages.errDeleteFailed" = "失败 to 删除 对话";
 "chat.deleteMessage" = "删除 消息";
 "chat.deleteMessageConfirm" = "你确定要删除这条消息吗？";
+"notifications.title" = "通知";
+"notifications.empty" = "无 通知 还";
+"notifications.emptyDesc" = "当有人与你互动时，会显示在这里";
+"notifications.likedPostSuffix" = "赞了你的帖子";
+"notifications.commentedPostSuffix" = "评论了你的帖子";
+"notifications.startedFollowingSuffix" = "开始关注你";
+"notifications.repostedPostSuffix" = "转发了你的帖子";
+"notifications.appealResolvedSuffix" = "处理了您的内容审核申诉";
+"notifications.listingApprovedSuffix" = "批准了您的市场商品";
+"notifications.listingRejectedSuffix" = "未批准您的市场商品";
+"notifications.listingRemovedSuffix" = "下架了您的市场商品";

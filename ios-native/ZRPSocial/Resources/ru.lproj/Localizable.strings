@@ -101,3 +101,14 @@
 "messages.errDeleteFailed" = "Не удалось в удалить диалог";
 "chat.deleteMessage" = "удалить сообщение";
 "chat.deleteMessageConfirm" = "Вы уверены, что хотите удалить это сообщение?";
+"notifications.title" = "Уведомления";
+"notifications.empty" = "Нет уведомления пока";
+"notifications.emptyDesc" = "Когда кто-то взаимодействует с вами, это появится здесь";
+"notifications.likedPostSuffix" = "понравилась ваша публикация";
+"notifications.commentedPostSuffix" = "прокомментировал(а) вашу публикацию";
+"notifications.startedFollowingSuffix" = "подписался(лась) на вас";
+"notifications.repostedPostSuffix" = "сделал(а) репост вашей публикации";
+"notifications.appealResolvedSuffix" = "рассмотрел(а) вашу апелляцию модерации";
+"notifications.listingApprovedSuffix" = "одобрил(а) ваше объявление на маркетплейсе";
+"notifications.listingRejectedSuffix" = "не одобрил(а) ваше объявление на маркетплейсе";
+"notifications.listingRemovedSuffix" = "удалил(а) ваше объявление на маркетплейсе";

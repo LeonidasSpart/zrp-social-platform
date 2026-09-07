@@ -101,3 +101,14 @@
 "messages.errDeleteFailed" = "Gagal menghapus percakapan";
 "chat.deleteMessage" = "Hapus pesan";
 "chat.deleteMessageConfirm" = "Apakah Anda yakin ingin menghapus pesan ini?";
+"notifications.title" = "Notifikasi";
+"notifications.empty" = "Belum ada notifikasi";
+"notifications.emptyDesc" = "Saat seseorang berinteraksi dengan Anda, akan muncul di sini";
+"notifications.likedPostSuffix" = "menyukai postingan Anda";
+"notifications.commentedPostSuffix" = "mengomentari postingan Anda";
+"notifications.startedFollowingSuffix" = "mulai mengikuti Anda";
+"notifications.repostedPostSuffix" = "membagikan ulang postingan Anda";
+"notifications.appealResolvedSuffix" = "memutuskan banding moderasi Anda";
+"notifications.listingApprovedSuffix" = "menyetujui listingan marketplace Anda";
+"notifications.listingRejectedSuffix" = "tidak menyetujui listingan marketplace Anda";
+"notifications.listingRemovedSuffix" = "menghapus listingan marketplace Anda";

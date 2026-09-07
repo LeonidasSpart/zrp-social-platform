@@ -101,3 +101,14 @@
 "messages.errDeleteFailed" = "Fshirja e bisedës dështoi";
 "chat.deleteMessage" = "Fshi mesazhin";
 "chat.deleteMessageConfirm" = "Jeni të sigurt që dëshironi ta fshini këtë mesazh?";
+"notifications.title" = "Njoftimet";
+"notifications.empty" = "Nuk ka njoftime ende";
+"notifications.emptyDesc" = "Kur dikush të ndërveprojë me ju, do të shfaqet këtu";
+"notifications.likedPostSuffix" = "pëlqeu postimin tuaj";
+"notifications.commentedPostSuffix" = "komentoi në postimin tuaj";
+"notifications.startedFollowingSuffix" = "filloi t'ju ndjekë";
+"notifications.repostedPostSuffix" = "ripublikoi postimin tuaj";
+"notifications.appealResolvedSuffix" = "vendosi për ankesën tuaj të moderimit";
+"notifications.listingApprovedSuffix" = "miratoi shpalljen tuaj në marketplace";
+"notifications.listingRejectedSuffix" = "nuk e miratoi shpalljen tuaj në marketplace";
+"notifications.listingRemovedSuffix" = "hoqi shpalljen tuaj në marketplace";

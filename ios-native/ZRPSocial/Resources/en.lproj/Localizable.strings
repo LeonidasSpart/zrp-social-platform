@@ -101,6 +101,17 @@
 "messages.errDeleteFailed" = "Failed to delete conversation";
 "chat.deleteMessage" = "Delete message";
 "chat.deleteMessageConfirm" = "Are you sure you want to delete this message?";
+"notifications.title" = "Notifications";
+"notifications.empty" = "No notifications yet";
+"notifications.emptyDesc" = "When someone interacts with you, it will appear here";
+"notifications.likedPostSuffix" = "liked your post";
+"notifications.commentedPostSuffix" = "commented on your post";
+"notifications.startedFollowingSuffix" = "started following you";
+"notifications.repostedPostSuffix" = "reposted your post";
+"notifications.appealResolvedSuffix" = "resolved your moderation appeal";
+"notifications.listingApprovedSuffix" = "approved your marketplace listing";
+"notifications.listingRejectedSuffix" = "didn't approve your marketplace listing";
+"notifications.listingRemovedSuffix" = "removed your marketplace listing";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back
@@ -173,3 +184,5 @@
 "ios.a11y.messageOptions" = "Message options";
 "ios.chat.react" = "React";
 "ios.chat.reply" = "Reply";
+"ios.notifications.messageSuffix" = "sent you a message";
+"ios.notifications.followRequestSuffix" = "requested to follow you";

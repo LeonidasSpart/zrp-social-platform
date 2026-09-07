@@ -101,3 +101,14 @@
 "messages.errDeleteFailed" = "Sohbet silinemedi";
 "chat.deleteMessage" = "Mesajı sil";
 "chat.deleteMessageConfirm" = "Bu mesajı silmek istediğinizden emin misiniz?";
+"notifications.title" = "Bildirimler";
+"notifications.empty" = "Henüz bildirim yok";
+"notifications.emptyDesc" = "Biri sizinle etkileşime geçtiğinde burada görünecek";
+"notifications.likedPostSuffix" = "gönderinizi beğendi";
+"notifications.commentedPostSuffix" = "gönderinize yorum yaptı";
+"notifications.startedFollowingSuffix" = "sizi takip etmeye başladı";
+"notifications.repostedPostSuffix" = "gönderinizi yeniden paylaştı";
+"notifications.appealResolvedSuffix" = "moderasyon itirazınızı karara bağladı";
+"notifications.listingApprovedSuffix" = "pazar yeri ilanınızı onayladı";
+"notifications.listingRejectedSuffix" = "pazar yeri ilanınızı onaylamadı";
+"notifications.listingRemovedSuffix" = "pazar yeri ilanınızı kaldırdı";

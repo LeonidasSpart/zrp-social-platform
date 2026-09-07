@@ -101,3 +101,14 @@
 "messages.errDeleteFailed" = "Error al eliminar la conversación";
 "chat.deleteMessage" = "Eliminar mensaje";
 "chat.deleteMessageConfirm" = "¿Seguro que quieres eliminar este mensaje?";
+"notifications.title" = "Notificaciones";
+"notifications.empty" = "Aún no hay notificaciones";
+"notifications.emptyDesc" = "Cuando alguien interactúe contigo, aparecerá aquí";
+"notifications.likedPostSuffix" = "le gustó tu publicación";
+"notifications.commentedPostSuffix" = "comentó tu publicación";
+"notifications.startedFollowingSuffix" = "comenzó a seguirte";
+"notifications.repostedPostSuffix" = "republicó tu publicación";
+"notifications.appealResolvedSuffix" = "resolvió tu apelación de moderación";
+"notifications.listingApprovedSuffix" = "aprobó tu anuncio del marketplace";
+"notifications.listingRejectedSuffix" = "no aprobó tu anuncio del marketplace";
+"notifications.listingRemovedSuffix" = "eliminó tu anuncio del marketplace";

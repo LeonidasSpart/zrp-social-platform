@@ -45,6 +45,8 @@ struct HomeView: View {
                     MessagesListView()
                 case .conversation(let partner):
                     ConversationView(partner: partner, viewerId: session.currentUser?.id)
+                case .notifications:
+                    NotificationsView { unread.clearNotificationCount() }
                 }
             }
         }
@@ -144,6 +146,28 @@ struct HomeView: View {
                 .scaledToFit()
                 .frame(width: 26, height: 26)
                 .accessibilityHidden(true)
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            Button {
+                navigator.push(.notifications)
+            } label: {
+                Image(systemName: "bell")
+                    .overlay(alignment: .topTrailing) {
+                        // A real count from GET /api/notifications/unread.
+                        if unread.notificationCount > 0 {
+                            Circle()
+                                .fill(ZrpColor.red)
+                                .frame(width: 8, height: 8)
+                                .offset(x: 4, y: -2)
+                        }
+                    }
+            }
+            .accessibilityLabel(Text(.notificationsTitle))
+            .accessibilityValue(
+                Text(verbatim: unread.notificationCount > 0
+                    ? CountFormatting.exact(unread.notificationCount)
+                    : "")
+            )
         }
         ToolbarItem(placement: .topBarTrailing) {
             Button {

@@ -166,9 +166,11 @@ called and the real response being handled.
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
-| Notification list | `GET /api/notifications` (50 most recent) | ✅ | ✅ | ⬜ | MISSING (Phase 11) |
-| Mark all read | `PUT /api/notifications` | ✅ | ✅ | ⬜ | MISSING (Phase 11) |
-| Unread badge | `GET /api/notifications/unread` | ✅ | ✅ | ⬜ | MISSING (Phase 11) |
+| Notification list | `GET /api/notifications` (bare array, 50 max, unpaginated) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Mark all read | `PUT /api/notifications` (all-at-once is the only granularity offered) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Unread badge | `GET /api/notifications/unread` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Notification tap-through | — | ✅ | ✅ | 🔶 like/comment/repost → post, follow → profile, message → thread; appeal and listing outcomes have no screen yet (Phases 15/16) | PARTIAL |
+| Unrecognised notification types | — | 🔶 renders with no action phrase | 🔶 same | 🔶 same, deliberately | PARTIAL |
 | Web Push (VAPID) | `POST /api/push/subscribe` | ✅ | n/a | n/a | WEB-ONLY |
 | **Device push** | `POST/DELETE /api/push/fcm` | n/a | ✅ FCM | ❌ | **BLOCKED — [B3](#b3-ios-device-push)** |
 
@@ -401,7 +403,7 @@ here. **No fake local notifications will stand in for this.**
 | 8 | Comments, replies, quotes, edit | ✅ done — 8b (reactions, comment repost/bookmark, reposts & quotes lists, translation) pending |
 | 9 | Stories | ✅ done |
 | 10 | Messages | ✅ done — attachments and conversation search pending (10b) |
-| 11 | Notifications (+ push, pending B3) | ⬜ |
+| 11 | Notifications | ✅ in-app list done — device push remains BLOCKED (B3) |
 | 12 | Search + hashtags | 🔶 hashtag timeline done; search pending |
 | 13 | Music + background player | ⬜ |
 | 14 | Music Studio | ⬜ |

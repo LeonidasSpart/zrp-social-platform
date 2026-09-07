@@ -79,6 +79,8 @@
     "ios.a11y.sendMessage": "Send message",
     "ios.a11y.messageOptions": "Message options",
     "ios.chat.react": "React",
-    "ios.chat.reply": "Reply"
+    "ios.chat.reply": "Reply",
+    "ios.notifications.messageSuffix": "sent you a message",
+    "ios.notifications.followRequestSuffix": "requested to follow you"
   }
 }

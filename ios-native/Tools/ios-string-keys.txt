@@ -128,3 +128,16 @@ messages.deleteConfirm
 messages.errDeleteFailed
 chat.deleteMessage
 chat.deleteMessageConfirm
+
+# ── Notifications (Phase 11) ────────────────────────────────────────
+notifications.title
+notifications.empty
+notifications.emptyDesc
+notifications.likedPostSuffix
+notifications.commentedPostSuffix
+notifications.startedFollowingSuffix
+notifications.repostedPostSuffix
+notifications.appealResolvedSuffix
+notifications.listingApprovedSuffix
+notifications.listingRejectedSuffix
+notifications.listingRemovedSuffix

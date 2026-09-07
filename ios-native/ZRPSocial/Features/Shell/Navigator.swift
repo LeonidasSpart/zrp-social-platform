@@ -19,6 +19,7 @@ enum Route: Hashable {
     case followList(username: String, kind: FollowListKind)
     case messages
     case conversation(partner: PostAuthor)
+    case notifications
 }
 
 /// Owns the navigation stack's path.

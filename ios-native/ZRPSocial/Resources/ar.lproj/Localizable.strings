@@ -101,3 +101,14 @@
 "messages.errDeleteFailed" = "تعذر to حذف محادثة";
 "chat.deleteMessage" = "حذف رسالة";
 "chat.deleteMessageConfirm" = "هل أنت متأكد أنك تريد حذف هذه الرسالة؟";
+"notifications.title" = "الإشعارات";
+"notifications.empty" = "لا إشعارات بعد";
+"notifications.emptyDesc" = "عندما يتفاعل شخص ما معك، سيظهر ذلك هنا";
+"notifications.likedPostSuffix" = "أُعجب بمنشورك";
+"notifications.commentedPostSuffix" = "علّق على منشورك";
+"notifications.startedFollowingSuffix" = "بدأ بمتابعتك";
+"notifications.repostedPostSuffix" = "أعاد نشر منشورك";
+"notifications.appealResolvedSuffix" = "بتّ في طعن الإشراف الخاص بك";
+"notifications.listingApprovedSuffix" = "وافق على إعلانك في السوق";
+"notifications.listingRejectedSuffix" = "لم يوافق على إعلانك في السوق";
+"notifications.listingRemovedSuffix" = "أزال إعلانك في السوق";
