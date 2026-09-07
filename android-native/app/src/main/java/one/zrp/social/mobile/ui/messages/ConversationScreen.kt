@@ -1,6 +1,7 @@
 package one.zrp.social.mobile.ui.messages
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -63,8 +65,9 @@ import one.zrp.social.mobile.util.formatRelativeTime
  * A single conversation - real message history and real sending
  * against the same DM endpoints the website uses, plus the same real
  * per-message reply/edit/delete/react actions ChatInterface.tsx
- * exposes. New messages arrive by polling (see ConversationViewModel's
- * KDoc), not a live socket push yet.
+ * exposes. New messages, edits, deletes, reactions, read receipts and
+ * typing status all arrive live over the same real Socket.IO
+ * connection the website uses (see ConversationViewModel's KDoc).
  */
 @Composable
 fun ConversationScreen(
@@ -94,11 +97,39 @@ fun ConversationScreen(
             IconButton(onClick = onBack) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.chat_back_to_messages))
             }
-            Text(
-                text = "@$partnerUsername",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(start = 4.dp),
-            )
+            Column(modifier = Modifier.padding(start = 4.dp)) {
+                Text(
+                    text = "@$partnerUsername",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                // Matches ChatInterface.tsx's own header status row - a
+                // "Typing..." indicator (from the real "user-typing" socket
+                // event) takes priority over the live/offline connection
+                // dot, exactly like web's own receiverTyping-vs-socketConnected
+                // conditional.
+                if (state.partnerTyping) {
+                    Text(
+                        text = stringResource(R.string.chat_typing),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = ZrpRed,
+                    )
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(if (state.socketConnected) Color(0xFF22C55E) else Color(0xFFEF4444)),
+                        )
+                        Text(
+                            text = stringResource(if (state.socketConnected) R.string.chat_live else R.string.chat_offline),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 4.dp),
+                        )
+                    }
+                }
+            }
         }
         HorizontalDivider()
 

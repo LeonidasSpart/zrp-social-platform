@@ -11,9 +11,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -37,10 +40,33 @@ import one.zrp.social.mobile.ui.theme.Spacing
  * Android/iOS.
  *
  * Only categories this slice genuinely backs with real native screens
- * are listed - Monetization (payment-restricted on native builds),
- * Notifications (email preferences), and Support are real web features
+ * are listed - Notifications (email preferences) is a real web feature
  * left for a later slice rather than linked to a screen that doesn't
  * exist yet. See SettingsRepository's KDoc for the full breakdown.
+ *
+ * Support routes to SupportTicketsScreen (the caller's own ticket
+ * list, itself linking to the create-ticket form) - labeled with the
+ * real translated support_tickets_page_title ("My Support Tickets")
+ * rather than a shorter invented label, since no shorter real
+ * translated nav string exists for this feature on the website either.
+ *
+ * Monetization routes to CreatorScreen (the native Creator Studio) -
+ * NOT payment-restricted itself, despite the name: only tip-sending
+ * and premium-post purchasing are (see CreatorApi's own KDoc), and
+ * neither of those lives on this screen at all. "Monetization" stays
+ * an untranslated literal here for the same reason Account and
+ * Security do below - the website's own CATEGORIES array hardcodes
+ * that exact label untranslated too.
+ *
+ * Journalist routes to JournalistDashboardScreen - the same real
+ * /journalist page the website reaches from two separate places (a
+ * Sidebar link shown only once already a journalist, and a footer
+ * link to apply otherwise), both landing on the exact same page and
+ * its own internal status branching. One entry point here is
+ * functionally equivalent regardless of the viewer's current
+ * status. Unlike "Monetization", this label uses the website's own
+ * real translated "nav.journalist" string (nav_journalist) rather
+ * than an untranslated literal.
  *
  * Every label here is a string resource with real translations for
  * all 11 official ZRP languages (extracted from the website's own
@@ -58,6 +84,9 @@ fun SettingsScreen(
     onOpenSecurity: () -> Unit,
     onOpenPrivacy: () -> Unit,
     onOpenLanguage: () -> Unit,
+    onOpenCreator: () -> Unit,
+    onOpenJournalist: () -> Unit,
+    onOpenSupport: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -82,6 +111,10 @@ fun SettingsScreen(
         SettingsRow(icon = Icons.Filled.Lock, label = stringResource(R.string.settings_security), onClick = onOpenSecurity)
         SettingsRow(icon = Icons.Filled.Shield, label = stringResource(R.string.settings_privacy_safety), onClick = onOpenPrivacy)
         SettingsRow(icon = Icons.Filled.Language, label = stringResource(R.string.nav_language), onClick = onOpenLanguage)
+        // "Monetization" stays English-only - see this file's own KDoc.
+        SettingsRow(icon = Icons.Filled.CreditCard, label = "Monetization", onClick = onOpenCreator)
+        SettingsRow(icon = Icons.Filled.Newspaper, label = stringResource(R.string.nav_journalist), onClick = onOpenJournalist)
+        SettingsRow(icon = Icons.Filled.SupportAgent, label = stringResource(R.string.support_tickets_page_title), onClick = onOpenSupport)
     }
 }
 

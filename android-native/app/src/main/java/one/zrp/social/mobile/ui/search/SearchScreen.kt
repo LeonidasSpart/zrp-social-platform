@@ -18,10 +18,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SmartDisplay
+import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.VolunteerActivism
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -63,6 +69,12 @@ fun SearchScreen(
     onAuthorClick: (String) -> Unit,
     onOpenMusic: () -> Unit,
     onOpenMarketplace: () -> Unit,
+    onOpenOpportunity: () -> Unit,
+    onOpenAid: () -> Unit,
+    onOpenPlay: () -> Unit,
+    onOpenNews: () -> Unit,
+    onOpenShorts: () -> Unit,
+    onOpenAi: () -> Unit,
     onOpenComments: (postId: String) -> Unit,
     onOpenQuotePost: (postId: String) -> Unit = {},
     onOpenReposts: (postId: String) -> Unit = {},
@@ -108,6 +120,12 @@ fun SearchScreen(
                 onHashtagClick = { tag -> viewModel.onHashtagClick(tag) },
                 onOpenMusic = onOpenMusic,
                 onOpenMarketplace = onOpenMarketplace,
+                onOpenOpportunity = onOpenOpportunity,
+                onOpenAid = onOpenAid,
+                onOpenPlay = onOpenPlay,
+                onOpenNews = onOpenNews,
+                onOpenShorts = onOpenShorts,
+                onOpenAi = onOpenAi,
             )
         } else {
             SearchResultsContent(
@@ -212,6 +230,12 @@ private fun DiscoverContent(
     onHashtagClick: (String) -> Unit,
     onOpenMusic: () -> Unit,
     onOpenMarketplace: () -> Unit,
+    onOpenOpportunity: () -> Unit,
+    onOpenAid: () -> Unit,
+    onOpenPlay: () -> Unit,
+    onOpenNews: () -> Unit,
+    onOpenShorts: () -> Unit,
+    onOpenAi: () -> Unit,
 ) {
     if (state.isLoadingDiscover) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -226,6 +250,24 @@ private fun DiscoverContent(
         }
         item {
             MarketplaceEntryRow(onClick = onOpenMarketplace)
+        }
+        item {
+            OpportunityEntryRow(onClick = onOpenOpportunity)
+        }
+        item {
+            AidEntryRow(onClick = onOpenAid)
+        }
+        item {
+            PlayEntryRow(onClick = onOpenPlay)
+        }
+        item {
+            NewsEntryRow(onClick = onOpenNews)
+        }
+        item {
+            ShortsEntryRow(onClick = onOpenShorts)
+        }
+        item {
+            AiEntryRow(onClick = onOpenAi)
         }
 
         if (state.trendingHashtags.isNotEmpty()) {
@@ -433,6 +475,120 @@ private fun MarketplaceEntryRow(onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(text = stringResource(R.string.marketplace_discover_entry), style = MaterialTheme.typography.titleSmall)
+    }
+}
+
+@Composable
+private fun OpportunityEntryRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Work,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text = stringResource(R.string.opportunity_discover_entry), style = MaterialTheme.typography.titleSmall)
+    }
+}
+
+@Composable
+private fun AidEntryRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.VolunteerActivism,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text = stringResource(R.string.aid_discover_entry), style = MaterialTheme.typography.titleSmall)
+    }
+}
+
+@Composable
+private fun PlayEntryRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.SportsEsports,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text = stringResource(R.string.play_discover_entry), style = MaterialTheme.typography.titleSmall)
+    }
+}
+
+@Composable
+private fun NewsEntryRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Newspaper,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text = stringResource(R.string.news_discover_entry), style = MaterialTheme.typography.titleSmall)
+    }
+}
+
+@Composable
+private fun ShortsEntryRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.SmartDisplay,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text = stringResource(R.string.shorts_discover_entry), style = MaterialTheme.typography.titleSmall)
+    }
+}
+
+@Composable
+private fun AiEntryRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.AutoAwesome,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text = stringResource(R.string.ai_discover_entry), style = MaterialTheme.typography.titleSmall)
     }
 }
 

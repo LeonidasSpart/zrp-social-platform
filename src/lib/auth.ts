@@ -213,6 +213,96 @@ async function generateUniqueUsername(base: string): Promise<string> {
   return username;
 }
 
+// The single source of truth for linking-or-creating an account for a
+// verified OAuth identity (Google or Apple) - shared by NextAuth's own
+// signIn callback (the website's browser OAuth flow, below) and the
+// mobile Google sign-in endpoint (POST /api/mobile/auth/google), so a
+// user who already exists - or is banned - is treated identically
+// regardless of which client authenticated them. Returns the same
+// shape verifyCredentials does, so both mobile auth endpoints build
+// their session token from an identical user object. Returns null only
+// when the matched existing account is banned; the caller decides how
+// to surface that (NextAuth's signIn callback returns false, the
+// mobile route returns 403).
+export async function findOrCreateOAuthUser(
+  email: string,
+  name: string | null | undefined,
+  image: string | null | undefined
+): Promise<VerifiedCredentialsUser | null> {
+  const normalizedEmail = email.toLowerCase();
+
+  const select = {
+    id: true,
+    email: true,
+    name: true,
+    username: true,
+    isAdmin: true,
+    role: true,
+    badgeType: true,
+    avatarUrl: true,
+    onboardingCompleted: true,
+    banned: true,
+    emailVerified: true,
+    plan: true,
+  } as const;
+
+  const existing = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
+    select,
+  });
+
+  if (existing) {
+    if (existing.banned) return null;
+    return {
+      id: existing.id,
+      email: existing.email,
+      name: existing.name,
+      username: existing.username,
+      isAdmin: existing.isAdmin,
+      role: existing.role,
+      badgeType: existing.badgeType,
+      avatarUrl: existing.avatarUrl,
+      onboardingCompleted: existing.onboardingCompleted,
+      banned: existing.banned || false,
+      emailVerified: !!existing.emailVerified,
+      plan: existing.plan || "free",
+    };
+  }
+
+  // ─── Create a new user for this Google/Apple account ──────────────
+  const baseHandle = normalizedEmail.split("@")[0] || name || "user";
+  const username = await generateUniqueUsername(baseHandle);
+
+  const created = await prisma.user.create({
+    data: {
+      email: normalizedEmail,
+      username,
+      name: name || null,
+      avatarUrl: image || null,
+      password: null,
+      emailVerified: new Date(),
+      role: "USER",
+      onboardingCompleted: false,
+    },
+    select,
+  });
+
+  return {
+    id: created.id,
+    email: created.email,
+    name: created.name,
+    username: created.username,
+    isAdmin: created.isAdmin,
+    role: created.role,
+    badgeType: created.badgeType,
+    avatarUrl: created.avatarUrl,
+    onboardingCompleted: created.onboardingCompleted,
+    banned: created.banned || false,
+    emailVerified: !!created.emailVerified,
+    plan: created.plan || "free",
+  };
+}
+
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
@@ -274,32 +364,8 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account }) {
       if (account?.provider === "google" || account?.provider === "apple") {
         if (!user.email) return false;
-
-        const existing = await prisma.user.findUnique({
-          where: { email: user.email.toLowerCase() },
-        });
-
-        if (existing) {
-          if (existing.banned) return false;
-          return true;
-        }
-
-        // ─── Create a new user for this Google/Apple account ──────
-        const baseHandle = user.email.split("@")[0] || user.name || "user";
-        const username = await generateUniqueUsername(baseHandle);
-
-        await prisma.user.create({
-          data: {
-            email: user.email.toLowerCase(),
-            username,
-            name: user.name || null,
-            avatarUrl: user.image || null,
-            password: null,
-            emailVerified: new Date(),
-            role: "USER",
-            onboardingCompleted: false,
-          },
-        });
+        const result = await findOrCreateOAuthUser(user.email, user.name, user.image);
+        return result !== null;
       }
       return true;
     },

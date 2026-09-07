@@ -64,9 +64,8 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 /**
  * A single listing - the same real image carousel, description, seller
  * card, and favorite/share/report/contact-seller actions as
- * ListingDetailPage. The owner-only "Edit Listing" link isn't shown -
- * that screen doesn't exist natively yet - so an owner just sees the
- * listing itself without a broken affordance.
+ * ListingDetailPage, including the owner-only "Edit Listing" link in
+ * place of Contact Seller (matching web's own isOwner branch exactly).
  */
 @Composable
 fun ListingDetailScreen(
@@ -74,6 +73,7 @@ fun ListingDetailScreen(
     onBack: () -> Unit,
     onOpenSeller: (String) -> Unit,
     onMessageSeller: (userId: String, username: String) -> Unit,
+    onEditListing: (String) -> Unit,
 ) {
     val viewModel: ListingDetailViewModel = viewModel(
         factory = remember { ListingDetailViewModelFactory(listingId, MarketplaceRepository()) },
@@ -177,7 +177,7 @@ fun ListingDetailScreen(
                             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                             modifier = Modifier.padding(top = Spacing.xs),
                         ) {
-                            items(listing.imageUrls.withIndex().toList()) { (index, url) ->
+                            items(listing.imageUrls.withIndex().toList(), key = { (index, _) -> index }) { (index, url) ->
                                 AsyncImage(
                                     model = url,
                                     contentDescription = null,
@@ -261,7 +261,11 @@ fun ListingDetailScreen(
                         }
                         if (!isOwner) {
                             IconButton(onClick = viewModel::onOpenReport, modifier = Modifier.padding(start = Spacing.xs)) {
-                                Icon(Icons.Filled.Flag, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Icon(
+                                    Icons.Filled.Flag,
+                                    contentDescription = stringResource(R.string.report_modal_title),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
                             }
                         }
                     }
@@ -343,7 +347,16 @@ fun ListingDetailScreen(
                             )
                         }
 
-                        if (!isOwner) {
+                        if (isOwner) {
+                            OutlinedButton(
+                                onClick = { onEditListing(listing.id) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = Spacing.md),
+                            ) {
+                                Text(stringResource(R.string.marketplace_edit_listing))
+                            }
+                        } else {
                             Button(
                                 onClick = { onMessageSeller(listing.seller.id, listing.seller.username) },
                                 modifier = Modifier

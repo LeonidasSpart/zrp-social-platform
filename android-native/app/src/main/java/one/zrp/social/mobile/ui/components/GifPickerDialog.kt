@@ -101,8 +101,13 @@ fun GifPickerDialog(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text("Choose a GIF", style = MaterialTheme.typography.titleMedium)
+                    // Hardcoded English, not stringResource - this whole dialog's text
+                    // (title, placeholder, loading/error copy) is native-only and not
+                    // yet wired into the translation system, so these two accessibility
+                    // labels stay consistent with that rather than being translated in
+                    // isolation.
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Filled.Close, contentDescription = null)
+                        Icon(Icons.Filled.Close, contentDescription = "Close")
                     }
                 }
 
@@ -121,7 +126,7 @@ fun GifPickerDialog(
                         modifier = Modifier.weight(1f),
                     )
                     IconButton(onClick = { search() }, enabled = query.length >= 2) {
-                        Icon(Icons.Filled.Search, contentDescription = null)
+                        Icon(Icons.Filled.Search, contentDescription = "Search")
                     }
                 }
 

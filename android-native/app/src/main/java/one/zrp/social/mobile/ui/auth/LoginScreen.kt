@@ -53,6 +53,7 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 fun LoginScreen(
     formState: LoginFormState,
     onLogin: (identifier: String, password: String) -> Unit,
+    onGoogleIdToken: (String) -> Unit,
     onSignUp: () -> Unit,
     onForgotPassword: () -> Unit,
 ) {
@@ -169,6 +170,15 @@ fun LoginScreen(
                 Text(stringResource(R.string.auth_sign_in))
             }
         }
+
+        Text(
+            text = stringResource(R.string.auth_or),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 16.dp),
+        )
+
+        GoogleSignInButton(enabled = !isSubmitting, onIdToken = onGoogleIdToken)
 
         Row(modifier = Modifier.padding(top = 16.dp)) {
             Text(

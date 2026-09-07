@@ -5,6 +5,7 @@ import one.zrp.social.mobile.network.ApiErrorBody
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.CheckUsernameResponse
 import one.zrp.social.mobile.network.ForgotPasswordRequest
+import one.zrp.social.mobile.network.GoogleLoginRequest
 import one.zrp.social.mobile.network.LoginRequest
 import one.zrp.social.mobile.network.MobileUser
 import one.zrp.social.mobile.network.RegisterRequest
@@ -37,6 +38,22 @@ class AuthRepository {
     suspend fun login(identifier: String, password: String): Result<MobileUser> {
         return try {
             val response = ApiClient.authApi.login(LoginRequest(identifier, password))
+            tokenStore.saveSession(response.sessionToken, response.cookieName)
+            Result.success(response.user)
+        } catch (e: HttpException) {
+            Result.failure(Exception(extractErrorMessage(e) ?: "Something went wrong. Please try again."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // Same session-token persistence as login() - GoogleAuth.requestIdToken
+    // has already obtained a real signed Google ID token by this point,
+    // this just hands it to the backend for verification + account
+    // find-or-create (see /mobile/auth/google's own comment).
+    suspend fun loginWithGoogle(idToken: String): Result<MobileUser> {
+        return try {
+            val response = ApiClient.authApi.loginWithGoogle(GoogleLoginRequest(idToken))
             tokenStore.saveSession(response.sessionToken, response.cookieName)
             Result.success(response.user)
         } catch (e: HttpException) {

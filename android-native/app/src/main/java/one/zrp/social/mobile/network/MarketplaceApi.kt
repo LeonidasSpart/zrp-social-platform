@@ -1,7 +1,9 @@
 package one.zrp.social.mobile.network
 
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.POST
 import retrofit2.http.Query
@@ -85,13 +87,45 @@ data class ListingFavoritesResponse(val listings: List<ListingSummary> = emptyLi
 
 data class ToggleListingFavoriteResponse(val favorited: Boolean)
 
+// ─── Create/edit (POST /listings, PUT /listings/{id}) - Marketplace
+// phase 2. Both real routes take the same request shape and return the
+// same lean `{listing}` wrapper around the raw Listing row (no
+// seller/_count include, unlike every read response above) - matched
+// here with one shared request/response pair rather than two
+// near-identical ones.
+data class ListingWriteRequest(
+    val category: String,
+    val title: String,
+    val description: String,
+    val priceOnRequest: Boolean,
+    val price: Double?,
+    val currency: String,
+    val location: String?,
+    val imageUrls: List<String>,
+    val videoUrl: String?,
+)
+
+data class ListingRow(
+    val id: String,
+    val category: String,
+    val title: String,
+    val description: String,
+    val price: Double?,
+    val currency: String,
+    val priceOnRequest: Boolean,
+    val location: String?,
+    val imageUrls: List<String> = emptyList(),
+    val videoUrl: String?,
+    val status: String,
+    val createdAt: String,
+)
+
+data class ListingWriteResponse(val listing: ListingRow)
+
 /**
  * ZRP Market Plus - the same real GET/POST /listings, GET/PUT/DELETE
  * /listings/{id}, POST /listings/{id}/favorite, GET /listings/mine and
  * GET /listings/favorites routes the website's marketplace pages use.
- * Listing creation/editing (src/app/marketplace/new, /edit/[id]) is a
- * later native phase - this phase covers real browsing, search,
- * listing detail, and favoriting.
  */
 interface MarketplaceApi {
     @GET("listings")
@@ -117,4 +151,13 @@ interface MarketplaceApi {
 
     @GET("listings/favorites")
     suspend fun getFavoriteListings(): ListingFavoritesResponse
+
+    @POST("listings")
+    suspend fun createListing(@Body request: ListingWriteRequest): ListingWriteResponse
+
+    @PUT("listings/{id}")
+    suspend fun updateListing(@Path("id") id: String, @Body request: ListingWriteRequest): ListingWriteResponse
+
+    @DELETE("listings/{id}")
+    suspend fun deleteListing(@Path("id") id: String)
 }

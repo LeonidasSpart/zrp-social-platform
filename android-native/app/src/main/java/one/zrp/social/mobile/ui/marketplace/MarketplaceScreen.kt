@@ -15,8 +15,10 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
@@ -52,13 +54,18 @@ import one.zrp.social.mobile.data.MarketplaceRepository
  * folded into one screen: search bar, category chips (tap to filter
  * in place), a sort menu, and an infinite-scroll grid of the same real
  * GET /listings results those three web pages all render with
- * ListingCard. Create Listing / My Listings aren't shown yet - those
- * screens don't exist natively yet (a later phase), so only Favorites
- * (built alongside this) is offered as a real destination.
+ * ListingCard, plus real entry points into Favorites, My Listings, and
+ * Create Listing.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MarketplaceScreen(onBack: () -> Unit, onListingClick: (String) -> Unit, onOpenFavorites: () -> Unit) {
+fun MarketplaceScreen(
+    onBack: () -> Unit,
+    onListingClick: (String) -> Unit,
+    onOpenFavorites: () -> Unit,
+    onOpenMyListings: () -> Unit,
+    onCreateListing: () -> Unit,
+) {
     val viewModel: MarketplaceViewModel = viewModel(
         factory = remember { MarketplaceViewModelFactory(MarketplaceRepository()) },
     )
@@ -82,8 +89,14 @@ fun MarketplaceScreen(onBack: () -> Unit, onListingClick: (String) -> Unit, onOp
                     .padding(start = 4.dp)
                     .weight(1f),
             )
+            IconButton(onClick = onOpenMyListings) {
+                Icon(Icons.Filled.ListAlt, contentDescription = stringResource(R.string.marketplace_my_listings))
+            }
             IconButton(onClick = onOpenFavorites) {
                 Icon(Icons.Filled.Favorite, contentDescription = stringResource(R.string.marketplace_favorites))
+            }
+            IconButton(onClick = onCreateListing) {
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.marketplace_create_listing))
             }
         }
         Text(
@@ -124,7 +137,7 @@ fun MarketplaceScreen(onBack: () -> Unit, onListingClick: (String) -> Unit, onOp
                     label = { Text(stringResource(R.string.marketplace_all_categories)) },
                 )
             }
-            items(allMarketplaceCategories) { category ->
+            items(allMarketplaceCategories, key = { it }) { category ->
                 FilterChip(
                     selected = state.selectedCategory == category,
                     onClick = { viewModel.onCategorySelect(category) },

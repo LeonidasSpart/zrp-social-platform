@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -45,6 +47,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -57,6 +60,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -103,6 +107,7 @@ fun ProfileScreen(
     onOpenReposts: (postId: String) -> Unit = {},
     onOpenQuotes: (postId: String) -> Unit = {},
     onOpenHashtag: (String) -> Unit = {},
+    onOpenTrustPassport: (username: String) -> Unit = {},
 ) {
     val viewModel: ProfileViewModel = viewModel(
         factory = remember(username) { ProfileViewModelFactory(ProfileRepository(), username) },
@@ -185,6 +190,7 @@ fun ProfileScreen(
                             onSettingsClick = onOpenSettings,
                             onAvatarPicked = { uri -> viewModel.uploadAvatar(contentResolver, uri) },
                             onBannerPicked = { uri -> viewModel.uploadBanner(contentResolver, uri) },
+                            onTrustPassportClick = { onOpenTrustPassport(profile.username) },
                         )
 
                         val mediaUploadError = state.mediaUploadError
@@ -413,6 +419,7 @@ private fun ProfileHeader(
     onBlockedUsersClick: () -> Unit,
     onMutedUsersClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onTrustPassportClick: () -> Unit,
 ) {
     val avatarPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -656,6 +663,63 @@ private fun ProfileHeader(
             ProfileStat(count = profile._count.posts, label = stringResource(R.string.profile_posts))
             ProfileStat(count = profile._count.followers, label = stringResource(R.string.profile_followers), onClick = onFollowersClick)
             ProfileStat(count = profile._count.following, label = stringResource(R.string.profile_following), onClick = onFollowingClick)
+        }
+
+        // ZRP Trust Passport - a real, public trust score built from
+        // this account's own signals (see TrustApi's own KDoc). Shown
+        // on every profile, own and others' alike, matching the
+        // website's own unconditional placement here.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.lg, vertical = Spacing.sm)
+                .clip(MaterialTheme.shapes.large)
+                .background(ZrpBlue.copy(alpha = 0.08f))
+                .clickable(onClick = onTrustPassportClick)
+                .padding(Spacing.md),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(ZrpBlue.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Filled.Shield, contentDescription = null, tint = ZrpBlue, modifier = Modifier.size(24.dp))
+            }
+
+            Column(modifier = Modifier.weight(1f).padding(start = Spacing.sm)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.profile_trust_passport_title),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Surface(shape = MaterialTheme.shapes.extraLarge, color = ZrpRed.copy(alpha = 0.1f), modifier = Modifier.padding(start = Spacing.xs)) {
+                        Text(
+                            text = stringResource(R.string.profile_trust_passport_badge),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = ZrpRed,
+                            modifier = Modifier.padding(horizontal = Spacing.xs, vertical = 1.dp),
+                        )
+                    }
+                }
+                Text(
+                    text = stringResource(R.string.profile_trust_passport_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 1.dp),
+                )
+            }
+
+            Text(
+                text = stringResource(R.string.profile_trust_passport_view) + " →",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = ZrpBlue,
+            )
         }
 
         HorizontalDivider()

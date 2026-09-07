@@ -94,4 +94,13 @@ object ApiClient {
     val uploadThingApi: UploadThingApi by lazy { retrofit.create(UploadThingApi::class.java) }
     val onboardingApi: OnboardingApi by lazy { retrofit.create(OnboardingApi::class.java) }
     val marketplaceApi: MarketplaceApi by lazy { retrofit.create(MarketplaceApi::class.java) }
+    val opportunityApi: OpportunityApi by lazy { retrofit.create(OpportunityApi::class.java) }
+    val aidApi: AidApi by lazy { retrofit.create(AidApi::class.java) }
+    val playApi: PlayApi by lazy { retrofit.create(PlayApi::class.java) }
+    val newsApi: NewsApi by lazy { retrofit.create(NewsApi::class.java) }
+    val creatorApi: CreatorApi by lazy { retrofit.create(CreatorApi::class.java) }
+    val trustApi: TrustApi by lazy { retrofit.create(TrustApi::class.java) }
+    val journalistApi: JournalistApi by lazy { retrofit.create(JournalistApi::class.java) }
+    val aiApi: AiApi by lazy { retrofit.create(AiApi::class.java) }
+    val supportApi: SupportApi by lazy { retrofit.create(SupportApi::class.java) }
 }

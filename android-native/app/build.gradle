@@ -36,14 +36,30 @@ android {
         applicationId "one.zrp.social"
         minSdkVersion 24
         targetSdkVersion 36
+
+        // Google Sign-In (Credential Manager) - the OAuth Web client ID
+        // registered in the same Google Cloud project GOOGLE_CLIENT_ID
+        // already uses server-side (src/lib/auth.ts's GoogleProvider,
+        // src/app/api/mobile/auth/google/route.ts's audience check).
+        // Not a secret (client IDs are public identifiers, unlike a
+        // client secret) but still not hardcoded here, mirroring the
+        // keystore.properties pattern above: supplied via a Gradle
+        // property so a build with none configured still compiles -
+        // GoogleAuth.kt's own call simply fails at runtime with a clear
+        // error until it's set, instead of failing the build.
+        buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", "\"${project.findProperty('GOOGLE_WEB_CLIENT_ID') ?: ''}\""
         // versionCode 1 ("1.0") is the existing Capacitor app's Internal
         // Testing release - confirmed via Play Console there is no
-        // Production release yet. This native app's first release is
-        // versionCode 2 so it can still be uploaded as a valid update to
-        // that same applicationId whenever it replaces the Capacitor
-        // build, per Play's per-applicationId monotonically-increasing
-        // versionCode requirement.
-        versionCode 2
+        // Production release yet. This native app's own first release
+        // was versionCode 2, per Play's per-applicationId monotonically-
+        // increasing versionCode requirement; Play Console rejected a
+        // later Internal Testing upload with "Le code de version 2 a
+        // déjà été utilisé" (versionCode 2 already used - a prior AAB
+        // with that code had already been uploaded), so this bumps to
+        // versionCode 3. versionName intentionally stays "1.0.0" - it's
+        // the human-facing label and this is still the same 1.0.0
+        // release, just a new build of it.
+        versionCode 3
         versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -94,6 +110,7 @@ android {
 
     buildFeatures {
         compose true
+        buildConfig true
     }
 }
 
@@ -149,6 +166,31 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+
+    // Real-time messaging parity - the same Socket.IO server the website's
+    // src/lib/socket-client.ts talks to (server.js, "socket.io": "^4.7.0"),
+    // reached over the exact same NextAuth session cookie ApiClient's own
+    // sessionCookieInterceptor already attaches to every REST call (see
+    // ZrpSocket's own KDoc). org.json is excluded because engine.io-client
+    // pulls in a standalone org.json:json jar that duplicates classes
+    // already provided by the Android platform, which fails the build at
+    // dex-merge time otherwise.
+    implementation('io.socket:socket.io-client:2.1.1') {
+        exclude group: 'org.json', module: 'json'
+    }
+
+    // Google Sign-In - Android's Credential Manager API, which returns a
+    // signed Google ID token directly (an account picker, no browser
+    // redirect). This is a genuinely different mechanism from the
+    // Capacitor app's own nativeGoogleSignIn() (src/lib/nativeAuth.ts,
+    // system-browser redirect) - that one exists solely to work around
+    // Google blocking OAuth from an *embedded WebView*, which doesn't
+    // apply here since this app has no WebView at all. Verified server-
+    // side by src/app/api/mobile/auth/google/route.ts against the same
+    // GOOGLE_CLIENT_ID the website's own GoogleProvider already trusts.
+    implementation 'androidx.credentials:credentials:1.3.0'
+    implementation 'androidx.credentials:credentials-play-services-auth:1.3.0'
+    implementation 'com.google.android.libraries.identity.googleid:googleid:1.1.1'
 
     implementation 'io.coil-kt:coil-compose:2.7.0'
 

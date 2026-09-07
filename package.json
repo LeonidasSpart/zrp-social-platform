@@ -30,6 +30,7 @@
     "file-type": "^22.0.2",
     "firebase-admin": "^14.3.0",
     "framer-motion": "^12.43.0",
+    "google-auth-library": "^9.15.1",
     "lucide-react": "^0.263.1",
     "marked": "^18.0.11",
     "next": "^15.5.21",

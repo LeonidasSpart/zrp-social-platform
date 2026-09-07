@@ -137,6 +137,31 @@ class AuthViewModel(
         }
     }
 
+    // Called once GoogleAuth.requestIdToken (Credential Manager) has
+    // already produced a real signed Google ID token - drives the exact
+    // same LoginFormState machine password login() does, so both
+    // LoginScreen and SignupScreen render Submitting/Error identically
+    // regardless of which method was used.
+    fun loginWithGoogle(idToken: String) {
+        _loginForm.value = LoginFormState.Submitting
+        viewModelScope.launch {
+            authRepository.loginWithGoogle(idToken)
+                .onSuccess { user ->
+                    _loginForm.value = LoginFormState.Idle
+                    _authState.value = AuthUiState.LoggedIn(user, needsOnboarding = !user.onboardingCompleted)
+                    try {
+                        pushRepository.registerCurrentToken()
+                    } catch (_: Exception) {
+                    }
+                }
+                .onFailure { error ->
+                    _loginForm.value = LoginFormState.Error(
+                        error.message ?: "Something went wrong. Please try again."
+                    )
+                }
+        }
+    }
+
     // Called after a signup flow's own post-registration login attempt
     // (expected to fail, since a fresh account always starts
     // unverified - see SignupViewModel) in case it unexpectedly

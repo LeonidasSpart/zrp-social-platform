@@ -41,7 +41,9 @@ import one.zrp.social.mobile.ui.hashtag.HashtagScreen
 import one.zrp.social.mobile.ui.home.HomeScreen
 import one.zrp.social.mobile.ui.marketplace.ListingDetailScreen
 import one.zrp.social.mobile.ui.marketplace.ListingFavoritesScreen
+import one.zrp.social.mobile.ui.marketplace.ListingFormScreen
 import one.zrp.social.mobile.ui.marketplace.MarketplaceScreen
+import one.zrp.social.mobile.ui.marketplace.MyListingsScreen
 import one.zrp.social.mobile.ui.messages.ConversationScreen
 import one.zrp.social.mobile.ui.messages.MessagesScreen
 import one.zrp.social.mobile.ui.moderation.ModerationListMode
@@ -62,10 +64,40 @@ import one.zrp.social.mobile.ui.music.MusicScreen
 import one.zrp.social.mobile.ui.music.PlaylistDetailScreen
 import one.zrp.social.mobile.ui.music.PlaylistsScreen
 import one.zrp.social.mobile.ui.notifications.NotificationsScreen
+import one.zrp.social.mobile.ui.aid.AidDetailScreen
+import one.zrp.social.mobile.ui.aid.AidFormScreen
+import one.zrp.social.mobile.ui.aid.AidOffersScreen
+import one.zrp.social.mobile.ui.aid.AidScreen
+import one.zrp.social.mobile.ui.aid.MyAidCampaignsScreen
+import one.zrp.social.mobile.ui.opportunity.MyApplicationsScreen
+import one.zrp.social.mobile.ui.opportunity.MyOpportunityListingsScreen
+import one.zrp.social.mobile.ui.opportunity.OpportunityApplicantsScreen
+import one.zrp.social.mobile.ui.opportunity.OpportunityDetailScreen
+import one.zrp.social.mobile.ui.opportunity.OpportunityFormScreen
+import one.zrp.social.mobile.ui.opportunity.OpportunityScreen
+import one.zrp.social.mobile.ui.news.NewsArticleScreen
+import one.zrp.social.mobile.ui.news.NewsScreen
+import one.zrp.social.mobile.ui.shorts.ShortsScreen
+import one.zrp.social.mobile.ui.play.PlayAchievementsScreen
+import one.zrp.social.mobile.ui.play.PlayChallengeScreen
+import one.zrp.social.mobile.ui.play.PlayCreateChallengeScreen
+import one.zrp.social.mobile.ui.play.PlayDuelDetailScreen
+import one.zrp.social.mobile.ui.play.PlayDuelsScreen
+import one.zrp.social.mobile.ui.play.PlayLeaderboardScreen
+import one.zrp.social.mobile.ui.play.PlayProfileScreen
+import one.zrp.social.mobile.ui.play.PlayScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
 import one.zrp.social.mobile.ui.quotes.QuotesScreen
 import one.zrp.social.mobile.ui.reposts.RepostsScreen
 import one.zrp.social.mobile.ui.search.SearchScreen
+import one.zrp.social.mobile.ui.ai.AiChatScreen
+import one.zrp.social.mobile.ui.creator.CreatorScreen
+import one.zrp.social.mobile.ui.journalist.ArticleEditorScreen
+import one.zrp.social.mobile.ui.journalist.JournalistDashboardScreen
+import one.zrp.social.mobile.ui.support.NewTicketScreen
+import one.zrp.social.mobile.ui.support.SupportTicketsScreen
+import one.zrp.social.mobile.ui.support.TicketDetailScreen
+import one.zrp.social.mobile.ui.trust.TrustPassportScreen
 import one.zrp.social.mobile.ui.settings.AccountSettingsScreen
 import one.zrp.social.mobile.ui.settings.DeleteAccountScreen
 import one.zrp.social.mobile.ui.settings.LanguageSettingsScreen
@@ -92,6 +124,7 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 fun ZrpNavHost(onLogout: () -> Unit) {
     val navController = rememberNavController()
     val goToProfile: (String) -> Unit = { username -> navController.navigate("profile/$username") }
+    val goToTrustPassport: (String) -> Unit = { username -> navController.navigate("trust/$username") }
     val goToConversation: (partnerId: String, partnerUsername: String) -> Unit = { partnerId, partnerUsername ->
         navController.navigate("messages/$partnerId/$partnerUsername")
     }
@@ -115,6 +148,32 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToMarketplace: () -> Unit = { navController.navigate("marketplace") }
     val goToListing: (String) -> Unit = { id -> navController.navigate("marketplace/listing/$id") }
     val goToMarketplaceFavorites: () -> Unit = { navController.navigate("marketplace/favorites") }
+    val goToNewListing: () -> Unit = { navController.navigate("marketplace/new") }
+    val goToEditListing: (String) -> Unit = { id -> navController.navigate("marketplace/edit/$id") }
+    val goToMyListings: () -> Unit = { navController.navigate("marketplace/my-listings") }
+    val goToOpportunity: () -> Unit = { navController.navigate("opportunity") }
+    val goToOpportunityListing: (String) -> Unit = { id -> navController.navigate("opportunity/listing/$id") }
+    val goToNewOpportunity: () -> Unit = { navController.navigate("opportunity/new") }
+    val goToEditOpportunity: (String) -> Unit = { id -> navController.navigate("opportunity/edit/$id") }
+    val goToMyOpportunityListings: () -> Unit = { navController.navigate("opportunity/my-listings") }
+    val goToOpportunityApplicants: (String) -> Unit = { id -> navController.navigate("opportunity/listing/$id/applicants") }
+    val goToMyApplications: () -> Unit = { navController.navigate("opportunity/my-applications") }
+    val goToAid: () -> Unit = { navController.navigate("aid") }
+    val goToAidCampaign: (String) -> Unit = { id -> navController.navigate("aid/campaign/$id") }
+    val goToNewCampaign: () -> Unit = { navController.navigate("aid/new") }
+    val goToMyCampaigns: () -> Unit = { navController.navigate("aid/my-campaigns") }
+    val goToAidOffers: (String) -> Unit = { id -> navController.navigate("aid/campaign/$id/offers") }
+    val goToPlay: () -> Unit = { navController.navigate("play") }
+    val goToPlayChallenge: (String) -> Unit = { id -> navController.navigate("play/challenge/$id") }
+    val goToPlayDuels: () -> Unit = { navController.navigate("play/duels") }
+    val goToPlayDuel: (String) -> Unit = { id -> navController.navigate("play/duel/$id") }
+    val goToPlayLeaderboard: () -> Unit = { navController.navigate("play/leaderboard") }
+    val goToPlayAchievements: () -> Unit = { navController.navigate("play/achievements") }
+    val goToPlayProfile: (String) -> Unit = { username -> navController.navigate("play/profile/${Uri.encode(username)}") }
+    val goToPlayCreateChallenge: () -> Unit = { navController.navigate("play/create") }
+    val goToNews: () -> Unit = { navController.navigate("news") }
+    val goToNewsArticle: (String) -> Unit = { slug -> navController.navigate("news/article/${Uri.encode(slug)}") }
+    val goToShorts: () -> Unit = { navController.navigate("shorts") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -127,6 +186,14 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToSettingsPrivacy: () -> Unit = { navController.navigate("settings/privacy") }
     val goToSettingsLanguage: () -> Unit = { navController.navigate("settings/language") }
     val goToDeleteAccount: () -> Unit = { navController.navigate("settings/delete-account") }
+    val goToCreator: () -> Unit = { navController.navigate("creator") }
+    val goToJournalist: () -> Unit = { navController.navigate("journalist") }
+    val goToNewArticle: () -> Unit = { navController.navigate("journalist/new") }
+    val goToEditArticle: (String) -> Unit = { id -> navController.navigate("journalist/edit/$id") }
+    val goToAi: () -> Unit = { navController.navigate("ai") }
+    val goToSupportTickets: () -> Unit = { navController.navigate("support/tickets") }
+    val goToNewTicket: () -> Unit = { navController.navigate("support/new") }
+    val goToTicketDetail: (String) -> Unit = { id -> navController.navigate("support/tickets/$id") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
@@ -198,6 +265,12 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onAuthorClick = goToProfile,
                     onOpenMusic = goToMusic,
                     onOpenMarketplace = goToMarketplace,
+                    onOpenOpportunity = goToOpportunity,
+                    onOpenAid = goToAid,
+                    onOpenPlay = goToPlay,
+                    onOpenNews = goToNews,
+                    onOpenShorts = goToShorts,
+                    onOpenAi = goToAi,
                     onOpenComments = goToComments,
                     onOpenQuotePost = goToQuotePost,
                     onOpenReposts = goToReposts,
@@ -237,6 +310,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenReposts = goToReposts,
                     onOpenQuotes = goToQuotes,
                     onOpenHashtag = goToHashtag,
+                    onOpenTrustPassport = goToTrustPassport,
                 )
             }
             composable(
@@ -258,7 +332,22 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenReposts = goToReposts,
                     onOpenQuotes = goToQuotes,
                     onOpenHashtag = goToHashtag,
+                    onOpenTrustPassport = goToTrustPassport,
                 )
+            }
+            composable(
+                route = "trust/{username}",
+                arguments = listOf(navArgument("username") { type = NavType.StringType }),
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/trust/{username}" }),
+            ) { backStackEntry ->
+                val username = backStackEntry.arguments?.getString("username")
+                if (username != null) {
+                    TrustPassportScreen(
+                        username = username,
+                        onBack = { navController.popBackStack() },
+                        onOpenProfile = { navController.popBackStack() },
+                    )
+                }
             }
             composable(
                 route = "profile/{username}/followers",
@@ -416,6 +505,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onBack = { navController.popBackStack() },
                     onListingClick = goToListing,
                     onOpenFavorites = goToMarketplaceFavorites,
+                    onOpenMyListings = goToMyListings,
+                    onCreateListing = goToNewListing,
                 )
             }
             composable(
@@ -429,6 +520,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                         onBack = { navController.popBackStack() },
                         onOpenSeller = goToProfile,
                         onMessageSeller = goToConversation,
+                        onEditListing = goToEditListing,
                     )
                 }
             }
@@ -436,6 +528,266 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                 ListingFavoritesScreen(
                     onBack = { navController.popBackStack() },
                     onListingClick = goToListing,
+                )
+            }
+            composable("marketplace/new") {
+                ListingFormScreen(
+                    listingId = null,
+                    onBack = { navController.popBackStack() },
+                    onSaved = { id ->
+                        navController.navigate("marketplace/listing/$id") {
+                            popUpTo("marketplace") { inclusive = false }
+                        }
+                    },
+                )
+            }
+            composable(
+                route = "marketplace/edit/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    ListingFormScreen(
+                        listingId = id,
+                        onBack = { navController.popBackStack() },
+                        onSaved = { savedId -> navController.navigate("marketplace/listing/$savedId") { popUpTo("marketplace") { inclusive = false } } },
+                    )
+                }
+            }
+            composable("marketplace/my-listings") {
+                MyListingsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenListing = goToListing,
+                    onCreateListing = goToNewListing,
+                    onEditListing = goToEditListing,
+                )
+            }
+            composable("opportunity") {
+                OpportunityScreen(
+                    onBack = { navController.popBackStack() },
+                    onListingClick = goToOpportunityListing,
+                    onPostOpportunity = goToNewOpportunity,
+                    onOpenMyListings = goToMyOpportunityListings,
+                    onOpenMyApplications = goToMyApplications,
+                )
+            }
+            composable(
+                route = "opportunity/listing/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    OpportunityDetailScreen(
+                        listingId = id,
+                        onBack = { navController.popBackStack() },
+                        onOpenPoster = goToProfile,
+                        onEditListing = goToEditOpportunity,
+                        onOpenApplicants = goToOpportunityApplicants,
+                    )
+                }
+            }
+            composable(
+                route = "opportunity/listing/{id}/applicants",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    OpportunityApplicantsScreen(
+                        listingId = id,
+                        onBack = { navController.popBackStack() },
+                        onOpenApplicant = goToProfile,
+                    )
+                }
+            }
+            composable("opportunity/my-applications") {
+                MyApplicationsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenListing = goToOpportunityListing,
+                )
+            }
+            composable("aid") {
+                AidScreen(
+                    onBack = { navController.popBackStack() },
+                    onCampaignClick = goToAidCampaign,
+                    onCreateCampaign = goToNewCampaign,
+                    onOpenMyCampaigns = goToMyCampaigns,
+                )
+            }
+            composable(
+                route = "aid/campaign/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    AidDetailScreen(
+                        campaignId = id,
+                        onBack = { navController.popBackStack() },
+                        onOpenOrganizer = goToProfile,
+                        onOpenOffers = { goToAidOffers(id) },
+                    )
+                }
+            }
+            composable(
+                route = "aid/campaign/{id}/offers",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    AidOffersScreen(
+                        campaignId = id,
+                        onBack = { navController.popBackStack() },
+                        onOpenOfferer = goToProfile,
+                    )
+                }
+            }
+            composable("aid/new") {
+                AidFormScreen(
+                    onBack = { navController.popBackStack() },
+                    onSaved = { campaignId ->
+                        navController.popBackStack()
+                        goToAidCampaign(campaignId)
+                    },
+                )
+            }
+            composable("aid/my-campaigns") {
+                MyAidCampaignsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenCampaign = goToAidCampaign,
+                )
+            }
+            composable("play") {
+                PlayScreen(
+                    onBack = { navController.popBackStack() },
+                    onChallengeClick = goToPlayChallenge,
+                    onOpenDuel = goToPlayDuel,
+                    onOpenDuels = goToPlayDuels,
+                    onOpenLeaderboard = goToPlayLeaderboard,
+                    onOpenAchievements = goToPlayAchievements,
+                    onOpenProfile = goToPlayProfile,
+                    onOpenCreateChallenge = goToPlayCreateChallenge,
+                )
+            }
+            composable("play/create") {
+                PlayCreateChallengeScreen(
+                    onBack = { navController.popBackStack() },
+                    onCreated = { id ->
+                        navController.navigate("play/challenge/$id") {
+                            popUpTo("play") { inclusive = false }
+                        }
+                    },
+                )
+            }
+            composable("play/leaderboard") {
+                PlayLeaderboardScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenProfile = goToPlayProfile,
+                )
+            }
+            composable("play/achievements") {
+                PlayAchievementsScreen(onBack = { navController.popBackStack() })
+            }
+            composable(
+                route = "play/profile/{username}",
+                arguments = listOf(navArgument("username") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val username = backStackEntry.arguments?.getString("username")
+                if (username != null) {
+                    PlayProfileScreen(
+                        username = username,
+                        onBack = { navController.popBackStack() },
+                        onOpenChallenge = goToPlayChallenge,
+                    )
+                }
+            }
+            composable(
+                route = "play/challenge/{id}?duelId={duelId}",
+                arguments = listOf(
+                    navArgument("id") { type = NavType.StringType },
+                    navArgument("duelId") { type = NavType.StringType; nullable = true; defaultValue = null },
+                ),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                val duelId = backStackEntry.arguments?.getString("duelId")
+                if (id != null) {
+                    PlayChallengeScreen(
+                        challengeId = id,
+                        duelId = duelId,
+                        onBack = { navController.popBackStack() },
+                        onViewDuels = goToPlayDuels,
+                    )
+                }
+            }
+            composable("play/duels") {
+                PlayDuelsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenDuel = goToPlayDuel,
+                )
+            }
+            composable(
+                route = "play/duel/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    PlayDuelDetailScreen(
+                        duelId = id,
+                        onBack = { navController.popBackStack() },
+                        onPlay = { challengeId, playDuelId -> navController.navigate("play/challenge/$challengeId?duelId=${Uri.encode(playDuelId)}") },
+                    )
+                }
+            }
+            composable("news") {
+                NewsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenArticle = goToNewsArticle,
+                )
+            }
+            composable(
+                route = "news/article/{slug}",
+                arguments = listOf(navArgument("slug") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val slug = backStackEntry.arguments?.getString("slug")
+                if (slug != null) {
+                    NewsArticleScreen(slug = slug, onBack = { navController.popBackStack() })
+                }
+            }
+            composable("shorts") {
+                ShortsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenComments = goToComments,
+                    onAuthorClick = goToProfile,
+                )
+            }
+            composable("opportunity/new") {
+                OpportunityFormScreen(
+                    listingId = null,
+                    onBack = { navController.popBackStack() },
+                    onSaved = { id ->
+                        navController.navigate("opportunity/listing/$id") {
+                            popUpTo("opportunity") { inclusive = false }
+                        }
+                    },
+                )
+            }
+            composable(
+                route = "opportunity/edit/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    OpportunityFormScreen(
+                        listingId = id,
+                        onBack = { navController.popBackStack() },
+                        onSaved = { savedId -> navController.navigate("opportunity/listing/$savedId") { popUpTo("opportunity") { inclusive = false } } },
+                    )
+                }
+            }
+            composable("opportunity/my-listings") {
+                MyOpportunityListingsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenListing = goToOpportunityListing,
+                    onEditListing = goToEditOpportunity,
+                    onOpenApplicants = goToOpportunityApplicants,
                 )
             }
             composable("bookmarks") {
@@ -471,7 +823,70 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenSecurity = goToSettingsSecurity,
                     onOpenPrivacy = goToSettingsPrivacy,
                     onOpenLanguage = goToSettingsLanguage,
+                    onOpenCreator = goToCreator,
+                    onOpenJournalist = goToJournalist,
+                    onOpenSupport = goToSupportTickets,
                 )
+            }
+            composable("creator") {
+                CreatorScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenPost = goToComments,
+                )
+            }
+            composable("journalist") {
+                JournalistDashboardScreen(
+                    onBack = { navController.popBackStack() },
+                    onCreateArticle = goToNewArticle,
+                    onEditArticle = goToEditArticle,
+                    onViewArticle = goToNewsArticle,
+                )
+            }
+            composable("ai") {
+                AiChatScreen(onBack = { navController.popBackStack() })
+            }
+            composable("support/tickets") {
+                SupportTicketsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenTicket = goToTicketDetail,
+                    onNewTicket = goToNewTicket,
+                )
+            }
+            composable("support/new") {
+                NewTicketScreen(
+                    onBack = { navController.popBackStack() },
+                    onSubmitted = { navController.popBackStack() },
+                    onOpenMyTickets = { navController.popBackStack() },
+                )
+            }
+            composable(
+                route = "support/tickets/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    TicketDetailScreen(ticketId = id, onBack = { navController.popBackStack() })
+                }
+            }
+            composable("journalist/new") {
+                ArticleEditorScreen(
+                    articleId = null,
+                    onBack = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() },
+                )
+            }
+            composable(
+                route = "journalist/edit/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    ArticleEditorScreen(
+                        articleId = id,
+                        onBack = { navController.popBackStack() },
+                        onSaved = { navController.popBackStack() },
+                    )
+                }
             }
             composable("settings/language") {
                 LanguageSettingsScreen(onBack = { navController.popBackStack() })

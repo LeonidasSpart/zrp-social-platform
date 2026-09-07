@@ -30,6 +30,17 @@ data class ProfileUpdateResponse(
     val website: String?,
 )
 
+// ─── Solana receiving wallet (PUT /user, solanaWallet-only body) ────
+// The real route only ever touches a field present as a key in the
+// request body (see its own comment), so this is a second, separate
+// Retrofit method with its own single-field body - sending it
+// alongside name/bio/etc. in ProfileUpdateRequest would needlessly
+// couple two independent web forms (the main profile form and its own
+// separate "Solana Wallet" form/button) into one native save action.
+data class UpdateWalletRequest(val solanaWallet: String)
+
+data class UpdateWalletResponse(val solanaWallet: String?)
+
 // ─── Username (GET+PUT /user/username) ──────────────────────────────
 data class UsernameStatusResponse(val username: String, val cooldownDays: Int)
 
@@ -80,15 +91,18 @@ data class CoverUpdateResponse(val coverUrl: String?)
  * Settings/Account mutations - the same PUT/POST endpoints the web
  * settings hub (src/app/settings/page.tsx) and its delete-account page
  * call, none of them reinvented. Deliberately scoped to the fields this
- * slice's native screens actually edit (profile text fields, username,
- * password, email, privacy toggles, account deletion, avatar/banner) -
- * the custom-URL/professional-category pickers, monetisation, and
- * email/support preferences are real backend features this slice does
- * not yet cover natively (see SettingsRepository's KDoc).
+ * slice's native screens actually edit (profile text fields, Solana
+ * receiving wallet, username, password, email, privacy toggles, account
+ * deletion, avatar/banner) - the custom-URL/professional-category
+ * pickers and email/support preferences are real backend features this
+ * slice does not yet cover natively (see SettingsRepository's KDoc).
  */
 interface SettingsApi {
     @PUT("user")
     suspend fun updateProfile(@Body request: ProfileUpdateRequest): ProfileUpdateResponse
+
+    @PUT("user")
+    suspend fun updateWallet(@Body request: UpdateWalletRequest): UpdateWalletResponse
 
     @GET("user/username")
     suspend fun getUsernameStatus(): UsernameStatusResponse
