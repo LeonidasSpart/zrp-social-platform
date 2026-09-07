@@ -65,7 +65,9 @@ import one.zrp.social.mobile.ui.music.PlaylistDetailScreen
 import one.zrp.social.mobile.ui.music.PlaylistsScreen
 import one.zrp.social.mobile.ui.notifications.NotificationsScreen
 import one.zrp.social.mobile.ui.aid.AidDetailScreen
+import one.zrp.social.mobile.ui.aid.AidFormScreen
 import one.zrp.social.mobile.ui.aid.AidScreen
+import one.zrp.social.mobile.ui.aid.MyAidCampaignsScreen
 import one.zrp.social.mobile.ui.opportunity.MyApplicationsScreen
 import one.zrp.social.mobile.ui.opportunity.MyOpportunityListingsScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityApplicantsScreen
@@ -137,6 +139,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToMyApplications: () -> Unit = { navController.navigate("opportunity/my-applications") }
     val goToAid: () -> Unit = { navController.navigate("aid") }
     val goToAidCampaign: (String) -> Unit = { id -> navController.navigate("aid/campaign/$id") }
+    val goToNewCampaign: () -> Unit = { navController.navigate("aid/new") }
+    val goToMyCampaigns: () -> Unit = { navController.navigate("aid/my-campaigns") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -544,6 +548,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                 AidScreen(
                     onBack = { navController.popBackStack() },
                     onCampaignClick = goToAidCampaign,
+                    onCreateCampaign = goToNewCampaign,
+                    onOpenMyCampaigns = goToMyCampaigns,
                 )
             }
             composable(
@@ -558,6 +564,21 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                         onOpenOrganizer = goToProfile,
                     )
                 }
+            }
+            composable("aid/new") {
+                AidFormScreen(
+                    onBack = { navController.popBackStack() },
+                    onSaved = { campaignId ->
+                        navController.popBackStack()
+                        goToAidCampaign(campaignId)
+                    },
+                )
+            }
+            composable("aid/my-campaigns") {
+                MyAidCampaignsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenCampaign = goToAidCampaign,
+                )
             }
             composable("opportunity/new") {
                 OpportunityFormScreen(
