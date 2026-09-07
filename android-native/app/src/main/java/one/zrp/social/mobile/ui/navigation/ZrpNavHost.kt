@@ -94,6 +94,9 @@ import one.zrp.social.mobile.ui.ai.AiChatScreen
 import one.zrp.social.mobile.ui.creator.CreatorScreen
 import one.zrp.social.mobile.ui.journalist.ArticleEditorScreen
 import one.zrp.social.mobile.ui.journalist.JournalistDashboardScreen
+import one.zrp.social.mobile.ui.support.NewTicketScreen
+import one.zrp.social.mobile.ui.support.SupportTicketsScreen
+import one.zrp.social.mobile.ui.support.TicketDetailScreen
 import one.zrp.social.mobile.ui.trust.TrustPassportScreen
 import one.zrp.social.mobile.ui.settings.AccountSettingsScreen
 import one.zrp.social.mobile.ui.settings.DeleteAccountScreen
@@ -188,6 +191,9 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToNewArticle: () -> Unit = { navController.navigate("journalist/new") }
     val goToEditArticle: (String) -> Unit = { id -> navController.navigate("journalist/edit/$id") }
     val goToAi: () -> Unit = { navController.navigate("ai") }
+    val goToSupportTickets: () -> Unit = { navController.navigate("support/tickets") }
+    val goToNewTicket: () -> Unit = { navController.navigate("support/new") }
+    val goToTicketDetail: (String) -> Unit = { id -> navController.navigate("support/tickets/$id") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
@@ -819,6 +825,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenLanguage = goToSettingsLanguage,
                     onOpenCreator = goToCreator,
                     onOpenJournalist = goToJournalist,
+                    onOpenSupport = goToSupportTickets,
                 )
             }
             composable("creator") {
@@ -837,6 +844,29 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             }
             composable("ai") {
                 AiChatScreen(onBack = { navController.popBackStack() })
+            }
+            composable("support/tickets") {
+                SupportTicketsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenTicket = goToTicketDetail,
+                    onNewTicket = goToNewTicket,
+                )
+            }
+            composable("support/new") {
+                NewTicketScreen(
+                    onBack = { navController.popBackStack() },
+                    onSubmitted = { navController.popBackStack() },
+                    onOpenMyTickets = { navController.popBackStack() },
+                )
+            }
+            composable(
+                route = "support/tickets/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    TicketDetailScreen(ticketId = id, onBack = { navController.popBackStack() })
+                }
             }
             composable("journalist/new") {
                 ArticleEditorScreen(
