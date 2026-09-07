@@ -73,7 +73,7 @@ fun PlaylistsScreen(onBack: () -> Unit, onPlaylistClick: (String) -> Unit) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
             }
             Text(
-                text = stringResource(R.string.music_playlists_title),
+                text = stringResource(R.string.music_playlists_page_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
                     .padding(start = 4.dp)

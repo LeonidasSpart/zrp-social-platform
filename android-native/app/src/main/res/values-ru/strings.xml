@@ -298,7 +298,8 @@
     <string name="music_albums_search_placeholder">Поиск альбомов...</string>
     <string name="music_albums_none_found">Альбомы не найдены</string>
     <!-- Music Phase 4: Playlists -->
-    <string name="music_playlists_title">Ваши плейлисты</string>
+    <string name="music_playlists_title">Плейлисты</string>
+    <string name="music_playlists_page_title">Ваши плейлисты</string>
     <string name="music_playlists_new_playlist">Новый плейлист</string>
     <string name="music_playlists_name_placeholder">Название плейлиста</string>
     <string name="music_playlists_create">Создать</string>
@@ -318,4 +319,14 @@
     <string name="music_playlist_detail_move_up_aria">Переместить вверх</string>
     <string name="music_playlist_detail_move_down_aria">Переместить вниз</string>
     <string name="music_playlist_detail_remove_track_aria">Удалить %1$s из плейлиста</string>
-</resources>
+
+    <!-- Music Phase 5: Discover -->
+    <string name="music_nav_discover_title">Открыть</string>
+    <string name="music_discover_search_placeholder">Поиск треков, артистов, жанров...</string>
+    <string name="music_discover_browse_by_genre">Просмотр по жанру</string>
+    <string name="music_discover_all">Все</string>
+    <string name="music_discover_results_for">Результаты по запросу «%1$s»</string>
+    <string name="music_discover_all_tracks">Все треки</string>
+    <string name="music_discover_no_tracks_title">Треки не найдены</string>
+    <string name="music_discover_no_tracks_body">Попробуйте другой запрос или жанр.</string>
+    <string name="music_shell_genres_heading">Жанры</string></resources>

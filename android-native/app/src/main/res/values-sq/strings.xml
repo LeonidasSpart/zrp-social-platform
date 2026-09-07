@@ -298,7 +298,8 @@
     <string name="music_albums_search_placeholder">Kërko albume...</string>
     <string name="music_albums_none_found">Nuk u gjetën albume</string>
     <!-- Music Phase 4: Playlists -->
-    <string name="music_playlists_title">Playlistat e tua</string>
+    <string name="music_playlists_title">Playlistat</string>
+    <string name="music_playlists_page_title">Playlistat e tua</string>
     <string name="music_playlists_new_playlist">Playlist e re</string>
     <string name="music_playlists_name_placeholder">Emri i playlistit</string>
     <string name="music_playlists_create">Krijo</string>
@@ -318,4 +319,14 @@
     <string name="music_playlist_detail_move_up_aria">Lëviz lart</string>
     <string name="music_playlist_detail_move_down_aria">Lëviz poshtë</string>
     <string name="music_playlist_detail_remove_track_aria">Hiq %1$s nga playlisti</string>
-</resources>
+
+    <!-- Music Phase 5: Discover -->
+    <string name="music_nav_discover_title">Zbulo</string>
+    <string name="music_discover_search_placeholder">Kërko këngë, artistë, zhanre...</string>
+    <string name="music_discover_browse_by_genre">Shfleto sipas zhanrit</string>
+    <string name="music_discover_all">Të gjitha</string>
+    <string name="music_discover_results_for">Rezultate për "%1$s"</string>
+    <string name="music_discover_all_tracks">Të gjitha këngët</string>
+    <string name="music_discover_no_tracks_title">Nuk u gjetën këngë</string>
+    <string name="music_discover_no_tracks_body">Provo një kërkim ose zhanër tjetër.</string>
+    <string name="music_shell_genres_heading">Zhanret</string></resources>

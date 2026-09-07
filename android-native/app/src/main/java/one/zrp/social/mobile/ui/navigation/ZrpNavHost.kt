@@ -1,5 +1,6 @@
 package one.zrp.social.mobile.ui.navigation
 
+import android.net.Uri
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -47,6 +48,7 @@ import one.zrp.social.mobile.ui.music.AlbumDetailScreen
 import one.zrp.social.mobile.ui.music.AlbumsScreen
 import one.zrp.social.mobile.ui.music.ArtistDetailScreen
 import one.zrp.social.mobile.ui.music.ArtistsScreen
+import one.zrp.social.mobile.ui.music.DiscoverScreen
 import one.zrp.social.mobile.ui.music.MusicPlayerViewModel
 import one.zrp.social.mobile.ui.music.MusicPlayerViewModelFactory
 import one.zrp.social.mobile.ui.music.MusicQueueScreen
@@ -98,6 +100,9 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToMusicAlbum: (String) -> Unit = { id -> navController.navigate("music/albums/$id") }
     val goToMusicPlaylists: () -> Unit = { navController.navigate("music/playlists") }
     val goToMusicPlaylist: (String) -> Unit = { id -> navController.navigate("music/playlists/$id") }
+    val goToMusicDiscover: (String?) -> Unit = { genre ->
+        navController.navigate(if (genre != null) "music/discover?genre=${Uri.encode(genre)}" else "music/discover")
+    }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -311,9 +316,11 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenArtists = goToMusicArtists,
                     onOpenAlbums = goToMusicAlbums,
                     onOpenPlaylists = goToMusicPlaylists,
+                    onOpenDiscover = { goToMusicDiscover(null) },
                     onArtistClick = goToMusicArtist,
                     onAlbumClick = goToMusicAlbum,
                     onPlaylistClick = goToMusicPlaylist,
+                    onGenreClick = goToMusicDiscover,
                 )
             }
             composable("music/queue") {
@@ -327,6 +334,16 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             }
             composable("music/playlists") {
                 PlaylistsScreen(onBack = { navController.popBackStack() }, onPlaylistClick = goToMusicPlaylist)
+            }
+            composable(
+                route = "music/discover?genre={genre}",
+                arguments = listOf(navArgument("genre") { type = NavType.StringType; nullable = true; defaultValue = null }),
+            ) { backStackEntry ->
+                DiscoverScreen(
+                    player = musicPlayerViewModel,
+                    initialGenre = backStackEntry.arguments?.getString("genre"),
+                    onBack = { navController.popBackStack() },
+                )
             }
             composable(
                 route = "music/playlists/{id}",

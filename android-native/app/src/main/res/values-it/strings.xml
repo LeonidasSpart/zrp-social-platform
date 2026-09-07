@@ -298,7 +298,8 @@
     <string name="music_albums_search_placeholder">Cerca album...</string>
     <string name="music_albums_none_found">Nessun album trovato</string>
     <!-- Music Phase 4: Playlists -->
-    <string name="music_playlists_title">Le tue playlist</string>
+    <string name="music_playlists_title">Playlist</string>
+    <string name="music_playlists_page_title">Le tue playlist</string>
     <string name="music_playlists_new_playlist">Nuova playlist</string>
     <string name="music_playlists_name_placeholder">Nome della playlist</string>
     <string name="music_playlists_create">Crea</string>
@@ -318,4 +319,14 @@
     <string name="music_playlist_detail_move_up_aria">Sposta su</string>
     <string name="music_playlist_detail_move_down_aria">Sposta giù</string>
     <string name="music_playlist_detail_remove_track_aria">Rimuovi %1$s dalla playlist</string>
-</resources>
+
+    <!-- Music Phase 5: Discover -->
+    <string name="music_nav_discover_title">Scopri</string>
+    <string name="music_discover_search_placeholder">Cerca brani, artisti, generi...</string>
+    <string name="music_discover_browse_by_genre">Sfoglia per genere</string>
+    <string name="music_discover_all">Tutti</string>
+    <string name="music_discover_results_for">Risultati per "%1$s"</string>
+    <string name="music_discover_all_tracks">Tutti i brani</string>
+    <string name="music_discover_no_tracks_title">Nessun brano trovato</string>
+    <string name="music_discover_no_tracks_body">Prova una ricerca o un genere diverso.</string>
+    <string name="music_shell_genres_heading">Generi</string></resources>
