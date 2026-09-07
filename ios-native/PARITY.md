@@ -200,7 +200,7 @@ called and the real response being handled.
 | --- | --- | --- | --- | --- | --- |
 | Publish authorization gate | `GET /api/music/access` | ✅ | ✅ | ✅ read to decide what to show; enforced server-side twice | IMPLEMENTED |
 | Apply as artist | `POST /api/music/artists` | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Artist profile edit (name, bio, avatar, banner) | `GET /api/music/artists?mine=true`, `POST /api/music/artists` | ✅ | ✅ | ✅ loads every field before saving, see [F1](#f1-postapimusicartists-erases-bio-avatar-and-banner-on-publish) | IMPLEMENTED |
+| Artist profile edit (name, bio, avatar, banner) | `GET /api/music/artists?mine=true`, `POST /api/music/artists` | ✅ | ✅ | ✅ three-state field encoding; loads every field before saving | IMPLEMENTED |
 | Track upload + publish | UploadThing `musicTrack` + `POST /api/music/tracks` | ✅ | ✅ | ✅ audio + cover in one presign; retry publishes without re-uploading | IMPLEMENTED |
 | Own tracks (any status) | `GET /api/music/tracks?mine=true` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Edit track metadata | `PATCH /api/music/tracks/{id}` | ✅ | ✅ | ✅ title, description, genre, explicit, cover, album | IMPLEMENTED |
@@ -360,38 +360,41 @@ Noted, not worked around.
 Found while auditing, per the isolation rules: reported here for their
 owners, not silently fixed from iOS.
 
-### F1. `POST /api/music/artists` erases bio, avatar and banner on publish
+### F1. `POST /api/music/artists` erased bio, avatar and banner — **RESOLVED**
 
-The route is an upsert whose **update** branch writes every field
-unconditionally:
+Reported from the Phase 14 audit; fixed server-side and merged (PR #103,
+`src/app/api/music/artists/route.ts` on `main`). The route's update branch
+no longer writes a field the request did not mention:
 
 ```ts
-update: { displayName, bio: body.bio || null, avatarUrl: body.avatarUrl || null, bannerUrl: body.bannerUrl || null }
+const profileUpdate: Record<string, string | null> = {};
+if ("bio" in body) profileUpdate.bio = body.bio || null;
+if ("avatarUrl" in body) profileUpdate.avatarUrl = body.avatarUrl || null;
+if ("bannerUrl" in body) profileUpdate.bannerUrl = body.bannerUrl || null;
+update: { displayName, ...profileUpdate }
 ```
 
-Two web call sites in `src/components/music/MusicStudio.tsx` call it with
-only a display name, or with `{}`:
+Three states now, decided by **key presence**: omitted leaves the column
+alone, explicit `null` clears it, a value sets it.
 
-- `publish()` (the Upload tab) - `body: JSON.stringify({ displayName: artistName || undefined })`
-- `create()` (Create Album) - `body: JSON.stringify({})`
+**iOS was realigned to the corrected contract, not left on its
+workaround.** `ArtistProfileField` encodes all three states, so:
 
-So **every track publish and every album creation wipes an existing
-artist's bio, avatar and banner.** The Artist Profile tab avoids it by
-preloading all four fields first, and its own comment says exactly why -
-the other two paths were not given the same treatment.
+- the profile editor sends all three fields, and an emptied one is a real
+  `null` — a deliberate clear
+- applying as an artist, publishing a track and creating an album send
+  **only** a display name, omitting the profile keys entirely
 
-Suggested fix, entirely server-side and safe for all three clients: build
-the `update` object from only the keys actually present in the body
-(`...(body.bio !== undefined ? { bio: body.bio } : {})`, and so on), which
-is the pattern `PATCH /api/music/tracks/{id}` already uses in this same
-feature.
+The one asymmetry that remains by design: the route writes `displayName`
+on every update, falling back to the account's name when the body omits
+one. So `ensureArtistId` posts a name when the person typed one, and
+otherwise reads the id rather than posting an empty body that would rename
+the artist. That is a property of the route, not a workaround for a bug.
 
-**What iOS does meanwhile:** it never calls the route with fields it has
-not loaded. The artist editor loads all four first (as the web Artist tab
-does), and publishing reads the artist id from
-`GET /api/music/artists?mine=true` instead of upserting - only creating a
-profile when the account genuinely has none. Same routes, same semantics,
-no destructive write. When F1 is fixed, nothing on iOS needs to change.
+`Tools/verify-artist-contract.py` pins the pairing in CI: it transcribes
+the merged route's per-field rule and the exact bodies each iOS path
+emits, and fails if either drifts. Reverting the client to the old
+all-nulls encoder makes it fail on four checks.
 
 ## Blocked items
 

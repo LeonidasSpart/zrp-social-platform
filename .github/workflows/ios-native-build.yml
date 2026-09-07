@@ -59,6 +59,15 @@ jobs:
         working-directory: ios-native
         run: python3 Tools/validate-sources.py
 
+      # The artist-profile route decides each field by key presence, so
+      # what the app sends - and what it deliberately omits - is the whole
+      # contract. A client that sends explicit nulls for fields it never
+      # loaded is exactly what erased artists' bios before the route was
+      # fixed, so that pairing is pinned here rather than left to review.
+      - name: Verify artist profile request contract
+        working-directory: ios-native
+        run: python3 Tools/verify-artist-contract.py
+
       # Hard guarantee of the isolation this module promises: the iOS
       # module must never contain a path into the Android project.
       - name: Assert no Android coupling

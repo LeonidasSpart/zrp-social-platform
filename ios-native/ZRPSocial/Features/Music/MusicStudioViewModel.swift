@@ -110,14 +110,9 @@ final class MusicStudioViewModel: ObservableObject {
         let trimmed = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         do {
-            artist = try await repository.saveArtist(
-                ArtistProfileRequest(
-                    displayName: trimmed,
-                    bio: nil,
-                    avatarUrl: nil,
-                    bannerUrl: nil
-                )
-            )
+            // Applying only sets a name. It says nothing about the
+            // profile fields, and the route leaves them untouched.
+            artist = try await repository.saveArtist(.nameOnly(trimmed))
             access = try await repository.access()
         } catch {
             show(.failure, message(for: error, fallback: .musicStudioSaveFailed))

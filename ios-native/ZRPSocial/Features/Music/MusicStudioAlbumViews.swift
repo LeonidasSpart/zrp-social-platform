@@ -417,18 +417,23 @@ struct MusicAlbumManageView: View {
 /// The artist profile tab: `GET /api/music/artists?mine=true` to load,
 /// `POST /api/music/artists` to save.
 ///
-/// Every field is loaded before any of them can be edited. That is not a
-/// nicety - the route's update branch writes `bio`, `avatarUrl` and
-/// `bannerUrl` from the body unconditionally, so saving a form that
-/// never loaded them would erase them.
+/// Every field is loaded before any of them can be edited.
+///
+/// Still not a nicety, and not a workaround for the route's old
+/// unconditional-write behaviour (fixed server-side): this editor is the
+/// one caller that deliberately sends all three profile fields, because
+/// emptying one here *means* clear it. A form that rendered blanks it
+/// never actually read would therefore send three explicit nulls and
+/// erase a real bio, avatar and banner. Loading first is what makes the
+/// blanks trustworthy.
 struct MusicStudioArtistView: View {
 
     @ObservedObject var viewModel: MusicStudioViewModel
 
     /// Three genuinely different states. Blank fields on a *failed*
     /// load look identical to blank fields on a real empty profile, and
-    /// saving from the first would erase a bio and images the editor
-    /// never read - so the two are never conflated here.
+    /// this editor sends blanks as deliberate clears - so the two are
+    /// never conflated here.
     private enum LoadState: Equatable {
         case loading
         case loaded
@@ -512,12 +517,15 @@ struct MusicStudioArtistView: View {
     private func save() {
         Task {
             isSaving = true
+            // The editor has loaded every field, so it sends every
+            // field: one the person emptied is sent as an explicit null,
+            // which the route treats as a deliberate clear.
             _ = await viewModel.saveArtistProfile(
-                ArtistProfileRequest(
+                .fullProfile(
                     displayName: displayName.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
-                    bio: bio.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
-                    avatarUrl: avatar.url.nilIfEmpty,
-                    bannerUrl: banner.url.nilIfEmpty
+                    bio: bio,
+                    avatarUrl: avatar.url,
+                    bannerUrl: banner.url
                 )
             )
             isSaving = false

@@ -35,11 +35,73 @@ protocol MusicStudioRepositoryProtocol: Sendable {
 // "leave the genre alone" - so every one of these writes its container
 // by hand, matching exactly what the website sends.
 
+/// One profile field in an artist write.
+///
+/// `POST /api/music/artists` decides per field by **key presence**:
+///
+/// ```ts
+/// if ("bio" in body) profileUpdate.bio = body.bio || null;
+/// ```
+///
+/// So all three states are real and distinct, and an `Optional` cannot
+/// express them: omitting the key leaves the column alone, an explicit
+/// `null` clears it, and a value sets it.
+enum ArtistProfileField: Equatable {
+    /// Key omitted - the server leaves the stored value untouched.
+    case unchanged
+    /// Explicit `null` - the server clears the stored value.
+    case clear
+    case value(String)
+
+    /// Empty text means the person emptied the field, which is a clear.
+    init(text: String) {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        self = trimmed.isEmpty ? .clear : .value(trimmed)
+    }
+
+    /// A URL the editor holds, or a clear when it holds none.
+    init(url: String?) {
+        guard let url, !url.isEmpty else {
+            self = .clear
+            return
+        }
+        self = .value(url)
+    }
+}
+
 struct ArtistProfileRequest: Encodable {
     let displayName: String?
-    let bio: String?
-    let avatarUrl: String?
-    let bannerUrl: String?
+    let bio: ArtistProfileField
+    let avatarUrl: ArtistProfileField
+    let bannerUrl: ArtistProfileField
+
+    /// The profile editor, which has loaded every field and is saving all
+    /// of them. An emptied field clears; a filled one sets.
+    static func fullProfile(
+        displayName: String?,
+        bio: String,
+        avatarUrl: String?,
+        bannerUrl: String?
+    ) -> ArtistProfileRequest {
+        ArtistProfileRequest(
+            displayName: displayName,
+            bio: ArtistProfileField(text: bio),
+            avatarUrl: ArtistProfileField(url: avatarUrl),
+            bannerUrl: ArtistProfileField(url: bannerUrl)
+        )
+    }
+
+    /// Applying as an artist, or creating the row a publish needs. These
+    /// callers know nothing about the profile fields, so they say nothing
+    /// about them - which the route now honours by leaving them alone.
+    static func nameOnly(_ displayName: String?) -> ArtistProfileRequest {
+        ArtistProfileRequest(
+            displayName: displayName,
+            bio: .unchanged,
+            avatarUrl: .unchanged,
+            bannerUrl: .unchanged
+        )
+    }
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
@@ -47,9 +109,24 @@ struct ArtistProfileRequest: Encodable {
         // (`body.displayName || session.user.name || username`), so an
         // omitted value is meaningful and a null is not.
         try container.encodeIfPresent(displayName, forKey: .displayName)
-        try container.encode(bio, forKey: .bio)
-        try container.encode(avatarUrl, forKey: .avatarUrl)
-        try container.encode(bannerUrl, forKey: .bannerUrl)
+        try encode(bio, forKey: .bio, into: &container)
+        try encode(avatarUrl, forKey: .avatarUrl, into: &container)
+        try encode(bannerUrl, forKey: .bannerUrl, into: &container)
+    }
+
+    private func encode(
+        _ field: ArtistProfileField,
+        forKey key: CodingKeys,
+        into container: inout KeyedEncodingContainer<CodingKeys>
+    ) throws {
+        switch field {
+        case .unchanged:
+            break
+        case .clear:
+            try container.encodeNil(forKey: key)
+        case .value(let text):
+            try container.encode(text, forKey: key)
+        }
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -185,44 +262,42 @@ struct MusicStudioRepository: MusicStudioRepositoryProtocol {
 
     /// Creates or updates the viewer's artist profile.
     ///
-    /// `POST /api/music/artists` is an **upsert whose update branch
-    /// always writes bio, avatarUrl and bannerUrl**. Calling it with
-    /// fields the caller has not loaded therefore erases them. This app
-    /// only ever calls it from the artist-profile editor, which loads
-    /// every field first - exactly as the website's own Artist tab does,
-    /// and for the reason its comment gives.
+    /// `POST /api/music/artists` upserts by session user id, and decides
+    /// each profile field by key presence: an omitted key leaves the
+    /// column alone, an explicit `null` clears it, a value sets it. That
+    /// is what `ArtistProfileField` encodes, so a caller that knows
+    /// nothing about the bio says nothing about it.
     ///
-    /// See `ensureArtistId()` for why publishing does not call it.
+    /// `displayName` is the exception: the route writes it on every
+    /// update, falling back to the account's name when the body omits
+    /// it. `ensureArtistId` is built around that.
     func saveArtist(_ request: ArtistProfileRequest) async throws -> MusicArtistProfile {
         try await client.send(try Endpoint.post("music/artists", body: request))
     }
 
-    /// The artist id to publish under, without touching the profile.
+    /// The artist id to publish or create an album under.
     ///
-    /// The website's publish and album-create paths both `POST
-    /// /api/music/artists` first, sending only a display name. Because
-    /// that route's update branch unconditionally writes `bio`,
-    /// `avatarUrl` and `bannerUrl` from the body, those calls wipe an
-    /// existing artist's bio and images every time someone publishes a
-    /// track. That is reported in PARITY.md (F1) as a backend/web defect
-    /// for its owners to fix - not worked around with a different route.
+    /// The route is explicitly a get-or-create for these callers, and
+    /// since the key-presence fix it no longer disturbs a profile it was
+    /// not told about - so sending a name the person actually typed is a
+    /// real, intended update and is passed straight through.
     ///
-    /// This reads the id instead, and only creates a profile when the
-    /// account genuinely has none. Same routes, same semantics, no
-    /// destructive write - and once F1 is fixed, nothing here changes.
+    /// The one asymmetry left is `displayName`, which the route writes on
+    /// every update whether or not the body carries one: posting an empty
+    /// body would rename an artist to the account's own name. So when
+    /// there is no name to set, the id is read instead of upserted -
+    /// not to dodge a bug, but because there is nothing to write.
     func ensureArtistId(displayName: String?) async throws -> String {
+        let name = displayName?.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if let name, !name.isEmpty {
+            return try await saveArtist(.nameOnly(name)).id
+        }
+
         if let existing = try await myArtist() {
             return existing.id
         }
-        let created = try await saveArtist(
-            ArtistProfileRequest(
-                displayName: displayName?.isEmpty == false ? displayName : nil,
-                bio: nil,
-                avatarUrl: nil,
-                bannerUrl: nil
-            )
-        )
-        return created.id
+        return try await saveArtist(.nameOnly(nil)).id
     }
 
     /// Every track owned by the viewer's artist profile, in any status -
