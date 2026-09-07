@@ -73,7 +73,7 @@ called and the real response being handled.
 | Like | `POST /api/posts/{id}/like` → `{liked}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Repost | `POST /api/posts/{id}/repost` → `{reposted}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Bookmark | `POST /api/posts/{id}/bookmark` → `{bookmarked}` | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Emoji reactions | `GET/POST /api/posts/{id}/reaction` | ✅ | ✅ | ⬜ | MISSING (Phase 8b) |
+| Emoji reactions | `GET /api/posts/{id}/reaction` → bare array of rows; `POST` → `{reaction}` or `{reaction: null}`, a per-(post, user, emoji) toggle | ✅ | ✅ | 🔶 rows are shown and toggled on the post detail screen, not on feed cards (one request per post); the picker is a fixed set of eight, where the website offers a full emoji picker — the route itself accepts any emoji | PARTIAL |
 | Delete own post | `DELETE /api/posts/{id}` (403 non-author, server-side) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Edit own post | `PUT /api/posts/{id}` (text only, matches web) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Pin post (single slot) | `POST /api/posts/{id}/pin` | ✅ | ✅ | ⬜ | MISSING (Phase 6b) |
@@ -132,7 +132,7 @@ called and the real response being handled.
 | Create comment | `POST /api/posts/{id}/comments` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Threaded replies | same, `parentId` | ✅ | ✅ | ✅ (full nested tree, indent capped for narrow screens) | IMPLEMENTED |
 | Like a comment | `POST /api/comments/{id}/like` | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Repost / bookmark a comment | `/api/comments/{id}/repost`, `/bookmark` | ✅ | ✅ | ⬜ | MISSING (Phase 8b) |
+| Repost / bookmark a comment | `POST /api/comments/{id}/repost` → `{reposted}`, `POST /api/comments/{id}/bookmark` → `{bookmarked}` | ✅ | ✅ | ✅ inline with counts, matching the web row | IMPLEMENTED |
 | Delete comment | `DELETE /api/comments/{id}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Edit comment | `PUT /api/comments/{id}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 
@@ -537,7 +537,7 @@ here. **No fake local notifications will stand in for this.**
 | 5 | Home feed (For You / Following) + interactions | ✅ done |
 | 6 | Profiles + social graph | ✅ done — 6b (edit profile, pin, extra profile tabs) pending |
 | 7 | Post composer + media upload + viewer | ✅ done — 7b (scheduling, quote entry point, camera capture) pending |
-| 8 | Comments, replies, quotes, edit | ✅ done — 8b (reactions, comment repost/bookmark, reposts & quotes lists, translation) pending |
+| 8 | Comments, replies, quotes, edit | ✅ done — 8b done for reactions and comment repost/bookmark; reposts & quotes lists and inline translation still pending |
 | 9 | Stories | ✅ done |
 | 10 | Messages | ✅ done — attachments and conversation search pending (10b) |
 | 11 | Notifications | ✅ in-app list done — device push remains BLOCKED (B3) |

@@ -17,6 +17,8 @@ struct CommentRowView: View {
     var onReply: () -> Void
     var onEdit: () -> Void
     var onDelete: () -> Void
+    var onRepost: () -> Void
+    var onBookmark: () -> Void
 
     @EnvironmentObject private var navigator: Navigator
     @State private var isConfirmingDelete = false
@@ -172,7 +174,69 @@ struct CommentRowView: View {
                 Text(.iosA11yReplyToComment, ["name": comment.author.displayName])
             )
 
+            // A comment can be reposted and bookmarked independently of
+            // its post; the website shows both inline here with their
+            // counts, and both flags arrive with the comment itself.
+            counterButton(
+                systemImage: "arrow.2.squarepath",
+                isOn: interaction.reposted,
+                tint: ZrpColor.green,
+                count: interaction.repostCount,
+                action: onRepost
+            )
+            .accessibilityLabel(
+                Text(interaction.reposted ? L10nKey.iosA11yUndoRepost : L10nKey.actionRepost)
+            )
+            .accessibilityValue(
+                Text(verbatim: CountFormatting.exact(interaction.repostCount))
+            )
+
+            counterButton(
+                systemImage: interaction.bookmarked ? "bookmark.fill" : "bookmark",
+                isOn: interaction.bookmarked,
+                tint: ZrpColor.blue,
+                count: interaction.bookmarkCount,
+                action: onBookmark
+            )
+            .accessibilityLabel(
+                Text(interaction.bookmarked ? L10nKey.iosA11yRemoveBookmark : L10nKey.iosA11yBookmark)
+            )
+            .accessibilityValue(
+                Text(verbatim: CountFormatting.exact(interaction.bookmarkCount))
+            )
+
             Spacer(minLength: 0)
         }
+    }
+
+    /// The repost and bookmark controls differ only in glyph, tint and
+    /// count, so they share one builder rather than two near-identical
+    /// blocks that could drift apart.
+    private func counterButton(
+        systemImage: String,
+        isOn: Bool,
+        tint: Color,
+        count: Int,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            action()
+        } label: {
+            HStack(spacing: ZrpSpacing.xs) {
+                Image(systemName: systemImage)
+                    .font(.caption)
+                if let text = CountFormatting.compact(count) {
+                    Text(verbatim: text)
+                        .font(.caption)
+                        .monospacedDigit()
+                }
+            }
+            .foregroundStyle(isOn ? tint : ZrpColor.onSurfaceMuted)
+            .frame(minHeight: ZrpMetrics.minTouchTarget)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(interaction.isMutating)
     }
 }

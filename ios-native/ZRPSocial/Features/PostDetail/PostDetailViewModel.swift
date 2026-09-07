@@ -1,8 +1,8 @@
 import Foundation
 import SwiftUI
 
-/// Local state for one comment: the viewer's like, and whether an action
-/// is in flight.
+/// Local state for one comment: the viewer's like, repost and bookmark,
+/// and whether an action is in flight.
 ///
 /// Held apart from the decoded `Comment` for the same reason post
 /// interactions are: the tree is immutable once decoded, and rebuilding a
@@ -10,11 +10,24 @@ import SwiftUI
 struct CommentInteraction: Equatable {
     var liked: Bool
     var likeCount: Int
+    var reposted: Bool
+    var repostCount: Int
+    var bookmarked: Bool
+    var bookmarkCount: Int
+
+    /// One flag for all three toggles. They hit three different routes,
+    /// but a single comment row is a single control group, and letting
+    /// one action run while another is settling would make the row's
+    /// optimistic counts race against each other.
     var isMutating: Bool = false
 
     init(comment: Comment) {
         liked = comment.liked ?? false
         likeCount = comment.counts.likes
+        reposted = comment.reposted ?? false
+        repostCount = comment.counts.reposts
+        bookmarked = comment.bookmarked ?? false
+        bookmarkCount = comment.counts.bookmarks
     }
 }
 
@@ -209,23 +222,80 @@ final class PostDetailViewModel: ObservableObject {
         comments = comments.map { $0.inserting(comment, under: parentId) }
     }
 
+    /// `POST /api/comments/{id}/like` answers `{liked}`.
     func toggleLike(_ comment: Comment) async {
+        await toggle(
+            comment,
+            optimistic: { state in
+                state.liked.toggle()
+                state.likeCount = max(0, state.likeCount + (state.liked ? 1 : -1))
+            },
+            perform: { try await self.commentsRepository.toggleLike(commentId: comment.id) },
+            settle: { state, previous, value in
+                guard state.liked != value else { return }
+                state.liked = value
+                state.likeCount = max(0, previous.likeCount + (value ? 1 : 0))
+            }
+        )
+    }
+
+    /// `POST /api/comments/{id}/repost` answers `{reposted}` - the
+    /// state after the toggle, which is what settles the optimistic
+    /// count below.
+    func toggleRepost(_ comment: Comment) async {
+        await toggle(
+            comment,
+            optimistic: { state in
+                state.reposted.toggle()
+                state.repostCount = max(0, state.repostCount + (state.reposted ? 1 : -1))
+            },
+            perform: { try await self.commentsRepository.toggleRepost(commentId: comment.id) },
+            settle: { state, previous, value in
+                guard state.reposted != value else { return }
+                state.reposted = value
+                state.repostCount = max(0, previous.repostCount + (value ? 1 : 0))
+            }
+        )
+    }
+
+    /// `POST /api/comments/{id}/bookmark` answers `{bookmarked}`.
+    func toggleBookmark(_ comment: Comment) async {
+        await toggle(
+            comment,
+            optimistic: { state in
+                state.bookmarked.toggle()
+                state.bookmarkCount = max(0, state.bookmarkCount + (state.bookmarked ? 1 : -1))
+            },
+            perform: { try await self.commentsRepository.toggleBookmark(commentId: comment.id) },
+            settle: { state, previous, value in
+                guard state.bookmarked != value else { return }
+                state.bookmarked = value
+                state.bookmarkCount = max(0, previous.bookmarkCount + (value ? 1 : 0))
+            }
+        )
+    }
+
+    /// The shared body of the three comment toggles: apply the guess,
+    /// call the route, reconcile with the state it reports, and restore
+    /// the previous state on failure.
+    private func toggle(
+        _ comment: Comment,
+        optimistic: (inout CommentInteraction) -> Void,
+        perform: () async throws -> Bool,
+        settle: (inout CommentInteraction, CommentInteraction, Bool) -> Void
+    ) async {
         var pending = interaction(for: comment)
         guard !pending.isMutating else { return }
         let previous = pending
 
-        pending.liked.toggle()
-        pending.likeCount = max(0, pending.likeCount + (pending.liked ? 1 : -1))
+        optimistic(&pending)
         pending.isMutating = true
         commentInteractions[comment.id] = pending
 
         do {
-            let liked = try await commentsRepository.toggleLike(commentId: comment.id)
+            let value = try await perform()
             var settled = commentInteractions[comment.id] ?? pending
-            if settled.liked != liked {
-                settled.liked = liked
-                settled.likeCount = max(0, previous.likeCount + (liked ? 1 : 0))
-            }
+            settle(&settled, previous, value)
             settled.isMutating = false
             commentInteractions[comment.id] = settled
         } catch {

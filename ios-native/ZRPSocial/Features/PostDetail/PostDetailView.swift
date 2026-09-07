@@ -84,6 +84,13 @@ struct PostDetailView: View {
                     onDelete: { Task { await interactions.deletePost(post) } }
                 )
 
+                // Reactions live on the detail screen rather than every
+                // feed card: each post costs its own request for the
+                // rows, which a timeline should not pay per card.
+                PostReactionsView(postId: post.id, viewerId: session.currentUser?.id)
+                    .padding(.horizontal, ZrpSpacing.lg)
+                    .padding(.bottom, ZrpSpacing.md)
+
                 commentsSection
             }
             .frame(maxWidth: ZrpMetrics.contentMaxWidth)
@@ -150,7 +157,9 @@ struct PostDetailView: View {
                         editDraft = entry.comment.content
                         editingComment = entry.comment
                     },
-                    onDelete: { Task { await viewModel.delete(entry.comment) } }
+                    onDelete: { Task { await viewModel.delete(entry.comment) } },
+                    onRepost: { Task { await viewModel.toggleRepost(entry.comment) } },
+                    onBookmark: { Task { await viewModel.toggleBookmark(entry.comment) } }
                 )
                 .task {
                     // Paging is by top-level thread, so only a root

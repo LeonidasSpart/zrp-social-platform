@@ -6,6 +6,8 @@ protocol CommentsRepositoryProtocol: Sendable {
     func edit(commentId: String, content: String) async throws -> Comment
     func delete(commentId: String) async throws
     func toggleLike(commentId: String) async throws -> Bool
+    func toggleRepost(commentId: String) async throws -> Bool
+    func toggleBookmark(commentId: String) async throws -> Bool
 }
 
 struct CommentsRepository: CommentsRepositoryProtocol {
@@ -63,8 +65,27 @@ struct CommentsRepository: CommentsRepositoryProtocol {
 
     func toggleLike(commentId: String) async throws -> Bool {
         let response: LikeResponse = try await client.send(
-            Endpoint.post("comments/\(commentId)/like")
+            Endpoint.post("comments/\(Endpoint.segment(commentId))/like")
         )
         return response.liked
+    }
+
+    /// Comments can be reposted and bookmarked in their own right, the
+    /// same as posts - separate routes, separate rows, and each returns
+    /// the state the server settled on.
+    func toggleRepost(commentId: String) async throws -> Bool {
+        struct Response: Decodable { let reposted: Bool }
+        let response: Response = try await client.send(
+            Endpoint.post("comments/\(Endpoint.segment(commentId))/repost")
+        )
+        return response.reposted
+    }
+
+    func toggleBookmark(commentId: String) async throws -> Bool {
+        struct Response: Decodable { let bookmarked: Bool }
+        let response: Response = try await client.send(
+            Endpoint.post("comments/\(Endpoint.segment(commentId))/bookmark")
+        )
+        return response.bookmarked
     }
 }

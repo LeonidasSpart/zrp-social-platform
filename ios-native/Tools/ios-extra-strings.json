@@ -105,6 +105,8 @@
     "ios.auth.forgotBody": "Enter the email address for your account. If it exists, we'll send a link to reset your password.",
     "ios.auth.forgotSend": "Send reset link",
     "ios.auth.forgotSent": "If an account exists for that address, a reset link is on its way. Open it to finish setting a new password.",
-    "ios.auth.verifyOnWebNote": "The link opens in your browser and signs you in here once you return."
+    "ios.auth.verifyOnWebNote": "The link opens in your browser and signs you in here once you return.",
+    "ios.post.addReaction": "Add a reaction",
+    "ios.post.reactions": "Reactions"
   }
 }

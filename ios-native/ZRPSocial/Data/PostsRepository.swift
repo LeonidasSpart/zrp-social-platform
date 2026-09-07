@@ -60,6 +60,30 @@ protocol PostsRepositoryProtocol: Sendable {
     func toggleBookmark(postId: String) async throws -> Bool
     func deletePost(id: String) async throws
     func updatePost(id: String, content: String) async throws -> Post
+    func reactions(postId: String) async throws -> [PostReaction]
+    func toggleReaction(postId: String, emoji: String) async throws -> Bool
+}
+
+/// One emoji reaction on a post, from `GET /api/posts/{id}/reaction`.
+///
+/// The route returns every reaction row rather than a tally, so the
+/// grouping and counting happen client-side - which is also what lets the
+/// app know which of them are the viewer's own.
+struct PostReaction: Decodable, Identifiable, Equatable {
+    let id: String
+    let emoji: String
+    let userId: String
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        emoji = try container.decodeIfPresent(String.self, forKey: .emoji) ?? ""
+        userId = try container.decodeIfPresent(String.self, forKey: .userId) ?? ""
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, emoji, userId
+    }
 }
 
 struct PostsRepository: PostsRepositoryProtocol {
@@ -145,5 +169,32 @@ struct PostsRepository: PostsRepositoryProtocol {
 
     func deletePost(id: String) async throws {
         try await client.sendIgnoringResponse(Endpoint.delete("posts/\(id)"))
+    }
+
+    // MARK: - Reactions
+
+    func reactions(postId: String) async throws -> [PostReaction] {
+        try await client.send(Endpoint.get("posts/\(Endpoint.segment(postId))/reaction"))
+    }
+
+    /// Toggles **one** emoji for the viewer, and reports whether it is
+    /// now on.
+    ///
+    /// The route keys on (post, user, emoji), so this is not "one
+    /// reaction per person": someone can hold several different emoji on
+    /// the same post at once, and tapping one only ever affects that one.
+    func toggleReaction(postId: String, emoji: String) async throws -> Bool {
+        struct Request: Encodable { let emoji: String }
+        struct Response: Decodable {
+            let reaction: PostReaction?
+        }
+        let response: Response = try await client.send(
+            try Endpoint.post(
+                "posts/\(Endpoint.segment(postId))/reaction",
+                body: Request(emoji: emoji)
+            )
+        )
+        // `{reaction: null}` means it was removed.
+        return response.reaction != nil
     }
 }

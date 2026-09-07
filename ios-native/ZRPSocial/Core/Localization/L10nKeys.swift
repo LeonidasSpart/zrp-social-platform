@@ -1190,6 +1190,10 @@ enum L10nKey: String, CaseIterable {
     case iosAuthForgotSent = "ios.auth.forgotSent"
     /// en: "The link opens in your browser and signs you in here once you return."
     case iosAuthVerifyOnWebNote = "ios.auth.verifyOnWebNote"
+    /// en: "Add a reaction"
+    case iosPostAddReaction = "ios.post.addReaction"
+    /// en: "Reactions"
+    case iosPostReactions = "ios.post.reactions"
 }
 
 extension L10nKey {
