@@ -105,6 +105,13 @@
     <string name="stories_add_story">Hikaye Ekle</string>
     <string name="stories_share_story">Hikayeyi Paylaş</string>
     <string name="stories_whats_on_your_mind">Aklından ne geçiyor?</string>
+    <string name="stories_image">Resim</string>
+    <string name="stories_video">Video</string>
+    <string name="stories_uploading">Yükleniyor...</string>
+    <string name="stories_err_file_too_large">Dosya çok büyük. Maksimum 16MB.</string>
+    <string name="stories_err_unsupported_type">Yalnızca resimler ve videolar desteklenir.</string>
+    <string name="stories_err_empty_content">Lütfen içerik veya bir medya dosyası ekleyin.</string>
+    <string name="stories_err_create_failed">Hikaye oluşturulamadı. Lütfen tekrar deneyin.</string>
     <string name="reposts_title">Yeniden Paylaşımlar</string>
     <string name="reposts_count">%1$d yeniden paylaşım</string>
     <string name="reposts_empty">Henüz yeniden paylaşım yok.</string>

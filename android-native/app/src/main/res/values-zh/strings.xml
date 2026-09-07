@@ -105,6 +105,13 @@
     <string name="stories_add_story">添加动态</string>
     <string name="stories_share_story">分享动态</string>
     <string name="stories_whats_on_your_mind">你在想什么?</string>
+    <string name="stories_image">图片</string>
+    <string name="stories_video">视频</string>
+    <string name="stories_uploading">上传中...</string>
+    <string name="stories_err_file_too_large">文件过大。最大 16MB。</string>
+    <string name="stories_err_unsupported_type">仅支持图片和视频。</string>
+    <string name="stories_err_empty_content">请添加文字内容或媒体文件。</string>
+    <string name="stories_err_create_failed">创建动态失败,请重试。</string>
     <string name="reposts_title">转发</string>
     <string name="reposts_count">%1$d 转发</string>
     <string name="reposts_empty">暂无转发。</string>

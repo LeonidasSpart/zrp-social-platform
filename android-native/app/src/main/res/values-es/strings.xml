@@ -105,6 +105,13 @@
     <string name="stories_add_story">Añadir historia</string>
     <string name="stories_share_story">Compartir historia</string>
     <string name="stories_whats_on_your_mind">¿Qué estás pensando?</string>
+    <string name="stories_image">Imagen</string>
+    <string name="stories_video">Video</string>
+    <string name="stories_uploading">Subiendo...</string>
+    <string name="stories_err_file_too_large">Archivo demasiado grande. Máximo 16 MB.</string>
+    <string name="stories_err_unsupported_type">Solo se admiten imágenes y videos.</string>
+    <string name="stories_err_empty_content">Añade contenido o un archivo multimedia.</string>
+    <string name="stories_err_create_failed">No se pudo crear la historia. Inténtalo de nuevo.</string>
     <string name="reposts_title">Republicaciones</string>
     <string name="reposts_count">%1$d republicaciones</string>
     <string name="reposts_empty">Aún no hay republicaciones.</string>

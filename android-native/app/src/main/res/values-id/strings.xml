@@ -105,6 +105,13 @@
     <string name="stories_add_story">Tambah Kisah</string>
     <string name="stories_share_story">Bagikan Kisah</string>
     <string name="stories_whats_on_your_mind">Apa yang Anda pikirkan?</string>
+    <string name="stories_image">Gambar</string>
+    <string name="stories_video">Video</string>
+    <string name="stories_uploading">Mengunggah...</string>
+    <string name="stories_err_file_too_large">File terlalu besar. Maksimum 16MB.</string>
+    <string name="stories_err_unsupported_type">Hanya gambar dan video yang didukung.</string>
+    <string name="stories_err_empty_content">Silakan tambahkan konten atau file media.</string>
+    <string name="stories_err_create_failed">Gagal membuat kisah. Silakan coba lagi.</string>
     <string name="reposts_title">Postingan Ulang</string>
     <string name="reposts_count">%1$d postingan ulang</string>
     <string name="reposts_empty">Belum ada postingan ulang.</string>

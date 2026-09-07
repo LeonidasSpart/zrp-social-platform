@@ -105,6 +105,13 @@
     <string name="stories_add_story">Shto Storie</string>
     <string name="stories_share_story">Shpërndaj Storien</string>
     <string name="stories_whats_on_your_mind">Çfarë po mendon?</string>
+    <string name="stories_image">Foto</string>
+    <string name="stories_video">Video</string>
+    <string name="stories_uploading">Duke ngarkuar...</string>
+    <string name="stories_err_file_too_large">Skedari është shumë i madh. Maksimumi 16MB.</string>
+    <string name="stories_err_unsupported_type">Mbështeten vetëm imazhet dhe videot.</string>
+    <string name="stories_err_empty_content">Ju lutemi shtoni përmbajtje ose një skedar media.</string>
+    <string name="stories_err_create_failed">Krijimi i storjes dështoi. Ju lutemi provoni përsëri.</string>
     <string name="reposts_title">Ripublikimet</string>
     <string name="reposts_count">%1$d ripublikime</string>
     <string name="reposts_empty">Nuk ka ripublikime ende.</string>

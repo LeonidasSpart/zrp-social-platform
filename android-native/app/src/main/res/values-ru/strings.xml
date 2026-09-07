@@ -105,6 +105,13 @@
     <string name="stories_add_story">Добавить историю</string>
     <string name="stories_share_story">Поделиться историей</string>
     <string name="stories_whats_on_your_mind">О чём вы думаете?</string>
+    <string name="stories_image">Изображение</string>
+    <string name="stories_video">Видео</string>
+    <string name="stories_uploading">Загрузка...</string>
+    <string name="stories_err_file_too_large">Файл слишком большой. Максимум 16 МБ.</string>
+    <string name="stories_err_unsupported_type">Поддерживаются только изображения и видео.</string>
+    <string name="stories_err_empty_content">Добавьте текст или медиафайл.</string>
+    <string name="stories_err_create_failed">Не удалось создать историю. Попробуйте ещё раз.</string>
     <string name="reposts_title">репостов</string>
     <string name="reposts_count">%1$d репостов</string>
     <string name="reposts_empty">Пока нет репостов.</string>

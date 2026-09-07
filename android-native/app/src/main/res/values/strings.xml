@@ -121,6 +121,13 @@
     <string name="stories_add_story">Add Story</string>
     <string name="stories_share_story">Share Story</string>
     <string name="stories_whats_on_your_mind">What\'s on your mind?</string>
+    <string name="stories_image">Image</string>
+    <string name="stories_video">Video</string>
+    <string name="stories_uploading">Uploading...</string>
+    <string name="stories_err_file_too_large">File too large. Max 16MB.</string>
+    <string name="stories_err_unsupported_type">Only images and videos are supported.</string>
+    <string name="stories_err_empty_content">Please add some content or a media file.</string>
+    <string name="stories_err_create_failed">Failed to create story. Please try again.</string>
     <string name="reposts_title">Reposts</string>
     <string name="reposts_count">%1$d reposts</string>
     <string name="reposts_empty">No reposts yet.</string>

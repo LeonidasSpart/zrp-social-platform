@@ -105,6 +105,13 @@
     <string name="stories_add_story">Story hinzufügen</string>
     <string name="stories_share_story">Story teilen</string>
     <string name="stories_whats_on_your_mind">Was gibt\'s Neues?</string>
+    <string name="stories_image">Bild</string>
+    <string name="stories_video">Video</string>
+    <string name="stories_uploading">Wird hochgeladen...</string>
+    <string name="stories_err_file_too_large">Datei zu groß. Max. 16 MB.</string>
+    <string name="stories_err_unsupported_type">Nur Bilder und Videos werden unterstützt.</string>
+    <string name="stories_err_empty_content">Bitte füge Inhalt oder eine Mediendatei hinzu.</string>
+    <string name="stories_err_create_failed">Story konnte nicht erstellt werden. Bitte versuche es erneut.</string>
     <string name="reposts_title">Reposts</string>
     <string name="reposts_count">%1$d Reposts</string>
     <string name="reposts_empty">Noch keine Reposts.</string>
