@@ -779,4 +779,33 @@
     <string name="play_sharing">Duke shpërndarë...</string>
     <string name="play_share_success">U shpërnda në feed-in tënd!</string>
     <string name="play_err_share_failed">Shpërndarja e rezultatit tënd dështoi. Provo përsëri.</string>
+    <!-- ZRP News (native parity) -->
+    <string name="news_filter_all">Të gjitha</string>
+    <string name="news_subtitle">Lajme dhe histori të pavarura nga Zvicra, Evropa dhe bota.</string>
+    <string name="news_retry">Provo përsëri</string>
+    <string name="news_no_news_title">Ende nuk ka lajme</string>
+    <string name="news_no_news_desc">Ende nuk ka artikuj të publikuar në këtë kategori.</string>
+    <string name="news_featured">Të zgjedhura</string>
+    <string name="news_latest_news">Lajmet e fundit</string>
+    <string name="news_views_count">%1$s shikime</string>
+    <string name="news_load_more">Ngarko më shumë</string>
+    <string name="news_loading_more">Duke ngarkuar...</string>
+    <string name="news_err_failed_load">Ngarkimi i lajmeve dështoi</string>
+    <string name="news_err_unable_to_load">ZRP News nuk mund të ngarkohet tani.</string>
+    <string name="news_back_to_list">Kthehu te ZRP News</string>
+    <string name="news_more_news">Më shumë ZRP News</string>
+    <string name="news_source">Burimi</string>
+    <string name="news_category_world">Bota</string>
+    <string name="news_category_europe">Evropa</string>
+    <string name="news_category_switzerland">Zvicra</string>
+    <string name="news_category_politics">Politika</string>
+    <string name="news_category_business">Biznesi</string>
+    <string name="news_category_technology">Teknologjia</string>
+    <string name="news_category_crypto">Kripto</string>
+    <string name="news_category_science">Shkenca</string>
+    <string name="news_category_sports">Sporti</string>
+    <string name="news_category_culture">Kultura</string>
+    <string name="news_category_community">Komuniteti</string>
+    <string name="news_title">ZRP News</string>
+    <string name="news_discover_entry">Zbulo ZRP News</string>
 </resources>

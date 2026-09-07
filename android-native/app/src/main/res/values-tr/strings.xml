@@ -779,4 +779,33 @@
     <string name="play_sharing">Paylaşılıyor...</string>
     <string name="play_share_success">Akışına paylaşıldı!</string>
     <string name="play_err_share_failed">Sonucun paylaşılamadı. Lütfen tekrar dene.</string>
+    <!-- ZRP News (native parity) -->
+    <string name="news_filter_all">Tümü</string>
+    <string name="news_subtitle">İsviçre, Avrupa ve dünyadan bağımsız haberler ve hikayeler.</string>
+    <string name="news_retry">Tekrar dene</string>
+    <string name="news_no_news_title">Henüz haber yok</string>
+    <string name="news_no_news_desc">Bu kategoride henüz yayınlanmış makale yok.</string>
+    <string name="news_featured">Öne çıkan</string>
+    <string name="news_latest_news">Son Haberler</string>
+    <string name="news_views_count">%1$s görüntülenme</string>
+    <string name="news_load_more">Daha fazla yükle</string>
+    <string name="news_loading_more">Yükleniyor...</string>
+    <string name="news_err_failed_load">Haberler yüklenemedi</string>
+    <string name="news_err_unable_to_load">ZRP News şu anda yüklenemiyor.</string>
+    <string name="news_back_to_list">ZRP News\'e dön</string>
+    <string name="news_more_news">Daha Fazla ZRP News</string>
+    <string name="news_source">Kaynak</string>
+    <string name="news_category_world">Dünya</string>
+    <string name="news_category_europe">Avrupa</string>
+    <string name="news_category_switzerland">İsviçre</string>
+    <string name="news_category_politics">Siyaset</string>
+    <string name="news_category_business">İş Dünyası</string>
+    <string name="news_category_technology">Teknoloji</string>
+    <string name="news_category_crypto">Kripto</string>
+    <string name="news_category_science">Bilim</string>
+    <string name="news_category_sports">Spor</string>
+    <string name="news_category_culture">Kültür</string>
+    <string name="news_category_community">Topluluk</string>
+    <string name="news_title">ZRP News</string>
+    <string name="news_discover_entry">ZRP News\'i Keşfet</string>
 </resources>

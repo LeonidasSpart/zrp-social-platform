@@ -779,4 +779,33 @@
     <string name="play_sharing">Condivisione in corso...</string>
     <string name="play_share_success">Condiviso nel tuo feed!</string>
     <string name="play_err_share_failed">Impossibile condividere il tuo risultato. Riprova.</string>
+    <!-- ZRP News (native parity) -->
+    <string name="news_filter_all">Tutte</string>
+    <string name="news_subtitle">Notizie e storie indipendenti dalla Svizzera, dall\'Europa e dal mondo.</string>
+    <string name="news_retry">Riprova</string>
+    <string name="news_no_news_title">Ancora nessuna notizia</string>
+    <string name="news_no_news_desc">Non ci sono ancora articoli pubblicati in questa categoria.</string>
+    <string name="news_featured">In evidenza</string>
+    <string name="news_latest_news">Ultime notizie</string>
+    <string name="news_views_count">%1$s visualizzazioni</string>
+    <string name="news_load_more">Carica altro</string>
+    <string name="news_loading_more">Caricamento...</string>
+    <string name="news_err_failed_load">Caricamento delle notizie non riuscito</string>
+    <string name="news_err_unable_to_load">Impossibile caricare ZRP News al momento.</string>
+    <string name="news_back_to_list">Torna a ZRP News</string>
+    <string name="news_more_news">Altre notizie ZRP</string>
+    <string name="news_source">Fonte</string>
+    <string name="news_category_world">Mondo</string>
+    <string name="news_category_europe">Europa</string>
+    <string name="news_category_switzerland">Svizzera</string>
+    <string name="news_category_politics">Politica</string>
+    <string name="news_category_business">Economia</string>
+    <string name="news_category_technology">Tecnologia</string>
+    <string name="news_category_crypto">Cripto</string>
+    <string name="news_category_science">Scienza</string>
+    <string name="news_category_sports">Sport</string>
+    <string name="news_category_culture">Cultura</string>
+    <string name="news_category_community">Comunità</string>
+    <string name="news_title">ZRP News</string>
+    <string name="news_discover_entry">Scopri ZRP News</string>
 </resources>

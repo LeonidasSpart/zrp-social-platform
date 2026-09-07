@@ -779,4 +779,33 @@
     <string name="play_sharing">جارٍ المشاركة...</string>
     <string name="play_share_success">تمت المشاركة في صفحتك!</string>
     <string name="play_err_share_failed">فشلت مشاركة نتيجتك. يرجى المحاولة مرة أخرى.</string>
+    <!-- ZRP News (native parity) -->
+    <string name="news_filter_all">الكل</string>
+    <string name="news_subtitle">أخبار وقصص مستقلة من سويسرا وأوروبا والعالم.</string>
+    <string name="news_retry">إعادة المحاولة</string>
+    <string name="news_no_news_title">لا توجد أخبار بعد</string>
+    <string name="news_no_news_desc">لا توجد مقالات منشورة في هذه الفئة بعد.</string>
+    <string name="news_featured">مميز</string>
+    <string name="news_latest_news">آخر الأخبار</string>
+    <string name="news_views_count">%1$s مشاهدة</string>
+    <string name="news_load_more">تحميل المزيد</string>
+    <string name="news_loading_more">جارٍ التحميل...</string>
+    <string name="news_err_failed_load">فشل تحميل الأخبار</string>
+    <string name="news_err_unable_to_load">تعذّر تحميل أخبار ZRP الآن.</string>
+    <string name="news_back_to_list">العودة إلى أخبار ZRP</string>
+    <string name="news_more_news">المزيد من أخبار ZRP</string>
+    <string name="news_source">المصدر</string>
+    <string name="news_category_world">العالم</string>
+    <string name="news_category_europe">أوروبا</string>
+    <string name="news_category_switzerland">سويسرا</string>
+    <string name="news_category_politics">السياسة</string>
+    <string name="news_category_business">الأعمال</string>
+    <string name="news_category_technology">التكنولوجيا</string>
+    <string name="news_category_crypto">العملات الرقمية</string>
+    <string name="news_category_science">العلوم</string>
+    <string name="news_category_sports">الرياضة</string>
+    <string name="news_category_culture">الثقافة</string>
+    <string name="news_category_community">المجتمع</string>
+    <string name="news_title">أخبار ZRP</string>
+    <string name="news_discover_entry">اكتشف ZRP News</string>
 </resources>
