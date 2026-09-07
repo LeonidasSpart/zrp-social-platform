@@ -74,3 +74,10 @@
 "composer.errUploadFailed" = "Error al subir. Inténtalo de nuevo.";
 "composer.errSomethingWrong" = "Algo salió mal. Revisa tu feed para ver si tu publicación se publicó.";
 "composer.errWriteSomething" = "Escribe algo o haz una pregunta de encuesta.";
+"postDetail.commentPlaceholder" = "Escribe un comentario...";
+"postDetail.replyPlaceholder" = "Escribe una respuesta...";
+"postDetail.sending" = "Enviando...";
+"postDetail.reply" = "Responder";
+"postDetail.commentsDisabled" = "💬 Los comentarios están desactivados para esta publicación.";
+"postDetail.postNotFound" = "Publicación no encontrada";
+"action.edit" = "Editar";

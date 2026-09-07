@@ -74,3 +74,10 @@
 "composer.errUploadFailed" = "Не удалось загрузить файл. Пожалуйста, попробуйте снова.";
 "composer.errSomethingWrong" = "Что-то пошло не так. Проверьте ленту, чтобы убедиться, что публикация была размещена.";
 "composer.errWriteSomething" = "Пожалуйста, напишите что-нибудь или задайте вопрос в опросе.";
+"postDetail.commentPlaceholder" = "Напишите комментарий...";
+"postDetail.replyPlaceholder" = "Напишите ответ...";
+"postDetail.sending" = "Отправка...";
+"postDetail.reply" = "Ответить";
+"postDetail.commentsDisabled" = "💬 Комментарии к этой публикации отключены.";
+"postDetail.postNotFound" = "Публикация не найдена";
+"action.edit" = "Изменить";

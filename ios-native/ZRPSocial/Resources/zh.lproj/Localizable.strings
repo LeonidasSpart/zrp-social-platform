@@ -74,3 +74,10 @@
 "composer.errUploadFailed" = "上传失败，请重试。";
 "composer.errSomethingWrong" = "出了点问题。请检查你的信息流，确认帖子是否已发布。";
 "composer.errWriteSomething" = "请输入内容或提出一个投票问题。";
+"postDetail.commentPlaceholder" = "写下评论...";
+"postDetail.replyPlaceholder" = "写下回复...";
+"postDetail.sending" = "发送中...";
+"postDetail.reply" = "回复";
+"postDetail.commentsDisabled" = "💬 此帖子已禁用评论。";
+"postDetail.postNotFound" = "未找到帖子";
+"action.edit" = "编辑";

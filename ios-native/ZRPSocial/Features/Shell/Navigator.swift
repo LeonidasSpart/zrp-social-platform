@@ -8,6 +8,12 @@ import SwiftUI
 /// tap on a follower row. One enum means one `navigationDestination` and
 /// one place to add a screen.
 enum Route: Hashable {
+    /// The post is carried along when the caller already has it - opening
+    /// a post from a timeline then renders immediately and refreshes
+    /// underneath, instead of showing a spinner over data the app is
+    /// already holding. `nil` when arriving from somewhere that only
+    /// knows the id, such as a deep link.
+    case postDetail(postId: String, preloaded: Post?)
     case profile(username: String)
     case hashtag(tag: String)
     case followList(username: String, kind: FollowListKind)

@@ -66,6 +66,11 @@ final class ComposeViewModel: ObservableObject {
     private let mediaRepository: MediaRepositoryProtocol
     private var uploadTasks: [UUID: Task<Void, Never>] = [:]
 
+    /// The post being quoted, when the composer was opened from a
+    /// post's Quote action. Sent as `quotePostId`, which is the only
+    /// thing that makes the created post a quote server-side.
+    var quotedPost: Post?
+
     /// The plan whose limits the composer pre-checks against. Advisory
     /// only - `POST /api/posts` and the upload router both enforce the
     /// real limits server-side.
@@ -112,7 +117,9 @@ final class ComposeViewModel: ObservableObject {
     var canPost: Bool {
         guard !isPosting, !isOverCharacterLimit, allUploadsSettled else { return false }
         let hasText = !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        return hasText || !attachments.isEmpty
+        // A quote is publishable with no text of its own - the quoted
+        // post is the content, exactly as on web.
+        return hasText || !attachments.isEmpty || quotedPost != nil
     }
 
     // MARK: - Attachments
@@ -266,7 +273,7 @@ final class ComposeViewModel: ObservableObject {
             content: text.trimmingCharacters(in: .whitespacesAndNewlines),
             imageUrls: uploaded.isEmpty ? nil : uploaded.map(\.url),
             mediaType: uploaded.first?.type,
-            quotePostId: nil
+            quotePostId: quotedPost?.id
         )
 
         do {

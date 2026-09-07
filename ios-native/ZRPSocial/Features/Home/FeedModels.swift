@@ -23,6 +23,17 @@ struct PostInteraction: Equatable {
     /// rather than letting a double tap send two racing requests.
     var isMutating: Bool = false
 
+    /// Text from a successful edit, shown in place of the decoded post's
+    /// own content.
+    ///
+    /// The edit route returns the updated post, but the post sits inside
+    /// whichever list happens to be holding it - possibly several at
+    /// once. Recording the new text here means every screen showing that
+    /// post updates together, without any of them knowing about the
+    /// others, and survives a refresh the same way the repost and
+    /// bookmark flags do.
+    var contentOverride: String?
+
     init(post: Post) {
         liked = post.liked ?? false
         likeCount = post.counts.likes

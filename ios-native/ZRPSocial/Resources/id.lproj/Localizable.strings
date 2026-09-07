@@ -74,3 +74,10 @@
 "composer.errUploadFailed" = "Unggahan gagal. Silakan coba lagi.";
 "composer.errSomethingWrong" = "Terjadi kesalahan. Periksa feed Anda untuk melihat apakah postingan Anda telah dipublikasikan.";
 "composer.errWriteSomething" = "Silakan tulis sesuatu atau ajukan pertanyaan polling.";
+"postDetail.commentPlaceholder" = "Tulis komentar...";
+"postDetail.replyPlaceholder" = "Tulis balasan...";
+"postDetail.sending" = "Mengirim...";
+"postDetail.reply" = "Balas";
+"postDetail.commentsDisabled" = "💬 Komentar dinonaktifkan untuk postingan ini.";
+"postDetail.postNotFound" = "Postingan tidak ditemukan";
+"action.edit" = "Edit";

@@ -74,3 +74,10 @@
 "composer.errUploadFailed" = "فشل رفع الملف. يرجى المحاولة مرة أخرى.";
 "composer.errSomethingWrong" = "حدث خطأ ما. تحقق من خلاصتك لمعرفة ما إذا تم نشر منشورك.";
 "composer.errWriteSomething" = "يرجى كتابة شيء أو طرح سؤال في الاستطلاع.";
+"postDetail.commentPlaceholder" = "اكتب تعليقًا...";
+"postDetail.replyPlaceholder" = "اكتب ردًا...";
+"postDetail.sending" = "جارٍ الإرسال...";
+"postDetail.reply" = "رد";
+"postDetail.commentsDisabled" = "💬 التعليقات معطّلة لهذا المنشور.";
+"postDetail.postNotFound" = "المنشور غير موجود";
+"action.edit" = "تعديل";

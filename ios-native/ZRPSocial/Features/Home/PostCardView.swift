@@ -18,6 +18,12 @@ struct PostCardView: View {
     var onBookmark: () -> Void
     var onDelete: () -> Void
 
+    /// Opening the composer belongs to the host screen, which owns the
+    /// sheet - a card inside a `LazyVStack` presenting its own would
+    /// tear down mid-presentation as rows recycle.
+    var onQuote: () -> Void = {}
+    var onEdit: () -> Void = {}
+
     @State private var isConfirmingDelete = false
     @EnvironmentObject private var navigator: Navigator
 
@@ -30,9 +36,12 @@ struct PostCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: ZrpSpacing.md) {
             header
-            if !post.content.isEmpty {
+            // The edited text when the viewer has edited this post,
+            // otherwise what the server sent.
+            let displayed = interaction.contentOverride ?? post.content
+            if !displayed.isEmpty {
                 LinkifiedText(
-                    content: post.content,
+                    content: displayed,
                     onHashtag: { navigator.push(.hashtag(tag: $0)) },
                     onMention: { navigator.push(.profile(username: $0)) }
                 )
@@ -126,9 +135,12 @@ struct PostCardView: View {
                 }
             }
             if isOwnPost {
-                // Deletion is author-only and enforced server-side with a
-                // 403; this menu item only hides what the backend would
-                // refuse anyway.
+                // Editing and deletion are both author-only and enforced
+                // server-side with a 403; these items only hide what the
+                // backend would refuse anyway.
+                Button(action: onEdit) {
+                    Label { Text(.actionEdit) } icon: { Image(systemName: "pencil") }
+                }
                 Button(role: .destructive) {
                     isConfirmingDelete = true
                 } label: {
@@ -225,25 +237,56 @@ struct PostCardView: View {
 
     private var actionBar: some View {
         HStack(spacing: 0) {
-            // Comments: a count, not a button. The comment thread is
-            // Phase 8; until it exists this states the real number without
-            // pretending to open anything.
-            countLabel(
+            actionButton(
                 systemImage: "bubble.left",
-                count: post.counts.comments
+                isActive: false,
+                activeTint: ZrpColor.onSurfaceMuted,
+                count: post.counts.comments,
+                label: L10n.string(.actionReply),
+                disabledWhileMutating: false,
+                action: {
+                    navigator.push(.postDetail(postId: post.id, preloaded: post))
+                }
             )
 
             Spacer(minLength: 0)
 
-            actionButton(
-                systemImage: "arrow.2.squarepath",
-                isActive: interaction.reposted ?? false,
-                activeTint: ZrpColor.green,
-                count: interaction.repostCount,
-                label: (interaction.reposted ?? false)
-                    ? L10n.string(.iosA11yUndoRepost)
-                    : L10n.string(.actionRepost),
-                action: onRepost
+            Menu {
+                Button {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    onRepost()
+                } label: {
+                    Label {
+                        Text((interaction.reposted ?? false)
+                            ? L10nKey.iosA11yUndoRepost
+                            : L10nKey.iosPostRepostAction)
+                    } icon: {
+                        Image(systemName: "arrow.2.squarepath")
+                    }
+                }
+                Button(action: onQuote) {
+                    Label { Text(.iosPostQuote) } icon: { Image(systemName: "quote.bubble") }
+                }
+            } label: {
+                HStack(spacing: ZrpSpacing.xs) {
+                    Image(systemName: "arrow.2.squarepath")
+                        .font(.subheadline)
+                    if let text = CountFormatting.compact(interaction.repostCount) {
+                        Text(verbatim: text)
+                            .font(.footnote)
+                            .monospacedDigit()
+                    }
+                }
+                .foregroundStyle(
+                    (interaction.reposted ?? false) ? ZrpColor.green : ZrpColor.onSurfaceMuted
+                )
+                .frame(minWidth: ZrpMetrics.minTouchTarget, minHeight: ZrpMetrics.minTouchTarget)
+                .contentShape(Rectangle())
+            }
+            .disabled(interaction.isMutating)
+            .accessibilityLabel(Text(.iosA11yRepostOptions))
+            .accessibilityValue(
+                Text(verbatim: CountFormatting.exact(interaction.repostCount))
             )
 
             Spacer(minLength: 0)
@@ -294,6 +337,9 @@ struct PostCardView: View {
         activeTint: Color,
         count: Int?,
         label: String,
+        // Navigation is not a mutation, so the comment button must stay
+        // usable while a like or repost is still in flight.
+        disabledWhileMutating: Bool = true,
         action: @escaping () -> Void
     ) -> some View {
         Button {
@@ -317,27 +363,11 @@ struct PostCardView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .disabled(interaction.isMutating)
+        .disabled(disabledWhileMutating && interaction.isMutating)
         .accessibilityLabel(Text(verbatim: label))
         .accessibilityValue(
             Text(verbatim: count.map { CountFormatting.exact($0) } ?? "")
         )
     }
 
-    private func countLabel(systemImage: String, count: Int) -> some View {
-        HStack(spacing: ZrpSpacing.xs) {
-            Image(systemName: systemImage)
-                .font(.subheadline)
-            if let text = CountFormatting.compact(count) {
-                Text(verbatim: text)
-                    .font(.footnote)
-                    .monospacedDigit()
-            }
-        }
-        .foregroundStyle(ZrpColor.onSurfaceMuted)
-        .frame(minHeight: ZrpMetrics.minTouchTarget)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text(.actionReply))
-        .accessibilityValue(Text(verbatim: CountFormatting.exact(count)))
-    }
 }

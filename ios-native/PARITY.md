@@ -67,22 +67,22 @@ called and the real response being handled.
 | Following feed | `GET /api/posts?tab=following` (post-id cursor) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Cursor pagination | both above | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Pull to refresh | — | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Single post detail | `GET /api/posts/{id}` (raw post, no envelope) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Single post detail | `GET /api/posts/{id}` (raw post, no envelope) | ✅ | ✅ | ✅ (dedicated screen with threaded comments) | IMPLEMENTED |
 | Like | `POST /api/posts/{id}/like` → `{liked}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Repost | `POST /api/posts/{id}/repost` → `{reposted}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Bookmark | `POST /api/posts/{id}/bookmark` → `{bookmarked}` | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Emoji reactions | `GET/POST /api/posts/{id}/reaction` | ✅ | ✅ | ⬜ | MISSING (Phase 8) |
+| Emoji reactions | `GET/POST /api/posts/{id}/reaction` | ✅ | ✅ | ⬜ | MISSING (Phase 8b) |
 | Delete own post | `DELETE /api/posts/{id}` (403 non-author, server-side) | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Edit own post | `PUT /api/posts/{id}` (text only, matches web) | ✅ | ✅ | ⬜ | MISSING (Phase 8) |
+| Edit own post | `PUT /api/posts/{id}` (text only, matches web) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Pin post (single slot) | `POST /api/posts/{id}/pin` | ✅ | ✅ | ⬜ | MISSING (Phase 6b) |
 | Create post (text) | `POST /api/posts` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Scheduled posts | `POST /api/posts` + `scheduledAt` naive wall-clock | ✅ | ✅ | ⬜ | MISSING (Phase 7b) |
-| Quote post | `POST /api/posts` + `quotePostId`; `GET /api/posts/{id}/quotes` | ✅ | ✅ | 🔶 renders nested quote; composer sends the field but has no quote entry point yet | PARTIAL |
-| Reposts list | `GET /api/posts/{id}/reposts` → `{items,nextCursor}` | ✅ | ✅ | ⬜ | MISSING (Phase 8) |
+| Quote post | `POST /api/posts` + `quotePostId` | ✅ | ✅ | ✅ (Quote action on every post, with a preview in the composer) | IMPLEMENTED |
+| Reposts list | `GET /api/posts/{id}/reposts` → `{items,nextCursor}` | ✅ | ✅ | ⬜ | MISSING (Phase 8b) |
 | Share sheet | — (client-side, `zrp.one/post/{id}`) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Post views | `POST /api/posts/{id}/view` | ✅ | ⬜ | ⬜ | MISSING |
 | Polls | `POST /api/polls/{id}/vote` | ✅ | ⬜ | ⬜ | MISSING |
-| Inline translation | `POST /api/translate` | ✅ | ✅ | ⬜ | MISSING (Phase 8) |
+| Inline translation | `POST /api/translate` | ✅ | ✅ | ⬜ | MISSING (Phase 8b) |
 | Link previews | `GET /api/link-preview` | ✅ | ⬜ | ⬜ | MISSING |
 
 ### Media
@@ -126,12 +126,13 @@ called and the real response being handled.
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
-| Comment list on a post | `GET /api/posts/{id}/comments` | ✅ | ✅ | ⬜ | MISSING (Phase 8) |
-| Create comment | `POST /api/posts/{id}/comments` | ✅ | ✅ | ⬜ | MISSING (Phase 8) |
-| Threaded replies | same, `parentId` | ✅ | ✅ | ⬜ | MISSING (Phase 8) |
-| Like a comment | `POST /api/comments/{id}/like` | ✅ | ✅ | ⬜ | MISSING (Phase 8) |
-| Repost / bookmark a comment | `/api/comments/{id}/repost`, `/bookmark` | ✅ | ✅ | ⬜ | MISSING (Phase 8) |
-| Delete comment | `DELETE /api/comments/{id}` | ✅ | ✅ | ⬜ | MISSING (Phase 8) |
+| Comment list on a post | `GET /api/posts/{id}/comments` (`{comments,nextCursor}`, paged by top-level thread) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Create comment | `POST /api/posts/{id}/comments` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Threaded replies | same, `parentId` | ✅ | ✅ | ✅ (full nested tree, indent capped for narrow screens) | IMPLEMENTED |
+| Like a comment | `POST /api/comments/{id}/like` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Repost / bookmark a comment | `/api/comments/{id}/repost`, `/bookmark` | ✅ | ✅ | ⬜ | MISSING (Phase 8b) |
+| Delete comment | `DELETE /api/comments/{id}` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Edit comment | `PUT /api/comments/{id}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 
 ### Stories
 
@@ -333,7 +334,7 @@ here. **No fake local notifications will stand in for this.**
 | 5 | Home feed (For You / Following) + interactions | ✅ done |
 | 6 | Profiles + social graph | ✅ done — 6b (edit profile, pin, extra profile tabs) pending |
 | 7 | Post composer + media upload + viewer | ✅ done — 7b (scheduling, quote entry point, camera capture) pending |
-| 8 | Comments, replies, quotes, reactions, edit | ⬜ |
+| 8 | Comments, replies, quotes, edit | ✅ done — 8b (reactions, comment repost/bookmark, reposts & quotes lists, translation) pending |
 | 9 | Stories | ⬜ |
 | 10 | Messages | ⬜ |
 | 11 | Notifications (+ push, pending B3) | ⬜ |

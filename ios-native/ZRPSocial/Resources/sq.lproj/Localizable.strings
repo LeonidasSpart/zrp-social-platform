@@ -74,3 +74,10 @@
 "composer.errUploadFailed" = "Ngarkimi dështoi. Ju lutemi riprovojeni.";
 "composer.errSomethingWrong" = "Diçka shkoi gabim. Kontrolloni furnizimin tuaj për të parë nëse postimi u publikua.";
 "composer.errWriteSomething" = "Ju lutemi shkruani diçka ose bëni një pyetje sondazhi.";
+"postDetail.commentPlaceholder" = "Shkruaj një koment...";
+"postDetail.replyPlaceholder" = "Shkruaj një përgjigje...";
+"postDetail.sending" = "Duke dërguar...";
+"postDetail.reply" = "Përgjigju";
+"postDetail.commentsDisabled" = "💬 Komentet janë çaktivizuar për këtë postim.";
+"postDetail.postNotFound" = "Postimi nuk u gjet";
+"action.edit" = "Ndrysho";

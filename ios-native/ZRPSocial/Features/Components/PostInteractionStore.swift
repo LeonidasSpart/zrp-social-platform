@@ -48,6 +48,9 @@ final class PostInteractionStore: ObservableObject {
             if let existing = interactions[post.id] {
                 seeded.reposted = existing.reposted
                 seeded.bookmarked = existing.bookmarked
+                // A refresh that returns the pre-edit text must not undo
+                // an edit the server has already accepted.
+                seeded.contentOverride = existing.contentOverride
                 if !replacing {
                     seeded.liked = existing.liked
                     seeded.likeCount = existing.likeCount
@@ -133,6 +136,31 @@ final class PostInteractionStore: ObservableObject {
             interactions[post.id] = settled
         } catch {
             interactions[post.id] = previous
+            report(error)
+        }
+    }
+
+    /// The content to render for a post: the edited text when there is
+    /// one, otherwise what the server sent.
+    func displayContent(for post: Post) -> String {
+        interactions[post.id]?.contentOverride ?? post.content
+    }
+
+    /// Text-only edit, matching the website's own modal exactly - it
+    /// never sends `imageUrl` either, and the route only touches that
+    /// field when the body includes it, so omitting it is what keeps the
+    /// post's media intact rather than silently clearing it.
+    ///
+    /// Author-only and plan-length-checked server-side.
+    func editPost(_ post: Post, content: String) async {
+        let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed != displayContent(for: post) else { return }
+        do {
+            let updated = try await repository.updatePost(id: post.id, content: trimmed)
+            var pending = interaction(for: post)
+            pending.contentOverride = updated.content
+            interactions[post.id] = pending
+        } catch {
             report(error)
         }
     }

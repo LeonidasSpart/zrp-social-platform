@@ -95,3 +95,12 @@ composer.addGif
 composer.errUploadFailed
 composer.errSomethingWrong
 composer.errWriteSomething
+
+# ── Post detail, comments and replies (Phase 8) ─────────────────────
+postDetail.commentPlaceholder
+postDetail.replyPlaceholder
+postDetail.sending
+postDetail.reply
+postDetail.commentsDisabled
+postDetail.postNotFound
+action.edit

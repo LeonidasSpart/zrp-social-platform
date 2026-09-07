@@ -28,6 +28,8 @@ struct HomeView: View {
             .overlay(alignment: .bottomTrailing) { composeButton }
             .navigationDestination(for: Route.self) { route in
                 switch route {
+                case .postDetail(let postId, let preloaded):
+                    PostDetailView(postId: postId, preloaded: preloaded)
                 case .profile(let username):
                     ProfileView(username: username)
                 case .hashtag(let tag):
@@ -181,6 +183,7 @@ struct HomeView: View {
                         onAppear: {
                             viewModel.loadMoreIfNeeded(viewModel.selectedTab, currentPost: $0)
                         },
+                        onCreated: { viewModel.insertCreated($0, interactions: interactions) },
                         header: { EmptyView() }
                     )
                 }

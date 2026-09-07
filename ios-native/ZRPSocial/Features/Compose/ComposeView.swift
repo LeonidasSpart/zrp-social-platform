@@ -9,6 +9,10 @@ import SwiftUI
 /// and retry. Nothing here is simulated.
 struct ComposeView: View {
 
+    /// The post being quoted, if the composer was opened from a Quote
+    /// action.
+    var quoting: Post? = nil
+
     /// Called with the created post so the caller can show it without a
     /// refetch.
     let onPosted: (Post) -> Void
@@ -27,6 +31,7 @@ struct ComposeView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: ZrpSpacing.lg) {
                     editor
+                    quotedPreview
                     attachmentsSection
                 }
                 .padding(ZrpSpacing.lg)
@@ -41,6 +46,7 @@ struct ComposeView: View {
             .toolbar { navigationButtons }
             .onAppear {
                 viewModel.plan = session.currentUser?.plan
+                viewModel.quotedPost = quoting
                 isTextFocused = true
             }
             .onChange(of: pickerSelection) { _, items in
@@ -83,6 +89,48 @@ struct ComposeView: View {
             }
         }
         .interactiveDismissDisabled(hasUnsavedWork)
+    }
+
+    /// A compact, non-interactive rendering of the quoted post, so the
+    /// author can see what they are quoting. Deliberately not tappable:
+    /// opening it would abandon the draft.
+    @ViewBuilder
+    private var quotedPreview: some View {
+        if let quoting {
+            VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
+                HStack(spacing: ZrpSpacing.sm) {
+                    AvatarView(
+                        url: quoting.author.avatarUrl,
+                        displayName: quoting.author.displayName,
+                        size: ZrpMetrics.avatarSmall
+                    )
+                    Text(verbatim: quoting.author.displayName)
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(ZrpColor.onSurface)
+                        .lineLimit(1)
+                    VerifiedBadge(badgeType: quoting.author.badgeType, size: 12)
+                    Text(verbatim: quoting.author.handle)
+                        .font(.footnote)
+                        .foregroundStyle(ZrpColor.onSurfaceMuted)
+                        .lineLimit(1)
+                        .layoutPriority(-1)
+                    Spacer(minLength: 0)
+                }
+                if !quoting.content.isEmpty {
+                    Text(verbatim: quoting.content)
+                        .font(.footnote)
+                        .foregroundStyle(ZrpColor.onSurface)
+                        .lineLimit(4)
+                }
+            }
+            .padding(ZrpSpacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .overlay(
+                RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous)
+                    .strokeBorder(ZrpColor.outline, lineWidth: 1)
+            )
+            .accessibilityElement(children: .combine)
+        }
     }
 
     private var hasUnsavedWork: Bool {

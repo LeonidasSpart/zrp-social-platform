@@ -74,3 +74,10 @@
 "composer.errUploadFailed" = "Upload fehlgeschlagen. Bitte versuche es erneut.";
 "composer.errSomethingWrong" = "Etwas ist schiefgelaufen. Prüfe deinen Feed, ob dein Beitrag veröffentlicht wurde.";
 "composer.errWriteSomething" = "Bitte schreibe etwas oder stelle eine Umfragefrage.";
+"postDetail.commentPlaceholder" = "Kommentar schreiben...";
+"postDetail.replyPlaceholder" = "Antwort schreiben...";
+"postDetail.sending" = "Wird gesendet...";
+"postDetail.reply" = "Antworten";
+"postDetail.commentsDisabled" = "💬 Kommentare sind für diesen Beitrag deaktiviert.";
+"postDetail.postNotFound" = "Beitrag nicht gefunden";
+"action.edit" = "Bearbeiten";

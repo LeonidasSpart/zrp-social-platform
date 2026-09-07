@@ -74,3 +74,10 @@
 "composer.errUploadFailed" = "Yükleme başarısız oldu. Lütfen tekrar deneyin.";
 "composer.errSomethingWrong" = "Bir şeyler ters gitti. Gönderinizin yayınlanıp yayınlanmadığını görmek için akışınızı kontrol edin.";
 "composer.errWriteSomething" = "Lütfen bir şeyler yazın veya bir anket sorusu sorun.";
+"postDetail.commentPlaceholder" = "Bir yorum yazın...";
+"postDetail.replyPlaceholder" = "Bir yanıt yazın...";
+"postDetail.sending" = "Gönderiliyor...";
+"postDetail.reply" = "Yanıtla";
+"postDetail.commentsDisabled" = "💬 Bu gönderi için yorumlar devre dışı.";
+"postDetail.postNotFound" = "Gönderi bulunamadı";
+"action.edit" = "Düzenle";

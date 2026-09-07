@@ -74,3 +74,10 @@
 "composer.errUploadFailed" = "Échec du téléchargement. Veuillez réessayer.";
 "composer.errSomethingWrong" = "Une erreur est survenue. Vérifiez votre fil pour voir si votre publication a été publiée.";
 "composer.errWriteSomething" = "Veuillez écrire quelque chose ou poser une question de sondage.";
+"postDetail.commentPlaceholder" = "Écrire un commentaire...";
+"postDetail.replyPlaceholder" = "Écrire une réponse...";
+"postDetail.sending" = "Envoi...";
+"postDetail.reply" = "Répondre";
+"postDetail.commentsDisabled" = "💬 Les commentaires sont désactivés pour cette publication.";
+"postDetail.postNotFound" = "Publication introuvable";
+"action.edit" = "Modifier";

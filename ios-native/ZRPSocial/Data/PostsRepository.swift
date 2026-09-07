@@ -59,6 +59,7 @@ protocol PostsRepositoryProtocol: Sendable {
     func toggleRepost(postId: String) async throws -> Bool
     func toggleBookmark(postId: String) async throws -> Bool
     func deletePost(id: String) async throws
+    func updatePost(id: String, content: String) async throws -> Post
 }
 
 struct PostsRepository: PostsRepositoryProtocol {
@@ -127,6 +128,21 @@ struct PostsRepository: PostsRepositoryProtocol {
     /// Only a post's own author may delete it, enforced server-side with a
     /// 403 rather than merely hidden in the UI - so exposing this from any
     /// post is safe; the backend is the real gate.
+    /// Text-only, matching the website's own edit modal exactly - it
+    /// never sends `imageUrl` either, and the route only touches that
+    /// field when the body explicitly includes it. Omitting it is what
+    /// keeps an edited post's existing media intact rather than silently
+    /// clearing it.
+    ///
+    /// Author-only and plan-length-checked server-side, and the route
+    /// returns the updated post bare (no envelope).
+    func updatePost(id: String, content: String) async throws -> Post {
+        struct Body: Encodable { let content: String }
+        return try await client.send(
+            try Endpoint.put("posts/\(id)", body: Body(content: content))
+        )
+    }
+
     func deletePost(id: String) async throws {
         try await client.sendIgnoringResponse(Endpoint.delete("posts/\(id)"))
     }

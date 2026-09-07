@@ -49,6 +49,19 @@
     "ios.compose.discardMessage": "Your draft and any uploads will be lost.",
     "ios.compose.discard": "Discard",
     "ios.compose.keepEditing": "Keep editing",
-    "ios.compose.uploaded": "Uploaded"
+    "ios.compose.uploaded": "Uploaded",
+    "ios.post.detailTitle": "Post",
+    "ios.comment.noComments": "No comments yet",
+    "ios.comment.beFirst": "Be the first to reply.",
+    "ios.comment.deleteConfirmTitle": "Delete comment?",
+    "ios.comment.editTitle": "Edit comment",
+    "ios.a11y.likeComment": "Like comment",
+    "ios.a11y.unlikeComment": "Unlike comment",
+    "ios.a11y.replyToComment": "Reply to {name}",
+    "ios.comment.replyingTo": "Replying to {name}",
+    "ios.comment.cancelReply": "Cancel reply",
+    "ios.post.editTitle": "Edit post",
+    "ios.post.repostAction": "Repost",
+    "ios.a11y.repostOptions": "Repost options"
   }
 }

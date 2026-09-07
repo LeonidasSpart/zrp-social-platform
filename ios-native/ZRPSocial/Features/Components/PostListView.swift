@@ -15,6 +15,10 @@ struct PostListView<Header: View>: View {
     /// Called as each row appears, so the host can decide whether to page.
     var onAppear: (Post) -> Void = { _ in }
 
+    /// Called when a quote composed from this list is published, so the
+    /// host can show it without a refetch.
+    var onCreated: (Post) -> Void = { _ in }
+
     /// Rendered above the first post - a profile header, a hashtag
     /// summary, or nothing. Generic rather than type-erased so a header
     /// costs nothing when a screen does not have one.
@@ -22,6 +26,13 @@ struct PostListView<Header: View>: View {
 
     @EnvironmentObject private var session: SessionController
     @EnvironmentObject private var interactions: PostInteractionStore
+
+    // The quote composer and the edit sheet live here rather than on
+    // each card: a sheet presented from inside a `LazyVStack` row is
+    // torn down when that row recycles mid-scroll.
+    @State private var quoting: Post?
+    @State private var editing: Post?
+    @State private var editDraft = ""
 
     /// Posts deleted this session are filtered here rather than removed
     /// from each screen's own array, so one delete is reflected
@@ -42,7 +53,12 @@ struct PostListView<Header: View>: View {
                     onLike: { Task { await interactions.toggleLike(post) } },
                     onRepost: { Task { await interactions.toggleRepost(post) } },
                     onBookmark: { Task { await interactions.toggleBookmark(post) } },
-                    onDelete: { Task { await interactions.deletePost(post) } }
+                    onDelete: { Task { await interactions.deletePost(post) } },
+                    onQuote: { quoting = post },
+                    onEdit: {
+                        editDraft = interactions.displayContent(for: post)
+                        editing = post
+                    }
                 )
                 .onAppear { onAppear(post) }
             }
@@ -53,6 +69,21 @@ struct PostListView<Header: View>: View {
         // stretching a post across a 12.9" display.
         .frame(maxWidth: ZrpMetrics.contentMaxWidth)
         .frame(maxWidth: .infinity)
+        .sheet(item: $quoting) { post in
+            ComposeView(quoting: post) { created in onCreated(created) }
+        }
+        .sheet(item: $editing) { post in
+            EditPostSheet(
+                draft: $editDraft,
+                onCancel: { editing = nil },
+                onSave: {
+                    let target = post
+                    let content = editDraft
+                    editing = nil
+                    Task { await interactions.editPost(target, content: content) }
+                }
+            )
+        }
     }
 
     @ViewBuilder
@@ -139,5 +170,48 @@ enum TimelineStateView {
         }
         .padding(ZrpSpacing.xl)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+/// The text-only edit modal, matching what the website's own edit
+/// modal offers - media is never touched by an edit on either client.
+private struct EditPostSheet: View {
+
+    @Binding var draft: String
+    let onCancel: () -> Void
+    let onSave: () -> Void
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: ZrpSpacing.lg) {
+                TextField(
+                    L10n.string(.composerPlaceholderDefault),
+                    text: $draft,
+                    axis: .vertical
+                )
+                .font(.body)
+                .lineLimit(4...12)
+                .padding(ZrpSpacing.md)
+                .background(ZrpColor.surfaceElevated)
+                .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous))
+                Spacer()
+            }
+            .padding(ZrpSpacing.lg)
+            .background(ZrpColor.background.ignoresSafeArea())
+            .navigationTitle(Text(.iosPostEditTitle))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: onCancel) { Text(.actionCancel) }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: onSave) {
+                        Text(.actionSave).font(.subheadline.weight(.semibold))
+                    }
+                    .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+        }
+        .presentationDetents([.medium])
     }
 }
