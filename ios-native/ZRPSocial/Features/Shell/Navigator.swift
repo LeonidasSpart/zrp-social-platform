@@ -43,6 +43,13 @@ enum Route: Hashable {
     /// part of what identifies this destination - pushing the same
     /// partner from a listing and from the inbox are different screens.
     case listingConversation(partner: PostAuthor, draft: String)
+    case settings
+    case privacySettings
+    case changePassword
+    case blockedUsers
+    case mutedUsers
+    case dataExport
+    case deleteAccount
 }
 
 /// Owns the navigation stack's path.

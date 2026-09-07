@@ -230,11 +230,13 @@ called and the real response being handled.
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
-| Report post/user/comment | `POST /api/reports` | ✅ | ✅ | ⬜ | MISSING (Phase 16) |
-| Block / unblock | `POST /api/users/{username}/block` | ✅ | ✅ | ⬜ | MISSING (Phase 16) |
-| Blocked list | `GET /api/users/blocked` (bare array) | ✅ | ✅ | ⬜ | MISSING (Phase 16) |
-| Mute / unmute | `GET/POST /api/users/mute` | ✅ | ✅ | ⬜ | MISSING (Phase 16) |
-| Muted list | `GET /api/users/muted` (bare array) | ✅ | ✅ | ⬜ | MISSING (Phase 16) |
+| Report post / comment / listing | `POST /api/reports` | ✅ | ✅ | ✅ posts and listings; the site's exact stored reason strings | IMPLEMENTED |
+| Report a comment | `POST /api/reports` (`commentId`) | ✅ | ✅ | ⬜ modelled and reachable, not yet wired into the comment row | MISSING (Phase 16b) |
+| Block / unblock | `POST /api/users/{username}/block` | ✅ | ✅ | ✅ toggle from the blocked list | IMPLEMENTED |
+| Blocked list | `GET /api/users/blocked` (bare array) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Mute / unmute | `GET/POST /api/users/mute` | ✅ | ✅ | ✅ toggle from the muted list | IMPLEMENTED |
+| Muted list | `GET /api/users/muted` (bare array) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Block / mute **from a profile** | same routes | ✅ | ✅ | ⬜ lists manage existing entries; no entry point on a profile yet | MISSING (Phase 16b) |
 | Appeals | `POST /api/appeals` | ✅ | ⬜ | ⬜ | MISSING |
 | Feed-level block/mute filtering | server-side in `/api/posts/explore` | ✅ | ✅ | ✅ (inherited from server) | IMPLEMENTED |
 
@@ -242,13 +244,17 @@ called and the real response being handled.
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
-| Account (email, username, custom URL) | `/api/user/email`, `/username`, `/custom-url` | ✅ | ✅ | ⬜ | MISSING (Phase 16) |
-| Security (password) | `PUT /api/user/password` | ✅ | ✅ | ⬜ | MISSING (Phase 16) |
-| Privacy (private account, public likes/following) | `PUT /api/user/privacy` | ✅ | ✅ | ⬜ | MISSING (Phase 16) |
-| Email preferences | `/api/user/email-preferences` | ✅ | ⬜ | ⬜ | MISSING (Phase 16) |
+| Settings hub | — | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Security (password) | `PUT /api/user/password` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Privacy (private account, public likes/following) | `PUT /api/user/privacy` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Account deletion — 30-day schedule / cancel | `GET /api/user/delete-status`, `POST /api/user/delete` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Account deletion — immediate and permanent | `POST /api/user/delete/confirm` | ✅ | ✅ | ✅ typed DELETE gate, as on web | IMPLEMENTED |
+| Data export | `GET /api/settings/export-data` | ✅ | ⬜ | ✅ downloaded to a file and handed to the share sheet | IMPLEMENTED |
+| Account (email, username, profile fields) | `/api/user`, `/api/user/email`, `/username` | ✅ | ✅ | ⬜ | MISSING (Phase 16b) |
+| Email preferences | `/api/user/email-preferences` | ✅ | ⬜ | ⬜ | MISSING (Phase 16b) |
 | Language (11 languages, `ar` RTL) | client-side preference | ✅ | ✅ | ⬜ | MISSING (Phase 17) |
-| Data export | `GET /api/settings/export-data` | ✅ | ⬜ | ⬜ | MISSING |
-| Plan / limits | `GET /api/user/plan`, `src/lib/limits.ts` | ✅ | ✅ | 🔶 composer pre-checks post length, image count and video size; settings surface pending | PARTIAL |
+| Plan / limits | `GET /api/user/plan`, `src/lib/limits.ts` | ✅ | ✅ | 🔶 composer and listing forms pre-check what the server enforces; the server's own limit message is shown verbatim | PARTIAL (by design) |
+| Plan upgrade / monetisation / wallet surfaces | web billing | ✅ | ✅ | ❌ deliberately absent — see [Store policy constraint](#store-policy-constraint) | OUT OF SCOPE |
 
 ### Deliberately out of scope for the consumer iOS app
 
@@ -485,7 +491,7 @@ here. **No fake local notifications will stand in for this.**
 | 13 | Music + background player | ✅ 13a (engine, background audio, lock screen, home) and 13b (discover, artists, albums, playlists, liked, history, queue) done |
 | 14 | Music Studio | ✅ gate, apply, artist profile, upload/publish, track + album management, reorder |
 | 15 | Marketplace | ✅ browse, detail, favorites, create/edit/delete, my listings, contact seller |
-| 16 | Settings, moderation, account deletion | ⬜ |
+| 16 | Settings, moderation, account deletion | ✅ settings hub, privacy, password, blocked/muted lists, reporting, data export, account deletion (both paths) |
 | 17 | Localization (11 languages) + accessibility | ⬜ |
 | 18 | Performance + security pass | ⬜ |
 | 19 | App Store preparation | 🔶 toolchain now Xcode 26 / iOS 26 SDK-gated; signing, archive and export still pending |

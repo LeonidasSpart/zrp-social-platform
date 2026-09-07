@@ -83,6 +83,20 @@ struct HomeView: View {
                     MyListingsView()
                 case .listingFavorites:
                     ListingFavoritesView()
+                case .settings:
+                    SettingsView()
+                case .privacySettings:
+                    PrivacySettingsView()
+                case .changePassword:
+                    ChangePasswordView()
+                case .blockedUsers:
+                    ModerationListView(kind: .blocked)
+                case .mutedUsers:
+                    ModerationListView(kind: .muted)
+                case .dataExport:
+                    DataExportView()
+                case .deleteAccount:
+                    DeleteAccountView()
                 case .listingConversation(let partner, let draft):
                     ConversationView(
                         partner: partner,
@@ -260,6 +274,11 @@ struct HomeView: View {
                     navigator.push(.marketplace)
                 } label: {
                     Label { Text(.marketplaceHeroTitle) } icon: { Image(systemName: "bag") }
+                }
+                Button {
+                    navigator.push(.settings)
+                } label: {
+                    Label { Text(.settingsTitle) } icon: { Image(systemName: "gearshape") }
                 }
                 Button(role: .destructive) {
                     Task { await session.signOut() }

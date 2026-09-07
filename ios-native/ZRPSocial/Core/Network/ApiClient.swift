@@ -96,6 +96,17 @@ final class ApiClient: @unchecked Sendable {
         }
     }
 
+    /// Send a request whose response is a file rather than an API
+    /// envelope.
+    ///
+    /// `GET /api/settings/export-data` answers with a JSON *document* and
+    /// a `Content-Disposition` filename - the thing a browser downloads -
+    /// so it is returned as bytes rather than decoded into a model the
+    /// app would only re-encode.
+    func sendRaw(_ endpoint: Endpoint) async throws -> Data {
+        try await perform(endpoint)
+    }
+
     /// Send a request whose response body the caller does not need.
     ///
     /// Deliberately not an overload of `send` - `Data` is itself

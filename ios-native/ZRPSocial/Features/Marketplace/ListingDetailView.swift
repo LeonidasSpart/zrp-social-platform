@@ -20,6 +20,7 @@ struct ListingDetailView: View {
     @State private var isDeleting = false
     @State private var confirmDelete = false
     @State private var actionError: String?
+    @State private var isReporting = false
 
     private let repository = ListingsRepository()
 
@@ -52,6 +53,21 @@ struct ListingDetailView: View {
         .navigationTitle(Text(.marketplaceHeroTitle))
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
+        .toolbar {
+            // Offered to everyone but the seller: reporting your own
+            // listing is meaningless when you can delete it.
+            if listing != nil, !isOwner {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { isReporting = true } label: {
+                        Image(systemName: "flag")
+                    }
+                    .accessibilityLabel(Text(.reportModalTitle))
+                }
+            }
+        }
+        .sheet(isPresented: $isReporting) {
+            ReportSheet(target: .listing(listingId))
+        }
         .alert(
             Text(.marketplaceConfirmDelete),
             isPresented: $confirmDelete

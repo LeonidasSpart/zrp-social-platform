@@ -25,6 +25,7 @@ struct PostCardView: View {
     var onEdit: () -> Void = {}
 
     @State private var isConfirmingDelete = false
+    @State private var isReporting = false
     @EnvironmentObject private var navigator: Navigator
 
     /// The canonical web URL for a post - what Share hands to other apps,
@@ -66,6 +67,9 @@ struct PostCardView: View {
             Button(role: .cancel) {} label: { Text(.actionCancel) }
         } message: {
             Text(.iosPostDeleteConfirmMessage)
+        }
+        .sheet(isPresented: $isReporting) {
+            ReportSheet(target: .post(post.id))
         }
     }
 
@@ -145,6 +149,15 @@ struct PostCardView: View {
                     isConfirmingDelete = true
                 } label: {
                     Label { Text(.actionDelete) } icon: { Image(systemName: "trash") }
+                }
+            } else {
+                // Reporting your own post is not offered - there is
+                // nothing to moderate that the author cannot simply
+                // delete.
+                Button {
+                    isReporting = true
+                } label: {
+                    Label { Text(.reportModalTitle) } icon: { Image(systemName: "flag") }
                 }
             }
         } label: {
