@@ -58,7 +58,7 @@ called and the real response being handled.
 | Reset password — complete | `POST /api/auth/reset-password` | ✅ | ✅ | ⬜ completed through the emailed link on the web; no route accepts a code typed into an app | MISSING (by design) |
 | Onboarding | `POST /api/user/onboarding-complete`, `PUT /api/user/profile`, `POST /api/user/update-avatar`, `GET /api/users/suggested` | ✅ | ✅ | ✅ profile, avatar, follow suggestions; every step skippable | IMPLEMENTED |
 | Google sign-in | `POST /api/mobile/auth/google` (added on `main` by PR #115) verifies a Google ID token and mints the same NextAuth JWT; the website still uses the NextAuth `google` web provider | ✅ | ✅ Credential Manager | ⬜ backend no longer blocks it — obtaining the ID token on iOS is outstanding client-side work, not built here | MISSING (was [B1](#b1-native-oauth--google-now-unblocked-server-side-apple-still-blocked)) |
-| **Sign in with Apple** | NextAuth `apple` provider (web OAuth, Services ID) | ✅ (if env configured) | n/a | ❌ | **BLOCKED — [B2](#b2-sign-in-with-apple-native)** |
+| **Sign in with Apple** | `POST /api/mobile/auth/apple` verifies a native Apple identityToken against Apple's JWKS and mints the same NextAuth JWT; the website still uses the NextAuth `apple` web provider (Services ID) | ✅ (if env configured) | n/a | ⬜ backend no longer blocks it — obtaining the identityToken via `ASAuthorizationAppleIDProvider` and calling this route is outstanding client-side work, not built here | MISSING (was [B2](#b2-sign-in-with-apple-native)) |
 | Account deletion | `POST /api/user/delete`, `/api/user/delete/confirm`, `GET /api/user/delete-status` | ✅ | ✅ | ✅ both paths — see [Settings](#settings) | IMPLEMENTED |
 
 ### Feed & posts
@@ -563,36 +563,52 @@ OAuth URL in a system browser, leaving the session as an httpOnly cookie
 inside the browser/WebView, which a real native app cannot read. That is
 still the only path for Apple.
 
-### B2. Sign in with Apple (native)
+### B2. Sign in with Apple (native) — **UNBLOCKED server-side**
 
 Apple requires Sign in with Apple in any app that offers third-party
-sign-in. This is therefore an **App Store submission blocker**, not a
-nice-to-have.
+sign-in, making this an **App Store submission blocker**. The two concrete
+gaps this entry originally described are now closed on `main`:
 
-Two concrete gaps:
+1. **Native token-exchange route.** `POST /api/mobile/auth/apple` verifies
+   an `ASAuthorizationAppleIDCredential.identityToken` against Apple's JWKS
+   (`https://appleid.apple.com/auth/keys`, fetched and cached in
+   `src/lib/apple-identity-token.ts` using only Node's built-in `crypto` —
+   no new JWT/JWKS dependency), checking `iss`, `aud`, `exp`, the signature,
+   and (when the caller supplies one) the SHA-256-hashed `nonce` claim.
+   Account resolution reuses the exact same `findOrCreateOAuthUser` the
+   NextAuth web `signIn` callback and `/api/mobile/auth/google` already
+   use, keyed on the verified `email` claim (real address or Apple's
+   private-relay address — both are stable identifiers, and Apple issues
+   the same relay address across every app under this Team ID). It then
+   `encode()`s the same NextAuth JWT payload and returns the same
+   `{sessionToken, cookieName, expiresInSeconds, user}` envelope
+   `/api/mobile/auth/login` and `/google` do.
+2. **Audience mismatch — resolved.** The verifier accepts *both*
+   `APPLE_CLIENT_ID` (the **Services ID**, for tokens from the web OAuth
+   flow) and `APPLE_MOBILE_CLIENT_ID` (defaults to the **bundle ID**
+   `one.zrp.social` if unset — native Sign in with Apple presents this as
+   `aud`) as valid audiences.
 
-1. **No native token-exchange route.** `ASAuthorizationAppleIDCredential`
-   yields an `identityToken` (a JWT signed by Apple). Nothing server-side
-   verifies one. Required: a route mirroring `mobile/auth/login`'s design —
-   verify the token against Apple's JWKS (`https://appleid.apple.com/auth/keys`),
-   check `iss`, `aud`, `exp`, and the SHA-256 `nonce` claim, link or create
-   the `User` + `Account` rows, then `encode()` the same NextAuth JWT payload
-   and return the same `{sessionToken, cookieName, expiresInSeconds, user}`
-   envelope.
-2. **Audience mismatch.** `APPLE_CLIENT_ID` is a **Services ID** (web flow).
-   Native Sign in with Apple presents the **bundle ID** (`one.zrp.social`)
-   as `aud`. The verifier must accept both.
+Request body: `{ identityToken: string, nonce?: string, fullName?: string }`.
+`fullName` matters only for a first-time sign-in: Apple hands the user's
+name to the *client* directly (never inside the identityToken) and only on
+the very first authorization for this app + Apple ID, so the client must
+capture it then and pass it here; `findOrCreateOAuthUser` only applies it
+when creating a new account, never overwriting an existing one — the same
+behavior already relied on for Google.
 
-Also unresolved server-side: Apple's name/email are returned **only on the
-very first authorization**, and private-relay addresses mean email is not a
-reliable identity key — `sub` is. Username generation for a first-time Apple
-user needs a rule (web's `register` route requires a caller-supplied
-username; Apple gives none).
-
-**Until that route exists, no Apple button ships.** A button that cannot
-complete a sign-in is a dead button. The entitlement and capability are
-prepared in `Supporting/ZRPSocial.entitlements` so the flow is one route
-away, and the audit above is the specification for it.
+**What remains is client-side, not a backend blocker:** wire up
+`ASAuthorizationAppleIDProvider` in the iOS app, obtain the
+`identityToken` (and pass the same raw `nonce` used in the authorization
+request, if any, so this route's nonce check has something to verify
+against), POST it here, and apply the returned session the same way the
+Google flow will. Two things still need a human, not code: enabling the
+"Sign in with Apple" capability for `one.zrp.social` in the Apple
+Developer portal, and then uncommenting the
+`com.apple.developer.applesignin` entitlement in
+`Supporting/ZRPSocial.entitlements` — deliberately left undone here since
+declaring it before the portal capability is enabled breaks automatic
+signing for anyone on this team.
 
 ### B3. iOS device push
 
