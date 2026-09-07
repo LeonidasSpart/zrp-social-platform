@@ -6,11 +6,13 @@ import one.zrp.social.mobile.network.MusicAlbumDetail
 import one.zrp.social.mobile.network.MusicAlbumSummary
 import one.zrp.social.mobile.network.MusicArtistDetail
 import one.zrp.social.mobile.network.MusicArtistListItem
+import one.zrp.social.mobile.network.MusicGenre
 import one.zrp.social.mobile.network.MusicHomeResponse
 import one.zrp.social.mobile.network.MusicLikeRequest
 import one.zrp.social.mobile.network.MusicLikeResponse
 import one.zrp.social.mobile.network.MusicPlaylistDetail
 import one.zrp.social.mobile.network.MusicPlaylistListItem
+import one.zrp.social.mobile.network.MusicTrack
 import one.zrp.social.mobile.network.RecordPlayRequest
 import one.zrp.social.mobile.network.ReorderPlaylistRequest
 import one.zrp.social.mobile.network.ToggleTrackInPlaylistRequest
@@ -81,5 +83,13 @@ class MusicRepository {
 
     suspend fun reorderPlaylist(id: String, orderedIds: List<String>): Result<Unit> = runCatching {
         ApiClient.musicApi.reorderPlaylist(id, ReorderPlaylistRequest(orderedIds))
+    }
+
+    suspend fun getGenres(): Result<List<MusicGenre>> = runCatching {
+        ApiClient.musicApi.getGenres()
+    }
+
+    suspend fun searchTracks(query: String?): Result<List<MusicTrack>> = runCatching {
+        ApiClient.musicApi.searchTracks(query?.trim()?.takeIf { it.isNotEmpty() })
     }
 }

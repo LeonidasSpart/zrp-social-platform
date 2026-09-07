@@ -1,7 +1,9 @@
 package one.zrp.social.mobile.ui.music
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Album
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.QueueMusic
@@ -57,6 +60,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MusicRepository
 import one.zrp.social.mobile.network.MusicAlbumSummary
 import one.zrp.social.mobile.network.MusicArtistSummary
+import one.zrp.social.mobile.network.MusicGenre
 import one.zrp.social.mobile.network.MusicPlaylistSummary
 import one.zrp.social.mobile.network.MusicTrack
 import one.zrp.social.mobile.ui.components.Avatar
@@ -80,9 +84,11 @@ fun MusicScreen(
     onOpenArtists: () -> Unit,
     onOpenAlbums: () -> Unit,
     onOpenPlaylists: () -> Unit,
+    onOpenDiscover: () -> Unit,
     onArtistClick: (String) -> Unit,
     onAlbumClick: (String) -> Unit,
     onPlaylistClick: (String) -> Unit,
+    onGenreClick: (String) -> Unit,
 ) {
     val viewModel: MusicViewModel = viewModel(
         factory = remember(player) { MusicViewModelFactory(MusicRepository(), player) },
@@ -114,9 +120,16 @@ fun MusicScreen(
         HorizontalDivider()
 
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            AssistChip(
+                onClick = onOpenDiscover,
+                leadingIcon = { Icon(Icons.Filled.Explore, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                label = { Text(stringResource(R.string.music_nav_discover_title)) },
+            )
             AssistChip(
                 onClick = onOpenArtists,
                 leadingIcon = { Icon(Icons.Filled.People, contentDescription = null, modifier = Modifier.size(18.dp)) },
@@ -145,7 +158,8 @@ fun MusicScreen(
                 state.likedPreview.isNotEmpty() ||
                 state.latestAlbums.isNotEmpty() ||
                 state.popularArtists.isNotEmpty() ||
-                state.yourPlaylists.isNotEmpty()
+                state.yourPlaylists.isNotEmpty() ||
+                state.genres.isNotEmpty()
 
             when {
                 state.isLoading -> {
@@ -175,8 +189,7 @@ fun MusicScreen(
                     // Section order matches MusicShell.tsx's own real
                     // home layout: Recently Played, Trending, Your
                     // Playlists, Liked preview, New Releases, Latest
-                    // Albums, Popular Artists (Genres is the one
-                    // section still deferred, pending Discover).
+                    // Albums, Popular Artists, Genres.
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         if (state.recentlyPlayed.isNotEmpty()) {
                             item {
@@ -231,6 +244,11 @@ fun MusicScreen(
                         if (state.popularArtists.isNotEmpty()) {
                             item {
                                 PopularArtistsSection(artists = state.popularArtists, onArtistClick = onArtistClick)
+                            }
+                        }
+                        if (state.genres.isNotEmpty()) {
+                            item {
+                                GenresSection(genres = state.genres, onGenreClick = onGenreClick)
                             }
                         }
                     }
@@ -491,6 +509,33 @@ private fun YourPlaylistsSection(playlists: List<MusicPlaylistSummary>, onPlayli
                         modifier = Modifier.padding(top = Spacing.xs),
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GenresSection(genres: List<MusicGenre>, onGenreClick: (String) -> Unit) {
+    Column {
+        Text(
+            text = stringResource(R.string.music_shell_genres_heading),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        )
+        // A horizontally scrolling row rather than the website's own
+        // flex-wrap grid - phone width can't show more than a handful
+        // of genre chips at once anyway, and every other home section
+        // in this screen already scrolls horizontally the same way.
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(genres, key = { it.genre }) { genre ->
+                AssistChip(
+                    onClick = { onGenreClick(genre.genre) },
+                    label = { Text("${genre.genre} (${genre.count})") },
+                )
             }
         }
     }

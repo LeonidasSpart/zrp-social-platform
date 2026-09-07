@@ -314,7 +314,8 @@
     <string name="music_albums_search_placeholder">Search albums...</string>
     <string name="music_albums_none_found">No albums found</string>
     <!-- Music Phase 4: Playlists -->
-    <string name="music_playlists_title">Your Playlists</string>
+    <string name="music_playlists_title">Playlists</string>
+    <string name="music_playlists_page_title">Your Playlists</string>
     <string name="music_playlists_new_playlist">New playlist</string>
     <string name="music_playlists_name_placeholder">Playlist name</string>
     <string name="music_playlists_create">Create</string>
@@ -334,4 +335,14 @@
     <string name="music_playlist_detail_move_up_aria">Move up</string>
     <string name="music_playlist_detail_move_down_aria">Move down</string>
     <string name="music_playlist_detail_remove_track_aria">Remove %1$s from playlist</string>
-</resources>
+
+    <!-- Music Phase 5: Discover -->
+    <string name="music_nav_discover_title">Discover</string>
+    <string name="music_discover_search_placeholder">Search songs, artists, genres...</string>
+    <string name="music_discover_browse_by_genre">Browse by genre</string>
+    <string name="music_discover_all">All</string>
+    <string name="music_discover_results_for">Results for "%1$s"</string>
+    <string name="music_discover_all_tracks">All tracks</string>
+    <string name="music_discover_no_tracks_title">No tracks found</string>
+    <string name="music_discover_no_tracks_body">Try a different search or genre.</string>
+    <string name="music_shell_genres_heading">Genres</string></resources>

@@ -228,6 +228,17 @@ interface MusicApi {
     @GET("music/albums/{id}")
     suspend fun getAlbumDetail(@Path("id") id: String): MusicAlbumDetail
 
+    @GET("music/genres")
+    suspend fun getGenres(): List<MusicGenre>
+
+    // Discover's own real search: `q` doubles as either a free-text
+    // search term or an exact genre name (discover/page.tsx passes the
+    // clicked genre chip's own name as `q`, there is no separate genre
+    // filter param on the wire) - matched here rather than inventing a
+    // native-only `genre` query param the backend doesn't have.
+    @GET("music/tracks")
+    suspend fun searchTracks(@Query("q") query: String? = null, @Query("limit") limit: Int = 60): List<MusicTrack>
+
     @GET("music/playlists")
     suspend fun getPlaylists(): List<MusicPlaylistListItem>
 

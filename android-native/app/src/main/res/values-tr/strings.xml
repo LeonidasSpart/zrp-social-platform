@@ -298,7 +298,8 @@
     <string name="music_albums_search_placeholder">Albüm ara...</string>
     <string name="music_albums_none_found">Albüm bulunamadı</string>
     <!-- Music Phase 4: Playlists -->
-    <string name="music_playlists_title">Çalma Listelerin</string>
+    <string name="music_playlists_title">Çalma Listeleri</string>
+    <string name="music_playlists_page_title">Çalma Listelerin</string>
     <string name="music_playlists_new_playlist">Yeni çalma listesi</string>
     <string name="music_playlists_name_placeholder">Çalma listesi adı</string>
     <string name="music_playlists_create">Oluştur</string>
@@ -318,4 +319,14 @@
     <string name="music_playlist_detail_move_up_aria">Yukarı taşı</string>
     <string name="music_playlist_detail_move_down_aria">Aşağı taşı</string>
     <string name="music_playlist_detail_remove_track_aria">%1$s şarkısını çalma listesinden kaldır</string>
-</resources>
+
+    <!-- Music Phase 5: Discover -->
+    <string name="music_nav_discover_title">Keşfet</string>
+    <string name="music_discover_search_placeholder">Şarkı, sanatçı, tür ara...</string>
+    <string name="music_discover_browse_by_genre">Türe göre göz at</string>
+    <string name="music_discover_all">Tümü</string>
+    <string name="music_discover_results_for">"%1$s" için sonuçlar</string>
+    <string name="music_discover_all_tracks">Tüm şarkılar</string>
+    <string name="music_discover_no_tracks_title">Şarkı bulunamadı</string>
+    <string name="music_discover_no_tracks_body">Farklı bir arama veya tür dene.</string>
+    <string name="music_shell_genres_heading">Türler</string></resources>

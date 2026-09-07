@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -198,14 +199,26 @@ fun TrackRow(
 }
 
 @Composable
-fun TrackListEmptyState(title: String, modifier: Modifier = Modifier) {
+fun TrackListEmptyState(title: String, body: String? = null, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxWidth()
             .padding(Spacing.lg),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text = title, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        if (body != null) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = title, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                Text(
+                    text = body,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = Spacing.xs),
+                )
+            }
+        } else {
+            Text(text = title, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
 }
 

@@ -298,7 +298,8 @@
     <string name="music_albums_search_placeholder">搜索专辑...</string>
     <string name="music_albums_none_found">未找到专辑</string>
     <!-- Music Phase 4: Playlists -->
-    <string name="music_playlists_title">你的播放列表</string>
+    <string name="music_playlists_title">播放列表</string>
+    <string name="music_playlists_page_title">你的播放列表</string>
     <string name="music_playlists_new_playlist">新建播放列表</string>
     <string name="music_playlists_name_placeholder">播放列表名称</string>
     <string name="music_playlists_create">创建</string>
@@ -318,4 +319,14 @@
     <string name="music_playlist_detail_move_up_aria">上移</string>
     <string name="music_playlist_detail_move_down_aria">下移</string>
     <string name="music_playlist_detail_remove_track_aria">从播放列表中移除 %1$s</string>
-</resources>
+
+    <!-- Music Phase 5: Discover -->
+    <string name="music_nav_discover_title">发现</string>
+    <string name="music_discover_search_placeholder">搜索歌曲、艺人、曲风...</string>
+    <string name="music_discover_browse_by_genre">按曲风浏览</string>
+    <string name="music_discover_all">全部</string>
+    <string name="music_discover_results_for">"%1$s"的搜索结果</string>
+    <string name="music_discover_all_tracks">所有歌曲</string>
+    <string name="music_discover_no_tracks_title">未找到歌曲</string>
+    <string name="music_discover_no_tracks_body">请尝试其他搜索词或曲风。</string>
+    <string name="music_shell_genres_heading">流派</string></resources>

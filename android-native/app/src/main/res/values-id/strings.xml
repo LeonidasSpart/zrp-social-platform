@@ -298,7 +298,8 @@
     <string name="music_albums_search_placeholder">Cari album...</string>
     <string name="music_albums_none_found">Tidak ada album yang ditemukan</string>
     <!-- Music Phase 4: Playlists -->
-    <string name="music_playlists_title">Playlist Kamu</string>
+    <string name="music_playlists_title">Playlist</string>
+    <string name="music_playlists_page_title">Playlist Kamu</string>
     <string name="music_playlists_new_playlist">Playlist baru</string>
     <string name="music_playlists_name_placeholder">Nama playlist</string>
     <string name="music_playlists_create">Buat</string>
@@ -318,4 +319,14 @@
     <string name="music_playlist_detail_move_up_aria">Pindahkan ke atas</string>
     <string name="music_playlist_detail_move_down_aria">Pindahkan ke bawah</string>
     <string name="music_playlist_detail_remove_track_aria">Hapus %1$s dari playlist</string>
-</resources>
+
+    <!-- Music Phase 5: Discover -->
+    <string name="music_nav_discover_title">Temukan</string>
+    <string name="music_discover_search_placeholder">Cari lagu, artis, genre...</string>
+    <string name="music_discover_browse_by_genre">Jelajahi berdasarkan genre</string>
+    <string name="music_discover_all">Semua</string>
+    <string name="music_discover_results_for">Hasil untuk "%1$s"</string>
+    <string name="music_discover_all_tracks">Semua lagu</string>
+    <string name="music_discover_no_tracks_title">Tidak ada lagu yang ditemukan</string>
+    <string name="music_discover_no_tracks_body">Coba pencarian atau genre lain.</string>
+    <string name="music_shell_genres_heading">Genre</string></resources>
