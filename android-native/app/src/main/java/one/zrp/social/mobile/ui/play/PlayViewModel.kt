@@ -12,12 +12,14 @@ import one.zrp.social.mobile.data.PlayRepository
 import one.zrp.social.mobile.network.PlayChallengeDetail
 import one.zrp.social.mobile.network.PlayChallengeSummary
 import one.zrp.social.mobile.network.PlayDuelSummary
+import one.zrp.social.mobile.network.PlayLeaderboardEntry
 import one.zrp.social.mobile.network.PlayProfileStats
 
 data class PlayUiState(
     val isLoading: Boolean = true,
     val dailyChallenge: PlayChallengeDetail? = null,
     val trending: List<PlayChallengeSummary> = emptyList(),
+    val topLeaderboard: List<PlayLeaderboardEntry> = emptyList(),
     val myProfile: PlayProfileStats? = null,
     val isSignedIn: Boolean = false,
     val ownUserId: String? = null,
@@ -28,12 +30,10 @@ data class PlayUiState(
 
 /**
  * ZRP PLAY home - ported from PlayHomePage.tsx: the daily challenge
- * slot, the trending-challenges grid, and incoming/active duel
- * sections, all against the real GET /play/home round trip. The
- * leaderboard snippet and Create Challenge/My Duels/Leaderboard entry
- * points aren't shown yet - those screens are later native phases,
- * same staging every other feature epic in this app used for its own
- * phase 1.
+ * slot, the trending-challenges grid, the leaderboard snippet, and
+ * incoming/active duel sections, all against the real GET /play/home
+ * round trip. Create Challenge is still deferred to the later
+ * challenge-creation phase.
  */
 class PlayViewModel(private val repository: PlayRepository) : ViewModel() {
     private val _state = MutableStateFlow(PlayUiState())
@@ -54,6 +54,7 @@ class PlayViewModel(private val repository: PlayRepository) : ViewModel() {
                             isLoading = false,
                             dailyChallenge = home.dailyChallenge,
                             trending = home.trending,
+                            topLeaderboard = home.topLeaderboard,
                             myProfile = home.myProfile,
                             isSignedIn = ownUserId != null,
                             ownUserId = ownUserId,

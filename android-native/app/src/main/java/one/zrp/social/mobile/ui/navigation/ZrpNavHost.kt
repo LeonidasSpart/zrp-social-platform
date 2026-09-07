@@ -75,9 +75,12 @@ import one.zrp.social.mobile.ui.opportunity.OpportunityApplicantsScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityDetailScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityFormScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityScreen
+import one.zrp.social.mobile.ui.play.PlayAchievementsScreen
 import one.zrp.social.mobile.ui.play.PlayChallengeScreen
 import one.zrp.social.mobile.ui.play.PlayDuelDetailScreen
 import one.zrp.social.mobile.ui.play.PlayDuelsScreen
+import one.zrp.social.mobile.ui.play.PlayLeaderboardScreen
+import one.zrp.social.mobile.ui.play.PlayProfileScreen
 import one.zrp.social.mobile.ui.play.PlayScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
 import one.zrp.social.mobile.ui.quotes.QuotesScreen
@@ -151,6 +154,9 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToPlayChallenge: (String) -> Unit = { id -> navController.navigate("play/challenge/$id") }
     val goToPlayDuels: () -> Unit = { navController.navigate("play/duels") }
     val goToPlayDuel: (String) -> Unit = { id -> navController.navigate("play/duel/$id") }
+    val goToPlayLeaderboard: () -> Unit = { navController.navigate("play/leaderboard") }
+    val goToPlayAchievements: () -> Unit = { navController.navigate("play/achievements") }
+    val goToPlayProfile: (String) -> Unit = { username -> navController.navigate("play/profile/${Uri.encode(username)}") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -611,7 +617,32 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onChallengeClick = goToPlayChallenge,
                     onOpenDuel = goToPlayDuel,
                     onOpenDuels = goToPlayDuels,
+                    onOpenLeaderboard = goToPlayLeaderboard,
+                    onOpenAchievements = goToPlayAchievements,
+                    onOpenProfile = goToPlayProfile,
                 )
+            }
+            composable("play/leaderboard") {
+                PlayLeaderboardScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenProfile = goToPlayProfile,
+                )
+            }
+            composable("play/achievements") {
+                PlayAchievementsScreen(onBack = { navController.popBackStack() })
+            }
+            composable(
+                route = "play/profile/{username}",
+                arguments = listOf(navArgument("username") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val username = backStackEntry.arguments?.getString("username")
+                if (username != null) {
+                    PlayProfileScreen(
+                        username = username,
+                        onBack = { navController.popBackStack() },
+                        onOpenChallenge = goToPlayChallenge,
+                    )
+                }
             }
             composable(
                 route = "play/challenge/{id}?duelId={duelId}",

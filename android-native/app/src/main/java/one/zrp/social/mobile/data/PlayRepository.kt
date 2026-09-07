@@ -54,6 +54,10 @@ class PlayRepository {
         ApiClient.authApi.getSession().user?.id
     }
 
+    suspend fun getOwnUsername(): Result<String?> = runCatching {
+        ApiClient.authApi.getSession().user?.username
+    }
+
     suspend fun getHome(): Result<PlayHomeResponse> = runCatching {
         ApiClient.playApi.getHome()
     }
