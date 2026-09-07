@@ -64,14 +64,18 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 /**
  * A single opportunity listing - ported from OpportunityListingPage.tsx:
  * type badge, deadline/location/remote, compensation, skills, poster
- * card, and save/report/apply actions. The owner-only "View Applicants"
- * and "Edit" links aren't shown yet - those screens are a later native
- * phase (applicants management + create/edit), so an owner just sees
- * the listing itself without a broken affordance, matching how
- * ZRP Market Plus's own detail screen was staged.
+ * card, and save/report/apply actions, plus an owner-only Edit button.
+ * The owner-only "View Applicants" link isn't shown yet - that screen is
+ * a later native phase (applicants management), so this omits only that
+ * one destination rather than linking to one that doesn't exist yet.
  */
 @Composable
-fun OpportunityDetailScreen(listingId: String, onBack: () -> Unit, onOpenPoster: (String) -> Unit) {
+fun OpportunityDetailScreen(
+    listingId: String,
+    onBack: () -> Unit,
+    onOpenPoster: (String) -> Unit,
+    onEditListing: (String) -> Unit,
+) {
     val viewModel: OpportunityDetailViewModel = viewModel(
         factory = remember { OpportunityDetailViewModelFactory(listingId, OpportunityRepository()) },
     )
@@ -272,7 +276,11 @@ fun OpportunityDetailScreen(listingId: String, onBack: () -> Unit, onOpenPoster:
 
                     Box(modifier = Modifier.padding(top = Spacing.lg, bottom = Spacing.xl)) {
                         when {
-                            isOwner -> {}
+                            isOwner -> {
+                                OutlinedButton(onClick = { onEditListing(listing.id) }) {
+                                    Text(stringResource(R.string.opportunity_edit_listing))
+                                }
+                            }
                             listing.externalUrl != null -> {
                                 Button(
                                     onClick = {
