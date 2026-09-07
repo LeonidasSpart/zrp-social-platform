@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -39,12 +40,9 @@ import one.zrp.social.mobile.data.OpportunityRepository
 
 /**
  * ZRP OPPORTUNITY browse - ported from OpportunityHomePage.tsx: Post
- * Opportunity/My Listings entry points, a type filter row + remote-only
- * toggle, and an infinite-scroll list of the same real GET /opportunity
- * results ListingCard renders. My Applications isn't shown yet - that
- * screen is a later native phase (applicants management), so this omits
- * only that one destination rather than linking to one that doesn't
- * exist yet.
+ * Opportunity/My Listings/My Applications entry points, a type filter
+ * row + remote-only toggle, and an infinite-scroll list of the same real
+ * GET /opportunity results ListingCard renders.
  */
 @Composable
 fun OpportunityScreen(
@@ -52,6 +50,7 @@ fun OpportunityScreen(
     onListingClick: (String) -> Unit,
     onPostOpportunity: () -> Unit,
     onOpenMyListings: () -> Unit,
+    onOpenMyApplications: () -> Unit,
 ) {
     val viewModel: OpportunityViewModel = viewModel(
         factory = remember { OpportunityViewModelFactory(OpportunityRepository()) },
@@ -76,6 +75,9 @@ fun OpportunityScreen(
                     .weight(1f)
                     .padding(start = 4.dp),
             )
+            IconButton(onClick = onOpenMyApplications) {
+                Icon(Icons.Filled.Description, contentDescription = stringResource(R.string.opportunity_my_applications))
+            }
             IconButton(onClick = onOpenMyListings) {
                 Icon(Icons.Filled.ListAlt, contentDescription = stringResource(R.string.opportunity_my_listings))
             }

@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,13 +42,16 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
  * My Listings - ported from MyOpportunityListingsPage.tsx: a poster's
- * own listings with real status badges and rejection-reason display.
- * The "View Applicants" link isn't shown yet - that screen is phase 3
- * (applicants management), so only Edit (a real phase-2 destination) is
- * offered here.
+ * own listings with real status badges, rejection-reason display, and
+ * View Applicants/Edit row actions.
  */
 @Composable
-fun MyOpportunityListingsScreen(onBack: () -> Unit, onOpenListing: (String) -> Unit, onEditListing: (String) -> Unit) {
+fun MyOpportunityListingsScreen(
+    onBack: () -> Unit,
+    onOpenListing: (String) -> Unit,
+    onEditListing: (String) -> Unit,
+    onOpenApplicants: (String) -> Unit,
+) {
     val viewModel: MyOpportunityListingsViewModel = viewModel(
         factory = remember { MyOpportunityListingsViewModelFactory(OpportunityRepository()) },
     )
@@ -93,6 +97,7 @@ fun MyOpportunityListingsScreen(onBack: () -> Unit, onOpenListing: (String) -> U
                         listing = listing,
                         onClick = { onOpenListing(listing.id) },
                         onEdit = { onEditListing(listing.id) },
+                        onOpenApplicants = { onOpenApplicants(listing.id) },
                     )
                 }
             }
@@ -101,7 +106,12 @@ fun MyOpportunityListingsScreen(onBack: () -> Unit, onOpenListing: (String) -> U
 }
 
 @Composable
-private fun MyOpportunityListingRow(listing: OpportunitySummary, onClick: () -> Unit, onEdit: () -> Unit) {
+private fun MyOpportunityListingRow(
+    listing: OpportunitySummary,
+    onClick: () -> Unit,
+    onEdit: () -> Unit,
+    onOpenApplicants: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -154,14 +164,30 @@ private fun MyOpportunityListingRow(listing: OpportunitySummary, onClick: () -> 
         }
 
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
-            IconButton(onClick = onEdit) {
-                Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.opportunity_edit_listing), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable(onClick = onOpenApplicants)) {
+                Icon(Icons.Filled.People, contentDescription = null, tint = ZrpRed, modifier = Modifier.size(16.dp))
+                Text(
+                    text = stringResource(R.string.opportunity_view_applicants, listing._count.applications),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = ZrpRed,
+                    modifier = Modifier.padding(start = 4.dp),
+                )
             }
-            Text(
-                text = stringResource(R.string.opportunity_edit_listing),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .clickable(onClick = onEdit),
+            ) {
+                Icon(Icons.Filled.Edit, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+                Text(
+                    text = stringResource(R.string.opportunity_edit_listing),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 4.dp),
+                )
+            }
         }
     }
 }
