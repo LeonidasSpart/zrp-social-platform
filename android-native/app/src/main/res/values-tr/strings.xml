@@ -1066,4 +1066,13 @@
     <string name="ai_page_powered_by">DeepSeek tarafından desteklenmektedir · Açık kaynak · Şeffaf</string>
     <string name="ai_page_subtitle">Her şeyi sorun. Gönderilerinizle ilgili yardım alın, ZRP hakkında bilgi edinin ya da sohbet edin.</string>
     <string name="ai_discover_entry">ZRP AI\'yi Keşfet</string>
+    <!-- ZRP Wallet: Solana receiving-wallet field (ported from settings/page.tsx) -->
+    <string name="settings_solana_wallet_title">Solana Cüzdanı (doğrudan bahşişler için)</string>
+    <string name="settings_solana_wallet_desc">Kullanıcılardan doğrudan bahşiş almak için Solana cüzdan adresinizi ekleyin. Kullanıcılar USDC\'yi doğrudan bu cüzdana gönderecektir: platform ücreti alınmaz.</string>
+    <string name="settings_wallet_address">Cüzdan Adresi</string>
+    <string name="settings_wallet_address_placeholder">Solana cüzdan adresiniz (örn. 4zMMC...)</string>
+    <string name="settings_wallet_address_note">Bu adres, doğrudan bahşişler için profilinizde görüntülenecektir.</string>
+    <string name="settings_save_wallet">Cüzdanı Kaydet</string>
+    <string name="settings_success_wallet_updated">Solana cüzdanı başarıyla güncellendi!</string>
+    <string name="settings_err_wallet_update_failed">Cüzdan adresi güncellenemedi.</string>
 </resources>

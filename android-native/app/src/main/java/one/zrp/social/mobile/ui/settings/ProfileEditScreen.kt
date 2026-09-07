@@ -179,5 +179,68 @@ private fun ProfileEditForm(state: ProfileEditUiState, viewModel: ProfileEditVie
                 }
             }
         }
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.lg))
+
+        Text(text = stringResource(R.string.settings_solana_wallet_title), style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = stringResource(R.string.settings_solana_wallet_desc),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+
+        OutlinedTextField(
+            value = state.solanaWallet,
+            onValueChange = viewModel::onSolanaWalletChange,
+            label = { Text(stringResource(R.string.settings_wallet_address)) },
+            placeholder = { Text(stringResource(R.string.settings_wallet_address_placeholder)) },
+            singleLine = true,
+            enabled = !state.isSavingWallet,
+            modifier = Modifier.fillMaxWidth().padding(top = Spacing.md),
+        )
+        Text(
+            text = stringResource(R.string.settings_wallet_address_note),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+
+        if (state.walletError != null) {
+            Text(
+                text = state.walletError ?: "",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = Spacing.sm),
+            )
+        } else if (state.walletSaved) {
+            Text(
+                text = stringResource(R.string.settings_success_wallet_updated),
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = Spacing.sm),
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = Spacing.lg),
+            horizontalArrangement = Arrangement.End,
+        ) {
+            Button(
+                onClick = { viewModel.saveWallet() },
+                enabled = !state.isSavingWallet,
+                colors = ButtonDefaults.buttonColors(containerColor = ZrpRed),
+            ) {
+                if (state.isSavingWallet) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        strokeWidth = 2.dp,
+                    )
+                } else {
+                    Text(stringResource(R.string.settings_save_wallet))
+                }
+            }
+        }
     }
 }

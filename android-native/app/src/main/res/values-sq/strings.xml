@@ -1066,4 +1066,13 @@
     <string name="ai_page_powered_by">Mundësuar nga DeepSeek · Me burim të hapur · Transparente</string>
     <string name="ai_page_subtitle">Pyet çfarëdo. Merr ndihmë me postimet, mëso për ZRP-në, ose thjesht bisedo.</string>
     <string name="ai_discover_entry">Zbulo ZRP AI</string>
+    <!-- ZRP Wallet: Solana receiving-wallet field (ported from settings/page.tsx) -->
+    <string name="settings_solana_wallet_title">Portofoli Solana (për bakshishe direkte)</string>
+    <string name="settings_solana_wallet_desc">Shtoni adresën tuaj të portofolit Solana për të marrë bakshishe direkte nga përdoruesit. Përdoruesit do të dërgojnë USDC direkt në këtë portofol: nuk aplikohen tarifa platforme.</string>
+    <string name="settings_wallet_address">Adresa e portofolit</string>
+    <string name="settings_wallet_address_placeholder">Adresa e portofolit tuaj Solana (p.sh., 4zMMC...)</string>
+    <string name="settings_wallet_address_note">Kjo adresë do të shfaqet në profilin tuaj për bakshishe direkte.</string>
+    <string name="settings_save_wallet">Ruaj portofolin</string>
+    <string name="settings_success_wallet_updated">Portofoli Solana u përditësua me sukses!</string>
+    <string name="settings_err_wallet_update_failed">Përditësimi i adresës së portofolit dështoi.</string>
 </resources>

@@ -1066,4 +1066,13 @@
     <string name="ai_page_powered_by">Unterstützt von DeepSeek · Open Source · Transparent</string>
     <string name="ai_page_subtitle">Frag alles. Hol dir Hilfe bei Beiträgen, erfahre mehr über ZRP oder chatte einfach.</string>
     <string name="ai_discover_entry">ZRP AI entdecken</string>
+    <!-- ZRP Wallet: Solana receiving-wallet field (ported from settings/page.tsx) -->
+    <string name="settings_solana_wallet_title">Solana-Wallet (für direkte Trinkgelder)</string>
+    <string name="settings_solana_wallet_desc">Füge deine Solana-Wallet-Adresse hinzu, um Trinkgelder direkt von Nutzern zu erhalten. Nutzer senden USDC direkt an diese Wallet: es fallen keine Plattformgebühren an.</string>
+    <string name="settings_wallet_address">Wallet-Adresse</string>
+    <string name="settings_wallet_address_placeholder">Deine Solana-Wallet-Adresse (z. B. 4zMMC...)</string>
+    <string name="settings_wallet_address_note">Diese Adresse wird auf deinem Profil für direkte Trinkgelder angezeigt.</string>
+    <string name="settings_save_wallet">Wallet speichern</string>
+    <string name="settings_success_wallet_updated">Solana-Wallet erfolgreich aktualisiert!</string>
+    <string name="settings_err_wallet_update_failed">Wallet-Adresse konnte nicht aktualisiert werden.</string>
 </resources>

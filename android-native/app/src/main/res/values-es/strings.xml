@@ -1066,4 +1066,13 @@
     <string name="ai_page_powered_by">Desarrollado con DeepSeek · Código abierto · Transparente</string>
     <string name="ai_page_subtitle">Pregunta lo que quieras. Obtén ayuda con publicaciones, aprende sobre ZRP o simplemente conversa.</string>
     <string name="ai_discover_entry">Descubrir ZRP AI</string>
+    <!-- ZRP Wallet: Solana receiving-wallet field (ported from settings/page.tsx) -->
+    <string name="settings_solana_wallet_title">Billetera Solana (para propinas directas)</string>
+    <string name="settings_solana_wallet_desc">Añade tu dirección de billetera Solana para recibir propinas directamente de los usuarios. Los usuarios enviarán USDC directamente a esta billetera; no se cobran comisiones de plataforma.</string>
+    <string name="settings_wallet_address">Dirección de la billetera</string>
+    <string name="settings_wallet_address_placeholder">Tu dirección de billetera Solana (p. ej., 4zMMC...)</string>
+    <string name="settings_wallet_address_note">Esta dirección se mostrará en tu perfil para propinas directas.</string>
+    <string name="settings_save_wallet">Guardar billetera</string>
+    <string name="settings_success_wallet_updated">¡Billetera Solana actualizada correctamente!</string>
+    <string name="settings_err_wallet_update_failed">Error al actualizar la dirección de la billetera.</string>
 </resources>

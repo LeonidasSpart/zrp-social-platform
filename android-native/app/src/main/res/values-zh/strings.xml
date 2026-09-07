@@ -1066,4 +1066,13 @@
     <string name="ai_page_powered_by">由 DeepSeek 提供支持 · 开源 · 透明</string>
     <string name="ai_page_subtitle">问任何问题。获取帖子帮助、了解 ZRP，或随便聊聊。</string>
     <string name="ai_discover_entry">发现 ZRP AI</string>
+    <!-- ZRP Wallet: Solana receiving-wallet field (ported from settings/page.tsx) -->
+    <string name="settings_solana_wallet_title">Solana 钱包（用于直接打赏）</string>
+    <string name="settings_solana_wallet_desc">添加你的 Solana 钱包地址，直接接收用户的打赏。用户将直接把 USDC 发送到此钱包，不收取任何平台费用。</string>
+    <string name="settings_wallet_address">钱包地址</string>
+    <string name="settings_wallet_address_placeholder">你的 Solana 钱包地址（例如 4zMMC...）</string>
+    <string name="settings_wallet_address_note">此地址将显示在你的个人资料中，用于直接接收打赏。</string>
+    <string name="settings_save_wallet">保存钱包</string>
+    <string name="settings_success_wallet_updated">Solana 钱包更新成功！</string>
+    <string name="settings_err_wallet_update_failed">更新钱包地址失败。</string>
 </resources>
