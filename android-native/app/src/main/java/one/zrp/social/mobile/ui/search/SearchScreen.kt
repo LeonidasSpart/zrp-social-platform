@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.VolunteerActivism
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -65,6 +66,7 @@ fun SearchScreen(
     onOpenMusic: () -> Unit,
     onOpenMarketplace: () -> Unit,
     onOpenOpportunity: () -> Unit,
+    onOpenAid: () -> Unit,
     onOpenComments: (postId: String) -> Unit,
     onOpenQuotePost: (postId: String) -> Unit = {},
     onOpenReposts: (postId: String) -> Unit = {},
@@ -111,6 +113,7 @@ fun SearchScreen(
                 onOpenMusic = onOpenMusic,
                 onOpenMarketplace = onOpenMarketplace,
                 onOpenOpportunity = onOpenOpportunity,
+                onOpenAid = onOpenAid,
             )
         } else {
             SearchResultsContent(
@@ -216,6 +219,7 @@ private fun DiscoverContent(
     onOpenMusic: () -> Unit,
     onOpenMarketplace: () -> Unit,
     onOpenOpportunity: () -> Unit,
+    onOpenAid: () -> Unit,
 ) {
     if (state.isLoadingDiscover) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -233,6 +237,9 @@ private fun DiscoverContent(
         }
         item {
             OpportunityEntryRow(onClick = onOpenOpportunity)
+        }
+        item {
+            AidEntryRow(onClick = onOpenAid)
         }
 
         if (state.trendingHashtags.isNotEmpty()) {
@@ -459,6 +466,25 @@ private fun OpportunityEntryRow(onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(text = stringResource(R.string.opportunity_discover_entry), style = MaterialTheme.typography.titleSmall)
+    }
+}
+
+@Composable
+private fun AidEntryRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.VolunteerActivism,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text = stringResource(R.string.aid_discover_entry), style = MaterialTheme.typography.titleSmall)
     }
 }
 

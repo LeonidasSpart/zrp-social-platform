@@ -95,4 +95,5 @@ object ApiClient {
     val onboardingApi: OnboardingApi by lazy { retrofit.create(OnboardingApi::class.java) }
     val marketplaceApi: MarketplaceApi by lazy { retrofit.create(MarketplaceApi::class.java) }
     val opportunityApi: OpportunityApi by lazy { retrofit.create(OpportunityApi::class.java) }
+    val aidApi: AidApi by lazy { retrofit.create(AidApi::class.java) }
 }

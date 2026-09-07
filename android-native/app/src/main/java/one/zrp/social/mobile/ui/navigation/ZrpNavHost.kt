@@ -64,6 +64,8 @@ import one.zrp.social.mobile.ui.music.MusicScreen
 import one.zrp.social.mobile.ui.music.PlaylistDetailScreen
 import one.zrp.social.mobile.ui.music.PlaylistsScreen
 import one.zrp.social.mobile.ui.notifications.NotificationsScreen
+import one.zrp.social.mobile.ui.aid.AidDetailScreen
+import one.zrp.social.mobile.ui.aid.AidScreen
 import one.zrp.social.mobile.ui.opportunity.MyApplicationsScreen
 import one.zrp.social.mobile.ui.opportunity.MyOpportunityListingsScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityApplicantsScreen
@@ -133,6 +135,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToMyOpportunityListings: () -> Unit = { navController.navigate("opportunity/my-listings") }
     val goToOpportunityApplicants: (String) -> Unit = { id -> navController.navigate("opportunity/listing/$id/applicants") }
     val goToMyApplications: () -> Unit = { navController.navigate("opportunity/my-applications") }
+    val goToAid: () -> Unit = { navController.navigate("aid") }
+    val goToAidCampaign: (String) -> Unit = { id -> navController.navigate("aid/campaign/$id") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -217,6 +221,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenMusic = goToMusic,
                     onOpenMarketplace = goToMarketplace,
                     onOpenOpportunity = goToOpportunity,
+                    onOpenAid = goToAid,
                     onOpenComments = goToComments,
                     onOpenQuotePost = goToQuotePost,
                     onOpenReposts = goToReposts,
@@ -534,6 +539,25 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onBack = { navController.popBackStack() },
                     onOpenListing = goToOpportunityListing,
                 )
+            }
+            composable("aid") {
+                AidScreen(
+                    onBack = { navController.popBackStack() },
+                    onCampaignClick = goToAidCampaign,
+                )
+            }
+            composable(
+                route = "aid/campaign/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    AidDetailScreen(
+                        campaignId = id,
+                        onBack = { navController.popBackStack() },
+                        onOpenOrganizer = goToProfile,
+                    )
+                }
             }
             composable("opportunity/new") {
                 OpportunityFormScreen(
