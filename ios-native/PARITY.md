@@ -78,7 +78,7 @@ called and the real response being handled.
 | Edit own post | `PUT /api/posts/{id}` (text only, matches web) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Pin post (single slot) | `POST /api/posts/{id}/pin` → `{pinned}`, author-only | ✅ | ✅ | ✅ offered from the post menu on your own profile; the pinned post is fetched via `GET /api/posts/{id}` (the profile route reports only `pinnedPostId`), labelled above the Posts tab and filtered out of the list below | IMPLEMENTED |
 | Create post (text) | `POST /api/posts` | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Scheduled posts | `POST /api/posts` + `scheduledAt` naive wall-clock | ✅ | ✅ | ⬜ | MISSING (Phase 7b) |
+| Scheduled posts | `POST /api/posts` + `scheduledAt` (naive wall-clock) → stored with `status: "scheduled"`; published by the platform's own scheduled-post cron. Monthly per-plan cap enforced server-side with a 400 | ✅ | ✅ | ✅ composer control; the same naive `yyyy-MM-dd'T'HH:mm` the web sends, deliberately — see [F2](#f2-scheduled-posts-are-timed-in-the-servers-timezone-not-the-authors--open). No management surface, matching the web, which has none either | IMPLEMENTED |
 | Quote post | `POST /api/posts` + `quotePostId` | ✅ | ✅ | ✅ (Quote action on every post, with a preview in the composer) | IMPLEMENTED |
 | Reposts list | `GET /api/posts/{id}/reposts` → `{items,nextCursor}` of users | ✅ | ✅ | ✅ reached from the post's repost count; shares one screen with followers/following, which answer the same shape | IMPLEMENTED |
 | Quotes list | `GET /api/posts/{id}/quotes` → `{items,nextCursor}` of posts | ✅ | ✅ | ✅ reached from the post's quote count, rendered with the standard post card | IMPLEMENTED |
@@ -388,6 +388,31 @@ Noted, not worked around.
 Found while auditing, per the isolation rules: reported here for their
 owners, not silently fixed from iOS.
 
+### F2. Scheduled posts are timed in the SERVER's timezone, not the author's — **OPEN**
+
+`POST /api/posts` stores `new Date(scheduledAt)`, and the composer sends
+whatever `<input type="datetime-local">` produces: a naive
+`yyyy-MM-dd'T'HH:mm` with no offset. ECMAScript reads a date-time form
+without an offset as **local time**, which on the server means the
+server's zone (UTC in production), not the author's.
+
+So an author in UTC+9 who schedules a post for 09:00 gets it published at
+09:00 UTC — 18:00 where they are. The further an author is from UTC, the
+further off it is. This affects the **web** today; Android and iOS
+inherit it by sending the same shape.
+
+iOS deliberately sends the **same** naive wall-clock string rather than a
+correct ISO-8601 instant. Sending an offset would be more correct in
+isolation and would make the two clients disagree: the route reads an
+offset when one is present and falls back to the server's zone when it is
+not, so the same wall-clock time would schedule to two different instants
+depending on which app the author used. The composer's note therefore
+says the time is the one on the author's device rather than implying a
+guarantee the backend does not make.
+
+The fix belongs server-side (accept and store an instant, or take the
+author's zone alongside the wall-clock time). Not worked around from iOS.
+
 ### F1. `POST /api/music/artists` erased bio, avatar and banner — **RESOLVED**
 
 Reported from the Phase 14 audit; fixed server-side and merged (PR #103,
@@ -556,7 +581,7 @@ here. **No fake local notifications will stand in for this.**
 | 4 | Navigation shell + deep links | 🔶 in-app routing done (profile / hashtag / follow lists); OS deep links pending |
 | 5 | Home feed (For You / Following) + interactions | ✅ done |
 | 6 | Profiles + social graph | ✅ done — 6b done (edit profile, pin, replies/media/likes/reposts tabs); the own-profile analytics dashboard is still MISSING |
-| 7 | Post composer + media upload + viewer | ✅ done — 7b (scheduling, quote entry point, camera capture) pending |
+| 7 | Post composer + media upload + viewer | ✅ done — 7b scheduling and polls done; camera capture still pending |
 | 8 | Comments, replies, quotes, edit | ✅ done — 8b complete (reactions, comment repost/bookmark, reposts & quotes lists, inline translation) |
 | 9 | Stories | ✅ done |
 | 10 | Messages | ✅ done — 10b image attachments done; conversation search still pending |

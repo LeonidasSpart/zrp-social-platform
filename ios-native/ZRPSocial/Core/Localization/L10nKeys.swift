@@ -1260,6 +1260,10 @@ enum L10nKey: String, CaseIterable {
     case iosComposeRemovePollOption = "ios.compose.removePollOption"
     /// en: "Set an end date"
     case iosComposePollEnds = "ios.compose.pollEnds"
+    /// en: "Schedule"
+    case iosComposeSchedule = "ios.compose.schedule"
+    /// en: "The post publishes at this time on your device's clock."
+    case iosComposeScheduleNote = "ios.compose.scheduleNote"
 }
 
 extension L10nKey {

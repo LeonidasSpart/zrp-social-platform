@@ -630,3 +630,5 @@
 "ios.compose.addPollOption" = "Add option";
 "ios.compose.removePollOption" = "Remove option";
 "ios.compose.pollEnds" = "Set an end date";
+"ios.compose.schedule" = "Schedule";
+"ios.compose.scheduleNote" = "The post publishes at this time on your device's clock.";

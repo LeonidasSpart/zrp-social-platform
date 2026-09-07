@@ -126,11 +126,43 @@ final class ComposeViewModel: ObservableObject {
         // A poll builder that is open but not yet valid blocks posting,
         // rather than quietly publishing a post with the poll dropped.
         if isBuildingPoll, newPoll == nil { return false }
+        // A schedule that is not in the future would be refused by the
+        // route; saying so by disabling the button beats sending it.
+        guard isScheduleValid else { return false }
         let hasText = !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         // A quote is publishable with no text of its own - the quoted
         // post is the content, exactly as on web. So is a poll: its
         // question becomes the post's text.
         return hasText || !attachments.isEmpty || quotedPost != nil || newPoll != nil
+    }
+
+    // MARK: - Scheduling
+
+    /// Whether the post is being scheduled rather than published now.
+    /// Turning it off clears the date, so a time typed and then
+    /// abandoned is not silently sent.
+    @Published var isScheduling = false {
+        didSet {
+            if isScheduling {
+                if scheduledAt == nil { scheduledAt = Self.defaultScheduleDate }
+            } else {
+                scheduledAt = nil
+            }
+        }
+    }
+
+    @Published var scheduledAt: Date?
+
+    /// An hour out. Far enough to be in the future by the time the post
+    /// is actually sent, which the route requires.
+    static var defaultScheduleDate: Date { Date().addingTimeInterval(60 * 60) }
+
+    /// The route refuses a time that is not in the future, and the
+    /// website checks the same thing before sending.
+    var isScheduleValid: Bool {
+        guard isScheduling else { return true }
+        guard let scheduledAt else { return false }
+        return scheduledAt > Date()
     }
 
     // MARK: - Poll
@@ -354,7 +386,8 @@ final class ComposeViewModel: ObservableObject {
             // A poll post with no text of its own carries the question
             // as its content - what the website sends, so the post reads
             // the same in a timeline on either platform.
-            poll: poll
+            poll: poll,
+            scheduledAt: (isScheduling ? scheduledAt : nil).map(WallClock.string(from:))
         )
 
         do {

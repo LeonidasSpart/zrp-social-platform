@@ -32,6 +32,7 @@ struct ComposeView: View {
                 VStack(alignment: .leading, spacing: ZrpSpacing.lg) {
                     editor
                     quotedPreview
+                    scheduler
                     pollBuilder
                     attachmentsSection
                 }
@@ -216,6 +217,16 @@ struct ComposeView: View {
             }
             .accessibilityLabel(Text(.iosComposeAddPoll))
 
+            Button {
+                viewModel.isScheduling.toggle()
+            } label: {
+                Image(systemName: viewModel.isScheduling ? "clock.fill" : "clock")
+                    .font(.title3)
+                    .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                    .contentShape(Rectangle())
+            }
+            .accessibilityLabel(Text(.iosComposeSchedule))
+
             Spacer()
 
             characterCounter
@@ -224,6 +235,41 @@ struct ComposeView: View {
         .padding(.horizontal, ZrpSpacing.lg)
         .padding(.vertical, ZrpSpacing.sm)
         .background(.bar)
+    }
+
+    /// The scheduling control.
+    ///
+    /// The post route takes a naive wall-clock time and reads it in the
+    /// server's own zone, so the note says the time is the one on this
+    /// device rather than implying a guarantee the backend does not
+    /// make. See the timezone note in PARITY.md.
+    @ViewBuilder
+    private var scheduler: some View {
+        if viewModel.isScheduling {
+            VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
+                DatePicker(
+                    selection: Binding(
+                        get: { viewModel.scheduledAt ?? ComposeViewModel.defaultScheduleDate },
+                        set: { viewModel.scheduledAt = $0 }
+                    ),
+                    in: Date()...,
+                    displayedComponents: [.date, .hourAndMinute]
+                ) {
+                    Text(.iosComposeSchedule)
+                        .font(.subheadline)
+                }
+
+                Text(.iosComposeScheduleNote)
+                    .font(.caption)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+            }
+            .padding(ZrpSpacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .overlay(
+                RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous)
+                    .strokeBorder(ZrpColor.outline, lineWidth: 1)
+            )
+        }
     }
 
     /// The poll builder.

@@ -53,6 +53,19 @@ struct CreatePostRequest: Encodable {
     var poll: NewPoll?
     var isPoll: Bool { poll != nil }
 
+    /// When to publish, as a NAIVE wall-clock string (`yyyy-MM-dd'T'HH:mm`)
+    /// with no timezone - byte for byte what a browser's
+    /// `<input type="datetime-local">` submits, which is what the route
+    /// is written against.
+    ///
+    /// Sending a proper ISO-8601 instant with an offset would be more
+    /// correct in isolation and WRONG here: the route hands the string
+    /// to `new Date(...)`, which reads an offset when one is present and
+    /// otherwise falls back to the server's own zone. Two clients
+    /// sending two formats would schedule the same wall-clock time to
+    /// two different instants. See the timezone note in PARITY.md.
+    var scheduledAt: String?
+
     struct NewPoll: Encodable, Equatable {
         let question: String
         let options: [String]
@@ -63,7 +76,7 @@ struct CreatePostRequest: Encodable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case content, imageUrls, mediaType, quotePostId, poll, isPoll
+        case content, imageUrls, mediaType, quotePostId, poll, isPoll, scheduledAt
     }
 
     func encode(to encoder: Encoder) throws {
@@ -74,6 +87,7 @@ struct CreatePostRequest: Encodable {
         try container.encodeIfPresent(quotePostId, forKey: .quotePostId)
         try container.encodeIfPresent(poll, forKey: .poll)
         try container.encode(isPoll, forKey: .isPoll)
+        try container.encodeIfPresent(scheduledAt, forKey: .scheduledAt)
     }
 }
 
