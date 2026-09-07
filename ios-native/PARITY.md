@@ -56,7 +56,7 @@ called and the real response being handled.
 | Email verification — confirm | `GET /api/auth/verify-email` | ✅ | ✅ | ⬜ opened from the emailed link in a browser; no in-app route exists | MISSING (by design) |
 | Forgot password — request | `POST /api/auth/forgot-password` | ✅ | ✅ | ✅ answers the same way whether or not the address exists, as the route intends | IMPLEMENTED |
 | Reset password — complete | `POST /api/auth/reset-password` | ✅ | ✅ | ⬜ completed through the emailed link on the web; no route accepts a code typed into an app | MISSING (by design) |
-| Onboarding | `POST /api/user/onboarding-complete` | ✅ | ✅ | ⬜ | MISSING (Phase 3b) |
+| Onboarding | `POST /api/user/onboarding-complete`, `PUT /api/user/profile`, `POST /api/user/update-avatar`, `GET /api/users/suggested` | ✅ | ✅ | ✅ profile, avatar, follow suggestions; every step skippable | IMPLEMENTED |
 | Google sign-in | NextAuth `google` provider (web OAuth) | ✅ | ❌ | ❌ | BLOCKED — [B1](#b1-native-oauth-google--apple) |
 | **Sign in with Apple** | NextAuth `apple` provider (web OAuth, Services ID) | ✅ (if env configured) | n/a | ❌ | **BLOCKED — [B2](#b2-sign-in-with-apple-native)** |
 | Account deletion | `POST /api/user/delete`, `/api/user/delete/confirm`, `GET /api/user/delete-status` | ✅ | ✅ | ✅ both paths — see [Settings](#settings) | IMPLEMENTED |

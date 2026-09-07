@@ -433,6 +433,36 @@
 "auth.resendVerificationError" = "Failed to send verification email. Please try again.";
 "auth.resendVerificationAlreadyVerified" = "This email is already verified. Please sign in.";
 "auth.resendVerificationUserNotFound" = "We couldn't find an account matching that email or username.";
+"onboarding.welcomeTitle" = "Welcome to ZRP! 👋";
+"onboarding.setupSubtitle" = "Set up your profile to get started.";
+"onboarding.displayName" = "Display Name";
+"onboarding.displayNamePlaceholder" = "Your name";
+"onboarding.bio" = "Bio";
+"onboarding.bioPlaceholder" = "Tell us about yourself...";
+"onboarding.locationLabel" = "Location";
+"onboarding.website" = "Website";
+"onboarding.websitePlaceholder" = "https://your-site.com";
+"onboarding.profilePicture" = "Profile Picture";
+"onboarding.upload" = "Upload";
+"onboarding.continue" = "Continue";
+"onboarding.skip" = "Skip for now";
+"onboarding.finish" = "Finish";
+"onboarding.followTitle" = "Follow some people 🧑‍🤝‍🧑";
+"onboarding.followSubtitle" = "Choose people to follow and fill your feed.";
+"onboarding.noSuggestions" = "No suggestions available.";
+"onboarding.usersSelected" = "{n} user(s) selected";
+"onboarding.doneTitle" = "You're all set!";
+"onboarding.doneSubtitle" = "Your profile is ready. Let's start exploring ZRP Social.";
+"onboarding.goToHome" = "Go to Home";
+"onboarding.stepProfile" = "Profile";
+"onboarding.stepFollow" = "Follow";
+"onboarding.stepDone" = "Done";
+"onboarding.errSaveProfile" = "Failed to save profile. Please try again.";
+"onboarding.errFollowUsers" = "Failed to follow users. Please try again.";
+"onboarding.errSkip" = "Failed to skip. Please try again.";
+"settings.errAvatarUploadFailedGeneric" = "Failed to save avatar";
+"settings.uploading" = "Uploading...";
+"settings.cityPlaceholder" = "Search for a city...";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back

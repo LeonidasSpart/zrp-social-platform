@@ -31,12 +31,39 @@ protocol UsersRepositoryProtocol: Sendable {
     func profile(username: String) async throws -> UserProfile
     func posts(username: String, cursor: String?) async throws -> PostsPage
     func toggleFollow(username: String) async throws -> FollowToggleResponse
+    func updateProfile(_ request: ProfileUpdateRequest) async throws
+    func setAvatar(url: String) async throws
+    func completeOnboarding() async throws
     func followList(
         _ kind: FollowListKind,
         username: String,
         cursor: String?
     ) async throws -> FollowListPage
     func hashtagPosts(tag: String) async throws -> [Post]
+}
+
+/// `PUT /api/user/profile` - the route onboarding and the profile editor
+/// both use. Distinct from `PUT /api/user`, which also accepts country,
+/// category and wallet fields this app does not offer.
+struct ProfileUpdateRequest: Encodable, Equatable {
+    let name: String?
+    let bio: String?
+    let location: String?
+    let website: String?
+
+    /// Explicit nulls: the route writes each field it is given, so an
+    /// emptied box has to arrive as null rather than being dropped.
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(name, forKey: .name)
+        try container.encode(bio, forKey: .bio)
+        try container.encode(location, forKey: .location)
+        try container.encode(website, forKey: .website)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case name, bio, location, website
+    }
 }
 
 struct UsersRepository: UsersRepositoryProtocol {
@@ -103,5 +130,32 @@ struct UsersRepository: UsersRepositoryProtocol {
     /// a single path component must not contain.
     private func escaped(_ value: String) -> String {
         Endpoint.segment(value)
+    }
+
+    // MARK: - Own profile
+
+    func updateProfile(_ request: ProfileUpdateRequest) async throws {
+        try await client.sendIgnoringResponse(
+            try Endpoint.put("user/profile", body: request)
+        )
+    }
+
+    /// Points the account at an already-uploaded avatar.
+    ///
+    /// The route accepts either a multipart file or a JSON `avatarUrl`.
+    /// This app uploads through UploadThing first - the same path every
+    /// other image takes - and then hands over the resulting URL, so
+    /// there is one upload mechanism in the app rather than two.
+    func setAvatar(url: String) async throws {
+        struct Request: Encodable { let avatarUrl: String }
+        try await client.sendIgnoringResponse(
+            try Endpoint.post("user/update-avatar", body: Request(avatarUrl: url))
+        )
+    }
+
+    /// Marks onboarding done. The flag lives on the user row, so the app
+    /// re-reads the session afterwards rather than assuming it locally.
+    func completeOnboarding() async throws {
+        try await client.sendIgnoringResponse(Endpoint.post("user/onboarding-complete"))
     }
 }

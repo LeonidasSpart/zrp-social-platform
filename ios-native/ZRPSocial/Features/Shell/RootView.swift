@@ -18,8 +18,18 @@ struct RootView: View {
                 LoginView()
                     .transition(.opacity)
             case .signedIn:
-                SignedInView()
-                    .transition(.opacity)
+                // `onboardingCompleted` lives on the user row, so it
+                // follows the account across devices and reinstalls
+                // rather than being a local flag this app could get
+                // wrong. Someone who finished onboarding on the web
+                // never sees it here.
+                if session.currentUser?.onboardingCompleted == false {
+                    OnboardingView()
+                        .transition(.opacity)
+                } else {
+                    SignedInView()
+                        .transition(.opacity)
+                }
             }
         }
         .animation(.easeInOut(duration: 0.2), value: session.state)
