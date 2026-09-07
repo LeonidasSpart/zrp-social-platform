@@ -120,10 +120,6 @@
     <string name="moderation_muted_count">%1$d sessize alındı</string>
     <string name="moderation_muted_on">%1$s tarihinde sessize alındı</string>
     <string name="music_title">ZRP Music</string>
-    <string name="music_trending">Şu An Trend</string>
-    <string name="music_recently_played">Son Dinlenenler</string>
-    <string name="music_new_releases">Yeni Çıkanlar</string>
-    <string name="music_liked">Beğenilen Müzikler</string>
     <string name="music_verified_artist">Doğrulanmış sanatçı</string>
     <string name="music_like">Beğen</string>
     <string name="music_pause">Duraklat</string>
@@ -249,4 +245,18 @@
     <string name="onboarding_err_follow_users">Kullanıcılar takip edilemedi. Lütfen tekrar deneyin.</string>
     <string name="onboarding_err_skip">Atlanamadı. Lütfen tekrar deneyin.</string>
     <string name="auth_err_session_expired">Oturumunuz artık geçerli değil. Lütfen tekrar giriş yapın.</string>
+    <!-- Music Phase 1: shared player + Queue -->
+    <string name="music_nav_queue_title">Sıran</string>
+    <string name="music_nav_history_title">Son Dinlenenler</string>
+    <string name="music_shell_trending_heading">Şu An Trend</string>
+    <string name="music_nav_liked_title">Beğenilen Müzikler</string>
+    <string name="music_shell_new_releases_heading">Yeni Çıkanlar</string>
+    <string name="music_queue_title">Sıran</string>
+    <string name="music_queue_clear_queue">Sırayı temizle</string>
+    <string name="music_queue_empty_title">Sıran boş</string>
+    <string name="music_queue_empty_body">Keşfet, bir sanatçı veya albüm sayfasından sıranıza şarkı ekleyin.</string>
+    <string name="music_queue_now_playing">Şimdi çalıyor</string>
+    <string name="music_queue_up_next">Sırada (%1$d)</string>
+    <string name="music_queue_play_now_aria">%1$s şarkısını şimdi çal</string>
+    <string name="music_queue_remove_aria">%1$s şarkısını sıradan kaldır</string>
 </resources>

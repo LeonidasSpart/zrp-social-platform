@@ -120,10 +120,6 @@
     <string name="moderation_muted_count">%1$d silenciado(s)</string>
     <string name="moderation_muted_on">Silenciado el %1$s</string>
     <string name="music_title">ZRP Music</string>
-    <string name="music_trending">Tendencias ahora</string>
-    <string name="music_recently_played">Escuchado recientemente</string>
-    <string name="music_new_releases">Nuevos lanzamientos</string>
-    <string name="music_liked">Música que te gusta</string>
     <string name="music_verified_artist">Artista verificado</string>
     <string name="music_like">Me gusta</string>
     <string name="music_pause">Pausa</string>
@@ -249,4 +245,18 @@
     <string name="onboarding_err_follow_users">Error al seguir usuarios. Inténtalo de nuevo.</string>
     <string name="onboarding_err_skip">Error al omitir. Inténtalo de nuevo.</string>
     <string name="auth_err_session_expired">Tu sesión ya no es válida. Vuelve a iniciar sesión.</string>
+    <!-- Music Phase 1: shared player + Queue -->
+    <string name="music_nav_queue_title">Tu cola</string>
+    <string name="music_nav_history_title">Escuchado recientemente</string>
+    <string name="music_shell_trending_heading">Tendencias ahora</string>
+    <string name="music_nav_liked_title">Música que te gusta</string>
+    <string name="music_shell_new_releases_heading">Nuevos lanzamientos</string>
+    <string name="music_queue_title">Tu cola</string>
+    <string name="music_queue_clear_queue">Vaciar cola</string>
+    <string name="music_queue_empty_title">Tu cola está vacía</string>
+    <string name="music_queue_empty_body">Añade canciones a tu cola desde Descubrir, un artista o un álbum.</string>
+    <string name="music_queue_now_playing">Reproduciendo ahora</string>
+    <string name="music_queue_up_next">A continuación (%1$d)</string>
+    <string name="music_queue_play_now_aria">Reproducir %1$s ahora</string>
+    <string name="music_queue_remove_aria">Quitar %1$s de la cola</string>
 </resources>

@@ -136,10 +136,6 @@
     <string name="moderation_muted_count">%1$d muted</string>
     <string name="moderation_muted_on">Muted %1$s</string>
     <string name="music_title">ZRP Music</string>
-    <string name="music_trending">Trending Now</string>
-    <string name="music_recently_played">Recently Played</string>
-    <string name="music_new_releases">New Releases</string>
-    <string name="music_liked">Liked Music</string>
     <string name="music_verified_artist">Verified artist</string>
     <string name="music_like">Like</string>
     <string name="music_pause">Pause</string>
@@ -265,4 +261,18 @@
     <string name="onboarding_err_follow_users">Failed to follow users. Please try again.</string>
     <string name="onboarding_err_skip">Failed to skip. Please try again.</string>
     <string name="auth_err_session_expired">Your session is no longer valid. Please sign in again.</string>
+    <!-- Music Phase 1: shared player + Queue -->
+    <string name="music_nav_queue_title">Your Queue</string>
+    <string name="music_nav_history_title">Recently Played</string>
+    <string name="music_shell_trending_heading">Trending Now</string>
+    <string name="music_nav_liked_title">Liked Music</string>
+    <string name="music_shell_new_releases_heading">New Releases</string>
+    <string name="music_queue_title">Your Queue</string>
+    <string name="music_queue_clear_queue">Clear queue</string>
+    <string name="music_queue_empty_title">Your queue is empty</string>
+    <string name="music_queue_empty_body">Add tracks to your queue from Discover, an artist, or an album.</string>
+    <string name="music_queue_now_playing">Now playing</string>
+    <string name="music_queue_up_next">Up next (%1$d)</string>
+    <string name="music_queue_play_now_aria">Play %1$s now</string>
+    <string name="music_queue_remove_aria">Remove %1$s from queue</string>
 </resources>

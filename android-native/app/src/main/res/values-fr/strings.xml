@@ -120,10 +120,6 @@
     <string name="moderation_muted_count">%1$d en sourdine</string>
     <string name="moderation_muted_on">En sourdine depuis le %1$s</string>
     <string name="music_title">ZRP Music</string>
-    <string name="music_trending">Tendances du moment</string>
-    <string name="music_recently_played">Écoutés récemment</string>
-    <string name="music_new_releases">Nouveautés</string>
-    <string name="music_liked">Musique aimée</string>
     <string name="music_verified_artist">Artiste vérifié</string>
     <string name="music_like">J\'aime</string>
     <string name="music_pause">Pause</string>
@@ -249,4 +245,18 @@
     <string name="onboarding_err_follow_users">Échec du suivi des utilisateurs. Veuillez réessayer.</string>
     <string name="onboarding_err_skip">Échec de l\'ignorance de cette étape. Veuillez réessayer.</string>
     <string name="auth_err_session_expired">Votre session n\'est plus valide. Veuillez vous reconnecter.</string>
+    <!-- Music Phase 1: shared player + Queue -->
+    <string name="music_nav_queue_title">Votre file d\'attente</string>
+    <string name="music_nav_history_title">Écoutés récemment</string>
+    <string name="music_shell_trending_heading">Tendances du moment</string>
+    <string name="music_nav_liked_title">Musique aimée</string>
+    <string name="music_shell_new_releases_heading">Nouveautés</string>
+    <string name="music_queue_title">Votre file d\'attente</string>
+    <string name="music_queue_clear_queue">Vider la file d\'attente</string>
+    <string name="music_queue_empty_title">Votre file d\'attente est vide</string>
+    <string name="music_queue_empty_body">Ajoutez des morceaux à votre file d\'attente depuis Découvrir, un artiste ou un album.</string>
+    <string name="music_queue_now_playing">En cours de lecture</string>
+    <string name="music_queue_up_next">À suivre (%1$d)</string>
+    <string name="music_queue_play_now_aria">Lire %1$s maintenant</string>
+    <string name="music_queue_remove_aria">Retirer %1$s de la file d\'attente</string>
 </resources>

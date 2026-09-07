@@ -120,10 +120,6 @@
     <string name="moderation_muted_count">%1$d stumm</string>
     <string name="moderation_muted_on">Stummgeschaltet am %1$s</string>
     <string name="music_title">ZRP Music</string>
-    <string name="music_trending">Aktuell angesagt</string>
-    <string name="music_recently_played">Zuletzt gehört</string>
-    <string name="music_new_releases">Neuerscheinungen</string>
-    <string name="music_liked">Gefällt mir Musik</string>
     <string name="music_verified_artist">Verifizierter Künstler</string>
     <string name="music_like">Gefällt mir</string>
     <string name="music_pause">Pause</string>
@@ -249,4 +245,18 @@
     <string name="onboarding_err_follow_users">Benutzern konnte nicht gefolgt werden. Bitte versuche es erneut.</string>
     <string name="onboarding_err_skip">Überspringen fehlgeschlagen. Bitte versuche es erneut.</string>
     <string name="auth_err_session_expired">Deine Sitzung ist nicht mehr gültig. Bitte melde dich erneut an.</string>
+    <!-- Music Phase 1: shared player + Queue -->
+    <string name="music_nav_queue_title">Deine Warteschlange</string>
+    <string name="music_nav_history_title">Zuletzt gehört</string>
+    <string name="music_shell_trending_heading">Aktuell angesagt</string>
+    <string name="music_nav_liked_title">Gefällt mir Musik</string>
+    <string name="music_shell_new_releases_heading">Neuerscheinungen</string>
+    <string name="music_queue_title">Deine Warteschlange</string>
+    <string name="music_queue_clear_queue">Warteschlange leeren</string>
+    <string name="music_queue_empty_title">Deine Warteschlange ist leer</string>
+    <string name="music_queue_empty_body">Füge Titel aus Entdecken, einem Künstler oder einem Album zu deiner Warteschlange hinzu.</string>
+    <string name="music_queue_now_playing">Wird gerade abgespielt</string>
+    <string name="music_queue_up_next">Als Nächstes (%1$d)</string>
+    <string name="music_queue_play_now_aria">%1$s jetzt abspielen</string>
+    <string name="music_queue_remove_aria">%1$s aus der Warteschlange entfernen</string>
 </resources>

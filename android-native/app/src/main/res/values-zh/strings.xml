@@ -120,10 +120,6 @@
     <string name="moderation_muted_count">已静音 %1$d 个</string>
     <string name="moderation_muted_on">于 %1$s 静音</string>
     <string name="music_title">ZRP Music</string>
-    <string name="music_trending">热门趋势</string>
-    <string name="music_recently_played">最近播放</string>
-    <string name="music_new_releases">新发行</string>
-    <string name="music_liked">喜欢的音乐</string>
     <string name="music_verified_artist">已认证艺人</string>
     <string name="music_like">喜欢</string>
     <string name="music_pause">暂停</string>
@@ -249,4 +245,18 @@
     <string name="onboarding_err_follow_users">关注用户失败，请重试。</string>
     <string name="onboarding_err_skip">跳过失败，请重试。</string>
     <string name="auth_err_session_expired">您的登录状态已失效,请重新登录。</string>
+    <!-- Music Phase 1: shared player + Queue -->
+    <string name="music_nav_queue_title">你的队列</string>
+    <string name="music_nav_history_title">最近播放</string>
+    <string name="music_shell_trending_heading">热门趋势</string>
+    <string name="music_nav_liked_title">喜欢的音乐</string>
+    <string name="music_shell_new_releases_heading">新发行</string>
+    <string name="music_queue_title">你的队列</string>
+    <string name="music_queue_clear_queue">清空队列</string>
+    <string name="music_queue_empty_title">你的队列是空的</string>
+    <string name="music_queue_empty_body">从“发现”、艺人页面或专辑页面将歌曲添加到你的队列。</string>
+    <string name="music_queue_now_playing">正在播放</string>
+    <string name="music_queue_up_next">接下来（%1$d）</string>
+    <string name="music_queue_play_now_aria">立即播放 %1$s</string>
+    <string name="music_queue_remove_aria">从队列中移除 %1$s</string>
 </resources>
