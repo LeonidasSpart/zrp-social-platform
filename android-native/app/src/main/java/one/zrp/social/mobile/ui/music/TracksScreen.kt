@@ -34,6 +34,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -411,6 +413,7 @@ private fun TrackListRow(track: MusicTrack, onEdit: () -> Unit, onDelete: () -> 
     HorizontalDivider()
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditTrackModal(
     state: TracksUiState,
@@ -512,7 +515,7 @@ private fun EditTrackModal(
                             .fillMaxWidth()
                             .menuAnchor(),
                     )
-                    ExposedDropdownMenuDefaults.DropdownMenu(
+                    ExposedDropdownMenu(
                         expanded = albumMenuExpanded,
                         onDismissRequest = { albumMenuExpanded = false },
                     ) {
