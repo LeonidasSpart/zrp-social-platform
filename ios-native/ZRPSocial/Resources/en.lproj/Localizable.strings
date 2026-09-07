@@ -120,6 +120,34 @@
 "home.trendingOnZrp" = "Trending on ZRP";
 "explore.postCount" = "{n} posts";
 "nav.explore" = "Explore";
+"nav.music" = "Music";
+"music.common.play" = "Play";
+"music.common.pause" = "Pause";
+"music.common.next" = "Next";
+"music.common.previous" = "Previous";
+"music.common.shuffle" = "Shuffle";
+"music.common.repeat" = "Repeat";
+"music.common.queue" = "Queue";
+"music.common.playAll" = "Play all";
+"music.player.nowPlayingLabel" = "Now Playing";
+"music.player.expandAria" = "Expand player";
+"music.player.closeAria" = "Close player";
+"music.player.openNowPlayingAria" = "Open now playing";
+"music.player.upNextLabel" = "Up Next";
+"music.queue.title" = "Your Queue";
+"music.queue.nowPlaying" = "Now playing";
+"music.queue.emptyTitle" = "Your queue is empty";
+"music.queue.emptyBody" = "Add tracks to your queue from Discover, an artist, or an album.";
+"music.nav.likedTitle" = "Liked Music";
+"music.nav.historyTitle" = "Recently Played";
+"music.nav.playlistsTitle" = "Playlists";
+"music.nav.artistsTitle" = "Artists";
+"music.nav.albumsTitle" = "Albums";
+"music.nav.discoverTitle" = "Discover";
+"music.history.title" = "Recently Played";
+"music.liked.title" = "Liked Music";
+"music.albums.title" = "Albums";
+"music.artists.title" = "Artists";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back
@@ -196,3 +224,12 @@
 "ios.notifications.followRequestSuffix" = "requested to follow you";
 "ios.search.minLength" = "Type at least 2 characters to search.";
 "ios.search.suggestedTitle" = "Suggested for you";
+"ios.music.trending" = "Trending";
+"ios.music.newReleases" = "New releases";
+"ios.music.latestAlbums" = "Latest albums";
+"ios.music.popularArtists" = "Popular artists";
+"ios.music.emptyTitle" = "No music yet";
+"ios.music.emptyBody" = "Published tracks will appear here.";
+"ios.a11y.likeTrack" = "Like track";
+"ios.a11y.unlikeTrack" = "Unlike track";
+"ios.music.explicit" = "Explicit";

@@ -21,6 +21,7 @@ enum Route: Hashable {
     case conversation(partner: PostAuthor)
     case notifications
     case search
+    case music
 }
 
 /// Owns the navigation stack's path.

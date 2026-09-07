@@ -69,17 +69,28 @@
 	<false/>
 
 	<!--
-	  Usage-description strings and UIBackgroundModes are deliberately
-	  absent. Nothing shipped so far opens the camera, the photo library,
-	  the microphone, or plays background audio, and Apple rejects
-	  permissions an app does not actually exercise. Each key is added in
-	  the phase that first genuinely needs it:
-	    Phase 7  media upload      -> NSPhotoLibraryUsageDescription,
-	                                  NSCameraUsageDescription
-	    Phase 9  video stories     -> NSMicrophoneUsageDescription
-	    Phase 11 push              -> UIBackgroundModes: remote-notification
-	    Phase 13 music player      -> UIBackgroundModes: audio
-	  See ios-native/PARITY.md for the phase plan.
+	  ZRP Music plays audio that must continue when the app is
+	  backgrounded or the screen locks - that is the whole point of a
+	  music player, and it is what MPNowPlayingInfoCenter and the lock
+	  screen transport controls attach to. This is the first phase that
+	  genuinely exercises a background mode, so it is the first phase
+	  that declares one.
+	-->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
+
+	<!--
+	  Still deliberately absent, because nothing exercises them yet -
+	  Apple rejects permissions an app does not actually use:
+	    NSPhotoLibraryUsageDescription  PhotosPicker is out-of-process
+	                                    and needs no permission at all
+	    NSCameraUsageDescription        camera capture, Phase 7b
+	    NSMicrophoneUsageDescription    in-app video capture, Phase 9b
+	    UIBackgroundModes remote-notification
+	                                    push, BLOCKED on B3
+	  See ios-native/PARITY.md.
 	-->
 </dict>
 </plist>

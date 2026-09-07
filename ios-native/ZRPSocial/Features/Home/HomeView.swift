@@ -49,6 +49,8 @@ struct HomeView: View {
                     NotificationsView { unread.clearNotificationCount() }
                 case .search:
                     SearchView()
+                case .music:
+                    MusicHomeView()
                 }
             }
         }
@@ -210,6 +212,11 @@ struct HomeView: View {
                     } label: {
                         Label { Text(.navProfile) } icon: { Image(systemName: "person") }
                     }
+                }
+                Button {
+                    navigator.push(.music)
+                } label: {
+                    Label { Text(.navMusic) } icon: { Image(systemName: "music.note") }
                 }
                 Button(role: .destructive) {
                     Task { await session.signOut() }

@@ -49,7 +49,20 @@ struct RootView: View {
 /// controls; those tabs appear in the phases that make them real (see
 /// ios-native/PARITY.md).
 struct SignedInView: View {
+
+    @EnvironmentObject private var player: MusicPlayer
+
     var body: some View {
         HomeView()
+            // The mini-player is anchored outside the navigation stack so
+            // it persists across every push - that is what makes it a
+            // *persistent* player rather than one screen's control. It
+            // renders nothing at all until something is playing.
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                MiniPlayerView()
+            }
+            .fullScreenCover(isPresented: $player.isExpanded) {
+                NowPlayingView()
+            }
     }
 }

@@ -178,15 +178,20 @@ called and the real response being handled.
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
-| Music home | `GET /api/music/home` | ✅ | ✅ | ⬜ | MISSING (Phase 13) |
-| Discover / genres | `GET /api/music/genres` | ✅ | ✅ | ⬜ | MISSING (Phase 13) |
-| Artists / artist detail / follow | `/api/music/artists`, `/{id}`, `/{id}/follow` | ✅ | ✅ | ⬜ | MISSING (Phase 13) |
-| Albums / album detail | `/api/music/albums`, `/{id}` | ✅ | ✅ | ⬜ | MISSING (Phase 13) |
-| Playlists (+ reorder) | `/api/music/playlists`, `/{id}`, `/{id}/reorder` | ✅ | ✅ | ⬜ | MISSING (Phase 13) |
-| Liked / library / history | `GET /api/music/library`, `POST /api/music/tracks/like`, `/tracks/play` | ✅ | ✅ | ⬜ | MISSING (Phase 13) |
-| Queue | client-side | ✅ | ✅ | ⬜ | MISSING (Phase 13) |
-| Mini + expanded player, seek, shuffle, repeat | client-side | ✅ | ✅ | ⬜ | MISSING (Phase 13) |
-| Background audio, lock-screen/Now Playing, interruptions, AirPlay | client-side (`AVAudioSession` + `MPNowPlayingInfoCenter` on iOS) | n/a | ✅ | ⬜ | MISSING (Phase 13) |
+| Music home | `GET /api/music/home` (8 sections in one response) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Discover / genres | `GET /api/music/genres` | ✅ | ✅ | ⬜ | MISSING (Phase 13b) |
+| Artists / artist detail / follow | `/api/music/artists`, `/{id}`, `/{id}/follow` | ✅ | ✅ | ⬜ | MISSING (Phase 13b) |
+| Albums / album detail | `/api/music/albums`, `/{id}` | ✅ | ✅ | ⬜ | MISSING (Phase 13b) |
+| Playlists (+ reorder) | `/api/music/playlists`, `/{id}`, `/{id}/reorder` | ✅ | ✅ | ⬜ | MISSING (Phase 13b) |
+| Track like | `POST /api/music/tracks/like` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Play reporting + duration backfill | `POST /api/music/tracks/play` | ✅ | ✅ | ✅ (reports AVPlayer's real decoded duration, repairing tracks stored without one) | IMPLEMENTED |
+| Liked / library / history pages | `GET /api/music/library` | ✅ | ✅ | 🔶 home previews only; full pages pending 13b | PARTIAL |
+| Queue | client-side | ✅ | ✅ | 🔶 real queue drives playback; dedicated queue screen pending 13b | PARTIAL |
+| Mini + expanded player, seek, shuffle, repeat | client-side | ✅ | ✅ | ✅ (persistent across navigation) | IMPLEMENTED |
+| Background audio | `UIBackgroundModes: audio` + `AVAudioSession .playback` | n/a | ✅ | ✅ | IMPLEMENTED |
+| Lock screen / Now Playing | `MPNowPlayingInfoCenter` + `MPRemoteCommandCenter` | n/a | ✅ | ✅ (title, artist, album, artwork, scrubbing) | IMPLEMENTED |
+| Interruptions & route changes | `AVAudioSession` notifications | n/a | ✅ | ✅ (resumes only when the system says to; pauses on headphone unplug) | IMPLEMENTED |
+| AirPlay | system-provided via `AVAudioSession` | n/a | ✅ | 🔶 audio routes correctly; no explicit route picker yet | PARTIAL |
 
 ### Music Studio
 
@@ -405,7 +410,7 @@ here. **No fake local notifications will stand in for this.**
 | 10 | Messages | ✅ done — attachments and conversation search pending (10b) |
 | 11 | Notifications | ✅ in-app list done — device push remains BLOCKED (B3) |
 | 12 | Search + hashtags | ✅ done |
-| 13 | Music + background player | ⬜ |
+| 13 | Music + background player | ✅ 13a done (engine, background audio, lock screen, home) — 13b (discover, artists, albums, playlists, queue screen) pending |
 | 14 | Music Studio | ⬜ |
 | 15 | Marketplace | ⬜ |
 | 16 | Settings, moderation, account deletion | ⬜ |
