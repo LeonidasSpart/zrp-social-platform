@@ -302,7 +302,7 @@ private fun UploadCard(
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
             modifier = Modifier.padding(top = Spacing.xs),
         ) {
-            items(MUSIC_GENRES) { genre ->
+            items(MUSIC_GENRES, key = { it }) { genre ->
                 AssistChip(onClick = { onGenreChange(genre) }, label = { Text(genre) })
             }
         }

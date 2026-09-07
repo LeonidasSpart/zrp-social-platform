@@ -177,7 +177,7 @@ fun ListingDetailScreen(
                             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                             modifier = Modifier.padding(top = Spacing.xs),
                         ) {
-                            items(listing.imageUrls.withIndex().toList()) { (index, url) ->
+                            items(listing.imageUrls.withIndex().toList(), key = { (index, _) -> index }) { (index, url) ->
                                 AsyncImage(
                                     model = url,
                                     contentDescription = null,

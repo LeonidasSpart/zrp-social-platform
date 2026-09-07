@@ -238,7 +238,7 @@ fun AidFormScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                         modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
                     )
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(state.imageUrls.withIndex().toList()) { (index, url) ->
+                        items(state.imageUrls.withIndex().toList(), key = { (index, _) -> index }) { (index, url) ->
                             Box(modifier = Modifier.size(80.dp)) {
                                 AsyncImage(
                                     model = url,

@@ -141,7 +141,7 @@ fun AidCardView(campaign: HelpCampaignSummary, onClick: () -> Unit) {
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     modifier = Modifier.padding(top = 8.dp),
                 ) {
-                    items(campaign.needTypes) { need ->
+                    items(campaign.needTypes, key = { it }) { need ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier

@@ -99,7 +99,7 @@ fun AidScreen(
                     label = { Text(stringResource(R.string.aid_all_categories)) },
                 )
             }
-            items(allAidCategories) { category ->
+            items(allAidCategories, key = { it }) { category ->
                 FilterChip(
                     selected = state.selectedCategory == category,
                     onClick = { viewModel.onCategorySelect(category) },
