@@ -177,7 +177,7 @@ called and the real response being handled.
 | Notification tap-through | — | ✅ | ✅ | ✅ like/comment/repost → post, follow → profile, message → thread, appeal outcome → Appeals, listing decision → My listings (the payload carries no listing id, so it leads to where the outcome is visible rather than guessing at one) | IMPLEMENTED |
 | Unrecognised notification types | — | 🔶 renders with no action phrase | 🔶 same | 🔶 same, deliberately | PARTIAL |
 | Web Push (VAPID) | `POST /api/push/subscribe` | ✅ | n/a | n/a | WEB-ONLY |
-| **Device push** | `POST/DELETE /api/push/fcm` | n/a | ✅ FCM | ❌ | **BLOCKED — [B3](#b3-ios-device-push)** |
+| **Device push** | `POST/DELETE /api/push/fcm` now accepts `platform: "ios"` and includes a deep-link `data.url` in every push | n/a | ✅ FCM | ❌ backend no longer blocks it — needs an APNs key on the Firebase project and a `GoogleService-Info.plist`, both external/console actions | **BLOCKED — [B3](#b3-ios-device-push)** |
 
 ### Music
 
@@ -596,24 +596,33 @@ away, and the audit above is the specification for it.
 
 ### B3. iOS device push
 
-`POST /api/push/fcm` stores tokens with `platform` hardcoded to `"android"`
-(`prisma/schema.prisma:649` also defaults it there), and `sendFcmPush()`
-fans out to **all** of a user's tokens with a generic `notification` payload.
+**Item 3 below (the backend change) is done.** `POST /api/push/fcm` now
+accepts an optional `platform` (`"android"` or `"ios"`, case-insensitive)
+in the request body, stored on both token creation and re-registration;
+any request that omits it - which today means every existing Android
+client, since this field didn't exist before - still defaults to
+`"android"`, so no existing row or caller is relabeled or broken.
+`sendFcmPush()` now also puts the same relative in-app path
+`sendPushNotification` already sends to Web Push subscribers (e.g.
+`/post/{id}`, `/messages/{username}`) into the FCM message's `data.url`,
+alongside the existing `notification` block, so a tap can navigate to the
+right screen instead of just opening the app - this reaches Android today
+too, not only a future iOS client, since Android's `notification`-only
+payload never carried a destination either.
 
-Delivery to iOS via FCM is technically possible, but needs:
+Two things are still needed for delivery to iOS specifically, and remain
+external/unverifiable from this environment:
 
 1. An **APNs key uploaded to the Firebase project** — a console action, not
-   a code change, and unverifiable from this environment.
+   a code change.
 2. A **`GoogleService-Info.plist`** for the iOS app. Only
    `android-native/app/google-services.json` exists in this repo; the iOS
    counterpart has never been generated.
-3. A **one-line backwards-compatible backend change**: accept an optional
-   `platform` in the `POST /api/push/fcm` body (defaulting to `"android"`,
-   so Android and every existing row are unaffected) so iOS tokens are
-   labelled correctly.
 
-Item 3 is small and safe; items 1 and 2 are external and cannot be done from
-here. **No fake local notifications will stand in for this.**
+Once both exist, an iOS client can register a token via the same
+`POST /api/push/fcm` (with `platform: "ios"`) and receive real FCM-routed
+pushes with no further backend change. **No fake local notifications will
+stand in for this.**
 
 ---
 

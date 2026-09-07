@@ -646,6 +646,10 @@ model FcmToken {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   token    String @unique
+  // "android" or "ios" - caller-supplied via POST /api/push/fcm, and
+  // defaults to "android" for any request (or client build) that
+  // doesn't send one, since that was the only platform this ever
+  // supported until the iOS app existed.
   platform String @default("android")
 
   createdAt DateTime @default(now())
