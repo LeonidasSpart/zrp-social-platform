@@ -41,6 +41,8 @@ fun PlayChallengeDetail.parsedContent(): PlayChallengeContent? {
     }
 }
 
+data class GeneratedChallenge(val title: String, val description: String?, val content: PlayChallengeContent)
+
 /**
  * ZRP PLAY - the same real /play routes the website's /play pages use:
  * trivia/memory/logic mini-games (solo and 1v1 duels), a daily
@@ -108,13 +110,14 @@ class PlayRepository {
         )
     }
 
-    suspend fun generateChallenge(topic: String, type: String, difficulty: String): Result<PlayChallengeContent> = runCatching {
+    suspend fun generateChallenge(topic: String, type: String, difficulty: String): Result<GeneratedChallenge> = runCatching {
         val response = ApiClient.playApi.generateChallenge(GenerateChallengeRequest(topic, type, difficulty))
-        when (response.type) {
+        val content = when (response.type) {
             "TRIVIA" -> PlayChallengeContent.Trivia(gson.fromJson(response.content, TriviaContent::class.java))
             "MEMORY" -> PlayChallengeContent.Memory(gson.fromJson(response.content, MemoryContent::class.java))
             else -> PlayChallengeContent.Logic(gson.fromJson(response.content, LogicContent::class.java))
         }
+        GeneratedChallenge(title = response.title, description = response.description, content = content)
     }
 
     suspend fun getDuels(cursor: String? = null, status: String? = null): Result<PlayDuelsPage> = runCatching {
