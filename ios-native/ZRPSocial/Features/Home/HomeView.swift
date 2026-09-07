@@ -13,12 +13,16 @@ struct HomeView: View {
     @StateObject private var navigator = Navigator()
     @StateObject private var viewModel = HomeViewModel()
     @State private var isComposing = false
+    @StateObject private var stories = StoriesViewModel()
+    @State private var isCreatingStory = false
+    @State private var openStory: StoryPresentation?
 
     var body: some View {
         NavigationStack(path: $navigator.path) {
             VStack(spacing: 0) {
                 tabPicker
                 Divider().overlay(ZrpColor.outline)
+                storiesHeader
                 feed
             }
             .background(ZrpColor.background.ignoresSafeArea())
@@ -45,9 +49,26 @@ struct HomeView: View {
                 viewModel.insertCreated(post, interactions: interactions)
             }
         }
+        .sheet(isPresented: $isCreatingStory) {
+            CreateStoryView {
+                // The create route returns the raw row, not the grouped
+                // rail shape, so the rail is refetched rather than
+                // reconstructed from a different response shape.
+                Task { await stories.load() }
+            }
+        }
+        .fullScreenCover(item: $openStory) { presentation in
+            StoryViewerView(
+                group: presentation.group,
+                startIndex: presentation.startIndex,
+                viewerId: session.currentUser?.id,
+                viewModel: stories
+            )
+        }
         .task {
             viewModel.attach(interactions: interactions)
             viewModel.loadIfNeeded(viewModel.selectedTab)
+            await stories.load()
         }
         .onChange(of: viewModel.selectedTab) { _, tab in
             viewModel.loadIfNeeded(tab)
@@ -62,6 +83,35 @@ struct HomeView: View {
             Button { interactions.actionError = nil } label: { Text(.actionCancel) }
         } message: {
             Text(verbatim: interactions.actionError ?? "")
+        }
+    }
+
+    /// The stories rail.
+    ///
+    /// Sits above the timeline rather than inside it as a scrolling
+    /// header: a header would vanish whenever the feed is empty, loading
+    /// or errored, which is exactly the state a brand-new account is in
+    /// while the people it follows are already posting stories. The
+    /// trade-off is that it does not scroll away with the content the way
+    /// the web rail does.
+    ///
+    /// Absent entirely when there are no unexpired stories - the route
+    /// returns only the viewer's own and those of accounts they follow,
+    /// so an empty rail is the normal state and an empty strip would be
+    /// noise.
+    @ViewBuilder
+    private var storiesHeader: some View {
+        if stories.hasStories {
+            StoriesRailView(
+                groups: stories.groups,
+                onOpen: { group in
+                    openStory = StoryPresentation(
+                        group: group,
+                        startIndex: group.firstUnviewedIndex
+                    )
+                },
+                onCreate: { isCreatingStory = true }
+            )
         }
     }
 
@@ -192,4 +242,11 @@ struct HomeView: View {
             }
         }
     }
+}
+
+/// Identifies which story group the full-screen viewer was opened on.
+struct StoryPresentation: Identifiable, Equatable {
+    let id = UUID()
+    let group: StoryGroup
+    let startIndex: Int
 }

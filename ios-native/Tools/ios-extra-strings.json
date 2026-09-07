@@ -62,6 +62,15 @@
     "ios.comment.cancelReply": "Cancel reply",
     "ios.post.editTitle": "Edit post",
     "ios.post.repostAction": "Repost",
-    "ios.a11y.repostOptions": "Repost options"
+    "ios.a11y.repostOptions": "Repost options",
+    "ios.stories.viewerTitle": "Story",
+    "ios.stories.noStories": "No stories right now",
+    "ios.stories.noStoriesDesc": "Stories from you and the people you follow appear here for 24 hours.",
+    "ios.a11y.storyOf": "Story by {name}",
+    "ios.a11y.pauseStory": "Pause",
+    "ios.a11y.closeStory": "Close story",
+    "ios.a11y.likeStory": "Like story",
+    "ios.a11y.unlikeStory": "Unlike story",
+    "ios.stories.viewCount": "{n} views"
   }
 }

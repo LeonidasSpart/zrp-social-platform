@@ -81,3 +81,13 @@
 "postDetail.commentsDisabled" = "💬 此帖子已禁用评论。";
 "postDetail.postNotFound" = "未找到帖子";
 "action.edit" = "编辑";
+"stories.yourStory" = "你的动态";
+"stories.addStory" = "添加动态";
+"stories.whatsOnYourMind" = "你在想什么?";
+"stories.uploading" = "上传中...";
+"stories.shareStory" = "分享动态";
+"stories.expiryNote" = "动态将在 24 小时后消失。文件大小上限:16MB。";
+"stories.errFileTooLarge" = "文件过大。最大 16MB。";
+"stories.errUnsupportedType" = "仅支持图片和视频。";
+"stories.errEmptyContent" = "请添加文字内容或媒体文件。";
+"stories.errCreateFailed" = "创建动态失败,请重试。";

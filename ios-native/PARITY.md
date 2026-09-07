@@ -138,11 +138,13 @@ called and the real response being handled.
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
-| Story rail | `GET /api/stories` | ✅ | ✅ | ⬜ | MISSING (Phase 9) |
-| Viewer + auto-progression + pause | — | ✅ | ✅ | ⬜ | MISSING (Phase 9) |
-| Mark viewed | `POST /api/stories/{id}/view` | ✅ | ✅ | ⬜ | MISSING (Phase 9) |
-| Like a story | `POST /api/stories/{id}/like` | ✅ | ✅ | ⬜ | MISSING (Phase 9) |
-| Create story (image/video) | `POST /api/stories` + UploadThing | ✅ | ✅ | ⬜ | MISSING (Phase 9) |
+| Story rail | `GET /api/stories` (bare array, grouped by author) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Viewer + auto-progression + pause | — | ✅ | ✅ | ✅ (tap to step, hold to pause, swipe down to dismiss; video runs its real duration) | IMPLEMENTED |
+| Mark viewed | `POST /api/stories/{id}/view` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Like a story | `POST /api/stories/{id}/like` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Create story (text/image/video) | `POST /api/stories` + UploadThing `storyMedia` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Story expiry | server filters `expiresAt > now`; no client handling needed | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Story view counts | returned to everyone, shown only to the author | ✅ | 🔶 | ✅ | IMPLEMENTED |
 
 ### Messages
 
@@ -373,7 +375,7 @@ here. **No fake local notifications will stand in for this.**
 | 6 | Profiles + social graph | ✅ done — 6b (edit profile, pin, extra profile tabs) pending |
 | 7 | Post composer + media upload + viewer | ✅ done — 7b (scheduling, quote entry point, camera capture) pending |
 | 8 | Comments, replies, quotes, edit | ✅ done — 8b (reactions, comment repost/bookmark, reposts & quotes lists, translation) pending |
-| 9 | Stories | ⬜ |
+| 9 | Stories | ✅ done |
 | 10 | Messages | ⬜ |
 | 11 | Notifications (+ push, pending B3) | ⬜ |
 | 12 | Search + hashtags | 🔶 hashtag timeline done; search pending |

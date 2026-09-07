@@ -68,6 +68,7 @@ final class UploadThingClient: NSObject, @unchecked Sendable {
     /// is never a free-form string at a call site.
     enum Slug: String {
         case postMedia
+        case storyMedia
         case avatar
         case banner
         case listingMedia

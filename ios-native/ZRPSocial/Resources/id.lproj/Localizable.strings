@@ -81,3 +81,13 @@
 "postDetail.commentsDisabled" = "💬 Komentar dinonaktifkan untuk postingan ini.";
 "postDetail.postNotFound" = "Postingan tidak ditemukan";
 "action.edit" = "Edit";
+"stories.yourStory" = "Kisahmu";
+"stories.addStory" = "Tambah Kisah";
+"stories.whatsOnYourMind" = "Apa yang Anda pikirkan?";
+"stories.uploading" = "Mengunggah...";
+"stories.shareStory" = "Bagikan Kisah";
+"stories.expiryNote" = "Kisah menghilang setelah 24 jam. Ukuran file maksimum: 16MB.";
+"stories.errFileTooLarge" = "File terlalu besar. Maksimum 16MB.";
+"stories.errUnsupportedType" = "Hanya gambar dan video yang didukung.";
+"stories.errEmptyContent" = "Silakan tambahkan konten atau file media.";
+"stories.errCreateFailed" = "Gagal membuat kisah. Silakan coba lagi.";

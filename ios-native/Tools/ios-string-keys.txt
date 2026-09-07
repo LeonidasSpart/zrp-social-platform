@@ -104,3 +104,15 @@ postDetail.reply
 postDetail.commentsDisabled
 postDetail.postNotFound
 action.edit
+
+# ── Stories (Phase 9) ───────────────────────────────────────────────
+stories.yourStory
+stories.addStory
+stories.whatsOnYourMind
+stories.uploading
+stories.shareStory
+stories.expiryNote
+stories.errFileTooLarge
+stories.errUnsupportedType
+stories.errEmptyContent
+stories.errCreateFailed

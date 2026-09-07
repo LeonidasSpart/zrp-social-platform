@@ -81,6 +81,16 @@
 "postDetail.commentsDisabled" = "💬 Comments are disabled for this post.";
 "postDetail.postNotFound" = "Post not found";
 "action.edit" = "Edit";
+"stories.yourStory" = "Your Story";
+"stories.addStory" = "Add Story";
+"stories.whatsOnYourMind" = "What's on your mind?";
+"stories.uploading" = "Uploading...";
+"stories.shareStory" = "Share Story";
+"stories.expiryNote" = "Stories disappear after 24 hours. Max file size: 16MB.";
+"stories.errFileTooLarge" = "File too large. Max 16MB.";
+"stories.errUnsupportedType" = "Only images and videos are supported.";
+"stories.errEmptyContent" = "Please add some content or a media file.";
+"stories.errCreateFailed" = "Failed to create story. Please try again.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back
@@ -136,3 +146,12 @@
 "ios.post.editTitle" = "Edit post";
 "ios.post.repostAction" = "Repost";
 "ios.a11y.repostOptions" = "Repost options";
+"ios.stories.viewerTitle" = "Story";
+"ios.stories.noStories" = "No stories right now";
+"ios.stories.noStoriesDesc" = "Stories from you and the people you follow appear here for 24 hours.";
+"ios.a11y.storyOf" = "Story by {name}";
+"ios.a11y.pauseStory" = "Pause";
+"ios.a11y.closeStory" = "Close story";
+"ios.a11y.likeStory" = "Like story";
+"ios.a11y.unlikeStory" = "Unlike story";
+"ios.stories.viewCount" = "{n} views";

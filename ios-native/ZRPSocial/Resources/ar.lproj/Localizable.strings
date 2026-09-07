@@ -81,3 +81,13 @@
 "postDetail.commentsDisabled" = "💬 التعليقات معطّلة لهذا المنشور.";
 "postDetail.postNotFound" = "المنشور غير موجود";
 "action.edit" = "تعديل";
+"stories.yourStory" = "قصتك";
+"stories.addStory" = "إضافة قصة";
+"stories.whatsOnYourMind" = "بم تفكر؟";
+"stories.uploading" = "جارٍ الرفع...";
+"stories.shareStory" = "مشاركة القصة";
+"stories.expiryNote" = "تختفي القصص بعد 24 ساعة. الحد الأقصى لحجم الملف: 16 ميجابايت.";
+"stories.errFileTooLarge" = "الملف كبير جدًا. الحد الأقصى 16 ميجابايت.";
+"stories.errUnsupportedType" = "يتم دعم الصور ومقاطع الفيديو فقط.";
+"stories.errEmptyContent" = "يرجى إضافة محتوى أو ملف وسائط.";
+"stories.errCreateFailed" = "فشل إنشاء القصة. يرجى المحاولة مرة أخرى.";

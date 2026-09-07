@@ -81,3 +81,13 @@
 "postDetail.commentsDisabled" = "💬 Les commentaires sont désactivés pour cette publication.";
 "postDetail.postNotFound" = "Publication introuvable";
 "action.edit" = "Modifier";
+"stories.yourStory" = "Votre story";
+"stories.addStory" = "Ajouter une story";
+"stories.whatsOnYourMind" = "À quoi pensez-vous ?";
+"stories.uploading" = "Envoi en cours...";
+"stories.shareStory" = "Partager la story";
+"stories.expiryNote" = "Les stories disparaissent après 24 heures. Taille de fichier max : 16 Mo.";
+"stories.errFileTooLarge" = "Fichier trop volumineux. Max 16 Mo.";
+"stories.errUnsupportedType" = "Seuls les images et vidéos sont prises en charge.";
+"stories.errEmptyContent" = "Veuillez ajouter du contenu ou un fichier média.";
+"stories.errCreateFailed" = "Échec de la création de la story. Veuillez réessayer.";

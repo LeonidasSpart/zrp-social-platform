@@ -81,3 +81,13 @@
 "postDetail.commentsDisabled" = "💬 I commenti sono disabilitati per questo post.";
 "postDetail.postNotFound" = "Post non trovato";
 "action.edit" = "Modifica";
+"stories.yourStory" = "La tua storia";
+"stories.addStory" = "Aggiungi storia";
+"stories.whatsOnYourMind" = "A cosa stai pensando?";
+"stories.uploading" = "Caricamento...";
+"stories.shareStory" = "Condividi storia";
+"stories.expiryNote" = "Le storie scompaiono dopo 24 ore. Dimensione massima file: 16MB.";
+"stories.errFileTooLarge" = "File troppo grande. Massimo 16MB.";
+"stories.errUnsupportedType" = "Sono supportati solo immagini e video.";
+"stories.errEmptyContent" = "Aggiungi del contenuto o un file multimediale.";
+"stories.errCreateFailed" = "Impossibile creare la storia. Riprova.";

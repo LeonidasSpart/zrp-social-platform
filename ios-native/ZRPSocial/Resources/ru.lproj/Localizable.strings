@@ -81,3 +81,13 @@
 "postDetail.commentsDisabled" = "💬 Комментарии к этой публикации отключены.";
 "postDetail.postNotFound" = "Публикация не найдена";
 "action.edit" = "Изменить";
+"stories.yourStory" = "Ваша история";
+"stories.addStory" = "Добавить историю";
+"stories.whatsOnYourMind" = "О чём вы думаете?";
+"stories.uploading" = "Загрузка...";
+"stories.shareStory" = "Поделиться историей";
+"stories.expiryNote" = "Истории исчезают через 24 часа. Максимальный размер файла: 16 МБ.";
+"stories.errFileTooLarge" = "Файл слишком большой. Максимум 16 МБ.";
+"stories.errUnsupportedType" = "Поддерживаются только изображения и видео.";
+"stories.errEmptyContent" = "Добавьте текст или медиафайл.";
+"stories.errCreateFailed" = "Не удалось создать историю. Попробуйте ещё раз.";

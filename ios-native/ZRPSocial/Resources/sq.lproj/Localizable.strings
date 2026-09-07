@@ -81,3 +81,13 @@
 "postDetail.commentsDisabled" = "💬 Komentet janë çaktivizuar për këtë postim.";
 "postDetail.postNotFound" = "Postimi nuk u gjet";
 "action.edit" = "Ndrysho";
+"stories.yourStory" = "Storia jote";
+"stories.addStory" = "Shto Storie";
+"stories.whatsOnYourMind" = "Çfarë po mendon?";
+"stories.uploading" = "Duke ngarkuar...";
+"stories.shareStory" = "Shpërndaj Storien";
+"stories.expiryNote" = "Storiet zhduken pas 24 orësh. Madhësia maksimale e skedarit: 16MB.";
+"stories.errFileTooLarge" = "Skedari është shumë i madh. Maksimumi 16MB.";
+"stories.errUnsupportedType" = "Mbështeten vetëm imazhet dhe videot.";
+"stories.errEmptyContent" = "Ju lutemi shtoni përmbajtje ose një skedar media.";
+"stories.errCreateFailed" = "Krijimi i storjes dështoi. Ju lutemi provoni përsëri.";

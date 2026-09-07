@@ -81,3 +81,13 @@
 "postDetail.commentsDisabled" = "💬 Bu gönderi için yorumlar devre dışı.";
 "postDetail.postNotFound" = "Gönderi bulunamadı";
 "action.edit" = "Düzenle";
+"stories.yourStory" = "Hikayen";
+"stories.addStory" = "Hikaye Ekle";
+"stories.whatsOnYourMind" = "Aklından ne geçiyor?";
+"stories.uploading" = "Yükleniyor...";
+"stories.shareStory" = "Hikayeyi Paylaş";
+"stories.expiryNote" = "Hikayeler 24 saat sonra kaybolur. Maksimum dosya boyutu: 16MB.";
+"stories.errFileTooLarge" = "Dosya çok büyük. Maksimum 16MB.";
+"stories.errUnsupportedType" = "Yalnızca resimler ve videolar desteklenir.";
+"stories.errEmptyContent" = "Lütfen içerik veya bir medya dosyası ekleyin.";
+"stories.errCreateFailed" = "Hikaye oluşturulamadı. Lütfen tekrar deneyin.";
