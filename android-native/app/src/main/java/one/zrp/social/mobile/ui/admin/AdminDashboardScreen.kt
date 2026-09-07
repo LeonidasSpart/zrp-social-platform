@@ -106,22 +106,27 @@ fun AdminDashboardScreen(
                     .padding(Spacing.lg),
             ) {
                 if (stats != null) {
+                    val roleCounts = stats.roleCounts
+                    // Built here, in the enclosing @Composable scope, not
+                    // inside LazyVerticalGrid's own content lambda below -
+                    // that lambda is a LazyGridScope builder, not a
+                    // @Composable context, so stringResource() can't be
+                    // called from inside it directly.
+                    val cards = listOf(
+                        stringResource(R.string.admin_dash_total_users) to stats.users.toString(),
+                        stringResource(R.string.admin_dash_total_posts) to stats.posts.toString(),
+                        stringResource(R.string.admin_dash_total_comments) to stats.comments.toString(),
+                        stringResource(R.string.admin_dash_total_reports) to stats.reports.toString(),
+                        stringResource(R.string.admin_dash_pending_reports) to stats.pendingReports.toString(),
+                        stringResource(R.string.admin_dash_admins) to (roleCounts["ADMIN"] ?: 0).toString(),
+                        stringResource(R.string.admin_dash_moderators) to (roleCounts["MODERATOR"] ?: 0).toString(),
+                    )
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
                         horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                         verticalArrangement = Arrangement.spacedBy(Spacing.md),
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        val roleCounts = stats.roleCounts
-                        val cards = listOf(
-                            stringResource(R.string.admin_dash_total_users) to stats.users.toString(),
-                            stringResource(R.string.admin_dash_total_posts) to stats.posts.toString(),
-                            stringResource(R.string.admin_dash_total_comments) to stats.comments.toString(),
-                            stringResource(R.string.admin_dash_total_reports) to stats.reports.toString(),
-                            stringResource(R.string.admin_dash_pending_reports) to stats.pendingReports.toString(),
-                            stringResource(R.string.admin_dash_admins) to (roleCounts["ADMIN"] ?: 0).toString(),
-                            stringResource(R.string.admin_dash_moderators) to (roleCounts["MODERATOR"] ?: 0).toString(),
-                        )
                         items(cards) { (label, value) -> StatCard(label = label, value = value) }
                     }
                 }
