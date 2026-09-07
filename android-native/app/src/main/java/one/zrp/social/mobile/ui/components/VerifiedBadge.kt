@@ -2,7 +2,7 @@ package one.zrp.social.mobile.ui.components
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -39,8 +39,15 @@ private val BadgeStyles: Map<String, BadgeStyle> = mapOf(
 @Composable
 fun VerifiedBadge(badgeType: String?, size: Dp = 16.dp, modifier: Modifier = Modifier) {
     val style = badgeType?.let { BadgeStyles[it] } ?: return
+    // The website's own BadgeCheck glyph (a scalloped-seal outline with
+    // a checkmark cut out of it) doesn't have a 1:1 Compose equivalent,
+    // but Material's own "Verified" seal - already used elsewhere in
+    // this app (NotificationsScreen's Verified filter tab) - is the
+    // same seal-with-checkmark-cutout shape, unlike a plain filled
+    // circle, so it reads as the same real badge shape rather than a
+    // generic checkmark icon.
     Icon(
-        imageVector = Icons.Filled.CheckCircle,
+        imageVector = Icons.Filled.Verified,
         contentDescription = style.label,
         tint = style.color,
         modifier = modifier.size(size),

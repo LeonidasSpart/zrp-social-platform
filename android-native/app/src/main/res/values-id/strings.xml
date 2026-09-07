@@ -1231,4 +1231,7 @@
     <string name="legal_terms">Ketentuan Layanan</string>
     <string name="legal_privacy">Kebijakan Privasi</string>
     <string name="legal_guidelines">Pedoman Komunitas</string>
+    <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
+    <string name="profile_joined">Bergabung</string>
+    <string name="profile_charity_note">%1$s%% dari keuntungan disumbangkan untuk amal</string>
 </resources>

@@ -1,5 +1,9 @@
 <resources>
-    <style name="Theme.ZrpSocial" parent="android:Theme.Material.NoActionBar">
+    <!-- Theme.AppCompat, not the platform android:Theme.Material - MainActivity
+         is now an AppCompatActivity (required for the per-app language switch
+         in LanguageSettingsScreen to actually reapply string resources on
+         pre-Android-13 devices), which requires a Theme.AppCompat descendant. -->
+    <style name="Theme.ZrpSocial" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">@color/zrp_deep_black</item>
         <item name="android:statusBarColor">@color/zrp_deep_black</item>
         <item name="android:navigationBarColor">@color/zrp_deep_black</item>

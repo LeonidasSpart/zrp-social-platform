@@ -3,11 +3,11 @@ package one.zrp.social.mobile
 import android.Manifest
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -32,7 +32,14 @@ import one.zrp.social.mobile.ui.theme.ZrpSocialTheme
 
 private enum class LoggedOutScreen { LOGIN, SIGNUP, FORGOT_PASSWORD }
 
-class MainActivity : ComponentActivity() {
+// AppCompatActivity, not ComponentActivity - AppCompatDelegate's per-app
+// language switch (LanguageSettingsScreen) only reliably reapplies the
+// new locale's string resources on Activity.recreate() via
+// AppCompatActivity's own attachBaseContext wrapping on pre-Android-13
+// devices; a plain ComponentActivity silently keeps the old language's
+// resources after recreate() there, even though the stored preference
+// is correct - the "unreliable" symptom real-device reports described.
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

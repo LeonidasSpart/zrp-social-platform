@@ -1,5 +1,11 @@
 package one.zrp.social.mobile.ui.home
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
@@ -20,6 +27,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -34,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -43,6 +52,7 @@ import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.stories.StoriesRail
 import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
  * The native Home screen: the same two real feed streams the website
@@ -255,21 +265,51 @@ fun HomeScreen(
                 // A real, always-visible manual refresh affordance -
                 // page.tsx's own floating "Refresh feed" button (fixed
                 // top-right over the feed, aria-label="Refresh feed",
-                // untranslated on web too) - not just the pull-to-refresh
-                // gesture above, which someone who doesn't know the
-                // gesture exists would otherwise have no way to trigger.
-                IconButton(
-                    onClick = { viewModel.refresh(activeTab) },
-                    enabled = !state.isRefreshing,
+                // untranslated on web too, w-9 h-9 rounded-full with a
+                // translucent background and a spin animation while
+                // refreshing) - not just the pull-to-refresh gesture
+                // above, which someone who doesn't know the gesture
+                // exists would otherwise have no way to trigger. Matches
+                // web's own circular translucent-background treatment
+                // (rather than a bare icon with no surface) precisely so
+                // it reads as a floating button over the feed instead of
+                // blending into - or looking misplaced against - the
+                // post content underneath it.
+                // The infinite transition only exists while refreshing -
+                // otherwise it would keep recomposing this button forever
+                // in the background for an animation nothing is showing.
+                val rotation = if (state.isRefreshing) {
+                    val angle by rememberInfiniteTransition(label = "refreshSpin").animateFloat(
+                        initialValue = 0f,
+                        targetValue = 360f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(durationMillis = 800, easing = LinearEasing),
+                            repeatMode = RepeatMode.Restart,
+                        ),
+                        label = "refreshSpinAngle",
+                    )
+                    angle
+                } else {
+                    0f
+                }
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.9f),
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(Spacing.sm),
+                        .padding(top = Spacing.md, end = Spacing.md)
+                        .size(36.dp),
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Refresh,
-                        contentDescription = "Refresh feed",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    IconButton(onClick = { viewModel.refresh(activeTab) }, enabled = !state.isRefreshing) {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = "Refresh feed",
+                            tint = if (state.isRefreshing) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .size(18.dp)
+                                .rotate(rotation),
+                        )
+                    }
                 }
             }
         }
