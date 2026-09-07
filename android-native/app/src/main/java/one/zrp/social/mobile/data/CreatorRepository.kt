@@ -13,7 +13,7 @@ import retrofit2.HttpException
 
 /**
  * ZRP Creator Studio - see CreatorApi's own KDoc for the full real
- * /api/creator/* contract and, importantly, exactly which actions are
+ * /api/creator/ contract and, importantly, exactly which actions are
  * deliberately NOT wrapped here (tip-sending, premium-post purchase)
  * and why.
  */

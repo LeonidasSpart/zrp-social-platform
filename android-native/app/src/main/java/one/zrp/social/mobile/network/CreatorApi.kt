@@ -142,7 +142,7 @@ data class CreatorWithdrawal(val id: String, val amount: Double, val walletAddre
 data class CreatorWithdrawResponse(val withdrawal: CreatorWithdrawal, val message: String)
 
 /**
- * ZRP Creator Studio - the real /api/creator/* routes the website's
+ * ZRP Creator Studio - the real /api/creator/ routes the website's
  * own /creator/dashboard page uses: eligibility + profile
  * (Business/Enterprise plan gated, matching src/lib/limits.ts),
  * earnings dashboard, 30-day content/audience analytics (the same
