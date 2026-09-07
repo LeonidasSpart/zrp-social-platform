@@ -84,6 +84,7 @@ fun ZrpSocialApp() {
                         LoggedOutScreen.LOGIN -> LoginScreen(
                             formState = loginForm,
                             onLogin = { identifier, password -> authViewModel.login(identifier, password) },
+                            onGoogleIdToken = { idToken -> authViewModel.loginWithGoogle(idToken) },
                             onSignUp = { loggedOutScreen = LoggedOutScreen.SIGNUP },
                             onForgotPassword = { loggedOutScreen = LoggedOutScreen.FORGOT_PASSWORD },
                         )

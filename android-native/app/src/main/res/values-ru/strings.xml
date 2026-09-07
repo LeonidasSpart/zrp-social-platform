@@ -199,6 +199,7 @@
     <string name="auth_resend_verification_already_verified">Этот адрес электронной почты уже подтверждён. Пожалуйста, войдите в систему.</string>
     <string name="auth_resend_verification_error">Не удалось отправить письмо для подтверждения. Пожалуйста, попробуйте снова.</string>
     <string name="auth_or">или</string>
+    <string name="auth_continue_with_google">Продолжить с Google</string>
     <string name="auth_full_name">Полное имя</string>
     <string name="auth_username">Имя пользователя</string>
     <string name="auth_email">Эл. почта</string>

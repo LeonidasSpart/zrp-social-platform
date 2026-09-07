@@ -199,6 +199,7 @@
     <string name="auth_resend_verification_already_verified">Email ini sudah diverifikasi. Silakan masuk.</string>
     <string name="auth_resend_verification_error">Gagal mengirim email verifikasi. Silakan coba lagi.</string>
     <string name="auth_or">atau</string>
+    <string name="auth_continue_with_google">Lanjutkan dengan Google</string>
     <string name="auth_full_name">Nama Lengkap</string>
     <string name="auth_username">Nama pengguna</string>
     <string name="auth_email">Email</string>

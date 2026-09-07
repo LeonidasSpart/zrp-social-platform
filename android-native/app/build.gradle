@@ -36,6 +36,18 @@ android {
         applicationId "one.zrp.social"
         minSdkVersion 24
         targetSdkVersion 36
+
+        // Google Sign-In (Credential Manager) - the OAuth Web client ID
+        // registered in the same Google Cloud project GOOGLE_CLIENT_ID
+        // already uses server-side (src/lib/auth.ts's GoogleProvider,
+        // src/app/api/mobile/auth/google/route.ts's audience check).
+        // Not a secret (client IDs are public identifiers, unlike a
+        // client secret) but still not hardcoded here, mirroring the
+        // keystore.properties pattern above: supplied via a Gradle
+        // property so a build with none configured still compiles -
+        // GoogleAuth.kt's own call simply fails at runtime with a clear
+        // error until it's set, instead of failing the build.
+        buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", "\"${project.findProperty('GOOGLE_WEB_CLIENT_ID') ?: ''}\""
         // versionCode 1 ("1.0") is the existing Capacitor app's Internal
         // Testing release - confirmed via Play Console there is no
         // Production release yet. This native app's own first release
@@ -98,6 +110,7 @@ android {
 
     buildFeatures {
         compose true
+        buildConfig true
     }
 }
 
@@ -165,6 +178,19 @@ dependencies {
     implementation('io.socket:socket.io-client:2.1.1') {
         exclude group: 'org.json', module: 'json'
     }
+
+    // Google Sign-In - Android's Credential Manager API, which returns a
+    // signed Google ID token directly (an account picker, no browser
+    // redirect). This is a genuinely different mechanism from the
+    // Capacitor app's own nativeGoogleSignIn() (src/lib/nativeAuth.ts,
+    // system-browser redirect) - that one exists solely to work around
+    // Google blocking OAuth from an *embedded WebView*, which doesn't
+    // apply here since this app has no WebView at all. Verified server-
+    // side by src/app/api/mobile/auth/google/route.ts against the same
+    // GOOGLE_CLIENT_ID the website's own GoogleProvider already trusts.
+    implementation 'androidx.credentials:credentials:1.3.0'
+    implementation 'androidx.credentials:credentials-play-services-auth:1.3.0'
+    implementation 'com.google.android.libraries.identity.googleid:googleid:1.1.1'
 
     implementation 'io.coil-kt:coil-compose:2.7.0'
 

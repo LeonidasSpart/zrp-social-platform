@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Official Google "G" mark, path-for-path from the website's own
+     src/components/icons/GoogleIcon.tsx (same viewBox, same four paths,
+     same official brand colors) - not a redrawn/reinterpreted icon. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#4285F4"
+        android:pathData="M23.52,12.27c0,-0.85 -0.08,-1.67 -0.22,-2.45L12,9.82v4.64h6.47c-0.28,1.5 -1.13,2.77 -2.4,3.62v3h3.88c2.27,-2.09 3.57,-5.17 3.57,-8.81z" />
+    <path
+        android:fillColor="#34A853"
+        android:pathData="M12,24c3.24,0 5.95,-1.07 7.94,-2.9l-3.88,-3.01c-1.08,0.72 -2.45,1.15 -4.06,1.15 -3.12,0 -5.77,-2.11 -6.71,-4.94H1.28v3.11C3.26,21.3 7.31,24 12,24z" />
+    <path
+        android:fillColor="#FBBC05"
+        android:pathData="M5.29,14.3c-0.24,-0.72 -0.38,-1.49 -0.38,-2.3s0.14,-1.58 0.38,-2.3V6.59H1.28A11.95,11.95 0,0 0,0 12c0,1.94 0.46,3.77 1.28,5.41l4.01,-3.11z" />
+    <path
+        android:fillColor="#EA4335"
+        android:pathData="M12,4.75c1.77,0 3.35,0.61 4.6,1.8l3.44,-3.44C17.94,1.19 15.24,0 12,0 7.31,0 3.26,2.7 1.28,6.59l4.01,3.11C6.23,6.86 8.88,4.75 12,4.75z" />
+</vector>
