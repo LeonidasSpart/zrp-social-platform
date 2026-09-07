@@ -96,6 +96,15 @@
     "ios.music.playlistsEmpty": "No playlists yet",
     "ios.music.playlistsEmptyBody": "Playlists you create on ZRP appear here.",
     "ios.language.systemDefault": "System language",
-    "ios.language.systemDefaultNote": "Follows the language set in iOS Settings. Choose a language below to use it in ZRP only."
+    "ios.language.systemDefaultNote": "Follows the language set in iOS Settings. Choose a language below to use it in ZRP only.",
+    "ios.auth.usernameAvailable": "Username is available",
+    "ios.auth.usernameTaken": "That username is taken",
+    "ios.auth.usernameInvalid": "3-20 characters, letters, numbers and underscores only",
+    "ios.auth.usernameSuggestions": "Try one of these",
+    "ios.auth.forgotTitle": "Reset your password",
+    "ios.auth.forgotBody": "Enter the email address for your account. If it exists, we'll send a link to reset your password.",
+    "ios.auth.forgotSend": "Send reset link",
+    "ios.auth.forgotSent": "If an account exists for that address, a reset link is on its way. Open it to finish setting a new password.",
+    "ios.auth.verifyOnWebNote": "The link opens in your browser and signs you in here once you return."
   }
 }

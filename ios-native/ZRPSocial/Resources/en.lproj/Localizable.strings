@@ -415,6 +415,24 @@
 "transparency.reasonImpersonation" = "Impersonation";
 "transparency.reasonOther" = "Other";
 "nav.language" = "Language";
+"auth.createAccount" = "Create account";
+"auth.creatingAccount" = "Creating account...";
+"auth.joinCommunity" = "Join the community";
+"auth.fullName" = "Full Name";
+"auth.username" = "Username";
+"auth.email" = "Email";
+"auth.createPassword" = "Create a password";
+"auth.passwordMinLength" = "Must be at least 6 characters";
+"auth.alreadyHaveAccount" = "Already have an account?";
+"auth.signupSuccessTitle" = "Account created!";
+"auth.signupSuccessBody" = "We sent a verification link to {email}. Please check your inbox to activate your account before signing in.";
+"auth.checkSpam" = "Didn't receive the email? Check your spam folder or click the link above.";
+"auth.resendVerification" = "Resend verification email";
+"auth.resendVerificationSending" = "Sending...";
+"auth.resendVerificationSuccess" = "Verification email sent! Please check your inbox.";
+"auth.resendVerificationError" = "Failed to send verification email. Please try again.";
+"auth.resendVerificationAlreadyVerified" = "This email is already verified. Please sign in.";
+"auth.resendVerificationUserNotFound" = "We couldn't find an account matching that email or username.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back
@@ -504,3 +522,12 @@
 "ios.music.playlistsEmptyBody" = "Playlists you create on ZRP appear here.";
 "ios.language.systemDefault" = "System language";
 "ios.language.systemDefaultNote" = "Follows the language set in iOS Settings. Choose a language below to use it in ZRP only.";
+"ios.auth.usernameAvailable" = "Username is available";
+"ios.auth.usernameTaken" = "That username is taken";
+"ios.auth.usernameInvalid" = "3-20 characters, letters, numbers and underscores only";
+"ios.auth.usernameSuggestions" = "Try one of these";
+"ios.auth.forgotTitle" = "Reset your password";
+"ios.auth.forgotBody" = "Enter the email address for your account. If it exists, we'll send a link to reset your password.";
+"ios.auth.forgotSend" = "Send reset link";
+"ios.auth.forgotSent" = "If an account exists for that address, a reset link is on its way. Open it to finish setting a new password.";
+"ios.auth.verifyOnWebNote" = "The link opens in your browser and signs you in here once you return.";

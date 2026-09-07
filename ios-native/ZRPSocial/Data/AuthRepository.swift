@@ -9,6 +9,45 @@ protocol AuthRepositoryProtocol: Sendable {
     func login(identifier: String, password: String) async throws -> CurrentUser
     func restoreSession() async throws -> CurrentUser?
     func logout() async
+    func register(_ request: RegistrationRequest) async throws
+    func checkUsername(_ username: String) async throws -> UsernameAvailability
+    func resendVerification(identifier: String) async throws
+    func requestPasswordReset(email: String) async throws
+}
+
+/// `POST /api/auth/register`.
+///
+/// The route validates all of this again - a 6-character minimum, a 3-20
+/// character username, a well-formed email - and answers 400 with a
+/// `field` naming which one was rejected, so the form can point at it.
+struct RegistrationRequest: Encodable, Equatable {
+    let name: String?
+    let username: String
+    let email: String
+    let password: String
+}
+
+/// `GET /api/auth/check-username?username=`.
+///
+/// `invalid` means the format is wrong rather than the name being taken -
+/// two different things to tell someone. `suggestions` are free
+/// alternatives the route has already checked, and is empty when the
+/// name is available.
+struct UsernameAvailability: Decodable, Equatable {
+    let available: Bool
+    let invalid: Bool
+    let suggestions: [String]
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        available = try container.decodeIfPresent(Bool.self, forKey: .available) ?? false
+        invalid = try container.decodeIfPresent(Bool.self, forKey: .invalid) ?? false
+        suggestions = try container.decodeIfPresent([String].self, forKey: .suggestions) ?? []
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case available, invalid, suggestions
+    }
 }
 
 struct AuthRepository: AuthRepositoryProtocol {
@@ -85,5 +124,71 @@ struct AuthRepository: AuthRepositoryProtocol {
     /// device - once device push exists at all (see PARITY.md, B3).
     func logout() async {
         sessionStore.clear()
+    }
+
+    // MARK: - Registration and recovery
+
+    /// Creates an account.
+    ///
+    /// Succeeds with 201 and no session: the route creates the user,
+    /// emails a verification link, and returns a message. **Logging in is
+    /// refused with 403 until that link is opened** (`verifyCredentials`
+    /// in src/lib/auth.ts), so the app must not pretend the account is
+    /// ready to use.
+    ///
+    /// Rejections come back as 400 with the offending `field` - "email"
+    /// or "username" - which is what lets the form mark the right box.
+    func register(_ request: RegistrationRequest) async throws {
+        try await client.sendIgnoringResponse(
+            try Endpoint.post("auth/register", body: request, requiresAuth: false)
+        )
+    }
+
+    /// Live username availability, with free alternatives when taken.
+    func checkUsername(_ username: String) async throws -> UsernameAvailability {
+        try await client.send(
+            Endpoint.get(
+                "auth/check-username",
+                query: [("username", username)],
+                requiresAuth: false
+            )
+        )
+    }
+
+    /// Re-sends the verification email.
+    ///
+    /// The route accepts an email **or** a username, which matters: after
+    /// a failed sign-in the app already holds whatever identifier was
+    /// typed, and can offer to resend without asking for it again.
+    func resendVerification(identifier: String) async throws {
+        struct Request: Encodable { let email: String }
+        try await client.sendIgnoringResponse(
+            try Endpoint.post(
+                "auth/resend-verification",
+                body: Request(email: identifier),
+                requiresAuth: false
+            )
+        )
+    }
+
+    /// Requests a password-reset email.
+    ///
+    /// Deliberately answers the same way whether or not the address
+    /// exists - the route refuses to confirm which addresses have
+    /// accounts, and the app must not undo that by reporting "no such
+    /// user".
+    ///
+    /// The reset itself is completed through the emailed link, which
+    /// opens on the web. There is no route that resets a password from a
+    /// code typed into an app, so this does not invent one.
+    func requestPasswordReset(email: String) async throws {
+        struct Request: Encodable { let email: String }
+        try await client.sendIgnoringResponse(
+            try Endpoint.post(
+                "auth/forgot-password",
+                body: Request(email: email),
+                requiresAuth: false
+            )
+        )
     }
 }

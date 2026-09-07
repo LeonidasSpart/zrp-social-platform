@@ -4,6 +4,8 @@ struct LoginView: View {
 
     @EnvironmentObject private var session: SessionController
     @StateObject private var viewModel = LoginViewModel()
+    @State private var isRegistering = false
+    @State private var isResettingPassword = false
     @FocusState private var focusedField: Field?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -33,6 +35,12 @@ struct LoginView: View {
             .frame(maxWidth: .infinity)
         }
         .background(ZrpColor.background.ignoresSafeArea())
+        .sheet(isPresented: $isRegistering) {
+            NavigationStack { RegisterView() }
+        }
+        .sheet(isPresented: $isResettingPassword) {
+            NavigationStack { ForgotPasswordView() }
+        }
         .scrollDismissesKeyboard(.interactively)
         .onChange(of: viewModel.identifier) { _, _ in viewModel.clearError() }
         .onChange(of: viewModel.password) { _, _ in viewModel.clearError() }
@@ -168,21 +176,29 @@ struct LoginView: View {
             : AnyLayout(HStackLayout(spacing: ZrpSpacing.xs))
 
         return VStack(spacing: ZrpSpacing.lg) {
+            Button { isResettingPassword = true } label: {
+                Text(.authForgotPassword)
+                    .font(.footnote)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+            }
+            .buttonStyle(.plain)
+
             layout {
                 Text(.authNoAccount)
                     .font(.footnote)
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
-                // Sign-up, forgot-password, and Sign in with Apple are
-                // deliberately absent rather than present-and-inert.
-                // Registration and password reset land in Phase 3b;
-                // Sign in with Apple is blocked on a backend route that
-                // does not exist yet (see PARITY.md, B2). A button that
-                // cannot complete its flow is worse than no button.
-                Text(.authSignUp)
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(ZrpColor.onSurfaceMuted.opacity(0.5))
+                // Sign in with Apple is still deliberately absent rather
+                // than present-and-inert: it is blocked on a backend
+                // route that does not exist yet (PARITY.md, B2), and a
+                // button that cannot complete its flow is worse than no
+                // button. Registration and password reset are real now.
+                Button { isRegistering = true } label: {
+                    Text(.authSignUp)
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(ZrpColor.red)
+                }
+                .buttonStyle(.plain)
             }
-            .accessibilityElement(children: .combine)
         }
     }
 

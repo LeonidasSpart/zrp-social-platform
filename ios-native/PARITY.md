@@ -50,10 +50,12 @@ called and the real response being handled.
 | Secure session storage | — | httpOnly cookie | EncryptedSharedPreferences | Keychain (`kSecAttrAccessibleAfterFirstUnlock`) | IMPLEMENTED |
 | Logout / session teardown | — (local + `DELETE /api/push/fcm`) | ✅ | ✅ | ✅ (local; push teardown pending Phase 11) | PARTIAL |
 | Session expiry handling (401) | any authed route | ✅ | ✅ | ✅ (401 → clear + return to login) | IMPLEMENTED |
-| Registration | `POST /api/auth/register` | ✅ | ✅ | ⬜ | MISSING (Phase 3b) |
-| Live username availability | `GET /api/auth/check-username` | ✅ | ✅ | ⬜ | MISSING (Phase 3b) |
-| Email verification | `POST /api/auth/resend-verification`, `GET /api/auth/verify` | ✅ | ✅ | ⬜ | MISSING (Phase 3b) |
-| Forgot / reset password | `POST /api/auth/forgot-password`, `/api/auth/reset-password` | ✅ | ✅ | ⬜ | MISSING (Phase 3b) |
+| Registration | `POST /api/auth/register` | ✅ | ✅ | ✅ ends on "check your email" — the route returns no session | IMPLEMENTED |
+| Live username availability | `GET /api/auth/check-username` | ✅ | ✅ | ✅ debounced, with the route's own pre-checked suggestions | IMPLEMENTED |
+| Email verification — resend | `POST /api/auth/resend-verification` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Email verification — confirm | `GET /api/auth/verify-email` | ✅ | ✅ | ⬜ opened from the emailed link in a browser; no in-app route exists | MISSING (by design) |
+| Forgot password — request | `POST /api/auth/forgot-password` | ✅ | ✅ | ✅ answers the same way whether or not the address exists, as the route intends | IMPLEMENTED |
+| Reset password — complete | `POST /api/auth/reset-password` | ✅ | ✅ | ⬜ completed through the emailed link on the web; no route accepts a code typed into an app | MISSING (by design) |
 | Onboarding | `POST /api/user/onboarding-complete` | ✅ | ✅ | ⬜ | MISSING (Phase 3b) |
 | Google sign-in | NextAuth `google` provider (web OAuth) | ✅ | ❌ | ❌ | BLOCKED — [B1](#b1-native-oauth-google--apple) |
 | **Sign in with Apple** | NextAuth `apple` provider (web OAuth, Services ID) | ✅ (if env configured) | n/a | ❌ | **BLOCKED — [B2](#b2-sign-in-with-apple-native)** |
