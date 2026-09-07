@@ -108,14 +108,11 @@ data class MessageReactionResponse(val action: String, val reactions: List<Messa
  * (full history with that partner; the server also marks their
  * messages read as a side effect, matching the website's own behavior).
  *
- * No native Socket.io client yet: the website pushes new messages over
- * a live socket connection, but that needs its own real protocol work
- * (handshake, auth, reconnection) and this sandboxed environment has
- * no way to test a live socket connection's actual correctness before
- * merging - unlike a REST call, a subtly wrong socket integration can
- * fail silently. ConversationViewModel instead polls this same real
- * endpoint on an interval as an honest, fully-testable substitute for
- * push delivery until native sockets are built and verified.
+ * ConversationViewModel also holds a real Socket.IO connection (see
+ * ZrpSocket) for live push delivery, matching the website's own
+ * ChatInterface.tsx - this REST layer's own getConversationMessages
+ * poll stays running alongside it as a fallback, the same
+ * belt-and-suspenders design the website itself uses.
  */
 interface MessagesApi {
     @GET("messages")
