@@ -808,4 +808,16 @@
     <string name="news_category_community">Komuniteti</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Zbulo ZRP News</string>
+    <!-- ZRP Shorts (native parity) -->
+    <string name="shorts_back">Prapa</string>
+    <string name="shorts_post_a_short">Posto një Short</string>
+    <string name="shorts_mute">Hesht zërin</string>
+    <string name="shorts_unmute">Aktivizo zërin</string>
+    <string name="shorts_no_shorts_yet">Ende nuk ka Shorts. Bëhu i pari që poston një.</string>
+    <string name="shorts_like">Pëlqe</string>
+    <string name="shorts_repost">Riposto</string>
+    <string name="shorts_share">Shpërndaj</string>
+    <string name="shorts_share_post_by">Postim nga %1$s</string>
+    <string name="shorts_comment">Komente</string>
+    <string name="shorts_discover_entry">Zbulo Shorts</string>
 </resources>

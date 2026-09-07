@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SmartDisplay
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.VolunteerActivism
 import androidx.compose.material.icons.filled.Work
@@ -71,6 +72,7 @@ fun SearchScreen(
     onOpenAid: () -> Unit,
     onOpenPlay: () -> Unit,
     onOpenNews: () -> Unit,
+    onOpenShorts: () -> Unit,
     onOpenComments: (postId: String) -> Unit,
     onOpenQuotePost: (postId: String) -> Unit = {},
     onOpenReposts: (postId: String) -> Unit = {},
@@ -120,6 +122,7 @@ fun SearchScreen(
                 onOpenAid = onOpenAid,
                 onOpenPlay = onOpenPlay,
                 onOpenNews = onOpenNews,
+                onOpenShorts = onOpenShorts,
             )
         } else {
             SearchResultsContent(
@@ -228,6 +231,7 @@ private fun DiscoverContent(
     onOpenAid: () -> Unit,
     onOpenPlay: () -> Unit,
     onOpenNews: () -> Unit,
+    onOpenShorts: () -> Unit,
 ) {
     if (state.isLoadingDiscover) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -254,6 +258,9 @@ private fun DiscoverContent(
         }
         item {
             NewsEntryRow(onClick = onOpenNews)
+        }
+        item {
+            ShortsEntryRow(onClick = onOpenShorts)
         }
 
         if (state.trendingHashtags.isNotEmpty()) {
@@ -537,6 +544,25 @@ private fun NewsEntryRow(onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(text = stringResource(R.string.news_discover_entry), style = MaterialTheme.typography.titleSmall)
+    }
+}
+
+@Composable
+private fun ShortsEntryRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.SmartDisplay,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text = stringResource(R.string.shorts_discover_entry), style = MaterialTheme.typography.titleSmall)
     }
 }
 

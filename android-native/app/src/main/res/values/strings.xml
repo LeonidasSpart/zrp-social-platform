@@ -825,4 +825,16 @@
     <string name="news_category_community">Community</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Discover ZRP News</string>
+    <!-- ZRP Shorts (native parity) -->
+    <string name="shorts_back">Back</string>
+    <string name="shorts_post_a_short">Post a Short</string>
+    <string name="shorts_mute">Mute</string>
+    <string name="shorts_unmute">Unmute</string>
+    <string name="shorts_no_shorts_yet">No Shorts yet. Be the first to post one.</string>
+    <string name="shorts_like">Like</string>
+    <string name="shorts_repost">Repost</string>
+    <string name="shorts_share">Share</string>
+    <string name="shorts_share_post_by">Post by %1$s</string>
+    <string name="shorts_comment">Comments</string>
+    <string name="shorts_discover_entry">Discover Shorts</string>
 </resources>

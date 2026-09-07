@@ -77,6 +77,7 @@ import one.zrp.social.mobile.ui.opportunity.OpportunityFormScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityScreen
 import one.zrp.social.mobile.ui.news.NewsArticleScreen
 import one.zrp.social.mobile.ui.news.NewsScreen
+import one.zrp.social.mobile.ui.shorts.ShortsScreen
 import one.zrp.social.mobile.ui.play.PlayAchievementsScreen
 import one.zrp.social.mobile.ui.play.PlayChallengeScreen
 import one.zrp.social.mobile.ui.play.PlayCreateChallengeScreen
@@ -163,6 +164,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToPlayCreateChallenge: () -> Unit = { navController.navigate("play/create") }
     val goToNews: () -> Unit = { navController.navigate("news") }
     val goToNewsArticle: (String) -> Unit = { slug -> navController.navigate("news/article/${Uri.encode(slug)}") }
+    val goToShorts: () -> Unit = { navController.navigate("shorts") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -250,6 +252,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenAid = goToAid,
                     onOpenPlay = goToPlay,
                     onOpenNews = goToNews,
+                    onOpenShorts = goToShorts,
                     onOpenComments = goToComments,
                     onOpenQuotePost = goToQuotePost,
                     onOpenReposts = goToReposts,
@@ -713,6 +716,13 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                 if (slug != null) {
                     NewsArticleScreen(slug = slug, onBack = { navController.popBackStack() })
                 }
+            }
+            composable("shorts") {
+                ShortsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenComments = goToComments,
+                    onAuthorClick = goToProfile,
+                )
             }
             composable("opportunity/new") {
                 OpportunityFormScreen(

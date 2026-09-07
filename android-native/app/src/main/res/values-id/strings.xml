@@ -808,4 +808,16 @@
     <string name="news_category_community">Komunitas</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Temukan ZRP News</string>
+    <!-- ZRP Shorts (native parity) -->
+    <string name="shorts_back">Kembali</string>
+    <string name="shorts_post_a_short">Posting Short</string>
+    <string name="shorts_mute">Bisukan</string>
+    <string name="shorts_unmute">Aktifkan suara</string>
+    <string name="shorts_no_shorts_yet">Belum ada Shorts. Jadilah yang pertama memposting.</string>
+    <string name="shorts_like">Suka</string>
+    <string name="shorts_repost">Posting ulang</string>
+    <string name="shorts_share">Bagikan</string>
+    <string name="shorts_share_post_by">Postingan oleh %1$s</string>
+    <string name="shorts_comment">Komentar</string>
+    <string name="shorts_discover_entry">Temukan Shorts</string>
 </resources>

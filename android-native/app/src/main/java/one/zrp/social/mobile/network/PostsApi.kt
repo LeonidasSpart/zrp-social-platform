@@ -139,6 +139,12 @@ interface PostsApi {
         @Query("cursor") cursor: String?,
     ): PostsPage
 
+    // The real vertical video feed src/app/shorts/page.tsx itself uses -
+    // filtered to genuine video posts (mediaType === "video") server-
+    // side, same Post shape and cursor pagination as every other feed.
+    @GET("videos")
+    suspend fun getVideos(@Query("cursor") cursor: String? = null, @Query("limit") limit: Int = 10): PostsPage
+
     @POST("posts/{id}/like")
     suspend fun toggleLike(@Path("id") postId: String): LikeResponse
 

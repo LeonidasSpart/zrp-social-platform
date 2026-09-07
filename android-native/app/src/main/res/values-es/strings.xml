@@ -808,4 +808,16 @@
     <string name="news_category_community">Comunidad</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Descubrir ZRP News</string>
+    <!-- ZRP Shorts (native parity) -->
+    <string name="shorts_back">Atrás</string>
+    <string name="shorts_post_a_short">Publicar un Short</string>
+    <string name="shorts_mute">Silenciar</string>
+    <string name="shorts_unmute">Activar sonido</string>
+    <string name="shorts_no_shorts_yet">Aún no hay Shorts. Sé el primero en publicar uno.</string>
+    <string name="shorts_like">Me gusta</string>
+    <string name="shorts_repost">Republicar</string>
+    <string name="shorts_share">Compartir</string>
+    <string name="shorts_share_post_by">Publicación de %1$s</string>
+    <string name="shorts_comment">Comentarios</string>
+    <string name="shorts_discover_entry">Descubrir Shorts</string>
 </resources>
