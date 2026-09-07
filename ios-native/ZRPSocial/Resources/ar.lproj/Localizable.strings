@@ -9,6 +9,9 @@
 "nav.messages" = "الرسائل";
 "nav.profile" = "الملف الشخصي";
 "nav.bookmarks" = "المحفوظات";
+"bookmarks.empty" = "لا توجد إشارات مرجعية بعد";
+"bookmarks.emptyDesc" = "احفظ المنشورات والتعليقات التي تريد الرجوع إليها بالنقر على أيقونة الإشارة المرجعية.";
+"bookmarks.replyingTo" = "الرد على";
 "nav.more" = "المزيد";
 "nav.marketplace" = "السوق";
 "nav.settings" = "الإعدادات";

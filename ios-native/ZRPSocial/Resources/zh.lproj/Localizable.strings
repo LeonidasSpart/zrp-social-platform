@@ -9,6 +9,9 @@
 "nav.messages" = "私信";
 "nav.profile" = "个人资料";
 "nav.bookmarks" = "收藏";
+"bookmarks.empty" = "暂无收藏";
+"bookmarks.emptyDesc" = "点击收藏图标，保存你想稍后再次查看的帖子和评论。";
+"bookmarks.replyingTo" = "回复";
 "nav.more" = "更多";
 "nav.marketplace" = "市场";
 "nav.settings" = "设置";

@@ -9,6 +9,9 @@
 "nav.messages" = "Сообщения";
 "nav.profile" = "Профиль";
 "nav.bookmarks" = "Закладки";
+"bookmarks.empty" = "Закладок пока нет";
+"bookmarks.emptyDesc" = "Сохраняйте публикации и комментарии, к которым хотите вернуться, нажимая значок закладки.";
+"bookmarks.replyingTo" = "Ответ пользователю";
 "nav.more" = "Ещё";
 "nav.marketplace" = "Маркетплейс";
 "nav.settings" = "Настройки";

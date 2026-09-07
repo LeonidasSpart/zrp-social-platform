@@ -16,6 +16,9 @@ nav.notifications
 nav.messages
 nav.profile
 nav.bookmarks
+bookmarks.empty
+bookmarks.emptyDesc
+bookmarks.replyingTo
 nav.more
 nav.marketplace
 nav.settings

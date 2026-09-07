@@ -9,6 +9,9 @@
 "nav.messages" = "Mesajlar";
 "nav.profile" = "Profil";
 "nav.bookmarks" = "Yer İmleri";
+"bookmarks.empty" = "Henüz yer imi yok";
+"bookmarks.emptyDesc" = "Yer imi simgesine tıklayarak tekrar görmek istediğiniz gönderileri ve yorumları kaydedin.";
+"bookmarks.replyingTo" = "Yanıtlanan";
 "nav.more" = "Daha Fazla";
 "nav.marketplace" = "Pazar Yeri";
 "nav.settings" = "Ayarlar";

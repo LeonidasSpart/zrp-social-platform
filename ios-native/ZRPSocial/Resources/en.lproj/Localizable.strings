@@ -9,6 +9,9 @@
 "nav.messages" = "Messages";
 "nav.profile" = "Profile";
 "nav.bookmarks" = "Bookmarks";
+"bookmarks.empty" = "No bookmarks yet";
+"bookmarks.emptyDesc" = "Save posts and comments you want to revisit by clicking the bookmark icon.";
+"bookmarks.replyingTo" = "Replying to";
 "nav.more" = "More";
 "nav.marketplace" = "Marketplace";
 "nav.settings" = "Settings";

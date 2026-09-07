@@ -91,6 +91,8 @@ struct RouteDestinationView: View {
             AppealsView()
         case .trustPassport(let username):
             TrustPassportView(username: username)
+        case .bookmarks:
+            BookmarksView()
         case .listingConversation(let partner, let draft):
             ConversationView(
                 partner: partner,

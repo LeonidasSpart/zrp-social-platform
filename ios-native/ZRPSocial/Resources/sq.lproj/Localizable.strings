@@ -9,6 +9,9 @@
 "nav.messages" = "Mesazhet";
 "nav.profile" = "Profili";
 "nav.bookmarks" = "Ruajtur";
+"bookmarks.empty" = "Nuk ka të ruajtura ende";
+"bookmarks.emptyDesc" = "Ruani postimet dhe komentet që dëshironi t'i rioxhoni duke klikuar ikonën e ruajtjes.";
+"bookmarks.replyingTo" = "Duke iu përgjigjur";
 "nav.more" = "Më shumë";
 "nav.marketplace" = "Marketplace";
 "nav.settings" = "Cilësimet";

@@ -9,6 +9,9 @@
 "nav.messages" = "Nachrichten";
 "nav.profile" = "Profil";
 "nav.bookmarks" = "Lesezeichen";
+"bookmarks.empty" = "Noch keine Lesezeichen";
+"bookmarks.emptyDesc" = "Speichere Beiträge und Kommentare, die du später erneut ansehen möchtest, indem du auf das Lesezeichen-Symbol klickst.";
+"bookmarks.replyingTo" = "Antwort an";
 "nav.more" = "Mehr";
 "nav.marketplace" = "Marktplatz";
 "nav.settings" = "Einstellungen";

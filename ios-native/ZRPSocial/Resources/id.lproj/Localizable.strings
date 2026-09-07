@@ -9,6 +9,9 @@
 "nav.messages" = "Pesan";
 "nav.profile" = "Profil";
 "nav.bookmarks" = "Markah";
+"bookmarks.empty" = "Belum ada markah";
+"bookmarks.emptyDesc" = "Simpan postingan dan komentar yang ingin Anda kunjungi kembali dengan mengklik ikon markah.";
+"bookmarks.replyingTo" = "Membalas";
 "nav.more" = "Lainnya";
 "nav.marketplace" = "Marketplace";
 "nav.settings" = "Pengaturan";

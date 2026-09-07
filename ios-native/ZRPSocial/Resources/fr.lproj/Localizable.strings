@@ -9,6 +9,9 @@
 "nav.messages" = "Messages";
 "nav.profile" = "Profil";
 "nav.bookmarks" = "Favoris";
+"bookmarks.empty" = "Aucun favori pour le moment";
+"bookmarks.emptyDesc" = "Enregistrez les publications et commentaires que vous souhaitez revoir en cliquant sur l'icône de favori.";
+"bookmarks.replyingTo" = "En réponse à";
 "nav.more" = "Plus";
 "nav.marketplace" = "Marketplace";
 "nav.settings" = "Paramètres";

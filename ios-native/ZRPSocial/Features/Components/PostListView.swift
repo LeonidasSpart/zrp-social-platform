@@ -33,25 +33,12 @@ struct PostListView<Header: View>: View {
     /// costs nothing when a screen does not have one.
     @ViewBuilder let header: () -> Header
 
-    @EnvironmentObject private var session: SessionController
     @EnvironmentObject private var interactions: PostInteractionStore
-    @EnvironmentObject private var language: LanguageController
 
-    // The quote composer and the edit sheet live here rather than on
-    // each card: a sheet presented from inside a `LazyVStack` row is
-    // torn down when that row recycles mid-scroll.
-    @State private var quoting: Post?
-    @State private var editing: Post?
-    @State private var editDraft = ""
-
-    /// Translating requires a session - the route answers 401 without
-    /// one - so the item is not offered to a signed-out reader. The
-    /// target language is whatever the app is currently displayed in,
-    /// which is what the website sends too.
-    private func translateAction(for post: Post) -> (() -> Void)? {
-        guard session.currentUser != nil else { return nil }
-        return { interactions.toggleTranslation(post, to: language.effectiveCode) }
-    }
+    // The quote composer and the edit sheet live at list level rather
+    // than on each card: a sheet presented from inside a `LazyVStack`
+    // row is torn down when that row recycles mid-scroll.
+    @StateObject private var sheets = PostSheetState()
 
     /// Posts deleted this session are filtered here rather than removed
     /// from each screen's own array, so one delete is reflected
@@ -65,30 +52,13 @@ struct PostListView<Header: View>: View {
             header()
 
             ForEach(visiblePosts) { post in
-                PostCardView(
+                PostRowView(
                     post: post,
-                    interaction: interactions.interaction(for: post),
-                    isOwnPost: post.author.id == session.currentUser?.id,
-                    onLike: { Task { await interactions.toggleLike(post) } },
-                    onRepost: { Task { await interactions.toggleRepost(post) } },
-                    onBookmark: { Task { await interactions.toggleBookmark(post) } },
-                    onDelete: { Task { await interactions.deletePost(post) } },
-                    onQuote: { quoting = post },
-                    onEdit: {
-                        editDraft = interactions.displayContent(for: post)
-                        editing = post
-                    },
-                    onPin: onPin.map { pin in { pin(post) } },
-                    isPinned: post.id == pinnedPostId,
-                    onTranslate: translateAction(for: post)
+                    onPin: onPin,
+                    pinnedPostId: pinnedPostId,
+                    onAppear: onAppear,
+                    sheets: sheets
                 )
-                .onAppear {
-                    onAppear(post)
-                    // Counted here rather than inside the card so the
-                    // card stays free of the store; the two screens that
-                    // build a card both already hold it.
-                    interactions.countView(post)
-                }
             }
 
             footer
@@ -97,21 +67,7 @@ struct PostListView<Header: View>: View {
         // stretching a post across a 12.9" display.
         .frame(maxWidth: ZrpMetrics.contentMaxWidth)
         .frame(maxWidth: .infinity)
-        .sheet(item: $quoting) { post in
-            ComposeView(quoting: post) { created in onCreated(created) }
-        }
-        .sheet(item: $editing) { post in
-            EditPostSheet(
-                draft: $editDraft,
-                onCancel: { editing = nil },
-                onSave: {
-                    let target = post
-                    let content = editDraft
-                    editing = nil
-                    Task { await interactions.editPost(target, content: content) }
-                }
-            )
-        }
+        .postSheets(sheets, onCreated: onCreated)
     }
 
     @ViewBuilder
@@ -198,48 +154,5 @@ enum TimelineStateView {
         }
         .padding(ZrpSpacing.xl)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-}
-
-/// The text-only edit modal, matching what the website's own edit
-/// modal offers - media is never touched by an edit on either client.
-private struct EditPostSheet: View {
-
-    @Binding var draft: String
-    let onCancel: () -> Void
-    let onSave: () -> Void
-
-    var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading, spacing: ZrpSpacing.lg) {
-                TextField(
-                    L10n.string(.composerPlaceholderDefault),
-                    text: $draft,
-                    axis: .vertical
-                )
-                .font(.body)
-                .lineLimit(4...12)
-                .padding(ZrpSpacing.md)
-                .background(ZrpColor.surfaceElevated)
-                .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous))
-                Spacer()
-            }
-            .padding(ZrpSpacing.lg)
-            .background(ZrpColor.background.ignoresSafeArea())
-            .navigationTitle(Text(.iosPostEditTitle))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(action: onCancel) { Text(.actionCancel) }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: onSave) {
-                        Text(.actionSave).font(.subheadline.weight(.semibold))
-                    }
-                    .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-            }
-        }
-        .presentationDetents([.medium])
     }
 }
