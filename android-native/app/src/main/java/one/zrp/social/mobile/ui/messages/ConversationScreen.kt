@@ -1,5 +1,8 @@
 package one.zrp.social.mobile.ui.messages
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -22,8 +25,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -37,6 +42,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,15 +54,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.network.ChatMessage
+import one.zrp.social.mobile.ui.call.CallPhase
+import one.zrp.social.mobile.ui.call.CallScreen
+import one.zrp.social.mobile.ui.call.CallViewModel
+import one.zrp.social.mobile.ui.call.CallViewModelFactory
 import one.zrp.social.mobile.ui.components.AddReactionDialog
+import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
+import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
@@ -81,12 +95,54 @@ fun ConversationScreen(
     )
     val state by viewModel.state.collectAsState()
 
+    val callViewModel: CallViewModel = viewModel(factory = remember { CallViewModelFactory() })
+    val callState by callViewModel.state.collectAsState()
+    val context = LocalContext.current
+
+    // Signaling is only live while this screen is open - matches
+    // page.tsx's own page-scoped setupSocket()/useEffect cleanup (see
+    // CallViewModel's own KDoc).
+    DisposableEffect(Unit) {
+        callViewModel.connectSignaling()
+        onDispose { callViewModel.disconnectSignaling() }
+    }
+
     var deletingMessageId by remember { mutableStateOf<String?>(null) }
     var isDeletingMessage by remember { mutableStateOf(false) }
     var reactingToMessageId by remember { mutableStateOf<String?>(null) }
+    var showContactPopup by remember { mutableStateOf(false) }
+    var isBlocked by remember { mutableStateOf(false) }
 
     val listState = rememberLazyListState()
     var pendingScrollIndex by remember { mutableStateOf<Int?>(null) }
+
+    // Matches getUserMedia's own browser permission prompt, asked right
+    // before a call actually starts/is accepted rather than up front.
+    var pendingVideoCall by remember { mutableStateOf(false) }
+    val callPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+    ) { granted ->
+        if (granted[Manifest.permission.RECORD_AUDIO] == true) {
+            val partner = state.partner
+            if (partner != null) {
+                callViewModel.startCall(context, partner.id, pendingVideoCall)
+            }
+        }
+    }
+    fun requestCall(isVideo: Boolean) {
+        pendingVideoCall = isVideo
+        val permissions = if (isVideo) {
+            arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA)
+        } else {
+            arrayOf(Manifest.permission.RECORD_AUDIO)
+        }
+        callPermissionLauncher.launch(permissions)
+    }
+
+    if (callState.phase != CallPhase.IDLE) {
+        CallScreen(viewModel = callViewModel, onDismiss = {})
+        return
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -98,50 +154,86 @@ fun ConversationScreen(
             IconButton(onClick = onBack) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.chat_back_to_messages))
             }
-            Column(
+
+            val partner = state.partner
+            Row(
                 modifier = Modifier
+                    .weight(1f)
                     .padding(start = 4.dp)
-                    // Matches ChatInterface.tsx's own header button - web
-                    // opens a ChatContactDrawer with call buttons/shared
-                    // media/a "View Profile" link; this app has none of
-                    // that yet, so the header goes straight to the real
-                    // profile instead of a drawer this app doesn't have.
-                    .clickable(onClick = onOpenProfile),
+                    // Matches ChatInterface.tsx's own header button - opens
+                    // the same real user-action popup web's own
+                    // ChatContactDrawer is, rather than jumping straight to
+                    // the profile.
+                    .clickable { showContactPopup = true },
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = "@$partnerUsername",
-                    style = MaterialTheme.typography.titleMedium,
+                Avatar(
+                    url = partner?.avatarUrl,
+                    name = partner?.name ?: partner?.username ?: partnerUsername,
+                    size = 36.dp,
                 )
-                // Matches ChatInterface.tsx's own header status row - a
-                // "Typing..." indicator (from the real "user-typing" socket
-                // event) takes priority over the live/offline connection
-                // dot, exactly like web's own receiverTyping-vs-socketConnected
-                // conditional.
-                if (state.partnerTyping) {
-                    Text(
-                        text = stringResource(R.string.chat_typing),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = ZrpRed,
-                    )
-                } else {
+                Column(modifier = Modifier.padding(start = Spacing.sm)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .clip(CircleShape)
-                                .background(if (state.socketConnected) Color(0xFF22C55E) else Color(0xFFEF4444)),
-                        )
                         Text(
-                            text = stringResource(if (state.socketConnected) R.string.chat_live else R.string.chat_offline),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(start = 4.dp),
+                            text = partner?.name ?: partner?.username ?: partnerUsername,
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
+                        VerifiedBadge(badgeType = partner?.badgeType, modifier = Modifier.padding(start = 3.dp))
+                    }
+                    // Matches ChatInterface.tsx's own header status row - a
+                    // "Typing..." indicator (from the real "user-typing" socket
+                    // event) takes priority over the live/offline connection
+                    // dot, exactly like web's own receiverTyping-vs-socketConnected
+                    // conditional.
+                    if (state.partnerTyping) {
+                        Text(
+                            text = stringResource(R.string.chat_typing),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = ZrpRed,
+                        )
+                    } else {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(if (state.socketConnected) Color(0xFF22C55E) else Color(0xFFEF4444)),
+                            )
+                            Text(
+                                text = stringResource(if (state.socketConnected) R.string.chat_live else R.string.chat_offline),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 4.dp),
+                            )
+                        }
                     }
                 }
             }
+
+            IconButton(onClick = { requestCall(isVideo = false) }) {
+                Icon(Icons.Filled.Call, contentDescription = "Voice call")
+            }
+            IconButton(onClick = { requestCall(isVideo = true) }) {
+                Icon(Icons.Filled.Videocam, contentDescription = "Video call")
+            }
         }
         HorizontalDivider()
+
+        val popupPartner = state.partner
+        if (showContactPopup && popupPartner != null) {
+            ChatContactPopup(
+                partner = popupPartner,
+                messages = state.messages,
+                isBlocked = isBlocked,
+                onDismiss = { showContactPopup = false },
+                onOpenProfile = onOpenProfile,
+                onVoiceCall = { requestCall(isVideo = false) },
+                onVideoCall = { requestCall(isVideo = true) },
+                onBlockToggled = { isBlocked = it },
+            )
+        }
 
         Box(
             modifier = Modifier

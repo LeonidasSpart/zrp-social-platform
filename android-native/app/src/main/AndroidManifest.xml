@@ -8,6 +8,13 @@
          user is signed in (see AuthState-gated LaunchedEffect there),
          not declaring this alone is enough. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Voice/video calling (Messaging parity) - requested at runtime
+         right before a call starts or is accepted, matching the browser's
+         own getUserMedia permission prompt at the same point in the flow. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
 
     <application
         android:name=".ZrpApplication"

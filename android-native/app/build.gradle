@@ -124,8 +124,9 @@ dependencies {
     // recommended API for this, delegating to the framework LocaleManager
     // on API 33+ and to its own AppLocalesMetadataHolderService-backed
     // storage below that (see the matching AndroidManifest.xml service
-    // entry). Needed even though MainActivity is a plain ComponentActivity,
-    // not AppCompatActivity - the API itself works standalone.
+    // entry). MainActivity is now an AppCompatActivity itself (required
+    // separately, so the new locale's string resources actually reapply
+    // on recreate() below Android 13 - see MainActivity's own comment).
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.6'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6'
@@ -207,6 +208,18 @@ dependencies {
     // firebase-messaging-ktx below doesn't declare its own version.
     implementation platform('com.google.firebase:firebase-bom:33.5.1')
     implementation 'com.google.firebase:firebase-messaging-ktx'
+
+    // Real voice/video calling (Messaging parity) - the same WebRTC
+    // protocol ChatInterface.tsx/page.tsx already use via simple-peer
+    // (browser RTCPeerConnection), signaled over the exact same
+    // call-user/incoming-call/accept-call/call-accepted/reject-call/
+    // end-call Socket.IO events server.js already relays, and the same
+    // real /api/turn-credentials ICE servers (see CallViewModel's own
+    // KDoc for the full wire-protocol mapping). google-webrtc itself
+    // stopped publishing to Maven Central in 2023; this is the actively
+    // maintained community build of the same upstream libwebrtc used
+    // by every other production Android WebRTC app since.
+    implementation 'io.github.webrtc-sdk:android:125.6422.06.1'
 
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'

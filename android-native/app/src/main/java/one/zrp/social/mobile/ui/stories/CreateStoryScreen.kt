@@ -247,7 +247,7 @@ private fun StoryMediaPreview(
             AsyncImage(
                 model = url,
                 contentDescription = "Story media preview",
-                contentScale = ContentScale.Contain,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize(),
             )
         }

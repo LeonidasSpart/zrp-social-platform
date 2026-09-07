@@ -16,6 +16,7 @@ import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.ChatMessage
 import one.zrp.social.mobile.network.MessageReaction
+import one.zrp.social.mobile.network.PostAuthor
 import one.zrp.social.mobile.network.SocketMessageDeletedPayload
 import one.zrp.social.mobile.network.SocketMessageEditedPayload
 import one.zrp.social.mobile.network.SocketMessagePreview
@@ -50,6 +51,12 @@ data class ConversationUiState(
     val error: String? = null,
     val partnerTyping: Boolean = false,
     val socketConnected: Boolean = false,
+    // Derived from whichever loaded message first carries a real
+    // sender/receiver - see ConversationViewModel's own load(). Null
+    // only until the first page of history (or the poll) resolves it,
+    // same as ChatInterface.tsx itself has no receiver identity beyond
+    // its own receiverId/receiverName/receiverAvatar props until then.
+    val partner: PostAuthor? = null,
 )
 
 /**
@@ -330,7 +337,21 @@ class ConversationViewModel(
 
             repository.getConversationMessages(partnerId)
                 .onSuccess { list ->
-                    _state.update { it.copy(messages = list, isLoading = false, isRefreshing = false) }
+                    val derivedPartner = list.firstNotNullOfOrNull { message ->
+                        when (partnerId) {
+                            message.sender?.id -> message.sender
+                            message.receiver?.id -> message.receiver
+                            else -> null
+                        }
+                    }
+                    _state.update {
+                        it.copy(
+                            messages = list,
+                            isLoading = false,
+                            isRefreshing = false,
+                            partner = derivedPartner ?: it.partner,
+                        )
+                    }
                 }
                 .onFailure { error ->
                     _state.update {
