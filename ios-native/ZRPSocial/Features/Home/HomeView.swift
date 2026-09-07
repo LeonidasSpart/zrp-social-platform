@@ -127,6 +127,11 @@ struct HomeView: View {
                     Label { Text(.navMarketplace) } icon: { Image(systemName: "bag") }
                 }
                 Button {
+                    navigator.push(.play)
+                } label: {
+                    Label { Text(.navPlay) } icon: { Image(systemName: "gamecontroller") }
+                }
+                Button {
                     navigator.push(.opportunity)
                 } label: {
                     Label { Text(.navOpportunity) } icon: { Image(systemName: "briefcase") }

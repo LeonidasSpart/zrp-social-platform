@@ -115,6 +115,12 @@ struct RouteDestinationView: View {
             OpportunityView()
         case .opportunityDetail(let id):
             OpportunityDetailView(listingId: id)
+        case .play:
+            PlayHomeView()
+        case .playChallenge(let id):
+            PlayChallengeView(challengeId: id)
+        case .playLeaderboard:
+            PlayLeaderboardView()
         case .listingConversation(let partner, let draft):
             ConversationView(
                 partner: partner,

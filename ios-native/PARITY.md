@@ -172,6 +172,18 @@ called and the real response being handled.
 | Delete a conversation | `DELETE /api/messages/conversation/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Image attachments | `POST /api/messages` + `imageUrl` (UploadThing `chatImage`, 4 MB); the route accepts an empty `content` **only** alongside an image and refuses both-empty with a 400 | ✅ | ✅ | ✅ one picture per message (the row stores a single `imageUrl`), uploaded on send rather than on selection, and a failed upload stops the send rather than silently dropping the picture | IMPLEMENTED |
 
+### ZRP PLAY
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| PLAY home | `GET /api/play/home` | ✅ | ✅ | ✅ today's challenge, trending, the top of the leaderboard and the viewer's own standing; serves a signed-out reader with the personal parts absent | IMPLEMENTED |
+| Play a challenge | `GET /api/play/challenges/{id}` + `POST .../submit` | ✅ | ✅ | ✅ all three types — trivia, logic (multiple-choice and free-text), and a real memory board | IMPLEMENTED |
+| Scoring | `scoreTrivia` / `scoreMemory` / `scoreLogic`, server-side | ✅ | ✅ | ✅ **nothing is scored on the client.** `stripAnswers` removes the answers before the content leaves the server, so this app could not score a challenge even if it wanted to — it sends what the player did and displays what the server made of it | IMPLEMENTED |
+| XP, level, streak, achievements | computed by the submit route and `xpProgress` | ✅ | ✅ | ✅ every figure is the server's; the level curve is never recomputed here | IMPLEMENTED |
+| Leaderboard | `GET /api/play/leaderboard` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Duels | `GET`/`POST /api/play/duels`, `/duels/{id}` | ✅ | ✅ | ⬜ opponent search, an invitation lifecycle (pending / accepted / declined / expired) and a result screen that waits for the other player — a module of its own | MISSING |
+| Create a challenge | `POST /api/play/challenges`, `/challenges/generate` | ✅ | ✅ | ⬜ a builder for three different content shapes, plus the AI generator | MISSING |
+
 ### ZRP OPPORTUNITY
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
@@ -338,7 +350,7 @@ called and the real response being handled.
 | Admin console (`/api/admin/**`, 40+ routes) | STAFF/ADMIN — server-role gated. |
 | Tips, plan upgrade, premium-post purchase, help/charity contribution | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
 | Ads, Careers, Investors, Press, Transparency, API keys, Team | WEB-ONLY — Android has no surface for any of them either. |
-| Play, Journalist, Creator Studio | **NOT out of scope — outstanding iOS work.** The 2026-09-07 audit corrected an earlier claim here: Android *does* ship all of these natively. They are genuine iOS gaps, not deliberate omissions. |
+| Journalist, Creator Studio | **NOT out of scope — outstanding iOS work.** The 2026-09-07 audit corrected an earlier claim here: Android *does* ship all of these natively. They are genuine iOS gaps, not deliberate omissions. |
 
 ---
 

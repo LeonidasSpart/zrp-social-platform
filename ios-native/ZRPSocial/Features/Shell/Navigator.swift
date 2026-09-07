@@ -74,6 +74,9 @@ enum Route: Hashable {
     case aidCampaign(id: String)
     case opportunity
     case opportunityDetail(id: String)
+    case play
+    case playChallenge(id: String)
+    case playLeaderboard
 }
 
 /// Owns the navigation stack's path.

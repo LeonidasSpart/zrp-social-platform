@@ -79,6 +79,13 @@ enum DeepLink {
             // parameter is for.
             return DeepLinkTarget(.home, .shorts(startId: second))
 
+        case "play":
+            // /play, and /play/challenge/{id} for one challenge.
+            if second == "challenge", let id = third {
+                return DeepLinkTarget(.home, .playChallenge(id: id))
+            }
+            return DeepLinkTarget(.home, .play)
+
         case "opportunity":
             return DeepLinkTarget(.home, second.map { .opportunityDetail(id: $0) } ?? .opportunity)
 
