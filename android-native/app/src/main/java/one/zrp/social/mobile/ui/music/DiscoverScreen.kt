@@ -115,8 +115,13 @@ fun DiscoverScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    // Captured into a local val first - smart-casting
+                    // state.activeGenre directly from String? to String
+                    // fails to compile since it's read through a
+                    // Compose State delegate's getter, not a plain val.
+                    val activeGenre = state.activeGenre
                     val heading = when {
-                        state.activeGenre != null -> state.activeGenre
+                        activeGenre != null -> activeGenre
                         state.query.isNotBlank() -> stringResource(R.string.music_discover_results_for, state.query)
                         else -> stringResource(R.string.music_discover_all_tracks)
                     }
