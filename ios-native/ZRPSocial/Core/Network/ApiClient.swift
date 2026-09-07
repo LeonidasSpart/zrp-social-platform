@@ -208,21 +208,28 @@ final class ApiClient: @unchecked Sendable {
     /// `2025-01-02T03:04:05.123Z`. A few routes hand back values without
     /// fractional seconds, so both are accepted rather than failing a
     /// whole feed page on one timestamp.
-    private static let fractionalFormatter: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return formatter
-    }()
+    ///
+    /// `Date.ISO8601FormatStyle` rather than a shared
+    /// `ISO8601DateFormatter`: the format style is a `Sendable` value
+    /// type, so it can be referenced from the `@Sendable` decoding
+    /// closure below without the shared-mutable-reference hazard a
+    /// formatter instance would carry. Xcode 26 diagnoses that
+    /// conversion; Xcode 16 did not.
+    private static let fractionalISO8601 = Date.ISO8601FormatStyle(
+        includingFractionalSeconds: true
+    )
 
-    private static let plainFormatter: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
-        return formatter
-    }()
+    private static let plainISO8601 = Date.ISO8601FormatStyle(
+        includingFractionalSeconds: false
+    )
 
-    private static func decodeDate(_ decoder: Decoder) throws -> Date {
+    @Sendable
+    private static func decodeDate(_ decoder: any Decoder) throws -> Date {
         let raw = try decoder.singleValueContainer().decode(String.self)
-        if let date = fractionalFormatter.date(from: raw) ?? plainFormatter.date(from: raw) {
+        if let date = try? fractionalISO8601.parse(raw) {
+            return date
+        }
+        if let date = try? plainISO8601.parse(raw) {
             return date
         }
         throw DecodingError.dataCorrupted(

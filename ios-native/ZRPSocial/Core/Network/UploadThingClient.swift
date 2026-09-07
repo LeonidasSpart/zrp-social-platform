@@ -352,6 +352,16 @@ final class UploadThingClient: NSObject, @unchecked Sendable {
 /// `URLSession` calls these on its own queue while the continuation is
 /// attached from the caller's, so every mutation is behind a lock. The
 /// continuation is resumed exactly once - resuming twice would trap.
+///
+/// Note there is deliberately no `didReceive response:` delegate method.
+/// Its only useful form is `async`, and taking an `NSLock` inside an
+/// async function is a real hazard - the lock can be acquired on one
+/// thread and released on another across a suspension point. Xcode 26
+/// diagnoses exactly that ("'lock' is unavailable from asynchronous
+/// contexts ... this is an error in the Swift 6 language mode"), and
+/// Xcode 16 did not. The response is read from `task.response` in
+/// `didCompleteWithError` instead, where it is already populated and no
+/// lock is needed to observe it.
 private final class UploadCompletion: NSObject, URLSessionDataDelegate {
 
     private let lock = NSLock()
@@ -360,7 +370,6 @@ private final class UploadCompletion: NSObject, URLSessionDataDelegate {
     private var continuation: CheckedContinuation<(Data, URLResponse), Error>?
     private var finished: Result<(Data, URLResponse), Error>?
     private var buffer = Data()
-    private var response: URLResponse?
 
     init(onProgress: @escaping (Double) -> Void) {
         self.onProgress = onProgress
@@ -397,17 +406,6 @@ private final class UploadCompletion: NSObject, URLSessionDataDelegate {
     func urlSession(
         _ session: URLSession,
         dataTask: URLSessionDataTask,
-        didReceive response: URLResponse
-    ) async -> URLSession.ResponseDisposition {
-        lock.lock()
-        self.response = response
-        lock.unlock()
-        return .allow
-    }
-
-    func urlSession(
-        _ session: URLSession,
-        dataTask: URLSessionDataTask,
         didReceive data: Data
     ) {
         lock.lock()
@@ -420,13 +418,22 @@ private final class UploadCompletion: NSObject, URLSessionDataDelegate {
         task: URLSessionTask,
         didCompleteWithError error: Error?
     ) {
+        // One critical section: `buffer` is read under the same lock it is
+        // appended under, and the continuation is claimed atomically so it
+        // can only ever be resumed once - resuming twice traps.
+        lock.lock()
+        guard finished == nil else {
+            lock.unlock()
+            return
+        }
+
         let result: Result<(Data, URLResponse), Error>
         if let error {
             let isCancellation = (error as? URLError)?.code == .cancelled
             result = .failure(
                 isCancellation ? UploadThingClient.UploadError.cancelled : error
             )
-        } else if let response = response ?? task.response {
+        } else if let response = task.response {
             result = .success((buffer, response))
         } else {
             result = .failure(
@@ -434,16 +441,14 @@ private final class UploadCompletion: NSObject, URLSessionDataDelegate {
             )
         }
 
-        lock.lock()
-        guard finished == nil else {
-            lock.unlock()
-            return
-        }
         finished = result
         let pending = continuation
         continuation = nil
         lock.unlock()
 
+        // Resumed outside the lock: the awaiting task continues here, and
+        // holding a lock across that hand-off is exactly the hazard this
+        // file no longer has anywhere else.
         pending?.resume(with: result)
     }
 }
