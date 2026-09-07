@@ -79,6 +79,11 @@ enum DeepLink {
             // parameter is for.
             return DeepLinkTarget(.home, .shorts(startId: second))
 
+        case "explore":
+            // /explore, /explore/people and /explore/trending all land on
+            // the same screen here - it carries both lists.
+            return DeepLinkTarget(.search, .explore)
+
         case "news":
             return DeepLinkTarget(.home, second.map { .newsArticle(slug: $0) } ?? .news)
 

@@ -161,6 +161,10 @@
 "search.noPosts" = "Keine Beiträge gefunden.";
 "home.trendingOnZrp" = "Trends auf ZRP";
 "explore.postCount" = "{n} Beiträge";
+"explore.title" = "Entdecken";
+"rightPanel.whoToFollow" = "Wem du folgen könntest";
+"rightPanel.trending" = "Im Trend";
+"rightPanel.noTrending" = "Noch keine Trend-Hashtags.";
 "nav.explore" = "Entdecken";
 "nav.music" = "Musik";
 "music.common.play" = "Abspielen";

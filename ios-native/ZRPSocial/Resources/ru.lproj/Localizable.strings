@@ -161,6 +161,10 @@
 "search.noPosts" = "Публикации не найдены.";
 "home.trendingOnZrp" = "В тренде на ZRP";
 "explore.postCount" = "{n} публикаций";
+"explore.title" = "Обзор";
+"rightPanel.whoToFollow" = "На кого подписаться";
+"rightPanel.trending" = "В тренде";
+"rightPanel.noTrending" = "Нет в тренде хэштегов пока.";
 "nav.explore" = "Обзор";
 "nav.music" = "Музыка";
 "music.common.play" = "Воспроизвести";

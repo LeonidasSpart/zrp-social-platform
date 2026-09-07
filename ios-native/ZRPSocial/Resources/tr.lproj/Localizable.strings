@@ -161,6 +161,10 @@
 "search.noPosts" = "Gönderi bulunamadı.";
 "home.trendingOnZrp" = "ZRP'de gündemde";
 "explore.postCount" = "{n} gönderi";
+"explore.title" = "Keşfet";
+"rightPanel.whoToFollow" = "Takip edilecekler";
+"rightPanel.trending" = "Gündemdekiler";
+"rightPanel.noTrending" = "Henüz gündemde hashtag yok.";
 "nav.explore" = "Keşfet";
 "nav.music" = "Müzik";
 "music.common.play" = "Oynat";

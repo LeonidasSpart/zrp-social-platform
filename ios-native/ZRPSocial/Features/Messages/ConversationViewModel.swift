@@ -59,13 +59,16 @@ final class ConversationViewModel: ObservableObject {
         initialDraft: String = "",
         repository: MessagesRepositoryProtocol = MessagesRepository(),
         uploads: UploadThingClient = UploadThingClient(),
-        socket: ZrpSocket = .shared
+        // Not a default argument: a default is evaluated outside the
+        // actor, and `ZrpSocket.shared` is main-actor isolated. Resolved
+        // in the body instead, where this init already is.
+        socket: ZrpSocket? = nil
     ) {
         self.partner = partner
         self.viewerId = viewerId
         self.repository = repository
         self.uploads = uploads
-        self.socket = socket
+        self.socket = socket ?? .shared
         // Pre-filled, never auto-sent. "Contact Seller" in the
         // marketplace opens this thread with the same opening line and
         // listing link the website composes - the person still reads it,

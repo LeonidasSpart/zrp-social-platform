@@ -53,8 +53,8 @@ struct NewsArticleView: View {
                 TimelineStateView.error(error) {
                     Task { await viewModel.load() }
                 }
-            case .loaded(let article):
-                article(article)
+            case .loaded(let loaded):
+                articleBody(loaded)
             }
         }
         .background(ZrpColor.background.ignoresSafeArea())
@@ -64,7 +64,7 @@ struct NewsArticleView: View {
     }
 
     @ViewBuilder
-    private func article(_ article: NewsArticle) -> some View {
+    private func articleBody(_ article: NewsArticle) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: ZrpSpacing.lg) {
                 if let cover = article.coverImage {

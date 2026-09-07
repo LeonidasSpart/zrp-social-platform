@@ -99,6 +99,8 @@ struct RouteDestinationView: View {
             NewsView()
         case .newsArticle(let slug):
             NewsArticleView(slug: slug)
+        case .explore:
+            ExploreView()
         case .listingConversation(let partner, let draft):
             ConversationView(
                 partner: partner,

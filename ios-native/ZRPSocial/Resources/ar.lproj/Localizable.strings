@@ -161,6 +161,10 @@
 "search.noPosts" = "لم يتم العثور على منشورات.";
 "home.trendingOnZrp" = "الأكثر رواجاً على ZRP";
 "explore.postCount" = "{n} منشورات";
+"explore.title" = "استكشاف";
+"rightPanel.whoToFollow" = "من تتابع";
+"rightPanel.trending" = "الرائج";
+"rightPanel.noTrending" = "لا رائج وسوم بعد.";
 "nav.explore" = "استكشاف";
 "nav.music" = "الموسيقى";
 "music.common.play" = "تشغيل";

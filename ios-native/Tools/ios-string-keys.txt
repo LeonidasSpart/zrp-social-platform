@@ -192,6 +192,10 @@ search.noUsers
 search.noPosts
 home.trendingOnZrp
 explore.postCount
+explore.title
+rightPanel.whoToFollow
+rightPanel.trending
+rightPanel.noTrending
 nav.explore
 
 # ── Music (Phase 13) ────────────────────────────────────────────────

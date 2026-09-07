@@ -161,6 +161,10 @@
 "search.noPosts" = "Nessun post trovato.";
 "home.trendingOnZrp" = "Di tendenza su ZRP";
 "explore.postCount" = "{n} post";
+"explore.title" = "Esplora";
+"rightPanel.whoToFollow" = "Chi seguire";
+"rightPanel.trending" = "Tendenze";
+"rightPanel.noTrending" = "Ancora nessuna tendenza.";
 "nav.explore" = "Esplora";
 "nav.music" = "Musica";
 "music.common.play" = "Riproduci";

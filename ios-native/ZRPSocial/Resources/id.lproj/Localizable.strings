@@ -161,6 +161,10 @@
 "search.noPosts" = "Postingan tidak ditemukan.";
 "home.trendingOnZrp" = "Sedang tren di ZRP";
 "explore.postCount" = "{n} postingan";
+"explore.title" = "Jelajahi";
+"rightPanel.whoToFollow" = "Yang bisa diikuti";
+"rightPanel.trending" = "Sedang Tren";
+"rightPanel.noTrending" = "Belum ada tagar yang sedang tren.";
 "nav.explore" = "Jelajahi";
 "nav.music" = "Musik";
 "music.common.play" = "Putar";

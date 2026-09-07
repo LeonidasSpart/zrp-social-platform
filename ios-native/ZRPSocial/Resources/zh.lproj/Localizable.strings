@@ -161,6 +161,10 @@
 "search.noPosts" = "未找到帖子。";
 "home.trendingOnZrp" = "ZRP 热门话题";
 "explore.postCount" = "{n} 帖子";
+"explore.title" = "探索";
+"rightPanel.whoToFollow" = "推荐关注";
+"rightPanel.trending" = "热门";
+"rightPanel.noTrending" = "无 热门 话题标签 还.";
 "nav.explore" = "探索";
 "nav.music" = "音乐";
 "music.common.play" = "播放";

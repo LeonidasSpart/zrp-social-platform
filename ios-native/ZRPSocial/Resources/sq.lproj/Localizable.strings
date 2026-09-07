@@ -161,6 +161,10 @@
 "search.noPosts" = "Nuk u gjet asnjë postim.";
 "home.trendingOnZrp" = "Në trend në ZRP";
 "explore.postCount" = "{n} postime";
+"explore.title" = "Eksploro";
+"rightPanel.whoToFollow" = "Kë të ndiqni";
+"rightPanel.trending" = "Kryesore";
+"rightPanel.noTrending" = "Nuk ka hashtags kryesorë ende.";
 "nav.explore" = "Eksploro";
 "nav.music" = "Muzikë";
 "music.common.play" = "Luaj";
