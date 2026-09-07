@@ -334,4 +334,24 @@
     <string name="music_liked_empty_title">Ancora nessun brano tra i preferiti</string>
     <string name="music_liked_empty_body">Tocca il cuore di un brano per salvarlo qui.</string>
     <string name="music_history_empty_title">Ancora nessuna cronologia di ascolto</string>
-    <string name="music_history_empty_body">I brani che ascolti appariranno qui.</string></resources>
+    <string name="music_history_empty_body">I brani che ascolti appariranno qui.</string>
+    <!-- Music Studio: Artist Profile -->
+    <string name="music_shell_studio_label">Music Studio</string>
+    <string name="music_shell_studio_eyebrow">Strumenti per creator</string>
+    <string name="music_shell_studio_description">Pubblica la tua musica direttamente su ZRP.</string>
+    <string name="music_shell_gate_title">Music Studio - Stato Artista o Creator richiesto</string>
+    <string name="music_shell_gate_body">Ascoltare ZRP Music è aperto a tutti. Pubblicare musica richiede uno stato Creator approvato o un profilo Artista Musicale verificato.</string>
+    <string name="music_shell_pending_verification">Il tuo profilo artista è stato inviato ed è in attesa di verifica da parte dello staff ZRP.</string>
+    <string name="music_shell_apply_intro_prefix">Crea un profilo artista per richiedere la verifica come Artista Musicale, oppure</string>
+    <string name="music_shell_apply_intro_link">richiedi lo stato Creator</string>
+    <string name="music_shell_apply_intro_suffix">dalle tue impostazioni.</string>
+    <string name="music_shell_artist_name_placeholder">Nome d\'arte</string>
+    <string name="music_shell_apply_submit">Candidati come artista</string>
+    <string name="music_shell_apply_submitting">Invio in corso...</string>
+    <string name="music_studio_bio_placeholder">Biografia (facoltativa)</string>
+    <string name="music_studio_saving">Salvataggio...</string>
+    <string name="music_studio_save">Salva</string>
+    <string name="music_studio_artist_profile_saved">Profilo artista salvato.</string>
+    <string name="music_studio_change_banner">Cambia banner</string>
+    <string name="music_studio_uploading">Caricamento...</string>
+    <string name="music_studio_change_avatar">Cambia avatar</string></resources>

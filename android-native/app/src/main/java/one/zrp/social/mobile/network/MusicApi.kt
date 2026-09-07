@@ -204,6 +204,32 @@ data class MusicLibraryResponse(
     val history: List<MusicLibraryEntry> = emptyList(),
 )
 
+// ─── Music Studio: Artist Profile (GET /music/access, GET/POST
+// /music/artists) - the first Studio slice; Tracks/Albums management
+// are their own later phases. ────────────────────────────────────────
+data class MusicAccess(
+    val allowed: Boolean,
+    val isCreator: Boolean = false,
+    val isVerifiedArtist: Boolean = false,
+    val hasArtistProfile: Boolean = false,
+    val reason: String? = null,
+)
+
+data class MyArtistProfile(
+    val id: String,
+    val displayName: String,
+    val bio: String? = null,
+    val avatarUrl: String? = null,
+    val bannerUrl: String? = null,
+)
+
+data class SaveArtistProfileRequest(
+    val displayName: String? = null,
+    val bio: String? = null,
+    val avatarUrl: String? = null,
+    val bannerUrl: String? = null,
+)
+
 /**
  * The same real ZRP Music catalogue the website's Music home page
  * uses. Artist/album/playlist detail, Discover, History, Liked and
@@ -282,6 +308,21 @@ interface MusicApi {
 
     @GET("music/library")
     suspend fun getLibrary(): MusicLibraryResponse
+
+    @GET("music/access")
+    suspend fun getAccess(): MusicAccess
+
+    // `mine=true` returns the caller's own MusicArtist row (or a null
+    // body if they haven't created one yet, matching the real route's
+    // own findUnique() return value).
+    @GET("music/artists")
+    suspend fun getMyArtistProfile(@Query("mine") mine: Boolean = true): MyArtistProfile?
+
+    // Also the real "apply as artist" call - creating and updating a
+    // profile are the exact same upsert on the wire, matched here as
+    // one method rather than two.
+    @POST("music/artists")
+    suspend fun saveArtistProfile(@Body request: SaveArtistProfileRequest): MyArtistProfile
 }
 
 data class MusicHomeResponse(

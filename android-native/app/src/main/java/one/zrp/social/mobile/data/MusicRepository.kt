@@ -2,6 +2,7 @@ package one.zrp.social.mobile.data
 
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.CreatePlaylistRequest
+import one.zrp.social.mobile.network.MusicAccess
 import one.zrp.social.mobile.network.MusicAlbumDetail
 import one.zrp.social.mobile.network.MusicAlbumSummary
 import one.zrp.social.mobile.network.MusicArtistDetail
@@ -14,8 +15,10 @@ import one.zrp.social.mobile.network.MusicLikeResponse
 import one.zrp.social.mobile.network.MusicPlaylistDetail
 import one.zrp.social.mobile.network.MusicPlaylistListItem
 import one.zrp.social.mobile.network.MusicTrack
+import one.zrp.social.mobile.network.MyArtistProfile
 import one.zrp.social.mobile.network.RecordPlayRequest
 import one.zrp.social.mobile.network.ReorderPlaylistRequest
+import one.zrp.social.mobile.network.SaveArtistProfileRequest
 import one.zrp.social.mobile.network.ToggleTrackInPlaylistRequest
 import one.zrp.social.mobile.network.UpdatePlaylistRequest
 
@@ -96,5 +99,22 @@ class MusicRepository {
 
     suspend fun getLibrary(): Result<MusicLibraryResponse> = runCatching {
         ApiClient.musicApi.getLibrary()
+    }
+
+    suspend fun getAccess(): Result<MusicAccess> = runCatching {
+        ApiClient.musicApi.getAccess()
+    }
+
+    suspend fun getMyArtistProfile(): Result<MyArtistProfile?> = runCatching {
+        ApiClient.musicApi.getMyArtistProfile()
+    }
+
+    suspend fun saveArtistProfile(
+        displayName: String?,
+        bio: String?,
+        avatarUrl: String?,
+        bannerUrl: String?,
+    ): Result<MyArtistProfile> = runCatching {
+        ApiClient.musicApi.saveArtistProfile(SaveArtistProfileRequest(displayName, bio, avatarUrl, bannerUrl))
     }
 }

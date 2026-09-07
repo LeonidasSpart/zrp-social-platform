@@ -334,4 +334,24 @@
     <string name="music_liked_empty_title">Ende pa këngë të pëlqyera</string>
     <string name="music_liked_empty_body">Prek zemrën e një kënge për ta ruajtur këtu.</string>
     <string name="music_history_empty_title">Ende pa histori dëgjimi</string>
-    <string name="music_history_empty_body">Këngët që dëgjon do të shfaqen këtu.</string></resources>
+    <string name="music_history_empty_body">Këngët që dëgjon do të shfaqen këtu.</string>
+    <!-- Music Studio: Artist Profile -->
+    <string name="music_shell_studio_label">Studio Muzikore</string>
+    <string name="music_shell_studio_eyebrow">Mjete për krijuesit</string>
+    <string name="music_shell_studio_description">Publiko muzikën tënde direkt në ZRP.</string>
+    <string name="music_shell_gate_title">Studio Muzikore - Kërkohet statusi Artist ose Krijues</string>
+    <string name="music_shell_gate_body">Dëgjimi i ZRP Music është i hapur për të gjithë. Publikimi i muzikës kërkon status të miratuar Krijuesi ose profil të verifikuar Artisti Muzikor.</string>
+    <string name="music_shell_pending_verification">Profili yt si artist është dorëzuar dhe pret verifikim nga stafi i ZRP.</string>
+    <string name="music_shell_apply_intro_prefix">Krijo një profil artisti për të aplikuar për verifikim si Artist Muzikor, ose</string>
+    <string name="music_shell_apply_intro_link">apliko për status Krijuesi</string>
+    <string name="music_shell_apply_intro_suffix">nga cilësimet e tua.</string>
+    <string name="music_shell_artist_name_placeholder">Emri i artistit</string>
+    <string name="music_shell_apply_submit">Apliko si artist</string>
+    <string name="music_shell_apply_submitting">Duke dërguar...</string>
+    <string name="music_studio_bio_placeholder">Bio (opsionale)</string>
+    <string name="music_studio_saving">Duke ruajtur...</string>
+    <string name="music_studio_save">Ruaj</string>
+    <string name="music_studio_artist_profile_saved">Profili i artistit u ruajt.</string>
+    <string name="music_studio_change_banner">Ndrysho banerin</string>
+    <string name="music_studio_uploading">Duke ngarkuar...</string>
+    <string name="music_studio_change_avatar">Ndrysho avatarin</string></resources>

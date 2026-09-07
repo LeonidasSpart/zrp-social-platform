@@ -52,6 +52,7 @@ import one.zrp.social.mobile.ui.music.DiscoverScreen
 import one.zrp.social.mobile.ui.music.HistoryScreen
 import one.zrp.social.mobile.ui.music.LikedScreen
 import one.zrp.social.mobile.ui.music.MusicPlayerViewModel
+import one.zrp.social.mobile.ui.music.StudioScreen
 import one.zrp.social.mobile.ui.music.MusicPlayerViewModelFactory
 import one.zrp.social.mobile.ui.music.MusicQueueScreen
 import one.zrp.social.mobile.ui.music.MusicScreen
@@ -107,6 +108,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     }
     val goToMusicLiked: () -> Unit = { navController.navigate("music/liked") }
     val goToMusicHistory: () -> Unit = { navController.navigate("music/history") }
+    val goToMusicStudio: () -> Unit = { navController.navigate("music/studio") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -323,6 +325,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenDiscover = { goToMusicDiscover(null) },
                     onOpenLiked = goToMusicLiked,
                     onOpenHistory = goToMusicHistory,
+                    onOpenStudio = goToMusicStudio,
                     onArtistClick = goToMusicArtist,
                     onAlbumClick = goToMusicAlbum,
                     onPlaylistClick = goToMusicPlaylist,
@@ -340,6 +343,9 @@ fun ZrpNavHost(onLogout: () -> Unit) {
             }
             composable("music/playlists") {
                 PlaylistsScreen(onBack = { navController.popBackStack() }, onPlaylistClick = goToMusicPlaylist)
+            }
+            composable("music/studio") {
+                StudioScreen(onBack = { navController.popBackStack() })
             }
             composable(
                 route = "music/discover?genre={genre}",

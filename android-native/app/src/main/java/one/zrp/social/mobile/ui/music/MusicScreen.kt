@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Album
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.ListAlt
@@ -88,6 +89,7 @@ fun MusicScreen(
     onOpenDiscover: () -> Unit,
     onOpenLiked: () -> Unit,
     onOpenHistory: () -> Unit,
+    onOpenStudio: () -> Unit,
     onArtistClick: (String) -> Unit,
     onAlbumClick: (String) -> Unit,
     onPlaylistClick: (String) -> Unit,
@@ -116,6 +118,9 @@ fun MusicScreen(
                     .padding(start = 4.dp)
                     .weight(1f),
             )
+            IconButton(onClick = onOpenStudio) {
+                Icon(Icons.Filled.CloudUpload, contentDescription = stringResource(R.string.music_shell_studio_label))
+            }
             IconButton(onClick = onOpenQueue) {
                 Icon(Icons.Filled.QueueMusic, contentDescription = stringResource(R.string.music_nav_queue_title))
             }

@@ -350,4 +350,24 @@
     <string name="music_liked_empty_title">No liked tracks yet</string>
     <string name="music_liked_empty_body">Tap the heart on any track to save it here.</string>
     <string name="music_history_empty_title">No listening history yet</string>
-    <string name="music_history_empty_body">Tracks you play will show up here.</string></resources>
+    <string name="music_history_empty_body">Tracks you play will show up here.</string>
+    <!-- Music Studio: Artist Profile -->
+    <string name="music_shell_studio_label">Music Studio</string>
+    <string name="music_shell_studio_eyebrow">Creator tools</string>
+    <string name="music_shell_studio_description">Publish your music directly to ZRP.</string>
+    <string name="music_shell_gate_title">Music Studio - Artist or Creator status required</string>
+    <string name="music_shell_gate_body">Listening to ZRP Music is open to everyone. Publishing music requires an approved Creator status or a verified Music Artist profile.</string>
+    <string name="music_shell_pending_verification">Your artist profile has been submitted and is awaiting verification from ZRP staff.</string>
+    <string name="music_shell_apply_intro_prefix">Create an artist profile to apply for Music Artist verification, or</string>
+    <string name="music_shell_apply_intro_link">apply for Creator status</string>
+    <string name="music_shell_apply_intro_suffix">from your settings.</string>
+    <string name="music_shell_artist_name_placeholder">Artist name</string>
+    <string name="music_shell_apply_submit">Apply as Artist</string>
+    <string name="music_shell_apply_submitting">Submitting...</string>
+    <string name="music_studio_bio_placeholder">Bio (optional)</string>
+    <string name="music_studio_saving">Saving...</string>
+    <string name="music_studio_save">Save</string>
+    <string name="music_studio_artist_profile_saved">Artist profile saved.</string>
+    <string name="music_studio_change_banner">Change banner</string>
+    <string name="music_studio_uploading">Uploading...</string>
+    <string name="music_studio_change_avatar">Change avatar</string></resources>

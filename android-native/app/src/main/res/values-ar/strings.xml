@@ -334,4 +334,24 @@
     <string name="music_liked_empty_title">لا توجد مقاطع مفضلة بعد</string>
     <string name="music_liked_empty_body">اضغط على قلب أي مقطع لحفظه هنا.</string>
     <string name="music_history_empty_title">لا يوجد سجل استماع بعد</string>
-    <string name="music_history_empty_body">ستظهر المقاطع التي تستمع إليها هنا.</string></resources>
+    <string name="music_history_empty_body">ستظهر المقاطع التي تستمع إليها هنا.</string>
+    <!-- Music Studio: Artist Profile -->
+    <string name="music_shell_studio_label">استوديو الموسيقى</string>
+    <string name="music_shell_studio_eyebrow">أدوات المبدعين</string>
+    <string name="music_shell_studio_description">انشر موسيقاك مباشرة على ZRP.</string>
+    <string name="music_shell_gate_title">استوديو الموسيقى - يتطلب صفة فنان أو مبدع</string>
+    <string name="music_shell_gate_body">الاستماع إلى ZRP Music متاح للجميع. يتطلب نشر الموسيقى صفة مبدع معتمدة أو ملف فنان موسيقي موثّق.</string>
+    <string name="music_shell_pending_verification">تم إرسال ملفك الشخصي كفنان وهو بانتظار التحقق من قبل فريق ZRP.</string>
+    <string name="music_shell_apply_intro_prefix">أنشئ ملفًا شخصيًا كفنان للتقدم بطلب التحقق كفنان موسيقي، أو</string>
+    <string name="music_shell_apply_intro_link">تقدم بطلب للحصول على صفة مبدع</string>
+    <string name="music_shell_apply_intro_suffix">من إعداداتك.</string>
+    <string name="music_shell_artist_name_placeholder">اسم الفنان</string>
+    <string name="music_shell_apply_submit">التقدم كفنان</string>
+    <string name="music_shell_apply_submitting">جارٍ الإرسال...</string>
+    <string name="music_studio_bio_placeholder">نبذة (اختياري)</string>
+    <string name="music_studio_saving">جارٍ الحفظ...</string>
+    <string name="music_studio_save">حفظ</string>
+    <string name="music_studio_artist_profile_saved">تم حفظ الملف الشخصي للفنان.</string>
+    <string name="music_studio_change_banner">تغيير الغلاف العلوي</string>
+    <string name="music_studio_uploading">جارٍ الرفع...</string>
+    <string name="music_studio_change_avatar">تغيير الصورة الرمزية</string></resources>
