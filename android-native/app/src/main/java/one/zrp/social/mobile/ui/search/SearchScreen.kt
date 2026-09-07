@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -63,6 +64,7 @@ fun SearchScreen(
     onAuthorClick: (String) -> Unit,
     onOpenMusic: () -> Unit,
     onOpenMarketplace: () -> Unit,
+    onOpenOpportunity: () -> Unit,
     onOpenComments: (postId: String) -> Unit,
     onOpenQuotePost: (postId: String) -> Unit = {},
     onOpenReposts: (postId: String) -> Unit = {},
@@ -108,6 +110,7 @@ fun SearchScreen(
                 onHashtagClick = { tag -> viewModel.onHashtagClick(tag) },
                 onOpenMusic = onOpenMusic,
                 onOpenMarketplace = onOpenMarketplace,
+                onOpenOpportunity = onOpenOpportunity,
             )
         } else {
             SearchResultsContent(
@@ -212,6 +215,7 @@ private fun DiscoverContent(
     onHashtagClick: (String) -> Unit,
     onOpenMusic: () -> Unit,
     onOpenMarketplace: () -> Unit,
+    onOpenOpportunity: () -> Unit,
 ) {
     if (state.isLoadingDiscover) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -226,6 +230,9 @@ private fun DiscoverContent(
         }
         item {
             MarketplaceEntryRow(onClick = onOpenMarketplace)
+        }
+        item {
+            OpportunityEntryRow(onClick = onOpenOpportunity)
         }
 
         if (state.trendingHashtags.isNotEmpty()) {
@@ -433,6 +440,25 @@ private fun MarketplaceEntryRow(onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(text = stringResource(R.string.marketplace_discover_entry), style = MaterialTheme.typography.titleSmall)
+    }
+}
+
+@Composable
+private fun OpportunityEntryRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Work,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text = stringResource(R.string.opportunity_discover_entry), style = MaterialTheme.typography.titleSmall)
     }
 }
 

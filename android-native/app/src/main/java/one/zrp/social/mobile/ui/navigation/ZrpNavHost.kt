@@ -64,6 +64,8 @@ import one.zrp.social.mobile.ui.music.MusicScreen
 import one.zrp.social.mobile.ui.music.PlaylistDetailScreen
 import one.zrp.social.mobile.ui.music.PlaylistsScreen
 import one.zrp.social.mobile.ui.notifications.NotificationsScreen
+import one.zrp.social.mobile.ui.opportunity.OpportunityDetailScreen
+import one.zrp.social.mobile.ui.opportunity.OpportunityScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
 import one.zrp.social.mobile.ui.quotes.QuotesScreen
 import one.zrp.social.mobile.ui.reposts.RepostsScreen
@@ -120,6 +122,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToNewListing: () -> Unit = { navController.navigate("marketplace/new") }
     val goToEditListing: (String) -> Unit = { id -> navController.navigate("marketplace/edit/$id") }
     val goToMyListings: () -> Unit = { navController.navigate("marketplace/my-listings") }
+    val goToOpportunity: () -> Unit = { navController.navigate("opportunity") }
+    val goToOpportunityListing: (String) -> Unit = { id -> navController.navigate("opportunity/listing/$id") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -203,6 +207,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onAuthorClick = goToProfile,
                     onOpenMusic = goToMusic,
                     onOpenMarketplace = goToMarketplace,
+                    onOpenOpportunity = goToOpportunity,
                     onOpenComments = goToComments,
                     onOpenQuotePost = goToQuotePost,
                     onOpenReposts = goToReposts,
@@ -477,6 +482,25 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onCreateListing = goToNewListing,
                     onEditListing = goToEditListing,
                 )
+            }
+            composable("opportunity") {
+                OpportunityScreen(
+                    onBack = { navController.popBackStack() },
+                    onListingClick = goToOpportunityListing,
+                )
+            }
+            composable(
+                route = "opportunity/listing/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    OpportunityDetailScreen(
+                        listingId = id,
+                        onBack = { navController.popBackStack() },
+                        onOpenPoster = goToProfile,
+                    )
+                }
             }
             composable("bookmarks") {
                 BookmarksScreen(
