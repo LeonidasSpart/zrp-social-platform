@@ -82,7 +82,7 @@ fun MyListingsScreen(onBack: () -> Unit, onOpenListing: (String) -> Unit, onCrea
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.nav_back))
             }
             Text(
                 text = stringResource(R.string.marketplace_my_listings),

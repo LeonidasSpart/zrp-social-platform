@@ -246,7 +246,7 @@ private fun StoryMediaPreview(
         } else {
             AsyncImage(
                 model = url,
-                contentDescription = "Story media preview",
+                contentDescription = stringResource(R.string.story_media_preview_cd),
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize(),
             )
@@ -257,7 +257,7 @@ private fun StoryMediaPreview(
                 .align(Alignment.TopEnd)
                 .padding(Spacing.xs),
         ) {
-            Icon(Icons.Filled.Close, contentDescription = "Remove media", tint = Color.White)
+            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.story_remove_media_cd), tint = Color.White)
         }
     }
 }

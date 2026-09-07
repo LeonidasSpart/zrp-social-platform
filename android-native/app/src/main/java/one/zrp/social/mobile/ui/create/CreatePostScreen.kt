@@ -325,9 +325,9 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
                         Icon(
                             Icons.Filled.AddAPhoto,
                             contentDescription = if (maxImages > 0) {
-                                "${state.mediaUrls.size}/$maxImages media"
+                                stringResource(R.string.createpost_media_count_cd, state.mediaUrls.size, maxImages)
                             } else {
-                                "Media unavailable for this plan"
+                                stringResource(R.string.createpost_media_unavailable_cd)
                             },
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -524,7 +524,7 @@ private fun ComposerMediaPreview(
                 onClick = { onRemove(0) },
                 modifier = Modifier.align(Alignment.TopEnd).padding(Spacing.xs),
             ) {
-                Icon(Icons.Filled.Close, contentDescription = "Remove video", tint = Color.White)
+                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.createpost_remove_video_cd), tint = Color.White)
             }
         }
         return
@@ -543,7 +543,7 @@ private fun ComposerMediaPreview(
                     ) {
                         AsyncImage(
                             model = url,
-                            contentDescription = "Upload preview ${index + 1}",
+                            contentDescription = stringResource(R.string.createpost_upload_preview_cd, index + 1),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize(),
                         )
@@ -553,7 +553,7 @@ private fun ComposerMediaPreview(
                         ) {
                             Icon(
                                 Icons.Filled.Close,
-                                contentDescription = "Remove image ${index + 1}",
+                                contentDescription = stringResource(R.string.createpost_remove_image_cd, index + 1),
                                 tint = Color.White,
                             )
                         }

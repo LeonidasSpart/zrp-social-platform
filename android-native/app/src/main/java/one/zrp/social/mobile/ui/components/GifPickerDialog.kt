@@ -32,11 +32,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
+import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.GifsRepository
 import one.zrp.social.mobile.network.GifResult
 import one.zrp.social.mobile.ui.theme.Spacing
@@ -45,10 +47,9 @@ import one.zrp.social.mobile.ui.theme.Spacing
  * The native equivalent of the website's GifPicker.tsx - the same real
  * trending-on-open / search-as-you-confirm flow, backed by the same
  * real, backend-proxied Giphy endpoints (never talking to Giphy
- * directly). "Choose a GIF" / "Search GIFs..." / "No GIFs found" /
- * "Type to search GIFs" / "Loading..." all stay English-only on
- * purpose, matching GifPicker.tsx's own hardcoded, untranslated copy
- * exactly.
+ * directly). GifPicker.tsx's own title/placeholder/loading/empty-state
+ * copy is hardcoded English with no t() calls, so these are translated
+ * as native-only supporting copy rather than left English.
  */
 @Composable
 fun GifPickerDialog(
@@ -100,14 +101,9 @@ fun GifPickerDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("Choose a GIF", style = MaterialTheme.typography.titleMedium)
-                    // Hardcoded English, not stringResource - this whole dialog's text
-                    // (title, placeholder, loading/error copy) is native-only and not
-                    // yet wired into the translation system, so these two accessibility
-                    // labels stay consistent with that rather than being translated in
-                    // isolation.
+                    Text(stringResource(R.string.gif_picker_title), style = MaterialTheme.typography.titleMedium)
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Filled.Close, contentDescription = "Close")
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close))
                     }
                 }
 
@@ -121,25 +117,25 @@ fun GifPickerDialog(
                     OutlinedTextField(
                         value = query,
                         onValueChange = { query = it },
-                        placeholder = { Text("Search GIFs...") },
+                        placeholder = { Text(stringResource(R.string.gif_search_placeholder)) },
                         singleLine = true,
                         modifier = Modifier.weight(1f),
                     )
                     IconButton(onClick = { search() }, enabled = query.length >= 2) {
-                        Icon(Icons.Filled.Search, contentDescription = "Search")
+                        Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.nav_search))
                     }
                 }
 
                 Box(modifier = Modifier.fillMaxSize().padding(Spacing.md)) {
                     when {
-                        loading -> Text("Loading...", modifier = Modifier.align(Alignment.Center))
+                        loading -> Text(stringResource(R.string.action_loading), modifier = Modifier.align(Alignment.Center))
                         error != null -> Text(
                             text = error ?: "",
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.align(Alignment.Center),
                         )
                         displayGifs.isEmpty() -> Text(
-                            text = if (query.length >= 2) "No GIFs found" else "Type to search GIFs",
+                            text = stringResource(if (query.length >= 2) R.string.gif_no_results else R.string.gif_type_to_search),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.align(Alignment.Center),
                         )

@@ -331,7 +331,7 @@ fun StoryViewerScreen(userId: String, onClose: () -> Unit, onAddStory: () -> Uni
                         }
 
                         IconButton(onClick = onClose) {
-                            Icon(Icons.Filled.Close, contentDescription = "Close", tint = Color.White)
+                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close), tint = Color.White)
                         }
                     }
                 }
@@ -363,9 +363,7 @@ fun StoryViewerScreen(userId: String, onClose: () -> Unit, onAddStory: () -> Uni
                         IconButton(onClick = { viewModel.toggleLike(story.id) }) {
                             Icon(
                                 imageVector = if (story.liked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                                // English-only on purpose - StoryViewer.tsx's own
-                                // "Like story"/"Unlike story" aria-label is hardcoded too.
-                                contentDescription = if (story.liked) "Unlike" else "Like",
+                                contentDescription = stringResource(if (story.liked) R.string.story_unlike_cd else R.string.story_like_cd),
                                 tint = if (story.liked) ZrpRed else Color.White,
                                 modifier = Modifier.size(28.dp),
                             )

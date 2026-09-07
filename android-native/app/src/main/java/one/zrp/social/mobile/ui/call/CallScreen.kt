@@ -124,7 +124,7 @@ fun CallScreen(
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.error)
                     }
                     else -> {
-                        Text(text = "No video", color = Color.Gray)
+                        Text(text = stringResource(R.string.call_no_video), color = Color.Gray)
                     }
                 }
             }
@@ -150,10 +150,10 @@ fun CallScreen(
                 .padding(top = 48.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(text = state.callerName.ifBlank { "Call" }, color = Color.White, style = MaterialTheme.typography.titleLarge)
+            Text(text = state.callerName.ifBlank { stringResource(R.string.call_fallback_name) }, color = Color.White, style = MaterialTheme.typography.titleLarge)
             val statusText = when {
-                state.phase == CallPhase.INCOMING -> if (state.isVideo) "Incoming video call..." else "Incoming voice call..."
-                state.phase == CallPhase.CALLING && !state.hasRemoteStream -> "Ringing..."
+                state.phase == CallPhase.INCOMING -> stringResource(if (state.isVideo) R.string.call_incoming_video else R.string.call_incoming_voice)
+                state.phase == CallPhase.CALLING && !state.hasRemoteStream -> stringResource(R.string.call_ringing)
                 state.hasRemoteStream -> formatDuration(durationSeconds)
                 else -> ""
             }

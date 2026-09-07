@@ -181,7 +181,7 @@ fun SignupScreen(authViewModel: AuthViewModel, onSignIn: () -> Unit) {
                     // such control on either its login or signup form.
                     Icon(
                         imageVector = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                        contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                        contentDescription = stringResource(if (passwordVisible) R.string.action_hide_password else R.string.action_show_password),
                     )
                 }
             },
