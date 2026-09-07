@@ -65,8 +65,9 @@ import one.zrp.social.mobile.util.formatRelativeTime
  * A single conversation - real message history and real sending
  * against the same DM endpoints the website uses, plus the same real
  * per-message reply/edit/delete/react actions ChatInterface.tsx
- * exposes. New messages arrive by polling (see ConversationViewModel's
- * KDoc), not a live socket push yet.
+ * exposes. New messages, edits, deletes, reactions, read receipts and
+ * typing status all arrive live over the same real Socket.IO
+ * connection the website uses (see ConversationViewModel's KDoc).
  */
 @Composable
 fun ConversationScreen(
