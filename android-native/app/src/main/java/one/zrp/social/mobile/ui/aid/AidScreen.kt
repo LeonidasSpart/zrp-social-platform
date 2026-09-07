@@ -13,7 +13,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -38,14 +40,17 @@ import one.zrp.social.mobile.data.AidRepository
 /**
  * ZRP Aid browse - ported from AidHomePage.tsx: a category filter row
  * and an infinite-scroll list of the same real GET /help results
- * CampaignCard renders. The Create Campaign/My Campaigns entry points
- * aren't shown yet - those screens are a later native phase, so this
- * stays browse-only rather than linking to a destination that doesn't
- * exist yet, matching how ZRP Market Plus's and ZRP OPPORTUNITY's own
- * browse screens were staged.
+ * CampaignCard renders, plus the same Create Campaign (organizer-only,
+ * gated inside AidFormScreen) and My Campaigns entry points the web
+ * header carries.
  */
 @Composable
-fun AidScreen(onBack: () -> Unit, onCampaignClick: (String) -> Unit) {
+fun AidScreen(
+    onBack: () -> Unit,
+    onCampaignClick: (String) -> Unit,
+    onCreateCampaign: () -> Unit,
+    onOpenMyCampaigns: () -> Unit,
+) {
     val viewModel: AidViewModel = viewModel(
         factory = remember { AidViewModelFactory(AidRepository()) },
     )
@@ -69,6 +74,12 @@ fun AidScreen(onBack: () -> Unit, onCampaignClick: (String) -> Unit) {
                     .weight(1f)
                     .padding(start = 4.dp),
             )
+            IconButton(onClick = onOpenMyCampaigns) {
+                Icon(Icons.Filled.ListAlt, contentDescription = stringResource(R.string.aid_my_campaigns))
+            }
+            IconButton(onClick = onCreateCampaign) {
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.aid_create_campaign))
+            }
         }
         Text(
             text = stringResource(R.string.aid_hero_subtitle),
