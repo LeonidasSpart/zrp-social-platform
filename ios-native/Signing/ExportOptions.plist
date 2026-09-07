@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Export options for an App Store submission of ZRP Social.
+
+  Used as:
+      xcodebuild -exportArchive \
+        -archivePath build/ZRPSocial.xcarchive \
+        -exportOptionsPlist Signing/ExportOptions.plist \
+        -exportPath build/export
+
+  `teamID` is deliberately absent rather than guessed. It is an account
+  identifier this repository does not contain, and a wrong one produces
+  an export that fails at upload with a misleading error. Supply it at
+  export time:
+      -exportOptionsPlist ... -allowProvisioningUpdates \
+      OTHER: pass DEVELOPMENT_TEAM=<id> to the archive step
+  or add a <key>teamID</key> entry locally, uncommitted.
+-->
+<plist version="1.0">
+<dict>
+	<key>method</key>
+	<string>app-store-connect</string>
+
+	<!--
+	  Automatic signing, matching the project's CODE_SIGN_STYLE. Xcode
+	  resolves the distribution certificate and provisioning profile from
+	  the signed-in account, so nothing here pins a profile name that
+	  would rot the first time it is regenerated.
+	-->
+	<key>signingStyle</key>
+	<string>automatic</string>
+
+	<!--
+	  Symbols go to App Store Connect so crash reports arrive
+	  symbolicated. This is not analytics and collects nothing from the
+	  device.
+	-->
+	<key>uploadSymbols</key>
+	<true/>
+
+	<!--
+	  Bitcode has been removed from the toolchain entirely since Xcode
+	  14; stating it explicitly keeps the intent obvious rather than
+	  relying on the default.
+	-->
+	<key>uploadBitcode</key>
+	<false/>
+
+	<!--
+	  App Store thinning is decided by the store, not the export.
+	-->
+	<key>stripSwiftSymbols</key>
+	<true/>
+
+	<key>destination</key>
+	<string>export</string>
+</dict>
+</plist>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  Intentionally empty today.
+
+	  Sign in with Apple is a real App Store requirement for this app (it
+	  offers Google sign-in on web), but it is BLOCKED server-side: the
+	  backend registers Apple only as a NextAuth *web* OAuth provider
+	  using a Services ID, and no route accepts a native
+	  ASAuthorizationAppleIDCredential identityToken and returns a mobile
+	  session token. See "B2. Sign in with Apple (native)" in
+	  ios-native/PARITY.md for the exact contract that route needs.
+
+	  Declaring the entitlement before that route exists would demand a
+	  provisioning profile carrying a capability the app cannot yet use,
+	  and would break automatic signing for anyone whose team has not
+	  enabled it. When B2 is unblocked, add:
+
+	      <key>com.apple.developer.applesignin</key>
+	      <array><string>Default</string></array>
+
+	  and enable "Sign in with Apple" for one.zrp.social in the developer
+	  portal at the same time.
+
+	  Push notifications (aps-environment) are likewise deferred to Phase
+	  11 and are blocked on B3 - see PARITY.md.
+	-->
+</dict>
+</plist>

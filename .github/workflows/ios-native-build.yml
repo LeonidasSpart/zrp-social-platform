@@ -1,0 +1,329 @@
+name: Native iOS App Build
+
+# Builds the ZRP Social native iOS app (ios-native/) - the genuine
+# Swift/SwiftUI app being built alongside, and eventually replacing, the
+# Capacitor WebView shell (ios/), which is produced by the web release
+# tooling and is untouched by this workflow.
+#
+# Completely independent of the Android pipelines. The path filters below
+# never match android-native/** or android/**, and this workflow shares no
+# secrets, no runner, and no job with android-native-build.yml or
+# android-release.yml - a change here can never affect an Android build,
+# and an Android change never triggers this.
+#
+# Runs on GitHub's macOS infrastructure because Xcode is the only thing
+# that can compile an iOS app, and it is not available in every
+# development environment. The static checks in the first job run
+# anywhere, so contract drift and localization mistakes are caught in
+# seconds rather than after a ten-minute macOS build.
+on:
+  workflow_dispatch: {}
+  pull_request:
+    paths:
+      - "ios-native/**"
+      - ".github/workflows/ios-native-build.yml"
+  push:
+    branches: [main]
+    paths:
+      - "ios-native/**"
+      - ".github/workflows/ios-native-build.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    name: Static checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # The iOS app's .strings files and its L10nKey enum are generated
+      # from the web app's own translation dictionary
+      # (src/lib/translations.ts), which is the single source of truth for
+      # ZRP copy in all 11 supported languages. This fails if the
+      # committed output no longer matches that source - which is exactly
+      # what would happen if a key were renamed on web, or if someone
+      # hand-edited a generated file.
+      - name: Verify generated localizations are current
+        working-directory: ios-native
+        run: python3 Tools/generate-localizations.py --check
+
+      - name: Validate sources, plists and asset catalog
+        working-directory: ios-native
+        run: python3 Tools/validate-sources.py
+
+      # The artist-profile route decides each field by key presence, so
+      # what the app sends - and what it deliberately omits - is the whole
+      # contract. A client that sends explicit nulls for fields it never
+      # loaded is exactly what erased artists' bios before the route was
+      # fixed, so that pairing is pinned here rather than left to review.
+      - name: Verify artist profile request contract
+        working-directory: ios-native
+        run: python3 Tools/verify-artist-contract.py
+
+      # PARITY.md is the document this whole module is judged against, so
+      # it must not be allowed to become prose that drifted from the
+      # code. This checks the two claims that can be falsified: every
+      # route it names exists, and every row it marks IMPLEMENTED is
+      # backed by iOS code that actually calls that route.
+      - name: Audit the parity matrix against the code
+        working-directory: ios-native
+        run: python3 Tools/audit-parity.py
+
+      # Hard guarantee of the isolation this module promises: the iOS
+      # module must never contain a path into the Android project.
+      - name: Assert no Android coupling
+        run: |
+          if grep -rn --exclude-dir=.git -e 'android-native' -e '\.\./android' ios-native/ZRPSocial ios-native/Supporting 2>/dev/null; then
+            echo "::error::ios-native must not reference the Android module."
+            exit 1
+          fi
+          echo "No Android references in the iOS module."
+
+  build:
+    name: Build (Xcode 26 / iOS 26 SDK)
+    runs-on: macos-15
+    needs: static-checks
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Toolchain selection ────────────────────────────────────────
+      # The runner image ships several Xcode versions and makes one of
+      # them the default. On macos-15 that default is Xcode 16.4, which
+      # carries the iOS 18.5 SDK - and Apple has refused App Store
+      # Connect uploads built with anything below Xcode 26 / the iOS 26
+      # SDK since 28 April 2026. Nothing here previously selected a
+      # version, so every build silently used that non-submittable
+      # default.
+      #
+      # This picks the highest installed Xcode whose major version is 26
+      # or greater, rather than hardcoding a path: the image's exact
+      # point release changes with every image bump, and a pinned
+      # /Applications/Xcode_26.3.app would break the day it moves. If no
+      # such Xcode exists on the runner it FAILS the job and prints what
+      # is actually installed - it must never fall back to an older
+      # toolchain, because a green build on Xcode 16 is a build that
+      # cannot be submitted.
+      - name: Select Xcode 26 or later
+        run: |
+          set -euo pipefail
+
+          best_dir=""
+          best_version=""
+          best_rank=-1
+
+          for app in /Applications/Xcode*.app; do
+            [ -d "$app" ] || continue
+            version="$(/usr/bin/defaults read "$app/Contents/Info" CFBundleShortVersionString 2>/dev/null || true)"
+            [ -n "$version" ] || continue
+
+            major="${version%%.*}"
+            case "$major" in ''|*[!0-9]*) continue ;; esac
+            [ "$major" -ge 26 ] || continue
+
+            # Written as `if` rather than `[ ... ] && x=y`: under
+            # `set -e` a false test at statement level aborts the job,
+            # which would turn a plain "26" (no minor component) into a
+            # spurious build failure.
+            rest="${version#*.}"
+            if [ "$rest" = "$version" ]; then
+              rest="0.0"
+            fi
+            minor="${rest%%.*}"
+            case "$minor" in ''|*[!0-9]*) minor=0 ;; esac
+            patch="${rest#*.}"
+            if [ "$patch" = "$rest" ]; then
+              patch="0"
+            fi
+            case "$patch" in ''|*[!0-9]*) patch=0 ;; esac
+
+            # A single comparable integer avoids relying on `sort -V`,
+            # which is not dependable on BSD/macOS.
+            rank=$(( major * 10000 + minor * 100 + patch ))
+            if [ "$rank" -gt "$best_rank" ]; then
+              best_rank="$rank"
+              best_dir="$app/Contents/Developer"
+              best_version="$version"
+            fi
+          done
+
+          if [ -z "$best_dir" ]; then
+            echo "::error::No Xcode 26 or later is installed on this runner. Apple has required Xcode 26+ with an iOS 26 SDK for App Store Connect uploads since 2026-04-28, so this build cannot produce a submittable app. Installed Xcode versions are listed below; move this job to a runner image that provides Xcode 26+."
+            for app in /Applications/Xcode*.app; do
+              [ -d "$app" ] || continue
+              echo "  $app -> $(/usr/bin/defaults read "$app/Contents/Info" CFBundleShortVersionString 2>/dev/null || echo unknown)"
+            done
+            exit 1
+          fi
+
+          echo "Selected Xcode $best_version at $best_dir"
+          sudo xcode-select --switch "$best_dir"
+          echo "DEVELOPER_DIR=$best_dir" >> "$GITHUB_ENV"
+
+      # ── Toolchain evidence ─────────────────────────────────────────
+      # Printed verbatim so the exact Xcode, both iOS SDKs and the macOS
+      # version are readable straight from the CI log, rather than being
+      # inferred from an -sdk path buried in the compiler invocation.
+      - name: Report toolchain
+        run: |
+          echo "── xcodebuild -version ─────────────────────────────"
+          xcodebuild -version
+          echo "── xcrun --sdk iphoneos --show-sdk-version ─────────"
+          xcrun --sdk iphoneos --show-sdk-version
+          echo "── xcrun --sdk iphonesimulator --show-sdk-version ──"
+          xcrun --sdk iphonesimulator --show-sdk-version
+          echo "── sw_vers ────────────────────────────────────────"
+          sw_vers
+          echo "── swift --version ────────────────────────────────"
+          swift --version
+
+      # A hard gate, not a printout. If a future runner image changes its
+      # default, drops Xcode 26, or ships an SDK below 26, this fails
+      # here with a specific reason instead of producing another green
+      # build that could not be submitted.
+      - name: Assert App Store toolchain requirements
+        run: |
+          set -euo pipefail
+
+          xcode_version="$(xcodebuild -version | head -n1 | awk '{print $2}')"
+          device_sdk="$(xcrun --sdk iphoneos --show-sdk-version)"
+          simulator_sdk="$(xcrun --sdk iphonesimulator --show-sdk-version)"
+
+          fail=0
+          check() {
+            local label="$1" value="$2" minimum="$3"
+            local major="${value%%.*}"
+            if [ -z "$major" ] || [ -n "${major//[0-9]/}" ]; then
+              echo "::error::Could not parse $label version from '$value'."
+              fail=1
+              return
+            fi
+            if [ "$major" -lt "$minimum" ]; then
+              echo "::error::$label is $value, below the required $minimum. Apple has required Xcode 26+ with an iOS 26 SDK for App Store Connect uploads since 2026-04-28."
+              fail=1
+            else
+              echo "OK: $label $value (>= $minimum)"
+            fi
+          }
+
+          check "Xcode" "$xcode_version" 26
+          check "iOS device SDK" "$device_sdk" 26
+          check "iOS Simulator SDK" "$simulator_sdk" 26
+
+          [ "$fail" -eq 0 ] || exit 1
+
+      # ── Builds ─────────────────────────────────────────────────────
+      # Unsigned: this module has no provisioning profile of its own yet
+      # (see ios-native/PARITY.md - Sign in with Apple and push both
+      # remain blocked server-side), so there is nothing real to sign
+      # against. Signing and archiving are configured in Phase 19.
+      #
+      # The device build matters beyond the simulator ones: an App Store
+      # archive compiles against the iOS *device* SDK, so this is what
+      # actually proves the app builds against iOS 26 the way a
+      # submission would.
+      - name: Build for device (iOS 26 SDK, unsigned)
+        working-directory: ios-native
+        run: |
+          xcodebuild build \
+            -project ZRPSocial.xcodeproj \
+            -scheme ZRPSocial \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS=""
+
+      - name: Build (Debug, Simulator)
+        working-directory: ios-native
+        run: |
+          xcodebuild build \
+            -project ZRPSocial.xcodeproj \
+            -scheme ZRPSocial \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+
+      # Release is built too, not just Debug: it compiles with whole-module
+      # optimization and without DEBUG, which surfaces a different class of
+      # error (and every `#if DEBUG` branch that would otherwise never be
+      # type-checked in CI).
+      - name: Build (Release, Simulator)
+        working-directory: ios-native
+        run: |
+          xcodebuild build \
+            -project ZRPSocial.xcodeproj \
+            -scheme ZRPSocial \
+            -configuration Release \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+
+      # ── Archive ────────────────────────────────────────────────────
+      # An App Store submission is produced by `archive`, not `build`,
+      # and archiving exercises a genuinely different path: it runs
+      # `installapi`, bundles dSYMs, applies the Release optimisation
+      # settings to a packaged product, and validates the Info.plist and
+      # asset catalog the way a submission does. A project can build
+      # cleanly and still fail to archive.
+      #
+      # UNSIGNED, and honest about what that does and does not prove:
+      # this repository holds no Apple Developer certificate, team id or
+      # provisioning profile, so the archive here cannot be exported or
+      # uploaded. It proves the app archives; it does not prove it is
+      # signable. See ios-native/PARITY.md - "App Store submission".
+      - name: Archive (unsigned)
+        working-directory: ios-native
+        run: |
+          xcodebuild archive \
+            -project ZRPSocial.xcodeproj \
+            -scheme ZRPSocial \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/ZRPSocial.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS=""
+
+      # Proves the archive really contains an app bundle with the
+      # identity and version the store will read, rather than an empty
+      # shell that happened to exit zero.
+      - name: Inspect the archived product
+        run: |
+          set -euo pipefail
+          app="$RUNNER_TEMP/ZRPSocial.xcarchive/Products/Applications/ZRPSocial.app"
+          test -d "$app" || { echo "::error::No app bundle in the archive."; exit 1; }
+
+          plist="$app/Info.plist"
+          for key in CFBundleIdentifier CFBundleShortVersionString CFBundleVersion MinimumOSVersion; do
+            value="$(/usr/libexec/PlistBuddy -c "Print :$key" "$plist" 2>/dev/null || true)"
+            [ -n "$value" ] || { echo "::error::$key missing from the built Info.plist"; exit 1; }
+            echo "$key = $value"
+          done
+
+          # The privacy manifest must survive into the bundle - Apple
+          # reads it from there, not from the repository.
+          test -f "$app/PrivacyInfo.xcprivacy" \
+            || { echo "::error::PrivacyInfo.xcprivacy is not in the app bundle."; exit 1; }
+          echo "PrivacyInfo.xcprivacy present in the bundle."
+
+          # An app icon is required for submission and is easy to lose
+          # silently when an asset catalog is misconfigured.
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIcons" "$plist" >/dev/null 2>&1 \
+            || { echo "::error::No app icon recorded in the built Info.plist."; exit 1; }
+          echo "App icon recorded."
+
+          echo "SUPPORTED LOCALIZATIONS:"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleLocalizations" "$plist" 2>/dev/null \
+            || ls "$app" | grep '\.lproj$' | sed 's/^/  /'
