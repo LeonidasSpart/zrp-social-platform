@@ -796,4 +796,33 @@
     <string name="play_sharing">Sharing...</string>
     <string name="play_share_success">Shared to your feed!</string>
     <string name="play_err_share_failed">Failed to share your result. Please try again.</string>
+    <!-- ZRP News (native parity) -->
+    <string name="news_filter_all">All</string>
+    <string name="news_subtitle">Independent news and stories from Switzerland, Europe and the world.</string>
+    <string name="news_retry">Retry</string>
+    <string name="news_no_news_title">No news yet</string>
+    <string name="news_no_news_desc">There are no published articles in this category yet.</string>
+    <string name="news_featured">Featured</string>
+    <string name="news_latest_news">Latest News</string>
+    <string name="news_views_count">%1$s views</string>
+    <string name="news_load_more">Load more</string>
+    <string name="news_loading_more">Loading...</string>
+    <string name="news_err_failed_load">Failed to load news</string>
+    <string name="news_err_unable_to_load">Unable to load ZRP News right now.</string>
+    <string name="news_back_to_list">Back to ZRP News</string>
+    <string name="news_more_news">More ZRP News</string>
+    <string name="news_source">Source</string>
+    <string name="news_category_world">World</string>
+    <string name="news_category_europe">Europe</string>
+    <string name="news_category_switzerland">Switzerland</string>
+    <string name="news_category_politics">Politics</string>
+    <string name="news_category_business">Business</string>
+    <string name="news_category_technology">Technology</string>
+    <string name="news_category_crypto">Crypto</string>
+    <string name="news_category_science">Science</string>
+    <string name="news_category_sports">Sports</string>
+    <string name="news_category_culture">Culture</string>
+    <string name="news_category_community">Community</string>
+    <string name="news_title">ZRP News</string>
+    <string name="news_discover_entry">Discover ZRP News</string>
 </resources>

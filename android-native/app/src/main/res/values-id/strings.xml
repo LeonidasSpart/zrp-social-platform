@@ -779,4 +779,33 @@
     <string name="play_sharing">Membagikan...</string>
     <string name="play_share_success">Dibagikan ke feed-mu!</string>
     <string name="play_err_share_failed">Gagal membagikan hasilmu. Silakan coba lagi.</string>
+    <!-- ZRP News (native parity) -->
+    <string name="news_filter_all">Semua</string>
+    <string name="news_subtitle">Berita dan kisah independen dari Swiss, Eropa, dan dunia.</string>
+    <string name="news_retry">Coba lagi</string>
+    <string name="news_no_news_title">Belum ada berita</string>
+    <string name="news_no_news_desc">Belum ada artikel yang diterbitkan di kategori ini.</string>
+    <string name="news_featured">Unggulan</string>
+    <string name="news_latest_news">Berita Terbaru</string>
+    <string name="news_views_count">%1$s tayangan</string>
+    <string name="news_load_more">Muat lebih banyak</string>
+    <string name="news_loading_more">Memuat...</string>
+    <string name="news_err_failed_load">Gagal memuat berita</string>
+    <string name="news_err_unable_to_load">ZRP News tidak dapat dimuat saat ini.</string>
+    <string name="news_back_to_list">Kembali ke ZRP News</string>
+    <string name="news_more_news">Lebih Banyak ZRP News</string>
+    <string name="news_source">Sumber</string>
+    <string name="news_category_world">Dunia</string>
+    <string name="news_category_europe">Eropa</string>
+    <string name="news_category_switzerland">Swiss</string>
+    <string name="news_category_politics">Politik</string>
+    <string name="news_category_business">Bisnis</string>
+    <string name="news_category_technology">Teknologi</string>
+    <string name="news_category_crypto">Kripto</string>
+    <string name="news_category_science">Sains</string>
+    <string name="news_category_sports">Olahraga</string>
+    <string name="news_category_culture">Budaya</string>
+    <string name="news_category_community">Komunitas</string>
+    <string name="news_title">ZRP News</string>
+    <string name="news_discover_entry">Temukan ZRP News</string>
 </resources>

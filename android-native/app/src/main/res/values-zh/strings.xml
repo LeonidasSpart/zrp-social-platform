@@ -779,4 +779,33 @@
     <string name="play_sharing">正在分享...</string>
     <string name="play_share_success">已分享到你的动态！</string>
     <string name="play_err_share_failed">分享结果失败，请重试。</string>
+    <!-- ZRP News (native parity) -->
+    <string name="news_filter_all">全部</string>
+    <string name="news_subtitle">来自瑞士、欧洲和世界各地的独立新闻和报道。</string>
+    <string name="news_retry">重试</string>
+    <string name="news_no_news_title">暂无新闻</string>
+    <string name="news_no_news_desc">该分类下暂无已发布的文章。</string>
+    <string name="news_featured">精选</string>
+    <string name="news_latest_news">最新消息</string>
+    <string name="news_views_count">%1$s 次浏览</string>
+    <string name="news_load_more">加载更多</string>
+    <string name="news_loading_more">加载中...</string>
+    <string name="news_err_failed_load">新闻加载失败</string>
+    <string name="news_err_unable_to_load">目前无法加载 ZRP 新闻。</string>
+    <string name="news_back_to_list">返回 ZRP 新闻</string>
+    <string name="news_more_news">更多 ZRP 新闻</string>
+    <string name="news_source">来源</string>
+    <string name="news_category_world">世界</string>
+    <string name="news_category_europe">欧洲</string>
+    <string name="news_category_switzerland">瑞士</string>
+    <string name="news_category_politics">政治</string>
+    <string name="news_category_business">商业</string>
+    <string name="news_category_technology">科技</string>
+    <string name="news_category_crypto">加密货币</string>
+    <string name="news_category_science">科学</string>
+    <string name="news_category_sports">体育</string>
+    <string name="news_category_culture">文化</string>
+    <string name="news_category_community">社区</string>
+    <string name="news_title">ZRP 新闻</string>
+    <string name="news_discover_entry">发现 ZRP News</string>
 </resources>

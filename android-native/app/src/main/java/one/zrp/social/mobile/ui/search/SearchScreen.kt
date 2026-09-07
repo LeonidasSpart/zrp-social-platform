@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SportsEsports
@@ -69,6 +70,7 @@ fun SearchScreen(
     onOpenOpportunity: () -> Unit,
     onOpenAid: () -> Unit,
     onOpenPlay: () -> Unit,
+    onOpenNews: () -> Unit,
     onOpenComments: (postId: String) -> Unit,
     onOpenQuotePost: (postId: String) -> Unit = {},
     onOpenReposts: (postId: String) -> Unit = {},
@@ -117,6 +119,7 @@ fun SearchScreen(
                 onOpenOpportunity = onOpenOpportunity,
                 onOpenAid = onOpenAid,
                 onOpenPlay = onOpenPlay,
+                onOpenNews = onOpenNews,
             )
         } else {
             SearchResultsContent(
@@ -224,6 +227,7 @@ private fun DiscoverContent(
     onOpenOpportunity: () -> Unit,
     onOpenAid: () -> Unit,
     onOpenPlay: () -> Unit,
+    onOpenNews: () -> Unit,
 ) {
     if (state.isLoadingDiscover) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -247,6 +251,9 @@ private fun DiscoverContent(
         }
         item {
             PlayEntryRow(onClick = onOpenPlay)
+        }
+        item {
+            NewsEntryRow(onClick = onOpenNews)
         }
 
         if (state.trendingHashtags.isNotEmpty()) {
@@ -511,6 +518,25 @@ private fun PlayEntryRow(onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(text = stringResource(R.string.play_discover_entry), style = MaterialTheme.typography.titleSmall)
+    }
+}
+
+@Composable
+private fun NewsEntryRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Newspaper,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text = stringResource(R.string.news_discover_entry), style = MaterialTheme.typography.titleSmall)
     }
 }
 

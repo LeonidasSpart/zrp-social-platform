@@ -97,4 +97,5 @@ object ApiClient {
     val opportunityApi: OpportunityApi by lazy { retrofit.create(OpportunityApi::class.java) }
     val aidApi: AidApi by lazy { retrofit.create(AidApi::class.java) }
     val playApi: PlayApi by lazy { retrofit.create(PlayApi::class.java) }
+    val newsApi: NewsApi by lazy { retrofit.create(NewsApi::class.java) }
 }

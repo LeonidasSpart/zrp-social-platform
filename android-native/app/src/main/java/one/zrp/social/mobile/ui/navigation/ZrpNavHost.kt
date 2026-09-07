@@ -75,6 +75,8 @@ import one.zrp.social.mobile.ui.opportunity.OpportunityApplicantsScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityDetailScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityFormScreen
 import one.zrp.social.mobile.ui.opportunity.OpportunityScreen
+import one.zrp.social.mobile.ui.news.NewsArticleScreen
+import one.zrp.social.mobile.ui.news.NewsScreen
 import one.zrp.social.mobile.ui.play.PlayAchievementsScreen
 import one.zrp.social.mobile.ui.play.PlayChallengeScreen
 import one.zrp.social.mobile.ui.play.PlayCreateChallengeScreen
@@ -159,6 +161,8 @@ fun ZrpNavHost(onLogout: () -> Unit) {
     val goToPlayAchievements: () -> Unit = { navController.navigate("play/achievements") }
     val goToPlayProfile: (String) -> Unit = { username -> navController.navigate("play/profile/${Uri.encode(username)}") }
     val goToPlayCreateChallenge: () -> Unit = { navController.navigate("play/create") }
+    val goToNews: () -> Unit = { navController.navigate("news") }
+    val goToNewsArticle: (String) -> Unit = { slug -> navController.navigate("news/article/${Uri.encode(slug)}") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -245,6 +249,7 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                     onOpenOpportunity = goToOpportunity,
                     onOpenAid = goToAid,
                     onOpenPlay = goToPlay,
+                    onOpenNews = goToNews,
                     onOpenComments = goToComments,
                     onOpenQuotePost = goToQuotePost,
                     onOpenReposts = goToReposts,
@@ -692,6 +697,21 @@ fun ZrpNavHost(onLogout: () -> Unit) {
                         onBack = { navController.popBackStack() },
                         onPlay = { challengeId, playDuelId -> navController.navigate("play/challenge/$challengeId?duelId=${Uri.encode(playDuelId)}") },
                     )
+                }
+            }
+            composable("news") {
+                NewsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenArticle = goToNewsArticle,
+                )
+            }
+            composable(
+                route = "news/article/{slug}",
+                arguments = listOf(navArgument("slug") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val slug = backStackEntry.arguments?.getString("slug")
+                if (slug != null) {
+                    NewsArticleScreen(slug = slug, onBack = { navController.popBackStack() })
                 }
             }
             composable("opportunity/new") {
