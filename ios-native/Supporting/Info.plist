@@ -82,12 +82,15 @@
 	</array>
 
 	<!--
-	  Still deliberately absent, because nothing exercises them yet -
-	  Apple rejects permissions an app does not actually use:
+	  Deliberately absent. Apple rejects permissions an app does not
+	  actually use, and every one of these would be exactly that:
 	    NSPhotoLibraryUsageDescription  PhotosPicker is out-of-process
 	                                    and needs no permission at all
-	    NSCameraUsageDescription        camera capture, Phase 7b
-	    NSMicrophoneUsageDescription    in-app video capture, Phase 9b
+	    NSCameraUsageDescription        no ZRP client captures from the
+	                                    camera - not the web app, not
+	                                    Android - so there is no product
+	                                    reason to ask for it here
+	    NSMicrophoneUsageDescription    likewise: nothing records audio
 	    UIBackgroundModes remote-notification
 	                                    push, BLOCKED on B3
 	  See ios-native/PARITY.md.

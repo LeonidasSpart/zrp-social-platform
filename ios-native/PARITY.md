@@ -100,7 +100,7 @@ called and the real response being handled.
 | Full-screen media viewer | — | ✅ | ✅ | ✅ (paged, pinch zoom, AVKit video) | IMPLEMENTED |
 | Image/video/GIF upload | UploadThing `postMedia` router (`/api/uploadthing`) | ✅ | ✅ | ✅ (streamed from disk, real progress, cancel, resume-aware retry) | IMPLEMENTED |
 | GIF picker (Giphy, proxied) | `GET /api/gifs/search`, `/api/gifs/trending` | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Avatar / cover upload | `/api/user/update-avatar`, `/api/user/update-cover` | ✅ | ✅ | ⬜ | MISSING (Phase 6b) — upload client already supports the `avatar`/`banner` slugs |
+| Avatar / cover upload | `POST /api/user/update-avatar`, `POST /api/user/update-cover` — both reject any URL not on UploadThing's hosts, so the file must be uploaded first and its URL handed over | ✅ | ✅ | ✅ from Edit profile and from onboarding | IMPLEMENTED |
 
 ### Profiles & social graph
 
@@ -616,7 +616,7 @@ here. **No fake local notifications will stand in for this.**
 | 4 | Navigation shell + deep links | 🔶 in-app routing done (profile / hashtag / follow lists); OS deep links pending |
 | 5 | Home feed (For You / Following) + interactions | ✅ done |
 | 6 | Profiles + social graph | ✅ done — 6b complete (edit profile, pin, all five list tabs, own-profile analytics, Trust Passport) |
-| 7 | Post composer + media upload + viewer | ✅ done — 7b scheduling and polls done; camera capture still pending |
+| 7 | Post composer + media upload + viewer | ✅ done — 7b complete (scheduling, polls). Camera capture was listed here in error: no ZRP client has it — not the web app, not Android — so `NSCameraUsageDescription` stays absent by decision rather than by omission |
 | 8 | Comments, replies, quotes, edit | ✅ done — 8b complete (reactions, comment repost/bookmark, reposts & quotes lists, inline translation) |
 | 9 | Stories | ✅ done |
 | 10 | Messages | ✅ done — 10b image attachments done. Conversation search was listed here in error: the website has none either (no search box on `/messages`, and no route behind one), so there is nothing to reach parity with |
