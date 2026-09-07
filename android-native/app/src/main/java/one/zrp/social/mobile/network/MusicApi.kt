@@ -1,7 +1,9 @@
 package one.zrp.social.mobile.network
 
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -148,6 +150,47 @@ data class MusicAlbumDetail(
     val tracks: List<MusicTrack> = emptyList(),
 )
 
+// ─── Playlists (GET/POST /music/playlists, GET/PATCH/DELETE/POST
+// /music/playlists/{id}, POST /music/playlists/{id}/reorder) ────────
+// A MusicPlaylistTrack row's own id (not the track's id) - reorder's
+// real request body is a list of THESE ids, not track ids, since a
+// track can only appear once per playlist but this is still the id
+// that actually has a `position` column.
+data class MusicPlaylistTrackRow(
+    val id: String,
+    val position: Int,
+    val track: MusicTrack,
+)
+
+data class MusicPlaylistListItem(
+    val id: String,
+    val name: String,
+    val coverUrl: String?,
+    val isPublic: Boolean,
+    val tracks: List<MusicPlaylistTrackRow> = emptyList(),
+)
+
+data class MusicPlaylistDetail(
+    val id: String,
+    val name: String,
+    val description: String?,
+    val isPublic: Boolean,
+    val isOwner: Boolean,
+    val tracks: List<MusicPlaylistTrackRow> = emptyList(),
+)
+
+data class CreatePlaylistRequest(val name: String)
+
+data class UpdatePlaylistRequest(val name: String? = null)
+
+data class DeletePlaylistResponse(val deleted: Boolean)
+
+data class ToggleTrackInPlaylistRequest(val trackId: String)
+
+data class ToggleTrackInPlaylistResponse(val added: Boolean)
+
+data class ReorderPlaylistRequest(val orderedIds: List<String>)
+
 /**
  * The same real ZRP Music catalogue the website's Music home page
  * uses. Artist/album/playlist detail, Discover, History, Liked and
@@ -184,6 +227,34 @@ interface MusicApi {
 
     @GET("music/albums/{id}")
     suspend fun getAlbumDetail(@Path("id") id: String): MusicAlbumDetail
+
+    @GET("music/playlists")
+    suspend fun getPlaylists(): List<MusicPlaylistListItem>
+
+    @POST("music/playlists")
+    suspend fun createPlaylist(@Body request: CreatePlaylistRequest): MusicPlaylistListItem
+
+    @GET("music/playlists/{id}")
+    suspend fun getPlaylistDetail(@Path("id") id: String): MusicPlaylistDetail
+
+    @PATCH("music/playlists/{id}")
+    suspend fun updatePlaylist(@Path("id") id: String, @Body request: UpdatePlaylistRequest): MusicPlaylistDetail
+
+    @DELETE("music/playlists/{id}")
+    suspend fun deletePlaylist(@Path("id") id: String): DeletePlaylistResponse
+
+    // Toggles: adds the track if absent, removes it if present - the
+    // real route's own behavior (see MusicRepository's KDoc on why
+    // that's safe to call as a plain "add" from a track picker that
+    // only ever shows playlists the track isn't already in).
+    @POST("music/playlists/{id}")
+    suspend fun toggleTrackInPlaylist(
+        @Path("id") id: String,
+        @Body request: ToggleTrackInPlaylistRequest,
+    ): ToggleTrackInPlaylistResponse
+
+    @POST("music/playlists/{id}/reorder")
+    suspend fun reorderPlaylist(@Path("id") id: String, @Body request: ReorderPlaylistRequest)
 }
 
 data class MusicHomeResponse(

@@ -215,6 +215,12 @@ fun PlayAllShuffleRow(
     onPlayAll: () -> Unit,
     onShuffle: () -> Unit,
     modifier: Modifier = Modifier,
+    // Artist/Album detail's own real buttons say "Play all"
+    // (music.common.playAll); the playlist detail page's own real
+    // button says just "Play" (music.common.play) for the identical
+    // play-the-whole-list action - a genuine inconsistency in the real
+    // product, matched here rather than made falsely consistent.
+    playLabelRes: Int = R.string.music_common_play_all,
 ) {
     Row(modifier = modifier) {
         Button(
@@ -223,7 +229,7 @@ fun PlayAllShuffleRow(
             colors = ButtonDefaults.buttonColors(containerColor = ZrpRed),
         ) {
             Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
-            Text(stringResource(R.string.music_common_play_all), modifier = Modifier.padding(start = Spacing.xs))
+            Text(stringResource(playLabelRes), modifier = Modifier.padding(start = Spacing.xs))
         }
         Spacer(modifier = Modifier.width(Spacing.sm))
         OutlinedButton(onClick = onShuffle, enabled = enabled) {

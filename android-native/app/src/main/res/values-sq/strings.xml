@@ -297,4 +297,25 @@
     <string name="music_albums_title">Albume</string>
     <string name="music_albums_search_placeholder">Kërko albume...</string>
     <string name="music_albums_none_found">Nuk u gjetën albume</string>
+    <!-- Music Phase 4: Playlists -->
+    <string name="music_playlists_title">Playlistat e tua</string>
+    <string name="music_playlists_new_playlist">Playlist e re</string>
+    <string name="music_playlists_name_placeholder">Emri i playlistit</string>
+    <string name="music_playlists_create">Krijo</string>
+    <string name="music_playlists_cancel_aria">Anulo</string>
+    <string name="music_playlists_empty_title">Ende pa playlista</string>
+    <string name="music_playlists_empty_body">Krijo playlistin tënd të parë për të filluar organizimin e këngëve.</string>
+    <string name="music_playlist_detail_not_found">Playlisti nuk u gjet</string>
+    <string name="music_playlist_detail_back_to_playlists">Kthehu te playlistat</string>
+    <string name="music_playlist_detail_public">Playlist publike</string>
+    <string name="music_playlist_detail_private">Playlist private</string>
+    <string name="music_playlist_detail_rename_aria">Riemërto playlistin</string>
+    <string name="music_playlist_detail_save_aria">Ruaj emrin</string>
+    <string name="music_playlist_detail_delete">Fshi</string>
+    <string name="music_playlist_detail_delete_confirm">Të fshihet \"%1$s\"? Ky veprim nuk mund të kthehet.</string>
+    <string name="music_playlist_detail_empty_title">Ende pa këngë në këtë playlist</string>
+    <string name="music_playlist_detail_empty_body">Shto këngë nga Zbulo, një artist ose një album.</string>
+    <string name="music_playlist_detail_move_up_aria">Lëviz lart</string>
+    <string name="music_playlist_detail_move_down_aria">Lëviz poshtë</string>
+    <string name="music_playlist_detail_remove_track_aria">Hiq %1$s nga playlisti</string>
 </resources>

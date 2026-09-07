@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Album
+import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.QueueMusic
 import androidx.compose.material.icons.filled.VerifiedUser
@@ -56,6 +57,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MusicRepository
 import one.zrp.social.mobile.network.MusicAlbumSummary
 import one.zrp.social.mobile.network.MusicArtistSummary
+import one.zrp.social.mobile.network.MusicPlaylistSummary
 import one.zrp.social.mobile.network.MusicTrack
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.theme.Spacing
@@ -77,8 +79,10 @@ fun MusicScreen(
     onOpenQueue: () -> Unit,
     onOpenArtists: () -> Unit,
     onOpenAlbums: () -> Unit,
+    onOpenPlaylists: () -> Unit,
     onArtistClick: (String) -> Unit,
     onAlbumClick: (String) -> Unit,
+    onPlaylistClick: (String) -> Unit,
 ) {
     val viewModel: MusicViewModel = viewModel(
         factory = remember(player) { MusicViewModelFactory(MusicRepository(), player) },
@@ -123,6 +127,11 @@ fun MusicScreen(
                 leadingIcon = { Icon(Icons.Filled.Album, contentDescription = null, modifier = Modifier.size(18.dp)) },
                 label = { Text(stringResource(R.string.music_albums_title)) },
             )
+            AssistChip(
+                onClick = onOpenPlaylists,
+                leadingIcon = { Icon(Icons.Filled.ListAlt, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                label = { Text(stringResource(R.string.music_playlists_title)) },
+            )
         }
 
         Box(
@@ -135,7 +144,8 @@ fun MusicScreen(
                 state.recentlyPlayed.isNotEmpty() ||
                 state.likedPreview.isNotEmpty() ||
                 state.latestAlbums.isNotEmpty() ||
-                state.popularArtists.isNotEmpty()
+                state.popularArtists.isNotEmpty() ||
+                state.yourPlaylists.isNotEmpty()
 
             when {
                 state.isLoading -> {
@@ -163,10 +173,10 @@ fun MusicScreen(
                 }
                 else -> {
                     // Section order matches MusicShell.tsx's own real
-                    // home layout: Recently Played, Trending, Liked
-                    // preview, New Releases, Latest Albums, Popular
-                    // Artists (Genres/Your Playlists follow in later
-                    // phases, once their own destination screens exist).
+                    // home layout: Recently Played, Trending, Your
+                    // Playlists, Liked preview, New Releases, Latest
+                    // Albums, Popular Artists (Genres is the one
+                    // section still deferred, pending Discover).
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         if (state.recentlyPlayed.isNotEmpty()) {
                             item {
@@ -186,6 +196,11 @@ fun MusicScreen(
                                     currentTrackId = playerState.currentTrack?.id,
                                     onTrackClick = { viewModel.onTrackClick(it, state.trending) },
                                 )
+                            }
+                        }
+                        if (state.yourPlaylists.isNotEmpty()) {
+                            item {
+                                YourPlaylistsSection(playlists = state.yourPlaylists, onPlaylistClick = onPlaylistClick)
                             }
                         }
                         if (state.likedPreview.isNotEmpty()) {
@@ -421,6 +436,60 @@ private fun PopularArtistsSection(artists: List<MusicArtistSummary>, onArtistCli
                             )
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun YourPlaylistsSection(playlists: List<MusicPlaylistSummary>, onPlaylistClick: (String) -> Unit) {
+    Column {
+        Text(
+            // The real home page reuses music.nav.playlistsTitle
+            // ("Playlists") for this section's own heading too, rather
+            // than a distinct "Your Playlists" string - matched as-is.
+            text = stringResource(R.string.music_playlists_title),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        )
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            items(playlists, key = { it.id }) { playlist ->
+                val cover = playlist.coverUrl
+                    ?: playlist.tracks.firstOrNull()?.track?.coverUrl
+                    ?: playlist.tracks.firstOrNull()?.track?.album?.coverUrl
+                Column(
+                    modifier = Modifier
+                        .width(130.dp)
+                        .clickable { onPlaylistClick(playlist.id) },
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(130.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                    ) {
+                        if (cover != null) {
+                            AsyncImage(
+                                model = cover,
+                                contentDescription = playlist.name,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        } else {
+                            Icon(imageVector = Icons.Filled.ListAlt, contentDescription = playlist.name, modifier = Modifier.fillMaxSize())
+                        }
+                    }
+                    Text(
+                        text = playlist.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = Spacing.xs),
+                    )
                 }
             }
         }

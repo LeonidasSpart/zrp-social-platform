@@ -297,4 +297,25 @@
     <string name="music_albums_title">Alben</string>
     <string name="music_albums_search_placeholder">Alben suchen...</string>
     <string name="music_albums_none_found">Keine Alben gefunden</string>
+    <!-- Music Phase 4: Playlists -->
+    <string name="music_playlists_title">Deine Playlists</string>
+    <string name="music_playlists_new_playlist">Neue Playlist</string>
+    <string name="music_playlists_name_placeholder">Playlist-Name</string>
+    <string name="music_playlists_create">Erstellen</string>
+    <string name="music_playlists_cancel_aria">Abbrechen</string>
+    <string name="music_playlists_empty_title">Noch keine Playlists</string>
+    <string name="music_playlists_empty_body">Erstelle deine erste Playlist, um Titel zu organisieren.</string>
+    <string name="music_playlist_detail_not_found">Playlist nicht gefunden</string>
+    <string name="music_playlist_detail_back_to_playlists">Zurück zu den Playlists</string>
+    <string name="music_playlist_detail_public">Öffentliche Playlist</string>
+    <string name="music_playlist_detail_private">Private Playlist</string>
+    <string name="music_playlist_detail_rename_aria">Playlist umbenennen</string>
+    <string name="music_playlist_detail_save_aria">Namen speichern</string>
+    <string name="music_playlist_detail_delete">Löschen</string>
+    <string name="music_playlist_detail_delete_confirm">„%1$s“ löschen? Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="music_playlist_detail_empty_title">Noch keine Titel in dieser Playlist</string>
+    <string name="music_playlist_detail_empty_body">Füge Titel aus Entdecken, einem Künstler oder einem Album hinzu.</string>
+    <string name="music_playlist_detail_move_up_aria">Nach oben verschieben</string>
+    <string name="music_playlist_detail_move_down_aria">Nach unten verschieben</string>
+    <string name="music_playlist_detail_remove_track_aria">%1$s aus der Playlist entfernen</string>
 </resources>

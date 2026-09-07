@@ -297,4 +297,25 @@
     <string name="music_albums_title">Альбомы</string>
     <string name="music_albums_search_placeholder">Поиск альбомов...</string>
     <string name="music_albums_none_found">Альбомы не найдены</string>
+    <!-- Music Phase 4: Playlists -->
+    <string name="music_playlists_title">Ваши плейлисты</string>
+    <string name="music_playlists_new_playlist">Новый плейлист</string>
+    <string name="music_playlists_name_placeholder">Название плейлиста</string>
+    <string name="music_playlists_create">Создать</string>
+    <string name="music_playlists_cancel_aria">Отмена</string>
+    <string name="music_playlists_empty_title">Плейлистов пока нет</string>
+    <string name="music_playlists_empty_body">Создайте свой первый плейлист, чтобы начать организовывать треки.</string>
+    <string name="music_playlist_detail_not_found">Плейлист не найден</string>
+    <string name="music_playlist_detail_back_to_playlists">Назад к плейлистам</string>
+    <string name="music_playlist_detail_public">Публичный плейлист</string>
+    <string name="music_playlist_detail_private">Приватный плейлист</string>
+    <string name="music_playlist_detail_rename_aria">Переименовать плейлист</string>
+    <string name="music_playlist_detail_save_aria">Сохранить название</string>
+    <string name="music_playlist_detail_delete">Удалить</string>
+    <string name="music_playlist_detail_delete_confirm">Удалить «%1$s»? Это действие нельзя отменить.</string>
+    <string name="music_playlist_detail_empty_title">В этом плейлисте пока нет треков</string>
+    <string name="music_playlist_detail_empty_body">Добавляйте треки со страниц Открыть, артиста или альбома.</string>
+    <string name="music_playlist_detail_move_up_aria">Переместить вверх</string>
+    <string name="music_playlist_detail_move_down_aria">Переместить вниз</string>
+    <string name="music_playlist_detail_remove_track_aria">Удалить %1$s из плейлиста</string>
 </resources>
