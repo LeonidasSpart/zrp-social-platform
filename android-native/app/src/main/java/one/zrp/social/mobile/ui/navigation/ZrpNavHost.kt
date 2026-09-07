@@ -183,6 +183,10 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
     val goToNews: () -> Unit = { navController.navigate("news") }
     val goToNewsArticle: (String) -> Unit = { slug -> navController.navigate("news/article/${Uri.encode(slug)}") }
     val goToShorts: () -> Unit = { navController.navigate("shorts") }
+    // Matches PostCard.tsx's own video-tap behavior: opens the same
+    // full-screen swipeable video feed as the Shorts tab, starting at
+    // this exact post (VideoFeedViewer's own startPostId prop).
+    val goToVideoViewer: (String) -> Unit = { postId -> navController.navigate("shorts/$postId") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -271,6 +275,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onOpenReposts = goToReposts,
                     onOpenQuotes = goToQuotes,
                     onOpenHashtag = goToHashtag,
+                    onOpenVideoViewer = goToVideoViewer,
                 )
             }
             composable(
@@ -292,6 +297,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onOpenReposts = goToReposts,
                     onOpenQuotes = goToQuotes,
                     onOpenHashtag = goToHashtag,
+                    onOpenVideoViewer = goToVideoViewer,
                 )
             }
             composable(ZrpDestination.Create.route) { CreatePostScreen(onPosted = goHome) }
@@ -327,6 +333,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onOpenQuotes = goToQuotes,
                     onOpenHashtag = goToHashtag,
                     onOpenTrustPassport = goToTrustPassport,
+                    onOpenVideoViewer = goToVideoViewer,
                 )
             }
             composable(
@@ -349,6 +356,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onOpenQuotes = goToQuotes,
                     onOpenHashtag = goToHashtag,
                     onOpenTrustPassport = goToTrustPassport,
+                    onOpenVideoViewer = goToVideoViewer,
                 )
             }
             composable(
@@ -775,6 +783,18 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onAuthorClick = goToProfile,
                 )
             }
+            composable(
+                route = "shorts/{postId}",
+                arguments = listOf(navArgument("postId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val postId = backStackEntry.arguments?.getString("postId")
+                ShortsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenComments = goToComments,
+                    onAuthorClick = goToProfile,
+                    startPostId = postId,
+                )
+            }
             composable("opportunity/new") {
                 OpportunityFormScreen(
                     listingId = null,
@@ -816,6 +836,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onOpenReposts = goToReposts,
                     onOpenQuotes = goToQuotes,
                     onOpenHashtag = goToHashtag,
+                    onOpenVideoViewer = goToVideoViewer,
                 )
             }
             composable("blocked-users") {
@@ -1026,6 +1047,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                         onOpenReposts = goToReposts,
                         onOpenQuotes = goToQuotes,
                         onOpenHashtag = goToHashtag,
+                        onOpenVideoViewer = goToVideoViewer,
                         onBack = { navController.popBackStack() },
                     )
                 }
@@ -1046,6 +1068,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                         onOpenReposts = goToReposts,
                         onOpenQuotes = goToQuotes,
                         onOpenHashtag = goToHashtag,
+                        onOpenVideoViewer = goToVideoViewer,
                     )
                 }
             }

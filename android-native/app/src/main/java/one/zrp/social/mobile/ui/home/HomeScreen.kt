@@ -70,6 +70,7 @@ fun HomeScreen(
     onOpenReposts: (postId: String) -> Unit = {},
     onOpenQuotes: (postId: String) -> Unit = {},
     onOpenHashtag: (String) -> Unit = {},
+    onOpenVideoViewer: (String) -> Unit = {},
 ) {
     val viewModel: HomeViewModel = viewModel(
         factory = remember { HomeViewModelFactory(PostsRepository()) },
@@ -166,6 +167,7 @@ fun HomeScreen(
                                 onClick = onOpenComments,
                                 onAuthorClick = onAuthorClick,
                                 onHashtagClick = onOpenHashtag,
+                                onOpenVideoViewer = onOpenVideoViewer,
                             )
                         }
 

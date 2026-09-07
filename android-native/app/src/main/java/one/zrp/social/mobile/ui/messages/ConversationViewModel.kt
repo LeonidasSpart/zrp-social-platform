@@ -1,5 +1,7 @@
 package one.zrp.social.mobile.ui.messages
 
+import android.content.ContentResolver
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
@@ -12,10 +14,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import one.zrp.social.mobile.data.MediaUploadRepository
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.ChatMessage
 import one.zrp.social.mobile.network.MessageReaction
+import one.zrp.social.mobile.network.PostAuthor
 import one.zrp.social.mobile.network.SocketMessageDeletedPayload
 import one.zrp.social.mobile.network.SocketMessageEditedPayload
 import one.zrp.social.mobile.network.SocketMessagePreview
@@ -37,6 +41,21 @@ import org.json.JSONObject
 // dropped by a flaky connection.
 private const val POLL_INTERVAL_MS = 5000L
 
+/**
+ * An image-attachment problem the screen needs to show translated -
+ * kept separate from a plain string the same way CallViewModel's own
+ * CallError is, since a plain ViewModel can't resolve Android string
+ * resources itself; ConversationScreen maps each case to its real,
+ * translated chat.err* string (see ChatInterface.tsx's own
+ * handleImageUpload, which this mirrors exactly: same 4MB cap, same
+ * JPEG/PNG/GIF/WebP allow-list, same chatImage UploadThing router).
+ */
+sealed class ChatImageError {
+    data class FileTooLarge(val maxMb: Int) : ChatImageError()
+    object InvalidType : ChatImageError()
+    data class UploadFailed(val detail: String) : ChatImageError()
+}
+
 data class ConversationUiState(
     val messages: List<ChatMessage> = emptyList(),
     val draft: String = "",
@@ -50,6 +69,19 @@ data class ConversationUiState(
     val error: String? = null,
     val partnerTyping: Boolean = false,
     val socketConnected: Boolean = false,
+    // Derived from whichever loaded message first carries a real
+    // sender/receiver - see ConversationViewModel's own load(). Null
+    // only until the first page of history (or the poll) resolves it,
+    // same as ChatInterface.tsx itself has no receiver identity beyond
+    // its own receiverId/receiverName/receiverAvatar props until then.
+    val partner: PostAuthor? = null,
+    // Mirrors ChatInterface.tsx's own uploadingImage/handleImageUpload -
+    // the picked image uploads immediately (not staged for send()) and
+    // sends itself as soon as the upload resolves, same as web does via
+    // useUploadThing's onClientUploadComplete -> sendMessage("", url).
+    val isUploadingImage: Boolean = false,
+    val imageUploadProgress: Float = 0f,
+    val imageError: ChatImageError? = null,
 )
 
 /**
@@ -65,6 +97,7 @@ data class ConversationUiState(
 class ConversationViewModel(
     private val repository: MessagesRepository,
     private val partnerId: String,
+    private val mediaUploadRepository: MediaUploadRepository = MediaUploadRepository(),
 ) : ViewModel() {
     private val _state = MutableStateFlow(ConversationUiState())
     val state: StateFlow<ConversationUiState> = _state.asStateFlow()
@@ -322,6 +355,77 @@ class ConversationViewModel(
         }
     }
 
+    fun dismissImageError() {
+        _state.update { it.copy(imageError = null) }
+    }
+
+    /**
+     * Mirrors ChatInterface.tsx's own handleImageUpload exactly - same
+     * 4MB cap, same JPEG/PNG/GIF/WebP allow-list, uploaded through the
+     * same real chatImage UploadThing router - then immediately sent as
+     * its own image-only message the moment the upload resolves,
+     * matching web's own onClientUploadComplete -> sendMessage("", url).
+     */
+    fun onImagePicked(
+        contentResolver: ContentResolver,
+        uri: Uri,
+        fileName: String,
+        mimeType: String,
+        size: Long,
+    ) {
+        val validTypes = setOf("image/jpeg", "image/png", "image/gif", "image/webp")
+        if (mimeType !in validTypes) {
+            _state.update { it.copy(imageError = ChatImageError.InvalidType) }
+            return
+        }
+        val maxBytes = 4L * 1024 * 1024
+        if (size > maxBytes) {
+            _state.update { it.copy(imageError = ChatImageError.FileTooLarge(4)) }
+            return
+        }
+
+        _state.update { it.copy(isUploadingImage = true, imageUploadProgress = 0f, imageError = null, error = null) }
+        viewModelScope.launch {
+            mediaUploadRepository.upload(
+                slug = "chatImage",
+                contentResolver = contentResolver,
+                uri = uri,
+                fileName = fileName,
+                mimeType = mimeType,
+                size = size,
+                onProgress = { progress -> _state.update { it.copy(imageUploadProgress = progress) } },
+            ).onSuccess { uploaded ->
+                _state.update { it.copy(isUploadingImage = false) }
+                sendImage(uploaded.url)
+            }.onFailure { error ->
+                _state.update {
+                    it.copy(isUploadingImage = false, imageError = ChatImageError.UploadFailed(error.message ?: "Unknown error"))
+                }
+            }
+        }
+    }
+
+    private fun sendImage(imageUrl: String) {
+        viewModelScope.launch {
+            repository.sendMessage(receiverId = partnerId, content = "", imageUrl = imageUrl)
+                .onSuccess { message ->
+                    _state.update { it.copy(messages = it.messages + message) }
+                    socket?.emit(
+                        "send-message",
+                        JSONObject()
+                            .put("receiverId", partnerId)
+                            .put("content", "")
+                            .put("messageId", message.id),
+                    )
+                }
+                .onFailure { error ->
+                    _state.update {
+                        it.copy(imageError = ChatImageError.UploadFailed(error.message ?: "Unknown error"))
+                    }
+                }
+        }
+    }
+
     private fun load(isInitial: Boolean) {
         viewModelScope.launch {
             _state.update {
@@ -330,7 +434,21 @@ class ConversationViewModel(
 
             repository.getConversationMessages(partnerId)
                 .onSuccess { list ->
-                    _state.update { it.copy(messages = list, isLoading = false, isRefreshing = false) }
+                    val derivedPartner = list.firstNotNullOfOrNull { message ->
+                        when (partnerId) {
+                            message.sender?.id -> message.sender
+                            message.receiver?.id -> message.receiver
+                            else -> null
+                        }
+                    }
+                    _state.update {
+                        it.copy(
+                            messages = list,
+                            isLoading = false,
+                            isRefreshing = false,
+                            partner = derivedPartner ?: it.partner,
+                        )
+                    }
                 }
                 .onFailure { error ->
                     _state.update {

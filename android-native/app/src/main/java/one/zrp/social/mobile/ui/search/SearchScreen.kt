@@ -80,6 +80,7 @@ fun SearchScreen(
     onOpenReposts: (postId: String) -> Unit = {},
     onOpenQuotes: (postId: String) -> Unit = {},
     onOpenHashtag: (String) -> Unit = {},
+    onOpenVideoViewer: (String) -> Unit = {},
 ) {
     val viewModel: SearchViewModel = viewModel(
         factory = remember { SearchViewModelFactory(SearchRepository()) },
@@ -148,6 +149,7 @@ fun SearchScreen(
                 onQuoteClick = onOpenQuotePost,
                 onViewReposts = onOpenReposts,
                 onViewQuotes = onOpenQuotes,
+                onOpenVideoViewer = onOpenVideoViewer,
             )
         }
     }
@@ -323,6 +325,7 @@ private fun SearchResultsContent(
     onQuoteClick: (String) -> Unit,
     onViewReposts: (String) -> Unit,
     onViewQuotes: (String) -> Unit,
+    onOpenVideoViewer: (String) -> Unit,
 ) {
     if (state.isSearching) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -404,6 +407,7 @@ private fun SearchResultsContent(
                     onClick = onCommentClick,
                     onAuthorClick = onAuthorClick,
                     onHashtagClick = onOpenHashtag,
+                    onOpenVideoViewer = onOpenVideoViewer,
                 )
             }
         }

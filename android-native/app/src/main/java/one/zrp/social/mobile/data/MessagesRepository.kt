@@ -19,9 +19,16 @@ class MessagesRepository {
         ApiClient.messagesApi.getConversationMessages(userId)
     }
 
-    suspend fun sendMessage(receiverId: String, content: String, replyToId: String? = null): Result<ChatMessage> {
+    suspend fun sendMessage(
+        receiverId: String,
+        content: String,
+        replyToId: String? = null,
+        imageUrl: String? = null,
+    ): Result<ChatMessage> {
         return try {
-            Result.success(ApiClient.messagesApi.sendMessage(SendMessageRequest(content, receiverId, replyToId)))
+            Result.success(
+                ApiClient.messagesApi.sendMessage(SendMessageRequest(content, receiverId, imageUrl, replyToId)),
+            )
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't send this message. Please try again."))
         } catch (e: Exception) {

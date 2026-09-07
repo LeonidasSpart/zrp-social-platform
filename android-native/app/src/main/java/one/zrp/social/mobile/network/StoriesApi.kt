@@ -29,7 +29,7 @@ data class UserStories(
     val stories: List<StoryItem>,
 )
 
-data class CreateStoryRequest(val content: String)
+data class CreateStoryRequest(val content: String?, val mediaUrl: String? = null, val mediaType: String? = null)
 
 data class CreatedStory(
     val id: String,
@@ -45,10 +45,11 @@ data class StoryLikeResponse(val liked: Boolean)
 /**
  * The same real 24-hour stories the website's rail uses - GET
  * /stories (grouped per author: own + everyone followed, already
- * excludes expired ones server-side), POST /stories (create -
- * text-only here; see PostsApi.createPost's note on why native media
- * upload isn't wired yet), POST /stories/{id}/view, POST
- * /stories/{id}/like.
+ * excludes expired ones server-side), POST /stories (create - content
+ * and/or one image/video, matching StoryComposer.tsx exactly; the
+ * media itself is uploaded separately via the storyMedia UploadThing
+ * router - see MediaUploadRepository - and only the resulting URL is
+ * sent here), POST /stories/{id}/view, POST /stories/{id}/like.
  */
 interface StoriesApi {
     @GET("stories")

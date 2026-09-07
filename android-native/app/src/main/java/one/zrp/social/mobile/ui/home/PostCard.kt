@@ -33,7 +33,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Flag
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Translate
@@ -193,6 +192,11 @@ fun PostCard(
     onQuoteClick: (String) -> Unit = {},
     onViewReposts: (String) -> Unit = {},
     onViewQuotes: (String) -> Unit = {},
+    // Matches PostCard.tsx's own video area: tapping it (anywhere but
+    // the mute button) opens the real full-screen swipeable video feed
+    // (VideoFeedViewer on web, ShortsScreen here), not an inline
+    // play/pause toggle - see PostVideoPlayer's own KDoc.
+    onOpenVideoViewer: (String) -> Unit = {},
     // Pin to profile - the website only offers this from the Profile
     // screen itself (showPinOption there is isOwnProfile; every other
     // surface that renders PostCard - Home, Search, Bookmarks, Quotes -
@@ -400,6 +404,7 @@ fun PostCard(
                 if (isVideo && post.imageUrl != null) {
                     PostVideoPlayer(
                         url = post.imageUrl,
+                        onOpenViewer = { onOpenVideoViewer(post.id) },
                         modifier = Modifier.padding(top = Spacing.sm),
                     )
                 } else if (galleryImages.isNotEmpty()) {
@@ -662,26 +667,24 @@ private fun ImageLightbox(images: List<String>, initialIndex: Int, onDismiss: ()
     }
 }
 
-// Real ExoPlayer-backed inline video playback for a video post - the
+// Real ExoPlayer-backed inline video preview for a video post - the
 // same media3 setup StoryViewerScreen's own video stories already use.
-// PostCard.tsx autoplays muted once a video post scrolls into view
-// (an IntersectionObserver-driven `videoInView`) and otherwise shows a
-// centered Play icon over the paused first frame; replicating that
-// scroll-driven autoplay would require plumbing LazyListState-derived
-// visibility through every screen that renders PostCard (Home, Search,
-// Profile, Bookmarks, Reposts, Quotes, Hashtag). Deliberately narrower
-// here: every video post starts paused with that same real Play-icon
-// overlay (one of web's own two real states, not an invented one), and
-// tapping it starts real muted, looping playback with the same
-// Mute/Unmute video toggle web's own button offers - matching its real,
-// untranslated aria-label text. Scroll-triggered autoplay is left as a
-// separate follow-up, same as the full-screen Shorts feed a tap opens
-// on web (a much larger, distinct feature this slice doesn't build).
+// Matches PostCard.tsx's real design exactly: the inline <video> itself
+// is pointer-events-none (autoplaying muted, looping, no direct
+// play/pause control) and tapping anywhere on the video area opens the
+// real full-screen swipeable video feed (VideoFeedViewer on web,
+// ShortsScreen here - see onOpenViewer) starting at this exact post,
+// with only its own separate Mute/Unmute button (bottom-right,
+// stopPropagation on web) controlling the inline preview without also
+// opening the viewer. Compose's LazyColumn only composes roughly-visible
+// items, which stands in for web's IntersectionObserver-driven
+// `videoInView` autoplay gate closely enough without plumbing a
+// separate visibility system through every screen that renders
+// PostCard.
 @OptIn(UnstableApi::class)
 @Composable
-private fun PostVideoPlayer(url: String, modifier: Modifier = Modifier) {
+private fun PostVideoPlayer(url: String, onOpenViewer: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    var isPlaying by remember(url) { mutableStateOf(false) }
     var isMuted by remember(url) { mutableStateOf(true) }
     // Web captures the real video's own dimensions (captureVideoAspect)
     // rather than assuming a fixed shape - a vertical phone-shot video
@@ -693,6 +696,7 @@ private fun PostVideoPlayer(url: String, modifier: Modifier = Modifier) {
             setMediaItem(MediaItem.fromUri(url))
             repeatMode = Player.REPEAT_MODE_ONE
             volume = 0f
+            playWhenReady = true
             prepare()
         }
     }
@@ -712,10 +716,6 @@ private fun PostVideoPlayer(url: String, modifier: Modifier = Modifier) {
         }
     }
 
-    LaunchedEffect(isPlaying) {
-        exoPlayer.playWhenReady = isPlaying
-    }
-
     LaunchedEffect(isMuted) {
         exoPlayer.volume = if (isMuted) 0f else 1f
     }
@@ -726,7 +726,7 @@ private fun PostVideoPlayer(url: String, modifier: Modifier = Modifier) {
             .aspectRatio(aspectRatio)
             .background(Color.Black)
             .clip(MaterialTheme.shapes.medium)
-            .clickable(enabled = !isPlaying) { isPlaying = true },
+            .clickable(onClick = onOpenViewer),
     ) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
@@ -739,36 +739,17 @@ private fun PostVideoPlayer(url: String, modifier: Modifier = Modifier) {
             },
         )
 
-        if (!isPlaying) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(MaterialTheme.shapes.extraLarge)
-                        .background(Color.Black.copy(alpha = 0.5f)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = Color.White)
-                }
-            }
-        } else {
-            IconButton(
-                onClick = { isMuted = !isMuted },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(Spacing.sm),
-            ) {
-                Icon(
-                    imageVector = if (isMuted) Icons.Filled.VolumeOff else Icons.Filled.VolumeUp,
-                    contentDescription = if (isMuted) "Unmute video" else "Mute video",
-                    tint = Color.White,
-                )
-            }
+        IconButton(
+            onClick = { isMuted = !isMuted },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(Spacing.sm),
+        ) {
+            Icon(
+                imageVector = if (isMuted) Icons.Filled.VolumeOff else Icons.Filled.VolumeUp,
+                contentDescription = if (isMuted) "Unmute video" else "Mute video",
+                tint = Color.White,
+            )
         }
     }
 }

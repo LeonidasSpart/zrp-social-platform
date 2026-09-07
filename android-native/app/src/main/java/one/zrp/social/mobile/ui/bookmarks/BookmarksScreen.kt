@@ -54,6 +54,7 @@ fun BookmarksScreen(
     onOpenReposts: (postId: String) -> Unit = {},
     onOpenQuotes: (postId: String) -> Unit = {},
     onOpenHashtag: (String) -> Unit = {},
+    onOpenVideoViewer: (String) -> Unit = {},
 ) {
     val viewModel: BookmarksViewModel = viewModel(
         factory = remember { BookmarksViewModelFactory(BookmarksRepository()) },
@@ -142,6 +143,7 @@ fun BookmarksScreen(
                             onClick = onOpenComments,
                             onAuthorClick = onAuthorClick,
                             onHashtagClick = onOpenHashtag,
+                            onOpenVideoViewer = onOpenVideoViewer,
                         )
                     }
 
