@@ -1,0 +1,398 @@
+import SwiftUI
+
+/// The Home timeline: For You and Following.
+///
+/// Both tabs are real backend feeds - `GET /api/posts/explore` and
+/// `GET /api/posts?tab=following`. Nothing on this screen is seeded,
+/// sampled, or stubbed; an empty feed renders the empty state rather than
+/// filler.
+struct HomeView: View {
+
+    @EnvironmentObject private var session: SessionController
+    @EnvironmentObject private var interactions: PostInteractionStore
+    @StateObject private var navigator = Navigator()
+    @StateObject private var viewModel = HomeViewModel()
+    @State private var isComposing = false
+    @StateObject private var stories = StoriesViewModel()
+    @State private var isCreatingStory = false
+    @State private var openStory: StoryPresentation?
+    @StateObject private var unread = UnreadBadgeViewModel()
+
+    var body: some View {
+        NavigationStack(path: $navigator.path) {
+            VStack(spacing: 0) {
+                tabPicker
+                Divider().overlay(ZrpColor.outline)
+                storiesHeader
+                feed
+            }
+            .background(ZrpColor.background.ignoresSafeArea())
+            .navigationTitle(Text(.navHome))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { toolbarContent }
+            .overlay(alignment: .bottomTrailing) { composeButton }
+            .navigationDestination(for: Route.self) { route in
+                switch route {
+                case .postDetail(let postId, let preloaded):
+                    PostDetailView(postId: postId, preloaded: preloaded)
+                case .profile(let username):
+                    ProfileView(username: username)
+                case .hashtag(let tag):
+                    HashtagView(tag: tag)
+                case .userList(let source):
+                    UserListView(source: source)
+                case .postQuotes(let postId):
+                    PostQuotesView(postId: postId)
+                case .messages:
+                    MessagesListView()
+                case .conversation(let partner):
+                    ConversationView(partner: partner, viewerId: session.currentUser?.id)
+                case .notifications:
+                    NotificationsView { unread.clearNotificationCount() }
+                case .search:
+                    SearchView()
+                case .music:
+                    MusicHomeView()
+                case .musicDiscover:
+                    MusicDiscoverView()
+                case .musicArtists:
+                    MusicArtistsView()
+                case .musicAlbums:
+                    MusicAlbumsView()
+                case .musicPlaylists:
+                    MusicPlaylistsView()
+                case .musicArtist(let id):
+                    MusicArtistDetailView(artistId: id)
+                case .musicAlbum(let id):
+                    MusicAlbumDetailView(albumId: id)
+                case .musicPlaylist(let id):
+                    MusicPlaylistDetailView(playlistId: id)
+                case .musicLiked:
+                    MusicLibraryListView(kind: .liked)
+                case .musicHistory:
+                    MusicLibraryListView(kind: .history)
+                case .musicQueue:
+                    MusicQueueView()
+                case .musicStudio:
+                    MusicStudioView()
+                case .marketplace:
+                    MarketplaceView()
+                case .listingDetail(let id):
+                    ListingDetailView(listingId: id)
+                case .listingCompose(let listingId):
+                    ListingComposerView(listingId: listingId)
+                case .myListings:
+                    MyListingsView()
+                case .listingFavorites:
+                    ListingFavoritesView()
+                case .settings:
+                    SettingsView()
+                case .privacySettings:
+                    PrivacySettingsView()
+                case .changePassword:
+                    ChangePasswordView()
+                case .blockedUsers:
+                    ModerationListView(kind: .blocked)
+                case .mutedUsers:
+                    ModerationListView(kind: .muted)
+                case .dataExport:
+                    DataExportView()
+                case .deleteAccount:
+                    DeleteAccountView()
+                case .languagePicker:
+                    LanguagePickerView()
+                case .editProfile:
+                    EditProfileView()
+                case .accountSettings:
+                    AccountSettingsView()
+                case .emailPreferences:
+                    EmailPreferencesView()
+                case .appeals:
+                    AppealsView()
+                case .trustPassport(let username):
+                    TrustPassportView(username: username)
+                case .listingConversation(let partner, let draft):
+                    ConversationView(
+                        partner: partner,
+                        viewerId: session.currentUser?.id,
+                        initialDraft: draft
+                    )
+                }
+            }
+        }
+        .environmentObject(navigator)
+        .sheet(isPresented: $isComposing) {
+            ComposeView { post in
+                viewModel.insertCreated(post, interactions: interactions)
+            }
+        }
+        .sheet(isPresented: $isCreatingStory) {
+            CreateStoryView {
+                // The create route returns the raw row, not the grouped
+                // rail shape, so the rail is refetched rather than
+                // reconstructed from a different response shape.
+                Task { await stories.load() }
+            }
+        }
+        .fullScreenCover(item: $openStory) { presentation in
+            StoryViewerView(
+                group: presentation.group,
+                startIndex: presentation.startIndex,
+                viewerId: session.currentUser?.id,
+                viewModel: stories
+            )
+        }
+        .task {
+            viewModel.attach(interactions: interactions)
+            viewModel.loadIfNeeded(viewModel.selectedTab)
+            await stories.load()
+            await unread.refresh()
+        }
+        .onChange(of: viewModel.selectedTab) { _, tab in
+            viewModel.loadIfNeeded(tab)
+        }
+        .alert(
+            Text(.iosErrorGenericTitle),
+            isPresented: Binding(
+                get: { interactions.actionError != nil },
+                set: { if !$0 { interactions.actionError = nil } }
+            )
+        ) {
+            Button { interactions.actionError = nil } label: { Text(.actionCancel) }
+        } message: {
+            Text(verbatim: interactions.actionError ?? "")
+        }
+    }
+
+    /// The stories rail.
+    ///
+    /// Sits above the timeline rather than inside it as a scrolling
+    /// header: a header would vanish whenever the feed is empty, loading
+    /// or errored, which is exactly the state a brand-new account is in
+    /// while the people it follows are already posting stories. The
+    /// trade-off is that it does not scroll away with the content the way
+    /// the web rail does.
+    ///
+    /// Absent entirely when there are no unexpired stories - the route
+    /// returns only the viewer's own and those of accounts they follow,
+    /// so an empty rail is the normal state and an empty strip would be
+    /// noise.
+    @ViewBuilder
+    private var storiesHeader: some View {
+        if stories.hasStories {
+            StoriesRailView(
+                groups: stories.groups,
+                onOpen: { group in
+                    openStory = StoryPresentation(
+                        group: group,
+                        startIndex: group.firstUnviewedIndex
+                    )
+                },
+                onCreate: { isCreatingStory = true }
+            )
+        }
+    }
+
+    private var composeButton: some View {
+        Button {
+            isComposing = true
+        } label: {
+            Image(systemName: "square.and.pencil")
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(.white)
+                .frame(width: 56, height: 56)
+                .background(ZrpColor.red, in: Circle())
+                .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
+        }
+        .padding(ZrpSpacing.lg)
+        .accessibilityLabel(Text(.iosComposeTitle))
+    }
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            Image("ZrpLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 26, height: 26)
+                .accessibilityHidden(true)
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            Button {
+                navigator.push(.search)
+            } label: {
+                Image(systemName: "magnifyingglass")
+            }
+            .accessibilityLabel(Text(.navSearch))
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            Button {
+                navigator.push(.notifications)
+            } label: {
+                Image(systemName: "bell")
+                    .overlay(alignment: .topTrailing) {
+                        // A real count from GET /api/notifications/unread.
+                        if unread.notificationCount > 0 {
+                            Circle()
+                                .fill(ZrpColor.red)
+                                .frame(width: 8, height: 8)
+                                .offset(x: 4, y: -2)
+                        }
+                    }
+            }
+            .accessibilityLabel(Text(.notificationsTitle))
+            .accessibilityValue(
+                Text(verbatim: unread.notificationCount > 0
+                    ? CountFormatting.exact(unread.notificationCount)
+                    : "")
+            )
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            Button {
+                navigator.push(.messages)
+            } label: {
+                Image(systemName: "bubble.left.and.bubble.right")
+                    .overlay(alignment: .topTrailing) {
+                        // A real count from GET /api/messages/unread -
+                        // never a placeholder dot.
+                        if unread.messageCount > 0 {
+                            Circle()
+                                .fill(ZrpColor.red)
+                                .frame(width: 8, height: 8)
+                                .offset(x: 4, y: -2)
+                        }
+                    }
+            }
+            .accessibilityLabel(Text(.messagesTitle))
+            .accessibilityValue(
+                Text(verbatim: unread.messageCount > 0
+                    ? CountFormatting.exact(unread.messageCount)
+                    : "")
+            )
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            Menu {
+                if let username = session.currentUser?.username {
+                    Button {
+                        navigator.push(.profile(username: username))
+                    } label: {
+                        Label { Text(.navProfile) } icon: { Image(systemName: "person") }
+                    }
+                }
+                Button {
+                    navigator.push(.music)
+                } label: {
+                    Label { Text(.navMusic) } icon: { Image(systemName: "music.note") }
+                }
+                Button {
+                    navigator.push(.marketplace)
+                } label: {
+                    Label { Text(.marketplaceHeroTitle) } icon: { Image(systemName: "bag") }
+                }
+                Button {
+                    navigator.push(.settings)
+                } label: {
+                    Label { Text(.settingsTitle) } icon: { Image(systemName: "gearshape") }
+                }
+                Button(role: .destructive) {
+                    Task { await session.signOut() }
+                } label: {
+                    Label {
+                        Text(.navSignOut)
+                    } icon: {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                    }
+                }
+            } label: {
+                AvatarView(
+                    url: session.currentUser?.avatarUrl,
+                    displayName: session.currentUser?.displayName ?? "",
+                    size: 28
+                )
+            }
+        }
+    }
+
+    // MARK: - Tabs
+
+    private var tabPicker: some View {
+        HStack(spacing: 0) {
+            ForEach(FeedTab.allCases) { tab in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        viewModel.selectedTab = tab
+                    }
+                } label: {
+                    VStack(spacing: ZrpSpacing.sm) {
+                        Text(tab.titleKey)
+                            .font(.subheadline.weight(viewModel.selectedTab == tab ? .semibold : .regular))
+                            .foregroundStyle(
+                                viewModel.selectedTab == tab
+                                    ? ZrpColor.onSurface
+                                    : ZrpColor.onSurfaceMuted
+                            )
+                        Capsule()
+                            .fill(viewModel.selectedTab == tab ? ZrpColor.red : .clear)
+                            .frame(height: 3)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: ZrpMetrics.minTouchTarget)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(
+                    viewModel.selectedTab == tab ? [.isSelected, .isButton] : .isButton
+                )
+            }
+        }
+        .background(ZrpColor.background)
+    }
+
+    // MARK: - Feed
+
+    @ViewBuilder
+    private var feed: some View {
+        let state = viewModel.currentState
+
+        switch state.phase {
+        case .idle, .loading:
+            TimelineStateView.loading()
+        case .failed(let error):
+            TimelineStateView.error(error) {
+                viewModel.retry(viewModel.selectedTab)
+            }
+        case .loaded:
+            if state.isEmpty {
+                TimelineStateView.empty(
+                    systemImage: "sparkles",
+                    title: .feedNoPosts,
+                    subtitle: viewModel.selectedTab == .following
+                        ? L10nKey.feedFollowSomeone
+                        : L10nKey.feedCheckBackLater
+                )
+            } else {
+                ScrollView {
+                    PostListView(
+                        posts: state.posts,
+                        isLoadingMore: state.isLoadingMore,
+                        hasMore: state.hasMore,
+                        onAppear: {
+                            viewModel.loadMoreIfNeeded(viewModel.selectedTab, currentPost: $0)
+                        },
+                        onCreated: { viewModel.insertCreated($0, interactions: interactions) },
+                        header: { EmptyView() }
+                    )
+                }
+                .refreshable { await viewModel.refresh(viewModel.selectedTab) }
+                .scrollDismissesKeyboard(.immediately)
+            }
+        }
+    }
+}
+
+/// Identifies which story group the full-screen viewer was opened on.
+struct StoryPresentation: Identifiable, Equatable {
+    let id = UUID()
+    let group: StoryGroup
+    let startIndex: Int
+}
