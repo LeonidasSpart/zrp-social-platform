@@ -225,6 +225,10 @@
         <item quantity="one">%1$d vote</item>
         <item quantity="other">%1$d votes</item>
     </plurals>
+    <plurals name="post_views_count">
+        <item quantity="one">%1$d view</item>
+        <item quantity="other">%1$d views</item>
+    </plurals>
     <string name="nav_bookmarks">Bookmarks</string>
     <string name="nav_sign_out">Sign Out</string>
     <string name="notifications_empty">No notifications yet</string>

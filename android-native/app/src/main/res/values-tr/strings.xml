@@ -213,6 +213,10 @@
         <item quantity="one">%1$d oy</item>
         <item quantity="other">%1$d oy</item>
     </plurals>
+    <plurals name="post_views_count">
+        <item quantity="one">%1$d görüntülenme</item>
+        <item quantity="other">%1$d görüntülenme</item>
+    </plurals>
     <string name="nav_bookmarks">Yer İmleri</string>
     <string name="nav_sign_out">Çıkış Yap</string>
     <string name="notifications_empty">Henüz bildirim yok</string>

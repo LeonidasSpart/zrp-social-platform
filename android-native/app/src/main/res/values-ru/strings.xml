@@ -213,6 +213,10 @@
         <item quantity="one">%1$d голос</item>
         <item quantity="other">%1$d голосов</item>
     </plurals>
+    <plurals name="post_views_count">
+        <item quantity="one">%1$d просмотр</item>
+        <item quantity="other">%1$d просмотров</item>
+    </plurals>
     <string name="nav_bookmarks">Закладки</string>
     <string name="nav_sign_out">Выйти</string>
     <string name="notifications_empty">Нет уведомления пока</string>

@@ -28,6 +28,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ChatBubbleOutline
@@ -86,6 +87,7 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.LinkPreviewRepository
+import one.zrp.social.mobile.data.PostViewRepository
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.LinkPreview
 import one.zrp.social.mobile.network.Poll
@@ -102,6 +104,7 @@ import one.zrp.social.mobile.ui.theme.IconSize
 import one.zrp.social.mobile.ui.theme.ZrpBlue
 import one.zrp.social.mobile.ui.theme.ZrpGreen
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.ViewedPostsTracker
 import one.zrp.social.mobile.util.formatCount
 import one.zrp.social.mobile.util.formatRelativeTime
 import one.zrp.social.mobile.util.parseIsoMillis
@@ -317,6 +320,20 @@ fun PostCard(
         post.linkUrl ?: extractFirstUrl(post.content)
     }
     var linkPreviewFound by remember(post.id) { mutableStateOf(false) }
+
+    // Matches PostCard.tsx's own view-count effect: fires once per post
+    // per app-process lifetime (ViewedPostsTracker), not gated by scroll
+    // visibility or media type - every post counts a view as soon as its
+    // card is first composed, the same as web counts one on mount. Local
+    // per-card state, same category as translation/reactions above -
+    // the real count is never lifted into any ViewModel's own post list.
+    var viewsCount by remember(post.id) { mutableStateOf(post.views) }
+    val postViewRepository = remember { PostViewRepository() }
+    LaunchedEffect(post.id) {
+        if (ViewedPostsTracker.markViewed(post.id)) {
+            postViewRepository.recordView(post.id).getOrNull()?.views?.let { viewsCount = it }
+        }
+    }
 
     suspend fun refreshReactions() {
         try {
@@ -575,6 +592,7 @@ fun PostCard(
                         count = post._count.likes,
                         onClick = { onLikeClick(post.id) },
                     )
+                    ViewsStat(count = viewsCount)
                     BookmarkButton(
                         bookmarked = post.bookmarked == true,
                         onClick = { onBookmarkClick(post.id) },
@@ -1330,6 +1348,32 @@ private fun LikeStat(liked: Boolean, count: Int, onClick: () -> Unit) {
             text = formatCount(count),
             style = MaterialTheme.typography.bodySmall,
             color = if (liked) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+// Matches PostCard.tsx's own VIEWS span exactly: shown on every post to
+// every viewer (not author-gated, unlike Pin/Edit/Delete), a plain
+// non-interactive stat rather than a button - no click target, no
+// dropdown, nothing to toggle. The website spells the count out in full
+// in its title tooltip; contentDescription does the same job here for a
+// screen reader, while the visible text stays the same abbreviated
+// formatCount() every other stat in this row uses.
+@Composable
+private fun ViewsStat(count: Int) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = Icons.Filled.BarChart,
+            contentDescription = pluralStringResource(R.plurals.post_views_count, count, count),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .size(TouchTarget.min)
+                .padding((TouchTarget.min - IconSize.sm) / 2),
+        )
+        Text(
+            text = formatCount(count),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

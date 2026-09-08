@@ -213,6 +213,10 @@
         <item quantity="one">%1$d Stimme</item>
         <item quantity="other">%1$d Stimmen</item>
     </plurals>
+    <plurals name="post_views_count">
+        <item quantity="one">%1$d Aufruf</item>
+        <item quantity="other">%1$d Aufrufe</item>
+    </plurals>
     <string name="nav_bookmarks">Lesezeichen</string>
     <string name="nav_sign_out">Abmelden</string>
     <string name="notifications_empty">Noch keine Benachrichtigungen</string>

@@ -213,6 +213,10 @@
         <item quantity="one">%1$d 票</item>
         <item quantity="other">%1$d 票</item>
     </plurals>
+    <plurals name="post_views_count">
+        <item quantity="one">%1$d 次浏览</item>
+        <item quantity="other">%1$d 次浏览</item>
+    </plurals>
     <string name="nav_bookmarks">收藏</string>
     <string name="nav_sign_out">退出登录</string>
     <string name="notifications_empty">无 通知 还</string>
