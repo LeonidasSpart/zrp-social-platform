@@ -251,9 +251,17 @@ private fun ShortItem(
 
         val shareLabel = stringResource(R.string.shorts_share)
         val shareTitle = stringResource(R.string.shorts_share_post_by, post.author.name ?: post.author.username)
+        // BottomEnd, not CenterEnd - CenterEnd here centered the whole
+        // padded column (icons + the 90dp of bottom padding meant to
+        // clear the caption row below) on the screen, which pushed the
+        // actual icons up near mid-screen instead of the lower-third
+        // rail TikTok/X/Instagram all use. BottomEnd anchors to the true
+        // bottom edge, so the same 90dp now correctly reads as clearance
+        // above the author/caption row (~24dp padding + ~50dp content)
+        // rather than an offset from center.
         Column(
             modifier = Modifier
-                .align(Alignment.CenterEnd)
+                .align(Alignment.BottomEnd)
                 .padding(end = 12.dp, bottom = 90.dp)
                 .navigationBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
