@@ -195,8 +195,13 @@ called and the real response being handled.
 | Apply externally | `externalUrl` on the listing | ✅ | ✅ | ✅ opens the link instead of posting an application — the field exists precisely so ZRP does not collect it | IMPLEMENTED |
 | Attach a CV | `resumeUrl` on the apply body | ✅ | ✅ | ⬜ the field is sent as absent rather than empty; a résumé picker is not built | MISSING |
 | Save a listing | `POST`/`DELETE /api/opportunity/{id}/save` | ✅ | ✅ | 🔶 both directions work, but **no route reports whether a listing is already saved** — the save endpoints only answer with the state they just set. The control is therefore indeterminate until used, rather than claiming "not saved" | PARTIAL (backend limitation) |
-| Post a listing | `POST /api/opportunity` — created as `PENDING_REVIEW` | ✅ | ✅ | ⬜ a long form with a skills editor, deadline picker and résumé upload; its own phase rather than a partial version | MISSING |
-| My listings / my applications | `GET /api/opportunity/my-listings`, `/my-applications` | ✅ | ✅ | ⬜ | MISSING |
+| Post a listing | `POST /api/opportunity` — created as `PENDING_REVIEW` | ✅ | ✅ | ✅ full composer: all eleven types, skills editor, deadline picker, paid/remote toggles, external URL. The route's own limits are mirrored so a refusal is not how anyone learns them, and the note says the listing is not live yet | IMPLEMENTED |
+| Edit a listing | `PUT /api/opportunity/{id}` — poster or staff | ✅ | ✅ | ✅ same composer. A **substantive** edit (type, title, description, compensation) returns a live listing to `PENDING_REVIEW`; the warning appears only when the route's own four fields actually changed | IMPLEMENTED |
+| Close a listing | `PUT /api/opportunity/{id}` with `status: "CLOSED"` | ✅ | ✅ | ✅ offered only on an ACTIVE listing, which is the only state the route honours it in — elsewhere it silently keeps the existing status | IMPLEMENTED |
+| Delete a listing | `DELETE /api/opportunity/{id}` | ✅ | ✅ | ⬜ the repository method exists; no control surfaces it, because closing is what a poster actually wants and deletion discards the applications with it | MISSING (by design) |
+| My listings / my applications | `GET /api/opportunity/my-listings`, `/my-applications` | ✅ | ✅ | ✅ one screen, two tabs. Listings show status and a moderator's rejection reason verbatim — `my-listings` is the only route that returns a listing that is not live | IMPLEMENTED |
+| Review applicants | `GET /api/opportunity/{id}/applications` — poster or staff, 403 otherwise | ✅ | ✅ | ✅ cover notes, and the three decisions the route lets an owner set | IMPLEMENTED |
+| Decide on an application | `PUT /api/opportunity/applications/{id}` | ✅ | ✅ | ✅ the route splits by role — an applicant may set only `WITHDRAWN` on their own application, an owner only `REVIEWED`/`ACCEPTED`/`REJECTED`. Each side is offered only its own statuses, so the 403 explaining the rule is never how anyone finds out | IMPLEMENTED |
 
 ### ZRP HELP (Aid)
 

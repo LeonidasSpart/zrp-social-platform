@@ -74,6 +74,13 @@ enum Route: Hashable {
     case aidCampaign(id: String)
     case opportunity
     case opportunityDetail(id: String)
+    /// The composer. Carries the whole listing when editing rather than
+    /// an id, the same way `postDetail` carries a preloaded post: it
+    /// always arrives from "My listings", which has already fetched it,
+    /// so re-fetching would show a spinner over data the app is holding.
+    case opportunityCompose(listing: MyOpportunityListing?)
+    case myOpportunities
+    case opportunityApplicants(listingId: String)
     case play
     case playChallenge(id: String)
     case playLeaderboard

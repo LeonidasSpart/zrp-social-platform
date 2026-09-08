@@ -59,6 +59,7 @@ enum DeepLink {
 
         let second = segments.count > 1 ? segments[1] : nil
         let third = segments.count > 2 ? segments[2] : nil
+        let fourth = segments.count > 3 ? segments[3] : nil
 
         switch first {
         case "search":
@@ -87,7 +88,37 @@ enum DeepLink {
             return DeepLinkTarget(.home, .play)
 
         case "opportunity":
-            return DeepLinkTarget(.home, second.map { .opportunityDetail(id: $0) } ?? .opportunity)
+            // The website's own paths, which are NOT /opportunity/{id}:
+            // a listing lives at /opportunity/listing/{id}, its
+            // applicants a segment deeper, and the composer, my-listings
+            // and my-applications are named routes beside them. Treating
+            // the second segment as an id - which this did - turned
+            // every one of those links into a request for a listing
+            // whose id was the literal word "create".
+            switch second {
+            case "listing":
+                guard let id = third else { return DeepLinkTarget(.home, .opportunity) }
+                if fourth == "applicants" {
+                    return DeepLinkTarget(.home, .opportunityApplicants(listingId: id))
+                }
+                return DeepLinkTarget(.home, .opportunityDetail(id: id))
+            case "create":
+                return DeepLinkTarget(.home, .opportunityCompose(listing: nil))
+            case "my-listings", "my-applications":
+                // Both tabs of one screen here; it opens on listings and
+                // the other is one tap away.
+                return DeepLinkTarget(.home, .myOpportunities)
+            case "edit":
+                // The editor needs the listing itself, which a link does
+                // not carry, so this lands on the listing - from which
+                // its poster can edit it.
+                guard let id = third else { return DeepLinkTarget(.home, .opportunity) }
+                return DeepLinkTarget(.home, .opportunityDetail(id: id))
+            case .none:
+                return DeepLinkTarget(.home, .opportunity)
+            default:
+                return DeepLinkTarget(.home, .opportunity)
+            }
 
         case "aid":
             // /aid is the list; /aid/campaign/{id} is one campaign.

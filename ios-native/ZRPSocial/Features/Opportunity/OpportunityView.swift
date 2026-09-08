@@ -118,6 +118,16 @@ struct OpportunityView: View {
         .background(ZrpColor.background.ignoresSafeArea())
         .navigationTitle(Text(.navOpportunity))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    navigator.push(.myOpportunities)
+                } label: {
+                    Image(systemName: "person.crop.rectangle.stack")
+                }
+                .accessibilityLabel(Text(.opportunityMyListings))
+            }
+        }
         .task { await viewModel.loadIfNeeded() }
     }
 
