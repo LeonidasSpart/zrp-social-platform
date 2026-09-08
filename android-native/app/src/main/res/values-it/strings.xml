@@ -1513,6 +1513,15 @@
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Iscritto dal</string>
     <string name="profile_charity_note">Il %1$s%% dei profitti va in beneficenza</string>
+    <string name="profile_impact">Impatto: %1$s $ donati in beneficenza</string>
+    <string name="profile_milestone_years">%1$d anni su ZRP</string>
+    <string name="profile_milestone_six_months">6 mesi su ZRP</string>
+    <string name="profile_milestone_new_member">Nuovo membro</string>
+    <string name="profile_milestone_posts_500">500+ post</string>
+    <string name="profile_milestone_posts_100">100+ post</string>
+    <string name="profile_milestone_posts_10">10+ post</string>
+    <string name="profile_milestone_followers_1k">1K+ follower</string>
+    <string name="profile_milestone_followers_100">100+ follower</string>
 
     <!-- Home feed empty / error states -->
     <string name="home_empty_following_title">Il tuo feed Following ti aspetta.</string>

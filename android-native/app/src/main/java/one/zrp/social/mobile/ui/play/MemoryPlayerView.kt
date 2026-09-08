@@ -5,12 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -78,42 +75,55 @@ fun MemoryPlayerView(content: MemoryContent, onSubmit: (moves: Int, matchedPairs
             Text(stringResource(R.string.play_moves, moves), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
             Text(stringResource(R.string.play_matched, matched.size, totalPairs), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
         }
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            items(deck.withIndex().toList(), key = { it.value.id }) { (cardIndex, card) ->
-                val isFlipped = flipped.contains(cardIndex) || matched.contains(card.pairKey)
-                val isMatched = matched.contains(card.pairKey)
-                Column(
-                    modifier = Modifier
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            when {
-                                isMatched -> Color(0xFF15803D).copy(alpha = 0.1f)
-                                isFlipped -> ZrpRed.copy(alpha = 0.1f)
-                                else -> MaterialTheme.colorScheme.surfaceContainerHigh
-                            },
-                        )
-                        .clickable(enabled = !submitting && flipped.size != 2 && !flipped.contains(cardIndex) && !isMatched) {
-                            flipped = flipped + cardIndex
+        // A fixed, non-lazy grid rather than LazyVerticalGrid: this view is
+        // always laid out inside PlayChallengeScreen's own vertically
+        // scrolling Column (verticalScroll gives children an unbounded
+        // max height), and a lazy layout measured with infinite height
+        // throws immediately ("Vertically scrollable component was
+        // measured with an infinity maximum height constraint"), which is
+        // exactly what closed the app the instant a Memory challenge was
+        // opened. The deck is always small (3-12 pairs -> 6-24 cards) so
+        // there's no virtualization to lose by chunking it into rows by
+        // hand instead.
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            deck.withIndex().toList().chunked(4).forEach { row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                    row.forEach { (cardIndex, card) ->
+                        val isFlipped = flipped.contains(cardIndex) || matched.contains(card.pairKey)
+                        val isMatched = matched.contains(card.pairKey)
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    when {
+                                        isMatched -> Color(0xFF15803D).copy(alpha = 0.1f)
+                                        isFlipped -> ZrpRed.copy(alpha = 0.1f)
+                                        else -> MaterialTheme.colorScheme.surfaceContainerHigh
+                                    },
+                                )
+                                .clickable(enabled = !submitting && flipped.size != 2 && !flipped.contains(cardIndex) && !isMatched) {
+                                    flipped = flipped + cardIndex
+                                },
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text(
+                                text = if (isFlipped) card.value else "?",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = when {
+                                    isMatched -> Color(0xFF15803D)
+                                    isFlipped -> ZrpRed
+                                    else -> Color.Transparent
+                                },
+                            )
                         }
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Text(
-                        text = if (isFlipped) card.value else "?",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = when {
-                            isMatched -> Color(0xFF15803D)
-                            isFlipped -> ZrpRed
-                            else -> Color.Transparent
-                        },
-                    )
+                    }
+                    repeat(4 - row.size) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
                 }
             }
         }

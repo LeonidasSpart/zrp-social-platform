@@ -1513,6 +1513,15 @@
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Katılma tarihi</string>
     <string name="profile_charity_note">Kârın %%%1$s\'si hayır kurumuna bağışlanıyor</string>
+    <string name="profile_impact">Etki: Hayır kurumuna %1$s $ bağışlandı</string>
+    <string name="profile_milestone_years">ZRP\'de %1$d yıl</string>
+    <string name="profile_milestone_six_months">ZRP\'de 6 ay</string>
+    <string name="profile_milestone_new_member">Yeni üye</string>
+    <string name="profile_milestone_posts_500">500+ gönderi</string>
+    <string name="profile_milestone_posts_100">100+ gönderi</string>
+    <string name="profile_milestone_posts_10">10+ gönderi</string>
+    <string name="profile_milestone_followers_1k">1K+ takipçi</string>
+    <string name="profile_milestone_followers_100">100+ takipçi</string>
 
     <!-- Home feed empty / error states -->
     <string name="home_empty_following_title">Takip edilenler akışın seni bekliyor.</string>

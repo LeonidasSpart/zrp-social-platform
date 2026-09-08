@@ -136,17 +136,47 @@ function makeSafeLookup(isAddressAllowed: IsAddressAllowedFn) {
  * asked for it via Accept-Encoding - so without this, treating the
  * compressed bytes as UTF-8 text silently produces garbage that no
  * meta-tag regex will ever match, indistinguishable from "the page
- * really has no metadata." Failure here (e.g. a response truncated
- * mid-stream by the maxBytes cap below, which can land inside a gzip
- * frame) falls back to the raw bytes rather than throwing - the worst
- * case is the same "no metadata found" outcome this replaces.
+ * really has no metadata."
+ *
+ * A response truncated mid-stream by the maxBytes cap below lands
+ * inside a gzip/deflate/brotli frame - the compressed stream is
+ * genuinely incomplete. Node's default *Sync decompressors require a
+ * complete, validly-terminated stream and throw "unexpected end of
+ * file" on anything less, which - without `finishFlush` below - meant
+ * the *entire* decoded prefix was discarded, not just the truncated
+ * tail. That's a real bug in practice: a page's <meta property="og:*">
+ * tags sit in <head>, near the very start of the document, while the
+ * bulk of a modern page's weight (hydration JSON, ad-tech config,
+ * tracking pixels, related-content data) sits later, well after
+ * </head> - so a heavy real-world page (a news site with the usual
+ * ad-tech/analytics/CMP payload is routinely 500KB-1MB+ of raw HTML,
+ * compressing to well over the 200,000-byte cap) would get its
+ * completely-intact, completely-parseable <head> thrown away purely
+ * because *unrelated* bulk further down the same document pushed the
+ * compressed stream past maxBytes and left it unterminated. Passing
+ * `finishFlush: Z_SYNC_FLUSH` (gzip/deflate) / `BROTLI_OPERATION_FLUSH`
+ * (brotli) tells zlib to flush and return whatever it successfully
+ * decoded up to the truncation point instead of demanding the stream's
+ * final block - recovering the real, valid <head> content instead of
+ * losing 100% of it. A genuinely malformed stream (corrupt from the
+ * start, not just truncated) still throws and falls back to the raw
+ * bytes below - the worst case is unchanged, still just "no metadata
+ * found" rather than a crash.
  */
 export function decompressBody(body: Buffer, contentEncoding?: string): Buffer {
   const encoding = (contentEncoding || "").toLowerCase().trim();
   try {
-    if (encoding === "gzip" || encoding === "x-gzip") return zlib.gunzipSync(body);
-    if (encoding === "deflate") return zlib.inflateSync(body);
-    if (encoding === "br") return zlib.brotliDecompressSync(body);
+    if (encoding === "gzip" || encoding === "x-gzip") {
+      return zlib.gunzipSync(body, { finishFlush: zlib.constants.Z_SYNC_FLUSH });
+    }
+    if (encoding === "deflate") {
+      return zlib.inflateSync(body, { finishFlush: zlib.constants.Z_SYNC_FLUSH });
+    }
+    if (encoding === "br") {
+      return zlib.brotliDecompressSync(body, {
+        finishFlush: zlib.constants.BROTLI_OPERATION_FLUSH,
+      });
+    }
   } catch {
     // Truncated or malformed stream - the raw bytes are the best
     // fallback available.
