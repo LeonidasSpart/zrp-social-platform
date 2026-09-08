@@ -20,6 +20,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -114,6 +115,7 @@ import one.zrp.social.mobile.util.formatRelativeTime
  * typing status all arrive live over the same real Socket.IO
  * connection the website uses (see ConversationViewModel's KDoc).
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ConversationScreen(
     partnerId: String,
