@@ -678,6 +678,19 @@ Three fixes, all server-side/web, no client (Android/iOS) involvement:
    cleanup failing doesn't block the rest of the sweep — it just stays
    scheduled and gets retried on the next run.
 
+That third piece needs an actual scheduler calling it, which this repo
+had no in-repo mechanism for at all - not for this route or, as far as
+a full search of the repository turned up, for either of the other two
+`CRON_SECRET`-gated routes either (no `railway.json`, no scheduled
+GitHub Actions workflow, no cron-related npm script existed anywhere).
+Those two are presumably invoked by a Cron Job configured directly in
+Railway's own project dashboard, which is both invisible and off-limits
+to touch from here. `.github/workflows/cron-delete-scheduled-accounts.yml`
+gives this route its own independent, in-repo, code-reviewable daily
+schedule instead of guessing at or modifying that external
+configuration - it needs a `CRON_SECRET` repository secret added once
+under this repo's GitHub Settings before it can succeed.
+
 Verified end-to-end in a browser against a real Postgres-backed test
 user: "Request Account Deletion" now shows the scheduled-for-30-days
 banner with working Cancel/Delete Now buttons, and "Delete Now" now
