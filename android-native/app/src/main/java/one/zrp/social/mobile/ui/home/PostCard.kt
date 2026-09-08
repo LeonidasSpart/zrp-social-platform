@@ -72,6 +72,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
@@ -1009,7 +1010,11 @@ private fun QuotedPostPreview(quotedPost: Post, onClick: () -> Unit) {
                 text = quotedPost.author.name ?: quotedPost.author.username,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = Spacing.xs),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .padding(start = Spacing.xs)
+                    .weight(1f, fill = false),
             )
             VerifiedBadge(badgeType = quotedPost.author.badgeType, size = BadgeSize.small)
             Text(
