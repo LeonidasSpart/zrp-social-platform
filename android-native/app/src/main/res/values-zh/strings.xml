@@ -1128,6 +1128,8 @@
     <string name="shorts_upload_err_too_large_plan">此视频超出您套餐的大小限制。请尝试更小的文件或升级套餐。</string>
     <string name="shorts_upload_err_url_gen_failed">无法开始上传，这通常是暂时的网络连接问题。请重试。</string>
     <string name="shorts_upload_err_internal_server">上传时我们这边出了点问题。请稍后再试。</string>
+    <string name="caption_view_more">查看更多</string>
+    <string name="caption_view_less">收起</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">金额（USDC）</string>
     <string name="creator_available_balance">可用余额：%1$s</string>
