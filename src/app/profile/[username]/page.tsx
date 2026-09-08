@@ -40,7 +40,6 @@ import PostCard from "@/components/PostCard";
 import ActivityHeatmap from "@/components/ActivityHeatmap";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import AnalyticsTab from "@/components/AnalyticsTab";
-import PostComposer from "@/components/PostComposer";
 import TipModal from "@/components/TipModal";
 import NativePaymentNotice from "@/components/NativePaymentNotice";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -1319,16 +1318,25 @@ export default function ProfilePage(
           BANNER
       ─────────────────────────────────────────────────────────── */}
 
-      <div className="relative h-48 bg-gradient-to-r from-zrp-red/30 to-zrp-red/10">
+      {/* An account with no cover got a pale red gradient - the brand
+          colour used as decoration, and the first of three accents
+          stacked in the top 150px of this page. A cover is content; its
+          absence is not an occasion for brand colour, so the default is
+          now a quiet neutral field. The dark scrim exists to keep the
+          avatar and the camera button legible over a photograph, so it
+          is now drawn only when there is a photograph. */}
+      <div className="relative h-48 bg-gray-100 dark:bg-gray-900">
         {profile.coverUrl && (
-          <img
-            src={profile.coverUrl}
-            alt="Cover"
-            className="w-full h-full object-cover"
-          />
-        )}
+          <>
+            <img
+              src={profile.coverUrl}
+              alt="Cover"
+              className="w-full h-full object-cover"
+            />
 
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
+          </>
+        )}
 
         {isOwnProfile && (
           <div className="absolute bottom-2 right-2">
@@ -1372,7 +1380,12 @@ export default function ProfilePage(
         {/* Avatar + action buttons row */}
 
         <div className="flex items-start justify-between gap-3">
-          <div className="relative w-20 h-20 -mt-10 sm:w-28 sm:h-28 sm:-mt-16 rounded-full border-4 border-white dark:border-gray-900 shadow-lg overflow-hidden flex-shrink-0 group bg-white dark:bg-zrp-deepBlack">
+          <div // The ring reads as a ring only when it is the ground colour behind
+          // the page. It was gray-900 in dark mode while the page ground is
+          // zrp-deepBlack (#050505), so it drew as a visible grey band. The
+          // shadow goes with it: the ring already separates the avatar from
+          // any cover.
+          className="relative w-20 h-20 -mt-10 sm:w-28 sm:h-28 sm:-mt-16 rounded-full border-4 border-white dark:border-zrp-deepBlack overflow-hidden flex-shrink-0 group bg-white dark:bg-zrp-deepBlack">
             {profile.avatarUrl ? (
               <img
                 src={profile.avatarUrl}
@@ -1427,221 +1440,6 @@ export default function ProfilePage(
             )}
           </div>
 
-          {/* Action buttons */}
-
-          <div className="flex flex-wrap gap-2 justify-end pt-2 flex-shrink-0">
-            {/* Share Profile */}
-
-            <button
-              onClick={
-                handleShareProfile
-              }
-              className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
-            >
-              <Share2 className="w-4 h-4" />
-
-              <span className="hidden sm:inline">
-                {t(
-                  "profile.share"
-                )}
-              </span>
-            </button>
-
-            {isOwnProfile ? (
-              <Link
-                href="/settings"
-                className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
-              >
-                <Pencil className="w-4 h-4" />
-
-                <span className="hidden sm:inline">
-                  {t(
-                    "profile.edit"
-                  )}
-                </span>
-              </Link>
-            ) : (
-              <>
-                {/* Follow */}
-
-                <button
-                  onClick={
-                    handleFollow
-                  }
-                  disabled={
-                    followLoading
-                  }
-                  className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap ${
-                    isFollowRequested
-                      ? "bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 cursor-default"
-                      : isFollowing
-                      ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
-                      : "bg-zrp-red text-white hover:bg-zrp-darkRed"
-                  }`}
-                >
-                  {followLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : isFollowRequested ? (
-                    "Requested"
-                  ) : isFollowing ? (
-                    <>
-                      <UserCheck className="w-4 h-4" />
-
-                      <span className="hidden sm:inline">
-                        {t(
-                          "action.following"
-                        )}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="w-4 h-4" />
-
-                      <span>
-                        {t(
-                          "action.follow"
-                        )}
-                      </span>
-                    </>
-                  )}
-                </button>
-
-                {/* Message */}
-
-                <Link
-                  href={`/messages/${profile.username}`}
-                  className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
-                >
-                  <MessageCircle className="w-4 h-4" />
-
-                  <span className="hidden sm:inline">
-                    {t(
-                      "action.message"
-                    )}
-                  </span>
-                </Link>
-
-                {/* Tip */}
-
-                {canReceiveTips && (
-                  <button
-                    onClick={() =>
-                      isNativeStoreRestrictedPayment("tips", isNativeApp())
-                        ? setShowTipNativeNotice(true)
-                        : setShowTipModal(true)
-                    }
-                    className="flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap bg-green-600 text-white hover:bg-green-700"
-                  >
-                    <DollarSign className="w-4 h-4" />
-
-                    <span className="hidden sm:inline">
-                      {t(
-                        "profile.tip"
-                      )}
-                    </span>
-                  </button>
-                )}
-
-                {/* More */}
-
-                <div
-                  className="relative"
-                  ref={
-                    moreMenuRef
-                  }
-                >
-                  <button
-                    onClick={() =>
-                      setMoreMenuOpen(
-                        !moreMenuOpen
-                      )
-                    }
-                    className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
-                    title={t(
-                      "profile.moreActions"
-                    )}
-                  >
-                    <MoreHorizontal className="w-4 h-4" />
-                  </button>
-
-                  {moreMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
-                      {/* Mute */}
-
-                      <button
-                        onClick={() => {
-                          handleMute();
-                          setMoreMenuOpen(
-                            false
-                          );
-                        }}
-                        disabled={
-                          muteLoading
-                        }
-                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                      >
-                        {muteLoading ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : isMuted ? (
-                          <>
-                            <BellOff className="w-4 h-4" />
-
-                            {t(
-                              "profile.unmute"
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <Bell className="w-4 h-4" />
-
-                            {t(
-                              "profile.mute"
-                            )}
-                          </>
-                        )}
-                      </button>
-
-                      {/* Block */}
-
-                      <button
-                        onClick={() => {
-                          handleBlock();
-
-                          setMoreMenuOpen(
-                            false
-                          );
-                        }}
-                        disabled={
-                          blockLoading
-                        }
-                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition border-t border-gray-200 dark:border-gray-700"
-                      >
-                        {blockLoading ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : isBlocked ? (
-                          <>
-                            <CheckCircle className="w-4 h-4" />
-
-                            {t(
-                              "profile.unblock"
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <Ban className="w-4 h-4" />
-
-                            {t(
-                              "profile.block"
-                            )}
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
         </div>
 
         {/* ─────────────────────────────────────────────────────────
@@ -1848,6 +1646,233 @@ export default function ProfilePage(
             </div>
           )}
 
+        {/* ─────────────────────────────────────────────────────────
+            ACTION ROW
+
+            Share / Edit / Follow / Message / Tip used to float in the
+            avatar's row, right-aligned against the top of a 112px
+            avatar that overlaps the banner - so their vertical position
+            was set by the avatar's overhang rather than by anything
+            about the actions themselves, and on a phone they wrapped
+            into the space beside it. They are now a row of their own,
+            after the identity block that says whose profile this is and
+            before the counts.
+        ───────────────────────────────────────────────────────── */}
+
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {/* Share Profile */}
+
+          <button
+            onClick={
+              handleShareProfile
+            }
+            className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+          >
+            <Share2 className="w-4 h-4" />
+
+            <span className="hidden sm:inline">
+              {t(
+                "profile.share"
+              )}
+            </span>
+          </button>
+
+          {isOwnProfile ? (
+            <Link
+              href="/settings"
+              className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+            >
+              <Pencil className="w-4 h-4" />
+
+              <span className="hidden sm:inline">
+                {t(
+                  "profile.edit"
+                )}
+              </span>
+            </Link>
+          ) : (
+            <>
+              {/* Follow */}
+
+              <button
+                onClick={
+                  handleFollow
+                }
+                disabled={
+                  followLoading
+                }
+                className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap ${
+                  isFollowRequested
+                    ? "bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 cursor-default"
+                    : isFollowing
+                    ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                    : "bg-zrp-red text-white hover:bg-zrp-darkRed"
+                }`}
+              >
+                {followLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : isFollowRequested ? (
+                  "Requested"
+                ) : isFollowing ? (
+                  <>
+                    <UserCheck className="w-4 h-4" />
+
+                    <span className="hidden sm:inline">
+                      {t(
+                        "action.following"
+                      )}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-4 h-4" />
+
+                    <span>
+                      {t(
+                        "action.follow"
+                      )}
+                    </span>
+                  </>
+                )}
+              </button>
+
+              {/* Message */}
+
+              <Link
+                href={`/messages/${profile.username}`}
+                className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+              >
+                <MessageCircle className="w-4 h-4" />
+
+                <span className="hidden sm:inline">
+                  {t(
+                    "action.message"
+                  )}
+                </span>
+              </Link>
+
+              {/* Tip */}
+
+              {canReceiveTips && (
+                <button
+                  onClick={() =>
+                    isNativeStoreRestrictedPayment("tips", isNativeApp())
+                      ? setShowTipNativeNotice(true)
+                      : setShowTipModal(true)
+                  }
+                  className="flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap bg-green-600 text-white hover:bg-green-700"
+                >
+                  <DollarSign className="w-4 h-4" />
+
+                  <span className="hidden sm:inline">
+                    {t(
+                      "profile.tip"
+                    )}
+                  </span>
+                </button>
+              )}
+
+              {/* More */}
+
+              <div
+                className="relative"
+                ref={
+                  moreMenuRef
+                }
+              >
+                <button
+                  onClick={() =>
+                    setMoreMenuOpen(
+                      !moreMenuOpen
+                    )
+                  }
+                  className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+                  title={t(
+                    "profile.moreActions"
+                  )}
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                </button>
+
+                {moreMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+                    {/* Mute */}
+
+                    <button
+                      onClick={() => {
+                        handleMute();
+                        setMoreMenuOpen(
+                          false
+                        );
+                      }}
+                      disabled={
+                        muteLoading
+                      }
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                    >
+                      {muteLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : isMuted ? (
+                        <>
+                          <BellOff className="w-4 h-4" />
+
+                          {t(
+                            "profile.unmute"
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <Bell className="w-4 h-4" />
+
+                          {t(
+                            "profile.mute"
+                          )}
+                        </>
+                      )}
+                    </button>
+
+                    {/* Block */}
+
+                    <button
+                      onClick={() => {
+                        handleBlock();
+
+                        setMoreMenuOpen(
+                          false
+                        );
+                      }}
+                      disabled={
+                        blockLoading
+                      }
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition border-t border-gray-200 dark:border-gray-700"
+                    >
+                      {blockLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : isBlocked ? (
+                        <>
+                          <CheckCircle className="w-4 h-4" />
+
+                          {t(
+                            "profile.unblock"
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <Ban className="w-4 h-4" />
+
+                          {t(
+                            "profile.block"
+                          )}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+
           {/* Following / Followers */}
 
           <div className="flex gap-4 mt-2">
@@ -1897,20 +1922,30 @@ export default function ProfilePage(
               CHARITY / IMPACT
           ─────────────────────────────────────────────────────── */}
 
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-            <span className="bg-zrp-red/10 text-zrp-red px-3 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap">
-              <Heart className="w-3.5 h-3.5" />
+          {/* One metadata line, where there used to be a red Impact
+              pill here and a blue gradient Trust Passport card below the
+              milestones - two saturated surfaces for two facts, inside
+              150px that already carried the banner. Both facts and both
+              destinations survive; only the surfaces are gone. The
+              trailing emoji goes too: the heart glyph already says it,
+              twice was decoration. text-gray-400 on white is 2.85:1 and
+              failed AA, so the line sits at the gray-500 floor. */}
+          <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-gray-500 dark:text-gray-400">
+            <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+              <Heart
+                className="w-4 h-4"
+                aria-hidden="true"
+              />
 
               {t(
                 "profile.impact",
                 {
                   amount: charityContributionUsdc.toFixed(2),
                 }
-              )}{" "}
-              🧡
+              )}
             </span>
 
-            <span className="text-gray-400 text-xs">
+            <span>
               {t(
                 "profile.charityNote",
                 {
@@ -1918,6 +1953,18 @@ export default function ProfilePage(
                 }
               )}
             </span>
+
+            <Link
+              href={`/trust/${profile.username}`}
+              className="inline-flex items-center gap-1.5 whitespace-nowrap font-medium text-gray-700 dark:text-gray-200 underline-offset-4 hover:text-zrp-red hover:underline"
+            >
+              <ShieldCheck
+                className="w-4 h-4"
+                aria-hidden="true"
+              />
+
+              {t("profile.trustPassportTitle")}
+            </Link>
           </div>
 
           {/* ───────────────────────────────────────────────────────
@@ -1956,44 +2003,6 @@ export default function ProfilePage(
             </div>
           )}
 
-          {/* ───────────────────────────────────────────────────────
-              ZRP TRUST PASSPORT
-              
-              NEW FEATURE.
-              Does not modify your existing profile API,
-              database schema, follow system, posts, or privacy.
-          ─────────────────────────────────────────────────────── */}
-
-          <Link
-            href={`/trust/${profile.username}`}
-            className="mt-4 group flex items-center justify-between gap-3 rounded-2xl border border-zrp-blue/20 bg-gradient-to-r from-zrp-blue/5 to-transparent dark:from-zrp-blue/10 dark:to-transparent px-4 py-3.5 hover:border-zrp-blue/40 hover:bg-zrp-blue/10 dark:hover:bg-zrp-blue/15 transition"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="flex-shrink-0 w-11 h-11 rounded-full bg-zrp-blue/10 flex items-center justify-center border border-zrp-blue/10">
-                <ShieldCheck className="w-6 h-6 text-zrp-blue" />
-              </div>
-
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    {t("profile.trustPassportTitle")}
-                  </span>
-
-                  <span className="text-[10px] font-bold uppercase tracking-wide text-zrp-red bg-zrp-red/10 px-1.5 py-0.5 rounded-full">
-                    {t("profile.trustPassportBadge")}
-                  </span>
-                </div>
-
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  {t("profile.trustPassportDesc")}
-                </p>
-              </div>
-            </div>
-
-            <span className="flex-shrink-0 text-zrp-blue text-sm font-semibold group-hover:translate-x-0.5 transition-transform">
-              {t("profile.trustPassportView")} →
-            </span>
-          </Link>
 
           {/* ───────────────────────────────────────────────────────
               ACTIVITY HEATMAP
@@ -2009,19 +2018,13 @@ export default function ProfilePage(
         </div>
       </div>
 
-      {/* ───────────────────────────────────────────────────────────
-          POST COMPOSER
-      ─────────────────────────────────────────────────────────── */}
-
-      {isOwnProfile && (
-        <div className="mt-4 px-4">
-          <PostComposer
-            onPostCreated={
-              fetchPosts
-            }
-          />
-        </div>
-      )}
+      {/* The composer used to render here as well as on Home. It is the
+          same component and the same action, and on a profile it sat
+          between the identity block and the tabs, pushing Posts /
+          Replies / Media below the fold on a phone. Composing belongs to
+          the feed; a profile is for reading one. Nothing is lost - the
+          composer on Home is the same one, reachable from every screen
+          via the bottom nav and the sidebar. */}
 
       {/* ───────────────────────────────────────────────────────────
           TABS
