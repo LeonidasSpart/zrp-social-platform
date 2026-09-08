@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -61,6 +62,7 @@ import one.zrp.social.mobile.ui.stories.StoriesRail
 import one.zrp.social.mobile.ui.components.EmptyStateAction
 import one.zrp.social.mobile.ui.components.PostSkeletonList
 import one.zrp.social.mobile.ui.components.ZrpEmptyState
+import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
@@ -290,7 +292,17 @@ fun HomeScreen(
                     var isSubmittingEdit by remember { mutableStateOf(false) }
                     var editError by remember { mutableStateOf<String?>(null) }
 
-                    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                    // Bottom content padding beyond the Scaffold's own
+                    // bottomBar-height innerPadding (ZrpNavHost.kt's
+                    // NavHost already reserves that) - the same real gap
+                    // fixed on ProfileScreen's own feed LazyColumn, for
+                    // the same reason: without it the last post's text
+                    // sits right at that boundary with no breathing room.
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = Spacing.xxl),
+                    ) {
                         itemsIndexed(state.posts, key = { _, post -> post.id }) { index, post ->
                             PostCard(
                                 post = post,

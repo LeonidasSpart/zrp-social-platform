@@ -56,15 +56,15 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * a bordered chat card with its own compact header (an "ZRP AI" H2 +
  * ai.chat.poweredByDeepseek + ai.chat.remainingToday) - this screen
  * collapses both into one compact top bar (title + ai.page.subtitle)
- * plus one caption row (ai.page.poweredBy + remainingToday), matching
- * the established compact-top-bar convention (CreatorScreen,
- * TrustPassportScreen) rather than nesting two headers. That leaves
- * ai_chat_powered_by_deepseek real but deliberately unused - its text
- * ("Powered by DeepSeek") is a strict subset of the fuller
- * ai_page_powered_by ("Powered by DeepSeek · Open-source ·
- * Transparent") already shown, so rendering both would just repeat
- * the same fact twice on screen. ai_chat_err_failed_response is
- * unused for a different reason: it's AIChat.tsx's own fallback for
+ * plus one caption row (remainingToday only), matching the established
+ * compact-top-bar convention (CreatorScreen, TrustPassportScreen)
+ * rather than nesting two headers. Neither ai_chat_powered_by_deepseek
+ * nor ai_page_powered_by is rendered here: the underlying AI provider
+ * is never named in user-facing UI, and there's no existing generic
+ * (provider-free) translated string to fall back to, so both stay real
+ * but deliberately unused rather than being deleted outright.
+ * ai_chat_err_failed_response is unused for a different reason: it's
+ * AIChat.tsx's own fallback for
  * an empty `error.error` field, but every real failure path the route
  * can hit always sets a non-empty error string - dead code on the
  * website too (AiRepository's own generic fallback covers the same,
@@ -110,15 +110,19 @@ fun AiChatScreen(onBack: () -> Unit) {
                 }
             }
         }
+        // The "Powered by DeepSeek..." caption that used to live here
+        // (ai_page_powered_by) is intentionally not rendered - the
+        // underlying AI provider is never named in user-facing UI. The
+        // string resource itself is left defined (see strings.xml) since
+        // it's still real, translated content that may be reused for a
+        // future generic caption; only the DeepSeek-branded render is
+        // removed. Arrangement.End (was SpaceBetween, which needed two
+        // children) keeps the remaining-count text in the same visual
+        // spot, at the row's end.
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.End,
         ) {
-            Text(
-                text = stringResource(R.string.ai_page_powered_by),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
             state.remaining?.let {
                 Text(
                     text = stringResource(R.string.ai_chat_remaining_today, it),

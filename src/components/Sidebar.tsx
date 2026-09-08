@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Fragment, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -81,6 +81,27 @@ export default function Sidebar() {
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
+  // Both popovers were dismissable by pointer only - the invisible
+  // fixed backdrop each one renders catches a click, but a keyboard
+  // user who opened one had no way out.
+  useEffect(() => {
+    if (!moreMenuOpen && !langMenuOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+
+      setLangMenuOpen(false);
+      setMoreMenuOpen(false);
+      setAboutOpen(false);
+      setSupportOpen(false);
+      setLegalOpen(false);
+    };
+
+    document.addEventListener("keydown", handleEscape);
+
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [moreMenuOpen, langMenuOpen]);
+
   if (
     !isAuthenticated ||
     pathname?.startsWith("/onboarding") ||
@@ -119,6 +140,12 @@ export default function Sidebar() {
       label: t("nav.profile"),
     },
   ];
+
+  // The column is 14 rows of identical shape. These two hairlines cut
+  // it into feed/discovery, the verticals, and what belongs to you -
+  // grouping only, so nothing is reordered and no new label copy is
+  // introduced that would need translating into all 11 languages.
+  const GROUP_BREAK_AFTER = new Set(["/news", "/aid"]);
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -169,24 +196,40 @@ export default function Sidebar() {
         gone, and Header's own logo still links to "/".
       */}
       {/* Nav items */}
-      <nav className="flex-1 flex flex-col gap-1">
+      <nav
+        aria-label={t("nav.primary")}
+        className="flex-1 flex flex-col gap-1"
+      >
         {navItems.map((item) => {
           const active = isActive(item.href);
 
           return (
+            <Fragment key={item.href}>
             <Link
-              key={item.href}
               href={item.href}
+              aria-current={active ? "page" : undefined}
               className={`relative flex items-center gap-4 px-3 py-2.5 rounded-full text-lg transition ${
                 active
                   ? "font-bold text-gray-900 dark:text-white"
                   : "font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
               }`}
             >
+              {/* Weight plus a red glyph was the whole current-page
+                  signal, and it reads as emphasis rather than position.
+                  This marker says where you are without spending a
+                  second red surface on it. */}
+              {active && (
+                <span
+                  aria-hidden="true"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-zrp-red"
+                />
+              )}
+
               <item.icon
                 className={`w-6 h-6 ${
                   active ? "text-zrp-red" : ""
                 }`}
+                strokeWidth={active ? 2.5 : 2}
               />
 
               <span>{item.label}</span>
@@ -197,6 +240,14 @@ export default function Sidebar() {
                 </span>
               )}
             </Link>
+
+            {GROUP_BREAK_AFTER.has(item.href) && (
+              <div
+                aria-hidden="true"
+                className="mx-3 my-2 h-px bg-gray-200 dark:bg-gray-800"
+              />
+            )}
+            </Fragment>
           );
         })}
 
@@ -206,16 +257,25 @@ export default function Sidebar() {
           session?.user?.role === "MODERATOR") && (
           <Link
             href="/admin"
-            className={`flex items-center gap-4 px-3 py-2.5 rounded-full text-lg transition ${
+            aria-current={isActive("/admin") ? "page" : undefined}
+            className={`relative flex items-center gap-4 px-3 py-2.5 rounded-full text-lg transition ${
               isActive("/admin")
                 ? "font-bold text-gray-900 dark:text-white"
                 : "font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
             }`}
           >
+            {isActive("/admin") && (
+              <span
+                aria-hidden="true"
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-zrp-red"
+              />
+            )}
+
             <LayoutDashboard
               className={`w-6 h-6 ${
                 isActive("/admin") ? "text-zrp-red" : ""
               }`}
+              strokeWidth={isActive("/admin") ? 2.5 : 2}
             />
 
             <span>{t("nav.admin")}</span>
@@ -226,16 +286,25 @@ export default function Sidebar() {
         {session?.user?.role === "JOURNALIST" && (
           <Link
             href="/journalist"
-            className={`flex items-center gap-4 px-3 py-2.5 rounded-full text-lg transition ${
+            aria-current={isActive("/journalist") ? "page" : undefined}
+            className={`relative flex items-center gap-4 px-3 py-2.5 rounded-full text-lg transition ${
               isActive("/journalist")
                 ? "font-bold text-gray-900 dark:text-white"
                 : "font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
             }`}
           >
+            {isActive("/journalist") && (
+              <span
+                aria-hidden="true"
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-zrp-red"
+              />
+            )}
+
             <Newspaper
               className={`w-6 h-6 ${
                 isActive("/journalist") ? "text-zrp-red" : ""
               }`}
+              strokeWidth={isActive("/journalist") ? 2.5 : 2}
             />
 
             <span>{t("nav.journalist")}</span>
@@ -266,6 +335,8 @@ export default function Sidebar() {
           <button
             type="button"
             onClick={() => setLangMenuOpen(!langMenuOpen)}
+            aria-haspopup="menu"
+            aria-expanded={langMenuOpen}
             className="w-full flex items-center gap-4 px-3 py-2.5 rounded-full text-lg font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
           >
             <Globe className="w-6 h-6" />
@@ -312,6 +383,8 @@ export default function Sidebar() {
           <button
             type="button"
             onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+            aria-haspopup="menu"
+            aria-expanded={moreMenuOpen}
             className="w-full flex items-center gap-4 px-3 py-2.5 rounded-full text-lg font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
           >
             <MoreHorizontal className="w-6 h-6" />

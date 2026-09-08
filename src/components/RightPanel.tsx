@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Search, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import VerifiedBadge from "./VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -23,11 +23,9 @@ interface SuggestedUser {
 
 export default function RightPanel() {
   const { data: session } = useSession();
-  const router = useRouter();
   const pathname = usePathname();
   const { t } = useLanguage();
 
-  const [query, setQuery] = useState("");
   const [trending, setTrending] = useState<TrendingTag[]>([]);
   const [suggestions, setSuggestions] = useState<SuggestedUser[]>([]);
   const [loadingTrending, setLoadingTrending] = useState(true);
@@ -50,14 +48,6 @@ export default function RightPanel() {
       .catch(() => {})
       .finally(() => setLoadingSuggestions(false));
   }, [session]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (query.trim()) {
-      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-    }
-  };
 
   const handleFollow = async (userId: string, username: string) => {
     setFollowLoading(userId);
@@ -95,9 +85,9 @@ export default function RightPanel() {
   // Messages they competed with a conversation that wants the width.
   // Both are surfaces someone is on to finish something, not to browse.
   //
-  // Nothing is removed from the product: search lives in this panel and
-  // also as its own /search destination in both the sidebar and the
-  // bottom nav, and Explore covers trending and suggestions.
+  // Nothing is removed from the product: search lives in the header at
+  // lg and above and as its own /search destination in both the sidebar
+  // and the bottom nav, and Explore covers trending and suggestions.
   const FOCUSED_SURFACES = ["/admin", "/onboarding", "/shorts", "/settings", "/messages"];
 
   if (!session || FOCUSED_SURFACES.some((path) => pathname?.startsWith(path))) {
@@ -121,40 +111,14 @@ export default function RightPanel() {
         scrollbar-hide
       "
     >
-      {/* ─── Search ─────────────────────────────────────────────── */}
-      <form onSubmit={handleSearch} className="mb-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t("rightPanel.searchPlaceholder")}
-            className="
-              w-full
-              pl-10
-              pr-4
-              py-2.5
-              bg-gray-100
-              dark:bg-gray-800
-              border
-              border-transparent
-              focus:border-zrp-red
-              focus:bg-white
-              dark:focus:bg-gray-900
-              rounded-full
-              text-sm
-              text-gray-900
-              dark:text-white
-              focus:outline-none
-              focus:ring-2
-              focus:ring-zrp-red
-              transition
-            "
-          />
-        </div>
-      </form>
+      {/* The rail's own search field is gone: the header now carries
+          one at lg and above, so from 1280px up (where this rail
+          appears) the two sat on screen together showing the same
+          placeholder and doing the same thing. The header's is the one
+          that survives, because it is also present on Settings,
+          Messages, Shorts, Admin and Onboarding - the surfaces this
+          rail deliberately hides on. Nothing is lost: same /search
+          route, still a destination in the sidebar and bottom nav. */}
 
       {/* ─── Trending ───────────────────────────────────────────── */}
       <div className="mb-5 pb-5 border-b border-gray-200 dark:border-gray-800">

@@ -13,7 +13,7 @@ import one.zrp.social.mobile.network.PostAuthor
 
 enum class NotificationFilterTab { ALL, VERIFIED, FOLLOWS }
 
-enum class FollowBackState { LOADING, DONE }
+enum class FollowBackState { LOADING, DONE, REQUESTED }
 
 // The same "collapse like/repost/follow notifications on the same
 // target into one row" the website's own groupNotifications does -
@@ -123,7 +123,23 @@ class NotificationsViewModel(private val repository: NotificationsRepository) : 
         _state.update { it.copy(followBackState = it.followBackState + (userId to FollowBackState.LOADING)) }
         viewModelScope.launch {
             repository.toggleFollow(username)
-                .onSuccess { _state.update { it.copy(followBackState = it.followBackState + (userId to FollowBackState.DONE)) } }
+                .onSuccess { result ->
+                    // A private target resolves to a pending follow
+                    // REQUEST, not an actual follow (result.following
+                    // stays false) - the server's response is
+                    // authoritative here, the same as ProfileViewModel's
+                    // and FollowListViewModel's own toggleFollow. Showing
+                    // "Following" for a request that's still pending
+                    // asserted a relationship that doesn't exist yet.
+                    val next = when {
+                        result.following -> FollowBackState.DONE
+                        result.requested -> FollowBackState.REQUESTED
+                        else -> null
+                    }
+                    _state.update {
+                        it.copy(followBackState = if (next != null) it.followBackState + (userId to next) else it.followBackState - userId)
+                    }
+                }
                 .onFailure { _state.update { it.copy(followBackState = it.followBackState - userId) } }
         }
     }

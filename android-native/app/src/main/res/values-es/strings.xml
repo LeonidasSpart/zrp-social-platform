@@ -271,6 +271,10 @@
     <string name="post_unmute_video_cd">Activar sonido del video</string>
     <string name="story_like_cd">Me gusta la historia</string>
     <string name="story_unlike_cd">Ya no me gusta la historia</string>
+
+    <string name="story_mute_cd">Silenciar el sonido de la historia</string>
+
+    <string name="story_unmute_cd">Activar el sonido de la historia</string>
     <string name="comment_repost_cd">Republicar</string>
     <string name="comment_undo_repost_cd">Deshacer republicación</string>
     <string name="createpost_media_count_cd">%1$d/%2$d multimedia</string>
@@ -1513,6 +1517,15 @@
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Se unió</string>
     <string name="profile_charity_note">%1$s%% de los beneficios van a caridad</string>
+    <string name="profile_impact">Impacto: %1$s $ donados a caridad</string>
+    <string name="profile_milestone_years">%1$d años en ZRP</string>
+    <string name="profile_milestone_six_months">6 meses en ZRP</string>
+    <string name="profile_milestone_new_member">Nuevo miembro</string>
+    <string name="profile_milestone_posts_500">500+ publicaciones</string>
+    <string name="profile_milestone_posts_100">100+ publicaciones</string>
+    <string name="profile_milestone_posts_10">10+ publicaciones</string>
+    <string name="profile_milestone_followers_1k">1K+ seguidores</string>
+    <string name="profile_milestone_followers_100">100+ seguidores</string>
 
     <!-- Home feed empty / error states -->
     <string name="home_empty_following_title">Tu feed de Siguiendo te está esperando.</string>
