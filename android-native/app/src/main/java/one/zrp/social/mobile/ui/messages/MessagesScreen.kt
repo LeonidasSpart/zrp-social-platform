@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
@@ -144,6 +145,9 @@ private fun ConversationRow(conversation: ConversationSummary, onClick: () -> Un
                     text = partner.name ?: partner.username,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = if (conversation.unreadCount > 0) FontWeight.Bold else FontWeight.Normal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
                 VerifiedBadge(badgeType = partner.badgeType)
             }
