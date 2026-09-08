@@ -451,7 +451,7 @@ export async function POST(
     });
 
   if (!limit.success) {
-    return limit.response;
+    return limit.response!;
   }
 
   try {
