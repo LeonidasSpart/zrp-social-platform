@@ -378,6 +378,31 @@ boundary, and are displayed as strings. Parsing them into local `Date`s
 would shift a day for anyone west of UTC and make the axis labels disagree
 with the server's own buckets.
 
+### Ads (viewing)
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Sponsored post in the feed | `GET /api/ads/serve` → `{ad}` (usually `null`); picks at random among ACTIVE campaigns that still have budget, and never the viewer's own | ✅ `AdCard.tsx`, after the post at index 4 when the feed has more than five | ✅ | ✅ same slot and same rule, on both feed tabs — the web's ad block carries no `feedType` guard, unlike the discovery modules directly beneath it in the same map, so that difference is deliberate and copied | IMPLEMENTED |
+| Impression tracking | `POST /api/ads/impression` | ✅ IntersectionObserver at 0.5 | ✅ | ✅ measured against the key window at the same 0.5 threshold, fired once. **Not `.onAppear`** — a `LazyVStack` builds a row slightly before it is visible, which is fine for a view tally and not for something an advertiser is billed for | IMPLEMENTED |
+| Click tracking + destination | `POST /api/ads/click` → `{logged, redirectUrl}` | ✅ | ✅ | ✅ the destination comes from the route, not from `targetUrl` locally — an advertiser who set none gets `/post/{id}` back. A relative path opens in-app; an advertiser's own URL opens in the browser, where the address bar shows whose site it is | IMPLEMENTED |
+| Author tap is not a click | — | ✅ | ✅ | ✅ opening the advertiser's profile is not the billed event, the same line `PostCard` draws between its author link and its body | IMPLEMENTED |
+
+The ad card deliberately reuses **none** of the post card's engagement
+machinery. The serve route sends no counts and no viewer flags, and there
+is no route to like, repost or reply to an ad — a post card here would
+show four controls with nothing behind them. `AdCard.tsx` reuses none of
+`PostCard` for the same reason; this matches that decision rather than
+arriving at a different one.
+
+A video ad shows its poster frame and does not autoplay. The feed has one
+shared `AVPlayer` that belongs to the timeline, and letting a sponsored
+post take it would interrupt the video someone was actually watching.
+
+The ad is fetched **once per app run**, not per feed load. The route picks
+at random among eligible campaigns, so refetching on pull-to-refresh would
+swap the ad under a reader mid-scroll and bill a second impression for
+what is, to them, the same slot. The website fetches once on mount too.
+
 ### Deliberately out of scope for the consumer iOS app
 
 | Area | Reason |
@@ -385,7 +410,7 @@ with the server's own buckets.
 | **Admin console** (`/api/admin/**`, 40+ routes) | **Web-only for v1, by decision — not an oversight.** Android ships four admin screens; iOS ships none. Every admin route is independently role-gated server-side, so an iOS app without an admin surface loses no security and gains none: hiding a screen is not what protects those routes, and building one would not weaken them either. The reason to leave it out is product, not safety — a staff console is a desk-and-keyboard tool, and the four screens Android has cover a fraction of the twenty the website offers. Anyone doing moderation work should be on the web console that has all of it. Revisit only if staff genuinely need to act from a phone; if so, build it against the same server-role gate and never surface an admin control on a client check alone. |
 | Tips, plan upgrade, premium-post purchase, help/charity contribution, creator withdrawals | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
 | Careers, Investors, Press, Transparency, API keys, Team | WEB-ONLY — Android has no surface for any of them either. |
-| **Ads** (`/api/ads/**`) | Campaign creation is ad *spend* — money leaving an advertiser's account for placement. That is a commerce surface with the same store-policy exposure as the payment routes above, and it is a desk task besides. Android has no surface for it either. |
+| **Ads** — advertiser side (`/api/ads/campaigns`, `src/app/ads`, `src/app/ads/new`) | Campaign creation is ad *spend* — money leaving an advertiser's account for placement. That is a commerce surface with the same store-policy exposure as the payment routes above, and it is a desk task besides. **The viewing side is a different question and is now built** — see the Ads section below. |
 | **Journalist** (`/api/journalist/**`) | **Outstanding, and narrow.** Every route is behind `requireJournalistRole()`, so the only part most people could use is the application form. The rest is an article editor with a draft/review/publish workflow — a professional writing tool, and a poor fit for a phone. Worth building when journalists ask for it, not before. |
 | **Creator Studio** — earnings half (`/api/creator/dashboard`, `/withdraw`) | Balance, tips, premium revenue and withdrawals are the monetisation surface the row above already excludes. |
 

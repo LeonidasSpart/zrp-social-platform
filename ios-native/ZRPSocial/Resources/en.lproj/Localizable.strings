@@ -970,3 +970,5 @@
 "ios.music.airPlay" = "AirPlay and output";
 "ios.a11y.mute" = "Mute";
 "ios.a11y.unmute" = "Unmute";
+"ios.ads.sponsored" = "Sponsored";
+"ios.a11y.sponsoredPost" = "Sponsored post by {name}";

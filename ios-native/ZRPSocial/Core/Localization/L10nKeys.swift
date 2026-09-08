@@ -1940,6 +1940,10 @@ enum L10nKey: String, CaseIterable {
     case iosA11yMute = "ios.a11y.mute"
     /// en: "Unmute"
     case iosA11yUnmute = "ios.a11y.unmute"
+    /// en: "Sponsored"
+    case iosAdsSponsored = "ios.ads.sponsored"
+    /// en: "Sponsored post by {name}"
+    case iosA11ySponsoredPost = "ios.a11y.sponsoredPost"
 }
 
 extension L10nKey {

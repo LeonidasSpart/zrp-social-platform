@@ -79,33 +79,19 @@ struct InlineVideoView: View {
             GeometryReader { proxy in
                 Color.clear
                     .onChange(of: proxy.frame(in: .global)) { _, frame in
-                        videos.report(id: id, visibleFraction: Self.fraction(of: frame))
+                        videos.report(id: id, visibleFraction: ScreenVisibility.fraction(of: frame))
                     }
                     .onAppear {
                         videos.register(id: id, url: url)
-                        videos.report(id: id, visibleFraction: Self.fraction(
-                            of: proxy.frame(in: .global)
-                        ))
+                        videos.report(
+                            id: id,
+                            visibleFraction: ScreenVisibility.fraction(
+                                of: proxy.frame(in: .global)
+                            )
+                        )
                     }
                     .onDisappear { videos.unregister(id: id) }
             }
         }
-    }
-
-    /// How much of `frame` lies inside the window, 0…1 by height.
-    ///
-    /// Height alone: a timeline scrolls vertically, and a card is always
-    /// full width, so the horizontal extent carries no information.
-    private static func fraction(of frame: CGRect) -> CGFloat {
-        guard frame.height > 0 else { return 0 }
-        guard let window = UIApplication.shared.connectedScenes
-            .compactMap({ $0 as? UIWindowScene })
-            .flatMap(\.windows)
-            .first(where: \.isKeyWindow)
-        else {
-            return 0
-        }
-        let visible = frame.intersection(window.bounds).height
-        return max(0, min(1, visible / frame.height))
     }
 }
