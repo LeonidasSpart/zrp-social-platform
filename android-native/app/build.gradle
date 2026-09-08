@@ -57,17 +57,17 @@ android {
         // déjà été utilisé" (versionCode 2 already used - a prior AAB
         // with that code had already been uploaded), so that bumped to
         // versionCode 3, then 4 once Play confirmed 3 was uploaded too,
-        // then 5 for the V4.0.1 real-device validation build - never
-        // reuse a versionCode Play has already seen for this
-        // applicationId. 4.0.1 (versionCode 5) is now published on Play,
-        // so this build bumps to versionCode 6 for the same reason,
-        // alongside versionName "4.0.2" - the next real release
-        // (Google Sign-In root cause, follow persistence, video sizing,
-        // image viewer tap-to-close, Home scroll-to-top, native legal/
-        // support pages replacing the WebView), not yet the V5 work that
-        // follows it.
-        versionCode 6
-        versionName "4.0.2"
+        // then 5 for the V4.0.1 real-device validation build, then 6
+        // alongside versionName "4.0.2" - never reuse a versionCode Play
+        // has already seen for this applicationId. This build bumps to
+        // versionCode 7 / versionName "4.0.3" - the native stabilization
+        // pass (follow-back state, Marketplace video, ZRP Play crash
+        // fixes, AI branding, generic link previews, notification deep-
+        // links, messaging keyboard/IME, Story author navigation + video
+        // mute, ZRP Music real background playback via MediaSessionService,
+        // Admin Dashboard crash fix) for real-user Play testing.
+        versionCode 7
+        versionName "4.0.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
