@@ -1,6 +1,7 @@
 name: DIAG - link preview live test
 on:
-  workflow_dispatch:
+  push:
+    branches: [claude/diag-link-preview-live-test]
 jobs:
   test:
     runs-on: ubuntu-latest
