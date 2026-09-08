@@ -232,6 +232,13 @@ dependencies {
     implementation 'androidx.media3:media3-exoplayer:1.4.1'
     implementation 'androidx.media3:media3-ui:1.4.1'
 
+    // Real background playback for ZRP Music (lock-screen/notification
+    // controls, foreground-service-backed playback that survives the
+    // app being backgrounded) - MusicPlaybackService.kt. Same 1.4.1
+    // version as the two media3 artifacts above to avoid a mixed-version
+    // resolution.
+    implementation 'androidx.media3:media3-session:1.4.1'
+
     // Push notifications (Phase 13) - real device registration tokens
     // and real message receipt via Firebase Cloud Messaging. The BoM
     // pins a mutually-compatible set of Firebase library versions, so

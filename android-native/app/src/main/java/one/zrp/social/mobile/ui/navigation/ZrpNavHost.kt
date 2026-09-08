@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -292,8 +293,9 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
     // (Home, Queue, and later Artist/Album/Playlist/Discover/Liked/
     // History), the native equivalent of the website's own
     // MusicPlayerProvider React context wrapping every /music/* page.
+    val appContext = LocalContext.current.applicationContext
     val musicPlayerViewModel: MusicPlayerViewModel = viewModel(
-        factory = remember { MusicPlayerViewModelFactory(MusicRepository()) },
+        factory = remember { MusicPlayerViewModelFactory(MusicRepository(), appContext) },
     )
 
     Scaffold(
