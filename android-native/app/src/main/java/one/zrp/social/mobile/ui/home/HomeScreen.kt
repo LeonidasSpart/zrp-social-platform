@@ -20,6 +20,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -54,6 +57,9 @@ import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.stories.StoriesRail
+import one.zrp.social.mobile.ui.components.EmptyStateAction
+import one.zrp.social.mobile.ui.components.PostSkeletonList
+import one.zrp.social.mobile.ui.components.ZrpEmptyState
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
@@ -73,6 +79,9 @@ fun HomeScreen(
     onOpenQuotes: (postId: String) -> Unit = {},
     onOpenHashtag: (String) -> Unit = {},
     onOpenVideoViewer: (String) -> Unit = {},
+    onDiscoverCreators: () -> Unit = {},
+    onExploreMusic: () -> Unit = {},
+    onExploreTopics: () -> Unit = {},
 ) {
     val viewModel: HomeViewModel = viewModel(
         factory = remember { HomeViewModelFactory(PostsRepository()) },
@@ -197,14 +206,65 @@ fun HomeScreen(
                     }
                 }
 
+                // Three real states before the list, none of which
+                // existed: a first load rendered an empty LazyColumn
+                // (blank screen until data landed), an empty feed
+                // rendered the same blank screen with no explanation,
+                // and a failure rendered one bare red sentence with no
+                // way to retry. An empty Following tab is the default
+                // experience for every brand-new account, so that blank
+                // screen was the first thing a new user saw.
                 if (state.error != null && state.posts.isEmpty()) {
-                    Text(
-                        text = state.error,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(24.dp),
+                    ZrpEmptyState(
+                        icon = Icons.Filled.CloudOff,
+                        title = state.error,
+                        primaryAction = EmptyStateAction(
+                            label = stringResource(R.string.feed_retry),
+                            icon = Icons.Filled.Refresh,
+                            onClick = { viewModel.refresh(activeTab) },
+                        ),
+                        modifier = Modifier.align(Alignment.Center),
                     )
+                } else if (state.isRefreshing && state.posts.isEmpty()) {
+                    // refresh() is what the init block calls, so an
+                    // empty list while refreshing is the first load.
+                    PostSkeletonList(modifier = Modifier.fillMaxSize())
+                } else if (state.posts.isEmpty()) {
+                    if (activeTab == FeedTab.FOLLOWING) {
+                        ZrpEmptyState(
+                            icon = Icons.Filled.Group,
+                            title = stringResource(R.string.home_empty_following_title),
+                            body = stringResource(R.string.home_empty_following_subtitle),
+                            primaryAction = EmptyStateAction(
+                                label = stringResource(R.string.home_cta_discover_creators),
+                                icon = Icons.Filled.AutoAwesome,
+                                onClick = onDiscoverCreators,
+                            ),
+                            secondaryActions = listOf(
+                                EmptyStateAction(
+                                    label = stringResource(R.string.home_cta_explore_music),
+                                    onClick = onExploreMusic,
+                                ),
+                                EmptyStateAction(
+                                    label = stringResource(R.string.home_cta_explore_topics),
+                                    onClick = onExploreTopics,
+                                ),
+                            ),
+                            modifier = Modifier.align(Alignment.Center),
+                        )
+                    } else {
+                        ZrpEmptyState(
+                            icon = Icons.Filled.AutoAwesome,
+                            title = stringResource(R.string.feed_no_posts),
+                            body = stringResource(R.string.feed_check_back_later),
+                            primaryAction = EmptyStateAction(
+                                label = stringResource(R.string.feed_retry),
+                                icon = Icons.Filled.Refresh,
+                                onClick = { viewModel.refresh(activeTab) },
+                            ),
+                            modifier = Modifier.align(Alignment.Center),
+                        )
+                    }
                 } else {
                     var reportingPostId by remember { mutableStateOf<String?>(null) }
                     var isSubmittingReport by remember { mutableStateOf(false) }

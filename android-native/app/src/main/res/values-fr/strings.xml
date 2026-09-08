@@ -1511,4 +1511,14 @@
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Inscrit(e) depuis</string>
     <string name="profile_charity_note">%1$s%% des bénéfices sont reversés à des associations caritatives</string>
+
+    <!-- Home feed empty / error states -->
+    <string name="home_empty_following_title">Votre fil Abonnements vous attend.</string>
+    <string name="home_empty_following_subtitle">Découvrez des personnes, de la musique et des sujets à suivre.</string>
+    <string name="feed_no_posts">Aucune publication pour le moment.</string>
+    <string name="feed_check_back_later">Revenez plus tard pour du contenu tendance.</string>
+    <string name="feed_retry">Réessayer</string>
+    <string name="home_cta_discover_creators">Découvrir des créateurs</string>
+    <string name="home_cta_explore_music">Explorer Music</string>
+    <string name="home_cta_explore_topics">Explorer les sujets</string>
 </resources>

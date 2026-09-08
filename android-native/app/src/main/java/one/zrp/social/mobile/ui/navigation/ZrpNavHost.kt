@@ -315,6 +315,9 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onOpenQuotes = goToQuotes,
                     onOpenHashtag = goToHashtag,
                     onOpenVideoViewer = goToVideoViewer,
+                    onDiscoverCreators = goToExplorePeople,
+                    onExploreMusic = goToMusic,
+                    onExploreTopics = goToTrending,
                 )
             }
             composable(

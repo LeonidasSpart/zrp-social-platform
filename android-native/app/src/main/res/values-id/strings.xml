@@ -1511,4 +1511,14 @@
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Bergabung</string>
     <string name="profile_charity_note">%1$s%% dari keuntungan disumbangkan untuk amal</string>
+
+    <!-- Home feed empty / error states -->
+    <string name="home_empty_following_title">Feed Mengikuti Anda sedang menunggu.</string>
+    <string name="home_empty_following_subtitle">Temukan orang, musik, dan topik untuk diikuti.</string>
+    <string name="feed_no_posts">Belum ada postingan.</string>
+    <string name="feed_check_back_later">Kunjungi lagi nanti untuk konten yang sedang tren.</string>
+    <string name="feed_retry">Coba Lagi</string>
+    <string name="home_cta_discover_creators">Temukan kreator</string>
+    <string name="home_cta_explore_music">Jelajahi Music</string>
+    <string name="home_cta_explore_topics">Jelajahi topik</string>
 </resources>
