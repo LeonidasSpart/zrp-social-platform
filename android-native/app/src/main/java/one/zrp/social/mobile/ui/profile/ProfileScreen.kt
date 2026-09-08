@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -74,6 +75,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -91,6 +93,7 @@ import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.home.PostCard
 import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.ui.theme.TouchTarget
 import one.zrp.social.mobile.ui.theme.ZrpBlue
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.ui.theme.ZrpWhite
@@ -736,10 +739,21 @@ private fun ProfileHeader(
 
         Column(modifier = Modifier.padding(start = Spacing.lg, end = Spacing.lg, top = Spacing.sm)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                // weight(fill = false) + single line: a display name is
+                // free text the account owner sets, so an unconstrained
+                // one took the whole row and pushed the verification
+                // badge and the private-account lock off the right edge
+                // entirely - most easily on a 320dp screen, but any
+                // long name did it. The name now yields to them and
+                // ellipsizes instead; the badge is never the thing that
+                // gets dropped.
                 Text(
                     text = profile.name ?: profile.username,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
                 VerifiedBadge(
                     badgeType = profile.badgeType,
@@ -760,6 +774,8 @@ private fun ProfileHeader(
                 text = "@${profile.username}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
 
             // Professional category - a free-text field the account
@@ -926,8 +942,21 @@ private fun ProfileHeader(
 
 @Composable
 private fun ProfileStat(count: Int, label: String, onClick: (() -> Unit)? = null, displayOverride: String? = null) {
+    // Followers/Following are primary navigation off this screen, but
+    // the column is only a bold number over a small caption - roughly
+    // 36dp tall, under Android's 48dp accessible minimum - and a bare
+    // clickable() announces as plain text rather than something you can
+    // activate. Only the rows that actually navigate get the target and
+    // the role; the Posts count isn't tappable and shouldn't claim to be.
     Column(
-        modifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier,
+        modifier = if (onClick != null) {
+            Modifier
+                .heightIn(min = TouchTarget.min)
+                .clickable(onClick = onClick, role = Role.Button, onClickLabel = label)
+        } else {
+            Modifier
+        },
+        verticalArrangement = Arrangement.Center,
     ) {
         Text(
             text = displayOverride ?: formatCount(count),
