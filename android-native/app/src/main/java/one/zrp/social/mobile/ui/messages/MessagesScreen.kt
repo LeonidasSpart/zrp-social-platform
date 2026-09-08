@@ -18,6 +18,10 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +42,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.VerifiedBadge
+import one.zrp.social.mobile.ui.components.ZrpEmptyState
+import one.zrp.social.mobile.ui.components.EmptyStateAction
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.network.ConversationSummary
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -73,16 +79,29 @@ fun MessagesScreen(onOpenConversation: (partnerId: String, partnerUsername: Stri
                 }
             }
             state.conversations.isEmpty() -> {
+                // "No conversations yet" and "loading them failed" were the
+                // same centred sentence, distinguishable only by its colour
+                // and with no way to retry the failure. They are different
+                // situations and now say so, through the same shared empty
+                // state the rest of the app uses.
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = state.error ?: stringResource(R.string.messages_no_messages_yet),
-                        color = if (state.error != null) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                        modifier = Modifier.padding(24.dp),
-                    )
+                    val loadError = state.error
+                    if (loadError != null) {
+                        ZrpEmptyState(
+                            icon = Icons.Filled.CloudOff,
+                            title = loadError,
+                            primaryAction = EmptyStateAction(
+                                label = stringResource(R.string.feed_retry),
+                                icon = Icons.Filled.Refresh,
+                                onClick = { viewModel.refresh() },
+                            ),
+                        )
+                    } else {
+                        ZrpEmptyState(
+                            icon = Icons.Filled.ChatBubbleOutline,
+                            title = stringResource(R.string.messages_no_messages_yet),
+                        )
+                    }
                 }
             }
             else -> {
