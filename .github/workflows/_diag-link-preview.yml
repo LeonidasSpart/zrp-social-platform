@@ -1,0 +1,23 @@
+name: DIAG - link preview live test
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch 20min.ch directly (sanity check the runner can reach it)
+        run: |
+          echo "--- Direct fetch of 20min.ch article ---"
+          curl -sS -o /tmp/direct.html -w "HTTP_STATUS:%{http_code} SIZE:%{size_download} CONTENT_TYPE:%{content_type}\n" \
+            -A "Mozilla/5.0 (compatible; ZRPLinkPreview/1.0; +https://zrp.one)" \
+            --max-time 15 -L \
+            "https://www.20min.ch/fr/story/football-atteinte-d-un-cancer-elle-voit-son-club-faire-un-geste-emouvant-103629744" || true
+          echo "--- og: tags found in raw HTML ---"
+          grep -o '<meta[^>]*property="og:[a-z:]*"[^>]*>' /tmp/direct.html | head -20 || echo "none found"
+      - name: Fetch ZRP's own deployed link-preview endpoint for the same URL
+        run: |
+          echo "--- ZRP production /api/link-preview for the 20min.ch URL ---"
+          curl -sS -o /tmp/zrp.json -w "HTTP_STATUS:%{http_code}\n" --max-time 20 \
+            "https://zrp.one/api/link-preview?url=https%3A%2F%2Fwww.20min.ch%2Ffr%2Fstory%2Ffootball-atteinte-d-un-cancer-elle-voit-son-club-faire-un-geste-emouvant-103629744" || true
+          echo "--- response body ---"
+          cat /tmp/zrp.json || true
