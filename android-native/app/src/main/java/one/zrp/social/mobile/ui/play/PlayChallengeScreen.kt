@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -272,16 +270,40 @@ fun PlayChallengeScreen(
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(top = 24.dp, bottom = 12.dp),
                                 )
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(2),
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                                // A real (non-lazy) grid, not
+                                // LazyVerticalGrid: this whole screen
+                                // already lives inside a verticalScroll
+                                // Column above, and any Lazy* layout
+                                // nested in a verticalScroll container
+                                // gets measured with an unbounded max
+                                // height, which Compose deterministically
+                                // crashes on ("measured with an infinity
+                                // maximum height constraint") - the exact
+                                // same bug class MemoryPlayerView's own
+                                // card grid hit. unlockedAchievements is
+                                // always a short, bounded list per
+                                // challenge, so there's no virtualization
+                                // benefit being given up here.
+                                Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(bottom = 8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(10.dp),
                                 ) {
-                                    items(result.unlockedAchievements, key = { it.key }) { achievement ->
-                                        AchievementBadgeView(achievement = achievement)
+                                    result.unlockedAchievements.chunked(2).forEach { rowAchievements ->
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                            modifier = Modifier.fillMaxWidth(),
+                                        ) {
+                                            rowAchievements.forEach { achievement ->
+                                                Box(modifier = Modifier.weight(1f)) {
+                                                    AchievementBadgeView(achievement = achievement)
+                                                }
+                                            }
+                                            if (rowAchievements.size < 2) {
+                                                Spacer(modifier = Modifier.weight(1f))
+                                            }
+                                        }
                                     }
                                 }
                             }
