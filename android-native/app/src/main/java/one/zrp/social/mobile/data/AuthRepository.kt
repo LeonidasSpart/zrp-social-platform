@@ -77,6 +77,33 @@ class AuthRepository {
     suspend fun getOnboardingStatus(): Boolean =
         runCatching { ApiClient.authApi.getSession().user?.onboardingCompleted }.getOrNull() ?: true
 
+    // Hydrates the full signed-in user (role/plan/badge included, not
+    // just onboardingCompleted) for a cold start whose AuthUiState
+    // starts as LoggedIn(user = null) - a locally-present token alone
+    // never carried the role/plan the real backend session knows, so
+    // any UI gated on those (Settings' own Admin row, most visibly)
+    // stayed permanently blind to them on every app resume that wasn't
+    // a fresh login. Null on a network failure or a session whose
+    // underlying account is gone - the caller decides what to do with
+    // that (AuthViewModel keeps the existing soft-fail behavior: stay
+    // signed in, just without the role-gated UI, rather than forcing a
+    // logout on a transient network hiccup).
+    suspend fun getSessionUser(): MobileUser? {
+        val user = runCatching { ApiClient.authApi.getSession().user }.getOrNull() ?: return null
+        val id = user.id ?: return null
+        val username = user.username ?: return null
+        return MobileUser(
+            id = id,
+            username = username,
+            name = user.name,
+            avatarUrl = user.avatarUrl,
+            badgeType = user.badgeType,
+            role = user.role ?: "USER",
+            plan = user.plan ?: "free",
+            onboardingCompleted = user.onboardingCompleted ?: true,
+        )
+    }
+
     // The same real POST /auth/register the website's own /signup page
     // calls - no session is established here (a fresh account is
     // always created unverified), so this never touches tokenStore.
