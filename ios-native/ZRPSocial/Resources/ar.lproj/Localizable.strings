@@ -809,3 +809,13 @@
 "opportunity.errUpdateFailed" = "فشل تحديث الإعلان. حاول مرة أخرى.";
 "opportunity.errTitleRequired" = "العنوان مطلوب.";
 "opportunity.errDescriptionRequired" = "الوصف مطلوب.";
+"profile.impact" = "الأثر: تم التبرع بـ {amount}$ للأعمال الخيرية";
+"profile.charityNote" = "يذهب {pct}% من الأرباح إلى الأعمال الخيرية";
+"profile.milestoneYearsOnZRP" = "{n} سنة على ZRP";
+"profile.milestoneSixMonths" = "6 أشهر على ZRP";
+"profile.milestoneNewMember" = "عضو جديد";
+"profile.milestonePosts500" = "500+ منشور";
+"profile.milestonePosts100" = "100+ منشور";
+"profile.milestonePosts10" = "10+ منشورات";
+"profile.milestoneFollowers1k" = "1K+ متابع";
+"profile.milestoneFollowers100" = "100+ متابع";

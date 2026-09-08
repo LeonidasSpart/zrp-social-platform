@@ -31,6 +31,8 @@ struct ProfileHeaderView: View {
             }
             metadata
             stats
+            impact
+            milestoneBadges
         }
         .padding(.bottom, ZrpSpacing.md)
         .background(ZrpColor.surface)
@@ -184,6 +186,103 @@ struct ProfileHeaderView: View {
         }
         .padding(.horizontal, ZrpSpacing.lg)
         .padding(.top, ZrpSpacing.xs)
+    }
+
+    /// What this account has sent to charity, and the platform's own
+    /// note about the share.
+    ///
+    /// Shown only when the route actually reported a figure. Absent is
+    /// not zero: an older deployment sends no field at all, and
+    /// rendering "$0.00 contributed" for that would be stating something
+    /// the server never said. Zero itself is shown, because that IS a
+    /// figure the server reported.
+    ///
+    /// The amount is formatted to two decimal places the way the website
+    /// formats it, through the active locale's own number rules so a
+    /// French reader sees `12,34` rather than `12.34`.
+    @ViewBuilder
+    private var impact: some View {
+        if let amount = profile.charityContributionUsdc {
+            VStack(alignment: .leading, spacing: ZrpSpacing.xs) {
+                Label {
+                    Text(.profileImpact, ["amount": Self.usdc(amount)])
+                        .font(.caption)
+                } icon: {
+                    Image(systemName: "heart.fill")
+                        .font(.caption)
+                }
+                .foregroundStyle(ZrpColor.red)
+                .padding(.horizontal, ZrpSpacing.md)
+                .padding(.vertical, ZrpSpacing.xs)
+                .background(ZrpColor.red.opacity(0.1))
+                .clipShape(Capsule())
+
+                // The share is the website's own constant, passed as a
+                // parameter there too - not a number invented here.
+                Text(.profileCharityNote, ["pct": CountFormatting.exact(Self.charitySharePercent)])
+                    .font(.caption2)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, ZrpSpacing.lg)
+            .padding(.top, ZrpSpacing.sm)
+        }
+    }
+
+    /// The share of profits that goes to charity, as the website states
+    /// it. Hard-coded there as well (`{ pct: 35 }`); no route reports it,
+    /// so this mirrors the one place it is written down rather than
+    /// inventing a second figure.
+    private static let charitySharePercent = 35
+
+    private static func usdc(_ amount: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+        formatter.locale = L10n.activeLocale
+        return formatter.string(from: NSNumber(value: amount)) ?? String(format: "%.2f", amount)
+    }
+
+    /// The badges this profile has earned.
+    ///
+    /// Every one of them is a fact the route computed. A badge whose key
+    /// this app does not recognise is skipped rather than rendered as
+    /// its raw key - an unknown key means a newer backend, and
+    /// "posts_500" in front of an Arabic or Chinese reader is worse than
+    /// one fewer badge.
+    @ViewBuilder
+    private var milestoneBadges: some View {
+        let earned = (profile.milestones ?? []).filter { $0.localizedTitle != nil }
+        if !earned.isEmpty {
+            LazyVGrid(
+                columns: [GridItem(.adaptive(minimum: 110), spacing: ZrpSpacing.sm)],
+                alignment: .leading,
+                spacing: ZrpSpacing.sm
+            ) {
+                ForEach(earned) { milestone in
+                    HStack(spacing: ZrpSpacing.xs) {
+                        Text(verbatim: milestone.icon)
+                            .font(.caption)
+                        Text(verbatim: milestone.localizedTitle ?? "")
+                            .font(.caption.weight(.medium))
+                            .lineLimit(1)
+                    }
+                    .padding(.horizontal, ZrpSpacing.sm)
+                    .padding(.vertical, ZrpSpacing.xs)
+                    .foregroundStyle(ZrpColor.onSurface)
+                    .background(ZrpColor.surfaceElevated)
+                    .clipShape(Capsule())
+                    .overlay(Capsule().strokeBorder(ZrpColor.outline, lineWidth: 1))
+                    // One element per badge, read as "icon, label" -
+                    // the emoji alone would be announced by name.
+                    .accessibilityElement(children: .combine)
+                }
+            }
+            .padding(.horizontal, ZrpSpacing.lg)
+            .padding(.top, ZrpSpacing.sm)
+        }
     }
 
     @ViewBuilder

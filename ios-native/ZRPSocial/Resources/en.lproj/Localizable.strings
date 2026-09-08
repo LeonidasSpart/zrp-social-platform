@@ -809,6 +809,16 @@
 "opportunity.errUpdateFailed" = "Failed to update listing. Please try again.";
 "opportunity.errTitleRequired" = "A title is required.";
 "opportunity.errDescriptionRequired" = "A description is required.";
+"profile.impact" = "Impact: ${amount} contributed to charity";
+"profile.charityNote" = "{pct}% of profits go to charity";
+"profile.milestoneYearsOnZRP" = "{n}yr on ZRP";
+"profile.milestoneSixMonths" = "6 months on ZRP";
+"profile.milestoneNewMember" = "New member";
+"profile.milestonePosts500" = "500+ posts";
+"profile.milestonePosts100" = "100+ posts";
+"profile.milestonePosts10" = "10+ posts";
+"profile.milestoneFollowers1k" = "1K+ followers";
+"profile.milestoneFollowers100" = "100+ followers";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back

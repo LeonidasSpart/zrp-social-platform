@@ -809,3 +809,13 @@
 "opportunity.errUpdateFailed" = "更新招聘信息失败,请重试。";
 "opportunity.errTitleRequired" = "标题为必填项。";
 "opportunity.errDescriptionRequired" = "描述为必填项。";
+"profile.impact" = "影响力：已捐赠 {amount} 美元用于慈善";
+"profile.charityNote" = "{pct}% 的利润用于慈善事业";
+"profile.milestoneYearsOnZRP" = "在 ZRP {n} 年";
+"profile.milestoneSixMonths" = "在 ZRP 6 个月";
+"profile.milestoneNewMember" = "新成员";
+"profile.milestonePosts500" = "500+ 帖子";
+"profile.milestonePosts100" = "100+ 帖子";
+"profile.milestonePosts10" = "10+ 帖子";
+"profile.milestoneFollowers1k" = "1K+ 关注者";
+"profile.milestoneFollowers100" = "100+ 关注者";

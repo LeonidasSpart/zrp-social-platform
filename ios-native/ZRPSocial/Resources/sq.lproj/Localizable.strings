@@ -809,3 +809,13 @@
 "opportunity.errUpdateFailed" = "Përditësimi i listimit dështoi. Provo përsëri.";
 "opportunity.errTitleRequired" = "Kërkohet një titull.";
 "opportunity.errDescriptionRequired" = "Kërkohet një përshkrim.";
+"profile.impact" = "Ndikimi: {amount} $ dhuruar për bamirësi";
+"profile.charityNote" = "{pct}% e fitimeve shkojnë për bamirësi";
+"profile.milestoneYearsOnZRP" = "{n} vjet në ZRP";
+"profile.milestoneSixMonths" = "6 muaj në ZRP";
+"profile.milestoneNewMember" = "Anëtar i ri";
+"profile.milestonePosts500" = "500+ postime";
+"profile.milestonePosts100" = "100+ postime";
+"profile.milestonePosts10" = "10+ postime";
+"profile.milestoneFollowers1k" = "1K+ ndjekës";
+"profile.milestoneFollowers100" = "100+ ndjekës";
