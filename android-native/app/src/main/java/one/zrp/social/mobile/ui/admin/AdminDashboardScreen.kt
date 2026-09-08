@@ -9,9 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -107,11 +104,6 @@ fun AdminDashboardScreen(
             ) {
                 if (stats != null) {
                     val roleCounts = stats.roleCounts
-                    // Built here, in the enclosing @Composable scope, not
-                    // inside LazyVerticalGrid's own content lambda below -
-                    // that lambda is a LazyGridScope builder, not a
-                    // @Composable context, so stringResource() can't be
-                    // called from inside it directly.
                     val cards = listOf(
                         stringResource(R.string.admin_dash_total_users) to stats.users.toString(),
                         stringResource(R.string.admin_dash_total_posts) to stats.posts.toString(),
@@ -121,13 +113,36 @@ fun AdminDashboardScreen(
                         stringResource(R.string.admin_dash_admins) to (roleCounts["ADMIN"] ?: 0).toString(),
                         stringResource(R.string.admin_dash_moderators) to (roleCounts["MODERATOR"] ?: 0).toString(),
                     )
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                    // A real (non-lazy) grid, not LazyVerticalGrid: this
+                    // whole screen already lives inside a verticalScroll
+                    // Column above, and any Lazy* layout nested in a
+                    // verticalScroll container gets measured with an
+                    // unbounded max height, which Compose deterministically
+                    // crashes on ("measured with an infinity maximum
+                    // height constraint") - the same bug class already
+                    // fixed in MemoryPlayerView.kt and
+                    // PlayChallengeScreen.kt. `cards` is always a short,
+                    // fixed-size list (7 stat cards), so nothing is lost
+                    // by not virtualizing.
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.md),
                     ) {
-                        items(cards) { (label, value) -> StatCard(label = label, value = value) }
+                        cards.chunked(2).forEach { rowCards ->
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                rowCards.forEach { (label, value) ->
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        StatCard(label = label, value = value)
+                                    }
+                                }
+                                if (rowCards.size < 2) {
+                                    Box(modifier = Modifier.weight(1f))
+                                }
+                            }
+                        }
                     }
                 }
 
