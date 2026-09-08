@@ -1,0 +1,149 @@
+ZRP Social Platform — Proprietary Software License
+Copyright (c) 2026 ZRP. All Rights Reserved.
+
+===============================================================================
+1. NOTICE
+===============================================================================
+
+This repository is publicly accessible. It is NOT open-source software.
+
+No open-source license (including, without limitation, the MIT, Apache,
+BSD, GPL, LGPL, MPL or ISC licenses) applies to this software. Public
+visibility of this repository is provided for transparency, review and
+reference purposes only, and does not grant any licence, right, title or
+interest in the software.
+
+"the Software" below means the source code, configuration, documentation,
+build tooling, design assets and any other material contained in this
+repository, excluding the third-party components described in Section 6.
+
+"the Copyright Holder" below means ZRP, the owner of the ZRP Social
+platform and of this repository.
+
+===============================================================================
+2. RESERVATION OF RIGHTS
+===============================================================================
+
+All rights in and to the Software are reserved by the Copyright Holder.
+
+No right or licence is granted by implication, estoppel, or otherwise.
+In particular, no right or licence arises merely because:
+
+  (a) the repository is publicly accessible;
+  (b) the Software can be viewed, fetched, cloned or forked using GitHub's
+      standard functionality;
+  (c) an issue, pull request or discussion has been opened; or
+  (d) the Software has been made available without an access control.
+
+===============================================================================
+3. PERMITTED USE
+===============================================================================
+
+Subject to the restrictions in Section 4, you may:
+
+  (a) view and read the Software; and
+  (b) make a temporary local copy solely for the purpose of reading,
+      reviewing or evaluating it.
+
+Any other use requires the prior written authorisation of the Copyright
+Holder.
+
+===============================================================================
+4. RESTRICTIONS
+===============================================================================
+
+Except with the prior express written authorisation of the Copyright
+Holder, you may NOT:
+
+  (a) copy, reproduce, publish or redistribute the Software, in whole or
+      in part;
+  (b) modify, adapt, translate or create derivative works of the Software;
+  (c) sublicense, sell, rent, lease, lend or otherwise commercially exploit
+      the Software;
+  (d) use the Software, in whole or in part, in any other product, service,
+      platform or application, whether commercial or non-commercial;
+  (e) deploy, host or operate the Software or any derivative of it as a
+      service;
+  (f) rebrand, white-label, or otherwise present the Software or any
+      derivative of it as your own or as another product;
+  (g) remove, obscure or alter any copyright, trademark or other proprietary
+      notice contained in the Software; or
+  (h) use the Software to train, fine-tune or evaluate a machine-learning
+      model whose outputs are made available to third parties.
+
+===============================================================================
+5. TRADEMARKS, BRANDING AND INTELLECTUAL PROPERTY
+===============================================================================
+
+The ZRP name, the ZRP and ZRP Social marks, the ZRP logo, product names
+(including but not limited to ZRP Music, ZRP AI, ZRP Help, Creator Studio
+and Trust Passport), brand assets, colour system, typography, iconography,
+visual identity, and the design of the ZRP products are the property of the
+Copyright Holder.
+
+Nothing in this licence grants any right to use those marks or assets. They
+may not be used, reproduced, modified, recoloured, redrawn or incorporated
+into any other product, service or material without prior express written
+authorisation.
+
+Brand assets included in this repository (for example under `assets/`,
+`public/`, `store-assets/`, and the native asset catalogues) are covered by
+this Section and by Section 4.
+
+===============================================================================
+6. THIRD-PARTY COMPONENTS
+===============================================================================
+
+The Software depends on, and in places includes, third-party software that
+is licensed separately by its respective copyright holders (for example the
+packages declared in `package.json` / `package-lock.json`, the Gradle
+dependencies declared under `android/` and `android-native/`, and the Apple
+frameworks used by `ios/` and `ios-native/`).
+
+Those components remain subject to their own licences. This licence does
+not modify, restrict, replace or override any third-party licence, and
+nothing in this licence should be read as asserting proprietary rights over
+third-party software.
+
+Where a conflict exists between this licence and a third-party licence in
+respect of a third-party component, the third-party licence governs that
+component.
+
+===============================================================================
+7. CONTRIBUTIONS
+===============================================================================
+
+This is not an open contribution project. Contributions are accepted only
+from persons authorised by the Copyright Holder. Unless agreed otherwise in
+writing, any contribution submitted to this repository is provided on the
+basis that the Copyright Holder may use it without restriction and that it
+becomes subject to this licence.
+
+===============================================================================
+8. NO WARRANTY
+===============================================================================
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT.
+
+===============================================================================
+9. LIMITATION OF LIABILITY
+===============================================================================
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
+OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+===============================================================================
+10. CONTACT
+===============================================================================
+
+Licensing and permission requests, including requests to use the ZRP name,
+logo or brand assets, should be directed to the Copyright Holder via
+https://zrp.one.
+
+Suspected security vulnerabilities should be reported as described in
+SECURITY.md, not through a public channel.
