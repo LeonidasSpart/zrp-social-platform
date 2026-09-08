@@ -53,4 +53,8 @@ class MessagesRepository {
     suspend fun toggleReaction(messageId: String, emoji: String): Result<MessageReactionResponse> = runCatching {
         ApiClient.messagesApi.toggleReaction(messageId, MessageReactionRequest(emoji))
     }
+
+    suspend fun getUnreadCount(): Result<Int> = runCatching {
+        ApiClient.messagesApi.getUnreadCount().count
+    }
 }
