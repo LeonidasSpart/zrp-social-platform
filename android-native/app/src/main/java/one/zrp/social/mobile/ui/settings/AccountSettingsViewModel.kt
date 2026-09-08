@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.SettingsRepository
+import one.zrp.social.mobile.network.ApiClient
 
 data class AccountSettingsUiState(
     val isLoading: Boolean = true,
@@ -51,7 +52,7 @@ class AccountSettingsViewModel(private val repository: SettingsRepository) : Vie
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             val session = repository.getOwnSession().getOrNull()
-            val username = session?.username
+            val username = ApiClient.ownUsernameOverride ?: session?.username
             var joinedAt: String? = null
             if (username != null) {
                 repository.getProfile(username).onSuccess { joinedAt = it.createdAt }
@@ -95,6 +96,12 @@ class AccountSettingsViewModel(private val repository: SettingsRepository) : Vie
         viewModelScope.launch {
             repository.updateUsername(current.newUsername)
                 .onSuccess { response ->
+                    // The active session JWT only re-fetches a renamed
+                    // username on its own 5-minute-throttled recheck (see
+                    // auth.ts) - without this, the very next "view my own
+                    // profile" right after this save could still resolve
+                    // the old, now-404ing username via GET /auth/session.
+                    ApiClient.ownUsernameOverride = response.user.username
                     _state.update {
                         it.copy(
                             isUpdatingUsername = false,

@@ -407,10 +407,16 @@ export const authOptions: NextAuthOptions = {
       }
 
       // ─── Re‑fetch fresh data on client update() ────────────────
+      // Also re-fetches username: settings/page.tsx's own
+      // handleUpdateProfile calls update() right after a rename, and
+      // any route resolving "my own profile" through session.user.username
+      // (rather than the stable session.user.id) - e.g. GET
+      // /users/{username} keyed off it - 404s until this catches up.
       if (trigger === "update" && token.id) {
         const freshUser = await prisma.user.findUnique({
           where: { id: token.id as string },
           select: {
+            username: true,
             isAdmin: true,
             role: true,
             badgeType: true,
@@ -421,6 +427,7 @@ export const authOptions: NextAuthOptions = {
           },
         });
         if (freshUser) {
+          token.username = freshUser.username;
           token.isAdmin = freshUser.isAdmin;
           token.role = freshUser.role;
           token.badgeType = freshUser.badgeType;
@@ -448,6 +455,19 @@ export const authOptions: NextAuthOptions = {
       // session out" (redirect, cleared cookies, blocked API writes),
       // so a deleted account is handled by that exact same, already-
       // proven path instead of a new one.
+      //
+      // This same window also refreshes token.username. A rename
+      // otherwise stayed frozen in the JWT at whatever it was when the
+      // token was minted - the trigger === "update" branch above never
+      // covered it (its own select never asked for username), and
+      // nothing else in this callback ever re-read it either. That's
+      // not just a stale display name: any route resolving "my own
+      // profile" through session.user.username (rather than the stable
+      // session.user.id) - e.g. GET /users/{username} keyed off it -
+      // 404s the instant a rename takes effect server-side but the
+      // active session's own copy hasn't caught up, for up to 30 days.
+      // Riding the existing 5-minute existence check to also pick this
+      // up needs no separate client-side update() round trip.
       if (token.id && !user && trigger !== "update" && !token.banned) {
         const lastChecked = (token.existsCheckedAt as number) || 0;
         if (Date.now() - lastChecked > 5 * 60 * 1000) {
@@ -456,6 +476,11 @@ export const authOptions: NextAuthOptions = {
             token.banned = true;
           } else {
             token.existsCheckedAt = Date.now();
+            const fresh = await prisma.user.findUnique({
+              where: { id: token.id as string },
+              select: { username: true },
+            });
+            if (fresh) token.username = fresh.username;
           }
         }
       }

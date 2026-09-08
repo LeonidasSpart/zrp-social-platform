@@ -32,8 +32,10 @@ import retrofit2.HttpException
  */
 class ProfileRepository {
     suspend fun getOwnUsername(): Result<String> = runCatching {
-        val session = ApiClient.authApi.getSession()
-        session.user?.username ?: throw IllegalStateException("Not signed in")
+        ApiClient.ownUsernameOverride ?: run {
+            val session = ApiClient.authApi.getSession()
+            session.user?.username ?: throw IllegalStateException("Not signed in")
+        }
     }
 
     suspend fun getOwnUserId(): Result<String?> = runCatching {
