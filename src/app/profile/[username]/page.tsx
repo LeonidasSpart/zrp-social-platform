@@ -134,76 +134,30 @@ function parseBio(bio: string) {
   return parts;
 }
 
-// ─── Compute milestone badges from data we already have ─────────────
+// ─── Milestone badges ────────────────────────────────────────────────
+// The facts themselves (which thresholds a profile has crossed) now come
+// from the API (src/lib/milestones.ts) instead of being recomputed here,
+// so web, Android and iOS can never disagree on which badges a profile
+// has earned. Only the key -> localized label mapping stays client-side,
+// matching every key computeMilestones() can produce.
+const MILESTONE_TRANSLATION_KEYS: Record<string, TranslationKey> = {
+  years_on_zrp: "profile.milestoneYearsOnZRP",
+  six_months: "profile.milestoneSixMonths",
+  new_member: "profile.milestoneNewMember",
+  posts_500: "profile.milestonePosts500",
+  posts_100: "profile.milestonePosts100",
+  posts_10: "profile.milestonePosts10",
+  followers_1k: "profile.milestoneFollowers1k",
+  followers_100: "profile.milestoneFollowers100",
+};
 
-interface Milestone {
-  icon: string;
-  label: string;
-}
-
-function getMilestones(
-  profile: UserProfile,
+function milestoneLabel(
+  fact: { key: string; params?: Record<string, number> },
   t: (key: TranslationKey, params?: Record<string, string | number>) => string
-): Milestone[] {
-  const badges: Milestone[] = [];
-
-  const joined = new Date(profile.createdAt);
-
-  const monthsSinceJoin =
-    (Date.now() - joined.getTime()) /
-    (1000 * 60 * 60 * 24 * 30.44);
-
-  if (monthsSinceJoin >= 12) {
-    badges.push({
-      icon: "🎂",
-      label: t("profile.milestoneYearsOnZRP", { n: Math.floor(monthsSinceJoin / 12) }),
-    });
-  } else if (monthsSinceJoin >= 6) {
-    badges.push({
-      icon: "🎉",
-      label: t("profile.milestoneSixMonths"),
-    });
-  } else if (monthsSinceJoin >= 1) {
-    badges.push({
-      icon: "🌱",
-      label: t("profile.milestoneNewMember"),
-    });
-  }
-
-  const posts = profile._count.posts;
-
-  if (posts >= 500) {
-    badges.push({
-      icon: "🏆",
-      label: t("profile.milestonePosts500"),
-    });
-  } else if (posts >= 100) {
-    badges.push({
-      icon: "📝",
-      label: t("profile.milestonePosts100"),
-    });
-  } else if (posts >= 10) {
-    badges.push({
-      icon: "✍️",
-      label: t("profile.milestonePosts10"),
-    });
-  }
-
-  const followers = profile._count.followers;
-
-  if (followers >= 1000) {
-    badges.push({
-      icon: "⭐",
-      label: t("profile.milestoneFollowers1k"),
-    });
-  } else if (followers >= 100) {
-    badges.push({
-      icon: "👥",
-      label: t("profile.milestoneFollowers100"),
-    });
-  }
-
-  return badges;
+): string {
+  const translationKey = MILESTONE_TRANSLATION_KEYS[fact.key];
+  if (!translationKey) return fact.key;
+  return t(translationKey, fact.params);
 }
 
 interface UserProfile {
@@ -243,6 +197,9 @@ interface UserProfile {
   isBlocked: boolean;
 
   followRequestStatus?: "pending" | "none";
+
+  charityContributionUsdc: number;
+  milestones: { key: string; icon: string; params?: Record<string, number> }[];
 }
 
 interface Post {
@@ -1042,17 +999,13 @@ export default function ProfilePage(
       }
     );
 
-  /*
-   * NOTE:
-   * This is kept exactly as your existing implementation.
-   */
-  const impactMeals =
-    Math.floor(
-      Math.random() * 50
-    ) + 5;
+  // Real figure from the API - the sum of this profile's own completed
+  // tips/purchases' charityAmount (see src/lib/charity.ts). This used to
+  // be `Math.floor(Math.random() * 50) + 5` "meals", a number with no
+  // connection to anything real, regenerated on every page load.
+  const charityContributionUsdc = profile.charityContributionUsdc;
 
-  const milestones =
-    getMilestones(profile, t);
+  const milestones = profile.milestones;
 
   // ─── Plan badge color ──────────────────────────────────────────
 
@@ -1951,7 +1904,7 @@ export default function ProfilePage(
               {t(
                 "profile.impact",
                 {
-                  n: impactMeals,
+                  amount: charityContributionUsdc.toFixed(2),
                 }
               )}{" "}
               🧡
@@ -1985,7 +1938,7 @@ export default function ProfilePage(
                     }
                     className="inline-flex items-center gap-1 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2.5 py-1 rounded-full border border-gray-200 dark:border-gray-700"
                     title={
-                      m.label
+                      milestoneLabel(m, t)
                     }
                   >
                     <span>
@@ -1995,7 +1948,7 @@ export default function ProfilePage(
                     </span>
 
                     {
-                      m.label
+                      milestoneLabel(m, t)
                     }
                   </span>
                 )
