@@ -52,6 +52,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.flow.SharedFlow
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.EditPostDialog
@@ -82,6 +83,7 @@ fun HomeScreen(
     onDiscoverCreators: () -> Unit = {},
     onExploreMusic: () -> Unit = {},
     onExploreTopics: () -> Unit = {},
+    scrollToTopEvents: SharedFlow<Unit>? = null,
 ) {
     val viewModel: HomeViewModel = viewModel(
         factory = remember { HomeViewModelFactory(PostsRepository()) },
@@ -191,6 +193,19 @@ fun HomeScreen(
                     .pullRefresh(pullRefreshState),
             ) {
                 val listState = rememberLazyListState()
+
+                // Only one LazyListState is ever live here (this Box's
+                // content, not the state itself, is what changes per
+                // tab - see this val's own placement above the
+                // activeTab branching below), so reacting to this one
+                // signal correctly scrolls whichever of For You/
+                // Following is actually on screen when Home is
+                // re-tapped, without knowing which tab that is.
+                LaunchedEffect(scrollToTopEvents) {
+                    scrollToTopEvents?.collect {
+                        listState.animateScrollToItem(0)
+                    }
+                }
 
                 val shouldLoadMore by remember {
                     derivedStateOf {

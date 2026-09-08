@@ -16,3 +16,8 @@ local.properties
 *.jks
 *.keystore
 keystore.properties
+
+# debug.keystore is the one deliberate exception to *.keystore above - see
+# app/build.gradle's own comment on why a checked-in, stable debug signing
+# cert is required for Google Sign-In to work on debug builds at all.
+!debug.keystore

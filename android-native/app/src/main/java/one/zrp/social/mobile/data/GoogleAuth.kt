@@ -1,6 +1,7 @@
 package one.zrp.social.mobile.data
 
 import android.content.Context
+import android.util.Log
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
@@ -41,17 +42,26 @@ object GoogleAuth {
         } catch (e: GoogleIdTokenParsingException) {
             Result.failure(Exception("Couldn't verify that Google account. Please try again."))
         } catch (e: NoCredentialException) {
-            // The device has no Google account configured (or none the
-            // account picker could offer) - Credential Manager's own
-            // signal for this, distinct from every other failure mode
-            // below. Previously fell into the generic catch-all and
-            // told the user to "check your connection", which sent
-            // real device testing down the wrong troubleshooting path
-            // for what was actually a missing-account (or, before
-            // GOOGLE_WEB_CLIENT_ID was configured in CI, a build
-            // misconfiguration Credential Manager reports the same way)
-            // rather than a network problem.
-            Result.failure(Exception("No Google account found on this device. Add a Google account in your device settings and try again."))
+            // Credential Manager throws this exact exception for two
+            // very different real causes, and it does not tell us
+            // which: (a) genuinely no Google account is usable on this
+            // device, or (b) - confirmed as the actual cause during
+            // V4.0.1 real-device testing, via google-services.json's
+            // own committed "oauth_client": [] - this app's signing
+            // certificate has no matching Android OAuth client
+            // registered in the "zrp-social" Google Cloud project, so
+            // Play Services refuses to return ANY credential regardless
+            // of how many accounts exist on the device. The previous
+            // message ("Add a Google account in your device settings")
+            // asserted cause (a) as fact, which sent real testing down
+            // the wrong path when the true cause was (b). Since this
+            // layer genuinely cannot distinguish the two, the message
+            // no longer claims to know which one it is - see
+            // build.gradle's own comment on the checked-in debug
+            // keystore, which is what makes cause (b) fixable at all by
+            // giving the debug build a stable, registerable fingerprint.
+            Log.e("GoogleAuth", "Credential Manager returned no credential (NoCredentialException) - see this file's own KDoc: either no usable Google account, or this app's signing cert isn't yet registered as an Android OAuth client for GOOGLE_WEB_CLIENT_ID's Google Cloud project.", e)
+            Result.failure(Exception("Google Sign-In couldn't find an account to use. Make sure a Google account is set up on this device, or try email sign-in instead."))
         } catch (e: GetCredentialException) {
             // Every other Credential Manager-level failure (provider
             // configuration, interrupted, unsupported) - still not a

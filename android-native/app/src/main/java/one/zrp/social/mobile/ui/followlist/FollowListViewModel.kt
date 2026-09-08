@@ -95,6 +95,15 @@ class FollowListViewModel(
     }
 
     fun toggleFollow(targetUsername: String, targetUserId: String) {
+        // Guards against a double-tap firing two overlapping toggles for
+        // the same row (ProfileViewModel's own toggleFollow has the
+        // identical isTogglingFollow guard, for the identical reason) -
+        // without this, two in-flight requests can resolve out of order
+        // and leave local state one flip behind whatever the server
+        // actually recorded, surfacing as the relationship "reverting"
+        // the next time this list is loaded fresh.
+        if (_state.value.followTogglingId == targetUserId) return
+
         val previousUsers = _state.value.users
         _state.update { state ->
             state.copy(
@@ -106,6 +115,20 @@ class FollowListViewModel(
         }
         viewModelScope.launch {
             repository.toggleFollow(targetUsername)
+                .onSuccess { result ->
+                    // The server's `following` is authoritative, not the
+                    // optimistic flip above - a private target resolves
+                    // to a pending follow REQUEST rather than an actual
+                    // follow (result.following stays false), which the
+                    // blind flip this replaces got wrong every time.
+                    _state.update { state ->
+                        state.copy(
+                            users = state.users.map { user ->
+                                if (user.id == targetUserId) user.copy(isFollowing = result.following) else user
+                            },
+                        )
+                    }
+                }
                 .onFailure { _state.update { it.copy(users = previousUsers) } }
             _state.update { it.copy(followTogglingId = null) }
         }

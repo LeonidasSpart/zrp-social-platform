@@ -31,6 +31,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import kotlinx.coroutines.flow.MutableSharedFlow
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.data.NotificationsRepository
@@ -254,6 +255,17 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
         }
     }
 
+    // Tapping the Home tab while ALREADY on Home is a no-op as far as
+    // navigation goes (launchSingleTop above means there's nowhere to
+    // navigate to), so without this the feed just silently ignored the
+    // tap instead of returning to the top the way X/TikTok's own Home
+    // tab does. HomeScreen collects this and scrolls its active
+    // LazyListState (whichever of For You/Following is currently
+    // showing - HomeScreen only keeps one rememberLazyListState() live
+    // at a time) to the top; buffering one event means a tap that lands
+    // a beat before HomeScreen's collector starts still isn't lost.
+    val homeScrollToTopEvents = remember { MutableSharedFlow<Unit>(extraBufferCapacity = 1) }
+
     // Hoisted above the NavHost, not created inside NotificationsScreen's
     // own composable, so the badge survives navigating away from the
     // Notifications tab instead of resetting every time that screen
@@ -293,6 +305,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     unreadBadgeViewModel.refresh()
                     unreadMessagesBadgeViewModel.refresh()
                 },
+                onHomeReselected = { homeScrollToTopEvents.tryEmit(Unit) },
             )
         },
     ) { innerPadding ->
@@ -318,6 +331,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onDiscoverCreators = goToExplorePeople,
                     onExploreMusic = goToMusic,
                     onExploreTopics = goToTrending,
+                    scrollToTopEvents = homeScrollToTopEvents,
                 )
             }
             composable(
@@ -1157,6 +1171,7 @@ private fun ZrpBottomBar(
     unreadMessageCount: Int,
     onNotificationsSelected: () -> Unit,
     onOtherTabSelected: () -> Unit,
+    onHomeReselected: () -> Unit,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
@@ -1173,6 +1188,15 @@ private fun ZrpBottomBar(
             NavigationBarItem(
                 selected = selected,
                 onClick = {
+                    // Re-tapping the tab you're already on is a
+                    // navigation no-op (see homeScrollToTopEvents' own
+                    // comment) - for Home specifically, that's the
+                    // signal to scroll the active feed back to the top
+                    // instead of doing anything nav-related.
+                    if (destination == ZrpDestination.Home && selected) {
+                        onHomeReselected()
+                        return@NavigationBarItem
+                    }
                     if (destination == ZrpDestination.Notifications) {
                         onNotificationsSelected()
                     } else {

@@ -79,10 +79,33 @@ android {
                 keyPassword keystoreProperties['keyPassword']
             }
         }
+        // Without this, Gradle falls back to its own auto-generated
+        // ~/.android/debug.keystore - created fresh (different SHA-1)
+        // on every machine and, critically, on every single GitHub
+        // Actions run, since CI runners are ephemeral. Google Sign-In
+        // (Credential Manager's GetGoogleIdOption) refuses to return a
+        // credential from any app whose signing certificate isn't
+        // registered against an OAuth client in the same Google Cloud
+        // project as GOOGLE_WEB_CLIENT_ID - confirmed by
+        // google-services.json's own "oauth_client": [] (nothing
+        // registered at all yet). A constantly-changing debug
+        // fingerprint would make that registration impossible to keep
+        // working, so this checked-in keystore (see its own comment)
+        // exists purely to give the debug build ONE stable, real
+        // fingerprint that can actually be registered once. Standard,
+        // safe practice: a debug keystore's password is always the
+        // well-known Android default below, never a real secret.
+        debug {
+            storeFile rootProject.file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
     }
 
     buildTypes {
         debug {
+            signingConfig signingConfigs.debug
             // No applicationIdSuffix here (there was one, ".native", for
             // side-by-side installs with the existing Capacitor app
             // during earlier phases): Firebase/FCM requires the built
