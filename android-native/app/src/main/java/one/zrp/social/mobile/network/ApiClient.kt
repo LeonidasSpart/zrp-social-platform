@@ -3,6 +3,7 @@ package one.zrp.social.mobile.network
 import android.content.Context
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import one.zrp.social.mobile.data.ComposerDraftStore
 import one.zrp.social.mobile.data.TokenStore
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -21,10 +22,12 @@ object ApiClient {
     private const val BASE_URL = "https://zrp.one/api/"
 
     private lateinit var tokenStore: TokenStore
+    private lateinit var composerDraftStore: ComposerDraftStore
 
     fun init(context: Context) {
         if (::tokenStore.isInitialized) return
         tokenStore = TokenStore(context.applicationContext)
+        composerDraftStore = ComposerDraftStore(context.applicationContext)
     }
 
     // Exposed so AuthRepository shares this exact instance rather than
@@ -39,6 +42,13 @@ object ApiClient {
             "ApiClient.init(context) must be called (see ZrpApplication) before use."
         }
         return tokenStore
+    }
+
+    fun getComposerDraftStore(): ComposerDraftStore {
+        check(::composerDraftStore.isInitialized) {
+            "ApiClient.init(context) must be called (see ZrpApplication) before use."
+        }
+        return composerDraftStore
     }
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
