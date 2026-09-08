@@ -26,6 +26,7 @@ import {
   CheckCircle,
   ShieldCheck,
   MoreHorizontal,
+  ChevronRight,
   DollarSign,
   Lock,
   FileText,
@@ -1004,6 +1005,12 @@ export default function ProfilePage(
   // connection to anything real, regenerated on every page load.
   const charityContributionUsdc = profile.charityContributionUsdc;
 
+  // The passport's own translated description, reused verbatim. Writing
+  // a new summary line would mean inventing a trust claim and 11
+  // translations for it; the real signals it summarises (verification,
+  // join date) are rendered from this page's own data.
+  const trustSummary = t("profile.trustPassportDesc");
+
   const milestones = profile.milestones;
 
   // ─── Plan badge color ──────────────────────────────────────────
@@ -1347,7 +1354,10 @@ export default function ProfilePage(
               disabled={
                 uploadingBanner
               }
-              className="bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
+              className="flex items-center justify-center h-11 w-11 bg-black/50 text-white rounded-full hover:bg-black/70 transition"
+              aria-label={t(
+                "profile.changeBanner"
+              )}
               title={t(
                 "profile.changeBanner"
               )}
@@ -1413,7 +1423,10 @@ export default function ProfilePage(
                   disabled={
                     uploadingAvatar
                   }
-                  className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white"
+                  className="absolute inset-0 bg-black/40 opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100 flex items-center justify-center text-white"
+                  aria-label={t(
+                    "profile.changeAvatar"
+                  )}
                   title={t(
                     "profile.changeAvatar"
                   )}
@@ -1440,6 +1453,228 @@ export default function ProfilePage(
             )}
           </div>
 
+          {/* Primary actions sit on the avatar's line, right-aligned,
+              the way every mature profile does it: the identity block
+              below then reads as one uninterrupted column of name,
+              handle, category, bio and metadata. Batch 06 had moved
+              these under the identity block, which left the whole band
+              beside a 112px avatar empty and pushed the counts down. */}
+          <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
+            {/* Share Profile */}
+
+            <button
+              onClick={
+                handleShareProfile
+              }
+              className="inline-flex items-center gap-1.5 h-11 px-4 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+            >
+              <Share2 className="w-4 h-4" />
+
+              <span>
+                {t(
+                  "profile.share"
+                )}
+              </span>
+            </button>
+
+            {isOwnProfile ? (
+              <Link
+                href="/settings"
+                className="inline-flex items-center gap-1.5 h-11 px-4 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+              >
+                <Pencil className="w-4 h-4" />
+
+                <span>
+                  {t(
+                    "profile.edit"
+                  )}
+                </span>
+              </Link>
+            ) : (
+              <>
+                {/* Follow */}
+
+                <button
+                  onClick={
+                    handleFollow
+                  }
+                  disabled={
+                    followLoading
+                  }
+                  className={`inline-flex items-center gap-1.5 h-11 px-5 rounded-full text-sm font-semibold transition whitespace-nowrap ${
+                    isFollowRequested
+                      ? "bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 cursor-default"
+                      : isFollowing
+                      ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                      : "bg-zrp-red text-white hover:bg-zrp-darkRed"
+                  }`}
+                >
+                  {followLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : isFollowRequested ? (
+                    "Requested"
+                  ) : isFollowing ? (
+                    <>
+                      <UserCheck className="w-4 h-4" />
+
+                      <span>
+                        {t(
+                          "action.following"
+                        )}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4" />
+
+                      <span>
+                        {t(
+                          "action.follow"
+                        )}
+                      </span>
+                    </>
+                  )}
+                </button>
+
+                {/* Message */}
+
+                <Link
+                  href={`/messages/${profile.username}`}
+                  className="inline-flex items-center gap-1.5 h-11 px-4 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+                >
+                  <MessageCircle className="w-4 h-4" />
+
+                  <span>
+                    {t(
+                      "action.message"
+                    )}
+                  </span>
+                </Link>
+
+                {/* Tip */}
+
+                {canReceiveTips && (
+                  <button
+                    onClick={() =>
+                      isNativeStoreRestrictedPayment("tips", isNativeApp())
+                        ? setShowTipNativeNotice(true)
+                        : setShowTipModal(true)
+                    }
+                    className="flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap bg-green-600 text-white hover:bg-green-700"
+                  >
+                    <DollarSign className="w-4 h-4" />
+
+                    <span>
+                      {t(
+                        "profile.tip"
+                      )}
+                    </span>
+                  </button>
+                )}
+
+                {/* More */}
+
+                <div
+                  className="relative"
+                  ref={
+                    moreMenuRef
+                  }
+                >
+                  <button
+                    onClick={() =>
+                      setMoreMenuOpen(
+                        !moreMenuOpen
+                      )
+                    }
+                    className="inline-flex items-center justify-center h-11 w-11 border border-gray-300 dark:border-gray-600 rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                    aria-label={t("profile.moreActions")}
+                    aria-haspopup="menu"
+                    aria-expanded={moreMenuOpen}
+                    title={t(
+                      "profile.moreActions"
+                    )}
+                  >
+                    <MoreHorizontal className="w-5 h-5" aria-hidden="true" />
+                  </button>
+
+                  {moreMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+                      {/* Mute */}
+
+                      <button
+                        onClick={() => {
+                          handleMute();
+                          setMoreMenuOpen(
+                            false
+                          );
+                        }}
+                        disabled={
+                          muteLoading
+                        }
+                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      >
+                        {muteLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : isMuted ? (
+                          <>
+                            <BellOff className="w-4 h-4" />
+
+                            {t(
+                              "profile.unmute"
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <Bell className="w-4 h-4" />
+
+                            {t(
+                              "profile.mute"
+                            )}
+                          </>
+                        )}
+                      </button>
+
+                      {/* Block */}
+
+                      <button
+                        onClick={() => {
+                          handleBlock();
+
+                          setMoreMenuOpen(
+                            false
+                          );
+                        }}
+                        disabled={
+                          blockLoading
+                        }
+                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition border-t border-gray-200 dark:border-gray-700"
+                      >
+                        {blockLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : isBlocked ? (
+                          <>
+                            <CheckCircle className="w-4 h-4" />
+
+                            {t(
+                              "profile.unblock"
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <Ban className="w-4 h-4" />
+
+                            {t(
+                              "profile.block"
+                            )}
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* ─────────────────────────────────────────────────────────
@@ -1471,11 +1706,15 @@ export default function ProfilePage(
             @{profile.username}
           </p>
 
-          {/* Professional category */}
+          {/* Category reads as a caption on the person, so it sits
+              with the rest of the metadata rather than between the
+              handle and the bio, where it interrupted the identity
+              line. Quiet, too: it is a fact about the account, not a
+              second brand accent competing with the actions above. */}
 
           {profile.category &&
             profile.showCategory && (
-              <p className="text-sm text-zrp-red font-medium mt-0.5">
+              <p className="mt-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                 {profile.category}
               </p>
             )}
@@ -1646,233 +1885,6 @@ export default function ProfilePage(
             </div>
           )}
 
-        {/* ─────────────────────────────────────────────────────────
-            ACTION ROW
-
-            Share / Edit / Follow / Message / Tip used to float in the
-            avatar's row, right-aligned against the top of a 112px
-            avatar that overlaps the banner - so their vertical position
-            was set by the avatar's overhang rather than by anything
-            about the actions themselves, and on a phone they wrapped
-            into the space beside it. They are now a row of their own,
-            after the identity block that says whose profile this is and
-            before the counts.
-        ───────────────────────────────────────────────────────── */}
-
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          {/* Share Profile */}
-
-          <button
-            onClick={
-              handleShareProfile
-            }
-            className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
-          >
-            <Share2 className="w-4 h-4" />
-
-            <span className="hidden sm:inline">
-              {t(
-                "profile.share"
-              )}
-            </span>
-          </button>
-
-          {isOwnProfile ? (
-            <Link
-              href="/settings"
-              className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
-            >
-              <Pencil className="w-4 h-4" />
-
-              <span className="hidden sm:inline">
-                {t(
-                  "profile.edit"
-                )}
-              </span>
-            </Link>
-          ) : (
-            <>
-              {/* Follow */}
-
-              <button
-                onClick={
-                  handleFollow
-                }
-                disabled={
-                  followLoading
-                }
-                className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap ${
-                  isFollowRequested
-                    ? "bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 cursor-default"
-                    : isFollowing
-                    ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
-                    : "bg-zrp-red text-white hover:bg-zrp-darkRed"
-                }`}
-              >
-                {followLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : isFollowRequested ? (
-                  "Requested"
-                ) : isFollowing ? (
-                  <>
-                    <UserCheck className="w-4 h-4" />
-
-                    <span className="hidden sm:inline">
-                      {t(
-                        "action.following"
-                      )}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="w-4 h-4" />
-
-                    <span>
-                      {t(
-                        "action.follow"
-                      )}
-                    </span>
-                  </>
-                )}
-              </button>
-
-              {/* Message */}
-
-              <Link
-                href={`/messages/${profile.username}`}
-                className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
-              >
-                <MessageCircle className="w-4 h-4" />
-
-                <span className="hidden sm:inline">
-                  {t(
-                    "action.message"
-                  )}
-                </span>
-              </Link>
-
-              {/* Tip */}
-
-              {canReceiveTips && (
-                <button
-                  onClick={() =>
-                    isNativeStoreRestrictedPayment("tips", isNativeApp())
-                      ? setShowTipNativeNotice(true)
-                      : setShowTipModal(true)
-                  }
-                  className="flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap bg-green-600 text-white hover:bg-green-700"
-                >
-                  <DollarSign className="w-4 h-4" />
-
-                  <span className="hidden sm:inline">
-                    {t(
-                      "profile.tip"
-                    )}
-                  </span>
-                </button>
-              )}
-
-              {/* More */}
-
-              <div
-                className="relative"
-                ref={
-                  moreMenuRef
-                }
-              >
-                <button
-                  onClick={() =>
-                    setMoreMenuOpen(
-                      !moreMenuOpen
-                    )
-                  }
-                  className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
-                  title={t(
-                    "profile.moreActions"
-                  )}
-                >
-                  <MoreHorizontal className="w-4 h-4" />
-                </button>
-
-                {moreMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
-                    {/* Mute */}
-
-                    <button
-                      onClick={() => {
-                        handleMute();
-                        setMoreMenuOpen(
-                          false
-                        );
-                      }}
-                      disabled={
-                        muteLoading
-                      }
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                    >
-                      {muteLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : isMuted ? (
-                        <>
-                          <BellOff className="w-4 h-4" />
-
-                          {t(
-                            "profile.unmute"
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          <Bell className="w-4 h-4" />
-
-                          {t(
-                            "profile.mute"
-                          )}
-                        </>
-                      )}
-                    </button>
-
-                    {/* Block */}
-
-                    <button
-                      onClick={() => {
-                        handleBlock();
-
-                        setMoreMenuOpen(
-                          false
-                        );
-                      }}
-                      disabled={
-                        blockLoading
-                      }
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition border-t border-gray-200 dark:border-gray-700"
-                    >
-                      {blockLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : isBlocked ? (
-                        <>
-                          <CheckCircle className="w-4 h-4" />
-
-                          {t(
-                            "profile.unblock"
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          <Ban className="w-4 h-4" />
-
-                          {t(
-                            "profile.block"
-                          )}
-                        </>
-                      )}
-                    </button>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-
           {/* Following / Followers */}
 
           <div className="flex gap-4 mt-2">
@@ -1930,20 +1942,30 @@ export default function ProfilePage(
               trailing emoji goes too: the heart glyph already says it,
               twice was decoration. text-gray-400 on white is 2.85:1 and
               failed AA, so the line sits at the gray-500 floor. */}
+          {/* charityContributionUsdc is a real figure - the sum of this
+              account's own completed tips' charityAmount (src/lib/charity.ts).
+              For an account that has never been tipped it is genuinely
+              0, and "Impact: $0.00 contributed to charity" on every such
+              profile turns a real distinction into noise. So the
+              per-account figure appears only when there is one; the 35%
+              line stays, because it is true of the platform regardless
+              of this account. */}
           <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-gray-500 dark:text-gray-400">
-            <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-              <Heart
-                className="w-4 h-4"
-                aria-hidden="true"
-              />
+            {charityContributionUsdc > 0 && (
+              <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                <Heart
+                  className="w-4 h-4"
+                  aria-hidden="true"
+                />
 
-              {t(
-                "profile.impact",
-                {
-                  amount: charityContributionUsdc.toFixed(2),
-                }
-              )}
-            </span>
+                {t(
+                  "profile.impact",
+                  {
+                    amount: charityContributionUsdc.toFixed(2),
+                  }
+                )}
+              </span>
+            )}
 
             <span>
               {t(
@@ -1953,19 +1975,48 @@ export default function ProfilePage(
                 }
               )}
             </span>
-
-            <Link
-              href={`/trust/${profile.username}`}
-              className="inline-flex items-center gap-1.5 whitespace-nowrap font-medium text-gray-700 dark:text-gray-200 underline-offset-4 hover:text-zrp-red hover:underline"
-            >
-              <ShieldCheck
-                className="w-4 h-4"
-                aria-hidden="true"
-              />
-
-              {t("profile.trustPassportTitle")}
-            </Link>
           </div>
+
+          {/* Trust Passport - a row of its own rather than a word in the
+              metadata line, because it is a destination, not a fact. It
+              stays quiet (a hairline, the page's own ground) but reads
+              unambiguously as something you open: full-width target, a
+              real chevron, and the signals it summarises are the
+              account's own - verification and how long it has been
+              here. Both come from data already on this page; nothing
+              here is a new or invented trust level. */}
+          <Link
+            href={`/trust/${profile.username}`}
+            className="mt-3 flex items-center gap-3 rounded-xl border border-gray-200 px-3 py-2.5 transition hover:border-gray-300 hover:bg-gray-50 dark:border-gray-800 dark:hover:border-gray-700 dark:hover:bg-white/[0.03]"
+          >
+            <ShieldCheck
+              className="w-5 h-5 shrink-0 text-gray-500 dark:text-gray-400"
+              aria-hidden="true"
+            />
+
+            <span className="min-w-0 flex-1">
+              <span className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
+                {t("profile.trustPassportTitle")}
+
+                {profile.badgeType && (
+                  <VerifiedBadge
+                    badgeType={
+                      profile.badgeType
+                    }
+                  />
+                )}
+              </span>
+
+              <span className="block truncate text-xs text-gray-500 dark:text-gray-400">
+                {trustSummary}
+              </span>
+            </span>
+
+            <ChevronRight
+              className="w-4 h-4 shrink-0 text-gray-400"
+              aria-hidden="true"
+            />
+          </Link>
 
           {/* ───────────────────────────────────────────────────────
               MILESTONE BADGES
@@ -2030,7 +2081,22 @@ export default function ProfilePage(
           TABS
       ─────────────────────────────────────────────────────────── */}
 
-      <div className="flex mt-4 px-4 border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
+      {/* Six tabs do not fit a 320px phone, and the row scrolled with
+          nothing to say so - Media and Analytics were simply unreachable
+          unless you happened to swipe a strip that looked static. The
+          fade at the trailing edge is the affordance; scroll-snap makes
+          the swipe land on a tab rather than between two. */}
+      <div className="relative mt-4">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent dark:from-zrp-deepBlack lg:hidden"
+        />
+
+        <div
+          role="tablist"
+          aria-label={t("profile.posts")}
+          className="flex px-4 border-b border-gray-200 dark:border-gray-800 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+        >
         {visibleTabs.map(
           (tab) => {
             const TabIcon =
@@ -2049,7 +2115,9 @@ export default function ProfilePage(
                     tab
                   )
                 }
-                className={`relative flex-shrink-0 px-4 py-3 text-sm font-medium transition hover:bg-gray-50 dark:hover:bg-gray-800/50 whitespace-nowrap ${
+                role="tab"
+                aria-selected={activeTab === tab}
+                className={`relative flex-shrink-0 snap-start min-h-[44px] px-4 py-3 text-sm font-medium transition hover:bg-gray-50 dark:hover:bg-gray-800/50 whitespace-nowrap ${
                   activeTab ===
                   tab
                     ? "text-gray-900 dark:text-white"
@@ -2077,6 +2145,7 @@ export default function ProfilePage(
             );
           }
         )}
+        </div>
       </div>
 
       {/* ───────────────────────────────────────────────────────────
