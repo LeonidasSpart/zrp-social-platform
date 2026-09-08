@@ -12,6 +12,7 @@ import {
 } from "@/lib/permissions";
 import { rateLimit } from "@/lib/rate-limit";
 import { renderArticleBody } from "@/lib/sanitize";
+import { resolveScheduledAt } from "@/lib/scheduled-time";
 
 // ─────────────────────────────────────────────────────────────
 // MEDIA HELPERS
@@ -508,6 +509,7 @@ export async function POST(
       quotePostId,
       poll,
       scheduledAt,
+      scheduledAtOffsetMinutes,
       commentsEnabled = true,
       type = "POST",
       company,
@@ -754,8 +756,9 @@ export async function POST(
 
       scheduledAt:
         scheduledAt
-          ? new Date(
-              scheduledAt
+          ? resolveScheduledAt(
+              scheduledAt,
+              scheduledAtOffsetMinutes
             )
           : null,
 

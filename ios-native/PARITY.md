@@ -572,30 +572,58 @@ browsing For You. Not built here.
 Found while auditing, per the isolation rules: reported here for their
 owners, not silently fixed from iOS.
 
-### F2. Scheduled posts are timed in the SERVER's timezone, not the author's — **OPEN**
+### F2. Scheduled posts are timed in the SERVER's timezone, not the author's — **FIXED server-side + web**
 
-`POST /api/posts` stores `new Date(scheduledAt)`, and the composer sends
-whatever `<input type="datetime-local">` produces: a naive
+`POST /api/posts` used to store a bare `new Date(scheduledAt)`, and the
+composer sent whatever `<input type="datetime-local">` produces: a naive
 `yyyy-MM-dd'T'HH:mm` with no offset. ECMAScript reads a date-time form
 without an offset as **local time**, which on the server means the
-server's zone (UTC in production), not the author's.
+server's zone (UTC in production), not the author's - an author in UTC+9
+scheduling for 09:00 got it published at 09:00 UTC (18:00 for them).
 
-So an author in UTC+9 who schedules a post for 09:00 gets it published at
-09:00 UTC — 18:00 where they are. The further an author is from UTC, the
-further off it is. This affects the **web** today; Android and iOS
-inherit it by sending the same shape.
+The route now resolves `scheduledAt` through `src/lib/scheduled-time.ts`'s
+`resolveScheduledAt(scheduledAt, scheduledAtOffsetMinutes)`, a drop-in
+replacement for the old bare `new Date(scheduledAt)` that recognizes two
+ways a caller can be unambiguous, on top of the exact legacy fallback for
+a caller that supplies neither:
 
-iOS deliberately sends the **same** naive wall-clock string rather than a
-correct ISO-8601 instant. Sending an offset would be more correct in
-isolation and would make the two clients disagree: the route reads an
-offset when one is present and falls back to the server's zone when it is
-not, so the same wall-clock time would schedule to two different instants
-depending on which app the author used. The composer's note therefore
-says the time is the one on the author's device rather than implying a
-guarantee the backend does not make.
+1. `scheduledAt` already carries a real offset or `Z` suffix (a genuine
+   ISO-8601 instant) - parsed directly, already correct regardless of
+   server timezone.
+2. `scheduledAt` is the naive wall-clock string, and the caller also sends
+   `scheduledAtOffsetMinutes` - the exact value
+   `Date.prototype.getTimezoneOffset()` reports in the author's own
+   timezone at that moment (e.g. UTC+9 reports `-540`). The route then
+   reads the wall-clock components as UTC and applies that offset to land
+   on the real instant.
 
-The fix belongs server-side (accept and store an instant, or take the
-author's zone alongside the wall-clock time). Not worked around from iOS.
+**Web is fixed**: the composer now sends `scheduledAtOffsetMinutes` from
+`new Date(scheduledAt).getTimezoneOffset()` (a value the browser already
+computes correctly, since parsing happens in the author's own real
+timezone there) alongside the unchanged naive string.
+
+**Android and iOS remain on the legacy path** (they still send only the
+naive string) and are therefore still affected exactly as before - this
+was never something either could work around on their own, and still
+isn't. Both now have a real, documented, already-live backend contract to
+adopt without needing any further backend change:
+
+- Android already tracks `scheduledAtMillis: Long?` internally
+  (`CreatePostViewModel.kt`) - `Instant.ofEpochMilli(scheduledAtMillis).toString()`
+  sent as `scheduledAt` directly satisfies path 1 above with no second
+  field needed at all.
+- iOS's `ComposeViewModel` already has a real `Date` before formatting it
+  through `WallClock.string(from:)` into the naive shape - switching that
+  one call to `ISO8601DateFormatter().string(from: scheduledAt)` would do
+  the same. Alternatively, either client can keep sending the naive
+  string and add `scheduledAtOffsetMinutes` (path 2) - e.g. Android's
+  `TimeZone.getDefault().getOffset(scheduledAtMillis) / 60000 * -1`, or
+  iOS's `-TimeZone.current.secondsFromGMT(for: scheduledAt) / 60` (the
+  sign flip in both matches `Date.prototype.getTimezoneOffset()`'s
+  convention: positive when local is *behind* UTC).
+
+Not worked around from iOS - this remains real, separate client-side work
+for whoever picks it up, now with no backend blocker.
 
 ### F1. `POST /api/music/artists` erased bio, avatar and banner — **RESOLVED**
 
