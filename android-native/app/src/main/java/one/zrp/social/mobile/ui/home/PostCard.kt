@@ -1,5 +1,7 @@
 package one.zrp.social.mobile.ui.home
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -23,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
@@ -34,6 +37,8 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Translate
@@ -80,7 +85,9 @@ import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.R
+import one.zrp.social.mobile.data.LinkPreviewRepository
 import one.zrp.social.mobile.network.ApiClient
+import one.zrp.social.mobile.network.LinkPreview
 import one.zrp.social.mobile.network.Poll
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.ReactionToggleRequest
@@ -113,6 +120,29 @@ private val imageExtensions = setOf(
 private val videoExtensions = setOf(
     "mp4", "webm", "mov", "avi", "mkv", "m4v", "3gp", "3g2", "ogv", "mpeg", "mpg", "m2v", "ts",
 )
+
+// Ported field-for-field from src/lib/link-preview-parse.ts's own
+// extractFirstUrl(): finds the first http(s)/www URL in free-form post
+// text, trims plain trailing sentence punctuation, then only strips a
+// trailing ')' when it isn't balanced by a still-open '(' earlier in
+// the same URL - the same bracket-balance heuristic that keeps a
+// Wikipedia-style .../wiki/Example_(disambiguation) link intact.
+private val FIRST_URL_REGEX = Regex("""(https?://\S+)|(www\.\S+)""")
+private val FIRST_URL_TRAILING_PUNCTUATION = Regex("""[.,!?;:'"\]}]+$""")
+
+private fun extractFirstUrl(content: String): String? {
+    val match = FIRST_URL_REGEX.find(content) ?: return null
+    var raw = match.value.replace(FIRST_URL_TRAILING_PUNCTUATION, "")
+
+    while (raw.endsWith(")")) {
+        val opens = raw.count { it == '(' }
+        val closes = raw.count { it == ')' }
+        if (closes <= opens) break
+        raw = raw.dropLast(1)
+    }
+
+    return if (raw.startsWith("http")) raw else "https://$raw"
+}
 
 private fun normalizeMediaType(value: String?): String =
     (value ?: "").trim().lowercase().replace(Regex("\\s+"), "")
@@ -274,6 +304,20 @@ fun PostCard(
     var lightboxIndex by remember(post.id) { mutableStateOf<Int?>(null) }
     val isVideo = remember(post.id, post.imageUrl, post.mediaType, post.imageUrls) { isVideoPost(post) }
 
+    // Matches PostCard.tsx's own `post.linkUrl || extractFirstUrl(post.content)` -
+    // linkUrl is a real column no current web usage ever sets, so this is
+    // effectively always the first URL found in the post's own text.
+    // linkPreviewFound is local, ephemeral per-card state (same category
+    // as translation/reactions above) tracking whether LinkPreviewBlock
+    // actually found something to show for it, so the matching raw URL
+    // token in the post's own LinkifiedText body is hidden only once
+    // there's really a card standing in for it - not merely because a
+    // URL-shaped candidate exists.
+    val previewUrl = remember(post.id, post.linkUrl, post.content) {
+        post.linkUrl ?: extractFirstUrl(post.content)
+    }
+    var linkPreviewFound by remember(post.id) { mutableStateOf(false) }
+
     suspend fun refreshReactions() {
         try {
             val currentUserId = runCatching { ApiClient.authApi.getSession().user?.id }.getOrNull()
@@ -409,6 +453,7 @@ fun PostCard(
                         onMentionClick = onAuthorClick,
                         onHashtagClick = onHashtagClick,
                         onNonLinkClick = { onClick(post.id) },
+                        suppressUrl = if (linkPreviewFound) previewUrl else null,
                         modifier = Modifier.padding(top = 4.dp),
                     )
                 }
@@ -440,6 +485,18 @@ fun PostCard(
                     PollBlock(
                         poll = poll,
                         onVote = { optionIndex -> onVoteClick(post.id, poll.id, optionIndex) },
+                    )
+                }
+
+                // Matches PostCard.tsx's own render gate exactly:
+                // !post.imageUrl && previewUrl - checked against
+                // imageUrl specifically, not the multi-image imageUrls
+                // array (a quirk of the reference component, not a
+                // native bug - see LinkPreviewBlock's own KDoc).
+                if (post.imageUrl == null && previewUrl != null) {
+                    LinkPreviewBlock(
+                        url = previewUrl,
+                        onLoaded = { found -> linkPreviewFound = found },
                     )
                 }
 
@@ -1092,6 +1149,150 @@ private fun PollOptionRow(
 private fun formatPollExpiry(iso: String): String {
     val millis = parseIsoMillis(iso) ?: return ""
     return DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault()).format(java.util.Date(millis))
+}
+
+// The native equivalent of LinkPreviewCard.tsx - same on-demand fetch
+// (GET /api/link-preview?url=), same "nothing usable found -> render
+// nothing, the plain URL text stays the fallback" behavior (never a
+// broken/empty card), same tap target (opens the real page in a
+// browser, never an in-app embed even for the video/YouTube case).
+// [onLoaded] mirrors the reference component's own onLoaded(found)
+// callback, which PostCard uses to decide whether to hide the matching
+// raw URL token in its own linkified text.
+@Composable
+private fun LinkPreviewBlock(url: String, onLoaded: (Boolean) -> Unit, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val repository = remember { LinkPreviewRepository() }
+    var preview by remember(url) { mutableStateOf<LinkPreview?>(null) }
+    var loading by remember(url) { mutableStateOf(true) }
+    var imageErrored by remember(url) { mutableStateOf(false) }
+
+    LaunchedEffect(url) {
+        loading = true
+        imageErrored = false
+        val data = repository.getLinkPreview(url).getOrNull()
+        val found = data != null && (data.title != null || data.image != null)
+        preview = if (found) data else null
+        loading = false
+        onLoaded(found)
+    }
+
+    if (loading) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(top = Spacing.sm)
+                .clip(MaterialTheme.shapes.medium)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1.91f)
+                    .background(MaterialTheme.colorScheme.surfaceContainerLow),
+            )
+        }
+        return
+    }
+
+    val data = preview ?: return
+
+    val domain = remember(data) {
+        data.siteName?.takeIf { it.isNotBlank() } ?: try {
+            java.net.URI(data.url).host?.removePrefix("www.") ?: ""
+        } catch (e: Exception) {
+            ""
+        }
+    }
+    // isVideo covers any publisher whose own page metadata says so, not
+    // just YouTube - matching LinkPreviewCard.tsx's own isVideo/isYouTube
+    // check exactly. This is purely a visual play-icon affordance; the
+    // card still only ever opens the real target page, never an embed.
+    val isYouTube = data.siteName == "YouTube"
+    val showPlayIcon = data.isVideo || isYouTube
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = Spacing.sm)
+            .clip(MaterialTheme.shapes.medium)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium)
+            .clickable {
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(data.url)))
+            },
+    ) {
+        if (data.image != null && !imageErrored) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1.91f)
+                    .background(MaterialTheme.colorScheme.surfaceContainerLow),
+            ) {
+                AsyncImage(
+                    model = data.image,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    onError = { imageErrored = true },
+                    modifier = Modifier.fillMaxSize(),
+                )
+                if (showPlayIcon) {
+                    Box(modifier = Modifier.matchParentSize(), contentAlignment = Alignment.Center) {
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(ZrpRed.copy(alpha = 0.9f))
+                                .padding(Spacing.sm),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.PlayArrow,
+                                contentDescription = null,
+                                tint = Color.White,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        Column(modifier = Modifier.padding(Spacing.sm)) {
+            if (domain.isNotEmpty()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Filled.OpenInNew,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(12.dp),
+                    )
+                    Text(
+                        text = domain.uppercase(Locale.getDefault()),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 4.dp),
+                    )
+                }
+            }
+            val title = data.title
+            if (!title.isNullOrBlank()) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    modifier = Modifier.padding(top = 2.dp),
+                )
+            }
+            val description = data.description
+            if (!description.isNullOrBlank()) {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    modifier = Modifier.padding(top = 2.dp),
+                )
+            }
+        }
+    }
 }
 
 // The one moment on this screen worth a deliberate flourish: liking a
