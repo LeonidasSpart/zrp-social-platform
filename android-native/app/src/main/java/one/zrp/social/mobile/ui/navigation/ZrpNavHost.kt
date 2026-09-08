@@ -32,6 +32,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import one.zrp.social.mobile.R
+import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.data.NotificationsRepository
 import one.zrp.social.mobile.network.MobileUser
 import one.zrp.social.mobile.ui.admin.AdminDashboardScreen
@@ -248,6 +249,16 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
     )
     val unreadCount by unreadBadgeViewModel.unreadCount.collectAsState()
 
+    // Same hoisting rationale as unreadBadgeViewModel above, for the
+    // Messages tab's own unread badge (GET /messages/unread) - the
+    // real cross-conversation total, distinct from each conversation
+    // row's own per-conversation unreadCount already shown inside
+    // MessagesScreen's own list.
+    val unreadMessagesBadgeViewModel: UnreadMessagesBadgeViewModel = viewModel(
+        factory = remember { UnreadMessagesBadgeViewModelFactory(MessagesRepository()) },
+    )
+    val unreadMessageCount by unreadMessagesBadgeViewModel.unreadCount.collectAsState()
+
     // Hoisted the same way as unreadBadgeViewModel above - playback and
     // the play queue need to survive navigating between Music screens
     // (Home, Queue, and later Artist/Album/Playlist/Discover/Liked/
@@ -262,8 +273,12 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
             ZrpBottomBar(
                 navController = navController,
                 unreadCount = unreadCount,
+                unreadMessageCount = unreadMessageCount,
                 onNotificationsSelected = { unreadBadgeViewModel.clear() },
-                onOtherTabSelected = { unreadBadgeViewModel.refresh() },
+                onOtherTabSelected = {
+                    unreadBadgeViewModel.refresh()
+                    unreadMessagesBadgeViewModel.refresh()
+                },
             )
         },
     ) { innerPadding ->
@@ -1090,6 +1105,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
 private fun ZrpBottomBar(
     navController: androidx.navigation.NavHostController,
     unreadCount: Int,
+    unreadMessageCount: Int,
     onNotificationsSelected: () -> Unit,
     onOtherTabSelected: () -> Unit,
 ) {
@@ -1150,11 +1166,16 @@ private fun ZrpBottomBar(
                             modifier = Modifier.scale(iconScale),
                         )
                     }
-                    if (destination == ZrpDestination.Notifications && unreadCount > 0) {
+                    val badgeCount = when (destination) {
+                        ZrpDestination.Notifications -> unreadCount
+                        ZrpDestination.Messages -> unreadMessageCount
+                        else -> 0
+                    }
+                    if (badgeCount > 0) {
                         BadgedBox(
                             badge = {
                                 Badge {
-                                    Text(if (unreadCount > 99) "99+" else unreadCount.toString())
+                                    Text(if (badgeCount > 99) "99+" else badgeCount.toString())
                                 }
                             },
                         ) { icon() }

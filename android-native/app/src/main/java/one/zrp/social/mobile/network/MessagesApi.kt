@@ -139,4 +139,16 @@ interface MessagesApi {
 
     @POST("messages/reaction/{id}")
     suspend fun toggleReaction(@Path("id") messageId: String, @Body request: MessageReactionRequest): MessageReactionResponse
+
+    // Backs the bottom nav's unread-messages badge - the real GET
+    // /messages/unread endpoint (a Prisma count of unread rows across
+    // every conversation), mirroring notifications/unread exactly.
+    // Reuses UnreadCountResponse - NotificationsApi.kt's own {count}
+    // shape, same package, no separate response type needed. Distinct
+    // from ConversationSummary.unreadCount (getConversations() above),
+    // which is the real per-conversation figure MessagesScreen's list
+    // rows render - this is the cross-conversation total the nav badge
+    // needs instead.
+    @GET("messages/unread")
+    suspend fun getUnreadCount(): UnreadCountResponse
 }
