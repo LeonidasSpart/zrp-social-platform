@@ -688,29 +688,32 @@ needed and none was added.
 `Instant.ofEpochMilli(scheduledAtMillis).toString()` sent as
 `scheduledAt` satisfies path 1 there with no second field either.
 
-### F3. A poll's `expiresAt` is still timed in the server's timezone — **OPEN (web/backend)**
+### F3. A poll's `expiresAt` is still timed in the server's timezone — **FIXED server-side + web**
 
 The F2 fix routed `scheduledAt` through `resolveScheduledAt`. A poll's
-end date in the same request was **not**: `POST /api/posts` still stores
-it with a bare `new Date(poll.expiresAt)`, and the poll branch reads no
+end date in the same request was **not**: `POST /api/posts` stored it
+with a bare `new Date(poll.expiresAt)`, and the poll branch read no
 offset field at all.
 
-So the original bug survives there in full. The web composer's poll end
+So the original bug survived there in full. The web composer's poll end
 date is an `<input type="datetime-local">` sending a naive string, which
-the server reads in its own zone - a poll an author in UTC+9 set to
-close at 23:00 actually closes at 23:00 UTC, nine hours late; west of
-UTC it closes early, cutting voting short.
+the server read in its own zone - a poll an author in UTC+9 set to close
+at 23:00 actually closed at 23:00 UTC, nine hours late; west of UTC it
+closed early, cutting voting short.
 
-**iOS is not affected**, because the same ISO-8601 instant it now sends
-for `scheduledAt` is sent here too, and a bare `new Date` parses an
-instant correctly - that is precisely why an instant was the right
-choice rather than the offset field.
+**iOS was not affected**, because the same ISO-8601 instant it sends for
+`scheduledAt` is sent here too, and a bare `new Date` parses an instant
+correctly - that is precisely why an instant was the right choice rather
+than the offset field.
 
-Reported rather than fixed: the remedy is one line in `src/app/api/posts`
-(route the poll's `expiresAt` through `resolveScheduledAt` as well) plus
-the matching `scheduledAtOffsetMinutes`-style field in the web composer,
-and it belongs with whoever owns that route and that component. iOS
-needed no backend change and made none.
+Fixed exactly the way this finding proposed: `POST /api/posts` now
+routes `poll.expiresAt` through `resolveScheduledAt(poll.expiresAt,
+poll.expiresAtOffsetMinutes)`, the same function `scheduledAt` already
+uses, and the web composer now sends a matching `expiresAtOffsetMinutes`
+(`new Date(pollExpiry).getTimezoneOffset()`) alongside the poll's naive
+`expiresAt` string. iOS needed no change and made none - its ISO-8601
+instant already satisfies path 1 of `resolveScheduledAt` with no second
+field.
 
 ### F4. Encoding a Swift `Date` into a request body silently sends a 2001 epoch — **FIXED (iOS)**
 

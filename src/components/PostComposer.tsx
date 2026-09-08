@@ -1423,6 +1423,7 @@ export default function PostComposer({
             question: string;
             options: string[];
             expiresAt?: string;
+            expiresAtOffsetMinutes?: number;
           }
         | null = null;
 
@@ -1458,6 +1459,20 @@ export default function PostComposer({
           expiresAt:
             pollExpiry ||
             undefined,
+
+          // Same F2 fix, applied to the poll's own end date - see
+          // ios-native/PARITY.md's F3. pollExpiry is the naive
+          // "yyyy-MM-ddTHH:mm" <input type="datetime-local"> string,
+          // with no timezone info; new Date(pollExpiry) here, in the
+          // browser, resolves it to the author's real intended instant,
+          // so its own getTimezoneOffset() is what the backend needs to
+          // reproduce that via resolveScheduledAt.
+          expiresAtOffsetMinutes:
+            pollExpiry
+              ? new Date(
+                  pollExpiry
+                ).getTimezoneOffset()
+              : undefined,
         };
       }
 
