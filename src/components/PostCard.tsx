@@ -1623,10 +1623,16 @@ export default function PostCard({
 
                 <Link
                   href={`/profile/${post.author.username}`}
-                  className="min-w-0"
+                  className="min-w-0 shrink-[6]"
                 >
-                  {/* Bounded rather than free: a pathologically long
-                      handle must not push the timestamp out either. */}
+                  {/* Flexbox shrinks siblings in proportion, not in
+                      order, so an equal-shrink handle took as much of
+                      the squeeze as the name and "Design Audit" came
+                      out as "Design..." at 390px. Weighting the handle
+                      6x makes it absorb the squeeze first: the name
+                      stays whole until the handle has nothing left to
+                      give. The max-width still stops a pathologically
+                      long handle from pushing the timestamp out. */}
                   <span className="block max-w-[10rem] truncate text-gray-500 dark:text-gray-400 text-sm hover:underline">
                     @{post.author.username}
                   </span>
