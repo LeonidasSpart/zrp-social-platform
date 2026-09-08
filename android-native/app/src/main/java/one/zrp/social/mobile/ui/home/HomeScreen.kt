@@ -1,5 +1,7 @@
 package one.zrp.social.mobile.ui.home
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -43,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -78,6 +81,8 @@ fun HomeScreen(
     val forYouState by viewModel.forYouState.collectAsState()
     val followingState by viewModel.followingState.collectAsState()
     val ownUserId by viewModel.ownUserId.collectAsState()
+    val ad by viewModel.ad.collectAsState()
+    val context = LocalContext.current
 
     val state = if (activeTab == FeedTab.FOR_YOU) forYouState else followingState
 
@@ -211,7 +216,7 @@ fun HomeScreen(
                     var editError by remember { mutableStateOf<String?>(null) }
 
                     LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
-                        itemsIndexed(state.posts, key = { _, post -> post.id }) { _, post ->
+                        itemsIndexed(state.posts, key = { _, post -> post.id }) { index, post ->
                             PostCard(
                                 post = post,
                                 onLikeClick = { postId -> viewModel.toggleLike(activeTab, postId) },
@@ -237,6 +242,29 @@ fun HomeScreen(
                                 onOpenVideoViewer = onOpenVideoViewer,
                                 onVoteClick = { postId, pollId, optionIndex -> viewModel.votePoll(postId, pollId, optionIndex) },
                             )
+
+                            // Same slot web's own page.tsx uses: right after
+                            // the 5th post (index 4), only once the feed
+                            // actually has more than 5 posts, on both tabs.
+                            if (ad != null && index == 4 && state.posts.size > 5) {
+                                val servedAd = ad
+                                if (servedAd != null) {
+                                    AdCard(
+                                        ad = servedAd,
+                                        onAuthorClick = onAuthorClick,
+                                        onImpression = { viewModel.logAdImpression() },
+                                        onAdClick = {
+                                            viewModel.logAdClick { redirectUrl ->
+                                                if (redirectUrl != null && (redirectUrl.startsWith("http://") || redirectUrl.startsWith("https://"))) {
+                                                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl)))
+                                                } else {
+                                                    onOpenComments(servedAd.post.id)
+                                                }
+                                            }
+                                        },
+                                    )
+                                }
+                            }
                         }
 
                         if (state.isLoadingMore) {

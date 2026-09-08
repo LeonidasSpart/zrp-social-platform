@@ -22,6 +22,7 @@
     <string name="settings_username_cooldown_banner">⏳ Podrás cambiar tu nombre de usuario de nuevo en %1$d días</string>
     <string name="settings_err_username_min_length">El nombre de usuario debe tener al menos 3 caracteres</string>
     <string name="settings_err_username_same">El nuevo nombre de usuario es igual al actual</string>
+    <string name="ads_sponsored_label">Patrocinado</string>
     <string name="settings_export_data_heading">Tus datos</string>
     <string name="settings_export_data">Exportar mis datos</string>
     <string name="settings_export_data_desc">Descarga una copia de tu perfil, publicaciones, comentarios, me gusta, republicaciones, marcadores, historias y listas de seguidores en formato JSON.</string>

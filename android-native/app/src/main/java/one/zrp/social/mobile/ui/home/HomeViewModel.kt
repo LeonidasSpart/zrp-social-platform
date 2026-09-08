@@ -7,10 +7,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import one.zrp.social.mobile.data.AdsRepository
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.PollVoteUser
 import one.zrp.social.mobile.network.PostsPage
+import one.zrp.social.mobile.network.ServedAd
 
 enum class FeedTab { FOR_YOU, FOLLOWING }
 
@@ -29,7 +31,10 @@ data class HomeUiState(
  * switching tabs and back doesn't re-fetch from scratch, matching how
  * the website's own tabs behave.
  */
-class HomeViewModel(private val repository: PostsRepository) : ViewModel() {
+class HomeViewModel(
+    private val repository: PostsRepository,
+    private val adsRepository: AdsRepository = AdsRepository(),
+) : ViewModel() {
     private val _forYou = MutableStateFlow(HomeUiState())
     private val _following = MutableStateFlow(HomeUiState())
 
@@ -47,11 +52,35 @@ class HomeViewModel(private val repository: PostsRepository) : ViewModel() {
     private val _ownUserId = MutableStateFlow<String?>(null)
     val ownUserId: StateFlow<String?> = _ownUserId.asStateFlow()
 
+    // One sponsored post per feed load, shown in both tabs (page.tsx's
+    // own ad slot isn't gated on feedType, unlike its For-You-only
+    // discovery modules) - fetched once here rather than per-tab, since
+    // it's the same single ad slot regardless of which tab is active.
+    private val _ad = MutableStateFlow<ServedAd?>(null)
+    val ad: StateFlow<ServedAd?> = _ad.asStateFlow()
+    private var adImpressionLogged = false
+
     init {
         refresh(FeedTab.FOR_YOU)
         viewModelScope.launch {
             repository.getOwnUserId().onSuccess { id -> _ownUserId.value = id }
         }
+        viewModelScope.launch { _ad.value = adsRepository.serveAd() }
+    }
+
+    // Deduped the same way ViewedPostsTracker dedupes post view counts -
+    // a boolean here rather than a whole tracker, since there's only
+    // ever one ad slot per HomeViewModel instance, not many.
+    fun logAdImpression() {
+        val campaignId = _ad.value?.campaignId ?: return
+        if (adImpressionLogged) return
+        adImpressionLogged = true
+        viewModelScope.launch { adsRepository.logImpression(campaignId) }
+    }
+
+    fun logAdClick(onResult: (redirectUrl: String?) -> Unit) {
+        val campaignId = _ad.value?.campaignId ?: return
+        viewModelScope.launch { onResult(adsRepository.logClick(campaignId)) }
     }
 
     fun selectTab(tab: FeedTab) {

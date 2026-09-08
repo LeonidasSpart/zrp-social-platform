@@ -22,6 +22,7 @@
     <string name="settings_username_cooldown_banner">⏳ Kullanıcı adınızı %1$d gün sonra tekrar değiştirebilirsiniz</string>
     <string name="settings_err_username_min_length">Kullanıcı adı en az 3 karakter olmalıdır</string>
     <string name="settings_err_username_same">Yeni kullanıcı adı mevcut kullanıcı adıyla aynı</string>
+    <string name="ads_sponsored_label">Sponsorlu</string>
     <string name="settings_export_data_heading">Verileriniz</string>
     <string name="settings_export_data">Verilerimi dışa aktar</string>
     <string name="settings_export_data_desc">Profilinizin, gönderilerinizin, yorumlarınızın, beğenilerinizin, repostlarınızın, yer imlerinizin, hikayelerinizin ve takip listelerinizin bir kopyasını JSON dosyası olarak indirin.</string>

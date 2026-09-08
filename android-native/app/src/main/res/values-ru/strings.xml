@@ -22,6 +22,7 @@
     <string name="settings_username_cooldown_banner">⏳ Вы сможете снова изменить имя пользователя через %1$d дн.</string>
     <string name="settings_err_username_min_length">Имя пользователя должно содержать минимум 3 символа</string>
     <string name="settings_err_username_same">Новое имя пользователя совпадает с текущим</string>
+    <string name="ads_sponsored_label">Спонсировано</string>
     <string name="settings_export_data_heading">Ваши данные</string>
     <string name="settings_export_data">Экспортировать мои данные</string>
     <string name="settings_export_data_desc">Скачайте копию своего профиля, публикаций, комментариев, лайков, репостов, закладок, историй и списков подписок в формате JSON.</string>
