@@ -1,4 +1,4 @@
-import { BadgeCheck, Newspaper, type LucideIcon } from "lucide-react";
+import { BadgeCheck, Newspaper, Rss, type LucideIcon } from "lucide-react";
 
 interface VerifiedBadgeProps {
   badgeType?: string | null;
@@ -17,6 +17,12 @@ const BADGE_STYLES: Record<
   // Newspaper glyph so it is never visually confused with the "team"
   // staff badge, even though both lean on ZRP red branding.
   journalist: { color: "#FF2D2D", label: "Verified Journalist", icon: Newspaper },
+  // ZRP News Network editorial feed (ZRP News World, ZRP Travel, ...).
+  // Same ZRP brand red as the journalist badge because both mark
+  // official ZRP editorial identities, but an Rss glyph so an automated
+  // feed is never mistaken for a verified human journalist. Its label
+  // says "automated" out loud - these accounts must never read as people.
+  editorial: { color: "#FF2D2D", label: "Official ZRP editorial feed (automated)", icon: Rss },
 };
 
 export default function VerifiedBadge({ badgeType, className = "" }: VerifiedBadgeProps) {

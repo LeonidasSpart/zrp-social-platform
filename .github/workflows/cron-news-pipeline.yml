@@ -1,0 +1,47 @@
+name: Cron - ZRP News Network pipeline
+
+# Calls GET /api/cron/news-pipeline on a schedule. One call runs one
+# editorial cycle: it publishes whatever the previous cycle scheduled
+# and is now due, polls the sources that are due, writes and validates
+# summaries, and plans the next window's publications.
+#
+# Every two hours matches the "approximately every 2-3 hours" brief.
+# Note that this is the *cycle* cadence, not a per-feed posting cadence:
+# each cycle spreads its publications across the following ~150 minutes
+# and every feed still has its own minimum gap and daily cap, so no feed
+# posts every two hours (see src/lib/news/scheduler.ts).
+#
+# Nothing is published until BOTH the CRON_SECRET repository secret
+# exists AND an admin has un-paused the automation in
+# /admin/news-network. Until then this workflow either fails loudly with
+# a 401 or returns "Automation is paused" - it can never quietly start
+# posting on its own.
+#
+# Follows the same in-repo, code-reviewable pattern as
+# cron-delete-scheduled-accounts.yml, and does not touch however the
+# other cron routes are scheduled in the Railway dashboard.
+on:
+  schedule:
+    - cron: "23 */2 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+# A cycle takes its own distributed lock, but there is no reason to have
+# two runs queued against each other in the first place.
+concurrency:
+  group: zrp-news-pipeline
+  cancel-in-progress: false
+
+jobs:
+  cycle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run one ZRP News Network editorial cycle
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail-with-body --silent --show-error --max-time 300 \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://zrp.one/api/cron/news-pipeline"
