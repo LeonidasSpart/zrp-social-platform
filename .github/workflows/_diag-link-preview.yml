@@ -10,18 +10,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: DNS resolution of www.20min.ch
-        run: |
-          echo "--- getent ahosts ---"
-          getent ahosts www.20min.ch || true
-          echo "--- node dns.lookup(all:true) ---"
-          node -e "require('dns').lookup('www.20min.ch',{all:true,verbatim:true},(e,a)=>console.log(e||a))"
+      - name: npm ci
+        run: npm ci
       - name: Run the REAL repo safeFetch + parseHtmlMetadata against the real URL
         run: |
-          npm install --no-save tsx 2>&1 | tail -5
-          cat > /tmp/probe.ts << 'TSEOF'
-          import { safeFetch } from "../src/lib/ssrf-guard";
-          import { parseHtmlMetadata } from "../src/lib/link-preview-parse";
+          cat > diag-probe.ts << 'TSEOF'
+          import { safeFetch } from "./src/lib/ssrf-guard";
+          import { parseHtmlMetadata } from "./src/lib/link-preview-parse";
 
           async function main() {
             const url = "https://www.20min.ch/fr/story/football-atteinte-d-un-cancer-elle-voit-son-club-faire-un-geste-emouvant-103629744";
@@ -37,17 +32,18 @@ jobs:
                 },
               });
               console.log("STATUS", res.statusCode);
-              console.log("HEADERS", JSON.stringify(res.headers));
+              console.log("CONTENT-TYPE", res.headers["content-type"]);
+              console.log("CONTENT-ENCODING", res.headers["content-encoding"]);
               console.log("BODY_LENGTH", res.body.length);
               const html = res.body.toString("utf-8");
-              console.log("BODY_PREFIX", html.slice(0, 300));
+              console.log("BODY_PREFIX", JSON.stringify(html.slice(0, 200)));
               const preview = parseHtmlMetadata(html, url);
               console.log("PARSED", JSON.stringify(preview));
             } catch (e: any) {
-              console.log("THREW", e?.name, e?.message, e?.stack);
+              console.log("THREW", e?.name, e?.message);
+              console.log(e?.stack);
             }
           }
           main();
           TSEOF
-          npx tsx /tmp/probe.ts
-        working-directory: .
+          npx tsx diag-probe.ts
