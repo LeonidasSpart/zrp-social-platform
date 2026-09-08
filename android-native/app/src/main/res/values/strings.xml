@@ -145,6 +145,11 @@
     <string name="message_attach_image_cd">Attach image</string>
     <string name="message_attach_video_cd">Attach video</string>
     <string name="message_attach_document_cd">Attach document</string>
+    <string name="message_record_voice_cd">Record a voice message</string>
+    <string name="chat_cancel_recording_cd">Cancel</string>
+    <string name="chat_recording_label">Recording...</string>
+    <string name="chat_send_voice_message_cd">Send</string>
+    <string name="chat_err_mic_access">Couldn\'t access your microphone. Please check your permissions.</string>
     <string name="chat_attachment_fallback">Document</string>
     <string name="comment_post_cd">Post comment</string>
     <string name="action_show_password">Show password</string>

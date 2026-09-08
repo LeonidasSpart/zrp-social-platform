@@ -133,6 +133,11 @@
     <string name="message_attach_image_cd">Bild anhängen</string>
     <string name="message_attach_video_cd">Video anhängen</string>
     <string name="message_attach_document_cd">Dokument anhängen</string>
+    <string name="message_record_voice_cd">Sprachnachricht aufnehmen</string>
+    <string name="chat_cancel_recording_cd">Abbrechen</string>
+    <string name="chat_recording_label">Aufnahme läuft...</string>
+    <string name="chat_send_voice_message_cd">Senden</string>
+    <string name="chat_err_mic_access">Zugriff auf das Mikrofon nicht möglich. Bitte überprüfe deine Berechtigungen.</string>
     <string name="chat_attachment_fallback">Dokument</string>
     <string name="comment_post_cd">Kommentar posten</string>
     <string name="action_show_password">Passwort anzeigen</string>

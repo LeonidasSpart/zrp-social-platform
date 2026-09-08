@@ -133,6 +133,11 @@
     <string name="message_attach_image_cd">إرفاق صورة</string>
     <string name="message_attach_video_cd">إرفاق فيديو</string>
     <string name="message_attach_document_cd">إرفاق مستند</string>
+    <string name="message_record_voice_cd">تسجيل رسالة صوتية</string>
+    <string name="chat_cancel_recording_cd">إلغاء</string>
+    <string name="chat_recording_label">جارٍ التسجيل...</string>
+    <string name="chat_send_voice_message_cd">إرسال</string>
+    <string name="chat_err_mic_access">تعذر الوصول إلى الميكروفون. يرجى التحقق من الأذونات.</string>
     <string name="chat_attachment_fallback">مستند</string>
     <string name="comment_post_cd">نشر التعليق</string>
     <string name="action_show_password">إظهار كلمة المرور</string>

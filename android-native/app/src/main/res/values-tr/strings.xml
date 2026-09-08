@@ -133,6 +133,11 @@
     <string name="message_attach_image_cd">Görsel ekle</string>
     <string name="message_attach_video_cd">Video ekle</string>
     <string name="message_attach_document_cd">Belge ekle</string>
+    <string name="message_record_voice_cd">Sesli mesaj kaydet</string>
+    <string name="chat_cancel_recording_cd">İptal</string>
+    <string name="chat_recording_label">Kaydediliyor...</string>
+    <string name="chat_send_voice_message_cd">Gönder</string>
+    <string name="chat_err_mic_access">Mikrofonunuza erişilemedi. Lütfen izinlerinizi kontrol edin.</string>
     <string name="chat_attachment_fallback">Belge</string>
     <string name="comment_post_cd">Yorumu gönder</string>
     <string name="action_show_password">Şifreyi göster</string>
