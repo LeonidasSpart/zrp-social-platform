@@ -27,12 +27,54 @@ import type { GroundednessReport, NewsLanguage } from "./types";
  * There is no placeholder text anywhere in this file.
  */
 
-// Same lazy-init pattern as ZRP AI and ZRP PLAY: never construct the
-// client at module/build time, only per call.
-function getModelClient(): OpenAI {
-  const apiKey = process.env.DEEPSEEK_API_KEY;
+/*
+ * ⚠️ Request bounds.
+ *
+ * The OpenAI SDK defaults to a 600s timeout and 2 retries - up to 1800s
+ * for a single call. The cron route that drives this pipeline has a 300s
+ * budget, and one cycle can make dozens of calls, so on the SDK defaults
+ * a single hung request runs the platform's function timeout out: stage
+ * 5 never executes, nothing publishes even though summaries were ready,
+ * the NewsJobRun is left RUNNING forever, and the dashboard reports a
+ * cycle that never finished.
+ *
+ * These bounds are sized against that 300s budget and are asserted
+ * against it in __tests__/generate.http.integration.test.ts.
+ */
+export const NEWS_MODEL_TIMEOUT_MS = 45_000;
+
+// One retry, not two: a 429 or a blip deserves a second attempt, a third
+// just spends the cycle's remaining budget.
+export const NEWS_MODEL_MAX_RETRIES = 1;
+
+/**
+ * Builds the model client.
+ *
+ * Same lazy-init pattern as ZRP AI and ZRP PLAY: never constructed at
+ * module/build time, only per call, so a missing DEEPSEEK_API_KEY can
+ * never break a build.
+ *
+ * `baseURL` is overridable so tests can point the real SDK at a local
+ * OpenAI-compatible endpoint and exercise genuine HTTP behaviour
+ * (timeouts, 5xx, malformed bodies) with the exact production timeout
+ * and retry configuration.
+ */
+export function createNewsModelClient(
+  options: { apiKey?: string; baseURL?: string } = {}
+): OpenAI {
+  const apiKey = options.apiKey ?? process.env.DEEPSEEK_API_KEY;
   if (!apiKey) throw new Error("DEEPSEEK_API_KEY is not configured");
-  return new OpenAI({ apiKey, baseURL: "https://api.deepseek.com" });
+
+  return new OpenAI({
+    apiKey,
+    baseURL: options.baseURL ?? "https://api.deepseek.com",
+    timeout: NEWS_MODEL_TIMEOUT_MS,
+    maxRetries: NEWS_MODEL_MAX_RETRIES,
+  });
+}
+
+function getModelClient(): OpenAI {
+  return createNewsModelClient();
 }
 
 export const NEWS_MODEL = "deepseek-v4-flash";
@@ -195,7 +237,17 @@ export interface RenditionOutcome {
   rendition: GeneratedRendition | null;
   error: string | null;
   validation: GroundednessReport | null;
+  /**
+   * True when this language was never attempted because the cycle ran
+   * out of its generation budget. Distinct from a failure: the story is
+   * left alone so the next cycle can pick it up, rather than being
+   * rejected for something it did not do wrong.
+   */
+  skippedForBudget?: boolean;
 }
+
+export const BUDGET_EXHAUSTED_MESSAGE =
+  "Skipped: the cycle's generation budget was exhausted before this language was attempted";
 
 /**
  * Generates renditions for several languages.
@@ -208,7 +260,7 @@ export interface RenditionOutcome {
 export async function generateRenditions(
   languages: NewsLanguage[],
   context: GenerationContext,
-  options: { client?: OpenAI } = {}
+  options: { client?: OpenAI; deadline?: number } = {}
 ): Promise<RenditionOutcome[]> {
   const ordered = [
     ...languages.filter((language) => language === "en"),
@@ -216,8 +268,23 @@ export async function generateRenditions(
   ];
 
   const outcomes: RenditionOutcome[] = [];
+  const { deadline } = options;
 
   for (const language of ordered) {
+    // Checked before each language, not just before each story: four
+    // languages at the per-request timeout would otherwise be able to
+    // overrun the whole cycle on their own.
+    if (deadline !== undefined && Date.now() >= deadline) {
+      outcomes.push({
+        language,
+        rendition: null,
+        error: BUDGET_EXHAUSTED_MESSAGE,
+        validation: null,
+        skippedForBudget: true,
+      });
+      continue;
+    }
+
     try {
       const rendition = await generateRendition(language, context, options);
       outcomes.push({ language, rendition, error: null, validation: rendition.validation });
@@ -237,7 +304,8 @@ export async function generateRenditions(
           outcomes.push({
             language: remaining,
             rendition: null,
-            error: "Skipped: the English summary failed validation, so no localisation was attempted",
+            error:
+              "Skipped: the English summary failed validation, so no localisation was attempted",
             validation: null,
           });
         }

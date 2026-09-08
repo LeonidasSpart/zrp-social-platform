@@ -3,7 +3,12 @@ import { prisma } from "@/lib/db";
 import { acquirePipelineLock } from "./lock";
 import { buildStoryIndex, expireStaleStories, ingestSource, isSourceDue } from "./ingest";
 import { MAX_STORY_AGE_HOURS, MIN_PUBLISHABLE_SCORE } from "./ranking";
-import { generateRenditions, type GenerationContext } from "./generate";
+import {
+  generateRenditions,
+  NEWS_MODEL_MAX_RETRIES,
+  NEWS_MODEL_TIMEOUT_MS,
+  type GenerationContext,
+} from "./generate";
 import { isNewsLanguage, type NewsLanguage } from "./config";
 import { CYCLE_WINDOW_MINUTES, getAutomationSettings, nextCycleAt, toSchedulerSettings } from "./settings";
 import { planCycle, storyLanguageKey, type SchedulableFeed, type SchedulableStory } from "./scheduler";
@@ -40,6 +45,21 @@ const MAX_SOURCES_PER_CYCLE = 40;
 /** Stories summarised per cycle, bounding model spend per run. */
 const MAX_GENERATIONS_PER_CYCLE = 10;
 
+/*
+ * Wall-clock budget for the summarisation stage.
+ *
+ * The cron route has a 300s platform budget. Summarisation is the only
+ * unbounded-ish stage (dozens of model calls), and if it consumes the
+ * whole budget the function is killed before stage 5 ever runs - so a
+ * cycle that generated perfectly good summaries publishes nothing, and
+ * its NewsJobRun is left RUNNING forever with no error recorded.
+ *
+ * Capping it leaves headroom for planning and publishing. Stories not
+ * reached stay NEW and are picked up by the next cycle: nothing is lost,
+ * and nothing is rejected for a delay that was not its fault.
+ */
+const GENERATION_BUDGET_MS = 180_000;
+
 export interface CycleResult {
   ran: boolean;
   jobRunId: string | null;
@@ -55,6 +75,11 @@ export interface CycleResult {
   publishFailures: number;
   scheduled: number;
   storiesExpired: number;
+  /**
+   * True when summarisation hit its wall-clock budget. Stories it did not
+   * reach are untouched and will be picked up next cycle.
+   */
+  generationBudgetExhausted: boolean;
 }
 
 function emptyResult(reason: string): CycleResult {
@@ -73,6 +98,7 @@ function emptyResult(reason: string): CycleResult {
     publishFailures: 0,
     scheduled: 0,
     storiesExpired: 0,
+    generationBudgetExhausted: false,
   };
 }
 
@@ -169,7 +195,16 @@ export async function runPipelineCycle(options: RunCycleOptions = {}): Promise<C
         include: { references: { include: { source: true } } },
       });
 
+      const generationDeadline = Date.now() + GENERATION_BUDGET_MS;
+
       for (const story of candidates) {
+        if (Date.now() >= generationDeadline) {
+          // Out of budget. Remaining candidates keep status NEW and are
+          // the next cycle's first pick.
+          result.generationBudgetExhausted = true;
+          break;
+        }
+
         // Travel stories are the ones that must exist in all four
         // languages. Everything else is written in the languages its
         // own audience reads, so we are not paying to translate a local
@@ -193,11 +228,22 @@ export async function runPipelineCycle(options: RunCycleOptions = {}): Promise<C
           ),
         };
 
-        const outcomes = await generateRenditions(targetLanguages, context);
+        const outcomes = await generateRenditions(targetLanguages, context, {
+          deadline: generationDeadline,
+        });
 
         let anyReady = false;
+        let anySkippedForBudget = false;
 
         for (const outcome of outcomes) {
+          if (outcome.skippedForBudget) {
+            anySkippedForBudget = true;
+            result.generationBudgetExhausted = true;
+            // Nothing recorded: an unattempted language is not a failed
+            // one, and must not show up in the failure counters.
+            continue;
+          }
+
           const data = outcome.rendition
             ? {
                 headline: outcome.rendition.headline,
@@ -230,16 +276,26 @@ export async function runPipelineCycle(options: RunCycleOptions = {}): Promise<C
           }
         }
 
-        await db.newsStory.update({
-          where: { id: story.id },
-          data: anyReady
-            ? { status: "READY" }
-            : {
-                status: "REJECTED",
-                rejectionReason:
-                  "No summary passed groundedness validation in any enabled language",
-              },
-        });
+        if (anyReady) {
+          await db.newsStory.update({
+            where: { id: story.id },
+            data: { status: "READY" },
+          });
+        } else if (anySkippedForBudget) {
+          // Ran out of time, not out of quality. Leave it NEW so the next
+          // cycle retries it rather than rejecting a story that was never
+          // actually assessed.
+          result.generationBudgetExhausted = true;
+        } else {
+          await db.newsStory.update({
+            where: { id: story.id },
+            data: {
+              status: "REJECTED",
+              rejectionReason:
+                "No summary passed groundedness validation in any enabled language",
+            },
+          });
+        }
       }
     }
 
@@ -359,7 +415,13 @@ export async function runPipelineCycle(options: RunCycleOptions = {}): Promise<C
         renditionsFailed: result.renditionsFailed,
         published: result.published,
         publishFailures: result.publishFailures,
-        details: { scheduled: result.scheduled, storiesExpired: result.storiesExpired },
+        details: {
+          scheduled: result.scheduled,
+          storiesExpired: result.storiesExpired,
+          generationBudgetExhausted: result.generationBudgetExhausted,
+          modelTimeoutMs: NEWS_MODEL_TIMEOUT_MS,
+          modelMaxRetries: NEWS_MODEL_MAX_RETRIES,
+        },
       },
     });
 
