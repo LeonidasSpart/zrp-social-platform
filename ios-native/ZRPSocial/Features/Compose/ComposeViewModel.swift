@@ -225,7 +225,7 @@ final class ComposeViewModel: ObservableObject {
             options: options
                 .prefix(Self.pollMaxOptions)
                 .map { String($0.prefix(Self.pollOptionMaxLength)) },
-            expiresAt: pollExpiry
+            expiresAt: pollExpiry.map(WallClock.string(from:))
         )
     }
 
