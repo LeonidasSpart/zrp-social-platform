@@ -131,6 +131,9 @@
     <string name="gif_search_placeholder">Cari GIF...</string>
     <string name="action_clear">Hapus</string>
     <string name="message_attach_image_cd">Lampirkan gambar</string>
+    <string name="message_attach_video_cd">Lampirkan video</string>
+    <string name="message_attach_document_cd">Lampirkan dokumen</string>
+    <string name="chat_attachment_fallback">Dokumen</string>
     <string name="comment_post_cd">Kirim komentar</string>
     <string name="action_show_password">Tampilkan kata sandi</string>
     <string name="action_hide_password">Sembunyikan kata sandi</string>

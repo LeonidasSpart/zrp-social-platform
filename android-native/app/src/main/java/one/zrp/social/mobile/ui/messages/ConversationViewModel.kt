@@ -42,18 +42,22 @@ import org.json.JSONObject
 private const val POLL_INTERVAL_MS = 5000L
 
 /**
- * An image-attachment problem the screen needs to show translated -
- * kept separate from a plain string the same way CallViewModel's own
+ * An attachment problem the screen needs to show translated - kept
+ * separate from a plain string the same way CallViewModel's own
  * CallError is, since a plain ViewModel can't resolve Android string
  * resources itself; ConversationScreen maps each case to its real,
- * translated chat.err* string (see ChatInterface.tsx's own
- * handleImageUpload, which this mirrors exactly: same 4MB cap, same
- * JPEG/PNG/GIF/WebP allow-list, same chatImage UploadThing router).
+ * translated chat.err* string. Shared across image/video/document
+ * attachments rather than one sealed class per kind: web's own
+ * handleDocumentUpload/handleVideoUpload (ChatInterface.tsx) reuse the
+ * exact same chat.errFileTooLarge/errInvalidFileType alert text written
+ * for images (down to the literal "JPEG, PNG, GIF, and WebP" wording)
+ * for every attachment kind's too-large/wrong-type case - a real,
+ * confirmed web quirk this mirrors rather than invents.
  */
-sealed class ChatImageError {
-    data class FileTooLarge(val maxMb: Int) : ChatImageError()
-    object InvalidType : ChatImageError()
-    data class UploadFailed(val detail: String) : ChatImageError()
+sealed class ChatAttachmentError {
+    data class FileTooLarge(val maxMb: Int) : ChatAttachmentError()
+    object InvalidType : ChatAttachmentError()
+    data class UploadFailed(val detail: String) : ChatAttachmentError()
 }
 
 data class ConversationUiState(
@@ -75,13 +79,18 @@ data class ConversationUiState(
     // same as ChatInterface.tsx itself has no receiver identity beyond
     // its own receiverId/receiverName/receiverAvatar props until then.
     val partner: PostAuthor? = null,
-    // Mirrors ChatInterface.tsx's own uploadingImage/handleImageUpload -
-    // the picked image uploads immediately (not staged for send()) and
-    // sends itself as soon as the upload resolves, same as web does via
-    // useUploadThing's onClientUploadComplete -> sendMessage("", url).
-    val isUploadingImage: Boolean = false,
-    val imageUploadProgress: Float = 0f,
-    val imageError: ChatImageError? = null,
+    // Mirrors ChatInterface.tsx's own uploadingImage flag - a single
+    // shared in-flight/progress/error trio, not one set per attachment
+    // kind, since web itself calls the same setUploadingImage(true) from
+    // handleImageUpload/handleDocumentUpload/handleVideoUpload alike
+    // (there's no separate uploadingVideo/uploadingDocument state on
+    // web to mirror). The picked file uploads immediately (not staged
+    // for send()) and sends itself as soon as the upload resolves, same
+    // as web does via useUploadThing's onClientUploadComplete ->
+    // sendMessage(content, url).
+    val isUploadingAttachment: Boolean = false,
+    val attachmentUploadProgress: Float = 0f,
+    val attachmentError: ChatAttachmentError? = null,
 )
 
 /**
@@ -355,8 +364,8 @@ class ConversationViewModel(
         }
     }
 
-    fun dismissImageError() {
-        _state.update { it.copy(imageError = null) }
+    fun dismissAttachmentError() {
+        _state.update { it.copy(attachmentError = null) }
     }
 
     /**
@@ -366,61 +375,140 @@ class ConversationViewModel(
      * its own image-only message the moment the upload resolves,
      * matching web's own onClientUploadComplete -> sendMessage("", url).
      */
-    fun onImagePicked(
+    fun onImagePicked(contentResolver: ContentResolver, uri: Uri, fileName: String, mimeType: String, size: Long) {
+        val validTypes = setOf("image/jpeg", "image/png", "image/gif", "image/webp")
+        uploadAttachment(
+            contentResolver = contentResolver,
+            uri = uri,
+            fileName = fileName,
+            mimeType = mimeType,
+            size = size,
+            validTypes = validTypes,
+            maxBytes = 4L * 1024 * 1024,
+            maxMb = 4,
+            slug = "chatImage",
+            content = "",
+        )
+    }
+
+    /**
+     * Mirrors ChatInterface.tsx's own handleVideoUpload exactly - same
+     * 32MB cap, same mp4/webm/quicktime/x-m4v allow-list, uploaded
+     * through the same real chatVideo UploadThing router - then sent as
+     * a "🎬 Video" message, the same content-prefix convention the real
+     * POST /api/messages route relies on to tell attachment kinds apart
+     * (there's no separate `type` field - see this ViewModel's own
+     * MessageBubble rendering counterpart in ConversationScreen).
+     */
+    fun onVideoPicked(contentResolver: ContentResolver, uri: Uri, fileName: String, mimeType: String, size: Long) {
+        val validTypes = setOf("video/mp4", "video/webm", "video/quicktime", "video/x-m4v")
+        uploadAttachment(
+            contentResolver = contentResolver,
+            uri = uri,
+            fileName = fileName,
+            mimeType = mimeType,
+            size = size,
+            validTypes = validTypes,
+            maxBytes = 32L * 1024 * 1024,
+            maxMb = 32,
+            slug = "chatVideo",
+            content = "🎬 Video",
+        )
+    }
+
+    /**
+     * Mirrors ChatInterface.tsx's own handleDocumentUpload exactly -
+     * same 8MB cap, same pdf/msword/docx/xls/xlsx/ppt/pptx/plain-text
+     * allow-list, uploaded through the same real chatFile UploadThing
+     * router - then sent as a "📎 <filename>" message, matching web's
+     * own content prefix exactly.
+     */
+    fun onDocumentPicked(contentResolver: ContentResolver, uri: Uri, fileName: String, mimeType: String, size: Long) {
+        val validTypes = setOf(
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.ms-powerpoint",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "text/plain",
+        )
+        uploadAttachment(
+            contentResolver = contentResolver,
+            uri = uri,
+            fileName = fileName,
+            mimeType = mimeType,
+            size = size,
+            validTypes = validTypes,
+            maxBytes = 8L * 1024 * 1024,
+            maxMb = 8,
+            slug = "chatFile",
+            content = "📎 $fileName",
+        )
+    }
+
+    private fun uploadAttachment(
         contentResolver: ContentResolver,
         uri: Uri,
         fileName: String,
         mimeType: String,
         size: Long,
+        validTypes: Set<String>,
+        maxBytes: Long,
+        maxMb: Int,
+        slug: String,
+        content: String,
     ) {
-        val validTypes = setOf("image/jpeg", "image/png", "image/gif", "image/webp")
         if (mimeType !in validTypes) {
-            _state.update { it.copy(imageError = ChatImageError.InvalidType) }
+            _state.update { it.copy(attachmentError = ChatAttachmentError.InvalidType) }
             return
         }
-        val maxBytes = 4L * 1024 * 1024
         if (size > maxBytes) {
-            _state.update { it.copy(imageError = ChatImageError.FileTooLarge(4)) }
+            _state.update { it.copy(attachmentError = ChatAttachmentError.FileTooLarge(maxMb)) }
             return
         }
 
-        _state.update { it.copy(isUploadingImage = true, imageUploadProgress = 0f, imageError = null, error = null) }
+        _state.update { it.copy(isUploadingAttachment = true, attachmentUploadProgress = 0f, attachmentError = null, error = null) }
         viewModelScope.launch {
             mediaUploadRepository.upload(
-                slug = "chatImage",
+                slug = slug,
                 contentResolver = contentResolver,
                 uri = uri,
                 fileName = fileName,
                 mimeType = mimeType,
                 size = size,
-                onProgress = { progress -> _state.update { it.copy(imageUploadProgress = progress) } },
+                onProgress = { progress -> _state.update { it.copy(attachmentUploadProgress = progress) } },
             ).onSuccess { uploaded ->
-                _state.update { it.copy(isUploadingImage = false) }
-                sendImage(uploaded.url)
+                _state.update { it.copy(isUploadingAttachment = false) }
+                sendAttachment(content, uploaded.url)
             }.onFailure { error ->
                 _state.update {
-                    it.copy(isUploadingImage = false, imageError = ChatImageError.UploadFailed(error.message ?: "Unknown error"))
+                    it.copy(
+                        isUploadingAttachment = false,
+                        attachmentError = ChatAttachmentError.UploadFailed(error.message ?: "Unknown error"),
+                    )
                 }
             }
         }
     }
 
-    private fun sendImage(imageUrl: String) {
+    private fun sendAttachment(content: String, imageUrl: String) {
         viewModelScope.launch {
-            repository.sendMessage(receiverId = partnerId, content = "", imageUrl = imageUrl)
+            repository.sendMessage(receiverId = partnerId, content = content, imageUrl = imageUrl)
                 .onSuccess { message ->
                     _state.update { it.copy(messages = it.messages + message) }
                     socket?.emit(
                         "send-message",
                         JSONObject()
                             .put("receiverId", partnerId)
-                            .put("content", "")
+                            .put("content", content)
                             .put("messageId", message.id),
                     )
                 }
                 .onFailure { error ->
                     _state.update {
-                        it.copy(imageError = ChatImageError.UploadFailed(error.message ?: "Unknown error"))
+                        it.copy(attachmentError = ChatAttachmentError.UploadFailed(error.message ?: "Unknown error"))
                     }
                 }
         }

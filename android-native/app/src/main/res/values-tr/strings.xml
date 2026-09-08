@@ -131,6 +131,9 @@
     <string name="gif_search_placeholder">GIF ara...</string>
     <string name="action_clear">Temizle</string>
     <string name="message_attach_image_cd">Görsel ekle</string>
+    <string name="message_attach_video_cd">Video ekle</string>
+    <string name="message_attach_document_cd">Belge ekle</string>
+    <string name="chat_attachment_fallback">Belge</string>
     <string name="comment_post_cd">Yorumu gönder</string>
     <string name="action_show_password">Şifreyi göster</string>
     <string name="action_hide_password">Şifreyi gizle</string>
