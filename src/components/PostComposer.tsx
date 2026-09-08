@@ -1505,6 +1505,22 @@ export default function PostComposer({
             ? scheduledAt
             : null,
 
+        // scheduledAt itself is the naive "yyyy-MM-ddTHH:mm" string
+        // <input type="datetime-local"> produces, with no timezone
+        // information at all - parsed as local time by whatever
+        // environment reads it, which on the server means the server's
+        // own zone, not the author's (see ios-native/PARITY.md's F2).
+        // new Date(scheduledAt) here, in the browser, DOES correctly
+        // resolve to the author's real intended instant, so its own
+        // getTimezoneOffset() is the exact correction the backend needs
+        // to reproduce that - see src/lib/scheduled-time.ts.
+        scheduledAtOffsetMinutes:
+          schedulePost
+            ? new Date(
+                scheduledAt
+              ).getTimezoneOffset()
+            : undefined,
+
         commentsEnabled,
 
         type: postType,
