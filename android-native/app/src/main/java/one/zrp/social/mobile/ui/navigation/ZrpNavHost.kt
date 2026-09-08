@@ -117,6 +117,7 @@ import one.zrp.social.mobile.ui.settings.PrivacySettingsScreen
 import one.zrp.social.mobile.ui.settings.ProfileEditScreen
 import one.zrp.social.mobile.ui.settings.SecuritySettingsScreen
 import one.zrp.social.mobile.ui.settings.SettingsScreen
+import one.zrp.social.mobile.ui.settings.TeamScreen
 import one.zrp.social.mobile.ui.stories.CreateStoryScreen
 import one.zrp.social.mobile.ui.stories.StoryViewerScreen
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -212,6 +213,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
     val goToDeleteAccount: () -> Unit = { navController.navigate("settings/delete-account") }
     val goToCreator: () -> Unit = { navController.navigate("creator") }
     val goToJournalist: () -> Unit = { navController.navigate("journalist") }
+    val goToTeam: () -> Unit = { navController.navigate("settings/team") }
     val goToNewArticle: () -> Unit = { navController.navigate("journalist/new") }
     val goToEditArticle: (String) -> Unit = { id -> navController.navigate("journalist/edit/$id") }
     val goToAi: () -> Unit = { navController.navigate("ai") }
@@ -915,6 +917,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onOpenNotifications = goToSettingsNotifications,
                     onOpenCreator = goToCreator,
                     onOpenJournalist = goToJournalist,
+                    onOpenTeam = goToTeam,
                     onOpenSupport = goToSupportTickets,
                     isStaff = isStaff,
                     onOpenAdmin = goToAdmin,
@@ -922,6 +925,9 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onOpenPrivacyPolicy = goToPrivacyPolicy,
                     onOpenGuidelines = goToGuidelines,
                 )
+            }
+            composable("settings/team") {
+                TeamScreen(onBack = { navController.popBackStack() })
             }
             composable("legal/terms") {
                 LegalWebViewScreen(
