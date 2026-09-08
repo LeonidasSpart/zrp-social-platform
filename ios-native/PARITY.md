@@ -120,7 +120,7 @@ called and the real response being handled.
 | Edit profile | `PUT /api/user/profile`, `POST /api/user/update-avatar`, `POST /api/user/update-cover` | ✅ | ✅ | ✅ loads the real profile first, so blanks it never read cannot erase a bio | IMPLEMENTED |
 | Suggested users | `GET /api/users/suggested` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Private-account gating | every content route returns `{items: []}`, not 403 | ✅ | 🔶 | ✅ (explains the account is private instead of showing "no posts") | IMPLEMENTED |
-| Trust Passport | `GET /api/users/{username}/trust` — score, level, per-signal points and the breakdown are all computed server-side; the route's own comment says a client must never calculate them | ✅ | ⬜ | ✅ reached from any profile's menu; nothing is derived beyond the ring's fraction (reported score ÷ reported maximum), and signal titles arrive in English because the route hardcodes them — see L5 | IMPLEMENTED |
+| Trust Passport | `GET /api/users/{username}/trust` — score, level, per-signal points and the breakdown are all computed server-side; the route's own comment says a client must never calculate them | ✅ | ⬜ | ✅ reached from any profile's menu; nothing is derived beyond the ring's fraction (reported score ÷ reported maximum); signal/category/level titles now also carry a `titleKey`/`descriptionKey` for localization — see L5 (FIXED) | IMPLEMENTED |
 
 ### Discovery
 
@@ -514,22 +514,51 @@ would fix it for web, Android and iOS at once.
 
 Noted, not worked around.
 
-### L5. The Trust Passport's signal text is hardcoded English
+### L5. The Trust Passport's signal text is hardcoded English - **FIXED server-side + web**
 
-`GET /api/users/{username}/trust` builds its `breakdown` and `signals`
+`GET /api/users/{username}/trust` built its `breakdown` and `signals`
 with English `title` and `description` strings written into the route
 ("Email verified", "Positive profile completeness signals."), and the
-level's own `levelLabel` likewise. None of them exist in
-`src/lib/translations.ts`, so there is nothing to translate against.
+level's own `levelLabel` likewise. None of them existed in
+`src/lib/translations.ts`, so there was nothing to translate against.
 
-The website has the same limitation: it translates its own chrome and
-renders the route's strings as they arrive. iOS does the same rather
-than inventing a dictionary for values the backend can add to at any
+The website had the same limitation: it translated its own chrome and
+rendered the route's strings as they arrived. iOS did the same rather
+than inventing a dictionary for values the backend could add to at any
 time — a guessed label is worse than an untranslated one on a screen
 whose whole point is transparency.
 
-Moving those strings into the shared dictionary, or having the route
-send keys rather than prose, would fix it for every client at once.
+Every `title`/`description` in `breakdown` and `signals`, every entry in
+`additionalSignals`, and `passport.levelLabel` now carry a sibling
+`titleKey`/`descriptionKey` (plus `descriptionParams` where the text is
+parameterized, e.g. the account-age signal's month count) that matches a
+real entry in `src/lib/translations.ts` — five of those entries
+(`trust.category*Desc`, one per breakdown category) are newly added,
+across all 11 locales; the rest already existed. This is the same
+"backend sends a stable key, each client owns the wording" contract
+already used for `src/lib/milestones.ts`. The old English `title`/
+`description`/`levelLabel` fields are unchanged, so nothing that already
+renders them breaks.
+
+The four breakdown-only signals with no top-level equivalent (the
+per-tier account-age and per-activity community entries under
+`history`/`community`) intentionally have no key yet — nothing renders
+them today, so a key with no real dictionary backing would just be a
+different kind of prose to guess at.
+
+The website's `src/app/trust/[username]/page.tsx` now reads `titleKey`/
+`descriptionKey`/`categoryTitleKey`/`levelLabelKey` from the response
+instead of keeping its own second copy of the signal-key mapping — the
+two copies had already partially drifted before this fix (the page's
+map only covered the top-level `signals`, not `breakdown`, and existed
+only in the web bundle iOS and Android can't see). The API response is
+now the one place that mapping lives.
+
+iOS and Android can adopt the same fields whenever it's their turn:
+prefer `titleKey`/`descriptionKey` when present, using the same
+translation values as `src/lib/translations.ts` (or an equivalent
+per-platform dictionary keyed the same way), and fall back to the raw
+`title`/`description` only when a key is absent.
 
 ### L4. The email-preference setting is enforced but unreachable
 
