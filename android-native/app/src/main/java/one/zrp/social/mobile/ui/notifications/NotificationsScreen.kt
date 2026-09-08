@@ -20,6 +20,7 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Favorite
@@ -57,6 +58,7 @@ import one.zrp.social.mobile.network.PostAuthor
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.VerifiedBadge
+import one.zrp.social.mobile.ui.components.ZrpEmptyState
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpBlue
 import one.zrp.social.mobile.ui.theme.ZrpGreen
@@ -138,21 +140,16 @@ fun NotificationsScreen(
                                 modifier = Modifier.padding(24.dp),
                             )
                         } else {
-                            // Matches the website's own two-line empty state
-                            // (notifications.empty + notifications.emptyDesc).
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text = stringResource(R.string.notifications_empty),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    style = MaterialTheme.typography.titleSmall,
-                                )
-                                Text(
-                                    text = stringResource(R.string.notifications_empty_desc),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.padding(top = 4.dp),
-                                )
-                            }
+                            // The website's same two-line empty state
+                            // (notifications.empty + notifications.emptyDesc),
+                            // now through the shared ZrpEmptyState so it is
+                            // composed like every other empty screen in the
+                            // app rather than as its own bare column.
+                            ZrpEmptyState(
+                                icon = Icons.Filled.NotificationsNone,
+                                title = stringResource(R.string.notifications_empty),
+                                body = stringResource(R.string.notifications_empty_desc),
+                            )
                         }
                     }
                 }
