@@ -14,6 +14,7 @@ import { TYPE_META, type OpportunitySummary } from "@/lib/opportunity";
 interface ListingDetail extends OpportunitySummary {
   posterId?: string;
   alreadyApplied?: boolean;
+  alreadySaved?: boolean;
 }
 
 const LOCALE_MAP: Record<string, string> = {
@@ -49,6 +50,7 @@ export default function OpportunityListingPage() {
       .then((data) => {
         setListing(data.listing);
         setApplied(!!data.listing?.alreadyApplied);
+        setSaved(!!data.listing?.alreadySaved);
       })
       .catch(() => setError(t("opportunity.errLoadFailed")))
       .finally(() => setLoading(false));

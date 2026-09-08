@@ -49,15 +49,28 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     // a confusing "already applied" error from the apply route instead
     // of the already-applied state the button should have shown.
     let alreadyApplied = false;
+    // Same gap on the save/bookmark toggle: POST and DELETE
+    // /api/opportunity/{id}/save only ever answer with the state they
+    // just set, so nothing told this route's caller whether the viewer
+    // had already saved the listing on a prior visit - the bookmark
+    // icon always started unfilled regardless of actual state.
+    let alreadySaved = false;
     if (session?.user?.id && !isOwner) {
-      const existing = await prisma.opportunityApplication.findUnique({
-        where: { listingId_applicantId: { listingId: id, applicantId: session.user.id } },
-        select: { id: true },
-      });
-      alreadyApplied = !!existing;
+      const [existingApplication, existingSave] = await Promise.all([
+        prisma.opportunityApplication.findUnique({
+          where: { listingId_applicantId: { listingId: id, applicantId: session.user.id } },
+          select: { id: true },
+        }),
+        prisma.opportunitySavedListing.findUnique({
+          where: { userId_listingId: { userId: session.user.id, listingId: id } },
+          select: { id: true },
+        }),
+      ]);
+      alreadyApplied = !!existingApplication;
+      alreadySaved = !!existingSave;
     }
 
-    return NextResponse.json({ listing: { ...listing, alreadyApplied } });
+    return NextResponse.json({ listing: { ...listing, alreadyApplied, alreadySaved } });
   } catch (error) {
     console.error("Error fetching opportunity listing:", error);
     return NextResponse.json({ error: "Failed to fetch listing" }, { status: 500 });
