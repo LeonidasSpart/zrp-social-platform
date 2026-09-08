@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { signOut, useSession } from "next-auth/react";
 import {
@@ -56,6 +57,24 @@ export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
   const { unreadCount, unreadMessageCount } = useUnreadCount();
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const [headerQuery, setHeaderQuery] = useState("");
+
+  // Same contract as the right rail's own field: push to the existing
+  // /search route with ?q=, which that page already reads. No new
+  // endpoint, no client-side searching.
+  const handleHeaderSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = headerQuery.trim();
+    if (q) router.push(`/search?q=${encodeURIComponent(q)}`);
+  };
+
+  // Identical rule to Sidebar.tsx and BottomNav.tsx: "/" only matches
+  // exactly, everything else matches its subtree.
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : !!pathname?.startsWith(href);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
@@ -289,6 +308,31 @@ export default function Header() {
     };
   }, []);
 
+  // Escape closes whatever is open, innermost first. The drawer, the
+  // user menu and the language menu were all dismissable by pointer
+  // only; a keyboard user who opened one had no way out but Tab.
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+
+      if (userMenuOpen || langMenuOpen) {
+        setUserMenuOpen(false);
+        setLangMenuOpen(false);
+        return;
+      }
+
+      if (mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [userMenuOpen, langMenuOpen, mobileMenuOpen]);
+
   return (
     <>
       {/* pt-[env(safe-area-inset-top)] keeps the header's tappable row
@@ -325,6 +369,58 @@ export default function Header() {
             </Link>
 
             {/* =====================================================
+                SEARCH  (desktop, signed in)
+
+                The header's middle band was empty at every desktop
+                width while the only search field lived in the right
+                rail - and that rail is itself hidden on Settings,
+                Messages, Shorts, Admin and Onboarding, so search simply
+                vanished on those surfaces. Putting it here makes it
+                reachable from every route without adding a navigation
+                item.
+
+                Same behaviour as the rail's field, not a new one: it
+                pushes to the existing /search route with ?q=, which
+                that page already reads. Signed out it is not rendered
+                at all - /search is not in middleware's PUBLIC_PATHS, so
+                submitting would only land on /login. Mobile is
+                unchanged: Search is already a bottom-nav destination.
+            ===================================================== */}
+
+            {isAuthenticated && (
+              <form
+                onSubmit={handleHeaderSearch}
+                role="search"
+                className="hidden lg:flex flex-1 justify-center px-4"
+              >
+                {/* globals.css caps .w-full at max-width:100% with
+                    !important, which silently beats max-w-md - hence
+                    flex-1 for the width and an arbitrary max-w-[28rem]
+                    the override does not match. Without this the field
+                    stretched the whole 1069px middle band. */}
+                <div className="relative flex-1 max-w-[28rem]">
+                  <Search
+                    className="pointer-events-none absolute left-3.5 top-1/2 w-4 h-4 -translate-y-1/2 text-gray-500 dark:text-gray-400"
+                    aria-hidden="true"
+                  />
+
+                  <input
+                    type="search"
+                    value={headerQuery}
+                    onChange={(e) =>
+                      setHeaderQuery(e.target.value)
+                    }
+                    placeholder={t(
+                      "rightPanel.searchPlaceholder"
+                    )}
+                    aria-label={t("nav.search")}
+                    className="w-full h-11 pl-10 pr-4 rounded-full border border-transparent bg-gray-100 text-sm text-gray-900 placeholder:text-gray-500 transition hover:bg-gray-200/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-zrp-red dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400 dark:hover:bg-gray-700/70 dark:focus:bg-gray-800"
+                  />
+                </div>
+              </form>
+            )}
+
+            {/* =====================================================
                 DESKTOP HEADER
             ===================================================== */}
 
@@ -335,7 +431,7 @@ export default function Header() {
               {isStaff && (
                 <Link
                   href="/admin"
-                  className="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-zrp-red transition"
+                  className="flex items-center gap-2 h-11 px-3 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-zrp-red transition"
                 >
                   <LayoutDashboard className="w-5 h-5" />
 
@@ -350,7 +446,7 @@ export default function Header() {
               {isJournalist && (
                 <Link
                   href="/journalist"
-                  className="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-zrp-red transition"
+                  className="flex items-center gap-2 h-11 px-3 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-zrp-red transition"
                 >
                   <Newspaper className="w-5 h-5" />
 
@@ -376,8 +472,9 @@ export default function Header() {
 
                     setUserMenuOpen(false);
                   }}
-                  className="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  className="flex items-center gap-2 h-11 px-3 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
                   aria-label={t("nav.language")}
+                  aria-haspopup="menu"
                   aria-expanded={langMenuOpen}
                 >
                   <Globe className="w-5 h-5" />
@@ -440,7 +537,7 @@ export default function Header() {
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="flex items-center justify-center w-10 h-10 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-zrp-red transition"
+                className="flex items-center justify-center w-11 h-11 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-zrp-red transition"
                 // title alone was the only name this icon-only button
                 // had. title is a last-resort fallback in the accessible
                 // name algorithm, is announced inconsistently, and never
@@ -483,6 +580,7 @@ export default function Header() {
                     }}
                     className="flex items-center gap-2 rounded-full px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
                     aria-label={t("nav.profile")}
+                    aria-haspopup="menu"
                     aria-expanded={userMenuOpen}
                   >
                     <div className="w-8 h-8 rounded-full overflow-hidden bg-zrp-red/10 flex items-center justify-center text-zrp-red font-semibold">
@@ -790,19 +888,52 @@ export default function Header() {
                   PRIMARY NAVIGATION
               ================================================= */}
 
-              <div className="space-y-1">
-                {navLinks.map((link) => (
+              {/* This drawer is the only navigation below lg, so it is
+                  the primary nav landmark there - it carries the same
+                  translated name BottomNav already uses. Until now no
+                  item in it showed which route you were on: the drawer
+                  was the one place in the shell with no current-page
+                  state at all. */}
+
+              <nav
+                // Not "primary": BottomNav already owns that name below
+                // lg and two landmarks with one name is worse than none.
+                // nav.more is the button that opens this panel and is
+                // already translated into all 11 languages.
+                aria-label={t("nav.more")}
+                className="space-y-1"
+              >
+                {navLinks.map((link) => {
+                  const active = isActive(link.href);
+
+                  return (
                   <Link
                     key={link.href}
                     href={link.href}
                     onClick={closeMobileMenu}
-                    className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                    aria-current={active ? "page" : undefined}
+                    className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition ${
+                      active
+                        ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
+                        : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    }`}
                   >
                     {link.icon && (
-                      <link.icon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                      <link.icon
+                        className={`w-5 h-5 ${
+                          active
+                            ? "text-zrp-red"
+                            : "text-gray-500 dark:text-gray-400"
+                        }`}
+                        strokeWidth={active ? 2.5 : 2}
+                      />
                     )}
 
-                    <span className="flex-1 font-medium">
+                    <span
+                      className={`flex-1 ${
+                        active ? "font-bold" : "font-medium"
+                      }`}
+                    >
                       {link.label}
                     </span>
 
@@ -817,8 +948,9 @@ export default function Header() {
 
                     <ChevronRight className="w-4 h-4 text-gray-400" />
                   </Link>
-                ))}
-              </div>
+                  );
+                })}
+              </nav>
 
               {/* =================================================
                   ADMINISTRATION
