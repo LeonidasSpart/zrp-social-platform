@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.SupportAgent
@@ -72,6 +73,14 @@ import one.zrp.social.mobile.ui.theme.Spacing
  * real translated "nav.journalist" string (nav_journalist) rather
  * than an untranslated literal.
  *
+ * Team Management routes to TeamScreen - unlike web, which hides its
+ * Sidebar link entirely for a non-Business/Enterprise account
+ * (features?.teamManagement), this row is always shown; TeamScreen
+ * itself carries the real GET /api/team 403 into a dedicated "why"
+ * body, the same shape CreatorScreen's own ineligible state already
+ * uses. Uses the website's own real translated "nav.teamManagement"
+ * string (nav_team_management) for its label.
+ *
  * Admin routes to AdminDashboardScreen (the native surface onto
  * /admin) - only rendered when isStaff is true (the caller's role is
  * ADMIN or MODERATOR, resolved from the real signed-in session; see
@@ -101,6 +110,7 @@ fun SettingsScreen(
     onOpenNotifications: () -> Unit,
     onOpenCreator: () -> Unit,
     onOpenJournalist: () -> Unit,
+    onOpenTeam: () -> Unit,
     onOpenSupport: () -> Unit,
     onOpenTerms: () -> Unit,
     onOpenPrivacyPolicy: () -> Unit,
@@ -135,6 +145,7 @@ fun SettingsScreen(
         // "Monetization" stays English-only - see this file's own KDoc.
         SettingsRow(icon = Icons.Filled.CreditCard, label = "Monetization", onClick = onOpenCreator)
         SettingsRow(icon = Icons.Filled.Newspaper, label = stringResource(R.string.nav_journalist), onClick = onOpenJournalist)
+        SettingsRow(icon = Icons.Filled.People, label = stringResource(R.string.nav_team_management), onClick = onOpenTeam)
         SettingsRow(icon = Icons.Filled.SupportAgent, label = stringResource(R.string.support_tickets_page_title), onClick = onOpenSupport)
 
         Text(
