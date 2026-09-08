@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Newspaper
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.SupportAgent
@@ -44,9 +45,8 @@ import one.zrp.social.mobile.ui.theme.Spacing
  * Android/iOS.
  *
  * Only categories this slice genuinely backs with real native screens
- * are listed - Notifications (email preferences) is a real web feature
- * left for a later slice rather than linked to a screen that doesn't
- * exist yet. See SettingsRepository's KDoc for the full breakdown.
+ * are listed. See SettingsRepository's KDoc for the full breakdown of
+ * what's covered vs. still deferred.
  *
  * Support routes to SupportTicketsScreen (the caller's own ticket
  * list, itself linking to the create-ticket form) - labeled with the
@@ -98,6 +98,7 @@ fun SettingsScreen(
     onOpenSecurity: () -> Unit,
     onOpenPrivacy: () -> Unit,
     onOpenLanguage: () -> Unit,
+    onOpenNotifications: () -> Unit,
     onOpenCreator: () -> Unit,
     onOpenJournalist: () -> Unit,
     onOpenSupport: () -> Unit,
@@ -130,6 +131,7 @@ fun SettingsScreen(
         SettingsRow(icon = Icons.Filled.Lock, label = stringResource(R.string.settings_security), onClick = onOpenSecurity)
         SettingsRow(icon = Icons.Filled.Shield, label = stringResource(R.string.settings_privacy_safety), onClick = onOpenPrivacy)
         SettingsRow(icon = Icons.Filled.Language, label = stringResource(R.string.nav_language), onClick = onOpenLanguage)
+        SettingsRow(icon = Icons.Filled.Notifications, label = stringResource(R.string.nav_notifications), onClick = onOpenNotifications)
         // "Monetization" stays English-only - see this file's own KDoc.
         SettingsRow(icon = Icons.Filled.CreditCard, label = "Monetization", onClick = onOpenCreator)
         SettingsRow(icon = Icons.Filled.Newspaper, label = stringResource(R.string.nav_journalist), onClick = onOpenJournalist)

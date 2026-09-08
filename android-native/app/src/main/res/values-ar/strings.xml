@@ -57,6 +57,12 @@
     <string name="nav_search">بحث</string>
     <string name="nav_messages">الرسائل</string>
     <string name="nav_notifications">الإشعارات</string>
+    <string name="settings_notif_mentions">الإشارات</string>
+    <string name="settings_notif_messages">الرسائل المباشرة</string>
+    <string name="settings_notif_likes">الإعجابات على منشوراتك</string>
+    <string name="settings_notif_comments">التعليقات على منشوراتك</string>
+    <string name="settings_notif_follows">متابعون جدد</string>
+    <string name="settings_notif_reposts">إعادة نشر منشوراتك</string>
     <string name="nav_profile">الملف الشخصي</string>
     <string name="action_post">نشر</string>
     <string name="auth_sign_in">تسجيل الدخول</string>

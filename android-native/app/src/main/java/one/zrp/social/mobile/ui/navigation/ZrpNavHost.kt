@@ -111,6 +111,7 @@ import one.zrp.social.mobile.ui.trust.TrustPassportScreen
 import one.zrp.social.mobile.ui.settings.AccountSettingsScreen
 import one.zrp.social.mobile.ui.settings.DeleteAccountScreen
 import one.zrp.social.mobile.ui.settings.LanguageSettingsScreen
+import one.zrp.social.mobile.ui.settings.NotificationSettingsScreen
 import one.zrp.social.mobile.ui.settings.PrivacySettingsScreen
 import one.zrp.social.mobile.ui.settings.ProfileEditScreen
 import one.zrp.social.mobile.ui.settings.SecuritySettingsScreen
@@ -205,6 +206,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
     val goToSettingsSecurity: () -> Unit = { navController.navigate("settings/security") }
     val goToSettingsPrivacy: () -> Unit = { navController.navigate("settings/privacy") }
     val goToSettingsLanguage: () -> Unit = { navController.navigate("settings/language") }
+    val goToSettingsNotifications: () -> Unit = { navController.navigate("settings/notifications") }
     val goToDeleteAccount: () -> Unit = { navController.navigate("settings/delete-account") }
     val goToCreator: () -> Unit = { navController.navigate("creator") }
     val goToJournalist: () -> Unit = { navController.navigate("journalist") }
@@ -906,6 +908,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onOpenSecurity = goToSettingsSecurity,
                     onOpenPrivacy = goToSettingsPrivacy,
                     onOpenLanguage = goToSettingsLanguage,
+                    onOpenNotifications = goToSettingsNotifications,
                     onOpenCreator = goToCreator,
                     onOpenJournalist = goToJournalist,
                     onOpenSupport = goToSupportTickets,
@@ -1016,6 +1019,9 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
             }
             composable("settings/language") {
                 LanguageSettingsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("settings/notifications") {
+                NotificationSettingsScreen(onBack = { navController.popBackStack() })
             }
             composable("settings/account") {
                 AccountSettingsScreen(

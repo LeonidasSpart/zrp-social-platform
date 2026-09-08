@@ -87,15 +87,37 @@ data class DeletionToggleResponse(val message: String, val deletionDate: String?
 data class AvatarUpdateResponse(val success: Boolean? = null, val avatarUrl: String?)
 data class CoverUpdateResponse(val coverUrl: String?)
 
+// ─── Email preferences (GET/PUT /user/email-preferences) ────────────
+// The real route stores these as a loose `emailPreferences Json?`
+// field on User (prisma/schema.prisma), not a dedicated table - GET
+// returns whatever's stored merged with these same six defaults
+// server-side, and PUT accepts any subset of the six keys as a
+// partial update (the route merges it against the stored/current
+// object itself), which is why the request body below is a plain Map
+// rather than a fixed data class - sending just the one toggled key,
+// matching EmailPreferences.tsx's own per-toggle PUT exactly, rather
+// than resending all six every time.
+data class EmailPreferences(
+    val mentions: Boolean = true,
+    val messages: Boolean = true,
+    val likes: Boolean = true,
+    val comments: Boolean = true,
+    val follows: Boolean = true,
+    val reposts: Boolean = true,
+)
+
+data class EmailPreferencesUpdateResponse(val success: Boolean, val preferences: EmailPreferences)
+
 /**
  * Settings/Account mutations - the same PUT/POST endpoints the web
  * settings hub (src/app/settings/page.tsx) and its delete-account page
  * call, none of them reinvented. Deliberately scoped to the fields this
  * slice's native screens actually edit (profile text fields, Solana
  * receiving wallet, username, password, email, privacy toggles, account
- * deletion, avatar/banner) - the custom-URL/professional-category
- * pickers and email/support preferences are real backend features this
- * slice does not yet cover natively (see SettingsRepository's KDoc).
+ * deletion, avatar/banner, email notification preferences) - the
+ * custom-URL/professional-category pickers and data export are real
+ * backend features this slice does not yet cover natively (see
+ * SettingsRepository's KDoc).
  */
 interface SettingsApi {
     @PUT("user")
@@ -135,4 +157,10 @@ interface SettingsApi {
     @Multipart
     @POST("user/update-cover")
     suspend fun updateCover(@Part file: MultipartBody.Part): CoverUpdateResponse
+
+    @GET("user/email-preferences")
+    suspend fun getEmailPreferences(): EmailPreferences
+
+    @PUT("user/email-preferences")
+    suspend fun updateEmailPreferences(@Body request: Map<String, Boolean>): EmailPreferencesUpdateResponse
 }

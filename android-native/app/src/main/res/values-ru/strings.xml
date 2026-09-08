@@ -57,6 +57,12 @@
     <string name="nav_search">Поиск</string>
     <string name="nav_messages">Сообщения</string>
     <string name="nav_notifications">Уведомления</string>
+    <string name="settings_notif_mentions">Упоминания</string>
+    <string name="settings_notif_messages">Личные сообщения</string>
+    <string name="settings_notif_likes">Лайки на ваши посты</string>
+    <string name="settings_notif_comments">Комментарии к вашим постам</string>
+    <string name="settings_notif_follows">Новые подписчики</string>
+    <string name="settings_notif_reposts">Репосты ваших постов</string>
     <string name="nav_profile">Профиль</string>
     <string name="action_post">Опубликовать</string>
     <string name="auth_sign_in">Войти</string>

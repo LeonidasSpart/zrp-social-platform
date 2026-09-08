@@ -3,6 +3,8 @@ package one.zrp.social.mobile.data
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.DeletionStatusResponse
 import one.zrp.social.mobile.network.DeletionToggleResponse
+import one.zrp.social.mobile.network.EmailPreferences
+import one.zrp.social.mobile.network.EmailPreferencesUpdateResponse
 import one.zrp.social.mobile.network.EmailUpdateRequest
 import one.zrp.social.mobile.network.MessageResponse
 import one.zrp.social.mobile.network.PasswordUpdateRequest
@@ -32,14 +34,14 @@ import retrofit2.HttpException
  *   updateWallet's own KDoc for why this is fine to edit natively
  *   despite the standing payment-restriction policy), privacy toggles
  *   (public likes/following, private account), account deletion
- *   (30-day schedule/cancel + confirm).
+ *   (30-day schedule/cancel + confirm), email notification preferences.
  * - NOT yet native (genuinely backend-supported, left for a follow-up
  *   slice rather than faked): avatar upload and the professional-
  *   profile category picker (both need the same native UploadThing/
  *   media-upload path already deferred for posts, DMs and story
  *   creation), custom profile URL (plan-gated, its own small slice),
  *   data export (needs a FileProvider + share-sheet path of its own),
- *   email notification preferences, support tickets, and appeals.
+ *   support tickets, and appeals.
  */
 class SettingsRepository {
     suspend fun getOwnSession(): Result<SessionUser?> = runCatching {
@@ -135,6 +137,18 @@ class SettingsRepository {
     suspend fun confirmDeletion(): Result<MessageResponse> = safeCall("Couldn't delete your account. Please try again.") {
         ApiClient.settingsApi.confirmDeletion()
     }
+
+    suspend fun getEmailPreferences(): Result<EmailPreferences> = safeCall("Couldn't load your notification preferences.") {
+        ApiClient.settingsApi.getEmailPreferences()
+    }
+
+    // Matches EmailPreferences.tsx's own per-toggle PUT exactly - one
+    // key at a time, not the whole six-field object, since the real
+    // route merges whatever subset it's sent against the stored value.
+    suspend fun updateEmailPreference(key: String, value: Boolean): Result<EmailPreferencesUpdateResponse> =
+        safeCall("Couldn't save this preference. Please try again.") {
+            ApiClient.settingsApi.updateEmailPreferences(mapOf(key to value))
+        }
 
     private suspend fun <T> safeCall(genericError: String, block: suspend () -> T): Result<T> {
         return try {
