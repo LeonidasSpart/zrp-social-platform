@@ -22,6 +22,10 @@
     <string name="settings_username_cooldown_banner">⏳ 你可以在 %1$d 天后再次更改用户名</string>
     <string name="settings_err_username_min_length">用户名至少需要 3 个字符</string>
     <string name="settings_err_username_same">新用户名与当前用户名相同</string>
+    <string name="settings_export_data_heading">您的数据</string>
+    <string name="settings_export_data">导出我的数据</string>
+    <string name="settings_export_data_desc">下载您的个人资料、帖子、评论、点赞、转发、书签、快拍和关注列表的 JSON 文件副本。</string>
+    <string name="settings_export_data_error">无法导出您的数据，请重试。</string>
     <string name="settings_delete_account">删除 账户</string>
     <string name="settings_joined">加入 %1$s</string>
     <string name="settings_display_name">显示名称</string>

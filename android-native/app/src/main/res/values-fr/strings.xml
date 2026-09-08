@@ -22,6 +22,10 @@
     <string name="settings_username_cooldown_banner">⏳ Vous pourrez changer de nom d\'utilisateur dans %1$d jours</string>
     <string name="settings_err_username_min_length">Le nom d\'utilisateur doit contenir au moins 3 caractères</string>
     <string name="settings_err_username_same">Le nouveau nom d\'utilisateur est identique à l\'actuel</string>
+    <string name="settings_export_data_heading">Vos données</string>
+    <string name="settings_export_data">Exporter mes données</string>
+    <string name="settings_export_data_desc">Téléchargez une copie de votre profil, publications, commentaires, mentions J\'aime, reposts, favoris, stories et listes d\'abonnements au format JSON.</string>
+    <string name="settings_export_data_error">Impossible d\'exporter vos données. Veuillez réessayer.</string>
     <string name="settings_delete_account">Supprimer le compte</string>
     <string name="settings_joined">Inscrit le %1$s</string>
     <string name="settings_display_name">Nom affiché</string>

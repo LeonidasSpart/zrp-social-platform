@@ -22,6 +22,10 @@
     <string name="settings_username_cooldown_banner">⏳ Вы сможете снова изменить имя пользователя через %1$d дн.</string>
     <string name="settings_err_username_min_length">Имя пользователя должно содержать минимум 3 символа</string>
     <string name="settings_err_username_same">Новое имя пользователя совпадает с текущим</string>
+    <string name="settings_export_data_heading">Ваши данные</string>
+    <string name="settings_export_data">Экспортировать мои данные</string>
+    <string name="settings_export_data_desc">Скачайте копию своего профиля, публикаций, комментариев, лайков, репостов, закладок, историй и списков подписок в формате JSON.</string>
+    <string name="settings_export_data_error">Не удалось экспортировать ваши данные. Попробуйте еще раз.</string>
     <string name="settings_delete_account">удалить аккаунт</string>
     <string name="settings_joined">присоединился %1$s</string>
     <string name="settings_display_name">Отображаемое имя</string>
