@@ -60,7 +60,7 @@ called and the real response being handled.
 | Onboarding | `POST /api/user/onboarding-complete`, `PUT /api/user/profile`, `POST /api/user/update-avatar`, `GET /api/users/suggested` | ✅ | ✅ | ✅ profile, avatar, follow suggestions; every step skippable | IMPLEMENTED |
 | Google sign-in | `POST /api/mobile/auth/google` (added on `main` by PR #115) verifies a Google ID token and mints the same NextAuth JWT; the website still uses the NextAuth `google` web provider | ✅ | ✅ Credential Manager | ⬜ backend no longer blocks it — obtaining the ID token on iOS is outstanding client-side work, not built here | MISSING (was [B1](#b1-native-oauth--google-now-unblocked-server-side-apple-still-blocked)) |
 | **Sign in with Apple** | NextAuth `apple` provider (web OAuth, Services ID) | ✅ (if env configured) | n/a | ❌ | **BLOCKED — [B2](#b2-sign-in-with-apple-native)** |
-| Account deletion | `POST /api/user/delete`, `/api/user/delete/confirm`, `GET /api/user/delete-status` | ✅ | ✅ | ✅ both paths — see [Settings](#settings) | IMPLEMENTED |
+| Account deletion | `POST /api/user/delete`, `/api/user/delete/confirm`, `GET /api/user/delete-status` | ✅ | ✅ | ✅ both paths — see [Settings](#settings); the web page's own wiring bug that skipped the 30-day path entirely is fixed — see [F5](#f5-account-deletions-30-day-grace-period-never-actually-applied--fixed-server-side--web) | IMPLEMENTED |
 
 ### Feed & posts
 
@@ -343,7 +343,7 @@ called and the real response being handled.
 | Settings hub | — | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Security (password) | `PUT /api/user/password` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Privacy (private account, public likes/following) | `PUT /api/user/privacy` | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Account deletion — 30-day schedule / cancel | `GET /api/user/delete-status`, `POST /api/user/delete` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Account deletion — 30-day schedule / cancel | `GET /api/user/delete-status`, `POST /api/user/delete` | ✅ | ✅ | ✅ web's own button reaching this path at all was broken until [F5](#f5-account-deletions-30-day-grace-period-never-actually-applied--fixed-server-side--web); a cron sweep now actually enforces the 30 days | IMPLEMENTED |
 | Account deletion — immediate and permanent | `POST /api/user/delete/confirm` | ✅ | ✅ | ✅ typed DELETE gate, as on web | IMPLEMENTED |
 | Data export | `GET /api/settings/export-data` | ✅ | ⬜ | ✅ downloaded to a file and handed to the share sheet | IMPLEMENTED |
 | Account (email, username) | `GET/PUT /api/user/username`, `PUT /api/user/email` | ✅ | ✅ | ✅ 30-day username cooldown surfaced before typing; email change states that it needs verification | IMPLEMENTED |
@@ -634,6 +634,72 @@ browsing For You. Not built here.
 
 Found while auditing, per the isolation rules: reported here for their
 owners, not silently fixed from iOS.
+
+### F5. Account deletion's 30-day grace period never actually applied — **FIXED server-side + web**
+
+Found while auditing account deletion/privacy per the agreed backend
+priority list — not an iOS parity gap, a real, already-shipped bug in
+the web deletion flow and a gap in the backend's own promise.
+
+`src/app/settings/delete/page.tsx`'s primary "Request Account Deletion"
+button did not call `POST /api/user/delete` (the route that actually
+sets `User.deletionScheduledFor` 30 days out) at all — `handleRequestDeletion`,
+the only function that calls it, was dead code, never wired to any
+button. The button instead revealed the typed-DELETE confirmation UI
+directly, whose confirm action calls `POST /api/user/delete/confirm` —
+**immediate, permanent deletion, no grace period**. Every user who used
+the page's main flow got instant deletion while reading copy that
+explicitly promised "your account will be deleted in **30 days**. You
+can cancel this request at any time." The separate "Delete Now" button
+(shown only once an account is actually scheduled) was also a dead
+click — it set `showConfirm`, but the typed-DELETE block that reads that
+state was only rendered in the *not-yet-scheduled* branch, so nothing
+visible happened.
+
+Separately, even a correctly-scheduled account was never actually
+deleted once its 30 days passed: nothing swept `deletionScheduledFor`.
+`GET /api/user/delete-status` could report a date in the past
+indefinitely with the account still fully live.
+
+Three fixes, all server-side/web, no client (Android/iOS) involvement:
+
+1. `src/app/settings/delete/page.tsx`: the primary button now calls
+   `handleRequestDeletion` (schedules, matches its own copy). The typed-
+   DELETE confirmation is reachable only via "Delete Now" from the
+   already-scheduled state, which now actually renders it.
+2. `src/lib/account-deletion.ts` (new): the account-wipe + UploadThing-
+   orphan-cleanup logic that used to live only inline in
+   `/api/user/delete/confirm` is now a shared `deleteUserAccountAndFiles(userId)`,
+   so the confirm route and the new sweep below can never drift apart on
+   what actually gets deleted.
+3. `GET /api/cron/delete-scheduled-accounts` (new): sweeps
+   `deletionScheduledFor <= now` and deletes each one, same `CRON_SECRET`
+   auth (fails closed) as `publish-scheduled-posts`. One account's
+   cleanup failing doesn't block the rest of the sweep — it just stays
+   scheduled and gets retried on the next run.
+
+That third piece needs an actual scheduler calling it, which this repo
+had no in-repo mechanism for at all - not for this route or, as far as
+a full search of the repository turned up, for either of the other two
+`CRON_SECRET`-gated routes either (no `railway.json`, no scheduled
+GitHub Actions workflow, no cron-related npm script existed anywhere).
+Those two are presumably invoked by a Cron Job configured directly in
+Railway's own project dashboard, which is both invisible and off-limits
+to touch from here. `.github/workflows/cron-delete-scheduled-accounts.yml`
+gives this route its own independent, in-repo, code-reviewable daily
+schedule instead of guessing at or modifying that external
+configuration - it needs a `CRON_SECRET` repository secret added once
+under this repo's GitHub Settings before it can succeed.
+
+Verified end-to-end in a browser against a real Postgres-backed test
+user: "Request Account Deletion" now shows the scheduled-for-30-days
+banner with working Cancel/Delete Now buttons, and "Delete Now" now
+correctly reveals the typed-DELETE prompt, without completing an actual
+deletion.
+
+Flagged for human review before merge given the blast radius (permanent,
+irreversible account deletion), per the standing rule for security- and
+safety-sensitive changes.
 
 ### F2. Scheduled posts are timed in the SERVER's timezone, not the author's — **FIXED (server, web and iOS)**
 

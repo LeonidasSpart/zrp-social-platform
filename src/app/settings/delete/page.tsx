@@ -158,7 +158,43 @@ export default function DeleteAccountPage() {
           </div>
         )}
 
-        {isScheduled ? (
+        {showConfirm ? (
+          // Reachable only from "Delete Now" below (already scheduled) -
+          // this is the *immediate, permanent, no grace period* path, so
+          // it must never be the first thing a fresh deletion request
+          // hits. It used to be wired directly to the primary "Request
+          // Account Deletion" button, which meant every deletion request
+          // was actually immediate and permanent regardless of the
+          // 30-day copy shown above it.
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">{t("deleteAccount.confirmDeletionTitle")}</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+              {t("deleteAccount.confirmDeletionInstructionPre")} <strong className="text-red-600">DELETE</strong> {t("deleteAccount.confirmDeletionInstructionPost")}
+            </p>
+            <input
+              type="text"
+              value={confirmationText}
+              onChange={(e) => setConfirmationText(e.target.value)}
+              placeholder={t("deleteAccount.typeDeleteToConfirm")}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => { setShowConfirm(false); setConfirmationText(""); }}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+              >
+                {t("action.cancel")}
+              </button>
+              <button
+                onClick={handleConfirmDeletion}
+                disabled={loading}
+                className="flex-1 bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700 disabled:opacity-50 transition"
+              >
+                {loading ? t("deleteAccount.deleting") : t("deleteAccount.permanentlyDeleteAccount")}
+              </button>
+            </div>
+          </div>
+        ) : isScheduled ? (
           <div className="space-y-4">
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
               <p className="text-yellow-800 dark:text-yellow-300">
@@ -206,44 +242,16 @@ export default function DeleteAccountPage() {
               </p>
             </div>
 
-            {showConfirm ? (
-              <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">{t("deleteAccount.confirmDeletionTitle")}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                  {t("deleteAccount.confirmDeletionInstructionPre")} <strong className="text-red-600">DELETE</strong> {t("deleteAccount.confirmDeletionInstructionPost")}
-                </p>
-                <input
-                  type="text"
-                  value={confirmationText}
-                  onChange={(e) => setConfirmationText(e.target.value)}
-                  placeholder={t("deleteAccount.typeDeleteToConfirm")}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <div className="flex gap-3 mt-4">
-                  <button
-                    onClick={() => { setShowConfirm(false); setConfirmationText(""); }}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-                  >
-                    {t("action.cancel")}
-                  </button>
-                  <button
-                    onClick={handleConfirmDeletion}
-                    disabled={loading}
-                    className="flex-1 bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700 disabled:opacity-50 transition"
-                  >
-                    {loading ? t("deleteAccount.deleting") : t("deleteAccount.permanentlyDeleteAccount")}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowConfirm(true)}
-                disabled={loading}
-                className="w-full mt-4 bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 disabled:opacity-50 transition"
-              >
-                {t("deleteAccount.requestAccountDeletion")}
-              </button>
-            )}
+            {/* This used to reveal the typed-DELETE immediate-deletion UI
+                directly - now it does what the copy above actually says
+                and schedules the 30-day grace period. */}
+            <button
+              onClick={handleRequestDeletion}
+              disabled={loading}
+              className="w-full mt-4 bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 disabled:opacity-50 transition"
+            >
+              {loading ? t("deleteAccount.deleting") : t("deleteAccount.requestAccountDeletion")}
+            </button>
           </>
         )}
       </div>
