@@ -1521,6 +1521,7 @@
     <string name="legal_terms">Terms of Service</string>
     <string name="legal_privacy">Privacy Policy</string>
     <string name="legal_guidelines">Community Guidelines</string>
+    <string name="legal_load_error">Couldn\'t load this page. Check your connection and try again.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Joined</string>
     <string name="profile_charity_note">%1$s%% of profits go to charity</string>

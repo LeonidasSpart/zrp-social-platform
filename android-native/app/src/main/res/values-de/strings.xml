@@ -1507,6 +1507,7 @@
     <string name="legal_terms">Nutzungsbedingungen</string>
     <string name="legal_privacy">Datenschutzerklärung</string>
     <string name="legal_guidelines">Community-Richtlinien</string>
+    <string name="legal_load_error">Diese Seite konnte nicht geladen werden. Überprüfe deine Verbindung und versuche es erneut.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Beigetreten</string>
     <string name="profile_charity_note">%1$s%% der Gewinne gehen an wohltätige Zwecke</string>
