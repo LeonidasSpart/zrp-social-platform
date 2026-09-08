@@ -123,6 +123,7 @@ called and the real response being handled.
 | --- | --- | --- | --- | --- | --- |
 | Search (users + posts) | `GET /api/search?q=&type=all` (min 2 chars; 10 users / 20 posts, unpaginated) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Trending hashtags | `GET /api/hashtags/trending` (bare array, server-cached, limit clamped 1–50) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Hashtag search | `GET /api/hashtags/search?q=` (new - prefix match against every real hashtag, ranked by usage, `{items,nextCursor}`; distinct from the row above, which only exact-matches a tag already typed out in full as part of a broader post search) | ⬜ no search-as-you-type hashtag UI on any client yet | ⬜ | ⬜ backend-only so far - not built on any client | MISSING |
 | Hashtag timeline | `GET /api/posts/hashtag/{tag}` (bare array, 50, no pagination) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Hashtag / mention tap-through in post text | — | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Explore / trending pages | `GET /api/posts/explore` | ✅ | 🔶 (For You tab) | 🔶 For You tab + a discover surface (trending tags, suggested people) | PARTIAL |
