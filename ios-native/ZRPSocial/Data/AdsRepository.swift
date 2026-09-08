@@ -20,13 +20,22 @@ struct AdsRepository: AdsRepositoryProtocol {
 
     /// One eligible ad, or `nil`.
     ///
-    /// Public: the route serves a signed-out reader too, exactly as the
-    /// rest of the feed does, so this does not require auth. It does
-    /// still send the session when there is one, which is how the route
-    /// knows not to show someone their own campaign.
+    /// **Sends the session, and must.** The route serves a signed-out
+    /// reader too, so this looked like a `requiresAuth: false` call -
+    /// but that flag does not mean "works signed out", it means "do not
+    /// attach the cookie at all", and the route reads the caller's
+    /// identity for a reason: `advertiserId: { not: viewerId }` is what
+    /// stops someone being shown their own ad and spending their own
+    /// budget on themselves. Stripping the cookie would defeat that
+    /// guard and log every impression as anonymous.
+    ///
+    /// `requiresAuth: true` is still correct for a signed-out reader:
+    /// `ApiClient` attaches the cookie only when a session exists and
+    /// sends the request either way, which is exactly what the
+    /// website's own same-origin fetch does.
     func serve() async throws -> SponsoredAd? {
         let response: SponsoredAdResponse = try await client.send(
-            Endpoint.get("ads/serve", requiresAuth: false)
+            Endpoint.get("ads/serve")
         )
         return response.ad
     }
