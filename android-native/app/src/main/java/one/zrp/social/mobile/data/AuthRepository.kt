@@ -33,7 +33,10 @@ class AuthRepository {
 
     fun isLoggedIn(): Boolean = tokenStore.getSessionToken() != null
 
-    fun logout() = tokenStore.clearSession()
+    fun logout() {
+        tokenStore.clearSession()
+        ApiClient.ownUsernameOverride = null
+    }
 
     suspend fun login(identifier: String, password: String): Result<MobileUser> {
         return try {
