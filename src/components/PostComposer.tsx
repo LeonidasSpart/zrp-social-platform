@@ -328,11 +328,80 @@ export default function PostComposer({
   const [cursorPosition, setCursorPosition] =
     useState(0);
 
+  /*
+   * Collapsed until intent.
+   *
+   * At rest the composer was 273px tall on a 390px phone - 32% of the
+   * viewport spent on an empty form before a single post. It now shows
+   * one row (avatar + placeholder) and opens the rest on focus.
+   *
+   * `expanded` is only ever the *user's* intent to write. Anything that
+   * means work is in progress keeps it open on its own through
+   * `hasDraft`, so no state can be hidden behind a collapse: text, an
+   * article body, uploaded media, an open poll/GIF/emoji panel, a
+   * scheduled time, a non-default post type, an in-flight upload or
+   * submit, or an error that still needs reading.
+   */
+  const [expanded, setExpanded] =
+    useState(false);
+
   const textareaRef =
     useRef<HTMLTextAreaElement>(null);
 
   const composerRef =
     useRef<HTMLDivElement>(null);
+
+  const hasDraft =
+    content.trim().length > 0 ||
+    articleBody.trim().length > 0 ||
+    imageUrls.length > 0 ||
+    showPollBuilder ||
+    showGifPicker ||
+    showEmojiPicker ||
+    schedulePost ||
+    uploading ||
+    loading ||
+    postType !== "POST" ||
+    !!error;
+
+  const isOpen = expanded || hasDraft;
+
+  const openComposer = () => setExpanded(true);
+
+  /*
+   * handleContentChange auto-grows the textarea by writing an inline
+   * height. That inline value outlives the collapse and beats the
+   * collapsed height class, so a composer that had been typed in and
+   * then emptied stayed ~120px tall instead of returning to one row.
+   */
+  useEffect(() => {
+    if (!isOpen && textareaRef.current) {
+      textareaRef.current.style.height = "";
+    }
+  }, [isOpen]);
+
+  /*
+   * Collapse again on a click outside, not on blur: every toolbar
+   * control blurs the textarea, so a blur handler would close the
+   * composer out from under the button the user is pressing. `hasDraft`
+   * still wins, so this only ever closes an empty one.
+   */
+  useEffect(() => {
+    if (!expanded) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const node = composerRef.current;
+
+      if (node && !node.contains(e.target as Node)) {
+        setExpanded(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
+  }, [expanded]);
 
   const fileInputRef =
     useRef<HTMLInputElement>(null);
@@ -1776,17 +1845,18 @@ export default function PostComposer({
   // ─────────────────────────────────────────────────────────────
 
   return (
+    /*
+     * Surface level 2, not 3. A composer sitting in the page is
+     * grouped content, not a detached object - so it gets a hairline
+     * and the page's own ground, and gives up the fill, the shadow and
+     * the 2xl radius that made the feed read as a stack of cards.
+     */
     <div
       ref={composerRef}
       className="
-        bg-white
-        dark:bg-zrp-deepBlack
-        rounded-2xl
-        shadow-sm
-        border
+        border-b
         border-gray-200
-        dark:border-gray-700
-        overflow-hidden
+        dark:border-gray-800
       "
     >
       <form
@@ -1794,8 +1864,16 @@ export default function PostComposer({
           handleSubmit
         }
       >
-        <div className="p-4 sm:p-5">
-          <div className="flex items-start gap-3 sm:gap-4">
+        <div
+          className={
+            isOpen ? "p-4 sm:p-5" : "px-4 py-3 sm:px-5"
+          }
+        >
+          <div
+            className={`flex gap-3 sm:gap-4 ${
+              isOpen ? "items-start" : "items-center"
+            }`}
+          >
 
             {/* ─────────────────────────────────────────────── */}
             {/* AVATAR */}
@@ -1846,7 +1924,7 @@ export default function PostComposer({
               {/* POST TYPE SELECTOR */}
               {/* ───────────────────────────────────────────── */}
 
-              {showTypeSelector && (
+              {isOpen && showTypeSelector && (
                 <div
                   className="
                     flex
@@ -2013,7 +2091,8 @@ export default function PostComposer({
                           "composer.placeholderDefault"
                         )
                   }
-                  className="
+                  onFocus={openComposer}
+                  className={`
                     w-full
                     resize-none
                     border-0
@@ -2024,17 +2103,25 @@ export default function PostComposer({
                     dark:text-gray-200
                     placeholder-gray-400
                     dark:placeholder-gray-500
-                    min-h-[90px]
                     max-h-[280px]
-                    overflow-y-auto
                     bg-transparent
                     text-[17px]
                     leading-7
-                  "
+                    ${
+                      isOpen
+                        ? "min-h-[90px] overflow-y-auto"
+                        : // One row means one line: without this the
+                          // placeholder wraps and the second line is
+                          // clipped mid-height. German and Russian run
+                          // ~30% longer, so this is not an English-only
+                          // concern.
+                          "min-h-0 h-7 whitespace-nowrap overflow-hidden"
+                    }
+                  `}
                   maxLength={
                     postLength
                   }
-                  rows={3}
+                  rows={isOpen ? 3 : 1}
                 />
               ) : (
                 <div className="space-y-3">
@@ -2312,14 +2399,11 @@ export default function PostComposer({
               {/* ───────────────────────────────────────────── */}
 
               <div
-                className="
-                  flex
-                  flex-wrap
-                  items-center
-                  gap-2
-                  sm:gap-3
-                  mt-4
-                "
+                className={
+                  isOpen
+                    ? "flex flex-wrap items-center gap-2 sm:gap-3 mt-4"
+                    : "hidden"
+                }
               >
                 {canSchedule && (
                   <button
@@ -2835,18 +2919,11 @@ export default function PostComposer({
               {/* ───────────────────────────────────────────── */}
 
               <div
-                className="
-                  flex
-                  flex-wrap
-                  items-center
-                  justify-between
-                  gap-3
-                  mt-4
-                  pt-3
-                  border-t
-                  border-gray-100
-                  dark:border-gray-700
-                "
+                className={
+                  isOpen
+                    ? "flex flex-wrap items-center justify-between gap-3 mt-4 pt-3 border-t border-gray-100 dark:border-gray-700"
+                    : "hidden"
+                }
               >
                 <div
                   className="
