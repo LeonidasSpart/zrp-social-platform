@@ -1764,7 +1764,7 @@ export default function ChatInterface({
           MESSAGES
       ====================================================================== */}
 
-      <main
+      <div
         ref={messagesContainerRef}
         className="
           relative
@@ -2769,7 +2769,7 @@ export default function ChatInterface({
             />
           </div>
         )}
-      </main>
+      </div>
 
       {/* =====================================================================
           REPLY PREVIEW

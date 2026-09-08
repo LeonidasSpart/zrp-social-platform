@@ -19,7 +19,7 @@ export default function CharityPage() {
       {/* Header removed: no navigation menu */}
 
       {/* Main content */}
-      <main>
+      <div>
         {/* Hero: dark red to black gradient */}
         <section className="relative bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack py-20 px-4">
           <div className="max-w-4xl mx-auto text-center">
@@ -161,7 +161,7 @@ export default function CharityPage() {
             </div>
           </div>
         </section>
-      </main>
+      </div>
 
       {/* Footer removed: global footer will render via layout */}
     </div>

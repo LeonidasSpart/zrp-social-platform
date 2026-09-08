@@ -21,7 +21,7 @@ export default function GuidelinesPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter">
-      <main>
+      <div>
         <section className="relative overflow-hidden bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack py-16 sm:py-20 px-4">
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute -top-24 -right-24 w-72 h-72 bg-zrp-red/20 rounded-full blur-3xl" />
@@ -130,7 +130,7 @@ export default function GuidelinesPage() {
             </div>
           </div>
         </section>
-      </main>
+      </div>
     </div>
   );
 }

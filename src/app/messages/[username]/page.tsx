@@ -769,7 +769,7 @@ export default function ChatPage(
   }
 
   return (
-    <main
+    <div
       ref={containerRef}
       className="
         w-full
@@ -918,6 +918,6 @@ export default function ChatPage(
           />
         </div>
       )}
-    </main>
+    </div>
   );
 }

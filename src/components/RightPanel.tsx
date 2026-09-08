@@ -87,12 +87,20 @@ export default function RightPanel() {
     }
   };
 
-  if (
-    !session ||
-    pathname?.startsWith("/admin") ||
-    pathname?.startsWith("/onboarding") ||
-    pathname?.startsWith("/shorts")
-  ) {
+  // Suppressed on focused surfaces as well as the immersive ones.
+  //
+  // Trending, Who-to-follow and a second search field are discovery
+  // aids for a browsing context. On Settings they turned the page into
+  // four columns where the fourth was irrelevant to the task; on
+  // Messages they competed with a conversation that wants the width.
+  // Both are surfaces someone is on to finish something, not to browse.
+  //
+  // Nothing is removed from the product: search lives in this panel and
+  // also as its own /search destination in both the sidebar and the
+  // bottom nav, and Explore covers trending and suggestions.
+  const FOCUSED_SURFACES = ["/admin", "/onboarding", "/shorts", "/settings", "/messages"];
+
+  if (!session || FOCUSED_SURFACES.some((path) => pathname?.startsWith(path))) {
     return null;
   }
 

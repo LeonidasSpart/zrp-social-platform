@@ -140,7 +140,7 @@ export default function MusicArtistPage() {
         </div>
       </header>
 
-      <main className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
         <section className="flex flex-col sm:flex-row items-center sm:items-end gap-6 rounded-[28px] overflow-hidden border border-gray-200 dark:border-white/10 p-6 sm:p-8 bg-gradient-to-br from-zrp-red/10 via-transparent to-transparent">
           <img
             src={artist.avatarUrl || "/logo.png"}
@@ -272,7 +272,7 @@ export default function MusicArtistPage() {
             emptyTitle={t("music.artistDetail.noTracks")}
           />
         </section>
-      </main>
+      </div>
     </div>
   );
 }

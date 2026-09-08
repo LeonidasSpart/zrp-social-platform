@@ -69,7 +69,7 @@ export default function MusicPlaylistsPage() {
         </div>
       </header>
 
-      <main className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {creating && (
           <div className="mb-6 rounded-2xl border border-gray-200 dark:border-white/10 p-4 flex items-center gap-3">
             <input
@@ -141,7 +141,7 @@ export default function MusicPlaylistsPage() {
             })}
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import {
   Home, Compass, Search, MessageSquare, Bell, Bookmark, User,
@@ -160,20 +159,15 @@ export default function Sidebar() {
         scrollbar-hide
       "
     >
-      {/* Logo */}
-      <Link
-        href="/"
-        className="flex items-center gap-2 px-3 py-2 mb-2"
-      >
-        <Image
-          src="/logo.png"
-          alt="ZRP"
-          width={44}
-          height={44}
-          className="w-11 h-11 object-contain"
-        />
-      </Link>
+      {/*
+        The ZRP mark is deliberately not repeated here.
 
+        Header renders on every route, signed in or out, and already
+        shows it - so at lg and above the same logo painted twice, 85px
+        apart (56px at the top of the header, 44px at the top of this
+        column). The asset is untouched; only the duplicate render is
+        gone, and Header's own logo still links to "/".
+      */}
       {/* Nav items */}
       <nav className="flex-1 flex flex-col gap-1">
         {navItems.map((item) => {

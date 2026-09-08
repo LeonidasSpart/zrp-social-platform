@@ -100,7 +100,7 @@ export default function TransparencyPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter">
-      <main>
+      <div>
         {/* Hero */}
         <section className="relative bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack py-20 px-4">
           <div className="max-w-4xl mx-auto text-center">
@@ -344,7 +344,7 @@ export default function TransparencyPage() {
             </div>
           </div>
         </section>
-      </main>
+      </div>
     </div>
   );
 }
