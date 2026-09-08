@@ -91,6 +91,15 @@ data class ConversationUiState(
     val isUploadingAttachment: Boolean = false,
     val attachmentUploadProgress: Float = 0f,
     val attachmentError: ChatAttachmentError? = null,
+    // Mirrors ChatInterface.tsx's own isRecording/recordingSeconds -
+    // the composer swaps to a dedicated recording sub-bar while this is
+    // true (see ConversationScreen). The actual MediaRecorder lives in
+    // ConversationScreen itself (it needs a Context/File, which this
+    // ViewModel deliberately never holds - see MediaUploadRepository's
+    // own KDoc for the established convention); this ViewModel only
+    // owns the UI-facing timer and the post-recording upload+send.
+    val isRecording: Boolean = false,
+    val recordingSeconds: Int = 0,
 )
 
 /**
@@ -114,6 +123,7 @@ class ConversationViewModel(
     private val gson = Gson()
     private var socket: Socket? = null
     private var typingJob: Job? = null
+    private var recordingTimerJob: Job? = null
     private var isTypingLocally = false
 
     init {
@@ -366,6 +376,75 @@ class ConversationViewModel(
 
     fun dismissAttachmentError() {
         _state.update { it.copy(attachmentError = null) }
+    }
+
+    // Called once ConversationScreen's MediaRecorder has actually started -
+    // mirrors ChatInterface.tsx's own setIsRecording(true)/
+    // setRecordingSeconds(0) plus its setInterval ticking recordingSeconds
+    // up every second.
+    fun startRecordingTimer() {
+        recordingTimerJob?.cancel()
+        _state.update { it.copy(isRecording = true, recordingSeconds = 0) }
+        recordingTimerJob = viewModelScope.launch {
+            while (true) {
+                delay(1000)
+                _state.update { it.copy(recordingSeconds = it.recordingSeconds + 1) }
+            }
+        }
+    }
+
+    // Called after ConversationScreen has stopped/discarded the
+    // MediaRecorder without sending - mirrors cancelRecording().
+    fun cancelRecordingTimer() {
+        recordingTimerJob?.cancel()
+        recordingTimerJob = null
+        _state.update { it.copy(isRecording = false, recordingSeconds = 0) }
+    }
+
+    /**
+     * Mirrors ChatInterface.tsx's own recorder.onstop -> startAudioUpload
+     * -> onClientUploadComplete -> sendMessage exactly - the real chatAudio
+     * UploadThing router, the same "🎤 Voice message (m:ss)" content
+     * prefix built from the elapsed recording time (ChatInterface.tsx's
+     * own formatRecordingTime: no leading zero on minutes, seconds
+     * zero-padded to 2 digits). Unlike onImagePicked/onVideoPicked/
+     * onDocumentPicked there's no client-side size/type pre-check here,
+     * matching web exactly - it uploads whatever MediaRecorder produced
+     * and lets the real chatAudio router's own 8MB limit be the only
+     * gate, surfaced through the same UploadFailed path on failure.
+     */
+    fun onVoiceRecorded(contentResolver: ContentResolver, uri: Uri, fileName: String, mimeType: String, size: Long) {
+        recordingTimerJob?.cancel()
+        recordingTimerJob = null
+        val durationSeconds = _state.value.recordingSeconds
+        _state.update { it.copy(isRecording = false, recordingSeconds = 0) }
+
+        val minutes = durationSeconds / 60
+        val seconds = durationSeconds % 60
+        val content = "🎤 Voice message (${minutes}:${seconds.toString().padStart(2, '0')})"
+
+        _state.update { it.copy(isUploadingAttachment = true, attachmentUploadProgress = 0f, attachmentError = null, error = null) }
+        viewModelScope.launch {
+            mediaUploadRepository.upload(
+                slug = "chatAudio",
+                contentResolver = contentResolver,
+                uri = uri,
+                fileName = fileName,
+                mimeType = mimeType,
+                size = size,
+                onProgress = { progress -> _state.update { it.copy(attachmentUploadProgress = progress) } },
+            ).onSuccess { uploaded ->
+                _state.update { it.copy(isUploadingAttachment = false) }
+                sendAttachment(content, uploaded.url)
+            }.onFailure { error ->
+                _state.update {
+                    it.copy(
+                        isUploadingAttachment = false,
+                        attachmentError = ChatAttachmentError.UploadFailed(error.message ?: "Unknown error"),
+                    )
+                }
+            }
+        }
     }
 
     /**

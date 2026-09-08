@@ -242,6 +242,75 @@ export async function GET(_request: Request, props: RouteContext) {
 
     /*
      * ---------------------------------------------------------------
+     * LOCALIZATION KEYS
+     * ---------------------------------------------------------------
+     *
+     * `title`/`description`/`levelLabel` below are hardcoded English
+     * kept only for existing consumers that already render them as-is.
+     * Every one of them also gets a stable `titleKey`/`descriptionKey`
+     * (and `descriptionParams` where the text is parameterized) that
+     * matches a real entry in src/lib/translations.ts, under the same
+     * "backend sends keys, each client localizes" contract already
+     * used for src/lib/milestones.ts. A client should always prefer
+     * the *Key field over the prose field when it has a dictionary
+     * for that key, and fall back to the prose otherwise.
+     *
+     * `titleKey`/`descriptionKey` for the four breakdown signals that
+     * have no top-level equivalent (the per-tier account-age and
+     * per-activity community signals under "history"/"community")
+     * are intentionally omitted - there is no dictionary entry for
+     * them yet since no client renders them today, and an omitted key
+     * is the same "nothing to guess at" fallback iOS and web already
+     * use for any key the dictionary doesn't have.
+     */
+
+    const CATEGORY_KEYS: Record<string, { titleKey: string; descriptionKey: string }> = {
+      security: { titleKey: "trust.categorySecurity", descriptionKey: "trust.categorySecurityDesc" },
+      profile: { titleKey: "trust.categoryProfile", descriptionKey: "trust.categoryProfileDesc" },
+      history: { titleKey: "trust.categoryHistory", descriptionKey: "trust.categoryHistoryDesc" },
+      community: { titleKey: "trust.categoryCommunity", descriptionKey: "trust.categoryCommunityDesc" },
+      zrp: { titleKey: "trust.categoryZrp", descriptionKey: "trust.categoryZrpDesc" },
+    };
+
+    const SIGNAL_KEYS: Record<string, { titleKey: string; descriptionKey: string }> = {
+      email: { titleKey: "trust.signalEmailTitle", descriptionKey: "trust.signalEmailDesc" },
+      avatar: { titleKey: "trust.signalAvatarTitle", descriptionKey: "trust.signalAvatarDesc" },
+      cover: { titleKey: "trust.signalCoverTitle", descriptionKey: "trust.signalCoverDesc" },
+      name: { titleKey: "trust.signalNameTitle", descriptionKey: "trust.signalNameDesc" },
+      bio: { titleKey: "trust.signalBioTitle", descriptionKey: "trust.signalBioDesc" },
+      location: { titleKey: "trust.signalLocationTitle", descriptionKey: "trust.signalLocationDesc" },
+      website: { titleKey: "trust.signalWebsiteTitle", descriptionKey: "trust.signalWebsiteDesc" },
+      community: { titleKey: "trust.signalCommunityTitle", descriptionKey: "trust.signalCommunityDesc" },
+      followers: { titleKey: "trust.signalFollowersTitle", descriptionKey: "trust.signalFollowersDesc" },
+      verified: { titleKey: "trust.signalVerifiedTitle", descriptionKey: "trust.signalVerifiedDesc" },
+    };
+
+    // Breakdown signal keys that have a directly equivalent top-level
+    // signal - reuse that signal's keys rather than inventing new ones.
+    const BREAKDOWN_SIGNAL_KEY_ALIAS: Record<string, string> = {
+      emailVerified: "email",
+      avatarAdded: "avatar",
+      coverAdded: "cover",
+      nameAdded: "name",
+      bioAdded: "bio",
+      locationAdded: "location",
+      websiteAdded: "website",
+      zrpVerification: "verified",
+    };
+
+    const accountAgeEstablished = accountAgeMonths >= 12;
+    const accountAgeTitleKey = accountAgeEstablished
+      ? "trust.signalAccountAgeTitleEstablished"
+      : "trust.signalAccountAgeTitleHistory";
+    const accountAgeDescriptionKey = accountAgeEstablished
+      ? "trust.signalAccountAgeDescEstablished"
+      : accountAgeMonths === 1
+        ? "trust.signalAccountAgeDescHistorySingular"
+        : "trust.signalAccountAgeDescHistoryPlural";
+    const accountAgeDescriptionParams = accountAgeEstablished ? undefined : { months: accountAgeMonths };
+
+    /*
+     * ---------------------------------------------------------------
      * TRANSPARENT SCORE BREAKDOWN
      * ---------------------------------------------------------------
      *
@@ -255,12 +324,14 @@ export async function GET(_request: Request, props: RouteContext) {
         key: "security",
         title: "Security",
         description: "Account security and verification signals.",
+        ...CATEGORY_KEYS.security,
         points: scorePoints.emailVerified,
         maxPoints: 20,
         signals: [
           {
             key: "emailVerified",
             title: "Email verified",
+            titleKey: SIGNAL_KEYS[BREAKDOWN_SIGNAL_KEY_ALIAS.emailVerified].titleKey,
             points: scorePoints.emailVerified,
             maxPoints: 20,
             verified: profileSignals.emailVerified,
@@ -272,6 +343,7 @@ export async function GET(_request: Request, props: RouteContext) {
         key: "profile",
         title: "Profile",
         description: "Positive profile completeness signals.",
+        ...CATEGORY_KEYS.profile,
         points:
           scorePoints.avatarAdded +
           scorePoints.coverAdded +
@@ -284,6 +356,7 @@ export async function GET(_request: Request, props: RouteContext) {
           {
             key: "avatarAdded",
             title: "Profile photo added",
+            titleKey: SIGNAL_KEYS[BREAKDOWN_SIGNAL_KEY_ALIAS.avatarAdded].titleKey,
             points: scorePoints.avatarAdded,
             maxPoints: 10,
             verified: profileSignals.avatarAdded,
@@ -291,6 +364,7 @@ export async function GET(_request: Request, props: RouteContext) {
           {
             key: "coverAdded",
             title: "Profile banner added",
+            titleKey: SIGNAL_KEYS[BREAKDOWN_SIGNAL_KEY_ALIAS.coverAdded].titleKey,
             points: scorePoints.coverAdded,
             maxPoints: 5,
             verified: profileSignals.coverAdded,
@@ -298,6 +372,7 @@ export async function GET(_request: Request, props: RouteContext) {
           {
             key: "nameAdded",
             title: "Display name added",
+            titleKey: SIGNAL_KEYS[BREAKDOWN_SIGNAL_KEY_ALIAS.nameAdded].titleKey,
             points: scorePoints.nameAdded,
             maxPoints: 5,
             verified: profileSignals.nameAdded,
@@ -305,6 +380,7 @@ export async function GET(_request: Request, props: RouteContext) {
           {
             key: "bioAdded",
             title: "Profile bio added",
+            titleKey: SIGNAL_KEYS[BREAKDOWN_SIGNAL_KEY_ALIAS.bioAdded].titleKey,
             points: scorePoints.bioAdded,
             maxPoints: 5,
             verified: profileSignals.bioAdded,
@@ -312,6 +388,7 @@ export async function GET(_request: Request, props: RouteContext) {
           {
             key: "locationAdded",
             title: "Location added",
+            titleKey: SIGNAL_KEYS[BREAKDOWN_SIGNAL_KEY_ALIAS.locationAdded].titleKey,
             points: scorePoints.locationAdded,
             maxPoints: 3,
             verified: profileSignals.locationAdded,
@@ -319,6 +396,7 @@ export async function GET(_request: Request, props: RouteContext) {
           {
             key: "websiteAdded",
             title: "Website added",
+            titleKey: SIGNAL_KEYS[BREAKDOWN_SIGNAL_KEY_ALIAS.websiteAdded].titleKey,
             points: scorePoints.websiteAdded,
             maxPoints: 2,
             verified: profileSignals.websiteAdded,
@@ -330,6 +408,7 @@ export async function GET(_request: Request, props: RouteContext) {
         key: "history",
         title: "Account history",
         description: "Positive signals based on account age.",
+        ...CATEGORY_KEYS.history,
         points:
           scorePoints.established30Days +
           scorePoints.established90Days +
@@ -372,6 +451,7 @@ export async function GET(_request: Request, props: RouteContext) {
         key: "community",
         title: "Community",
         description: "Positive participation and community signals.",
+        ...CATEGORY_KEYS.community,
         points:
           scorePoints.hasPosts +
           scorePoints.hasComments +
@@ -422,12 +502,14 @@ export async function GET(_request: Request, props: RouteContext) {
         key: "zrp",
         title: "ZRP",
         description: "ZRP platform verification signals.",
+        ...CATEGORY_KEYS.zrp,
         points: scorePoints.zrpVerification,
         maxPoints: 8,
         signals: [
           {
             key: "zrpVerification",
             title: "ZRP verification",
+            titleKey: SIGNAL_KEYS[BREAKDOWN_SIGNAL_KEY_ALIAS.zrpVerification].titleKey,
             points: scorePoints.zrpVerification,
             maxPoints: 8,
             verified: Boolean(user.badgeType),
@@ -444,22 +526,28 @@ export async function GET(_request: Request, props: RouteContext) {
 
     let level: "LOW" | "MODERATE" | "GOOD" | "HIGH" | "EXCELLENT";
     let levelLabel: string;
+    let levelLabelKey: string;
 
     if (score >= 90) {
       level = "EXCELLENT";
       levelLabel = "Excellent Trust";
+      levelLabelKey = "trust.levelExcellent";
     } else if (score >= 75) {
       level = "HIGH";
       levelLabel = "High Trust";
+      levelLabelKey = "trust.levelHigh";
     } else if (score >= 55) {
       level = "GOOD";
       levelLabel = "Good Trust";
+      levelLabelKey = "trust.levelGood";
     } else if (score >= 35) {
       level = "MODERATE";
       levelLabel = "Moderate Trust";
+      levelLabelKey = "trust.levelModerate";
     } else {
       level = "LOW";
       levelLabel = "Building Trust";
+      levelLabelKey = "trust.levelLow";
     }
 
     /*
@@ -473,8 +561,10 @@ export async function GET(_request: Request, props: RouteContext) {
         key: "email",
         title: "Email verified",
         description: "The account has completed email verification.",
+        ...SIGNAL_KEYS.email,
         verified: profileSignals.emailVerified,
         category: "SECURITY",
+        categoryTitleKey: CATEGORY_KEYS.security.titleKey,
         points: scorePoints.emailVerified,
         maxPoints: 20,
       },
@@ -483,8 +573,10 @@ export async function GET(_request: Request, props: RouteContext) {
         key: "avatar",
         title: "Profile photo added",
         description: "A profile photo has been added to the account.",
+        ...SIGNAL_KEYS.avatar,
         verified: profileSignals.avatarAdded,
         category: "PROFILE",
+        categoryTitleKey: CATEGORY_KEYS.profile.titleKey,
         points: scorePoints.avatarAdded,
         maxPoints: 10,
       },
@@ -493,8 +585,10 @@ export async function GET(_request: Request, props: RouteContext) {
         key: "cover",
         title: "Profile banner added",
         description: "A profile banner has been added.",
+        ...SIGNAL_KEYS.cover,
         verified: profileSignals.coverAdded,
         category: "PROFILE",
+        categoryTitleKey: CATEGORY_KEYS.profile.titleKey,
         points: scorePoints.coverAdded,
         maxPoints: 5,
       },
@@ -503,8 +597,10 @@ export async function GET(_request: Request, props: RouteContext) {
         key: "name",
         title: "Display name added",
         description: "The account has a configured display name.",
+        ...SIGNAL_KEYS.name,
         verified: profileSignals.nameAdded,
         category: "PROFILE",
+        categoryTitleKey: CATEGORY_KEYS.profile.titleKey,
         points: scorePoints.nameAdded,
         maxPoints: 5,
       },
@@ -513,8 +609,10 @@ export async function GET(_request: Request, props: RouteContext) {
         key: "bio",
         title: "Profile bio added",
         description: "The account has provided profile information.",
+        ...SIGNAL_KEYS.bio,
         verified: profileSignals.bioAdded,
         category: "PROFILE",
+        categoryTitleKey: CATEGORY_KEYS.profile.titleKey,
         points: scorePoints.bioAdded,
         maxPoints: 5,
       },
@@ -523,8 +621,10 @@ export async function GET(_request: Request, props: RouteContext) {
         key: "location",
         title: "Location added",
         description: "A location has been added to the public profile.",
+        ...SIGNAL_KEYS.location,
         verified: profileSignals.locationAdded,
         category: "PROFILE",
+        categoryTitleKey: CATEGORY_KEYS.profile.titleKey,
         points: scorePoints.locationAdded,
         maxPoints: 3,
       },
@@ -533,8 +633,10 @@ export async function GET(_request: Request, props: RouteContext) {
         key: "website",
         title: "Website added",
         description: "A website has been added to the profile.",
+        ...SIGNAL_KEYS.website,
         verified: profileSignals.websiteAdded,
         category: "PROFILE",
+        categoryTitleKey: CATEGORY_KEYS.profile.titleKey,
         points: scorePoints.websiteAdded,
         maxPoints: 2,
       },
@@ -551,8 +653,12 @@ export async function GET(_request: Request, props: RouteContext) {
             : `This account has been on ZRP for ${accountAgeMonths} month${
                 accountAgeMonths === 1 ? "" : "s"
               }.`,
+        titleKey: accountAgeTitleKey,
+        descriptionKey: accountAgeDescriptionKey,
+        descriptionParams: accountAgeDescriptionParams,
         verified: accountAgeDays >= 30,
         category: "HISTORY",
+        categoryTitleKey: CATEGORY_KEYS.history.titleKey,
         points:
           scorePoints.established30Days +
           scorePoints.established90Days +
@@ -566,12 +672,14 @@ export async function GET(_request: Request, props: RouteContext) {
         title: "Community activity",
         description:
           "The account has participated in the ZRP community.",
+        ...SIGNAL_KEYS.community,
         verified:
           activitySignals.hasPosts ||
           activitySignals.hasComments ||
           activitySignals.hasLikes ||
           activitySignals.hasReposts,
         category: "COMMUNITY",
+        categoryTitleKey: CATEGORY_KEYS.community.titleKey,
         points:
           scorePoints.hasPosts +
           scorePoints.hasComments +
@@ -585,8 +693,10 @@ export async function GET(_request: Request, props: RouteContext) {
         title: "Community connections",
         description:
           "The account has established connections with other ZRP users.",
+        ...SIGNAL_KEYS.followers,
         verified: activitySignals.hasFollowers,
         category: "COMMUNITY",
+        categoryTitleKey: CATEGORY_KEYS.community.titleKey,
         points: scorePoints.hasFollowers,
         maxPoints: 3,
       },
@@ -596,8 +706,10 @@ export async function GET(_request: Request, props: RouteContext) {
         title: "ZRP verification",
         description:
           "This account currently has a ZRP verification badge.",
+        ...SIGNAL_KEYS.verified,
         verified: Boolean(user.badgeType),
         category: "ZRP",
+        categoryTitleKey: CATEGORY_KEYS.zrp.titleKey,
         points: scorePoints.zrpVerification,
         maxPoints: 8,
       },
@@ -621,6 +733,8 @@ export async function GET(_request: Request, props: RouteContext) {
         title: "Wallet verified",
         description:
           "This account has a cryptographically verified crypto wallet linked to it.",
+        titleKey: "trust.signalWalletVerifiedTitle",
+        descriptionKey: "trust.signalWalletVerifiedDesc",
         verified: Boolean(user.verifiedSolanaWallet),
       },
     ];
@@ -646,6 +760,7 @@ export async function GET(_request: Request, props: RouteContext) {
         score,
         level,
         levelLabel,
+        levelLabelKey,
         generatedAt: new Date().toISOString(),
 
         /*

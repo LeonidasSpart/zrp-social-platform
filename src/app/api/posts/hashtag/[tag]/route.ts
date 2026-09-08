@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { viewablePostAuthorFilter } from "@/lib/permissions";
+import { parseCursorParams, buildPage } from "@/lib/pagination";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ tag: string }> }) {
   const params = await props.params;
@@ -37,75 +38,99 @@ export async function GET(req: NextRequest, props: { params: Promise<{ tag: stri
       ];
     }
 
-    // ─── Fetch posts with the given hashtag ──────────────────────────
-    const posts = await prisma.post.findMany({
-      where: {
-        hashtags: { has: normalizedTag },
-        status: "published",
-        scheduledAt: null,
-        authorId: { notIn: excludedAuthorIds },
-        author: viewablePostAuthorFilter(viewerId),
-      },
-      take: 50,
-      orderBy: { createdAt: "desc" },
-      include: {
-        author: {
-          select: {
-            id: true,
-            username: true,
-            name: true,
-            avatarUrl: true,
-            badgeType: true,
-          },
-        },
-        quotePost: {
-          include: {
-            author: {
-              select: {
-                id: true,
-                username: true,
-                name: true,
-                avatarUrl: true,
-                badgeType: true,
-              },
-            },
-            _count: {
-              select: {
-                likes: true,
-                comments: true,
-                reposts: true,
-                quotedBy: true,
-              },
-            },
-          },
-        },
-        _count: {
-          select: {
-            likes: true,
-            comments: true,
-            reposts: true,
-            quotedBy: true,
-          },
-        },
-      },
-    });
+    const where = {
+      hashtags: { has: normalizedTag },
+      status: "published",
+      scheduledAt: null,
+      authorId: { notIn: excludedAuthorIds },
+      author: viewablePostAuthorFilter(viewerId),
+    };
 
-    // ─── Add liked status for viewer ──────────────────────────────
-    if (viewerId && posts.length > 0) {
+    const include = {
+      author: {
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          avatarUrl: true,
+          badgeType: true,
+        },
+      },
+      quotePost: {
+        include: {
+          author: {
+            select: {
+              id: true,
+              username: true,
+              name: true,
+              avatarUrl: true,
+              badgeType: true,
+            },
+          },
+          _count: {
+            select: {
+              likes: true,
+              comments: true,
+              reposts: true,
+              quotedBy: true,
+            },
+          },
+        },
+      },
+      _count: {
+        select: {
+          likes: true,
+          comments: true,
+          reposts: true,
+          quotedBy: true,
+        },
+      },
+    };
+
+    // ─── Attach liked status for viewer ────────────────────────────
+    const withLiked = async <T extends { id: string }>(fetchedPosts: T[]): Promise<T[]> => {
+      if (!viewerId || fetchedPosts.length === 0) return fetchedPosts;
       const likes = await prisma.like.findMany({
         where: {
           userId: viewerId,
-          postId: { in: posts.map(p => p.id) },
+          postId: { in: fetchedPosts.map((p) => p.id) },
         },
         select: { postId: true },
       });
-      const likedIds = new Set(likes.map(l => l.postId));
-      posts.forEach(p => {
-        (p as any).liked = likedIds.has(p.id);
+      const likedIds = new Set(likes.map((l) => l.postId));
+      return fetchedPosts.map((p) => ({ ...p, liked: likedIds.has(p.id) }));
+    };
+
+    const { searchParams } = req.nextUrl;
+    const usesPagination = searchParams.has("cursor") || searchParams.has("limit");
+
+    if (!usesPagination) {
+      // No client in the wild sends cursor/limit here today and every
+      // one expects a bare JSON array - this keeps that exact contract
+      // (including the historical 50-post cap) while the branch below
+      // adds a real way to reach older posts under a popular hashtag,
+      // the same "legacy shape vs. {items,nextCursor} envelope" bridge
+      // already used by GET /api/messages/{userId}.
+      const posts = await prisma.post.findMany({
+        where,
+        take: 50,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        include,
       });
+      return NextResponse.json(await withLiked(posts));
     }
 
-    return NextResponse.json(posts);
+    const { cursor, limit: pageSize } = parseCursorParams(req);
+    const rawPosts = await prisma.post.findMany({
+      where,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: pageSize + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+      include,
+    });
+
+    const { items, nextCursor } = buildPage(rawPosts, pageSize);
+    return NextResponse.json({ items: await withLiked(items), nextCursor });
   } catch (error) {
     console.error("Error fetching hashtag posts:", error);
     return NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 });

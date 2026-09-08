@@ -60,7 +60,7 @@ called and the real response being handled.
 | Onboarding | `POST /api/user/onboarding-complete`, `PUT /api/user/profile`, `POST /api/user/update-avatar`, `GET /api/users/suggested` | ✅ | ✅ | ✅ profile, avatar, follow suggestions; every step skippable | IMPLEMENTED |
 | Google sign-in | `POST /api/mobile/auth/google` (added on `main` by PR #115) verifies a Google ID token and mints the same NextAuth JWT; the website still uses the NextAuth `google` web provider | ✅ | ✅ Credential Manager | ⬜ backend no longer blocks it — obtaining the ID token on iOS is outstanding client-side work, not built here | MISSING (was [B1](#b1-native-oauth--google-now-unblocked-server-side-apple-still-blocked)) |
 | **Sign in with Apple** | NextAuth `apple` provider (web OAuth, Services ID) | ✅ (if env configured) | n/a | ❌ | **BLOCKED — [B2](#b2-sign-in-with-apple-native)** |
-| Account deletion | `POST /api/user/delete`, `/api/user/delete/confirm`, `GET /api/user/delete-status` | ✅ | ✅ | ✅ both paths — see [Settings](#settings); the web page's own wiring bug that skipped the 30-day path entirely is fixed — see [F3](#f3-account-deletions-30-day-grace-period-never-actually-applied--fixed-server-side--web) | IMPLEMENTED |
+| Account deletion | `POST /api/user/delete`, `/api/user/delete/confirm`, `GET /api/user/delete-status` | ✅ | ✅ | ✅ both paths — see [Settings](#settings); the web page's own wiring bug that skipped the 30-day path entirely is fixed — see [F5](#f5-account-deletions-30-day-grace-period-never-actually-applied--fixed-server-side--web) | IMPLEMENTED |
 
 ### Feed & posts
 
@@ -79,7 +79,7 @@ called and the real response being handled.
 | Edit own post | `PUT /api/posts/{id}` (text only, matches web) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Pin post (single slot) | `POST /api/posts/{id}/pin` → `{pinned}`, author-only | ✅ | ✅ | ✅ offered from the post menu on your own profile; the pinned post is fetched via `GET /api/posts/{id}` (the profile route reports only `pinnedPostId`), labelled above the Posts tab and filtered out of the list below | IMPLEMENTED |
 | Create post (text) | `POST /api/posts` | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Scheduled posts | `POST /api/posts` + `scheduledAt` (naive wall-clock) → stored with `status: "scheduled"`; published by the platform's own scheduled-post cron. Monthly per-plan cap enforced server-side with a 400 | ✅ | ✅ | ✅ composer control; the same naive `yyyy-MM-dd'T'HH:mm` the web sends, deliberately — see [F2](#f2-scheduled-posts-are-timed-in-the-servers-timezone-not-the-authors--open). No management surface, matching the web, which has none either | IMPLEMENTED |
+| Scheduled posts | `POST /api/posts` + `scheduledAt`, resolved through `resolveScheduledAt` — an ISO-8601 instant is parsed directly, a naive string is read in the server's zone. Stored with `status: "scheduled"`; published by the platform's own cron. Monthly per-plan cap enforced server-side with a 400 | ✅ | 🔶 still sends the naive string | ✅ composer control, sending a real UTC instant so the post publishes at the moment the author chose — see [F2](#f2-scheduled-posts-are-timed-in-the-servers-timezone-not-the-authors--fixed-server-web-and-ios). No management surface, matching the web, which has none either | IMPLEMENTED |
 | Quote post | `POST /api/posts` + `quotePostId` | ✅ | ✅ | ✅ (Quote action on every post, with a preview in the composer) | IMPLEMENTED |
 | Reposts list | `GET /api/posts/{id}/reposts` → `{items,nextCursor}` of users | ✅ | ✅ | ✅ reached from the post's repost count; shares one screen with followers/following, which answer the same shape | IMPLEMENTED |
 | Quotes list | `GET /api/posts/{id}/quotes` → `{items,nextCursor}` of posts | ✅ | ✅ | ✅ reached from the post's quote count, rendered with the standard post card | IMPLEMENTED |
@@ -110,8 +110,8 @@ called and the real response being handled.
 | --- | --- | --- | --- | --- | --- |
 | Profile header + stats | `GET /api/users/{username}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Professional category | same route, `category`/`showCategory` (already selected server-side) | ✅ | ✅ (`UsersApi.kt` already decodes it) | ✅ (`UserProfile.swift` already decodes it) | IMPLEMENTED |
-| Charity impact | same route, new `charityContributionUsdc` - the real sum of this profile's own completed tips'/purchases' `charityAmount` (`src/lib/charity.ts`), computed the same way `api/transparency/charity` computes it platform-wide. Web's own display of this was previously `Math.floor(Math.random() * 50) + 5` "meals" - fabricated, regenerated every page load, with no established $-to-"meals" conversion anywhere in this codebase to make real. Now a real USD figure on web; not yet consumed by Android or iOS | ✅ (fixed - was fake) | ⬜ | ⬜ backend-only so far | MISSING (was fabricated on web) |
-| Milestone badges | same route, new `milestones: [{key, icon, params?}]` (`src/lib/milestones.ts`) - years-on-ZRP / post-count / follower-count tiers, previously computed only in web's own client code so Android/iOS had no way to show the same badges a profile earned. Stable `key` + numeric `params`, same as Trust Passport - each client owns its own localized label | ✅ (now server-computed, was client-only) | ⬜ | ⬜ backend-only so far | MISSING |
+| Charity impact | same route, new `charityContributionUsdc` - the real sum of this profile's own completed tips'/purchases' `charityAmount` (`src/lib/charity.ts`), computed the same way `api/transparency/charity` computes it platform-wide. Web's own display of this was previously `Math.floor(Math.random() * 50) + 5` "meals" - fabricated, regenerated every page load, with no established $-to-"meals" conversion anywhere in this codebase to make real. Now a real USD figure on web; not yet consumed by Android or iOS | ✅ (fixed - was fake) | ⬜ | ✅ the real USDC figure, shown only when the route reports one — absent is not zero, since "$0.00 contributed" would be a claim the server never made. The 35% share matches the website's own constant | IMPLEMENTED |
+| Milestone badges | same route, new `milestones: [{key, icon, params?}]` (`src/lib/milestones.ts`) - years-on-ZRP / post-count / follower-count tiers, previously computed only in web's own client code so Android/iOS had no way to show the same badges a profile earned. Stable `key` + numeric `params`, same as Trust Passport - each client owns its own localized label | ✅ (now server-computed, was client-only) | ⬜ | ✅ key → this app's own translation, nothing recomputed. An unrecognised key is skipped rather than rendered raw, so a newer backend's badge never puts "posts_500" in front of an Arabic or Chinese reader | IMPLEMENTED |
 | User posts tab | `GET /api/users/{username}/posts` (**`{items,nextCursor}`**) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Replies / media / likes / reposts tabs | `GET /api/users/{username}/replies`, `/media`, `/likes`, `/reposts` | ✅ | 🔶 | ✅ all four, each paging on its own cursor (likes and reposts page on the join row, not the post); Likes is hidden unless it is your own profile or the account keeps likes public, matching the web | IMPLEMENTED |
 | Profile analytics tab | `GET /api/user/posts/stats` — keyed by the SESSION, so there is no route for anyone else's numbers; returns the 20 newest posts and totals summed over exactly those | ✅ | ⬜ | ✅ own-profile only, for that reason; the scope is stated on screen rather than letting the totals read as lifetime figures | IMPLEMENTED |
@@ -120,7 +120,7 @@ called and the real response being handled.
 | Edit profile | `PUT /api/user/profile`, `POST /api/user/update-avatar`, `POST /api/user/update-cover` | ✅ | ✅ | ✅ loads the real profile first, so blanks it never read cannot erase a bio | IMPLEMENTED |
 | Suggested users | `GET /api/users/suggested` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Private-account gating | every content route returns `{items: []}`, not 403 | ✅ | 🔶 | ✅ (explains the account is private instead of showing "no posts") | IMPLEMENTED |
-| Trust Passport | `GET /api/users/{username}/trust` — score, level, per-signal points and the breakdown are all computed server-side; the route's own comment says a client must never calculate them | ✅ | ⬜ | ✅ reached from any profile's menu; nothing is derived beyond the ring's fraction (reported score ÷ reported maximum), and signal titles arrive in English because the route hardcodes them — see L5 | IMPLEMENTED |
+| Trust Passport | `GET /api/users/{username}/trust` — score, level, per-signal points and the breakdown are all computed server-side; the route's own comment says a client must never calculate them | ✅ | ⬜ | ✅ reached from any profile's menu; nothing is derived beyond the ring's fraction (reported score ÷ reported maximum); signal/category/level titles now also carry a `titleKey`/`descriptionKey` for localization — see L5 (FIXED) | IMPLEMENTED |
 
 ### Discovery
 
@@ -129,7 +129,7 @@ called and the real response being handled.
 | Search (users + posts) | `GET /api/search?q=&type=all` (min 2 chars; 10 users / 20 posts, unpaginated) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Trending hashtags | `GET /api/hashtags/trending` (bare array, server-cached, limit clamped 1–50) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Hashtag search | `GET /api/hashtags/search?q=` (new - prefix match against every real hashtag, ranked by usage, `{items,nextCursor}`; distinct from the row above, which only exact-matches a tag already typed out in full as part of a broader post search) | ⬜ no search-as-you-type hashtag UI on any client yet | ⬜ | ⬜ backend-only so far - not built on any client | MISSING |
-| Hashtag timeline | `GET /api/posts/hashtag/{tag}` (bare array, 50, no pagination) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Hashtag timeline | `GET /api/posts/hashtag/{tag}` — now cursor-paginated on request, same `?cursor=`/`?limit=` → `{items,nextCursor}` convention as every other paginated route; a request with neither still gets the unchanged bare array capped at 50 — **FIXED server-side** | ✅ (unchanged, legacy shape) | ✅ | ✅ same field available to consume; older posts under a popular hashtag were previously unreachable past the first 50 | IMPLEMENTED |
 | Hashtag / mention tap-through in post text | — | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Explore / trending pages | `GET /api/posts/explore` | ✅ | 🔶 (For You tab) | 🔶 For You tab + a discover surface (trending tags, suggested people) | PARTIAL |
 
@@ -198,7 +198,7 @@ called and the real response being handled.
 | Apply | `POST /api/opportunity/{id}/apply` | ✅ | ✅ | ✅ cover note; the route's own refusals ("already applied", "your own listing", "note too long") are shown as written | IMPLEMENTED |
 | Apply externally | `externalUrl` on the listing | ✅ | ✅ | ✅ opens the link instead of posting an application — the field exists precisely so ZRP does not collect it | IMPLEMENTED |
 | Attach a CV | `resumeUrl` on the apply body | ✅ | ✅ | ⬜ the field is sent as absent rather than empty; a résumé picker is not built | MISSING |
-| Save a listing | `POST`/`DELETE /api/opportunity/{id}/save` | ✅ | ✅ | 🔶 both directions work, but **no route reports whether a listing is already saved** — the save endpoints only answer with the state they just set. The control is therefore indeterminate until used, rather than claiming "not saved" | PARTIAL (backend limitation) |
+| Save a listing | `POST`/`DELETE /api/opportunity/{id}/save`; the detail route now reports `alreadySaved` (PR #150) | ✅ (web now hydrates from `alreadySaved`, was always `false` on load) | ✅ | ✅ the bookmark reflects real saved state on load. It stays indeterminate rather than showing "not saved" only when the route genuinely reports nothing — a signed-out viewer, who has nothing saved and no way to save it | IMPLEMENTED |
 | Post a listing | `POST /api/opportunity` — created as `PENDING_REVIEW` | ✅ | ✅ | ✅ full composer: all eleven types, skills editor, deadline picker, paid/remote toggles, external URL. The route's own limits are mirrored so a refusal is not how anyone learns them, and the note says the listing is not live yet | IMPLEMENTED |
 | Edit a listing | `PUT /api/opportunity/{id}` — poster or staff | ✅ | ✅ | ✅ same composer. A **substantive** edit (type, title, description, compensation) returns a live listing to `PENDING_REVIEW`; the warning appears only when the route's own four fields actually changed | IMPLEMENTED |
 | Close a listing | `PUT /api/opportunity/{id}` with `status: "CLOSED"` | ✅ | ✅ | ✅ offered only on an ACTIVE listing, which is the only state the route honours it in — elsewhere it silently keeps the existing status | IMPLEMENTED |
@@ -343,7 +343,7 @@ called and the real response being handled.
 | Settings hub | — | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Security (password) | `PUT /api/user/password` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Privacy (private account, public likes/following) | `PUT /api/user/privacy` | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Account deletion — 30-day schedule / cancel | `GET /api/user/delete-status`, `POST /api/user/delete` | ✅ | ✅ | ✅ web's own button reaching this path at all was broken until [F3](#f3-account-deletions-30-day-grace-period-never-actually-applied--fixed-server-side--web); a cron sweep now actually enforces the 30 days | IMPLEMENTED |
+| Account deletion — 30-day schedule / cancel | `GET /api/user/delete-status`, `POST /api/user/delete` | ✅ | ✅ | ✅ web's own button reaching this path at all was broken until [F5](#f5-account-deletions-30-day-grace-period-never-actually-applied--fixed-server-side--web); a cron sweep now actually enforces the 30 days | IMPLEMENTED |
 | Account deletion — immediate and permanent | `POST /api/user/delete/confirm` | ✅ | ✅ | ✅ typed DELETE gate, as on web | IMPLEMENTED |
 | Data export | `GET /api/settings/export-data` | ✅ | ⬜ | ✅ downloaded to a file and handed to the share sheet | IMPLEMENTED |
 | Account (email, username) | `GET/PUT /api/user/username`, `PUT /api/user/email` | ✅ | ✅ | ✅ 30-day username cooldown surfaced before typing; email change states that it needs verification | IMPLEMENTED |
@@ -378,6 +378,31 @@ boundary, and are displayed as strings. Parsing them into local `Date`s
 would shift a day for anyone west of UTC and make the axis labels disagree
 with the server's own buckets.
 
+### Ads (viewing)
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Sponsored post in the feed | `GET /api/ads/serve` → `{ad}` (usually `null`); picks at random among ACTIVE campaigns that still have budget, and never the viewer's own | ✅ `AdCard.tsx`, after the post at index 4 when the feed has more than five | ✅ | ✅ same slot and same rule, on both feed tabs — the web's ad block carries no `feedType` guard, unlike the discovery modules directly beneath it in the same map, so that difference is deliberate and copied | IMPLEMENTED |
+| Impression tracking | `POST /api/ads/impression` | ✅ IntersectionObserver at 0.5 | ✅ | ✅ measured against the key window at the same 0.5 threshold, fired once. **Not `.onAppear`** — a `LazyVStack` builds a row slightly before it is visible, which is fine for a view tally and not for something an advertiser is billed for | IMPLEMENTED |
+| Click tracking + destination | `POST /api/ads/click` → `{logged, redirectUrl}` | ✅ | ✅ | ✅ the destination comes from the route, not from `targetUrl` locally — an advertiser who set none gets `/post/{id}` back. A relative path opens in-app; an advertiser's own URL opens in the browser, where the address bar shows whose site it is | IMPLEMENTED |
+| Author tap is not a click | — | ✅ | ✅ | ✅ opening the advertiser's profile is not the billed event, the same line `PostCard` draws between its author link and its body | IMPLEMENTED |
+
+The ad card deliberately reuses **none** of the post card's engagement
+machinery. The serve route sends no counts and no viewer flags, and there
+is no route to like, repost or reply to an ad — a post card here would
+show four controls with nothing behind them. `AdCard.tsx` reuses none of
+`PostCard` for the same reason; this matches that decision rather than
+arriving at a different one.
+
+A video ad shows its poster frame and does not autoplay. The feed has one
+shared `AVPlayer` that belongs to the timeline, and letting a sponsored
+post take it would interrupt the video someone was actually watching.
+
+The ad is fetched **once per app run**, not per feed load. The route picks
+at random among eligible campaigns, so refetching on pull-to-refresh would
+swap the ad under a reader mid-scroll and bill a second impression for
+what is, to them, the same slot. The website fetches once on mount too.
+
 ### Deliberately out of scope for the consumer iOS app
 
 | Area | Reason |
@@ -385,7 +410,7 @@ with the server's own buckets.
 | **Admin console** (`/api/admin/**`, 40+ routes) | **Web-only for v1, by decision — not an oversight.** Android ships four admin screens; iOS ships none. Every admin route is independently role-gated server-side, so an iOS app without an admin surface loses no security and gains none: hiding a screen is not what protects those routes, and building one would not weaken them either. The reason to leave it out is product, not safety — a staff console is a desk-and-keyboard tool, and the four screens Android has cover a fraction of the twenty the website offers. Anyone doing moderation work should be on the web console that has all of it. Revisit only if staff genuinely need to act from a phone; if so, build it against the same server-role gate and never surface an admin control on a client check alone. |
 | Tips, plan upgrade, premium-post purchase, help/charity contribution, creator withdrawals | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
 | Careers, Investors, Press, Transparency, API keys, Team | WEB-ONLY — Android has no surface for any of them either. |
-| **Ads** (`/api/ads/**`) | Campaign creation is ad *spend* — money leaving an advertiser's account for placement. That is a commerce surface with the same store-policy exposure as the payment routes above, and it is a desk task besides. Android has no surface for it either. |
+| **Ads** — advertiser side (`/api/ads/campaigns`, `src/app/ads`, `src/app/ads/new`) | Campaign creation is ad *spend* — money leaving an advertiser's account for placement. That is a commerce surface with the same store-policy exposure as the payment routes above, and it is a desk task besides. **The viewing side is a different question and is now built** — see the Ads section below. |
 | **Journalist** (`/api/journalist/**`) | **Outstanding, and narrow.** Every route is behind `requireJournalistRole()`, so the only part most people could use is the application form. The rest is an article editor with a draft/review/publish workflow — a professional writing tool, and a poor fit for a phone. Worth building when journalists ask for it, not before. |
 | **Creator Studio** — earnings half (`/api/creator/dashboard`, `/withdraw`) | Balance, tips, premium revenue and withdrawals are the monetisation surface the row above already excludes. |
 
@@ -495,41 +520,76 @@ place a stale reaction can persist until the thread is reopened.
 Web and Android are unchanged and still send neither param, so both
 still get the bare-array shape they expect.
 
-### L2. `GET /api/music/playlists/{id}` does not report per-track `liked`
+### L2. `GET /api/music/playlists/{id}` does not report per-track `liked` - **FIXED server-side**
 
 Every other route that returns music tracks tells the caller whether the
 signed-in viewer has liked each one: `/api/music/home`, `/api/music/tracks`
 (line 104), `/api/music/artists/{id}` and `/api/music/albums/{id}` all
-attach a `liked` boolean. The playlist detail route does not - it returns
+attach a `liked` boolean. The playlist detail route did not - it returned
 the join rows and their tracks with no like state at all.
 
-The visible effect is the same on every client: a track opened from a
-playlist shows an empty heart even when the viewer has liked it, until
-some other screen loads the same track. iOS does **not** paper over this
+The visible effect was the same on every client: a track opened from a
+playlist showed an empty heart even when the viewer had liked it, until
+some other screen loaded the same track. iOS did **not** paper over this
 by assuming `false`; `MusicLikeStore` treats a missing flag as "unknown"
-and keeps whatever it already knows, so the heart is right whenever any
-other surface has reported it. Attaching `liked` there the same way the
-album route does (one `musicLike.findMany` over the playlist's track ids)
-would fix it for web, Android and iOS at once.
+and keeps whatever it already knows, so the heart was right whenever any
+other surface had reported it.
 
-Noted, not worked around.
+`GET /api/music/playlists/{id}` now attaches `liked` on each track the
+same way `/api/music/albums/{id}` and `/api/music/artists/{id}` already
+do: one `musicLike.findMany` scoped to the signed-in viewer and the
+playlist's own track ids, `false` for every track when there is no
+session. The response shape is unchanged otherwise - `liked` sits on the
+nested `track` object inside each `{ id, position, track }` row, matching
+where every other route that returns full track objects puts it (and
+where iOS's `MusicTrack` already expects to find it), so no client needs
+any changes to pick it up.
 
-### L5. The Trust Passport's signal text is hardcoded English
+### L5. The Trust Passport's signal text is hardcoded English - **FIXED server-side + web**
 
-`GET /api/users/{username}/trust` builds its `breakdown` and `signals`
+`GET /api/users/{username}/trust` built its `breakdown` and `signals`
 with English `title` and `description` strings written into the route
 ("Email verified", "Positive profile completeness signals."), and the
-level's own `levelLabel` likewise. None of them exist in
-`src/lib/translations.ts`, so there is nothing to translate against.
+level's own `levelLabel` likewise. None of them existed in
+`src/lib/translations.ts`, so there was nothing to translate against.
 
-The website has the same limitation: it translates its own chrome and
-renders the route's strings as they arrive. iOS does the same rather
-than inventing a dictionary for values the backend can add to at any
+The website had the same limitation: it translated its own chrome and
+rendered the route's strings as they arrived. iOS did the same rather
+than inventing a dictionary for values the backend could add to at any
 time — a guessed label is worse than an untranslated one on a screen
 whose whole point is transparency.
 
-Moving those strings into the shared dictionary, or having the route
-send keys rather than prose, would fix it for every client at once.
+Every `title`/`description` in `breakdown` and `signals`, every entry in
+`additionalSignals`, and `passport.levelLabel` now carry a sibling
+`titleKey`/`descriptionKey` (plus `descriptionParams` where the text is
+parameterized, e.g. the account-age signal's month count) that matches a
+real entry in `src/lib/translations.ts` — five of those entries
+(`trust.category*Desc`, one per breakdown category) are newly added,
+across all 11 locales; the rest already existed. This is the same
+"backend sends a stable key, each client owns the wording" contract
+already used for `src/lib/milestones.ts`. The old English `title`/
+`description`/`levelLabel` fields are unchanged, so nothing that already
+renders them breaks.
+
+The four breakdown-only signals with no top-level equivalent (the
+per-tier account-age and per-activity community entries under
+`history`/`community`) intentionally have no key yet — nothing renders
+them today, so a key with no real dictionary backing would just be a
+different kind of prose to guess at.
+
+The website's `src/app/trust/[username]/page.tsx` now reads `titleKey`/
+`descriptionKey`/`categoryTitleKey`/`levelLabelKey` from the response
+instead of keeping its own second copy of the signal-key mapping — the
+two copies had already partially drifted before this fix (the page's
+map only covered the top-level `signals`, not `breakdown`, and existed
+only in the web bundle iOS and Android can't see). The API response is
+now the one place that mapping lives.
+
+iOS and Android can adopt the same fields whenever it's their turn:
+prefer `titleKey`/`descriptionKey` when present, using the same
+translation values as `src/lib/translations.ts` (or an equivalent
+per-platform dictionary keyed the same way), and fall back to the raw
+`title`/`description` only when a key is absent.
 
 ### L4. The email-preference setting is enforced but unreachable
 
@@ -575,7 +635,7 @@ browsing For You. Not built here.
 Found while auditing, per the isolation rules: reported here for their
 owners, not silently fixed from iOS.
 
-### F3. Account deletion's 30-day grace period never actually applied — **FIXED server-side + web**
+### F5. Account deletion's 30-day grace period never actually applied — **FIXED server-side + web**
 
 Found while auditing account deletion/privacy per the agreed backend
 priority list — not an iOS parity gap, a real, already-shipped bug in
@@ -628,7 +688,7 @@ Flagged for human review before merge given the blast radius (permanent,
 irreversible account deletion), per the standing rule for security- and
 safety-sensitive changes.
 
-### F2. Scheduled posts are timed in the SERVER's timezone, not the author's — **FIXED server-side + web**
+### F2. Scheduled posts are timed in the SERVER's timezone, not the author's — **FIXED (server, web and iOS)**
 
 `POST /api/posts` used to store a bare `new Date(scheduledAt)`, and the
 composer sent whatever `<input type="datetime-local">` produces: a naive
@@ -658,28 +718,79 @@ a caller that supplies neither:
 computes correctly, since parsing happens in the author's own real
 timezone there) alongside the unchanged naive string.
 
-**Android and iOS remain on the legacy path** (they still send only the
-naive string) and are therefore still affected exactly as before - this
-was never something either could work around on their own, and still
-isn't. Both now have a real, documented, already-live backend contract to
-adopt without needing any further backend change:
+**iOS is now fixed** and takes path 1. `ScheduledInstant.string(from:)`
+replaces the old `WallClock.string(from:)` and writes
+`yyyy-MM-dd'T'HH:mm:ss'Z'` in UTC. The author's `Date` already holds the
+absolute moment their choice resolved to in their own timezone, so
+nothing on the client needs to know what that timezone was - rendering
+it as UTC is only how it is written down.
 
-- Android already tracks `scheduledAtMillis: Long?` internally
-  (`CreatePostViewModel.kt`) - `Instant.ofEpochMilli(scheduledAtMillis).toString()`
-  sent as `scheduledAt` directly satisfies path 1 above with no second
-  field needed at all.
-- iOS's `ComposeViewModel` already has a real `Date` before formatting it
-  through `WallClock.string(from:)` into the naive shape - switching that
-  one call to `ISO8601DateFormatter().string(from: scheduledAt)` would do
-  the same. Alternatively, either client can keep sending the naive
-  string and add `scheduledAtOffsetMinutes` (path 2) - e.g. Android's
-  `TimeZone.getDefault().getOffset(scheduledAtMillis) / 60000 * -1`, or
-  iOS's `-TimeZone.current.secondsFromGMT(for: scheduledAt) / 60` (the
-  sign flip in both matches `Date.prototype.getTimezoneOffset()`'s
-  convention: positive when local is *behind* UTC).
+Path 1 rather than path 2 for three reasons: one field instead of two,
+with nothing to keep in sync; no sign convention to get backwards; and
+it is the only one of the two that also fixes the poll expiry below,
+which knows nothing about `scheduledAtOffsetMinutes`.
 
-Not worked around from iOS - this remains real, separate client-side work
-for whoever picks it up, now with no backend blocker.
+Verified against the real `resolveScheduledAt`: a UTC+9 author choosing
+09:00 now sends `2026-09-15T00:00:00Z` and gets exactly that instant,
+where the old naive string produced `2026-09-15T09:00:00.000Z` - nine
+hours late. The Z-suffix branch is already covered by
+`src/lib/__tests__/scheduled-time.test.ts`, so no new backend test was
+needed and none was added.
+
+**Android remains on the legacy path.** Not this agent's code to change:
+`Instant.ofEpochMilli(scheduledAtMillis).toString()` sent as
+`scheduledAt` satisfies path 1 there with no second field either.
+
+### F3. A poll's `expiresAt` is still timed in the server's timezone — **FIXED server-side + web**
+
+The F2 fix routed `scheduledAt` through `resolveScheduledAt`. A poll's
+end date in the same request was **not**: `POST /api/posts` stored it
+with a bare `new Date(poll.expiresAt)`, and the poll branch read no
+offset field at all.
+
+So the original bug survived there in full. The web composer's poll end
+date is an `<input type="datetime-local">` sending a naive string, which
+the server read in its own zone - a poll an author in UTC+9 set to close
+at 23:00 actually closed at 23:00 UTC, nine hours late; west of UTC it
+closed early, cutting voting short.
+
+**iOS was not affected**, because the same ISO-8601 instant it sends for
+`scheduledAt` is sent here too, and a bare `new Date` parses an instant
+correctly - that is precisely why an instant was the right choice rather
+than the offset field.
+
+Fixed exactly the way this finding proposed: `POST /api/posts` now
+routes `poll.expiresAt` through `resolveScheduledAt(poll.expiresAt,
+poll.expiresAtOffsetMinutes)`, the same function `scheduledAt` already
+uses, and the web composer now sends a matching `expiresAtOffsetMinutes`
+(`new Date(pollExpiry).getTimezoneOffset()`) alongside the poll's naive
+`expiresAt` string. iOS needed no change and made none - its ISO-8601
+instant already satisfies path 1 of `resolveScheduledAt` with no second
+field.
+
+### F4. Encoding a Swift `Date` into a request body silently sends a 2001 epoch — **FIXED (iOS)**
+
+Not a backend fault, but worth recording because it bit this app twice
+and would bite it again.
+
+`JSONEncoder`'s default date strategy is `.deferredToDate`: a bare
+number of **seconds since 2001-01-01**. Every route here hands the value
+to `new Date(...)`, which reads a number as **milliseconds since 1970**.
+The two are silently compatible in type and wildly incompatible in
+meaning, so nothing fails - a date simply lands in early 1970.
+
+Both occurrences are fixed:
+
+- A poll's `expiresAt` - every poll created from iOS with an end date
+  was created having already expired on 10 January 1970. No votes were
+  possible, and it read as a server bug.
+- An Opportunity listing's `deadline` - a deadline of 31 December 2026
+  was stored as 10 January 1970, so the listing arrived expired.
+
+Both now go through `ScheduledInstant`. An audit of every `Encodable`
+request type in the app found no third case, and the two doc comments on
+those fields say why they are strings so the next person does not
+"simplify" them back to a `Date`.
 
 ### F1. `POST /api/music/artists` erased bio, avatar and banner — **RESOLVED**
 

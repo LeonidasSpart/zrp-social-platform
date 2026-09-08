@@ -52,6 +52,7 @@ struct HomeView: View {
         .task {
             viewModel.attach(interactions: interactions)
             viewModel.loadIfNeeded(viewModel.selectedTab)
+            await viewModel.loadSponsoredAdIfNeeded()
             await stories.load()
         }
         .onChange(of: viewModel.selectedTab) { _, tab in
@@ -254,6 +255,12 @@ struct HomeView: View {
                             viewModel.loadMoreIfNeeded(viewModel.selectedTab, currentPost: $0)
                         },
                         onCreated: { viewModel.insertCreated($0, interactions: interactions) },
+                        // Both tabs, matching the website. Its ad slot
+                        // carries no `feedType === "for-you"` guard,
+                        // unlike the discovery modules right beneath it
+                        // in the same map, which do - so the difference
+                        // is deliberate there and copied here.
+                        sponsoredAd: viewModel.sponsoredAd,
                         header: { EmptyView() }
                     )
                 }

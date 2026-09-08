@@ -809,3 +809,13 @@
 "opportunity.errUpdateFailed" = "Gagal memperbarui listingan. Silakan coba lagi.";
 "opportunity.errTitleRequired" = "Judul wajib diisi.";
 "opportunity.errDescriptionRequired" = "Deskripsi wajib diisi.";
+"profile.impact" = "Dampak: {amount} $ disumbangkan untuk amal";
+"profile.charityNote" = "{pct}% dari keuntungan disumbangkan untuk amal";
+"profile.milestoneYearsOnZRP" = "{n} tahun di ZRP";
+"profile.milestoneSixMonths" = "6 bulan di ZRP";
+"profile.milestoneNewMember" = "Anggota baru";
+"profile.milestonePosts500" = "500+ postingan";
+"profile.milestonePosts100" = "100+ postingan";
+"profile.milestonePosts10" = "10+ postingan";
+"profile.milestoneFollowers1k" = "1K+ pengikut";
+"profile.milestoneFollowers100" = "100+ pengikut";

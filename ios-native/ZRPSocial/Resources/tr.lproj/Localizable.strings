@@ -809,3 +809,13 @@
 "opportunity.errUpdateFailed" = "İlan güncellenemedi. Lütfen tekrar deneyin.";
 "opportunity.errTitleRequired" = "Bir başlık gerekli.";
 "opportunity.errDescriptionRequired" = "Bir açıklama gerekli.";
+"profile.impact" = "Etki: Hayır kurumuna {amount} $ bağışlandı";
+"profile.charityNote" = "Kârın %{pct}'si hayır kurumuna bağışlanıyor";
+"profile.milestoneYearsOnZRP" = "ZRP'de {n} yıl";
+"profile.milestoneSixMonths" = "ZRP'de 6 ay";
+"profile.milestoneNewMember" = "Yeni üye";
+"profile.milestonePosts500" = "500+ gönderi";
+"profile.milestonePosts100" = "100+ gönderi";
+"profile.milestonePosts10" = "10+ gönderi";
+"profile.milestoneFollowers1k" = "1K+ takipçi";
+"profile.milestoneFollowers100" = "100+ takipçi";

@@ -24,8 +24,12 @@ interface TrustSignal {
   key: string;
   title: string;
   description: string;
+  titleKey?: TranslationKey;
+  descriptionKey?: TranslationKey;
+  descriptionParams?: Record<string, number>;
   verified: boolean;
   category: string;
+  categoryTitleKey?: TranslationKey;
 }
 
 interface TrustData {
@@ -33,6 +37,7 @@ interface TrustData {
     score: number;
     level: "LOW" | "MODERATE" | "GOOD" | "HIGH" | "EXCELLENT";
     levelLabel: string;
+    levelLabelKey?: TranslationKey;
     generatedAt: string;
   };
 
@@ -54,6 +59,8 @@ interface TrustData {
     key: string;
     title: string;
     description: string;
+    titleKey?: TranslationKey;
+    descriptionKey?: TranslationKey;
     verified: boolean;
   }[];
 
@@ -68,6 +75,14 @@ interface TrustData {
  * ---------------------------------------------------------------
  * TRUST LEVEL DESCRIPTION
  * ---------------------------------------------------------------
+ *
+ * The passport's `level` is a closed, 5-value enum this page already
+ * receives, so its description copy is a fixed function of that enum
+ * rather than a guess at business logic - unlike the per-signal
+ * titles/descriptions below, which now come from the API's own
+ * `titleKey`/`descriptionKey` fields (see L5 in ios-native/PARITY.md)
+ * instead of a second, separately-maintained copy of that mapping
+ * living here too.
  */
 
 const LEVEL_DESC_KEYS: Record<TrustData["passport"]["level"], TranslationKey> = {
@@ -76,35 +91,6 @@ const LEVEL_DESC_KEYS: Record<TrustData["passport"]["level"], TranslationKey> = 
   GOOD: "trust.levelDescGood",
   MODERATE: "trust.levelDescModerate",
   LOW: "trust.levelDescLow",
-};
-
-const LEVEL_LABEL_KEYS: Record<TrustData["passport"]["level"], TranslationKey> = {
-  EXCELLENT: "trust.levelExcellent",
-  HIGH: "trust.levelHigh",
-  GOOD: "trust.levelGood",
-  MODERATE: "trust.levelModerate",
-  LOW: "trust.levelLow",
-};
-
-const CATEGORY_LABEL_KEYS: Record<string, TranslationKey> = {
-  SECURITY: "trust.categorySecurity",
-  PROFILE: "trust.categoryProfile",
-  HISTORY: "trust.categoryHistory",
-  COMMUNITY: "trust.categoryCommunity",
-  ZRP: "trust.categoryZrp",
-};
-
-const SIGNAL_LABEL_KEYS: Record<string, { titleKey: TranslationKey; descKey: TranslationKey }> = {
-  email: { titleKey: "trust.signalEmailTitle", descKey: "trust.signalEmailDesc" },
-  avatar: { titleKey: "trust.signalAvatarTitle", descKey: "trust.signalAvatarDesc" },
-  cover: { titleKey: "trust.signalCoverTitle", descKey: "trust.signalCoverDesc" },
-  name: { titleKey: "trust.signalNameTitle", descKey: "trust.signalNameDesc" },
-  bio: { titleKey: "trust.signalBioTitle", descKey: "trust.signalBioDesc" },
-  location: { titleKey: "trust.signalLocationTitle", descKey: "trust.signalLocationDesc" },
-  website: { titleKey: "trust.signalWebsiteTitle", descKey: "trust.signalWebsiteDesc" },
-  community: { titleKey: "trust.signalCommunityTitle", descKey: "trust.signalCommunityDesc" },
-  followers: { titleKey: "trust.signalFollowersTitle", descKey: "trust.signalFollowersDesc" },
-  verified: { titleKey: "trust.signalVerifiedTitle", descKey: "trust.signalVerifiedDesc" },
 };
 
 /*
@@ -434,7 +420,7 @@ export default function TrustPassportPage(
               )}`}
             >
               <ShieldCheck className="w-3.5 h-3.5" />
-              {t(LEVEL_LABEL_KEYS[data.passport.level])}
+              {data.passport.levelLabelKey ? t(data.passport.levelLabelKey) : data.passport.levelLabel}
             </span>
           </div>
         </section>
@@ -464,7 +450,7 @@ export default function TrustPassportPage(
             </div>
 
             <h3 className="mt-4 text-lg font-bold text-gray-900 dark:text-white">
-              {t(LEVEL_LABEL_KEYS[data.passport.level])}
+              {data.passport.levelLabelKey ? t(data.passport.levelLabelKey) : data.passport.levelLabel}
             </h3>
 
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
@@ -605,35 +591,23 @@ export default function TrustPassportPage(
               return (
                 <div key={group.category}>
                   <h4 className="text-xs font-bold tracking-wider text-gray-400 dark:text-gray-500 mb-2">
-                    {t(CATEGORY_LABEL_KEYS[group.category] ?? "trust.categoryZrp")}
+                    {group.signals[0].categoryTitleKey
+                      ? t(group.signals[0].categoryTitleKey)
+                      : group.category}
                   </h4>
 
                   <div className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
                     {group.signals.map(
                       (signal, index) => {
-                        let title: string;
-                        let description: string;
-
-                        if (signal.key === "account-age") {
-                          const established = data.user.accountAgeMonths >= 12;
-                          title = t(
-                            established
-                              ? "trust.signalAccountAgeTitleEstablished"
-                              : "trust.signalAccountAgeTitleHistory"
-                          );
-                          description = established
-                            ? t("trust.signalAccountAgeDescEstablished")
-                            : t(
-                                data.user.accountAgeMonths === 1
-                                  ? "trust.signalAccountAgeDescHistorySingular"
-                                  : "trust.signalAccountAgeDescHistoryPlural",
-                                { months: data.user.accountAgeMonths }
-                              );
-                        } else {
-                          const labelKeys = SIGNAL_LABEL_KEYS[signal.key];
-                          title = labelKeys ? t(labelKeys.titleKey) : signal.title;
-                          description = labelKeys ? t(labelKeys.descKey) : signal.description;
-                        }
+                        // The API now sends titleKey/descriptionKey directly
+                        // (see L5 in ios-native/PARITY.md) - this page no
+                        // longer keeps its own copy of the key-per-signal
+                        // mapping, so it can't silently drift from what
+                        // every other client uses.
+                        const title = signal.titleKey ? t(signal.titleKey) : signal.title;
+                        const description = signal.descriptionKey
+                          ? t(signal.descriptionKey, signal.descriptionParams)
+                          : signal.description;
 
                         return (
                           <div
@@ -709,14 +683,10 @@ export default function TrustPassportPage(
                           : "text-gray-500 dark:text-gray-400"
                       }`}
                     >
-                      {signal.key === "walletVerified"
-                        ? t("trust.signalWalletVerifiedTitle")
-                        : signal.title}
+                      {signal.titleKey ? t(signal.titleKey) : signal.title}
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {signal.key === "walletVerified"
-                        ? t("trust.signalWalletVerifiedDesc")
-                        : signal.description}
+                      {signal.descriptionKey ? t(signal.descriptionKey) : signal.description}
                     </p>
                   </div>
                 </div>

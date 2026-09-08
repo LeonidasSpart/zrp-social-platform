@@ -844,3 +844,13 @@ opportunity.errCreateFailed
 opportunity.errUpdateFailed
 opportunity.errTitleRequired
 opportunity.errDescriptionRequired
+profile.impact
+profile.charityNote
+profile.milestoneYearsOnZRP
+profile.milestoneSixMonths
+profile.milestoneNewMember
+profile.milestonePosts500
+profile.milestonePosts100
+profile.milestonePosts10
+profile.milestoneFollowers1k
+profile.milestoneFollowers100

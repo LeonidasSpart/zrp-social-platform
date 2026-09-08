@@ -23,7 +23,25 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  return NextResponse.json({ ...playlist, isOwner });
+  // Every other route returning tracks (home, tracks, artists, albums)
+  // attaches the viewer's own `liked` state - this one didn't, so a track
+  // opened from a playlist showed an empty heart until some other screen
+  // had already reported it liked (see L2, ios-native/PARITY.md).
+  const userId = session?.user?.id;
+  let likedTrackIds = new Set<string>();
+  if (userId) {
+    const likes = await prisma.musicLike.findMany({
+      where: { userId, trackId: { in: playlist.tracks.map((pt) => pt.trackId) } },
+      select: { trackId: true },
+    });
+    likedTrackIds = new Set(likes.map((l) => l.trackId));
+  }
+
+  return NextResponse.json({
+    ...playlist,
+    tracks: playlist.tracks.map((pt) => ({ ...pt, track: { ...pt.track, liked: likedTrackIds.has(pt.trackId) } })),
+    isOwner,
+  });
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

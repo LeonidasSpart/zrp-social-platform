@@ -809,3 +809,13 @@
 "opportunity.errUpdateFailed" = "Anzeige konnte nicht aktualisiert werden. Bitte versuche es erneut.";
 "opportunity.errTitleRequired" = "Ein Titel ist erforderlich.";
 "opportunity.errDescriptionRequired" = "Eine Beschreibung ist erforderlich.";
+"profile.impact" = "Wirkung: {amount} $ für wohltätige Zwecke gespendet";
+"profile.charityNote" = "{pct}% der Gewinne gehen an wohltätige Zwecke";
+"profile.milestoneYearsOnZRP" = "{n} Jahre bei ZRP";
+"profile.milestoneSixMonths" = "6 Monate bei ZRP";
+"profile.milestoneNewMember" = "Neues Mitglied";
+"profile.milestonePosts500" = "500+ Beiträge";
+"profile.milestonePosts100" = "100+ Beiträge";
+"profile.milestonePosts10" = "10+ Beiträge";
+"profile.milestoneFollowers1k" = "1K+ Follower";
+"profile.milestoneFollowers100" = "100+ Follower";

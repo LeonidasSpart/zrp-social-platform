@@ -451,7 +451,7 @@ export async function POST(
     });
 
   if (!limit.success) {
-    return limit.response;
+    return limit.response!;
   }
 
   try {
@@ -705,8 +705,9 @@ export async function POST(
               poll.options,
             expiresAt:
               poll.expiresAt
-                ? new Date(
-                    poll.expiresAt
+                ? resolveScheduledAt(
+                    poll.expiresAt,
+                    poll.expiresAtOffsetMinutes
                   )
                 : null,
           },

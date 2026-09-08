@@ -53,35 +53,48 @@ struct CreatePostRequest: Encodable {
     var poll: NewPoll?
     var isPoll: Bool { poll != nil }
 
-    /// When to publish, as a NAIVE wall-clock string (`yyyy-MM-dd'T'HH:mm`)
-    /// with no timezone - byte for byte what a browser's
-    /// `<input type="datetime-local">` submits, which is what the route
-    /// is written against.
+    /// When to publish, as an ISO-8601 **instant** (`ScheduledInstant`).
     ///
-    /// Sending a proper ISO-8601 instant with an offset would be more
-    /// correct in isolation and WRONG here: the route hands the string
-    /// to `new Date(...)`, which reads an offset when one is present and
-    /// otherwise falls back to the server's own zone. Two clients
-    /// sending two formats would schedule the same wall-clock time to
-    /// two different instants. See the timezone note in PARITY.md.
+    /// This used to be the naive `yyyy-MM-dd'T'HH:mm` the browser's
+    /// `<input type="datetime-local">` submits, and the comment here
+    /// argued for keeping it that way: the route parsed the string with
+    /// a bare `new Date(...)`, so a value carrying an offset would be
+    /// read as that instant while one without was read in the server's
+    /// zone, and two clients sending two shapes would schedule the same
+    /// wall-clock time to two different moments.
+    ///
+    /// That reasoning was right about the risk and wrong about which
+    /// side to land on - matching the web meant matching a bug (F2:
+    /// every scheduled post was timed in the SERVER's zone, so an author
+    /// in UTC+9 asking for 09:00 got 18:00 their time). The route now
+    /// resolves this through `resolveScheduledAt`, whose first branch is
+    /// "already carries a real offset or Z - parse it directly", so an
+    /// instant is both unambiguous and exactly what it asks for.
     var scheduledAt: String?
 
     struct NewPoll: Encodable, Equatable {
         let question: String
         let options: [String]
 
-        /// When the poll closes, as the same NAIVE wall-clock string
-        /// `scheduledAt` uses - the website's poll end date is a
-        /// `<input type="datetime-local">` too, so this is byte for byte
-        /// what the route is written against.
+        /// When the poll closes, as an ISO-8601 **instant**
+        /// (`ScheduledInstant`) - the same reasoning as `scheduledAt`
+        /// above, and for this field it is the *only* fix available.
+        ///
+        /// `POST /api/posts` still stores a poll's expiry with a bare
+        /// `new Date(poll.expiresAt)`; it was never routed through
+        /// `resolveScheduledAt`, and it accepts no offset field. So a
+        /// naive string here is read in the server's zone with nothing a
+        /// client can send to correct it - a poll closing at 23:00 for
+        /// an author in UTC+9 actually closed nine hours late. An
+        /// instant needs no such help: a bare `new Date` parses one
+        /// correctly, which is the whole point of sending one.
         ///
         /// **Not a `Date`.** `JSONEncoder`'s default strategy is
         /// `.deferredToDate`, which writes a bare number of seconds
         /// since 2001; the route hands whatever arrives to
-        /// `new Date(...)`, which reads a number as MILLISECONDS SINCE
-        /// 1970. A poll ending next week would have been created having
-        /// expired in January 1970 - closed before anyone could vote,
-        /// and looking like a server bug rather than an encoding one.
+        /// `new Date(...)`, which reads a NUMBER as milliseconds since
+        /// 1970. That is a separate bug, already fixed, and the reason
+        /// this is typed as a string rather than left to the encoder.
         ///
         /// Omitted entirely for a poll that never closes, which is what
         /// the website sends when no end date is chosen.

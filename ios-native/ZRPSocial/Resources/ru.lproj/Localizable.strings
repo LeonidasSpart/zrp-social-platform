@@ -809,3 +809,13 @@
 "opportunity.errUpdateFailed" = "Не удалось обновить объявление. Попробуйте снова.";
 "opportunity.errTitleRequired" = "Требуется заголовок.";
 "opportunity.errDescriptionRequired" = "Требуется описание.";
+"profile.impact" = "Вклад: {amount} $ на благотворительность";
+"profile.charityNote" = "{pct}% прибыли направляется на благотворительность";
+"profile.milestoneYearsOnZRP" = "{n} г. на ZRP";
+"profile.milestoneSixMonths" = "6 месяцев на ZRP";
+"profile.milestoneNewMember" = "Новый участник";
+"profile.milestonePosts500" = "500+ публикаций";
+"profile.milestonePosts100" = "100+ публикаций";
+"profile.milestonePosts10" = "10+ публикаций";
+"profile.milestoneFollowers1k" = "1K+ подписчиков";
+"profile.milestoneFollowers100" = "100+ подписчиков";

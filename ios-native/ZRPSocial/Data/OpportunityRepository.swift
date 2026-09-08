@@ -42,6 +42,9 @@ struct OpportunityDraft: Encodable, Equatable {
     var isPaid: Bool = true
     var compensationInfo: String = ""
     var externalUrl: String = ""
+
+    /// Held as a `Date` because a date picker produces one, but **never
+    /// encoded as one** - see `encode(to:)`.
     var deadline: Date?
 
     /// The route's own limits, mirrored so someone is stopped before a
@@ -108,7 +111,22 @@ struct OpportunityDraft: Encodable, Equatable {
         try container.encode(isPaid, forKey: .isPaid)
         try container.encode(trimmedOrNil(compensationInfo), forKey: .compensationInfo)
         try container.encode(trimmedOrNil(externalUrl), forKey: .externalUrl)
-        try container.encode(deadline, forKey: .deadline)
+        // As an ISO-8601 instant, NOT as a `Date`. `JSONEncoder`'s
+        // default strategy is `.deferredToDate`, which writes a bare
+        // number of seconds since 2001; both routes hand `deadline` to
+        // `new Date(...)`, which reads a NUMBER as milliseconds since
+        // 1970. A deadline of 31 December 2026 was therefore stored as
+        // 10 January 1970 - a listing that arrived already expired,
+        // and one whose deadline nobody could explain from the UI.
+        //
+        // A string also cannot be mistaken for the *naive* wall-clock
+        // shape the same routes read in the server's own timezone (F2);
+        // an instant names one moment and is read as that moment
+        // everywhere.
+        try container.encode(
+            deadline.map(ScheduledInstant.string(from:)),
+            forKey: .deadline
+        )
     }
 
     private func trimmedOrNil(_ value: String) -> String? {

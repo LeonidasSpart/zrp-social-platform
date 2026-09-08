@@ -41,11 +41,39 @@ struct UserProfile: Decodable, Identifiable, Equatable {
     var isFollowing: Bool
     let isBlocked: Bool
 
+    /// What this profile's own completed tips and purchases have sent to
+    /// charity, in USDC, summed server-side by `src/lib/charity.ts`.
+    ///
+    /// Worth knowing where this came from: the website used to display
+    /// `Math.floor(Math.random() * 50) + 5` "meals" here - a number
+    /// invented on every page load, with no conversion from dollars to
+    /// meals defined anywhere in the codebase to make it real. It is now
+    /// a genuine figure, computed the same way the platform-wide
+    /// transparency page computes its own.
+    ///
+    /// Optional because a client reading an older deployment would not
+    /// receive it, and a missing figure is shown as nothing rather than
+    /// as zero - "$0.00 contributed" is a claim, and absence is not.
+    let charityContributionUsdc: Double?
+
+    /// Badges this account has earned, computed server-side by
+    /// `src/lib/milestones.ts`.
+    ///
+    /// The thresholds and the if/else precedence between tiers used to
+    /// live in the website's own client code, which meant every other
+    /// client had to reimplement them identically or silently disagree
+    /// about which badges a profile has. They are facts now, not
+    /// instructions: a stable `key`, an `icon`, and whatever numeric
+    /// `params` the label needs. **Nothing here is recomputed** - this
+    /// app maps the key to its own translation and nothing else.
+    let milestones: [ProfileMilestone]?
+
     private enum CodingKeys: String, CodingKey {
         case id, username, customUrl, name, bio, avatarUrl, coverUrl
         case location, country, website, createdAt, isPrivate, badgeType
         case pinnedPostId, banned, publicLikes, publicFollowing
         case category, showCategory, isFollowing, isBlocked
+        case charityContributionUsdc, milestones
         case counts = "_count"
     }
 
@@ -62,6 +90,53 @@ struct UserProfile: Decodable, Identifiable, Equatable {
         if !isPrivate { return true }
         if viewerId == id { return true }
         return isFollowing
+    }
+}
+
+/// One earned badge, exactly as the route computes it.
+///
+/// The `icon` is an emoji and arrives ready to render - there is nothing
+/// language-dependent about it, which is why the server sends it rather
+/// than a second key each client would have to map. The label is the
+/// client's own business, keyed off `key`.
+struct ProfileMilestone: Decodable, Equatable, Identifiable {
+    let key: String
+    let icon: String
+    let params: [String: Int]?
+
+    /// The key is unique within a profile's list: the route emits at
+    /// most one badge per tier, and the tiers are mutually exclusive.
+    var id: String { key }
+
+    /// This app's label for the badge, or `nil` for a key it does not
+    /// recognise.
+    ///
+    /// An unknown key is a **new badge from a newer backend**, and the
+    /// honest thing to do with one is not show it. The website falls
+    /// back to rendering the raw key ("posts_500"), which would put an
+    /// untranslated identifier in front of someone in Arabic or
+    /// Chinese; showing nothing is better than showing that.
+    var titleKey: L10nKey? {
+        switch key {
+        case "years_on_zrp": return .profileMilestoneYearsOnZRP
+        case "six_months": return .profileMilestoneSixMonths
+        case "new_member": return .profileMilestoneNewMember
+        case "posts_500": return .profileMilestonePosts500
+        case "posts_100": return .profileMilestonePosts100
+        case "posts_10": return .profileMilestonePosts10
+        case "followers_1k": return .profileMilestoneFollowers1k
+        case "followers_100": return .profileMilestoneFollowers100
+        default: return nil
+        }
+    }
+
+    /// The localized label, with the route's own numbers substituted.
+    var localizedTitle: String? {
+        guard let titleKey else { return nil }
+        let arguments = (params ?? [:]).mapValues { CountFormatting.exact($0) }
+        return arguments.isEmpty
+            ? L10n.string(titleKey)
+            : L10n.string(titleKey, arguments)
     }
 }
 
