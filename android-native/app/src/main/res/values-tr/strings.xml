@@ -57,6 +57,12 @@
     <string name="nav_search">Ara</string>
     <string name="nav_messages">Mesajlar</string>
     <string name="nav_notifications">Bildirimler</string>
+    <string name="settings_notif_mentions">Bahsetmeler</string>
+    <string name="settings_notif_messages">Doğrudan Mesajlar</string>
+    <string name="settings_notif_likes">Gönderilerine gelen beğeniler</string>
+    <string name="settings_notif_comments">Gönderilerine gelen yorumlar</string>
+    <string name="settings_notif_follows">Yeni takipçiler</string>
+    <string name="settings_notif_reposts">Gönderilerinin yeniden paylaşımları</string>
     <string name="nav_profile">Profil</string>
     <string name="action_post">Gönder</string>
     <string name="auth_sign_in">Giriş yap</string>

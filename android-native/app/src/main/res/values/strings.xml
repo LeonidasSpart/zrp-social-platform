@@ -69,6 +69,12 @@
     <string name="nav_search">Search</string>
     <string name="nav_messages">Messages</string>
     <string name="nav_notifications">Notifications</string>
+    <string name="settings_notif_mentions">Mentions</string>
+    <string name="settings_notif_messages">Direct Messages</string>
+    <string name="settings_notif_likes">Likes on your posts</string>
+    <string name="settings_notif_comments">Comments on your posts</string>
+    <string name="settings_notif_follows">New followers</string>
+    <string name="settings_notif_reposts">Reposts of your posts</string>
     <string name="nav_profile">Profile</string>
     <string name="action_post">Post</string>
     <string name="auth_sign_in">Sign in</string>

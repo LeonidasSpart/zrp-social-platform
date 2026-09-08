@@ -57,6 +57,12 @@
     <string name="nav_search">搜索</string>
     <string name="nav_messages">私信</string>
     <string name="nav_notifications">通知</string>
+    <string name="settings_notif_mentions">提及</string>
+    <string name="settings_notif_messages">私信</string>
+    <string name="settings_notif_likes">你的帖子收到的点赞</string>
+    <string name="settings_notif_comments">你的帖子收到的评论</string>
+    <string name="settings_notif_follows">新粉丝</string>
+    <string name="settings_notif_reposts">你的帖子被转发</string>
     <string name="nav_profile">个人资料</string>
     <string name="action_post">发布</string>
     <string name="auth_sign_in">登录</string>

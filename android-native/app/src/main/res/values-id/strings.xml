@@ -57,6 +57,12 @@
     <string name="nav_search">Cari</string>
     <string name="nav_messages">Pesan</string>
     <string name="nav_notifications">Notifikasi</string>
+    <string name="settings_notif_mentions">Sebutan</string>
+    <string name="settings_notif_messages">Pesan Langsung</string>
+    <string name="settings_notif_likes">Suka pada postingan Anda</string>
+    <string name="settings_notif_comments">Komentar pada postingan Anda</string>
+    <string name="settings_notif_follows">Pengikut baru</string>
+    <string name="settings_notif_reposts">Repost postingan Anda</string>
     <string name="nav_profile">Profil</string>
     <string name="action_post">Kirim</string>
     <string name="auth_sign_in">Masuk</string>

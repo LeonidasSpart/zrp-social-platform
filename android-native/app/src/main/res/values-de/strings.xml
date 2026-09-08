@@ -57,6 +57,12 @@
     <string name="nav_search">Suche</string>
     <string name="nav_messages">Nachrichten</string>
     <string name="nav_notifications">Benachrichtigungen</string>
+    <string name="settings_notif_mentions">Erwähnungen</string>
+    <string name="settings_notif_messages">Direktnachrichten</string>
+    <string name="settings_notif_likes">Likes für deine Beiträge</string>
+    <string name="settings_notif_comments">Kommentare zu deinen Beiträgen</string>
+    <string name="settings_notif_follows">Neue Follower</string>
+    <string name="settings_notif_reposts">Reposts deiner Beiträge</string>
     <string name="nav_profile">Profil</string>
     <string name="action_post">Posten</string>
     <string name="auth_sign_in">Anmelden</string>
