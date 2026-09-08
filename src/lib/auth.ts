@@ -411,6 +411,19 @@ export const authOptions: NextAuthOptions = {
         const freshUser = await prisma.user.findUnique({
           where: { id: token.id as string },
           select: {
+            // username/name/avatarUrl are the identity fields Settings
+            // can actually change, and this refresh is what runs right
+            // after it saves. Leaving them out meant the token kept the
+            // pre-edit username indefinitely, while session.user.username
+            // is what BottomNav, Sidebar, Header and Settings all build
+            // `/profile/${username}` from - so every one of those links
+            // pointed at a username that no longer existed, and opening
+            // your own profile after a rename 404'd until the token was
+            // reissued. avatarUrl/name go stale the same way in the
+            // header and menus, from the same single save.
+            username: true,
+            name: true,
+            avatarUrl: true,
             isAdmin: true,
             role: true,
             badgeType: true,
@@ -421,6 +434,9 @@ export const authOptions: NextAuthOptions = {
           },
         });
         if (freshUser) {
+          token.username = freshUser.username;
+          token.name = freshUser.name;
+          token.avatarUrl = freshUser.avatarUrl;
           token.isAdmin = freshUser.isAdmin;
           token.role = freshUser.role;
           token.badgeType = freshUser.badgeType;

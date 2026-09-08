@@ -49,6 +49,13 @@ const PUBLIC_PATHS = [
   "/charity",
   "/contact",
   "/faq",
+  // Static legal/policy text with no session use of any kind, linked
+  // from /terms and /help - both themselves public - and opened by the
+  // native app's Settings > Community Guidelines row, which loads
+  // https://zrp.one/guidelines in a cookie-less WebView. Omitting it
+  // here bounced every one of those to /login: a signed-out visitor
+  // could read the Terms but not the Guidelines the Terms link to.
+  "/guidelines",
   "/help",
   "/investors",
   "/press",
