@@ -1507,6 +1507,8 @@
     <string name="legal_terms">Kushtet e Shërbimit</string>
     <string name="legal_privacy">Politika e Privatësisë</string>
     <string name="legal_guidelines">Udhëzimet e Komunitetit</string>
+    <string name="legal_help">Qendra e Ndihmës</string>
+    <string name="legal_contact">Kontakt</string>
     <string name="legal_load_error">Kjo faqe nuk mund të ngarkohej. Kontrollo lidhjen tënde dhe provo përsëri.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Anëtarësuar më</string>

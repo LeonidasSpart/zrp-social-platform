@@ -40,7 +40,7 @@ import one.zrp.social.mobile.ui.admin.AdminDashboardScreen
 import one.zrp.social.mobile.ui.admin.AdminPostsScreen
 import one.zrp.social.mobile.ui.admin.AdminReportsScreen
 import one.zrp.social.mobile.ui.admin.AdminUsersScreen
-import one.zrp.social.mobile.ui.legal.LegalWebViewScreen
+import one.zrp.social.mobile.ui.legal.LegalScreen
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
@@ -230,6 +230,8 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
     val goToTerms: () -> Unit = { navController.navigate("legal/terms") }
     val goToPrivacyPolicy: () -> Unit = { navController.navigate("legal/privacy") }
     val goToGuidelines: () -> Unit = { navController.navigate("legal/guidelines") }
+    val goToHelpCenter: () -> Unit = { navController.navigate("legal/help") }
+    val goToContact: () -> Unit = { navController.navigate("legal/contact") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
@@ -944,6 +946,8 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onOpenTerms = goToTerms,
                     onOpenPrivacyPolicy = goToPrivacyPolicy,
                     onOpenGuidelines = goToGuidelines,
+                    onOpenHelp = goToHelpCenter,
+                    onOpenContact = goToContact,
                 )
             }
             composable("settings/team") {
@@ -953,23 +957,37 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                 ApiKeysScreen(onBack = { navController.popBackStack() })
             }
             composable("legal/terms") {
-                LegalWebViewScreen(
-                    url = "https://zrp.one/terms",
+                LegalScreen(
+                    page = "terms",
                     title = stringResource(R.string.legal_terms),
                     onBack = { navController.popBackStack() },
                 )
             }
             composable("legal/privacy") {
-                LegalWebViewScreen(
-                    url = "https://zrp.one/privacy",
+                LegalScreen(
+                    page = "privacy",
                     title = stringResource(R.string.legal_privacy),
                     onBack = { navController.popBackStack() },
                 )
             }
             composable("legal/guidelines") {
-                LegalWebViewScreen(
-                    url = "https://zrp.one/guidelines",
+                LegalScreen(
+                    page = "guidelines",
                     title = stringResource(R.string.legal_guidelines),
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("legal/help") {
+                LegalScreen(
+                    page = "help",
+                    title = stringResource(R.string.legal_help),
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("legal/contact") {
+                LegalScreen(
+                    page = "contact",
+                    title = stringResource(R.string.legal_contact),
                     onBack = { navController.popBackStack() },
                 )
             }

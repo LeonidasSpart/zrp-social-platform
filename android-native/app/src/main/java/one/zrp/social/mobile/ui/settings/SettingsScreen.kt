@@ -13,7 +13,9 @@ import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Language
@@ -122,6 +124,8 @@ fun SettingsScreen(
     onOpenTerms: () -> Unit,
     onOpenPrivacyPolicy: () -> Unit,
     onOpenGuidelines: () -> Unit,
+    onOpenHelp: () -> Unit,
+    onOpenContact: () -> Unit,
     isStaff: Boolean = false,
     onOpenAdmin: () -> Unit = {},
 ) {
@@ -165,6 +169,8 @@ fun SettingsScreen(
         SettingsRow(icon = Icons.Filled.Gavel, label = stringResource(R.string.legal_terms), onClick = onOpenTerms)
         SettingsRow(icon = Icons.Filled.PrivacyTip, label = stringResource(R.string.legal_privacy), onClick = onOpenPrivacyPolicy)
         SettingsRow(icon = Icons.Filled.Groups, label = stringResource(R.string.legal_guidelines), onClick = onOpenGuidelines)
+        SettingsRow(icon = Icons.Filled.HelpOutline, label = stringResource(R.string.legal_help), onClick = onOpenHelp)
+        SettingsRow(icon = Icons.Filled.Email, label = stringResource(R.string.legal_contact), onClick = onOpenContact)
 
         if (isStaff) {
             SettingsRow(icon = Icons.Filled.AdminPanelSettings, label = stringResource(R.string.admin_nav_label), onClick = onOpenAdmin)
