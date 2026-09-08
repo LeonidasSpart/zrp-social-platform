@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { getUserCharityContributionUsdc } from "@/lib/charity";
+import { computeMilestones } from "@/lib/milestones";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
@@ -202,11 +204,24 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       solanaWallet: string | null;
     };
 
+    // Real data, not the previous `Math.floor(Math.random() * 50) + 5`
+    // ("impactMeals") the profile page used to render - see
+    // src/lib/charity.ts and src/lib/milestones.ts for why each is
+    // computed the way it is.
+    const charityContributionUsdc = await getUserCharityContributionUsdc(user.id);
+    const milestones = computeMilestones({
+      createdAt: user.createdAt,
+      postCount: user._count.posts,
+      followerCount: user._count.followers,
+    });
+
     return NextResponse.json({
       ...publicUser,
       solanaWallet: isOwner || user.creatorProfile?.tipsEnabled ? solanaWallet : null,
       isFollowing,
       isBlocked,
+      charityContributionUsdc,
+      milestones,
     });
   } catch (error) {
     console.error("Error fetching user:", error);
