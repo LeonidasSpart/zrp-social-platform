@@ -161,10 +161,8 @@ struct OpportunityComposerView: View {
 
     private var typePicker: some View {
         Picker(selection: $draft.type) {
-            ForEach(OpportunityType.selectable) { option in
-                if let key = option.titleKey {
-                    Text(key).tag(option)
-                }
+            ForEach(OpportunityType.selectableWithTitles, id: \.type) { option in
+                Text(option.titleKey).tag(option.type)
             }
         } label: {
             Text(.opportunityTypeLabel)

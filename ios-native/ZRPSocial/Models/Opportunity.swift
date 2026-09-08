@@ -89,6 +89,20 @@ enum OpportunityType: String, Decodable, CaseIterable, Identifiable, Hashable {
     static var selectable: [OpportunityType] {
         allCases.filter { $0 != .unknown }
     }
+
+    /// The selectable types paired with their labels.
+    ///
+    /// Exists so a `Picker` can render them without an `if let` inside
+    /// its `ForEach`: a conditional there wraps each row in
+    /// `_ConditionalContent`, and SwiftUI's tag matching is not
+    /// dependable through it - the selection silently stops binding.
+    /// Every selectable type has a label by construction, since only
+    /// `unknown` lacks one and it is filtered out.
+    static var selectableWithTitles: [(type: OpportunityType, titleKey: L10nKey)] {
+        selectable.compactMap { type in
+            type.titleKey.map { (type, $0) }
+        }
+    }
 }
 
 /// One page of `GET /api/opportunity`.
