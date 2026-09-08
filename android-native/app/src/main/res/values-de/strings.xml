@@ -22,6 +22,7 @@
     <string name="settings_username_cooldown_banner">⏳ Du kannst deinen Benutzernamen in %1$d Tagen wieder ändern</string>
     <string name="settings_err_username_min_length">Der Benutzername muss mindestens 3 Zeichen lang sein</string>
     <string name="settings_err_username_same">Der neue Benutzername entspricht dem aktuellen</string>
+    <string name="ads_sponsored_label">Gesponsert</string>
     <string name="settings_export_data_heading">Ihre Daten</string>
     <string name="settings_export_data">Meine Daten exportieren</string>
     <string name="settings_export_data_desc">Laden Sie eine Kopie Ihres Profils, Ihrer Beiträge, Kommentare, Likes, Reposts, Lesezeichen, Stories und Follower-Listen als JSON-Datei herunter.</string>
