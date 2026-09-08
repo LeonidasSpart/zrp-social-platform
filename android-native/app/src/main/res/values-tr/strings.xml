@@ -170,7 +170,11 @@
     <string name="search_no_users">Kullanıcı bulunamadı.</string>
     <string name="search_no_posts">Gönderi bulunamadı.</string>
     <string name="home_trending_on_zrp">ZRP\'de gündemde</string>
+    <string name="home_see_all">Tümünü gör</string>
     <string name="right_panel_who_to_follow">Takip edilecekler</string>
+    <string name="right_panel_trending">Gündemdekiler</string>
+    <string name="right_panel_posts_count">%1$d gönderi</string>
+    <string name="right_panel_no_trending">Henüz gündemde hashtag yok.</string>
     <string name="home_discover_music">Yeni müzik keşfet</string>
     <string name="action_follow">Takip Et</string>
     <string name="action_following">Takip Ediliyor</string>

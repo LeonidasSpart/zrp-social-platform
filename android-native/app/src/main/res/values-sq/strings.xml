@@ -170,7 +170,11 @@
     <string name="search_no_users">Nuk u gjet asnjë përdorues.</string>
     <string name="search_no_posts">Nuk u gjet asnjë postim.</string>
     <string name="home_trending_on_zrp">Në trend në ZRP</string>
+    <string name="home_see_all">Shiko të gjitha</string>
     <string name="right_panel_who_to_follow">Kë të ndiqni</string>
+    <string name="right_panel_trending">Kryesore</string>
+    <string name="right_panel_posts_count">%1$d postime</string>
+    <string name="right_panel_no_trending">Nuk ka hashtags kryesorë ende.</string>
     <string name="home_discover_music">Zbulo muzikë të re</string>
     <string name="action_follow">Ndiq</string>
     <string name="action_following">Duke ndjekur</string>

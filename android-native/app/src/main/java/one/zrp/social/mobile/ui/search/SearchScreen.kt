@@ -81,6 +81,8 @@ fun SearchScreen(
     onOpenQuotes: (postId: String) -> Unit = {},
     onOpenHashtag: (String) -> Unit = {},
     onOpenVideoViewer: (String) -> Unit = {},
+    onOpenTrending: () -> Unit = {},
+    onOpenExplorePeople: () -> Unit = {},
 ) {
     val viewModel: SearchViewModel = viewModel(
         factory = remember { SearchViewModelFactory(SearchRepository()) },
@@ -127,6 +129,8 @@ fun SearchScreen(
                 onOpenNews = onOpenNews,
                 onOpenShorts = onOpenShorts,
                 onOpenAi = onOpenAi,
+                onOpenTrending = onOpenTrending,
+                onOpenExplorePeople = onOpenExplorePeople,
             )
         } else {
             SearchResultsContent(
@@ -238,6 +242,8 @@ private fun DiscoverContent(
     onOpenNews: () -> Unit,
     onOpenShorts: () -> Unit,
     onOpenAi: () -> Unit,
+    onOpenTrending: () -> Unit,
+    onOpenExplorePeople: () -> Unit,
 ) {
     if (state.isLoadingDiscover) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -274,11 +280,9 @@ private fun DiscoverContent(
 
         if (state.trendingHashtags.isNotEmpty()) {
             item {
-                Text(
-                    text = stringResource(R.string.home_trending_on_zrp),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                SectionHeaderWithSeeAll(
+                    title = stringResource(R.string.home_trending_on_zrp),
+                    onSeeAllClick = onOpenTrending,
                 )
             }
             item {
@@ -296,11 +300,9 @@ private fun DiscoverContent(
 
         if (state.suggestedUsers.isNotEmpty()) {
             item {
-                Text(
-                    text = stringResource(R.string.right_panel_who_to_follow),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                SectionHeaderWithSeeAll(
+                    title = stringResource(R.string.right_panel_who_to_follow),
+                    onSeeAllClick = onOpenExplorePeople,
                 )
             }
             items(state.suggestedUsers, key = { it.id }) { user ->
@@ -595,6 +597,29 @@ private fun AiEntryRow(onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(text = stringResource(R.string.ai_discover_entry), style = MaterialTheme.typography.titleSmall)
+    }
+}
+
+// Matches HomeTrending.tsx/HomeCreatorsRow.tsx's own section-header +
+// "See all" link pairing exactly - both compact Discover teasers get
+// the same click-through to their real full-list page.
+@Composable
+private fun SectionHeaderWithSeeAll(title: String, onSeeAllClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+        )
+        TextButton(onClick = onSeeAllClick) {
+            Text(stringResource(R.string.home_see_all))
+        }
     }
 }
 

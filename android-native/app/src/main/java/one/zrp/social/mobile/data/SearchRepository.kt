@@ -24,12 +24,12 @@ class SearchRepository {
         ApiClient.searchApi.search(query)
     }
 
-    suspend fun getSuggestedUsers(): Result<List<SearchUser>> = runCatching {
-        ApiClient.searchApi.getSuggestedUsers()
+    suspend fun getSuggestedUsers(limit: Int = 10): Result<List<SearchUser>> = runCatching {
+        ApiClient.searchApi.getSuggestedUsers(limit)
     }
 
-    suspend fun getTrendingHashtags(): Result<List<TrendingHashtag>> = runCatching {
-        ApiClient.searchApi.getTrendingHashtags()
+    suspend fun getTrendingHashtags(limit: Int = 10): Result<List<TrendingHashtag>> = runCatching {
+        ApiClient.searchApi.getTrendingHashtags(limit)
     }
 
     suspend fun toggleLike(postId: String): Result<LikeResponse> = runCatching {

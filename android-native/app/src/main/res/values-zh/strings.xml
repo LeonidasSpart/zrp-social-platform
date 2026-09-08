@@ -170,7 +170,11 @@
     <string name="search_no_users">未找到用户。</string>
     <string name="search_no_posts">未找到帖子。</string>
     <string name="home_trending_on_zrp">ZRP 热门话题</string>
+    <string name="home_see_all">查看全部</string>
     <string name="right_panel_who_to_follow">推荐关注</string>
+    <string name="right_panel_trending">热门</string>
+    <string name="right_panel_posts_count">%1$d 帖子</string>
+    <string name="right_panel_no_trending">无热门话题标签。</string>
     <string name="home_discover_music">发现新音乐</string>
     <string name="action_follow">关注</string>
     <string name="action_following">已关注</string>
