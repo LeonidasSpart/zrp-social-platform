@@ -44,6 +44,13 @@ final class LoginViewModel: ObservableObject {
         }
     }
 
+    /// Shows a failure that happened outside this form - Sign in with
+    /// Apple - in the same banner as a password failure, rather than
+    /// giving that button an error surface of its own.
+    func showError(_ message: String) {
+        errorMessage = message
+    }
+
     func clearError() {
         errorMessage = nil
     }

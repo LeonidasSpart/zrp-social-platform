@@ -46,6 +46,7 @@ called and the real response being handled.
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
 | Email/username + password login | `POST /api/mobile/auth/login` | via NextAuth Credentials | ✅ | ✅ | IMPLEMENTED |
+| Sign in with Apple (native) | `POST /api/mobile/auth/apple` | via NextAuth Apple provider (web redirect) | n/a | ✅ native `ASAuthorizationAppleIDCredential`, server-verified | IMPLEMENTED |
 | Session restore on launch | `GET /api/auth/session` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Secure session storage | — | httpOnly cookie | EncryptedSharedPreferences | Keychain (`kSecAttrAccessibleAfterFirstUnlock`) | IMPLEMENTED |
 | Logout / session teardown | — (local + `DELETE /api/push/fcm`) | ✅ | ✅ | ✅ (local; push teardown pending Phase 11) | PARTIAL |
@@ -98,6 +99,7 @@ called and the real response being handled.
 | GIF rendering | — | ✅ | ✅ | ✅ animated, with the file's own per-frame timing; a single-frame GIF falls back to the still path, which is what it is | IMPLEMENTED |
 | Inline video playback | — | ✅ | ✅ (ExoPlayer) | ✅ muted, looping, autoplaying at the website's own 0.6 visibility threshold, through **one** shared player rather than one per card; tapping opens the full-screen viewer, where the controls are | IMPLEMENTED |
 | Full-screen media viewer | — | ✅ | ✅ | ✅ (paged, pinch zoom, AVKit video) | IMPLEMENTED |
+| ZRP Shorts (vertical video feed) | `GET /api/videos` (`cursor`, `limit`, `startId`) | ✅ `/shorts` | ✅ `ShortsScreen` | ✅ one video per screen, paged vertically, looping and muted until asked; reached from Home's More menu, from a video post's menu (opening on that video via `startId`), and from a `/shorts` link | IMPLEMENTED |
 | Image/video/GIF upload | UploadThing `postMedia` router (`/api/uploadthing`) | ✅ | ✅ | ✅ (streamed from disk, real progress, cancel, resume-aware retry) | IMPLEMENTED |
 | GIF picker (Giphy, proxied) | `GET /api/gifs/search`, `/api/gifs/trending` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Avatar / cover upload | `POST /api/user/update-avatar`, `POST /api/user/update-cover` — both reject any URL not on UploadThing's hosts, so the file must be uploaded first and its URL handed over | ✅ | ✅ | ✅ from Edit profile and from onboarding | IMPLEMENTED |
@@ -157,16 +159,99 @@ called and the real response being handled.
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
 | Conversation list | `GET /api/messages` (bare array; partner, last message, unread count) | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Thread | `GET /api/messages/{userId}` — now cursor-paginated (`?cursor=`/`?limit=`), see [L1](#l1-message-threads-are-unpaginated) | ✅ | ✅ | ⬜ backend no longer blocks it — a "load older messages" control is outstanding client-side work, not built here | IMPLEMENTED |
+| Thread | `GET /api/messages/{userId}` — now cursor-paginated (`?cursor=`/`?limit=`), see [L1](#l1-message-threads-are-unpaginated) | ✅ | ✅ | ✅ cursor-paginated with a "Load more" at the top of the thread, shown only when the route reports more history | IMPLEMENTED |
 | Send message | `POST /api/messages` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Edit / delete message | `PUT /api/messages/edit/{id}`, `DELETE /delete/{id}` | ✅ | ✅ | ✅ (sender-only, 403-enforced) | IMPLEMENTED |
 | Reactions | `POST /api/messages/reaction/{id}` — one per person; same emoji removes, different replaces | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Unread badge | `GET /api/messages/unread` | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Realtime | Socket.io (`server.js`) | ✅ | ❌ polling | ❌ 6s polling while a thread is open | PARTIAL (by design) |
+| Realtime | Socket.IO (`server.js`, path `/api/socket.io`, websocket transport, session-cookie handshake) | ✅ | ✅ (Socket.IO Java client) | ✅ Engine.IO v4 + Socket.IO framing written directly on `URLSessionWebSocketTask` — no dependency added. Live `receive-message`, `message-edited`, `message-deleted`, `reaction-updated`, `message-read`; polling stays as the fallback while the socket is down (30 s connected, 6 s not) | IMPLEMENTED |
+| Typing indicator | `typing` → `user-typing` relay | ✅ | ✅ | ✅ throttled to one event every 2 s; the indicator clears itself after 5 s in case the "stopped" event is lost with the connection | IMPLEMENTED |
+| Contact drawer (avatar, name, badge, handle, profile, block/mute, shared media) | `POST /api/users/{username}/block`, `POST /api/users/mute` | ✅ `ChatContactDrawer` | 🔶 | ✅ — **without Call and Video** | PARTIAL |
+| Voice / video calling | WebRTC signalling over the same socket (`call-user`, `accept-call`, …) | ✅ simple-peer | ⬜ | ❌ needs a WebRTC stack, which would be this app's first third-party dependency and a large one. Two permanently dead buttons would be worse than none — see the note in `ChatContactSheet.swift` | MISSING (reported) |
 | Read receipts | side effect of `GET /api/messages/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Reply to a message | `POST /api/messages` + `replyToId` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Delete a conversation | `DELETE /api/messages/conversation/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Image attachments | `POST /api/messages` + `imageUrl` (UploadThing `chatImage`, 4 MB); the route accepts an empty `content` **only** alongside an image and refuses both-empty with a 400 | ✅ | ✅ | ✅ one picture per message (the row stores a single `imageUrl`), uploaded on send rather than on selection, and a failed upload stops the send rather than silently dropping the picture | IMPLEMENTED |
+
+### ZRP PLAY
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| PLAY home | `GET /api/play/home` | ✅ | ✅ | ✅ today's challenge, trending, the top of the leaderboard and the viewer's own standing; serves a signed-out reader with the personal parts absent | IMPLEMENTED |
+| Play a challenge | `GET /api/play/challenges/{id}` + `POST .../submit` | ✅ | ✅ | ✅ all three types — trivia, logic (multiple-choice and free-text), and a real memory board | IMPLEMENTED |
+| Scoring | `scoreTrivia` / `scoreMemory` / `scoreLogic`, server-side | ✅ | ✅ | ✅ **nothing is scored on the client.** `stripAnswers` removes the answers before the content leaves the server, so this app could not score a challenge even if it wanted to — it sends what the player did and displays what the server made of it | IMPLEMENTED |
+| XP, level, streak, achievements | computed by the submit route and `xpProgress` | ✅ | ✅ | ✅ every figure is the server's; the level curve is never recomputed here | IMPLEMENTED |
+| Leaderboard | `GET /api/play/leaderboard` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Duels | `GET`/`POST /api/play/duels`, `/duels/{id}` | ✅ | ✅ | ⬜ opponent search, an invitation lifecycle (pending / accepted / declined / expired) and a result screen that waits for the other player — a module of its own | MISSING |
+| Create a challenge | `POST /api/play/challenges`, `/challenges/generate` | ✅ | ✅ | ⬜ a builder for three different content shapes, plus the AI generator | MISSING |
+
+### ZRP OPPORTUNITY
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Browse listings | `GET /api/opportunity` (`type`, `remote`, `q`, cursor) | ✅ | ✅ | ✅ public — the route serves it without a session | IMPLEMENTED |
+| Type and remote filters | same route, the eleven `OpportunityType` values | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Listing detail | `GET /api/opportunity/{id}` — attaches `alreadyApplied` for a signed-in viewer | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Apply | `POST /api/opportunity/{id}/apply` | ✅ | ✅ | ✅ cover note; the route's own refusals ("already applied", "your own listing", "note too long") are shown as written | IMPLEMENTED |
+| Apply externally | `externalUrl` on the listing | ✅ | ✅ | ✅ opens the link instead of posting an application — the field exists precisely so ZRP does not collect it | IMPLEMENTED |
+| Attach a CV | `resumeUrl` on the apply body | ✅ | ✅ | ⬜ the field is sent as absent rather than empty; a résumé picker is not built | MISSING |
+| Save a listing | `POST`/`DELETE /api/opportunity/{id}/save` | ✅ | ✅ | 🔶 both directions work, but **no route reports whether a listing is already saved** — the save endpoints only answer with the state they just set. The control is therefore indeterminate until used, rather than claiming "not saved" | PARTIAL (backend limitation) |
+| Post a listing | `POST /api/opportunity` — created as `PENDING_REVIEW` | ✅ | ✅ | ✅ full composer: all eleven types, skills editor, deadline picker, paid/remote toggles, external URL. The route's own limits are mirrored so a refusal is not how anyone learns them, and the note says the listing is not live yet | IMPLEMENTED |
+| Edit a listing | `PUT /api/opportunity/{id}` — poster or staff | ✅ | ✅ | ✅ same composer. A **substantive** edit (type, title, description, compensation) returns a live listing to `PENDING_REVIEW`; the warning appears only when the route's own four fields actually changed | IMPLEMENTED |
+| Close a listing | `PUT /api/opportunity/{id}` with `status: "CLOSED"` | ✅ | ✅ | ✅ offered only on an ACTIVE listing, which is the only state the route honours it in — elsewhere it silently keeps the existing status | IMPLEMENTED |
+| Delete a listing | `DELETE /api/opportunity/{id}` | ✅ | ✅ | ⬜ the repository method exists; no control surfaces it, because closing is what a poster actually wants and deletion discards the applications with it | MISSING (by design) |
+| My listings / my applications | `GET /api/opportunity/my-listings`, `/my-applications` | ✅ | ✅ | ✅ one screen, two tabs. Listings show status and a moderator's rejection reason verbatim — `my-listings` is the only route that returns a listing that is not live | IMPLEMENTED |
+| Review applicants | `GET /api/opportunity/{id}/applications` — poster or staff, 403 otherwise | ✅ | ✅ | ✅ cover notes, and the three decisions the route lets an owner set | IMPLEMENTED |
+| Decide on an application | `PUT /api/opportunity/applications/{id}` | ✅ | ✅ | ✅ the route splits by role — an applicant may set only `WITHDRAWN` on their own application, an owner only `REVIEWED`/`ACCEPTED`/`REJECTED`. Each side is offered only its own statuses, so the 403 explaining the rule is never how anyone finds out | IMPLEMENTED |
+
+### ZRP HELP (Aid)
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Browse campaigns | `GET /api/help` (`category`, `needType`, cursor) | ✅ | ✅ | ✅ public — the route serves it without a session | IMPLEMENTED |
+| Category filter | same route, the five `HELP_CATEGORIES` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Campaign detail | `GET /api/help/{id}` — reading it counts a view for anyone but the organiser | ✅ | ✅ | ✅ gallery, organiser, needs, description, and progress when money is one of the needs | IMPLEMENTED |
+| Offer supplies / skills / time | `POST /api/help/{id}/offer` — accepts exactly those three, refuses `MONEY` | ✅ | ✅ | ✅ one button per need the campaign actually asks for; a money-only campaign gets none rather than a control that cannot work | IMPLEMENTED |
+| **Contribute money** | `POST /api/help/{id}/contribute` — calls `rejectNativePayment()` | ✅ | ⬜ | ❌ **deliberately absent.** Every request from this app carries `x-zrp-native-app`, so that route can only refuse it (Apple 3.1.1). A button could produce nothing but that refusal | OUT OF SCOPE (store policy) |
+| Create a campaign | `POST /api/help` — `organization` badge only | ✅ | ✅ | ⬜ the badge is granted by manual verification off the app, so a composer would refuse almost everyone who opened it. The website's own `help.orgOnlyNote` is shown instead | MISSING (by design) |
+| Raised / goal figures | serialised as decimal strings by `jsonWithDecimals` | ✅ | ✅ | ✅ shown exactly as the server formatted them; a float is derived only for the progress bar's width, never for a figure on screen | IMPLEMENTED |
+
+### ZRP AI
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| AI chat | `POST /api/ai/chat` (DeepSeek-backed; per-plan daily limits enforced server-side) | ✅ streamed (SSE) | ✅ buffered | ✅ buffered | IMPLEMENTED |
+| Streaming replies | same route, `stream: true` | ✅ | ⬜ | ⬜ the route's own non-streaming branch is used instead — identical rate limiting, persistence and conversation; the difference is only whether the answer appears word by word or after a loading state. Android documents the same choice, and nothing in either app has ever needed an SSE reader | PARTIAL (by design) |
+| Daily allowance | reported by the route as `remaining` | ✅ | ✅ | ✅ displayed as the server reports it, never predicted | IMPLEMENTED |
+| Limit reached | 429 with the route's own wording | ✅ | ✅ | ✅ shown verbatim rather than reworded | IMPLEMENTED |
+
+### Support
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| My tickets | `GET /api/support/tickets` — a bare array, newest first, unpaginated | ✅ | ✅ | ✅ no paging control, because there is nothing to page | IMPLEMENTED |
+| Open a ticket | `POST /api/support/tickets` — eleven categories, and the route sets priority from the opener's plan | ✅ | ✅ | ✅ priority is deliberately **not** a field: a client choosing its own would be asking for a queue position it has no right to | IMPLEMENTED |
+| Ticket thread | `GET /api/support/tickets/{id}` — 403 for a ticket the viewer does not own | ✅ | ✅ | ✅ status, category, priority, the opening message and every reply, with support's own replies marked | IMPLEMENTED |
+| Reply | `POST /api/support/tickets/{id}/reply` — refused on a resolved or closed ticket | ✅ | ✅ | ✅ the composer is not offered on one, and the thread is refetched after a reply because a reply also moves the ticket's status server-side | IMPLEMENTED |
+| Delete a ticket | `DELETE /api/support/tickets/{id}` — only once resolved or closed | ✅ | ✅ | ✅ offered only where the route would allow it | IMPLEMENTED |
+
+### Explore
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Explore — people | `GET /api/users/suggested?limit=50` | ✅ `/explore/people` | ⬜ | ✅ full list with follow, at the same fifty the website asks for rather than the ten Search previews | IMPLEMENTED |
+| Explore — trending tags | `GET /api/hashtags/trending?limit=50` | ✅ `/explore/trending` | ⬜ | ✅ | IMPLEMENTED |
+| Explore — trending posts | `GET /api/posts/explore` | ✅ `/explore` | ⬜ | ✅ **as the Home "For You" tab** — the same route and the same feed. Rebuilding it inside Explore would be a second copy of a screen one tap away | IMPLEMENTED (elsewhere) |
+| Follow from a list | `POST /api/users/{username}/follow` | ✅ | ✅ | ✅ the route is a toggle and its own answer is what is recorded, never an assumption about what the tap did | IMPLEMENTED |
+
+### ZRP News
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| News feed | `GET /api/news` (`category`, `cursor`, `limit`; the cursor is a `publishedAt` timestamp, not an opaque token, and an unparseable one is a 400) | ✅ | ✅ | ✅ cursor-paginated, public — the route serves it without a session, exactly as zrp.one/news does | IMPLEMENTED |
+| Category filter | same route, `?category=` against the schema's eleven `NewsArticleCategory` values | ✅ | ✅ | ✅ same eleven chips and the same "All" default; an unknown category decodes to a value that is never sent back as a filter, so a category added server-side cannot break an older build | IMPLEMENTED |
+| Article | `GET /api/news/{slug}` — reading it is what increments the view tally, server-side | ✅ | ✅ | ✅ cover, category, byline (linking to the author's profile), excerpt, body, and the original source opened in the browser | IMPLEMENTED |
+| Article body formatting | — | rich | ✅ | 🔶 rendered as stored plain text. The route defines no markup, and interpreting one would be inventing a format the backend does not have | PARTIAL (by design) |
 
 ### Notifications
 
@@ -264,13 +349,42 @@ called and the real response being handled.
 | Plan / limits | `GET /api/user/plan`, `src/lib/limits.ts` | ✅ | ✅ | 🔶 composer and listing forms pre-check what the server enforces; the server's own limit message is shown verbatim | PARTIAL (by design) |
 | Plan upgrade / monetisation / wallet surfaces | web billing | ✅ | ✅ | ❌ deliberately absent — see [Store policy constraint](#store-policy-constraint) | OUT OF SCOPE |
 
+### Creator Studio
+
+| Feature | Backend | Web | Android | iOS | Status |
+| --- | --- | --- | --- | --- | --- |
+| Content performance | `GET /api/creator/studio` → `content` (30-day totals, daily engagement trend, top 5 posts ranked server-side by `likes + comments*2 + reposts*3`) | ✅ | ⬜ | ✅ totals, trend chart and the ranked posts, each opening the post | IMPLEMENTED |
+| Audience growth | same route → `audience` (total followers, new in window, daily curve) | ✅ | ⬜ | ✅ | IMPLEMENTED |
+| Earnings / Overview tab | `GET /api/creator/dashboard`, `POST /api/creator/withdraw` | ✅ | ⬜ | ❌ deliberately absent — see [Store policy constraint](#store-policy-constraint) | OUT OF SCOPE |
+
+The route is signed-in only and scoped to the caller by the session — there
+is no user parameter, so it can only ever return the viewer's own numbers.
+It is **not** role-gated: any account sees its own statistics, exactly as on
+the website.
+
+Two figures are the server's approximations and are shown as sent rather
+than recomputed. `topPosts` arrives pre-ranked, so the weighting is not
+written down a second time on the client where the two could drift. And the
+follower curve is reconstructed by working backwards from today's total
+without subtracting unfollows inside the window — the route says so in its
+own comment, and re-deriving it here would not make it more accurate, only
+differently wrong.
+
+Day keys (`YYYY-MM-DD`) come from `toISOString().slice(0, 10)`, a **UTC**
+boundary, and are displayed as strings. Parsing them into local `Date`s
+would shift a day for anyone west of UTC and make the axis labels disagree
+with the server's own buckets.
+
 ### Deliberately out of scope for the consumer iOS app
 
 | Area | Reason |
 | --- | --- |
-| Admin console (`/api/admin/**`, 40+ routes) | STAFF/ADMIN — server-role gated. |
-| Tips, plan upgrade, premium-post purchase, help/charity contribution | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
-| Play, Opportunity, Aid/Help, News, Journalist, Ads, Careers, Investors, Press, Transparency, Shorts, AI chat, API keys, Team, Support tickets | WEB-ONLY today — Android has no surface for any of them either. Not iOS regressions. |
+| **Admin console** (`/api/admin/**`, 40+ routes) | **Web-only for v1, by decision — not an oversight.** Android ships four admin screens; iOS ships none. Every admin route is independently role-gated server-side, so an iOS app without an admin surface loses no security and gains none: hiding a screen is not what protects those routes, and building one would not weaken them either. The reason to leave it out is product, not safety — a staff console is a desk-and-keyboard tool, and the four screens Android has cover a fraction of the twenty the website offers. Anyone doing moderation work should be on the web console that has all of it. Revisit only if staff genuinely need to act from a phone; if so, build it against the same server-role gate and never surface an admin control on a client check alone. |
+| Tips, plan upgrade, premium-post purchase, help/charity contribution, creator withdrawals | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
+| Careers, Investors, Press, Transparency, API keys, Team | WEB-ONLY — Android has no surface for any of them either. |
+| **Ads** (`/api/ads/**`) | Campaign creation is ad *spend* — money leaving an advertiser's account for placement. That is a commerce surface with the same store-policy exposure as the payment routes above, and it is a desk task besides. Android has no surface for it either. |
+| **Journalist** (`/api/journalist/**`) | **Outstanding, and narrow.** Every route is behind `requireJournalistRole()`, so the only part most people could use is the application form. The rest is an article editor with a draft/review/publish workflow — a professional writing tool, and a poor fit for a phone. Worth building when journalists ask for it, not before. |
+| **Creator Studio** — earnings half (`/api/creator/dashboard`, `/withdraw`) | Balance, tips, premium revenue and withdrawals are the monetisation surface the row above already excludes. |
 
 ---
 
@@ -354,11 +468,29 @@ paginated route already returns. Opening a conversation still marks the
 whole thread's unread messages read regardless of page size, unchanged
 from before.
 
-What remains is client-side, not a backend blocker: a "load older
-messages" control that calls this with `cursor`/`limit` once a thread's
-history exceeds one page. Not built here - the iOS app's own explanation
-above ("no paging UI, because there is nothing to page") no longer holds
-now that there's something to page.
+**iOS now uses it.** `MessagesRepository.thread(with:before:limit:)`
+always sends `limit`, which is what makes the envelope - and therefore
+the cursor - available at all; a request without it would get the bare
+array and no way to reach anything before it. A "Load more" appears at
+the top of a thread exactly when `nextCursor` is non-nil, so it is the
+route's own answer about whether more exists rather than a control that
+might do nothing.
+
+Two details that make it work rather than merely exist. The scroll-to-
+bottom is keyed on the newest message's identity, not on the message
+count: prepending history changes the count, and the old rule would have
+thrown the reader straight back out of the history they had just asked
+for. And a refresh merges rather than assigns - once someone has paged
+back, the array reaches further than any newest-page request returns, so
+assigning would silently discard it. Older messages are kept, the
+newest page replaces the range it covers (which is how an edit, a
+reaction or someone else's deletion lands), and the refresh is sized to
+cover what is on screen up to the route's 100-message cap. Beyond that
+cap the older pages are merged rather than refetched, which is the one
+place a stale reaction can persist until the thread is reopened.
+
+Web and Android are unchanged and still send neither param, so both
+still get the bare-array shape they expect.
 
 ### L2. `GET /api/music/playlists/{id}` does not report per-track `liked`
 
@@ -574,11 +706,48 @@ OAuth URL in a system browser, leaving the session as an httpOnly cookie
 inside the browser/WebView, which a real native app cannot read. That is
 still the only path for Apple.
 
-### B2. Sign in with Apple (native)
+### B2. Sign in with Apple (native) — RESOLVED (server + client), Apple portal outstanding
 
 Apple requires Sign in with Apple in any app that offers third-party
-sign-in. This is therefore an **App Store submission blocker**, not a
-nice-to-have.
+sign-in, so this was an **App Store submission blocker**.
+
+**Both gaps below are now closed.**
+
+`POST /api/mobile/auth/apple` verifies the identity token against Apple's
+published JWKS with Node's own crypto — no new dependency, the same
+choice `apple-client-secret.ts` already made — checking `alg` (pinned to
+RS256, never read from the header), the signature, `iss`, `aud`, `exp`,
+`iat`, and the SHA-256 `nonce` claim against the raw nonce the app kept.
+It then reuses `findOrCreateOAuthUser`, the exact function NextAuth's own
+`signIn` callback uses, and returns the same
+`{sessionToken, cookieName, expiresInSeconds, user}` envelope as the
+password and Google routes.
+
+Both audiences are accepted: the bundle ID `one.zrp.social` for the
+native flow and `APPLE_CLIENT_ID` (the Services ID) for the web one.
+`APPLE_NATIVE_CLIENT_ID` overrides the former if the bundle ID ever
+changes.
+
+On identity key: this links on **email**, not `sub`. That is deliberate —
+it is what the website's own Apple provider does through
+`findOrCreateOAuthUser`, so an account created by signing in with Apple on
+the web is the same account when signing in with Apple on iOS. A private
+relay address is stable per app, so it works as a key; keying on `sub`
+instead would silently split those two into different accounts.
+
+Apple's name arrives only on the first authorization, so the app sends it
+beside the token; `findOrCreateOAuthUser` only uses a name when creating,
+which is exactly that one time. Username generation is
+`generateUniqueUsername`, already shared with the web flow — no new rule
+was invented.
+
+**What remains is outside this repository:** "Sign In with Apple" must be
+enabled for the `one.zrp.social` App ID in the Apple Developer portal.
+The entitlement is declared in `Supporting/ZRPSocial.entitlements`; until
+the portal capability exists a *signed* build cannot provision. Unsigned
+CI builds are unaffected.
+
+The original finding, for the record:
 
 Two concrete gaps:
 

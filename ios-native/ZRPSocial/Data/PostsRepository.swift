@@ -70,9 +70,22 @@ struct CreatePostRequest: Encodable {
         let question: String
         let options: [String]
 
-        /// Omitted for a poll that never closes, which is what the
-        /// website sends when no end date is chosen.
-        let expiresAt: Date?
+        /// When the poll closes, as the same NAIVE wall-clock string
+        /// `scheduledAt` uses - the website's poll end date is a
+        /// `<input type="datetime-local">` too, so this is byte for byte
+        /// what the route is written against.
+        ///
+        /// **Not a `Date`.** `JSONEncoder`'s default strategy is
+        /// `.deferredToDate`, which writes a bare number of seconds
+        /// since 2001; the route hands whatever arrives to
+        /// `new Date(...)`, which reads a number as MILLISECONDS SINCE
+        /// 1970. A poll ending next week would have been created having
+        /// expired in January 1970 - closed before anyone could vote,
+        /// and looking like a server bug rather than an encoding one.
+        ///
+        /// Omitted entirely for a poll that never closes, which is what
+        /// the website sends when no end date is chosen.
+        let expiresAt: String?
     }
 
     private enum CodingKeys: String, CodingKey {

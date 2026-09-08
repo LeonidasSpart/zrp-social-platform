@@ -81,12 +81,32 @@ final class SessionController: ObservableObject {
         }
     }
 
+    /// Completes a Sign in with Apple.
+    ///
+    /// Lives here rather than in a view model because Apple's button
+    /// appears on more than one screen and the outcome is the same
+    /// everywhere: a session, or a message. `expiryNotice` carries the
+    /// failure so the login screen shows it in the banner it already has.
+    func signInWithApple(_ credential: AppleSignInCredential) async {
+        do {
+            let user = try await repository.loginWithApple(credential)
+            signedIn(user)
+        } catch let error as ApiError {
+            expiryNotice = error.userFacingMessage
+        } catch {
+            expiryNotice = L10n.string(.authErrSomethingWrong)
+        }
+    }
+
     func signedIn(_ user: CurrentUser) {
         expiryNotice = nil
         state = .signedIn(user)
     }
 
     func signOut() async {
+        // Before the token goes: a socket authenticated as this viewer
+        // must not outlive them on a shared device.
+        ZrpSocket.shared.disconnect()
         await repository.logout()
         expiryNotice = nil
         state = .signedOut
@@ -94,6 +114,7 @@ final class SessionController: ObservableObject {
 
     private func handleSessionExpired() {
         guard state != .signedOut else { return }
+        ZrpSocket.shared.disconnect()
         state = .signedOut
         expiryNotice = L10n.string(.authErrSessionExpired)
     }

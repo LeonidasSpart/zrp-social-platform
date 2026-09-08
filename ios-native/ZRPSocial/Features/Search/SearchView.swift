@@ -105,8 +105,18 @@ struct SearchView: View {
     var body: some View {
         content
             .background(ZrpColor.background.ignoresSafeArea())
-            .navigationTitle(Text(.navExplore))
+            .navigationTitle(Text(.navSearch))
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        navigator.push(.explore)
+                    } label: {
+                        Image(systemName: "safari")
+                    }
+                    .accessibilityLabel(Text(.exploreTitle))
+                }
+            }
             .searchable(
                 text: $viewModel.query,
                 placement: .navigationBarDrawer(displayMode: .always),

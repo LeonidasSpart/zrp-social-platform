@@ -18,6 +18,8 @@ struct ConversationView: View {
     /// chat offers.
     private let quickReactions = ["👍", "❤️", "😂", "😮", "😢", "🙏"]
 
+    @State private var isShowingContact = false
+
     init(partner: PostAuthor, viewerId: String?, initialDraft: String = "") {
         _viewModel = StateObject(
             wrappedValue: ConversationViewModel(
@@ -34,9 +36,32 @@ struct ConversationView: View {
             .navigationTitle(Text(verbatim: viewModel.partner.displayName))
             .navigationBarTitleDisplayMode(.inline)
             .safeAreaInset(edge: .bottom) { composer }
+            // The server's own `user-typing` relay, not a local guess.
+            .overlay(alignment: .top) { typingIndicator }
+            .onChange(of: viewModel.draft) { _, text in
+                guard !text.isEmpty else { return }
+                viewModel.reportTyping()
+            }
             .onChange(of: pickerSelection) { _, items in
                 guard !items.isEmpty else { return }
                 Task { await loadPickedImage(items) }
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { isShowingContact = true } label: {
+                        AvatarView(
+                            url: viewModel.partner.avatarUrl,
+                            displayName: viewModel.partner.displayName,
+                            size: 28
+                        )
+                    }
+                    .accessibilityLabel(
+                        Text(.iosA11yOpenProfile, ["name": viewModel.partner.displayName])
+                    )
+                }
+            }
+            .sheet(isPresented: $isShowingContact) {
+                ChatContactSheet(partner: viewModel.partner, messages: viewModel.messages)
             }
             .task { await viewModel.start() }
             .onDisappear { viewModel.stop() }
@@ -74,6 +99,8 @@ struct ConversationView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: ZrpSpacing.sm) {
+                    loadOlderControl(proxy)
+
                     ForEach(viewModel.messages) { message in
                         MessageBubble(
                             message: message,
@@ -101,9 +128,16 @@ struct ConversationView: View {
                 .frame(maxWidth: .infinity)
             }
             .scrollDismissesKeyboard(.interactively)
-            .onChange(of: viewModel.messages.count) { _, _ in
+            .onChange(of: viewModel.messages.last?.id) { _, _ in
                 // The thread arrives oldest-first, so the newest message
                 // is the one worth showing on arrival and after sending.
+                //
+                // Keyed on the last message's identity rather than on
+                // the count, which is what makes "load older" usable at
+                // all: prepending history changes the count but not the
+                // newest message, and scrolling to the bottom for it
+                // would throw the reader straight back out of the
+                // history they just asked for.
                 guard let last = viewModel.messages.last else { return }
                 withAnimation(.easeOut(duration: 0.2)) {
                     proxy.scrollTo(last.id, anchor: .bottom)
@@ -113,6 +147,63 @@ struct ConversationView: View {
                 guard let last = viewModel.messages.last else { return }
                 proxy.scrollTo(last.id, anchor: .bottom)
             }
+        }
+    }
+
+    /// "Load more" at the top of the thread, shown only when the route
+    /// says there is older history to fetch.
+    ///
+    /// Reuses the feed's own `feed.loadMore` / `feed.loadingMore`
+    /// wording, which is already translated into all eleven languages -
+    /// a chat-specific key would mean the same sentence in English only.
+    @ViewBuilder
+    private func loadOlderControl(_ proxy: ScrollViewProxy) -> some View {
+        if viewModel.isLoadingOlder {
+            HStack(spacing: ZrpSpacing.sm) {
+                ProgressView()
+                Text(.feedLoadingMore)
+                    .font(.footnote)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, ZrpSpacing.sm)
+        } else if viewModel.canLoadOlder {
+            Button {
+                // The message currently at the top, captured before the
+                // fetch. Older messages are prepended above it, which
+                // in a bottom-anchored scroll view would otherwise
+                // shove the reader's position down by the height of
+                // everything just inserted. Scrolling back to it puts
+                // the row they were looking at exactly where it was.
+                let anchor = viewModel.messages.first?.id
+                Task {
+                    await viewModel.loadOlder()
+                    guard let anchor else { return }
+                    proxy.scrollTo(anchor, anchor: .top)
+                }
+            } label: {
+                Text(.feedLoadMore)
+                    .font(.footnote.weight(.medium))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, ZrpSpacing.sm)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(ZrpColor.red)
+        }
+    }
+
+    @ViewBuilder
+    private var typingIndicator: some View {
+        if viewModel.partnerIsTyping {
+            Text(.chatTyping)
+                .font(.caption)
+                .foregroundStyle(ZrpColor.onSurfaceMuted)
+                .padding(.horizontal, ZrpSpacing.md)
+                .padding(.vertical, ZrpSpacing.xs)
+                .background(ZrpColor.surfaceElevated, in: Capsule())
+                .padding(.top, ZrpSpacing.sm)
+                .transition(.opacity)
+                .animation(.easeInOut(duration: 0.15), value: viewModel.partnerIsTyping)
         }
     }
 

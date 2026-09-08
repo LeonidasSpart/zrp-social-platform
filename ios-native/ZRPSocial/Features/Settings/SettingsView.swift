@@ -9,6 +9,13 @@ import SwiftUI
 /// out of scope for the consumer app rather than quietly omitted.
 struct SettingsView: View {
 
+    @EnvironmentObject private var session: SessionController
+
+    /// The legal page being read, or `nil`. `SFSafariViewController`
+    /// cannot be pushed onto a navigation stack, so these are presented
+    /// rather than pushed.
+    @State private var openPage: WebPage?
+
     var body: some View {
         List {
             Section {
@@ -62,6 +69,54 @@ struct SettingsView: View {
             }
 
             Section {
+                ForEach([WebPage.terms, .privacy, .guidelines]) { page in
+                    Button { openPage = page } label: {
+                        Label {
+                            Text(page.titleKey)
+                        } icon: {
+                            Image(systemName: page.systemImage)
+                        }
+                    }
+                }
+            } header: {
+                Text(.footerLegalHeading)
+            }
+
+            Section {
+                NavigationLink(value: Route.supportTickets) {
+                    Label {
+                        Text(.footerContactSupport)
+                    } icon: {
+                        Image(systemName: "lifepreserver")
+                    }
+                }
+            }
+
+            Section {
+                ForEach([WebPage.about, .help]) { page in
+                    Button { openPage = page } label: {
+                        Label {
+                            Text(page.titleKey)
+                        } icon: {
+                            Image(systemName: page.systemImage)
+                        }
+                    }
+                }
+            }
+
+            Section {
+                Button(role: .destructive) {
+                    Task { await session.signOut() }
+                } label: {
+                    Label {
+                        Text(.navSignOut)
+                    } icon: {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                    }
+                }
+            }
+
+            Section {
                 NavigationLink(value: Route.deleteAccount) {
                     Label { Text(.settingsDeleteAccount) } icon: { Image(systemName: "trash") }
                         .foregroundStyle(ZrpColor.red)
@@ -76,6 +131,11 @@ struct SettingsView: View {
         .background(ZrpColor.background.ignoresSafeArea())
         .navigationTitle(Text(.settingsTitle))
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(item: $openPage) { page in
+            if let url = page.url {
+                WebPageView(url: url).ignoresSafeArea()
+            }
+        }
     }
 }
 

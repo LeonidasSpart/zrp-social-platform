@@ -60,6 +60,33 @@ enum Route: Hashable {
     case emailPreferences
     case appeals
     case trustPassport(username: String)
+    case bookmarks
+    /// ZRP Shorts. `startId` opens the feed on one particular video -
+    /// what tapping a video elsewhere in the app leads to.
+    case shorts(startId: String?)
+    case news
+    case newsArticle(slug: String)
+    case explore
+    case supportTickets
+    case supportTicket(id: String)
+    case aiChat
+    case aid
+    case aidCampaign(id: String)
+    case opportunity
+    case opportunityDetail(id: String)
+    /// The composer. Carries the whole listing when editing rather than
+    /// an id, the same way `postDetail` carries a preloaded post: it
+    /// always arrives from "My listings", which has already fetched it,
+    /// so re-fetching would show a spinner over data the app is holding.
+    case opportunityCompose(listing: MyOpportunityListing?)
+    case myOpportunities
+    case opportunityApplicants(listingId: String)
+    case play
+    case playChallenge(id: String)
+    case playLeaderboard
+    /// Creator Studio - the analytics half only. The website's earnings
+    /// tab is excluded by store policy; see `CreatorStudioView`.
+    case creatorStudio
 }
 
 /// Owns the navigation stack's path.

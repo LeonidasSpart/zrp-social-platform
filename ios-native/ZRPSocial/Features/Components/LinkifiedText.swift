@@ -15,6 +15,11 @@ struct LinkifiedText: View {
     var onHashtag: ((String) -> Void)?
     var onMention: ((String) -> Void)?
 
+    /// Called for a zrp.one link that names a screen this app has. Web
+    /// links to anywhere else - and to ZRP pages iOS has not built - keep
+    /// going to Safari.
+    var onZrpLink: ((Route) -> Void)?
+
     /// The scheme is never registered in Info.plist. It exists only as a
     /// marker inside the attributed string and is always consumed by the
     /// handler below, so nothing outside the app can ever be launched
@@ -29,10 +34,17 @@ struct LinkifiedText: View {
             .textSelection(.enabled)
             .environment(\.openURL, OpenURLAction { url in
                 guard url.scheme == Self.internalScheme else {
-                    // A real http(s) link from user content. Hand it to
-                    // the system so it opens in Safari with the usual
-                    // protections, rather than in an in-app web view that
-                    // would hide the address from the user.
+                    // A ZRP link inside a post opens the app's own screen
+                    // for it - leaving the app to read a ZRP post in
+                    // Safari, signed out, would be absurd. Everything
+                    // else, including ZRP pages this app has no screen
+                    // for, goes to the system so it opens in Safari with
+                    // the usual protections rather than in an in-app web
+                    // view that would hide the address from the reader.
+                    if let onZrpLink, let route = DeepLink.target(for: url)?.route {
+                        onZrpLink(route)
+                        return .handled
+                    }
                     return .systemAction
                 }
                 let value = String(url.path().dropFirst()).removingPercentEncoding

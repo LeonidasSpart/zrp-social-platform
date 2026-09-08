@@ -58,11 +58,10 @@ final class NotificationsViewModel: ObservableObject {
 struct NotificationsView: View {
 
     @EnvironmentObject private var navigator: Navigator
+    /// Cleared after the list marks everything read, so the tab badge
+    /// goes away with the notifications rather than at the next refresh.
+    @EnvironmentObject private var unread: UnreadBadgeViewModel
     @StateObject private var viewModel = NotificationsViewModel()
-
-    /// Refreshed after the list marks itself read, so the toolbar badge
-    /// clears without waiting for the next launch.
-    let onRead: () -> Void
 
     var body: some View {
         Group {
@@ -91,7 +90,7 @@ struct NotificationsView: View {
         .task {
             await viewModel.loadIfNeeded()
             await viewModel.markAllRead()
-            onRead()
+            unread.clearNotificationCount()
         }
     }
 

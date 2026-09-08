@@ -63,28 +63,13 @@ struct RootView: View {
     }
 }
 
-/// The signed-in app.
+/// The signed-in app: the tab shell.
 ///
-/// Home is the only destination that exists today, so this is
-/// deliberately *not* a `TabView`. A tab bar whose Search, Notifications,
-/// Messages, and Profile tabs all opened empty screens would be four dead
-/// controls; those tabs appear in the phases that make them real (see
-/// ios-native/PARITY.md).
+/// Rebuilt from scratch on each sign-in, which is what discards the
+/// previous viewer's tab selection and navigation stacks along with their
+/// data.
 struct SignedInView: View {
-
-    @EnvironmentObject private var player: MusicPlayer
-
     var body: some View {
-        HomeView()
-            // The mini-player is anchored outside the navigation stack so
-            // it persists across every push - that is what makes it a
-            // *persistent* player rather than one screen's control. It
-            // renders nothing at all until something is playing.
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                MiniPlayerView()
-            }
-            .fullScreenCover(isPresented: $player.isExpanded) {
-                NowPlayingView()
-            }
+        MainTabView()
     }
 }

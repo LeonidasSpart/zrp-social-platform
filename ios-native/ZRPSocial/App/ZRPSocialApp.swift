@@ -31,6 +31,11 @@ struct ZRPSocialApp: App {
     /// running.
     @StateObject private var feedVideos = FeedVideoCoordinator()
 
+    /// Holds an incoming universal link until there is a signed-in shell
+    /// to open it in - a link can arrive at launch, mid-restore, or with
+    /// nobody signed in at all.
+    @StateObject private var deepLinks = DeepLinkInbox()
+
     var body: some Scene {
         WindowGroup {
             RootView()
@@ -40,6 +45,8 @@ struct ZRPSocialApp: App {
                 .environmentObject(musicLikes)
                 .environmentObject(language)
                 .environmentObject(feedVideos)
+                .environmentObject(deepLinks)
+                .onOpenURL { url in deepLinks.receive(url) }
                 // Rebuilt outright when the language changes. Strings
                 // resolve through L10n at call time, so SwiftUI has no
                 // dependency to invalidate and would otherwise keep

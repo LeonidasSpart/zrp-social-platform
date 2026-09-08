@@ -2,7 +2,11 @@ import Foundation
 
 protocol MessagesRepositoryProtocol: Sendable {
     func conversations() async throws -> [ConversationSummary]
-    func thread(with userId: String) async throws -> [Message]
+    func thread(
+        with userId: String,
+        before cursor: String?,
+        limit: Int
+    ) async throws -> MessageThreadPage
     func send(
         to userId: String,
         content: String,
@@ -45,19 +49,37 @@ struct MessagesRepository: MessagesRepositoryProtocol {
         try await client.send(Endpoint.get("messages"))
     }
 
-    /// The whole thread, oldest first.
+    /// One page of a thread, oldest first.
     ///
-    /// **This route is not paginated.** It returns every message ever
-    /// exchanged with that user - there is no cursor, limit or `take` on
-    /// the query. The UI reflects that rather than showing a "load more"
-    /// with nothing to load; see PARITY.md, which records it as a real
-    /// backend limitation rather than something the client can fix.
+    /// **Always sends `limit`,** and that is deliberate rather than
+    /// incidental: the route only answers the `{items, nextCursor}`
+    /// envelope when a request asks for a page. A request with neither
+    /// `cursor` nor `limit` gets a bare array of the most recent
+    /// messages and no cursor at all - correct for the website and the
+    /// shipped Android app, which have no "load older" control, but it
+    /// would leave this client unable to reach history beyond the first
+    /// page. Asking for a page is what makes the rest of the
+    /// conversation addressable.
+    ///
+    /// `cursor` is the id of the oldest message already held; the route
+    /// returns the ones before it. `limit` is clamped server-side to
+    /// 100, so asking for more is not an error, just not honoured.
     ///
     /// Fetching also has a side effect: the route marks the other
-    /// party's unread messages read. So calling this *is* the read
+    /// party's unread messages read, for the whole conversation and not
+    /// merely the page requested. So calling this *is* the read
     /// receipt - there is no separate endpoint to call.
-    func thread(with userId: String) async throws -> [Message] {
-        try await client.send(Endpoint.get("messages/\(userId)"))
+    func thread(
+        with userId: String,
+        before cursor: String?,
+        limit: Int
+    ) async throws -> MessageThreadPage {
+        try await client.send(
+            Endpoint.get(
+                "messages/\(userId)",
+                query: [("limit", String(limit)), ("cursor", cursor)]
+            )
+        )
     }
 
     /// Answers 201 with the created message, sender and replyTo included.
