@@ -9,8 +9,11 @@ import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import one.zrp.social.mobile.data.ComposerDraftStore
 import one.zrp.social.mobile.data.MediaUploadRepository
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.network.ApiClient
@@ -83,12 +86,19 @@ data class CreatePostUiState(
  * option, matching the website's QuotePostModal), the real post being
  * quoted is fetched via GET /posts/{id} to render its own preview
  * above the composer, and submit() attaches quotePostId to the create
- * call the same way QuotePostModal.tsx does.
+ * call the same way QuotePostModal.tsx does. QuotePostModal.tsx has no
+ * draft-protection of its own (confirmed by reading the component), so
+ * [draftStore] is only consulted for a plain new post below - matching
+ * PostComposer.tsx's own DRAFT_KEY block exactly, right down to saving
+ * a stripped-down draft (content/mediaUrls/mediaType only - native has
+ * no postType concept to persist) after every change and clearing it
+ * once a post actually goes through.
  */
 class CreatePostViewModel(
     private val repository: PostsRepository,
     private val quotePostId: String? = null,
     private val mediaUploadRepository: MediaUploadRepository = MediaUploadRepository(),
+    private val draftStore: ComposerDraftStore = ApiClient.getComposerDraftStore(),
 ) : ViewModel() {
     private val _state = MutableStateFlow(CreatePostUiState())
     val state: StateFlow<CreatePostUiState> = _state.asStateFlow()
@@ -98,6 +108,25 @@ class CreatePostViewModel(
             runCatching { ApiClient.authApi.getSession().user?.plan }
                 .getOrNull()
                 ?.let { plan -> _state.update { it.copy(plan = plan) } }
+        }
+
+        if (quotePostId == null) {
+            draftStore.load()?.let { draft ->
+                _state.update {
+                    it.copy(
+                        content = draft.content,
+                        mediaUrls = draft.mediaUrls,
+                        mediaType = draft.mediaType,
+                    )
+                }
+            }
+            viewModelScope.launch {
+                _state.map { Triple(it.content, it.mediaUrls, it.mediaType) }
+                    .distinctUntilChanged()
+                    .collect { (content, mediaUrls, mediaType) ->
+                        draftStore.save(content, mediaUrls, mediaType)
+                    }
+            }
         }
 
         if (quotePostId != null) {
@@ -361,6 +390,7 @@ class CreatePostViewModel(
         viewModelScope.launch {
             repository.createPost(effectiveContent, quotePostId, mediaUrls, mediaType, scheduledAt, poll, scheduledAtOffsetMinutes)
                 .onSuccess {
+                    if (quotePostId == null) draftStore.clear()
                     _state.update { it.copy(isPosting = false, posted = true) }
                 }
                 .onFailure { error ->
