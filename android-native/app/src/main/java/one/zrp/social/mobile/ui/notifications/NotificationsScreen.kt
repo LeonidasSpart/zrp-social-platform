@@ -54,6 +54,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.NotificationsRepository
 import one.zrp.social.mobile.network.PostAuthor
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpBlue
@@ -315,10 +316,13 @@ private fun NotificationRow(
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
+                // This row continues with more text after the badge
+                // ("liked your post"), so unlike every other usage it
+                // needs a gap on both sides.
                 VerifiedBadge(
                     badgeType = primaryUser?.badgeType,
-                    size = 14.dp,
-                    modifier = Modifier.padding(start = 3.dp, end = 3.dp),
+                    size = BadgeSize.small,
+                    trailingGap = Spacing.xs,
                 )
                 Text(
                     text = describeNotificationSuffix(group.type, others),

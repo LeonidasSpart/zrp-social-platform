@@ -145,7 +145,7 @@ private fun ConversationRow(conversation: ConversationSummary, onClick: () -> Un
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = if (conversation.unreadCount > 0) FontWeight.Bold else FontWeight.Normal,
                 )
-                VerifiedBadge(badgeType = partner.badgeType, modifier = Modifier.padding(start = 3.dp))
+                VerifiedBadge(badgeType = partner.badgeType)
             }
             Text(
                 text = preview,

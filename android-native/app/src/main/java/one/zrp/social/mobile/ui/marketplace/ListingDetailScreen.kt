@@ -326,7 +326,6 @@ fun ListingDetailScreen(
                                     if (listing.seller.badgeType != null) {
                                         VerifiedBadge(
                                             badgeType = listing.seller.badgeType,
-                                            modifier = Modifier.padding(start = 4.dp),
                                         )
                                     }
                                 }

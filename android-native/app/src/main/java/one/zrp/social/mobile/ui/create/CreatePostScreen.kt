@@ -196,7 +196,6 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
                                 )
                                 VerifiedBadge(
                                     badgeType = quotedPost.author.badgeType,
-                                    modifier = Modifier.padding(start = 3.dp),
                                 )
                             }
                             Text(

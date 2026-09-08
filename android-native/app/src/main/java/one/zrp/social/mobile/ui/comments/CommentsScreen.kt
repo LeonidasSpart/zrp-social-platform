@@ -386,7 +386,7 @@ private fun CommentRow(
                     text = comment.author.name ?: comment.author.username,
                     style = MaterialTheme.typography.titleSmall,
                 )
-                VerifiedBadge(badgeType = comment.author.badgeType, modifier = Modifier.padding(start = 3.dp))
+                VerifiedBadge(badgeType = comment.author.badgeType)
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "· ${formatRelativeTime(comment.createdAt)}",

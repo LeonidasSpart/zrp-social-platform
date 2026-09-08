@@ -272,7 +272,7 @@ fun OpportunityDetailScreen(
                                 modifier = Modifier.padding(start = Spacing.xs),
                             )
                             if (listing.poster.badgeType != null) {
-                                VerifiedBadge(badgeType = listing.poster.badgeType, modifier = Modifier.padding(start = 4.dp))
+                                VerifiedBadge(badgeType = listing.poster.badgeType)
                             }
                         }
                     }

@@ -69,7 +69,7 @@ fun DuelCardView(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                VerifiedBadge(badgeType = opponent.badgeType, modifier = Modifier.padding(start = 2.dp))
+                VerifiedBadge(badgeType = opponent.badgeType)
             }
             Text(
                 text = "${challengeTypeLabel(duel.challenge.type)} - ${duel.challenge.title}",

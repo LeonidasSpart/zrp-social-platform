@@ -125,7 +125,7 @@ fun ChatContactPopup(
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleMedium,
                 )
-                VerifiedBadge(badgeType = partner.badgeType, modifier = Modifier.padding(start = 4.dp))
+                VerifiedBadge(badgeType = partner.badgeType)
             }
             Text(
                 text = "@${partner.username}",

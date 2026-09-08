@@ -90,7 +90,7 @@ fun PlayProfileScreen(username: String, onBack: () -> Unit, onOpenChallenge: (St
                         Avatar(url = data.user.avatarUrl, name = data.user.username, size = 64.dp)
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
                             Text(text = "@${data.user.username}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                            VerifiedBadge(badgeType = data.user.badgeType, modifier = Modifier.padding(start = 2.dp))
+                            VerifiedBadge(badgeType = data.user.badgeType)
                         }
                         PlayXpBarView(
                             level = data.profile.level,

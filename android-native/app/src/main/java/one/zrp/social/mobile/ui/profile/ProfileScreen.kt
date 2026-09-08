@@ -87,6 +87,7 @@ import one.zrp.social.mobile.network.UserReply
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
+import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.home.PostCard
 import one.zrp.social.mobile.ui.theme.Spacing
@@ -742,8 +743,7 @@ private fun ProfileHeader(
                 )
                 VerifiedBadge(
                     badgeType = profile.badgeType,
-                    size = 20.dp,
-                    modifier = Modifier.padding(start = Spacing.xs),
+                    size = BadgeSize.large,
                 )
                 // Matches page.tsx's own `profile.isPrivate && !isOwnProfile`
                 // lock glyph next to the display name.
@@ -1109,7 +1109,7 @@ private fun ReplyRow(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.clickable { onAuthorClick(reply.author.username) },
                     )
-                    VerifiedBadge(badgeType = reply.author.badgeType, size = 16.dp, modifier = Modifier.padding(start = 2.dp))
+                    VerifiedBadge(badgeType = reply.author.badgeType, size = BadgeSize.default)
                 }
                 Row {
                     Text(

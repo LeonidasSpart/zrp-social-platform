@@ -96,7 +96,7 @@ fun JournalistDashboardScreen(
             if (state.isJournalist && state.profile?.status != "PENDING" && state.profile?.status != "SUSPENDED") {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 4.dp)) {
                     Text(text = stringResource(R.string.journalist_dash_title), style = MaterialTheme.typography.titleMedium)
-                    VerifiedBadge(badgeType = "journalist", modifier = Modifier.padding(start = 6.dp))
+                    VerifiedBadge(badgeType = "journalist")
                 }
             }
         }

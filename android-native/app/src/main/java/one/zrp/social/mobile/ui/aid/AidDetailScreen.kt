@@ -260,7 +260,7 @@ fun AidDetailScreen(
                                 modifier = Modifier.padding(start = Spacing.xs),
                             )
                             if (campaign.organizer.badgeType != null) {
-                                VerifiedBadge(badgeType = campaign.organizer.badgeType, modifier = Modifier.padding(start = 4.dp))
+                                VerifiedBadge(badgeType = campaign.organizer.badgeType)
                             }
                         }
                     }
