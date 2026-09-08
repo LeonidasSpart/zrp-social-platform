@@ -68,8 +68,8 @@ struct PostListView<Header: View>: View {
                     sheets: sheets
                 )
 
-                if let sponsoredAd, index == Self.adSlotIndex,
-                   visiblePosts.count > Self.adSlotIndex + 1 {
+                if let sponsoredAd, index == SponsoredPostCard.feedSlotIndex,
+                   visiblePosts.count > SponsoredPostCard.feedSlotIndex + 1 {
                     SponsoredPostCard(ad: sponsoredAd)
                 }
             }
@@ -82,12 +82,6 @@ struct PostListView<Header: View>: View {
         .frame(maxWidth: .infinity)
         .postSheets(sheets, onCreated: onCreated)
     }
-
-    /// The website's own slot: the ad follows the post at index 4, so it
-    /// is the sixth thing in the feed. Matched rather than chosen -
-    /// where an ad sits is a product decision, and the web is where it
-    /// was made.
-    private static let adSlotIndex = 4
 
     @ViewBuilder
     private var footer: some View {

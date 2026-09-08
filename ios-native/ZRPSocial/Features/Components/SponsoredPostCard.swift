@@ -28,6 +28,15 @@ struct SponsoredPostCard: View {
     /// The website's own IntersectionObserver threshold.
     private static let impressionThreshold: CGFloat = 0.5
 
+    /// The ad follows the post at this index, so it is the sixth thing
+    /// in the feed. Matched rather than chosen - where an ad sits is a
+    /// product decision, and the web is where it was made.
+    ///
+    /// Lives here rather than on `PostListView` because that type is
+    /// generic over its header, and Swift does not allow a static stored
+    /// property in a generic type. It is ad knowledge anyway.
+    static let feedSlotIndex = 4
+
     var body: some View {
         VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
             Label {
