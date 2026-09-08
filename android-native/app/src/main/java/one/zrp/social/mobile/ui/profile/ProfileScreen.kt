@@ -201,6 +201,7 @@ fun ProfileScreen(
                         showPinOption = showPin,
                         isPinned = isPinned,
                         onPinClick = { postId -> viewModel.togglePin(postId) },
+                        onVoteClick = { postId, pollId, optionIndex -> viewModel.votePoll(postId, pollId, optionIndex) },
                     )
                 }
 

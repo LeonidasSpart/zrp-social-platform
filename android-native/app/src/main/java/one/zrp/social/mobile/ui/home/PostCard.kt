@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -62,6 +63,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -79,6 +81,7 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.network.ApiClient
+import one.zrp.social.mobile.network.Poll
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.ReactionToggleRequest
 import one.zrp.social.mobile.network.TranslateRequest
@@ -94,7 +97,10 @@ import one.zrp.social.mobile.ui.theme.ZrpGreen
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatCount
 import one.zrp.social.mobile.util.formatRelativeTime
+import one.zrp.social.mobile.util.parseIsoMillis
+import java.text.DateFormat
 import java.util.Locale
+import kotlin.math.roundToInt
 
 // The exact same video-vs-image heuristic PostCard.tsx itself uses
 // (mediaType, URL extension, and URL path patterns together, since
@@ -206,6 +212,10 @@ fun PostCard(
     showPinOption: Boolean = false,
     isPinned: Boolean = false,
     onPinClick: (String) -> Unit = {},
+    // Poll voting - postId and pollId both passed since the vote
+    // endpoint is keyed on the poll, not the post, but the ViewModel
+    // still needs postId to know which Post in its own list to update.
+    onVoteClick: (postId: String, pollId: String, optionIndex: Int) -> Unit = { _, _, _ -> },
 ) {
     // Translation is purely local, ephemeral per-card UI state on the
     // website too (PostCard.tsx's own translatedText/showTranslation/
@@ -422,6 +432,14 @@ fun PostCard(
                     QuotedPostPreview(
                         quotedPost = quotedPost,
                         onClick = { onClick(quotedPost.id) },
+                    )
+                }
+
+                val poll = post.poll
+                if (poll != null) {
+                    PollBlock(
+                        poll = poll,
+                        onVote = { optionIndex -> onVoteClick(post.id, poll.id, optionIndex) },
                     )
                 }
 
@@ -916,6 +934,164 @@ private fun QuotedPostPreview(quotedPost: Post, onClick: () -> Unit) {
             )
         }
     }
+}
+
+// The native equivalent of the website's own (currently unwired into
+// PostCard.tsx) Poll.tsx component - real single-select voting against
+// POST /api/polls/{id}/vote, single-select and one vote per user
+// enforced server-side (PollVote's own [pollId, userId] unique
+// constraint), never a second local-only voting system. Mirrors
+// Poll.tsx's exact behavior: percentage/count text next to an option
+// only appears once `userVoteIndex != null` - NOT merely once the
+// poll has expired, so a viewer who never voted on an expired poll
+// still sees no results, exactly like the reference component (the
+// background proportion bar itself is still drawn behind every option
+// regardless, matching Poll.tsx's own unconditional bar render).
+@Composable
+private fun PollBlock(poll: Poll, onVote: (Int) -> Unit, modifier: Modifier = Modifier) {
+    val isExpired = remember(poll.expiresAt) {
+        val expiresAtMillis = poll.expiresAt?.let { parseIsoMillis(it) }
+        expiresAtMillis != null && expiresAtMillis < System.currentTimeMillis()
+    }
+    val userVoteIndex = poll.userVoteIndex
+    val hasVoted = userVoteIndex != null
+    val totalVotes = poll.totalVotes()
+    val canVote = !isExpired && !hasVoted
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = Spacing.sm)
+            .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .padding(Spacing.sm),
+    ) {
+        Text(text = poll.question, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+
+        Column(
+            modifier = Modifier.padding(top = Spacing.xs),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+        ) {
+            poll.options.forEachIndexed { index, label ->
+                val count = poll.voteCount(index)
+                val percentage = if (totalVotes > 0) ((count * 100f) / totalVotes).roundToInt() else 0
+                PollOptionRow(
+                    label = label,
+                    percentage = percentage,
+                    count = count,
+                    isSelected = userVoteIndex == index,
+                    // Matches Poll.tsx's own `selected !== null` gate -
+                    // deliberately not `hasVoted || isExpired`.
+                    showResult = hasVoted,
+                    canVote = canVote,
+                    onClick = { onVote(index) },
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Spacing.xs),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = pluralStringResource(R.plurals.poll_vote_count, totalVotes, totalVotes),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                val expiresAt = poll.expiresAt
+                if (isExpired) {
+                    Text(
+                        text = stringResource(R.string.poll_ended),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else if (expiresAt != null) {
+                    Text(
+                        text = stringResource(R.string.poll_ends_label) + " " + formatPollExpiry(expiresAt),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (hasVoted && !isExpired) {
+                    Text(
+                        text = stringResource(R.string.poll_voted),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = ZrpBlue,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PollOptionRow(
+    label: String,
+    percentage: Int,
+    count: Int,
+    isSelected: Boolean,
+    showResult: Boolean,
+    canVote: Boolean,
+    onClick: () -> Unit,
+) {
+    val borderColor = if (isSelected) ZrpBlue else MaterialTheme.colorScheme.outlineVariant
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.small)
+            .background(if (isSelected) ZrpBlue.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surface)
+            .border(if (isSelected) 2.dp else 1.dp, borderColor, MaterialTheme.shapes.small)
+            .then(if (canVote) Modifier.clickable(onClick = onClick) else Modifier),
+    ) {
+        // Background proportion bar - matches Poll.tsx's own
+        // unconditional absolute-positioned width:${percentage}% div,
+        // drawn regardless of showResult so this Box must size itself
+        // from the foreground Row below (matchParentSize), not the
+        // reverse.
+        Box(modifier = Modifier.matchParentSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(fraction = (percentage / 100f).coerceIn(0f, 1f))
+                    .background(ZrpBlue.copy(alpha = 0.12f)),
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.sm),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+            if (showResult) {
+                Text(
+                    text = stringResource(R.string.poll_option_result, percentage, formatCount(count)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = Spacing.xs),
+                )
+            }
+        }
+    }
+}
+
+// Short, locale-aware date - reference component uses a plain
+// toLocaleDateString() with no time component for a poll's own expiry
+// display, unlike CreatePostScreen's own datetime-local picker for
+// setting it.
+private fun formatPollExpiry(iso: String): String {
+    val millis = parseIsoMillis(iso) ?: return ""
+    return DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault()).format(java.util.Date(millis))
 }
 
 // The one moment on this screen worth a deliberate flourish: liking a

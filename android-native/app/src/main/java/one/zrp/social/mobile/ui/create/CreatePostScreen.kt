@@ -19,9 +19,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Poll
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -99,6 +102,10 @@ import one.zrp.social.mobile.util.getPlanLimits
  * picker or media upload of its own (confirmed by reading the
  * component), so neither button shows for the quote-post variant.
  */
+// Which field the shared two-step date/time picker (see the composable
+// body's own KDoc there) is currently filling in.
+private enum class DateTimeTarget { SCHEDULE, POLL_EXPIRY }
+
 @OptIn(ExperimentalMaterial3Api::class, UnstableApi::class)
 @Composable
 fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
@@ -115,6 +122,15 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
     // calendar day while the follow-up TimePicker step is still open -
     // combined with the picked hour/minute once that dialog confirms.
     var pendingDateMillis by remember { mutableStateOf<Long?>(null) }
+    // The same two-step Material3 date+time flow backs both "Schedule"
+    // and the poll's optional "Ends" picker (Android has no single
+    // widget matching <input type="datetime-local"> for either one) -
+    // this just tracks which one the current pick applies to, since
+    // their cancel behavior differs (cancelling Schedule with nothing
+    // picked turns scheduling back off; cancelling the poll's expiry
+    // pick just leaves it unset, matching PostComposer.tsx's own
+    // optional, no-toggle pollExpiry field).
+    var dateTimeTarget by remember { mutableStateOf(DateTimeTarget.SCHEDULE) }
 
     val mediaPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -267,7 +283,10 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
                 OutlinedButton(
                     onClick = {
                         viewModel.onToggleSchedule()
-                        if (!isScheduling) showDatePicker = true
+                        if (!isScheduling) {
+                            dateTimeTarget = DateTimeTarget.SCHEDULE
+                            showDatePicker = true
+                        }
                     },
                     enabled = !state.isPosting,
                     colors = scheduleColors,
@@ -283,10 +302,34 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
                         text = SimpleDateFormat("MMM d, yyyy · h:mm a", Locale.getDefault()).format(scheduledAtMillis),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.clip(MaterialTheme.shapes.small).clickable { showDatePicker = true }.padding(4.dp),
+                        modifier = Modifier.clip(MaterialTheme.shapes.small).clickable {
+                            dateTimeTarget = DateTimeTarget.SCHEDULE
+                            showDatePicker = true
+                        }.padding(4.dp),
                     )
                 }
             }
+        }
+
+        if (quotePostId == null && state.showPollBuilder) {
+            PollBuilder(
+                question = state.pollQuestion,
+                options = state.pollOptions,
+                expiryMillis = state.pollExpiryMillis,
+                onQuestionChange = { viewModel.onPollQuestionChange(it) },
+                onOptionChange = { index, text -> viewModel.onPollOptionChange(index, text) },
+                onAddOption = { viewModel.onAddPollOption() },
+                onRemoveOption = { index -> viewModel.onRemovePollOption(index) },
+                onExpiryClick = {
+                    dateTimeTarget = DateTimeTarget.POLL_EXPIRY
+                    showDatePicker = true
+                },
+                onClearExpiry = { viewModel.onPollExpirySelected(null) },
+                enabled = !state.isPosting,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.sm),
+            )
         }
 
         if (state.error != null) {
@@ -348,6 +391,25 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
+
+                    // Matches PostComposer.tsx's own poll toggle - never
+                    // disabled by media/GIF state there (a poll and
+                    // media can technically coexist), so this isn't
+                    // gated by canAddMoreMedia either. canCreatePoll is
+                    // a plan feature flag that defaults to allowed when
+                    // absent (`explicit === null ? true : explicit`);
+                    // native has no feature-flag fetch of its own, so
+                    // this always shows, matching that same default.
+                    IconButton(
+                        onClick = { viewModel.onTogglePollBuilder() },
+                        enabled = !state.isPosting,
+                    ) {
+                        Icon(
+                            Icons.Filled.Poll,
+                            contentDescription = stringResource(R.string.createpost_poll_toggle_cd),
+                            tint = if (state.showPollBuilder) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             } else {
                 Spacer(modifier = Modifier.size(1.dp))
@@ -393,18 +455,35 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
         )
     }
 
+    // Cancelling either step of the SCHEDULE flow with nothing picked
+    // turns scheduling back off rather than leaving the toggle stuck on;
+    // cancelling the poll's own (optional, no-toggle) expiry pick just
+    // leaves it unset, so there's nothing to undo there.
+    fun cancelDateTimePick() {
+        if (dateTimeTarget == DateTimeTarget.SCHEDULE && state.isScheduling && state.scheduledAtMillis == null) {
+            viewModel.onToggleSchedule()
+        }
+    }
+
+    fun applyDateTimePick(millis: Long) {
+        when (dateTimeTarget) {
+            DateTimeTarget.SCHEDULE -> viewModel.onScheduledAtSelected(millis)
+            DateTimeTarget.POLL_EXPIRY -> viewModel.onPollExpirySelected(millis)
+        }
+    }
+
     // Android has no single widget matching HTML's <input
     // type="datetime-local">, so the real datetime-local value web
     // collects in one field is built here from two native Material3
-    // steps in sequence - a date step, then a time step. Cancelling
-    // either step turns scheduling back off rather than leaving the
-    // toggle stuck on with nothing picked.
+    // steps in sequence - a date step, then a time step. Shared by both
+    // Schedule and the poll's own "Ends" picker - see dateTimeTarget's
+    // own KDoc for why cancel behavior differs between the two.
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState()
         DatePickerDialog(
             onDismissRequest = {
                 showDatePicker = false
-                if (state.isScheduling && state.scheduledAtMillis == null) viewModel.onToggleSchedule()
+                cancelDateTimePick()
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -413,8 +492,8 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
                     if (millis != null) {
                         pendingDateMillis = millis
                         showTimePicker = true
-                    } else if (state.isScheduling && state.scheduledAtMillis == null) {
-                        viewModel.onToggleSchedule()
+                    } else {
+                        cancelDateTimePick()
                     }
                 }) {
                     Text(stringResource(android.R.string.ok))
@@ -423,7 +502,7 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
             dismissButton = {
                 TextButton(onClick = {
                     showDatePicker = false
-                    if (state.isScheduling && state.scheduledAtMillis == null) viewModel.onToggleSchedule()
+                    cancelDateTimePick()
                 }) {
                     Text(stringResource(android.R.string.cancel))
                 }
@@ -438,7 +517,7 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
         AlertDialog(
             onDismissRequest = {
                 showTimePicker = false
-                if (state.isScheduling && state.scheduledAtMillis == null) viewModel.onToggleSchedule()
+                cancelDateTimePick()
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -463,7 +542,7 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
                             0,
                         )
                         localCal.set(Calendar.MILLISECOND, 0)
-                        viewModel.onScheduledAtSelected(localCal.timeInMillis)
+                        applyDateTimePick(localCal.timeInMillis)
                     }
                 }) {
                     Text(stringResource(android.R.string.ok))
@@ -472,7 +551,7 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
             dismissButton = {
                 TextButton(onClick = {
                     showTimePicker = false
-                    if (state.isScheduling && state.scheduledAtMillis == null) viewModel.onToggleSchedule()
+                    cancelDateTimePick()
                 }) {
                     Text(stringResource(android.R.string.cancel))
                 }
@@ -494,6 +573,115 @@ private fun mediaErrorMessage(error: MediaValidationError): String = when (error
     is MediaValidationError.GifLimit -> stringResource(R.string.composer_err_gif_limit, error.maxImages)
     is MediaValidationError.UploadFailed ->
         stringResource(R.string.composer_err_upload_failed) + ": " + error.detail
+}
+
+/**
+ * Mirrors PostComposer.tsx's own poll builder: a question field, 2-6
+ * option fields (a "Remove" affordance only once there are more than
+ * 2, matching PostComposer.tsx's own `pollOptions.length > 2` guard),
+ * an "Add option" action disabled once [PollLimits.maxOptions] is hit,
+ * and an optional expiry - all client-side-only limits, since the
+ * backend itself only enforces "at least 2 options" (see
+ * PollCreateRequest's own KDoc).
+ */
+@Composable
+private fun PollBuilder(
+    question: String,
+    options: List<String>,
+    expiryMillis: Long?,
+    onQuestionChange: (String) -> Unit,
+    onOptionChange: (Int, String) -> Unit,
+    onAddOption: () -> Unit,
+    onRemoveOption: (Int) -> Unit,
+    onExpiryClick: () -> Unit,
+    onClearExpiry: () -> Unit,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .padding(Spacing.md),
+    ) {
+        OutlinedTextField(
+            value = question,
+            onValueChange = onQuestionChange,
+            placeholder = { Text(stringResource(R.string.createpost_poll_question)) },
+            enabled = enabled,
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Column(
+            modifier = Modifier.padding(top = Spacing.sm),
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            options.forEachIndexed { index, option ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedTextField(
+                        value = option,
+                        onValueChange = { onOptionChange(index, it) },
+                        placeholder = { Text(stringResource(R.string.createpost_poll_option, index + 1)) },
+                        enabled = enabled,
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (options.size > 2) {
+                        IconButton(onClick = { onRemoveOption(index) }, enabled = enabled) {
+                            Icon(
+                                Icons.Filled.DeleteOutline,
+                                contentDescription = stringResource(R.string.createpost_poll_remove_option_cd),
+                                tint = MaterialTheme.colorScheme.error,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Spacing.sm),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            TextButton(onClick = onAddOption, enabled = enabled && options.size < PollLimits.maxOptions) {
+                Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.size(4.dp))
+                Text(stringResource(R.string.createpost_poll_add_option))
+            }
+
+            if (expiryMillis == null) {
+                TextButton(onClick = onExpiryClick, enabled = enabled) {
+                    Icon(Icons.Filled.Schedule, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.size(4.dp))
+                    Text(stringResource(R.string.poll_ends_label))
+                }
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.poll_ends_label) + " " +
+                            SimpleDateFormat("MMM d, yyyy · h:mm a", Locale.getDefault()).format(expiryMillis),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.small)
+                            .clickable(enabled = enabled, onClick = onExpiryClick)
+                            .padding(4.dp),
+                    )
+                    IconButton(onClick = onClearExpiry, enabled = enabled, modifier = Modifier.size(28.dp)) {
+                        Icon(
+                            Icons.Filled.Close,
+                            contentDescription = stringResource(R.string.poll_ends_clear_cd),
+                            modifier = Modifier.size(16.dp),
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 /**

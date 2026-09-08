@@ -198,6 +198,21 @@
     <string name="profile_share">Поделиться</string>
     <string name="profile_protected_account">Этот аккаунт закрыт</string>
     <string name="profile_protected_message">Подпишитесь на этот аккаунт, чтобы видеть его публикации и сведения о профиле.</string>
+    <string name="poll_ended">Завершён</string>
+    <string name="poll_voted">✓ Голос учтен</string>
+    <string name="poll_option_result">%1$d%% (%2$s голосов)</string>
+    <string name="poll_ends_label">Завершается</string>
+    <string name="createpost_poll_question">Вопрос опроса...</string>
+    <string name="createpost_poll_option">Вариант %1$d</string>
+    <string name="createpost_poll_add_option">Добавить вариант</string>
+    <string name="createpost_poll_toggle_cd">Добавить опрос</string>
+    <string name="createpost_poll_remove_cd">Удалить опрос</string>
+    <string name="createpost_poll_remove_option_cd">Удалить вариант</string>
+    <string name="poll_ends_clear_cd">Убрать срок действия</string>
+    <plurals name="poll_vote_count">
+        <item quantity="one">%1$d голос</item>
+        <item quantity="other">%1$d голосов</item>
+    </plurals>
     <string name="nav_bookmarks">Закладки</string>
     <string name="nav_sign_out">Выйти</string>
     <string name="notifications_empty">Нет уведомления пока</string>

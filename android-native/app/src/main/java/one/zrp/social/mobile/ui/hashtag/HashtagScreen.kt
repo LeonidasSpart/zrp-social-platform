@@ -143,6 +143,7 @@ fun HashtagScreen(
                             onAuthorClick = onAuthorClick,
                             onHashtagClick = onOpenHashtag,
                             onOpenVideoViewer = onOpenVideoViewer,
+                            onVoteClick = { postId, pollId, optionIndex -> viewModel.votePoll(postId, pollId, optionIndex) },
                         )
                     }
                 }

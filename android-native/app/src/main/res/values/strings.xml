@@ -210,6 +210,21 @@
     <string name="profile_share">Share</string>
     <string name="profile_protected_account">This account is private</string>
     <string name="profile_protected_message">Follow this account to see their posts and profile details.</string>
+    <string name="poll_ended">Ended</string>
+    <string name="poll_voted">✓ Voted</string>
+    <string name="poll_option_result">%1$d%% (%2$s votes)</string>
+    <string name="poll_ends_label">Ends</string>
+    <string name="createpost_poll_question">Poll question...</string>
+    <string name="createpost_poll_option">Option %1$d</string>
+    <string name="createpost_poll_add_option">Add option</string>
+    <string name="createpost_poll_toggle_cd">Add poll</string>
+    <string name="createpost_poll_remove_cd">Remove poll</string>
+    <string name="createpost_poll_remove_option_cd">Remove option</string>
+    <string name="poll_ends_clear_cd">Clear expiry</string>
+    <plurals name="poll_vote_count">
+        <item quantity="one">%1$d vote</item>
+        <item quantity="other">%1$d votes</item>
+    </plurals>
     <string name="nav_bookmarks">Bookmarks</string>
     <string name="nav_sign_out">Sign Out</string>
     <string name="notifications_empty">No notifications yet</string>

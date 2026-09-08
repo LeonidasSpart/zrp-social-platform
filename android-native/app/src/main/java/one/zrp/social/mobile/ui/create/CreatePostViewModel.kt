@@ -15,7 +15,9 @@ import one.zrp.social.mobile.data.MediaUploadRepository
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.GifResult
+import one.zrp.social.mobile.network.PollCreateRequest
 import one.zrp.social.mobile.network.Post
+import one.zrp.social.mobile.util.PollLimits
 import one.zrp.social.mobile.util.getPlanLimits
 
 /**
@@ -52,7 +54,19 @@ data class CreatePostUiState(
     val plan: String = "free",
     val isScheduling: Boolean = false,
     val scheduledAtMillis: Long? = null,
-)
+    // Mirrors PostComposer.tsx's own showPollBuilder/pollQuestion/
+    // pollOptions/pollExpiry state exactly - a poll and text/media can
+    // technically coexist on web (the media/GIF buttons are never
+    // disabled by showPollBuilder there), so this isn't mutually
+    // exclusive with mediaUrls either.
+    val showPollBuilder: Boolean = false,
+    val pollQuestion: String = "",
+    val pollOptions: List<String> = listOf("", ""),
+    val pollExpiryMillis: Long? = null,
+) {
+    val validPollOptions: List<String> get() = pollOptions.map { it.trim() }.filter { it.isNotEmpty() }
+    val isPollValid: Boolean get() = pollQuestion.trim().isNotEmpty() && validPollOptions.size >= 2
+}
 
 /**
  * Backs the Create tab's composer - a real POST /api/posts call. No
@@ -240,32 +254,102 @@ class CreatePostViewModel(
         _state.update { it.copy(scheduledAtMillis = millis, error = null) }
     }
 
+    // Matches PostComposer.tsx's own handleTogglePoll: closing the
+    // builder discards whatever question/options/expiry were entered
+    // rather than keeping them around for a later re-open.
+    fun onTogglePollBuilder() {
+        _state.update {
+            val next = !it.showPollBuilder
+            it.copy(
+                showPollBuilder = next,
+                pollQuestion = if (next) it.pollQuestion else "",
+                pollOptions = if (next) it.pollOptions else listOf("", ""),
+                pollExpiryMillis = if (next) it.pollExpiryMillis else null,
+                error = null,
+            )
+        }
+    }
+
+    fun onPollQuestionChange(text: String) {
+        _state.update { it.copy(pollQuestion = text.take(PollLimits.questionMaxLength), error = null) }
+    }
+
+    fun onPollOptionChange(index: Int, text: String) {
+        _state.update {
+            val updated = it.pollOptions.toMutableList()
+            if (index in updated.indices) updated[index] = text.take(PollLimits.optionMaxLength)
+            it.copy(pollOptions = updated)
+        }
+    }
+
+    // Matches PostComposer.tsx's own addPollOption cap.
+    fun onAddPollOption() {
+        _state.update {
+            if (it.pollOptions.size >= PollLimits.maxOptions) it else it.copy(pollOptions = it.pollOptions + "")
+        }
+    }
+
+    // Matches PostComposer.tsx's own removePollOption - the "Remove"
+    // button only ever shows once there are more than 2 options, so a
+    // poll can never drop below the real minimum.
+    fun onRemovePollOption(index: Int) {
+        _state.update {
+            if (it.pollOptions.size <= 2 || index !in it.pollOptions.indices) {
+                it
+            } else {
+                it.copy(pollOptions = it.pollOptions.toMutableList().apply { removeAt(index) })
+            }
+        }
+    }
+
+    fun onPollExpirySelected(millis: Long?) {
+        _state.update { it.copy(pollExpiryMillis = millis, error = null) }
+    }
+
     private val scheduledAtFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US)
 
     fun submit() {
-        val content = _state.value.content.trim()
-        val mediaUrls = _state.value.mediaUrls
-        val mediaType = _state.value.mediaType
-        val isScheduling = _state.value.isScheduling
-        val scheduledAtMillis = _state.value.scheduledAtMillis
+        val current = _state.value
+        val content = current.content.trim()
+        val mediaUrls = current.mediaUrls
+        val mediaType = current.mediaType
+        val isScheduling = current.isScheduling
+        val scheduledAtMillis = current.scheduledAtMillis
+        val hasPoll = current.showPollBuilder
         // Matches PostComposer.tsx's own isSubmitDisabled: a post needs
-        // real text OR real media - not necessarily both - and
-        // toggling "Schedule" on without yet picking a date/time blocks
-        // submit exactly like web's own `schedulePost && !scheduledAt`
-        // check.
+        // real text OR real media - not necessarily both - toggling
+        // "Schedule" on without yet picking a date/time blocks submit
+        // (web's own `schedulePost && !scheduledAt` check), and a poll
+        // builder left open with fewer than 2 real options blocks it
+        // too (web's own `hasPoll && !isPollValid` check).
         if (
-            (content.isEmpty() && mediaUrls.isEmpty()) ||
+            (content.isEmpty() && mediaUrls.isEmpty() && !hasPoll) ||
             (isScheduling && scheduledAtMillis == null) ||
-            _state.value.isPosting ||
-            _state.value.isUploading
+            (hasPoll && !current.isPollValid) ||
+            current.isPosting ||
+            current.isUploading
         ) {
             return
         }
         val scheduledAt = scheduledAtMillis?.let { scheduledAtFormat.format(it) }
+        // Matches PostComposer.tsx's own content fallback: an empty
+        // text field falls back to the poll question itself when a
+        // poll is being posted, so the post never ends up with no
+        // content at all just because the user only typed a question.
+        val effectiveContent = content.ifEmpty { current.pollQuestion.trim() }
+        val poll = if (hasPoll) {
+            PollCreateRequest(
+                question = current.pollQuestion.trim(),
+                options = current.validPollOptions,
+                expiresAt = current.pollExpiryMillis?.let { scheduledAtFormat.format(it) },
+            )
+        } else {
+            null
+        }
 
         _state.update { it.copy(isPosting = true, error = null) }
         viewModelScope.launch {
-            repository.createPost(content, quotePostId, mediaUrls, mediaType, scheduledAt)
+            repository.createPost(effectiveContent, quotePostId, mediaUrls, mediaType, scheduledAt, poll)
                 .onSuccess {
                     _state.update { it.copy(isPosting = false, posted = true) }
                 }

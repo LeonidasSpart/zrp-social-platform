@@ -198,6 +198,21 @@
     <string name="profile_share">Shpërndaj</string>
     <string name="profile_protected_account">Kjo llogari është private</string>
     <string name="profile_protected_message">Ndiqni këtë llogari për të parë postimet dhe detajet e profilit të tyre.</string>
+    <string name="poll_ended">Përfunduar</string>
+    <string name="poll_voted">✓ Votuar</string>
+    <string name="poll_option_result">%1$d%% (%2$s vota)</string>
+    <string name="poll_ends_label">Përfundon</string>
+    <string name="createpost_poll_question">Pyetja e sondazhit...</string>
+    <string name="createpost_poll_option">Opsioni %1$d</string>
+    <string name="createpost_poll_add_option">Shto opsion</string>
+    <string name="createpost_poll_toggle_cd">Shto sondazh</string>
+    <string name="createpost_poll_remove_cd">Hiq sondazhin</string>
+    <string name="createpost_poll_remove_option_cd">Hiq opsionin</string>
+    <string name="poll_ends_clear_cd">Hiq afatin</string>
+    <plurals name="poll_vote_count">
+        <item quantity="one">%1$d votë</item>
+        <item quantity="other">%1$d vota</item>
+    </plurals>
     <string name="nav_bookmarks">Ruajtur</string>
     <string name="nav_sign_out">Dil</string>
     <string name="notifications_empty">Nuk ka njoftime ende</string>

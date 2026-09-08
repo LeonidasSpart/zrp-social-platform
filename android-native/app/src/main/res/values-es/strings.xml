@@ -198,6 +198,21 @@
     <string name="profile_share">Compartir</string>
     <string name="profile_protected_account">Esta cuenta es privada</string>
     <string name="profile_protected_message">Sigue esta cuenta para ver sus publicaciones y los detalles de su perfil.</string>
+    <string name="poll_ended">Finalizada</string>
+    <string name="poll_voted">✓ Votado</string>
+    <string name="poll_option_result">%1$d%% (%2$s votos)</string>
+    <string name="poll_ends_label">Finaliza</string>
+    <string name="createpost_poll_question">Pregunta de la encuesta...</string>
+    <string name="createpost_poll_option">Opción %1$d</string>
+    <string name="createpost_poll_add_option">Añadir opción</string>
+    <string name="createpost_poll_toggle_cd">Añadir encuesta</string>
+    <string name="createpost_poll_remove_cd">Eliminar encuesta</string>
+    <string name="createpost_poll_remove_option_cd">Eliminar opción</string>
+    <string name="poll_ends_clear_cd">Borrar fecha de vencimiento</string>
+    <plurals name="poll_vote_count">
+        <item quantity="one">%1$d voto</item>
+        <item quantity="other">%1$d votos</item>
+    </plurals>
     <string name="nav_bookmarks">Marcadores</string>
     <string name="nav_sign_out">Cerrar sesión</string>
     <string name="notifications_empty">Aún no hay notificaciones</string>

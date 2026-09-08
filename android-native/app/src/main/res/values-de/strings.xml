@@ -198,6 +198,21 @@
     <string name="profile_share">Teilen</string>
     <string name="profile_protected_account">Dieses Konto ist privat</string>
     <string name="profile_protected_message">Folge diesem Konto, um seine Beiträge und Profildetails zu sehen.</string>
+    <string name="poll_ended">Beendet</string>
+    <string name="poll_voted">✓ Abgestimmt</string>
+    <string name="poll_option_result">%1$d%% (%2$s Stimmen)</string>
+    <string name="poll_ends_label">Endet</string>
+    <string name="createpost_poll_question">Umfragefrage...</string>
+    <string name="createpost_poll_option">Option %1$d</string>
+    <string name="createpost_poll_add_option">Option hinzufügen</string>
+    <string name="createpost_poll_toggle_cd">Umfrage hinzufügen</string>
+    <string name="createpost_poll_remove_cd">Umfrage entfernen</string>
+    <string name="createpost_poll_remove_option_cd">Option entfernen</string>
+    <string name="poll_ends_clear_cd">Ablaufdatum entfernen</string>
+    <plurals name="poll_vote_count">
+        <item quantity="one">%1$d Stimme</item>
+        <item quantity="other">%1$d Stimmen</item>
+    </plurals>
     <string name="nav_bookmarks">Lesezeichen</string>
     <string name="nav_sign_out">Abmelden</string>
     <string name="notifications_empty">Noch keine Benachrichtigungen</string>

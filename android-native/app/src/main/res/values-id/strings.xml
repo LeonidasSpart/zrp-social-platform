@@ -198,6 +198,21 @@
     <string name="profile_share">Bagikan</string>
     <string name="profile_protected_account">Akun ini privat</string>
     <string name="profile_protected_message">Ikuti akun ini untuk melihat postingan dan detail profil mereka.</string>
+    <string name="poll_ended">Berakhir</string>
+    <string name="poll_voted">✓ Sudah memilih</string>
+    <string name="poll_option_result">%1$d%% (%2$s suara)</string>
+    <string name="poll_ends_label">Berakhir</string>
+    <string name="createpost_poll_question">Pertanyaan polling...</string>
+    <string name="createpost_poll_option">Opsi %1$d</string>
+    <string name="createpost_poll_add_option">Tambah opsi</string>
+    <string name="createpost_poll_toggle_cd">Tambah polling</string>
+    <string name="createpost_poll_remove_cd">Hapus polling</string>
+    <string name="createpost_poll_remove_option_cd">Hapus opsi</string>
+    <string name="poll_ends_clear_cd">Hapus tanggal berakhir</string>
+    <plurals name="poll_vote_count">
+        <item quantity="one">%1$d suara</item>
+        <item quantity="other">%1$d suara</item>
+    </plurals>
     <string name="nav_bookmarks">Markah</string>
     <string name="nav_sign_out">Keluar</string>
     <string name="notifications_empty">Belum ada notifikasi</string>

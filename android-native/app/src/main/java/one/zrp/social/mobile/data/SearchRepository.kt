@@ -5,6 +5,8 @@ import one.zrp.social.mobile.network.BookmarkResponse
 import one.zrp.social.mobile.network.CreateReportRequest
 import one.zrp.social.mobile.network.LikeResponse
 import one.zrp.social.mobile.network.Post
+import one.zrp.social.mobile.network.PollVoteRequest
+import one.zrp.social.mobile.network.PollVoteResponse
 import one.zrp.social.mobile.network.RepostResponse
 import one.zrp.social.mobile.network.SearchResults
 import one.zrp.social.mobile.network.SearchUser
@@ -36,6 +38,10 @@ class SearchRepository {
 
     suspend fun toggleRepost(postId: String): Result<RepostResponse> = runCatching {
         ApiClient.postsApi.toggleRepost(postId)
+    }
+
+    suspend fun votePoll(pollId: String, optionIndex: Int): Result<PollVoteResponse> = runCatching {
+        ApiClient.postsApi.votePoll(pollId, PollVoteRequest(optionIndex))
     }
 
     suspend fun toggleBookmark(postId: String): Result<BookmarkResponse> = runCatching {

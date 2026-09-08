@@ -198,6 +198,21 @@
     <string name="profile_share">مشاركة</string>
     <string name="profile_protected_account">هذا الحساب خاص</string>
     <string name="profile_protected_message">تابع هذا الحساب لرؤية منشوراته وتفاصيل ملفه الشخصي.</string>
+    <string name="poll_ended">انتهى</string>
+    <string name="poll_voted">✓ تم التصويت</string>
+    <string name="poll_option_result">%1$d%% (%2$s صوت)</string>
+    <string name="poll_ends_label">ينتهي</string>
+    <string name="createpost_poll_question">سؤال الاستطلاع...</string>
+    <string name="createpost_poll_option">الخيار %1$d</string>
+    <string name="createpost_poll_add_option">إضافة خيار</string>
+    <string name="createpost_poll_toggle_cd">إضافة استطلاع</string>
+    <string name="createpost_poll_remove_cd">إزالة الاستطلاع</string>
+    <string name="createpost_poll_remove_option_cd">إزالة الخيار</string>
+    <string name="poll_ends_clear_cd">إزالة تاريخ الانتهاء</string>
+    <plurals name="poll_vote_count">
+        <item quantity="one">%1$d صوت</item>
+        <item quantity="other">%1$d صوت</item>
+    </plurals>
     <string name="nav_bookmarks">المحفوظات</string>
     <string name="nav_sign_out">تسجيل الخروج</string>
     <string name="notifications_empty">لا إشعارات بعد</string>
