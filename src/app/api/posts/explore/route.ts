@@ -70,7 +70,15 @@ export async function GET(req: NextRequest) {
     // entry still keyed under v5 needs to be treated as a completely
     // different, stale entry rather than naturally expiring over the
     // next 5 minutes.
-    const cacheKey = `explore:${userId || 'anon'}:v6`;
+    // Bumped v6 -> v7: now also selects isPoll/poll (see L3 in
+    // ios-native/PARITY.md - this route never selected poll data at
+    // all, so a poll post reaching For You rendered with no poll,
+    // indistinguishable from a post that never had one, on every
+    // client). Only the poll's shared/aggregate fields are cached here,
+    // deliberately excluding votes_user for the same reason `liked`
+    // above isn't cached: the viewer's own vote must never wait out the
+    // 5-minute cache window to show up.
+    const cacheKey = `explore:${userId || 'anon'}:v7`;
     let ranked: any[] | null = await getCached(cacheKey);
 
     if (!ranked) {
@@ -101,6 +109,16 @@ export async function GET(req: NextRequest) {
           mediaType: true,
           createdAt: true,
           views: true,
+          isPoll: true,
+          poll: {
+            select: {
+              id: true,
+              question: true,
+              options: true,
+              votes: true,
+              expiresAt: true,
+            },
+          },
           author: {
             select: {
               id: true,
@@ -174,6 +192,31 @@ export async function GET(req: NextRequest) {
       });
       const likedIds = new Set(likes.map(l => l.postId));
       page.forEach((p: any) => (p.liked = likedIds.has(p.id)));
+    }
+
+    // ─── Add the viewer's own poll vote for this page only (always
+    // fresh, never cached - same reasoning as `liked` above) ──────────
+    if (userId && page.length > 0) {
+      const pollIds = page
+        .filter((p: any) => p.poll)
+        .map((p: any) => p.poll.id);
+      if (pollIds.length > 0) {
+        const votes = await prisma.pollVote.findMany({
+          where: { userId, pollId: { in: pollIds } },
+          select: { pollId: true, optionIndex: true },
+        });
+        const votesByPoll = new Map(votes.map(v => [v.pollId, v]));
+        page.forEach((p: any) => {
+          if (p.poll) {
+            const vote = votesByPoll.get(p.poll.id);
+            // Same raw shape GET /api/posts?tab=following already
+            // returns - an array of the viewer's own vote row(s) - so
+            // every client's existing poll-parsing code handles this
+            // response exactly like it already handles that one.
+            p.poll.votes_user = vote ? [{ optionIndex: vote.optionIndex }] : [];
+          }
+        });
+      }
     }
 
     return NextResponse.json({ posts: page, nextCursor });
