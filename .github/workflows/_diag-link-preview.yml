@@ -6,21 +6,48 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Re-test the exact original URL (checks current cached state)
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: DNS resolution of www.20min.ch
         run: |
-          echo "--- ZRP production /api/link-preview, ORIGINAL url ---"
-          curl -sS -o /tmp/zrp_orig.json -w "HTTP_STATUS:%{http_code}\n" --max-time 20 \
-            "https://zrp.one/api/link-preview?url=https%3A%2F%2Fwww.20min.ch%2Ffr%2Fstory%2Ffootball-atteinte-d-un-cancer-elle-voit-son-club-faire-un-geste-emouvant-103629744"
-          cat /tmp/zrp_orig.json
-      - name: Cache-busted variant (forces a fresh server-side fetch, bypasses Redis cache key)
+          echo "--- getent ahosts ---"
+          getent ahosts www.20min.ch || true
+          echo "--- node dns.lookup(all:true) ---"
+          node -e "require('dns').lookup('www.20min.ch',{all:true,verbatim:true},(e,a)=>console.log(e||a))"
+      - name: Run the REAL repo safeFetch + parseHtmlMetadata against the real URL
         run: |
-          echo "--- ZRP production /api/link-preview, CACHE-BUSTED url (same page, different query string -> different cache key) ---"
-          curl -sS -o /tmp/zrp_bust.json -w "HTTP_STATUS:%{http_code}\n" --max-time 20 \
-            "https://zrp.one/api/link-preview?url=https%3A%2F%2Fwww.20min.ch%2Ffr%2Fstory%2Ffootball-atteinte-d-un-cancer-elle-voit-son-club-faire-un-geste-emouvant-103629744%3Fzrpcachebust%3D$(date +%s)"
-          cat /tmp/zrp_bust.json
-      - name: Test a different, never-before-seen 20min.ch article (guaranteed no cache entry)
-        run: |
-          echo "--- ZRP production /api/link-preview, DIFFERENT never-cached 20min.ch article ---"
-          curl -sS -o /tmp/zrp_fresh.json -w "HTTP_STATUS:%{http_code}\n" --max-time 20 \
-            "https://zrp.one/api/link-preview?url=https%3A%2F%2Fwww.20min.ch%2Ffr"
-          cat /tmp/zrp_fresh.json
+          npm install --no-save tsx 2>&1 | tail -5
+          cat > /tmp/probe.ts << 'TSEOF'
+          import { safeFetch } from "../src/lib/ssrf-guard";
+          import { parseHtmlMetadata } from "../src/lib/link-preview-parse";
+
+          async function main() {
+            const url = "https://www.20min.ch/fr/story/football-atteinte-d-un-cancer-elle-voit-son-club-faire-un-geste-emouvant-103629744";
+            try {
+              const res = await safeFetch(url, {
+                timeoutMs: 6000,
+                maxBytes: 200_000,
+                headers: {
+                  "User-Agent": "Mozilla/5.0 (compatible; ZRPLinkPreview/1.0; +https://zrp.one)",
+                  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                  "Accept-Language": "en-US,en;q=0.9",
+                  "Accept-Encoding": "gzip, deflate, br",
+                },
+              });
+              console.log("STATUS", res.statusCode);
+              console.log("HEADERS", JSON.stringify(res.headers));
+              console.log("BODY_LENGTH", res.body.length);
+              const html = res.body.toString("utf-8");
+              console.log("BODY_PREFIX", html.slice(0, 300));
+              const preview = parseHtmlMetadata(html, url);
+              console.log("PARSED", JSON.stringify(preview));
+            } catch (e: any) {
+              console.log("THREW", e?.name, e?.message, e?.stack);
+            }
+          }
+          main();
+          TSEOF
+          npx tsx /tmp/probe.ts
+        working-directory: .
