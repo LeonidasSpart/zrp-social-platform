@@ -343,7 +343,7 @@ fun ConversationScreen(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
-                        VerifiedBadge(badgeType = partner?.badgeType, modifier = Modifier.padding(start = 3.dp))
+                        VerifiedBadge(badgeType = partner?.badgeType)
                     }
                     // Matches ChatInterface.tsx's own header status row - a
                     // "Typing..." indicator (from the real "user-typing" socket

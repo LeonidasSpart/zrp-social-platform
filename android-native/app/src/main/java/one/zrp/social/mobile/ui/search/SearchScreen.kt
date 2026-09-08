@@ -437,7 +437,7 @@ private fun SearchUserRow(user: SearchUser, onClick: () -> Unit) {
                     text = user.name ?: user.username,
                     style = MaterialTheme.typography.titleSmall,
                 )
-                VerifiedBadge(badgeType = user.badgeType, modifier = Modifier.padding(start = 3.dp))
+                VerifiedBadge(badgeType = user.badgeType)
             }
             Text(
                 text = "@${user.username}",

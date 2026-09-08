@@ -140,7 +140,7 @@ private fun ApplicantRow(
                         modifier = Modifier.padding(start = 8.dp),
                     )
                     if (applicant.badgeType != null) {
-                        VerifiedBadge(badgeType = applicant.badgeType, modifier = Modifier.padding(start = 4.dp))
+                        VerifiedBadge(badgeType = applicant.badgeType)
                     }
                 }
             }

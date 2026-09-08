@@ -305,7 +305,6 @@ private fun ShortItem(
                         )
                         VerifiedBadge(
                             badgeType = post.author.badgeType,
-                            modifier = Modifier.padding(start = Spacing.xs),
                         )
                     }
                     if (post.content.isNotBlank()) {

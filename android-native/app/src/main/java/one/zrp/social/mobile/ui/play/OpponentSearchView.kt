@@ -64,7 +64,7 @@ fun OpponentSearchView(
                     .padding(start = 10.dp),
             ) {
                 Text(text = "@${value.username}", style = MaterialTheme.typography.labelLarge)
-                VerifiedBadge(badgeType = value.badgeType, modifier = Modifier.padding(start = 2.dp))
+                VerifiedBadge(badgeType = value.badgeType)
             }
             IconButton(onClick = { onChange(null) }) {
                 Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.play_select_opponent))
@@ -128,7 +128,7 @@ fun OpponentSearchView(
                             Avatar(url = user.avatarUrl, name = user.username, size = 32.dp)
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(text = "@${user.username}", style = MaterialTheme.typography.bodyMedium)
-                                VerifiedBadge(badgeType = user.badgeType, modifier = Modifier.padding(start = 2.dp))
+                                VerifiedBadge(badgeType = user.badgeType)
                             }
                         }
                     }

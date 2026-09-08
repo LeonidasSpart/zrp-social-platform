@@ -51,6 +51,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.OnboardingRepository
 import one.zrp.social.mobile.network.SuggestedUser
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -368,7 +369,7 @@ private fun SuggestedUserRow(user: SuggestedUser, isFollowing: Boolean, onClick:
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                VerifiedBadge(badgeType = user.badgeType, size = 16.dp, modifier = Modifier.padding(start = Spacing.xs))
+                VerifiedBadge(badgeType = user.badgeType, size = BadgeSize.default)
             }
             Text(
                 text = "@${user.username}",

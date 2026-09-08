@@ -1,5 +1,6 @@
 package one.zrp.social.mobile.ui.components
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Newspaper
@@ -11,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import one.zrp.social.mobile.ui.theme.Spacing
 
 /**
  * The same real per-account badge the website's VerifiedBadge.tsx
@@ -41,13 +43,51 @@ private val BadgeStyles: Map<String, BadgeStyle> = mapOf(
     "journalist" to BadgeStyle(Color(0xFFFF2D2D), "Verified Journalist", Icons.Filled.Newspaper),
 )
 
+/**
+ * The three sizes this badge is ever drawn at, named rather than
+ * respelled as a dp literal per screen.
+ *
+ * Web draws it at a single 16px because its layouts are one density;
+ * here a display name in a profile header and a name in a dense
+ * notification row are genuinely different type sizes, so the badge
+ * tracks them.
+ */
+object BadgeSize {
+    /** Dense secondary rows - notifications, a quoted post's byline. */
+    val small = 14.dp
+
+    /** The default: inline with a name in a list row or post header. */
+    val default = 16.dp
+
+    /** A profile header's display name. */
+    val large = 20.dp
+}
+
+/**
+ * @param leadingGap space between the name this badge follows and the
+ *   badge itself. Owned by the component on purpose: it was previously
+ *   left to each call site, and across the app's 30-odd usages that
+ *   produced 2dp, 3dp, 4dp, 6dp and no gap at all, so the badge sat a
+ *   different distance from the name on nearly every screen. Pass
+ *   0.dp for the rare case where the badge is not following text.
+ * @param trailingGap space after the badge, for the few rows that
+ *   continue with more text on the same line (notifications).
+ */
 @Composable
-fun VerifiedBadge(badgeType: String?, size: Dp = 16.dp, modifier: Modifier = Modifier) {
+fun VerifiedBadge(
+    badgeType: String?,
+    size: Dp = BadgeSize.default,
+    leadingGap: Dp = Spacing.xs,
+    trailingGap: Dp = 0.dp,
+    modifier: Modifier = Modifier,
+) {
     val style = badgeType?.let { BadgeStyles[it] } ?: return
     Icon(
         imageVector = style.icon,
         contentDescription = style.label,
         tint = style.color,
-        modifier = modifier.size(size),
+        modifier = modifier
+            .padding(start = leadingGap, end = trailingGap)
+            .size(size),
     )
 }

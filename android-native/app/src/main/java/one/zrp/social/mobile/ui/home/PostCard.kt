@@ -97,6 +97,7 @@ import one.zrp.social.mobile.network.TranslateRequest
 import one.zrp.social.mobile.ui.components.AddReactionDialog
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.LinkifiedText
+import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.TouchTarget
@@ -402,7 +403,7 @@ fun PostCard(
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
                         )
-                        VerifiedBadge(badgeType = post.author.badgeType, modifier = Modifier.padding(start = 3.dp))
+                        VerifiedBadge(badgeType = post.author.badgeType)
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "@${post.author.username}",
@@ -1010,12 +1011,11 @@ private fun QuotedPostPreview(quotedPost: Post, onClick: () -> Unit) {
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = Spacing.xs),
             )
-            VerifiedBadge(badgeType = quotedPost.author.badgeType, size = 14.dp, modifier = Modifier.padding(start = 2.dp))
+            VerifiedBadge(badgeType = quotedPost.author.badgeType, size = BadgeSize.small)
             Text(
                 text = "@${quotedPost.author.username}",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = Spacing.xs),
             )
         }
         if (quotedPost.content.isNotBlank()) {

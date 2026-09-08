@@ -181,7 +181,7 @@ private fun DuelParticipantColumn(avatarUrl: String?, username: String, badgeTyp
         Avatar(url = avatarUrl, name = username, size = 56.dp)
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 6.dp)) {
             Text(text = "@$username", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-            VerifiedBadge(badgeType = badgeType, modifier = Modifier.padding(start = 2.dp))
+            VerifiedBadge(badgeType = badgeType)
         }
         if (score != null) {
             Text(

@@ -190,7 +190,7 @@ private fun TrustPassportBody(data: TrustPassportResponse, onOpenProfile: (Strin
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                 )
-                VerifiedBadge(badgeType = data.user.badgeType, modifier = Modifier.padding(start = Spacing.xs))
+                VerifiedBadge(badgeType = data.user.badgeType)
             }
             Text(
                 text = "@${data.user.username}",
