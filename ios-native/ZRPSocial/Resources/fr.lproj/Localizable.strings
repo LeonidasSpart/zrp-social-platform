@@ -809,3 +809,13 @@
 "opportunity.errUpdateFailed" = "Échec de la mise à jour de l'annonce. Veuillez réessayer.";
 "opportunity.errTitleRequired" = "Un titre est requis.";
 "opportunity.errDescriptionRequired" = "Une description est requise.";
+"profile.impact" = "Impact : {amount} $ reversés à la charité";
+"profile.charityNote" = "{pct}% des bénéfices sont reversés à des associations caritatives";
+"profile.milestoneYearsOnZRP" = "{n} ans sur ZRP";
+"profile.milestoneSixMonths" = "6 mois sur ZRP";
+"profile.milestoneNewMember" = "Nouveau membre";
+"profile.milestonePosts500" = "500+ publications";
+"profile.milestonePosts100" = "100+ publications";
+"profile.milestonePosts10" = "10+ publications";
+"profile.milestoneFollowers1k" = "1K+ abonnés";
+"profile.milestoneFollowers100" = "100+ abonnés";

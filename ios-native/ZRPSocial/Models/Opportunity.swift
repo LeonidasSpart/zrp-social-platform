@@ -23,14 +23,19 @@ struct Opportunity: Decodable, Identifiable, Equatable {
     let counts: Counts?
 
     /// Only on the detail route, and only for a signed-in viewer: whether
-    /// they have already applied. The route names it `alreadyApplied` and
-    /// attaches it beside the listing.
+    /// they have already applied, and whether they have already saved.
     ///
-    /// There is deliberately no saved flag here: no route reports whether
-    /// a listing is saved. `POST`/`DELETE /api/opportunity/{id}/save`
-    /// answer with the state they just set, and that is the only thing
-    /// this app can honestly know - see `OpportunityDetailView`.
+    /// `alreadySaved` was added server-side after this app first shipped
+    /// its Opportunity screens (PR #150). Before it, no route reported
+    /// saved state at all - `POST`/`DELETE /api/opportunity/{id}/save`
+    /// answer only with the state they just set - so the bookmark could
+    /// not honestly claim either value on first load. It can now.
+    ///
+    /// Still optional, and still read as "not known" rather than "not
+    /// saved" when absent: a signed-out viewer gets neither field, and
+    /// so does anyone on a deployment older than that change.
     let alreadyApplied: Bool?
+    let alreadySaved: Bool?
 
     struct Counts: Decodable, Equatable, Hashable {
         let applications: Int
@@ -39,7 +44,7 @@ struct Opportunity: Decodable, Identifiable, Equatable {
     private enum CodingKeys: String, CodingKey {
         case id, type, title, description, organizationName, skills, location
         case remote, isPaid, compensationInfo, externalUrl, deadline, views
-        case createdAt, poster, alreadyApplied
+        case createdAt, poster, alreadyApplied, alreadySaved
         case counts = "_count"
     }
 

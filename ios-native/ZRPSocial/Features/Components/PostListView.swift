@@ -28,6 +28,14 @@ struct PostListView<Header: View>: View {
     /// on it and Pin on the rest.
     var pinnedPostId: String?
 
+    /// A sponsored post to interleave, or `nil` on every list that does
+    /// not carry ads - which is all of them but Home.
+    ///
+    /// Placed by the same rule the website uses: after the fifth post,
+    /// and only in a feed that has more than five, so an ad is never the
+    /// end of a short timeline. See `SponsoredPostCard`.
+    var sponsoredAd: SponsoredAd?
+
     /// Rendered above the first post - a profile header, a hashtag
     /// summary, or nothing. Generic rather than type-erased so a header
     /// costs nothing when a screen does not have one.
@@ -51,7 +59,7 @@ struct PostListView<Header: View>: View {
         LazyVStack(spacing: 0) {
             header()
 
-            ForEach(visiblePosts) { post in
+            ForEach(Array(visiblePosts.enumerated()), id: \.element.id) { index, post in
                 PostRowView(
                     post: post,
                     onPin: onPin,
@@ -59,6 +67,11 @@ struct PostListView<Header: View>: View {
                     onAppear: onAppear,
                     sheets: sheets
                 )
+
+                if let sponsoredAd, index == SponsoredPostCard.feedSlotIndex,
+                   visiblePosts.count > SponsoredPostCard.feedSlotIndex + 1 {
+                    SponsoredPostCard(ad: sponsoredAd)
+                }
             }
 
             footer

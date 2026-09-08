@@ -21,14 +21,45 @@ final class HomeViewModel: ObservableObject {
         .following: FeedState(),
     ]
 
+    /// The sponsored post to interleave, if the route had one to serve.
+    ///
+    /// `nil` is the ordinary case, not a failure: the route answers with
+    /// no ad whenever nothing is active, every active campaign has spent
+    /// its budget, or the only eligible campaign belongs to the viewer.
+    @Published private(set) var sponsoredAd: SponsoredAd?
+
     private let repository: PostsRepositoryProtocol
+    private let ads: AdsRepositoryProtocol
     private var inFlight: [FeedTab: Task<Void, Never>] = [:]
+
+    /// Fetched once per app run rather than per feed load.
+    ///
+    /// The route picks at random among eligible campaigns, so refetching
+    /// on every pull-to-refresh would swap the ad under a reader mid-
+    /// scroll and bill a second impression for what is, to them, the
+    /// same slot. The website fetches once on mount too.
+    private var hasRequestedAd = false
 
     /// Set by the view once, so page loads can record what they fetched.
     private weak var interactions: PostInteractionStore?
 
-    init(repository: PostsRepositoryProtocol = PostsRepository()) {
+    init(
+        repository: PostsRepositoryProtocol = PostsRepository(),
+        ads: AdsRepositoryProtocol = AdsRepository()
+    ) {
         self.repository = repository
+        self.ads = ads
+    }
+
+    /// Asks for one ad, once.
+    ///
+    /// Failure is silence. An ad is not content anyone came for, and a
+    /// feed that showed an error because its ad slot could not be filled
+    /// would be worse than a feed with no ad in it.
+    func loadSponsoredAdIfNeeded() async {
+        guard !hasRequestedAd else { return }
+        hasRequestedAd = true
+        sponsoredAd = try? await ads.serve()
     }
 
     func attach(interactions: PostInteractionStore) {
