@@ -1,7 +1,8 @@
-import { describe, it, expect, afterAll } from "vitest";
+import { describe, it, expect, afterAll, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 import { randomUUID } from "crypto";
 import { prisma } from "@/lib/db";
+import { getRedisClient } from "@/lib/redis";
 
 import { GET } from "../route";
 
@@ -58,6 +59,18 @@ describe.skipIf(!hasRealDatabaseUrl)(
       postIds.push(post.id);
       return post;
     }
+
+    // The route caches its full hashtag aggregate in Redis for 5 minutes
+    // (see route.ts's CACHE_KEY). Each test seeds its own posts and
+    // expects to see them immediately, so a stale aggregate left behind
+    // by an earlier test - invisible whenever Redis happens to be
+    // absent, since getCached() then always misses - must never survive
+    // between test cases when Redis actually is present (e.g. running
+    // locally alongside a real redis-server).
+    beforeEach(async () => {
+      const redis = await getRedisClient();
+      if (redis) await redis.flushDb();
+    });
 
     afterAll(async () => {
       await prisma.post.deleteMany({ where: { id: { in: postIds } } });
