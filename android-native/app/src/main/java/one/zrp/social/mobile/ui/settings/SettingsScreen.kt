@@ -3,10 +3,14 @@ package one.zrp.social.mobile.ui.settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AdminPanelSettings
@@ -147,33 +151,50 @@ fun SettingsScreen(
         }
         HorizontalDivider()
 
-        SettingsRow(icon = Icons.Filled.AccountCircle, label = stringResource(R.string.settings_account), onClick = onOpenAccount)
-        SettingsRow(icon = Icons.Filled.Person, label = stringResource(R.string.settings_profile_category), onClick = onOpenProfile)
-        SettingsRow(icon = Icons.Filled.Lock, label = stringResource(R.string.settings_security), onClick = onOpenSecurity)
-        SettingsRow(icon = Icons.Filled.Shield, label = stringResource(R.string.settings_privacy_safety), onClick = onOpenPrivacy)
-        SettingsRow(icon = Icons.Filled.Language, label = stringResource(R.string.nav_language), onClick = onOpenLanguage)
-        SettingsRow(icon = Icons.Filled.Notifications, label = stringResource(R.string.nav_notifications), onClick = onOpenNotifications)
-        // "Monetization" stays English-only - see this file's own KDoc.
-        SettingsRow(icon = Icons.Filled.CreditCard, label = "Monetization", onClick = onOpenCreator)
-        SettingsRow(icon = Icons.Filled.Newspaper, label = stringResource(R.string.nav_journalist), onClick = onOpenJournalist)
-        SettingsRow(icon = Icons.Filled.People, label = stringResource(R.string.nav_team_management), onClick = onOpenTeam)
-        SettingsRow(icon = Icons.Filled.Key, label = stringResource(R.string.nav_api_keys), onClick = onOpenApiKeys)
-        SettingsRow(icon = Icons.Filled.SupportAgent, label = stringResource(R.string.support_tickets_page_title), onClick = onOpenSupport)
+        // Real bug, confirmed on a physical device: this list is 12 rows
+        // plus a Legal section header plus 5 more Legal rows (17+ rows
+        // total, more still for staff), rendered inside the app's
+        // persistent bottom-nav Scaffold - on real screen heights that
+        // overflows the visible viewport. Without a scroll container here,
+        // Compose lays the overflow out below the visible bounds with no
+        // way to reach it - not a rendering glitch, the rows past Terms of
+        // Service (Privacy Policy, Guidelines, Help, Contact, Admin for
+        // staff) were genuinely unreachable, not just visually cut off.
+        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            SettingsRow(icon = Icons.Filled.AccountCircle, label = stringResource(R.string.settings_account), onClick = onOpenAccount)
+            SettingsRow(icon = Icons.Filled.Person, label = stringResource(R.string.settings_profile_category), onClick = onOpenProfile)
+            SettingsRow(icon = Icons.Filled.Lock, label = stringResource(R.string.settings_security), onClick = onOpenSecurity)
+            SettingsRow(icon = Icons.Filled.Shield, label = stringResource(R.string.settings_privacy_safety), onClick = onOpenPrivacy)
+            SettingsRow(icon = Icons.Filled.Language, label = stringResource(R.string.nav_language), onClick = onOpenLanguage)
+            SettingsRow(icon = Icons.Filled.Notifications, label = stringResource(R.string.nav_notifications), onClick = onOpenNotifications)
+            // "Monetization" stays English-only - see this file's own KDoc.
+            SettingsRow(icon = Icons.Filled.CreditCard, label = "Monetization", onClick = onOpenCreator)
+            SettingsRow(icon = Icons.Filled.Newspaper, label = stringResource(R.string.nav_journalist), onClick = onOpenJournalist)
+            SettingsRow(icon = Icons.Filled.People, label = stringResource(R.string.nav_team_management), onClick = onOpenTeam)
+            SettingsRow(icon = Icons.Filled.Key, label = stringResource(R.string.nav_api_keys), onClick = onOpenApiKeys)
+            SettingsRow(icon = Icons.Filled.SupportAgent, label = stringResource(R.string.support_tickets_page_title), onClick = onOpenSupport)
 
-        Text(
-            text = stringResource(R.string.legal_section_title),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = Spacing.lg, top = Spacing.lg, bottom = Spacing.xs),
-        )
-        SettingsRow(icon = Icons.Filled.Gavel, label = stringResource(R.string.legal_terms), onClick = onOpenTerms)
-        SettingsRow(icon = Icons.Filled.PrivacyTip, label = stringResource(R.string.legal_privacy), onClick = onOpenPrivacyPolicy)
-        SettingsRow(icon = Icons.Filled.Groups, label = stringResource(R.string.legal_guidelines), onClick = onOpenGuidelines)
-        SettingsRow(icon = Icons.Filled.HelpOutline, label = stringResource(R.string.legal_help), onClick = onOpenHelp)
-        SettingsRow(icon = Icons.Filled.Email, label = stringResource(R.string.legal_contact), onClick = onOpenContact)
+            Text(
+                text = stringResource(R.string.legal_section_title),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = Spacing.lg, top = Spacing.lg, bottom = Spacing.xs),
+            )
+            SettingsRow(icon = Icons.Filled.Gavel, label = stringResource(R.string.legal_terms), onClick = onOpenTerms)
+            SettingsRow(icon = Icons.Filled.PrivacyTip, label = stringResource(R.string.legal_privacy), onClick = onOpenPrivacyPolicy)
+            SettingsRow(icon = Icons.Filled.Groups, label = stringResource(R.string.legal_guidelines), onClick = onOpenGuidelines)
+            SettingsRow(icon = Icons.Filled.HelpOutline, label = stringResource(R.string.legal_help), onClick = onOpenHelp)
+            SettingsRow(icon = Icons.Filled.Email, label = stringResource(R.string.legal_contact), onClick = onOpenContact)
 
-        if (isStaff) {
-            SettingsRow(icon = Icons.Filled.AdminPanelSettings, label = stringResource(R.string.admin_nav_label), onClick = onOpenAdmin)
+            if (isStaff) {
+                SettingsRow(icon = Icons.Filled.AdminPanelSettings, label = stringResource(R.string.admin_nav_label), onClick = onOpenAdmin)
+            }
+
+            // Trailing space so the last row isn't flush against the
+            // bottom-nav Scaffold's own edge once scrolled all the way
+            // down - same bottom-content-padding fix already applied to
+            // Home's and Profile's feed lists this session.
+            Spacer(modifier = Modifier.height(Spacing.xxl))
         }
     }
 }

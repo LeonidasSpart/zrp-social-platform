@@ -1128,6 +1128,8 @@
     <string name="shorts_upload_err_too_large_plan">Kjo video është shumë e madhe për planin tënd. Provo një skedar më të vogël ose përmirëso planin tënd.</string>
     <string name="shorts_upload_err_url_gen_failed">Nuk mund të fillonte ngarkimi - kjo zakonisht është një problem i përkohshëm lidhjeje. Ju lutemi provoni përsëri.</string>
     <string name="shorts_upload_err_internal_server">Diçka shkoi keq nga ana jonë gjatë ngarkimit. Ju lutemi provoni përsëri pas pak.</string>
+    <string name="caption_view_more">Shiko më shumë</string>
+    <string name="caption_view_less">Shiko më pak</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">Shuma (USDC)</string>
     <string name="creator_available_balance">Bilanci i disponueshëm: {amount} $</string>
