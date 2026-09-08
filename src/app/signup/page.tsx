@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import Image from "next/image";
 import PasswordInput from "@/components/PasswordInput";
+import AuthShell from "@/components/auth/AuthShell";
 import { useLanguage } from "@/contexts/LanguageContext";
 import GoogleIcon from "@/components/icons/GoogleIcon";
 import AppleIcon from "@/components/icons/AppleIcon";
@@ -202,72 +202,8 @@ export default function SignupPage() {
       : "border-gray-300 dark:border-gray-600 focus:ring-zrp-red";
 
   return (
-    <div className="min-h-screen flex bg-white dark:bg-zrp-deepBlack">
-      {/* ─── Left brand panel, desktop only ─────────────────────────── */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-zrp-darkRed via-zrp-red to-zrp-darkRed">
-        <div
-          className="absolute inset-0 opacity-[0.08]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, #fff 1.5px, transparent 1.5px)",
-            backgroundSize: "28px 28px",
-          }}
-        />
-        <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16 w-full">
-          <Link href="/" className="inline-block w-fit">
-            <Image
-              src="/logo.png"
-              alt="ZRP"
-              width={56}
-              height={56}
-              className="w-14 h-14 object-contain"
-            />
-          </Link>
-
-          <div>
-            <h1 className="font-orbitron font-bold text-white text-5xl xl:text-6xl leading-[1.05] mb-6">
-              {t("auth.welcomeTitle")}
-            </h1>
-            <p className="text-white/80 text-xl xl:text-2xl max-w-md leading-snug">
-              {t("about.subtitle")}
-            </p>
-          </div>
-
-          <p className="text-white/60 text-sm">
-            {t("rightPanel.footerText")}
-          </p>
-        </div>
-      </div>
-
-      {/* ─── Right / mobile form panel ───────────────────────────────── */}
-      <div className="flex-1 flex items-center justify-center px-4 py-12 sm:py-16">
-        <div className="w-full max-w-md">
-          {/* ─── Mobile & tablet hero ──────────────────────────────────── */}
-          <div className="lg:hidden text-center mb-10 sm:mb-14">
-            <Link href="/" className="inline-block mb-6 sm:mb-8">
-              <Image
-                src="/logo.png"
-                alt="ZRP"
-                width={96}
-                height={96}
-                className="w-20 h-20 sm:w-24 sm:h-24 object-contain mx-auto"
-                priority
-              />
-            </Link>
-            <h2 className="text-4xl sm:text-5xl font-orbitron font-bold text-gray-900 dark:text-white leading-[1.05]">
-              {t("auth.welcomeTitle")}
-            </h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-3 text-base sm:text-lg max-w-sm mx-auto">
-              {t("about.subtitle")}
-            </p>
-          </div>
-
-          <div className="hidden lg:block mb-8">
-            <h2 className="text-2xl font-orbitron font-bold text-gray-900 dark:text-white">
-              {t("auth.joinCommunity")}
-            </h2>
-          </div>
-
+    <AuthShell heading={t("auth.joinCommunity")}>
+      <>
           {registeredEmail ? (
             <div className="text-center">
               <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-5">
@@ -343,10 +279,16 @@ export default function SignupPage() {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label
+                    htmlFor="signup-fullName"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
                     {t("auth.fullName")}
                   </label>
                   <input
+                    id="signup-fullName"
+                    name="name"
+                    autoComplete="name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -357,11 +299,17 @@ export default function SignupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label
+                    htmlFor="signup-username"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
                     {t("auth.username")}
                   </label>
                   <div className="relative">
                     <input
+                      id="signup-username"
+                      name="username"
+                      autoComplete="username"
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
@@ -412,10 +360,16 @@ export default function SignupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label
+                    htmlFor="signup-email"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
                     {t("auth.email")}
                   </label>
                   <input
+                    id="signup-email"
+                    name="email"
+                    autoComplete="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -434,6 +388,7 @@ export default function SignupPage() {
                   placeholder={t("auth.createPassword")}
                   required
                   autoComplete="new-password"
+                  className="rounded-xl px-4 py-3.5 text-base dark:bg-gray-800 sm:py-3"
                 />
 
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -457,8 +412,7 @@ export default function SignupPage() {
               </p>
             </>
           )}
-        </div>
-      </div>
-    </div>
+      </>
+    </AuthShell>
   );
 }

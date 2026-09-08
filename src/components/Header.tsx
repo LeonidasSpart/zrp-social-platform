@@ -441,6 +441,16 @@ export default function Header() {
                 type="button"
                 onClick={toggleTheme}
                 className="flex items-center justify-center w-10 h-10 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-zrp-red transition"
+                // title alone was the only name this icon-only button
+                // had. title is a last-resort fallback in the accessible
+                // name algorithm, is announced inconsistently, and never
+                // surfaces on touch - aria-label makes the name explicit.
+                // Same existing translated strings, no new keys.
+                aria-label={
+                  theme === "light"
+                    ? t("nav.darkMode")
+                    : t("nav.lightMode")
+                }
                 title={
                   theme === "light"
                     ? t("nav.darkMode")
