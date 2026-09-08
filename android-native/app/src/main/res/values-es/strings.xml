@@ -1510,4 +1510,14 @@
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Se unió</string>
     <string name="profile_charity_note">%1$s%% de los beneficios van a caridad</string>
+
+    <!-- Home feed empty / error states -->
+    <string name="home_empty_following_title">Tu feed de Siguiendo te está esperando.</string>
+    <string name="home_empty_following_subtitle">Descubre personas, música y temas para seguir.</string>
+    <string name="feed_no_posts">Aún no hay publicaciones.</string>
+    <string name="feed_check_back_later">Vuelve más tarde para ver contenido en tendencia.</string>
+    <string name="feed_retry">Reintentar</string>
+    <string name="home_cta_discover_creators">Descubrir creadores</string>
+    <string name="home_cta_explore_music">Explorar Music</string>
+    <string name="home_cta_explore_topics">Explorar temas</string>
 </resources>

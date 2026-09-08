@@ -1510,4 +1510,14 @@
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Anëtarësuar më</string>
     <string name="profile_charity_note">%1$s%% e fitimeve shkojnë për bamirësi</string>
+
+    <!-- Home feed empty / error states -->
+    <string name="home_empty_following_title">Furnizimi juaj i ndjekjes po ju pret.</string>
+    <string name="home_empty_following_subtitle">Zbuloni njerëz, muzikë dhe tema për të ndjekur.</string>
+    <string name="feed_no_posts">Nuk ka postime ende.</string>
+    <string name="feed_check_back_later">Rikthehuni më vonë për përmbajtje kryesore.</string>
+    <string name="feed_retry">Riprovo</string>
+    <string name="home_cta_discover_creators">Zbuloni krijues</string>
+    <string name="home_cta_explore_music">Eksploro Music</string>
+    <string name="home_cta_explore_topics">Eksploro temat</string>
 </resources>

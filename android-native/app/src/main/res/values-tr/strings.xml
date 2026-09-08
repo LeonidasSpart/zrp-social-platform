@@ -1510,4 +1510,14 @@
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Katılma tarihi</string>
     <string name="profile_charity_note">Kârın %%%1$s\'si hayır kurumuna bağışlanıyor</string>
+
+    <!-- Home feed empty / error states -->
+    <string name="home_empty_following_title">Takip edilenler akışın seni bekliyor.</string>
+    <string name="home_empty_following_subtitle">Takip edilecek kişileri, müziği ve konuları keşfet.</string>
+    <string name="feed_no_posts">Henüz gönderi yok.</string>
+    <string name="feed_check_back_later">Popüler içerikler için daha sonra tekrar kontrol edin.</string>
+    <string name="feed_retry">Yeniden Dene</string>
+    <string name="home_cta_discover_creators">İçerik üreticileri keşfet</string>
+    <string name="home_cta_explore_music">Music\'i keşfet</string>
+    <string name="home_cta_explore_topics">Konuları keşfet</string>
 </resources>
