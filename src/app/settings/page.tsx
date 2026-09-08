@@ -17,6 +17,7 @@ import { getPlanLimits } from "@/lib/limits";
 import CustomUrlSettings from "@/components/CustomUrlSettings";
 import CategoryPickerModal from "@/components/CategoryPickerModal";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { buttonClasses } from "@/components/ui/styles";
 
 interface UserData {
   id: string;
@@ -579,20 +580,34 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* ─── Mobile: horizontal scrollable category chips ─────────────── */}
-      <div className="lg:hidden flex gap-2 overflow-x-auto pb-3 mb-4 -mx-4 px-4 scrollbar-hide">
+      {/* ─── Mobile: horizontal category tabs ─────────────────────────
+          Functionally a tab strip, so it now speaks the same language
+          the feed tabs already do - a red underline under the active
+          item - instead of a solid red chip. A solid brand-red fill is
+          reserved for the one primary action on a view; here it marked
+          a location, and competed with whatever real action the panel
+          below it contained. */}
+      <div className="lg:hidden flex gap-1 overflow-x-auto mb-4 -mx-4 px-4 border-b border-gray-200 dark:border-gray-800 scrollbar-hide">
         {CATEGORIES.map((cat) => (
           <button
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
-            className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium border transition whitespace-nowrap ${
+            aria-current={activeCategory === cat.id ? "true" : undefined}
+            className={`relative flex-shrink-0 flex items-center gap-1.5 px-3 pb-3 pt-1 text-sm transition whitespace-nowrap ${
               activeCategory === cat.id
-                ? "bg-zrp-red text-white border-zrp-red"
-                : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                ? "font-semibold text-zrp-red"
+                : "font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
             }`}
           >
             <cat.icon className="w-4 h-4" />
             {cat.label}
+
+            {activeCategory === cat.id && (
+              <span
+                aria-hidden="true"
+                className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-zrp-red"
+              />
+            )}
           </button>
         ))}
       </div>
@@ -604,13 +619,30 @@ export default function SettingsPage() {
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-left transition ${
+              aria-current={activeCategory === cat.id ? "true" : undefined}
+              className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left transition ${
                 activeCategory === cat.id
-                  ? "bg-zrp-red/10 text-zrp-red"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  ? "font-bold text-gray-900 dark:text-white"
+                  : "font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
               }`}
             >
-              <cat.icon className="w-4 h-4 flex-shrink-0" />
+              {/* The same current-item language the sidebar uses: a red
+                  marker at the leading edge plus weight. This nav used a
+                  filled red pill, which was the third different way the
+                  app said "you are here" (sidebar: marker + weight; feed
+                  tabs: red underline). */}
+              {activeCategory === cat.id && (
+                <span
+                  aria-hidden="true"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-zrp-red"
+                />
+              )}
+
+              <cat.icon
+                className={`w-4 h-4 flex-shrink-0 ${
+                  activeCategory === cat.id ? "text-zrp-red" : ""
+                }`}
+              />
               {cat.label}
             </button>
           ))}
@@ -619,9 +651,9 @@ export default function SettingsPage() {
         <div className="flex-1 min-w-0">
           {/* ═══════════════════════ ACCOUNT ═══════════════════════ */}
           {activeCategory === "account" && (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {/* ─── Account Info ──────────────────────────────────────── */}
-              <div id="account-info" className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 scroll-mt-4">
+              <div id="account-info" className="pb-6 border-b border-gray-200 dark:border-gray-800 scroll-mt-4">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.accountInfo")}</h2>
                 <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                   <Calendar className="w-4 h-4" />
@@ -634,7 +666,7 @@ export default function SettingsPage() {
               </div>
 
               {/* ─── Change Email Section ───────────────────────────────────── */}
-              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="pb-6 border-b border-gray-200 dark:border-gray-800">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.changeEmail")}</h2>
                 <form onSubmit={handleUpdateEmail} className="space-y-4">
                   <div>
@@ -677,7 +709,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={updatingEmail}
-                    className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    className={buttonClasses({ variant: "secondary", fullWidth: true })}
                   >
                     {updatingEmail ? t("settings.sending") : t("settings.sendVerificationEmail")}
                   </button>
@@ -688,7 +720,7 @@ export default function SettingsPage() {
               </div>
 
               {/* ─── Username Section ────────────────────────────────────────── */}
-              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="pb-6 border-b border-gray-200 dark:border-gray-800">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.usernameTitle")}</h2>
 
                 {usernameCooldown !== null && usernameCooldown > 0 && (
@@ -735,7 +767,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={updatingUsername || (usernameCooldown !== null && usernameCooldown > 0)}
-                    className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    className={buttonClasses({ variant: "secondary", fullWidth: true })}
                   >
                     {updatingUsername ? t("settings.updating") : t("settings.changeUsername")}
                   </button>
@@ -743,7 +775,7 @@ export default function SettingsPage() {
               </div>
 
               {/* ─── Custom Profile URL ────────────────────────────────────── */}
-              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="pb-6 border-b border-gray-200 dark:border-gray-800">
                 <CustomUrlSettings
                   currentUsername={userData.username}
                   currentCustomUrl={userData.customUrl}
@@ -755,7 +787,7 @@ export default function SettingsPage() {
               </div>
 
               {/* ─── Export My Data ─────────────────────────────────────────── */}
-              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="pb-6 border-b border-gray-200 dark:border-gray-800">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.exportDataHeading")}</h2>
                 <div className="flex items-center justify-between">
                   <div>
@@ -780,7 +812,7 @@ export default function SettingsPage() {
               </div>
 
               {/* ─── Moderation Appeals ─────────────────────────────────────── */}
-              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="pb-6 border-b border-gray-200 dark:border-gray-800">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">{t("settings.appeals")}</p>
@@ -799,7 +831,7 @@ export default function SettingsPage() {
               </div>
 
               {/* ─── Delete Account Section ──────────────────────────────────── */}
-              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="pb-6 border-b border-gray-200 dark:border-gray-800">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.dangerZone")}</h2>
                 <div className="border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900/10">
                   <div className="flex items-center justify-between">
@@ -826,7 +858,7 @@ export default function SettingsPage() {
           {activeCategory === "profile" && (
             <div className="space-y-4">
               {/* ─── Profile Picture ────────────────────────────────────────── */}
-              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="pb-6 border-b border-gray-200 dark:border-gray-800">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.profilePicture")}</h2>
                 <div className="flex items-center gap-6">
                   <div className="relative">
@@ -871,7 +903,7 @@ export default function SettingsPage() {
               </div>
 
               {/* ─── Profile Section ────────────────────────────────────────── */}
-              <div id="profile" className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 scroll-mt-4">
+              <div id="profile" className="pb-6 border-b border-gray-200 dark:border-gray-800 scroll-mt-4">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.profile")}</h2>
                 <form onSubmit={handleUpdateProfile} className="space-y-4">
                   <div>
@@ -988,7 +1020,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={updatingProfile}
-                    className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    className={buttonClasses({ variant: "secondary", fullWidth: true })}
                   >
                     {updatingProfile ? t("settings.saving") : t("settings.updateProfile")}
                   </button>
@@ -1001,7 +1033,7 @@ export default function SettingsPage() {
           {activeCategory === "security" && (
             <div className="space-y-4">
               {/* ─── Password Section ────────────────────────────────────────── */}
-              <div id="password" className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 scroll-mt-4">
+              <div id="password" className="pb-6 border-b border-gray-200 dark:border-gray-800 scroll-mt-4">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.changePasswordTitle")}</h2>
                 <form onSubmit={handleUpdatePassword} className="space-y-4">
                   {passwordError && (
@@ -1044,7 +1076,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={updatingPassword}
-                    className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    className={buttonClasses({ variant: "secondary", fullWidth: true })}
                   >
                     {updatingPassword ? t("settings.updating") : t("settings.changePassword")}
                   </button>
@@ -1057,7 +1089,7 @@ export default function SettingsPage() {
           {activeCategory === "privacy" && (
             <div className="space-y-4">
               {/* ─── Privacy Settings ───────────────────────────────────────── */}
-              <div id="privacy" className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 scroll-mt-4">
+              <div id="privacy" className="pb-6 border-b border-gray-200 dark:border-gray-800 scroll-mt-4">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.privacySettings")}</h2>
                 <form onSubmit={handleUpdatePrivacy} className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -1120,7 +1152,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={updatingPrivacy}
-                    className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    className={buttonClasses({ variant: "secondary", fullWidth: true })}
                   >
                     {updatingPrivacy ? t("settings.saving") : t("settings.updatePrivacy")}
                   </button>
@@ -1128,7 +1160,7 @@ export default function SettingsPage() {
               </div>
 
               {/* ─── Muted / Blocked users ──────────────────────────────────── */}
-              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="pb-6 border-b border-gray-200 dark:border-gray-800">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.privacyTitle")}</h2>
                 <div className="space-y-2">
                   <Link
@@ -1163,7 +1195,7 @@ export default function SettingsPage() {
           {activeCategory === "notifications" && (
             <div className="space-y-4">
               {/* ─── Email Preferences Section ────────────────────────────── */}
-              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="pb-6 border-b border-gray-200 dark:border-gray-800">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.emailNotifications")}</h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                   {t("settings.emailNotificationsDesc")}
@@ -1177,7 +1209,7 @@ export default function SettingsPage() {
           {activeCategory === "monetization" && (
             <div className="space-y-4">
               {/* ─── Your Plan Section ────────────────────────────────────── */}
-              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="pb-6 border-b border-gray-200 dark:border-gray-800">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.yourPlan")}</h2>
                 <div className="flex items-center justify-between">
                   <div>
@@ -1228,7 +1260,7 @@ export default function SettingsPage() {
 
               {/* ─── Creator Monetisation Section ──────────────────────────── */}
               {isCreatorEligible && (
-                <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <div className="pb-6 border-b border-gray-200 dark:border-gray-800">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t("settings.creatorMonetisation")}</h2>
                     <Link
@@ -1291,7 +1323,7 @@ export default function SettingsPage() {
               )}
 
               {/* ─── Solana Wallet (for direct tips) ───────────────────────── */}
-              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="pb-6 border-b border-gray-200 dark:border-gray-800">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.solanaWalletTitle")}</h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
                   {t("settings.solanaWalletDesc")}
@@ -1319,7 +1351,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={updatingWallet}
-                    className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    className={buttonClasses({ variant: "secondary", fullWidth: true })}
                   >
                     {updatingWallet ? t("settings.saving") : t("settings.saveWallet")}
                   </button>
@@ -1332,7 +1364,7 @@ export default function SettingsPage() {
           {activeCategory === "support" && (
             <div className="space-y-4">
               {/* ─── Support Tickets Section ─────────────────────── */}
-              <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="pb-6 border-b border-gray-200 dark:border-gray-800">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.supportTickets") || "Support Tickets"}</h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                   {t("settings.supportTicketsDesc") || "View and manage your support tickets."}

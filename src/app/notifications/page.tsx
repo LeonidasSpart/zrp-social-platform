@@ -4,8 +4,9 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { Heart, MessageCircle, Repeat, UserPlus, BadgeCheck, Loader2, Mail, Scale, Store } from "lucide-react";
+import { Heart, MessageCircle, Repeat, UserPlus, BadgeCheck, Loader2, Mail, Scale, Store, Bell } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import EmptyState from "@/components/ui/EmptyState";
 import { useUnreadCount } from "@/contexts/UnreadCountContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
@@ -287,10 +288,11 @@ export default function NotificationsPage() {
       </div>
 
       {grouped.length === 0 ? (
-        <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8 border border-gray-200 dark:border-gray-800 text-center">
-          <p className="text-gray-500 dark:text-gray-400">{t("notifications.empty")}</p>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">{t("notifications.emptyDesc")}</p>
-        </div>
+        <EmptyState
+          icon={Bell}
+          title={t("notifications.empty")}
+          body={t("notifications.emptyDesc")}
+        />
       ) : (
         <div className="space-y-2">
           {grouped.map((g) => {
