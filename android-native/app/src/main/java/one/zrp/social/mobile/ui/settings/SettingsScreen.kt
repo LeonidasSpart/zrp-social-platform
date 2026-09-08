@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
@@ -81,6 +82,11 @@ import one.zrp.social.mobile.ui.theme.Spacing
  * uses. Uses the website's own real translated "nav.teamManagement"
  * string (nav_team_management) for its label.
  *
+ * API Keys routes to ApiKeysScreen - the same always-shown-row,
+ * screen-gates-itself shape as Team Management above, for the same
+ * real reason (web hides its own Sidebar link for a non-Business/
+ * Enterprise account via features?.apiAccess; this row doesn't).
+ *
  * Admin routes to AdminDashboardScreen (the native surface onto
  * /admin) - only rendered when isStaff is true (the caller's role is
  * ADMIN or MODERATOR, resolved from the real signed-in session; see
@@ -111,6 +117,7 @@ fun SettingsScreen(
     onOpenCreator: () -> Unit,
     onOpenJournalist: () -> Unit,
     onOpenTeam: () -> Unit,
+    onOpenApiKeys: () -> Unit,
     onOpenSupport: () -> Unit,
     onOpenTerms: () -> Unit,
     onOpenPrivacyPolicy: () -> Unit,
@@ -146,6 +153,7 @@ fun SettingsScreen(
         SettingsRow(icon = Icons.Filled.CreditCard, label = "Monetization", onClick = onOpenCreator)
         SettingsRow(icon = Icons.Filled.Newspaper, label = stringResource(R.string.nav_journalist), onClick = onOpenJournalist)
         SettingsRow(icon = Icons.Filled.People, label = stringResource(R.string.nav_team_management), onClick = onOpenTeam)
+        SettingsRow(icon = Icons.Filled.Key, label = stringResource(R.string.nav_api_keys), onClick = onOpenApiKeys)
         SettingsRow(icon = Icons.Filled.SupportAgent, label = stringResource(R.string.support_tickets_page_title), onClick = onOpenSupport)
 
         Text(
