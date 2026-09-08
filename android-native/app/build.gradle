@@ -56,15 +56,17 @@ android {
         // later Internal Testing upload with "Le code de version 2 a
         // déjà été utilisé" (versionCode 2 already used - a prior AAB
         // with that code had already been uploaded), so that bumped to
-        // versionCode 3. Play Console has now confirmed versionCode 3
-        // itself was uploaded too, so this bumps to versionCode 4 -
+        // versionCode 3, then 4 once Play confirmed 3 was uploaded too -
         // never reuse a versionCode Play has already seen for this
-        // applicationId. versionName moves to "1.0.1" alongside it (a
-        // real, if minor, set of feature changes shipped since 1.0.0 -
-        // Appeals, Team Management, API Keys, composer drafts - not
-        // just a re-signed rebuild of the same content).
-        versionCode 4
-        versionName "1.0.1"
+        // applicationId. This build (V4.0.1 real-device validation of
+        // the native stabilization pass - Google Sign-In diagnostics,
+        // Shorts rail, profile-rename 404, Admin visibility, legal
+        // routes, long-post truncation) bumps to versionCode 5 for the
+        // same reason, alongside versionName "4.0.1" - a validation
+        // build for the current stabilization line, not yet the V5 work
+        // that follows it.
+        versionCode 5
+        versionName "4.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
