@@ -412,22 +412,28 @@ its six keys and its merge behaviour are used exactly as written, and
 nothing about it is invented. Web and Android would benefit from the
 same screen.
 
-### L3. The explore feed does not select polls
+### L3. The explore feed does not select polls - **FIXED server-side**
 
 `GET /api/posts?tab=following` and `GET /api/posts/{id}` both `include`
 the post's `poll` (with the viewer's own vote rows). `GET /api/posts/explore`
-does not select it at all, so a poll post arriving in **For You** carries
+used to not select it at all, so a poll post arriving in **For You** carried
 no poll — indistinguishable, in the payload, from a post that never had
 one.
 
-The visible effect is the same on every client: the same post shows its
-poll in Following and on its own screen, and nothing in For You. iOS does
-not paper over this — there is no way to, short of a second request per
-card to find out whether a poll exists. Adding the same `include` block
-the following feed already uses would fix it for web, Android and iOS at
-once.
+`explore` now selects `isPoll` and the poll's `question`/`options`/`votes`/
+`expiresAt`, and separately attaches the viewer's own vote as
+`poll.votes_user` (the same raw shape the following feed already returns -
+an array of the viewer's vote row(s) - which iOS's own `Poll` model already
+falls back to reading when the folded `userVote` field isn't present, see
+`ios-native/ZRPSocial/Models/Poll.swift`). The one deliberate difference
+from a literal copy of the following feed's `include` block: `explore`
+caches its whole ranked list for 5 minutes, and the viewer's own vote is
+fetched fresh on every request rather than baked into that cache - the
+same reason `liked` on this route already isn't cached. Voting on a poll
+in For You shows up immediately, not up to 5 minutes later.
 
-Noted, not worked around.
+What remains is client-side: actually rendering a poll encountered while
+browsing For You. Not built here.
 
 ## Reported defects in web / backend
 
