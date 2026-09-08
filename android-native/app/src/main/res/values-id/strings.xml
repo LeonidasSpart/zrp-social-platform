@@ -271,6 +271,10 @@
     <string name="post_unmute_video_cd">Aktifkan suara video</string>
     <string name="story_like_cd">Suka story</string>
     <string name="story_unlike_cd">Batal suka story</string>
+
+    <string name="story_mute_cd">Bisukan suara story</string>
+
+    <string name="story_unmute_cd">Aktifkan suara story</string>
     <string name="comment_repost_cd">Posting ulang</string>
     <string name="comment_undo_repost_cd">Batalkan posting ulang</string>
     <string name="createpost_media_count_cd">%1$d/%2$d media</string>

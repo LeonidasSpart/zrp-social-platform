@@ -271,6 +271,10 @@
     <string name="post_unmute_video_cd">Réactiver le son de la vidéo</string>
     <string name="story_like_cd">Aimer la story</string>
     <string name="story_unlike_cd">Ne plus aimer la story</string>
+
+    <string name="story_mute_cd">Couper le son de la story</string>
+
+    <string name="story_unmute_cd">Activer le son de la story</string>
     <string name="comment_repost_cd">Republier</string>
     <string name="comment_undo_repost_cd">Annuler la republication</string>
     <string name="createpost_media_count_cd">%1$d/%2$d médias</string>

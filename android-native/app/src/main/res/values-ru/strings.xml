@@ -271,6 +271,10 @@
     <string name="post_unmute_video_cd">Включить звук видео</string>
     <string name="story_like_cd">Нравится история</string>
     <string name="story_unlike_cd">Не нравится история</string>
+
+    <string name="story_mute_cd">Выключить звук истории</string>
+
+    <string name="story_unmute_cd">Включить звук истории</string>
     <string name="comment_repost_cd">Репост</string>
     <string name="comment_undo_repost_cd">Отменить репост</string>
     <string name="createpost_media_count_cd">%1$d/%2$d медиафайлов</string>

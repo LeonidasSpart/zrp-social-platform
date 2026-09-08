@@ -271,6 +271,10 @@
     <string name="post_unmute_video_cd">Video-Ton aktivieren</string>
     <string name="story_like_cd">Story gefällt mir</string>
     <string name="story_unlike_cd">Story gefällt mir nicht mehr</string>
+
+    <string name="story_mute_cd">Story-Ton stummschalten</string>
+
+    <string name="story_unmute_cd">Story-Ton aktivieren</string>
     <string name="comment_repost_cd">Repost</string>
     <string name="comment_undo_repost_cd">Repost rückgängig machen</string>
     <string name="createpost_media_count_cd">%1$d/%2$d Medien</string>

@@ -283,6 +283,10 @@
     <string name="post_unmute_video_cd">Unmute video</string>
     <string name="story_like_cd">Like story</string>
     <string name="story_unlike_cd">Unlike story</string>
+
+    <string name="story_mute_cd">Mute story audio</string>
+
+    <string name="story_unmute_cd">Unmute story audio</string>
     <string name="comment_repost_cd">Repost</string>
     <string name="comment_undo_repost_cd">Undo repost</string>
     <string name="createpost_media_count_cd">%1$d/%2$d media</string>

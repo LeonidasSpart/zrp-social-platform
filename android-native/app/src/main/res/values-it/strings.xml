@@ -271,6 +271,10 @@
     <string name="post_unmute_video_cd">Riattiva audio video</string>
     <string name="story_like_cd">Mi piace la storia</string>
     <string name="story_unlike_cd">Non mi piace più la storia</string>
+
+    <string name="story_mute_cd">Disattiva audio della storia</string>
+
+    <string name="story_unmute_cd">Attiva audio della storia</string>
     <string name="comment_repost_cd">Ripubblica</string>
     <string name="comment_undo_repost_cd">Annulla ripubblicazione</string>
     <string name="createpost_media_count_cd">%1$d/%2$d contenuti multimediali</string>

@@ -503,6 +503,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                         userId = userId,
                         onClose = { navController.popBackStack() },
                         onAddStory = goToCreateStory,
+                        onOpenProfile = goToProfile,
                     )
                 }
             }
