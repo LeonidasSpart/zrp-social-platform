@@ -170,7 +170,11 @@
     <string name="search_no_users">Keine Nutzer gefunden.</string>
     <string name="search_no_posts">Keine Beiträge gefunden.</string>
     <string name="home_trending_on_zrp">Trends auf ZRP</string>
+    <string name="home_see_all">Alle anzeigen</string>
     <string name="right_panel_who_to_follow">Wem du folgen könntest</string>
+    <string name="right_panel_trending">Im Trend</string>
+    <string name="right_panel_posts_count">%1$d Beiträge</string>
+    <string name="right_panel_no_trending">Noch keine Trend-Hashtags.</string>
     <string name="home_discover_music">Neue Musik entdecken</string>
     <string name="action_follow">Folgen</string>
     <string name="action_following">Gefolgt</string>

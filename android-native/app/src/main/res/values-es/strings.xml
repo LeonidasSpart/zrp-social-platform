@@ -170,7 +170,11 @@
     <string name="search_no_users">No se encontraron usuarios.</string>
     <string name="search_no_posts">No se encontraron publicaciones.</string>
     <string name="home_trending_on_zrp">Tendencias en ZRP</string>
+    <string name="home_see_all">Ver todo</string>
     <string name="right_panel_who_to_follow">A quién seguir</string>
+    <string name="right_panel_trending">Tendencias</string>
+    <string name="right_panel_posts_count">%1$d publicaciones</string>
+    <string name="right_panel_no_trending">Aún no hay hashtags en tendencia.</string>
     <string name="home_discover_music">Descubrir nueva música</string>
     <string name="action_follow">Seguir</string>
     <string name="action_following">Siguiendo</string>

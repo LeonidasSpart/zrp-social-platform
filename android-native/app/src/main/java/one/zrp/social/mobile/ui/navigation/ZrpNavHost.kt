@@ -97,6 +97,8 @@ import one.zrp.social.mobile.ui.play.PlayScreen
 import one.zrp.social.mobile.ui.profile.ProfileScreen
 import one.zrp.social.mobile.ui.quotes.QuotesScreen
 import one.zrp.social.mobile.ui.reposts.RepostsScreen
+import one.zrp.social.mobile.ui.search.ExplorePeopleScreen
+import one.zrp.social.mobile.ui.search.ExploreTrendingScreen
 import one.zrp.social.mobile.ui.search.SearchScreen
 import one.zrp.social.mobile.ui.ai.AiChatScreen
 import one.zrp.social.mobile.ui.creator.CreatorScreen
@@ -189,6 +191,10 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
     // this exact post (VideoFeedViewer's own startPostId prop).
     val goToVideoViewer: (String) -> Unit = { postId -> navController.navigate("shorts/$postId") }
     val goToBookmarks: () -> Unit = { navController.navigate("bookmarks") }
+    // "See all" destinations for Search's Discover state - the real
+    // website's own /explore/trending and /explore/people pages.
+    val goToTrending: () -> Unit = { navController.navigate("explore/trending") }
+    val goToExplorePeople: () -> Unit = { navController.navigate("explore/people") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
     val goToBlockedUsers: () -> Unit = { navController.navigate("blocked-users") }
@@ -323,6 +329,20 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onOpenQuotes = goToQuotes,
                     onOpenHashtag = goToHashtag,
                     onOpenVideoViewer = goToVideoViewer,
+                    onOpenTrending = goToTrending,
+                    onOpenExplorePeople = goToExplorePeople,
+                )
+            }
+            composable("explore/trending") {
+                ExploreTrendingScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenHashtag = goToHashtag,
+                )
+            }
+            composable("explore/people") {
+                ExplorePeopleScreen(
+                    onBack = { navController.popBackStack() },
+                    onAuthorClick = goToProfile,
                 )
             }
             composable(ZrpDestination.Create.route) { CreatePostScreen(onPosted = goHome) }

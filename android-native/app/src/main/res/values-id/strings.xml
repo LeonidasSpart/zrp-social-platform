@@ -170,7 +170,11 @@
     <string name="search_no_users">Pengguna tidak ditemukan.</string>
     <string name="search_no_posts">Postingan tidak ditemukan.</string>
     <string name="home_trending_on_zrp">Sedang tren di ZRP</string>
+    <string name="home_see_all">Lihat semua</string>
     <string name="right_panel_who_to_follow">Yang bisa diikuti</string>
+    <string name="right_panel_trending">Sedang Tren</string>
+    <string name="right_panel_posts_count">%1$d postingan</string>
+    <string name="right_panel_no_trending">Belum ada tagar yang sedang tren.</string>
     <string name="home_discover_music">Temukan musik baru</string>
     <string name="action_follow">Ikuti</string>
     <string name="action_following">Mengikuti</string>

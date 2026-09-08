@@ -170,7 +170,11 @@
     <string name="search_no_users">لم يتم العثور على مستخدمين.</string>
     <string name="search_no_posts">لم يتم العثور على منشورات.</string>
     <string name="home_trending_on_zrp">الأكثر رواجاً على ZRP</string>
+    <string name="home_see_all">عرض الكل</string>
     <string name="right_panel_who_to_follow">من تتابع</string>
+    <string name="right_panel_trending">الرائج</string>
+    <string name="right_panel_posts_count">%1$d منشورات</string>
+    <string name="right_panel_no_trending">لا رائج وسوم بعد.</string>
     <string name="home_discover_music">اكتشف موسيقى جديدة</string>
     <string name="action_follow">متابعة</string>
     <string name="action_following">متابَع</string>

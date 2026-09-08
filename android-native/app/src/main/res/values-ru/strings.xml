@@ -170,7 +170,11 @@
     <string name="search_no_users">Пользователи не найдены.</string>
     <string name="search_no_posts">Публикации не найдены.</string>
     <string name="home_trending_on_zrp">В тренде на ZRP</string>
+    <string name="home_see_all">Смотреть все</string>
     <string name="right_panel_who_to_follow">На кого подписаться</string>
+    <string name="right_panel_trending">В тренде</string>
+    <string name="right_panel_posts_count">%1$d публикаций</string>
+    <string name="right_panel_no_trending">Нет в тренде хэштегов пока.</string>
     <string name="home_discover_music">Открыть новую музыку</string>
     <string name="action_follow">Подписаться</string>
     <string name="action_following">Подписан</string>
