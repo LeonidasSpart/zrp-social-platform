@@ -6,44 +6,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: npm ci
-        run: npm ci
-      - name: Run the REAL repo safeFetch + parseHtmlMetadata against the real URL
+      - name: Post-fix verification - fresh never-cached 20min.ch URL against production
         run: |
-          cat > diag-probe.ts << 'TSEOF'
-          import { safeFetch } from "./src/lib/ssrf-guard";
-          import { parseHtmlMetadata } from "./src/lib/link-preview-parse";
-
-          async function main() {
-            const url = "https://www.20min.ch/fr/story/football-atteinte-d-un-cancer-elle-voit-son-club-faire-un-geste-emouvant-103629744";
-            try {
-              const res = await safeFetch(url, {
-                timeoutMs: 6000,
-                maxBytes: 200_000,
-                headers: {
-                  "User-Agent": "Mozilla/5.0 (compatible; ZRPLinkPreview/1.0; +https://zrp.one)",
-                  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                  "Accept-Language": "en-US,en;q=0.9",
-                  "Accept-Encoding": "gzip, deflate, br",
-                },
-              });
-              console.log("STATUS", res.statusCode);
-              console.log("CONTENT-TYPE", res.headers["content-type"]);
-              console.log("CONTENT-ENCODING", res.headers["content-encoding"]);
-              console.log("BODY_LENGTH", res.body.length);
-              const html = res.body.toString("utf-8");
-              console.log("BODY_PREFIX", JSON.stringify(html.slice(0, 200)));
-              const preview = parseHtmlMetadata(html, url);
-              console.log("PARSED", JSON.stringify(preview));
-            } catch (e: any) {
-              console.log("THREW", e?.name, e?.message);
-              console.log(e?.stack);
-            }
-          }
-          main();
-          TSEOF
-          npx tsx diag-probe.ts
+          TS=$(date +%s)
+          echo "--- ZRP production /api/link-preview, fresh cache-busted 20min.ch article, post-fix ---"
+          curl -sS -o /tmp/zrp_postfix.json -w "HTTP_STATUS:%{http_code}\n" --max-time 20 \
+            "https://zrp.one/api/link-preview?url=https%3A%2F%2Fwww.20min.ch%2Ffr%2Fstory%2Ffootball-atteinte-d-un-cancer-elle-voit-son-club-faire-un-geste-emouvant-103629744%3Fpostfixcheck%3D${TS}"
+          cat /tmp/zrp_postfix.json
