@@ -1507,6 +1507,8 @@
     <string name="legal_terms">Términos de servicio</string>
     <string name="legal_privacy">Política de privacidad</string>
     <string name="legal_guidelines">Normas de la Comunidad</string>
+    <string name="legal_help">Centro de ayuda</string>
+    <string name="legal_contact">Contacto</string>
     <string name="legal_load_error">No se pudo cargar esta página. Comprueba tu conexión e inténtalo de nuevo.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Se unió</string>
