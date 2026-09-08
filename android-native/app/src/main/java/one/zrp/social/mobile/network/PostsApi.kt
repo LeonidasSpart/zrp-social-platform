@@ -87,6 +87,27 @@ data class Post(
     // this is always null from a feed response and only becomes known
     // once toggled here or the post is viewed via the Bookmarks screen.
     val bookmarked: Boolean? = null,
+    // Selected by every list/detail endpoint (see posts/route.ts's own
+    // `linkUrl: true`), but PostComposer.tsx never actually sets it on
+    // create - it's a real column that's simply unpopulated by current
+    // web usage. PostCard's link-preview card is keyed off whichever of
+    // this or the first URL found in `content` is present, matching
+    // PostCard.tsx's own `post.linkUrl || extractFirstUrl(post.content)`
+    // exactly, so this stays wired even though it's dead in practice.
+    val linkUrl: String? = null,
+)
+
+// GET /api/link-preview's real response shape (src/lib/link-preview-
+// parse.ts's own LinkPreview interface) - title/description/image/
+// siteName are only ever null when nothing usable was scraped from the
+// target page's OG/Twitter-card metadata, never fabricated locally.
+data class LinkPreview(
+    val url: String,
+    val title: String? = null,
+    val description: String? = null,
+    val image: String? = null,
+    val siteName: String? = null,
+    val isVideo: Boolean = false,
 )
 
 data class PostsPage(
@@ -153,12 +174,25 @@ data class PollCreateRequest(
     val expiresAt: String? = null,
 )
 
+// scheduledAtOffsetMinutes closes a real timezone bug (see
+// src/lib/scheduled-time.ts's resolveScheduledAt, added for web's own
+// identical F2 fix): scheduledAt alone is a naive "yyyy-MM-ddTHH:mm"
+// wall-clock string with no offset, which the server used to parse in
+// its OWN timezone (UTC in production), publishing at the wrong real
+// moment for any author not in UTC. Sending this alongside it - the
+// exact value java.util.TimeZone.getOffset() reports at that instant,
+// negated to match JS's own Date.getTimezoneOffset() sign convention
+// (UTC+9 reports -540, not +540) - lets the same already-deployed
+// server resolve the real intended instant. Optional and backward-
+// compatible: omitting it (the only thing older builds of this app
+// ever did) is still the exact legacy behavior.
 data class CreatePostRequest(
     val content: String,
     val quotePostId: String? = null,
     val imageUrls: List<String>? = null,
     val mediaType: String? = null,
     val scheduledAt: String? = null,
+    val scheduledAtOffsetMinutes: Int? = null,
     val poll: PollCreateRequest? = null,
 )
 
@@ -310,4 +344,12 @@ interface PostsApi {
     // backing the website's own /hashtag/{tag} page.
     @GET("posts/hashtag/{tag}")
     suspend fun getHashtagPosts(@Path("tag") tag: String): List<Post>
+
+    // The same on-demand, render-time unfurl LinkPreviewCard.tsx calls -
+    // there is no separate native endpoint and nothing about the result
+    // is ever persisted; PostCard fetches this itself for whatever URL
+    // extractFirstUrl() finds in a post's content, exactly once per post
+    // per screen composition, same as web's per-render fetch.
+    @GET("link-preview")
+    suspend fun getLinkPreview(@Query("url") url: String): LinkPreview
 }

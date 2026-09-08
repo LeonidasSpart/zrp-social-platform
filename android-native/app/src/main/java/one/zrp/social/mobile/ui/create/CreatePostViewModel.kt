@@ -332,6 +332,16 @@ class CreatePostViewModel(
             return
         }
         val scheduledAt = scheduledAtMillis?.let { scheduledAtFormat.format(it) }
+        // Closes the same real timezone bug web's own scheduled-time.ts
+        // fix (F2) documents: scheduledAt alone is a naive wall-clock
+        // string the server used to parse in ITS OWN timezone. Negating
+        // java.util.TimeZone's offset (millis to ADD to UTC for local
+        // time) converts it to JS's Date.getTimezoneOffset() convention
+        // (UTC minus local) the server's resolveScheduledAt() expects -
+        // see CreatePostRequest's own KDoc for the exact contract.
+        val scheduledAtOffsetMinutes = scheduledAtMillis?.let {
+            -(java.util.TimeZone.getDefault().getOffset(it) / 60_000)
+        }
         // Matches PostComposer.tsx's own content fallback: an empty
         // text field falls back to the poll question itself when a
         // poll is being posted, so the post never ends up with no
@@ -349,7 +359,7 @@ class CreatePostViewModel(
 
         _state.update { it.copy(isPosting = true, error = null) }
         viewModelScope.launch {
-            repository.createPost(effectiveContent, quotePostId, mediaUrls, mediaType, scheduledAt, poll)
+            repository.createPost(effectiveContent, quotePostId, mediaUrls, mediaType, scheduledAt, poll, scheduledAtOffsetMinutes)
                 .onSuccess {
                     _state.update { it.copy(isPosting = false, posted = true) }
                 }

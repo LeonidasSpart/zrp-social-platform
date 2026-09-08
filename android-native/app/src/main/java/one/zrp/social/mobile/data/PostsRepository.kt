@@ -74,6 +74,7 @@ class PostsRepository {
         mediaType: String? = null,
         scheduledAt: String? = null,
         poll: PollCreateRequest? = null,
+        scheduledAtOffsetMinutes: Int? = null,
     ): Result<Post> {
         return try {
             val request = CreatePostRequest(
@@ -82,6 +83,7 @@ class PostsRepository {
                 imageUrls = mediaUrls.ifEmpty { null },
                 mediaType = mediaType,
                 scheduledAt = scheduledAt,
+                scheduledAtOffsetMinutes = scheduledAtOffsetMinutes,
                 poll = poll,
             )
             Result.success(ApiClient.postsApi.createPost(request).post)
