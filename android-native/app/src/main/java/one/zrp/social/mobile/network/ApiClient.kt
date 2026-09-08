@@ -118,4 +118,5 @@ object ApiClient {
     val adsApi: AdsApi by lazy { retrofit.create(AdsApi::class.java) }
     val appealsApi: AppealsApi by lazy { retrofit.create(AppealsApi::class.java) }
     val teamApi: TeamApi by lazy { retrofit.create(TeamApi::class.java) }
+    val apiKeysApi: ApiKeysApi by lazy { retrofit.create(ApiKeysApi::class.java) }
 }
