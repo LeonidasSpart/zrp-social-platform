@@ -495,24 +495,30 @@ place a stale reaction can persist until the thread is reopened.
 Web and Android are unchanged and still send neither param, so both
 still get the bare-array shape they expect.
 
-### L2. `GET /api/music/playlists/{id}` does not report per-track `liked`
+### L2. `GET /api/music/playlists/{id}` does not report per-track `liked` - **FIXED server-side**
 
 Every other route that returns music tracks tells the caller whether the
 signed-in viewer has liked each one: `/api/music/home`, `/api/music/tracks`
 (line 104), `/api/music/artists/{id}` and `/api/music/albums/{id}` all
-attach a `liked` boolean. The playlist detail route does not - it returns
+attach a `liked` boolean. The playlist detail route did not - it returned
 the join rows and their tracks with no like state at all.
 
-The visible effect is the same on every client: a track opened from a
-playlist shows an empty heart even when the viewer has liked it, until
-some other screen loads the same track. iOS does **not** paper over this
+The visible effect was the same on every client: a track opened from a
+playlist showed an empty heart even when the viewer had liked it, until
+some other screen loaded the same track. iOS did **not** paper over this
 by assuming `false`; `MusicLikeStore` treats a missing flag as "unknown"
-and keeps whatever it already knows, so the heart is right whenever any
-other surface has reported it. Attaching `liked` there the same way the
-album route does (one `musicLike.findMany` over the playlist's track ids)
-would fix it for web, Android and iOS at once.
+and keeps whatever it already knows, so the heart was right whenever any
+other surface had reported it.
 
-Noted, not worked around.
+`GET /api/music/playlists/{id}` now attaches `liked` on each track the
+same way `/api/music/albums/{id}` and `/api/music/artists/{id}` already
+do: one `musicLike.findMany` scoped to the signed-in viewer and the
+playlist's own track ids, `false` for every track when there is no
+session. The response shape is unchanged otherwise - `liked` sits on the
+nested `track` object inside each `{ id, position, track }` row, matching
+where every other route that returns full track objects puts it (and
+where iOS's `MusicTrack` already expects to find it), so no client needs
+any changes to pick it up.
 
 ### L5. The Trust Passport's signal text is hardcoded English - **FIXED server-side + web**
 
