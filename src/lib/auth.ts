@@ -407,16 +407,20 @@ export const authOptions: NextAuthOptions = {
       }
 
       // ─── Re‑fetch fresh data on client update() ────────────────
-      // Also re-fetches username: settings/page.tsx's own
-      // handleUpdateProfile calls update() right after a rename, and
+      // Also re-fetches username/name/avatarUrl: settings/page.tsx's
+      // own handleUpdateProfile calls update() right after a save, and
       // any route resolving "my own profile" through session.user.username
       // (rather than the stable session.user.id) - e.g. GET
       // /users/{username} keyed off it - 404s until this catches up.
+      // name/avatarUrl go stale from that same save (header avatar,
+      // menus) for the same reason - neither was in this select either.
       if (trigger === "update" && token.id) {
         const freshUser = await prisma.user.findUnique({
           where: { id: token.id as string },
           select: {
             username: true,
+            name: true,
+            avatarUrl: true,
             isAdmin: true,
             role: true,
             badgeType: true,
@@ -428,6 +432,8 @@ export const authOptions: NextAuthOptions = {
         });
         if (freshUser) {
           token.username = freshUser.username;
+          token.name = freshUser.name;
+          token.avatarUrl = freshUser.avatarUrl;
           token.isAdmin = freshUser.isAdmin;
           token.role = freshUser.role;
           token.badgeType = freshUser.badgeType;
