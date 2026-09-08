@@ -411,6 +411,30 @@ describe.skipIf(!hasRealDatabaseUrl || !hasRedis)(
       }
     }, 30000);
 
+    it("refuses to run at all when Redis is unavailable, rather than running unlocked", async () => {
+      // Fail-closed is the deliberate choice here: an unlocked cycle can
+      // double-publish to a public feed, whereas a skipped cycle costs
+      // nothing - the next one picks up the same stories.
+      const originalUrl = process.env.REDIS_URL;
+      const originalPublicUrl = process.env.REDIS_PUBLIC_URL;
+      delete process.env.REDIS_URL;
+      delete process.env.REDIS_PUBLIC_URL;
+
+      try {
+        const result = await runPipelineCycle({ trigger: "cron", now: CYCLE_AT, db });
+
+        expect(result.ran).toBe(false);
+        expect(result.reason).toContain("lock");
+        expect(await postCount()).toBe(0);
+
+        // Nothing was even fetched: the lock is taken before any work.
+        expect(safeFetch).not.toHaveBeenCalled();
+      } finally {
+        if (originalUrl !== undefined) process.env.REDIS_URL = originalUrl;
+        if (originalPublicUrl !== undefined) process.env.REDIS_PUBLIC_URL = originalPublicUrl;
+      }
+    }, 30000);
+
     it("normalizes differently-worded headlines onto one story identity", async () => {
       await runPipelineCycle({ trigger: "manual", now: CYCLE_AT, db });
 
