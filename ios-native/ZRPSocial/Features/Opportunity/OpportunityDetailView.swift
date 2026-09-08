@@ -16,11 +16,15 @@ final class OpportunityDetailViewModel: ObservableObject {
 
     /// Whether this listing is saved - or `nil` for "not known".
     ///
-    /// No route reports it. `POST`/`DELETE .../save` answer with the state
-    /// they just set, so the only thing this app can honestly know is what
-    /// it did itself this session. The control shows an indeterminate
-    /// state rather than guessing "not saved", which would be a claim
-    /// about the server that might be false.
+    /// Seeded from the detail route's own `alreadySaved`, which it began
+    /// reporting in PR #150. Before that no route reported saved state
+    /// at all, and this app deliberately showed an indeterminate control
+    /// rather than claiming "not saved" - a claim about the server it
+    /// had no way to make.
+    ///
+    /// It stays optional because the answer can still be genuinely
+    /// unknown: the route omits the field for a signed-out viewer, who
+    /// has nothing saved and no way to save it.
     @Published private(set) var isSaved: Bool?
 
     private let listingId: String
@@ -35,6 +39,7 @@ final class OpportunityDetailViewModel: ObservableObject {
         do {
             let listing = try await repository.listing(id: listingId)
             hasApplied = listing.alreadyApplied ?? false
+            isSaved = listing.alreadySaved
             phase = .loaded(listing)
         } catch {
             if case .loaded = phase { return }
