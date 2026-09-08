@@ -95,7 +95,16 @@ data class Post(
     // PostCard.tsx's own `post.linkUrl || extractFirstUrl(post.content)`
     // exactly, so this stays wired even though it's dead in practice.
     val linkUrl: String? = null,
+    // Simple incrementing Int on Post itself (prisma/schema.prisma) -
+    // no per-user PostView table, no server-side dedup. Present on
+    // every post-returning endpoint (either explicitly selected, or
+    // implicitly via Prisma `include` pulling all scalar fields), so
+    // this is never actually absent the way `reposted`/`bookmarked`
+    // above are - defaulted only as a Gson-deserialization safeguard.
+    val views: Int = 0,
 )
+
+data class PostViewResponse(val views: Int?)
 
 // GET /api/link-preview's real response shape (src/lib/link-preview-
 // parse.ts's own LinkPreview interface) - title/description/image/
@@ -352,4 +361,15 @@ interface PostsApi {
     // per screen composition, same as web's per-render fetch.
     @GET("link-preview")
     suspend fun getLinkPreview(@Query("url") url: String): LinkPreview
+
+    // Fire-and-forget, no request body, no auth required by the real
+    // route (src/app/api/posts/[id]/view/route.ts just increments and
+    // returns the new count, swallowing a missing/deleted post into a
+    // 200 with views: null rather than an error - "views aren't
+    // critical"). No rate limit and no server-side dedup either; the
+    // one-count-per-session guard is entirely client-side, matching the
+    // real website's own sessionStorage-based approach exactly (see
+    // ViewedPostsTracker's own KDoc).
+    @POST("posts/{id}/view")
+    suspend fun recordView(@Path("id") postId: String): PostViewResponse
 }

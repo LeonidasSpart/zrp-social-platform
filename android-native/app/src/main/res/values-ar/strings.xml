@@ -213,6 +213,10 @@
         <item quantity="one">%1$d صوت</item>
         <item quantity="other">%1$d صوت</item>
     </plurals>
+    <plurals name="post_views_count">
+        <item quantity="one">%1$d مشاهدة</item>
+        <item quantity="other">%1$d مشاهدة</item>
+    </plurals>
     <string name="nav_bookmarks">المحفوظات</string>
     <string name="nav_sign_out">تسجيل الخروج</string>
     <string name="notifications_empty">لا إشعارات بعد</string>

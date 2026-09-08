@@ -213,6 +213,10 @@
         <item quantity="one">%1$d votë</item>
         <item quantity="other">%1$d vota</item>
     </plurals>
+    <plurals name="post_views_count">
+        <item quantity="one">%1$d shikim</item>
+        <item quantity="other">%1$d shikime</item>
+    </plurals>
     <string name="nav_bookmarks">Ruajtur</string>
     <string name="nav_sign_out">Dil</string>
     <string name="notifications_empty">Nuk ka njoftime ende</string>
