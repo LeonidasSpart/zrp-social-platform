@@ -133,6 +133,9 @@ private val videoExtensions = setOf(
 private val FIRST_URL_REGEX = Regex("""(https?://\S+)|(www\.\S+)""")
 private val FIRST_URL_TRAILING_PUNCTUATION = Regex("""[.,!?;:'"\]}]+$""")
 
+// Matches PostCard.tsx's own CONTENT_TRUNCATE_LENGTH exactly.
+private const val POST_CONTENT_TRUNCATE_LENGTH = 280
+
 private fun extractFirstUrl(content: String): String? {
     val match = FIRST_URL_REGEX.find(content) ?: return null
     var raw = match.value.replace(FIRST_URL_TRAILING_PUNCTUATION, "")
@@ -261,6 +264,7 @@ fun PostCard(
     var showTranslation by remember(post.id) { mutableStateOf(false) }
     var translating by remember(post.id) { mutableStateOf(false) }
     var translateError by remember(post.id) { mutableStateOf(false) }
+    var contentExpanded by remember(post.id) { mutableStateOf(false) }
 
     fun handleTranslate() {
         if (translatedText != null) {
@@ -464,8 +468,21 @@ fun PostCard(
                 }
 
                 if (post.content.isNotBlank()) {
+                    // Matches PostCard.tsx's own CONTENT_TRUNCATE_LENGTH
+                    // (280) exactly - the full post.content is always
+                    // kept in memory and passed to every action below
+                    // (edit, translate, share); only the rendered text
+                    // is ever shortened, and only until Show more is
+                    // tapped. Previously this rendered the entire
+                    // content unclamped, unlike every other ZRP surface.
+                    val isLongContent = post.content.length > POST_CONTENT_TRUNCATE_LENGTH
+                    val displayedContent = if (isLongContent && !contentExpanded) {
+                        post.content.take(POST_CONTENT_TRUNCATE_LENGTH) + "..."
+                    } else {
+                        post.content
+                    }
                     LinkifiedText(
-                        text = post.content,
+                        text = displayedContent,
                         style = MaterialTheme.typography.bodyMedium,
                         onMentionClick = onAuthorClick,
                         onHashtagClick = onHashtagClick,
@@ -473,6 +490,19 @@ fun PostCard(
                         suppressUrl = if (linkPreviewFound) previewUrl else null,
                         modifier = Modifier.padding(top = 4.dp),
                     )
+                    if (isLongContent) {
+                        // Byte-for-byte match of web's own hardcoded,
+                        // untranslated "Show more"/"Show less" copy -
+                        // see this file's own localization note above.
+                        Text(
+                            text = if (contentExpanded) "Show less" else "Show more",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = ZrpRed,
+                            modifier = Modifier
+                                .padding(top = 1.dp)
+                                .clickable { contentExpanded = !contentExpanded },
+                        )
+                    }
                 }
 
                 if (isVideo && post.imageUrl != null) {
