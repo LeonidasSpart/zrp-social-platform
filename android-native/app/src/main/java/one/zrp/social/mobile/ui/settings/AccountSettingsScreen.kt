@@ -47,12 +47,12 @@ import one.zrp.social.mobile.util.formatRelativeTime
 
 /**
  * The Account category screen - account info, username change, email
- * change, data export, and a link out to account deletion. Custom
- * profile URL (plan-gated) is the one genuinely backend-supported field
- * not yet native - see SettingsRepository's KDoc.
+ * change, data export, moderation appeals, and a link out to account
+ * deletion. Custom profile URL (plan-gated) is the one genuinely
+ * backend-supported field not yet native - see SettingsRepository's KDoc.
  */
 @Composable
-fun AccountSettingsScreen(onBack: () -> Unit, onOpenDeleteAccount: () -> Unit) {
+fun AccountSettingsScreen(onBack: () -> Unit, onOpenDeleteAccount: () -> Unit, onOpenAppeals: () -> Unit) {
     val viewModel: AccountSettingsViewModel = viewModel(
         factory = remember { AccountSettingsViewModelFactory(SettingsRepository()) },
     )
@@ -267,6 +267,26 @@ fun AccountSettingsScreen(onBack: () -> Unit, onOpenDeleteAccount: () -> Unit) {
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(top = Spacing.xs),
                     )
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.lg))
+
+                // Matches the real Account category's own placement -
+                // right between data export and the danger zone (see
+                // src/app/settings/page.tsx).
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onOpenAppeals)
+                        .padding(vertical = Spacing.md),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = stringResource(R.string.appeals_title),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.lg))

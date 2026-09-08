@@ -109,6 +109,7 @@ import one.zrp.social.mobile.ui.support.SupportTicketsScreen
 import one.zrp.social.mobile.ui.support.TicketDetailScreen
 import one.zrp.social.mobile.ui.trust.TrustPassportScreen
 import one.zrp.social.mobile.ui.settings.AccountSettingsScreen
+import one.zrp.social.mobile.ui.settings.AppealsScreen
 import one.zrp.social.mobile.ui.settings.DeleteAccountScreen
 import one.zrp.social.mobile.ui.settings.LanguageSettingsScreen
 import one.zrp.social.mobile.ui.settings.NotificationSettingsScreen
@@ -207,6 +208,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
     val goToSettingsPrivacy: () -> Unit = { navController.navigate("settings/privacy") }
     val goToSettingsLanguage: () -> Unit = { navController.navigate("settings/language") }
     val goToSettingsNotifications: () -> Unit = { navController.navigate("settings/notifications") }
+    val goToAppeals: () -> Unit = { navController.navigate("settings/appeals") }
     val goToDeleteAccount: () -> Unit = { navController.navigate("settings/delete-account") }
     val goToCreator: () -> Unit = { navController.navigate("creator") }
     val goToJournalist: () -> Unit = { navController.navigate("journalist") }
@@ -356,6 +358,8 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onAuthorClick = goToProfile,
                     onOpenComments = goToComments,
                     onOpenMessage = goToConversation,
+                    onOpenAppeals = goToAppeals,
+                    onOpenMyListings = goToMyListings,
                 )
             }
             composable(
@@ -1027,7 +1031,11 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                 AccountSettingsScreen(
                     onBack = { navController.popBackStack() },
                     onOpenDeleteAccount = goToDeleteAccount,
+                    onOpenAppeals = goToAppeals,
                 )
+            }
+            composable("settings/appeals") {
+                AppealsScreen(onBack = { navController.popBackStack() })
             }
             composable("settings/profile") {
                 ProfileEditScreen(onBack = { navController.popBackStack() })

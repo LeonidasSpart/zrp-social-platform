@@ -26,7 +26,9 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Balance
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.Store
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -75,6 +77,8 @@ fun NotificationsScreen(
     onAuthorClick: (String) -> Unit,
     onOpenComments: (String) -> Unit = {},
     onOpenMessage: (partnerId: String, partnerUsername: String) -> Unit = { _, _ -> },
+    onOpenAppeals: () -> Unit = {},
+    onOpenMyListings: () -> Unit = {},
 ) {
     val viewModel: NotificationsViewModel = viewModel(
         factory = remember { NotificationsViewModelFactory(NotificationsRepository()) },
@@ -91,6 +95,15 @@ fun NotificationsScreen(
         when {
             g.type == "message" -> onOpenMessage(primary.id, primary.username)
             g.type == "follow" || g.type == "follow_request" -> onAuthorClick(primary.username)
+            // Matches web's own notification-click routing
+            // (src/app/notifications/page.tsx): an appeal's resolution
+            // goes to the Appeals screen, a listing review's outcome
+            // goes to the seller's own listings - not the staff member
+            // who happened to trigger the notification, which this
+            // fell through to before AppealsScreen/MyListingsScreen
+            // existed natively.
+            g.type == "appeal_resolved" -> onOpenAppeals()
+            g.type == "listing_approved" || g.type == "listing_rejected" || g.type == "listing_removed" -> onOpenMyListings()
             g.postId != null -> onOpenComments(g.postId)
             else -> onAuthorClick(primary.username)
         }
@@ -224,6 +237,8 @@ private fun badgeFor(type: String): NotificationBadge = when (type) {
     "follow", "follow_request" -> NotificationBadge(Icons.Filled.PersonAdd, ZrpRed)
     "mention" -> NotificationBadge(Icons.Filled.AlternateEmail, ZrpBlue)
     "message" -> NotificationBadge(Icons.Filled.MailOutline, ZrpBlue)
+    "appeal_resolved" -> NotificationBadge(Icons.Filled.Balance, ZrpRed)
+    "listing_approved", "listing_rejected", "listing_removed" -> NotificationBadge(Icons.Filled.Store, ZrpRed)
     else -> NotificationBadge(Icons.Filled.Notifications, ZrpBlue)
 }
 
@@ -402,11 +417,15 @@ private fun describeNotificationSuffix(type: String, others: Int): String {
         "mention" -> "mentioned you"
         "message" -> "sent you a message"
         "follow_request" -> "requested to follow you"
+        "appeal_resolved" -> stringResource(R.string.notifications_appeal_resolved_suffix)
+        "listing_approved" -> stringResource(R.string.notifications_listing_approved_suffix)
+        "listing_rejected" -> stringResource(R.string.notifications_listing_rejected_suffix)
+        "listing_removed" -> stringResource(R.string.notifications_listing_removed_suffix)
         // Other real notification types exist server-side (support
-        // tickets, ZRP PLAY duels, Marketplace/Opportunity/Help listing
-        // reviews) for features this native app hasn't built screens
-        // for yet - a humanized fallback keeps them visible and honest
-        // rather than hidden or misrepresented as one of the types above.
+        // tickets, ZRP PLAY duels) for features this native app hasn't
+        // built screens for yet - a humanized fallback keeps them
+        // visible and honest rather than hidden or misrepresented as
+        // one of the types above.
         else -> "· ${type.replace('_', ' ').replaceFirstChar { it.uppercase() }}"
     }
     return "$prefix$suffix"
