@@ -61,23 +61,29 @@ class AuthViewModel(
                 } catch (_: Exception) {
                 }
             }
-            checkOnboardingStatus()
+            hydrateSessionUser()
         }
     }
 
-    // Cold start's own LoggedIn(user = null) doesn't know onboarding
-    // status without a real request - rather than delay the first
-    // paint on that (see AuthRepository.getOnboardingStatus()'s own
-    // comment), this resolves it just after and flips needsOnboarding
-    // if it turns out false. The rare case this trades away is a user
-    // who quit mid-onboarding briefly seeing the main app again before
-    // being routed back into it on the same cold start.
-    private fun checkOnboardingStatus() {
+    // Cold start's own LoggedIn(user = null) doesn't know the signed-in
+    // user's role/plan/badge (or onboarding status) without a real
+    // request - rather than delay the first paint on that, this
+    // resolves it just after and fills the real MobileUser in, the same
+    // one login()/loginWithGoogle() already populate on a fresh sign-in.
+    // Without this, every role-gated screen (Settings' own Admin row,
+    // most visibly) stayed permanently blind to who was actually signed
+    // in on every cold start that wasn't a fresh login - i.e. almost
+    // every real app open. A network failure here leaves user as null
+    // rather than forcing a logout, the same soft-fail this replaced.
+    // The rare case this trades away is a user who quit mid-onboarding
+    // briefly seeing the main app again before being routed back into
+    // it on the same cold start.
+    private fun hydrateSessionUser() {
         viewModelScope.launch {
-            val completed = authRepository.getOnboardingStatus()
+            val user = authRepository.getSessionUser() ?: return@launch
             val current = _authState.value
-            if (current is AuthUiState.LoggedIn && !completed) {
-                _authState.value = current.copy(needsOnboarding = true)
+            if (current is AuthUiState.LoggedIn) {
+                _authState.value = AuthUiState.LoggedIn(user, needsOnboarding = !user.onboardingCompleted)
             }
         }
     }
@@ -176,7 +182,7 @@ class AuthViewModel(
                 } catch (_: Exception) {
                 }
             }
-            checkOnboardingStatus()
+            hydrateSessionUser()
         }
     }
 
