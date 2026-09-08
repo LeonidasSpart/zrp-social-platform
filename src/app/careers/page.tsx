@@ -21,7 +21,7 @@ export default function CareersPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter">
-      <main>
+      <div>
         {/* Hero: dark red to black gradient, matching Charity page */}
         <section className="relative bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack py-20 px-4">
           <div className="max-w-4xl mx-auto text-center">
@@ -134,7 +134,7 @@ export default function CareersPage() {
             </a>
           </div>
         </section>
-      </main>
+      </div>
     </div>
   );
 }

@@ -104,7 +104,7 @@ function MusicDiscoverPageInner() {
         </div>
       </header>
 
-      <main className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
         {genres.length > 0 && (
           <section>
             <div className="text-xs uppercase tracking-[0.2em] text-zrp-red font-bold mb-3">{t("music.discover.browseByGenre")}</div>
@@ -176,7 +176,7 @@ function MusicDiscoverPageInner() {
             />
           )}
         </section>
-      </main>
+      </div>
     </div>
   );
 }

@@ -74,6 +74,11 @@ export default function SearchPage() {
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
+      {/* Search led with its input and no heading at all, so the page
+          had no name in the document outline. The field itself stays
+          the visible entry point. */}
+      <h1 className="sr-only">{t("nav.search")}</h1>
+
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
         <input
