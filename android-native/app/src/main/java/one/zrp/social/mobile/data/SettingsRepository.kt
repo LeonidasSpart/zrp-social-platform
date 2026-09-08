@@ -1,5 +1,8 @@
 package one.zrp.social.mobile.data
 
+import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.DeletionStatusResponse
 import one.zrp.social.mobile.network.DeletionToggleResponse
@@ -34,13 +37,14 @@ import retrofit2.HttpException
  *   updateWallet's own KDoc for why this is fine to edit natively
  *   despite the standing payment-restriction policy), privacy toggles
  *   (public likes/following, private account), account deletion
- *   (30-day schedule/cancel + confirm), email notification preferences.
+ *   (30-day schedule/cancel + confirm), email notification preferences,
+ *   data export (via a FileProvider + share-sheet path - see
+ *   exportData's own KDoc).
  * - NOT yet native (genuinely backend-supported, left for a follow-up
  *   slice rather than faked): avatar upload and the professional-
  *   profile category picker (both need the same native UploadThing/
  *   media-upload path already deferred for posts, DMs and story
  *   creation), custom profile URL (plan-gated, its own small slice),
- *   data export (needs a FileProvider + share-sheet path of its own),
  *   support tickets, and appeals.
  */
 class SettingsRepository {
@@ -149,6 +153,34 @@ class SettingsRepository {
         safeCall("Couldn't save this preference. Please try again.") {
             ApiClient.settingsApi.updateEmailPreferences(mapOf(key to value))
         }
+
+    /**
+     * Downloads the same JSON blob the website's own plain <a href=
+     * "/api/settings/export-data"> link triggers, and writes it into
+     * this app's cache dir - a real file the caller (AccountSettings-
+     * ViewModel) hands off to a FileProvider content:// Uri for a share/
+     * view Intent, since there's no browser-style "Downloads" folder
+     * flow to lean on here. Filename is built client-side from the
+     * already-known session username rather than parsed off the
+     * response's Content-Disposition header, matching the real route's
+     * own "zrp-data-export-<username>.json" pattern exactly.
+     */
+    suspend fun exportData(cacheDir: File, username: String): Result<File> {
+        return try {
+            val body = ApiClient.settingsApi.exportData()
+            val file = withContext(Dispatchers.IO) {
+                val exportsDir = File(cacheDir, "exports").apply { mkdirs() }
+                val target = File(exportsDir, "zrp-data-export-$username.json")
+                body.byteStream().use { input -> target.outputStream().use { output -> input.copyTo(output) } }
+                target
+            }
+            Result.success(file)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't export your data. Please try again."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
 
     private suspend fun <T> safeCall(genericError: String, block: suspend () -> T): Result<T> {
         return try {

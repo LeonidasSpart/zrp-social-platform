@@ -2,6 +2,7 @@ package one.zrp.social.mobile.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,13 +25,21 @@ data class AccountSettingsUiState(
     val isUpdatingEmail: Boolean = false,
     val emailError: String? = null,
     val emailSuccess: String? = null,
+    val isExporting: Boolean = false,
+    val exportError: String? = null,
+    // A freshly-downloaded export file the Screen hasn't yet turned into
+    // a share Intent - a one-shot event, not steady state, cleared via
+    // onExportedFileConsumed() the moment the Screen acts on it.
+    val exportedFile: File? = null,
 )
 
 /**
  * The Account category screen - account info, username change (PUT
- * /api/user/username), and email change (PUT /api/user/email, which
- * only ever sends a verification link rather than switching the email
- * immediately, exactly like the website's own flow).
+ * /api/user/username), email change (PUT /api/user/email, which only
+ * ever sends a verification link rather than switching the email
+ * immediately, exactly like the website's own flow), and data export
+ * (GET /api/settings/export-data, the same download the website's own
+ * plain <a> link triggers - see SettingsRepository.exportData's KDoc).
  */
 class AccountSettingsViewModel(private val repository: SettingsRepository) : ViewModel() {
     private val _state = MutableStateFlow(AccountSettingsUiState())
@@ -131,4 +140,17 @@ class AccountSettingsViewModel(private val repository: SettingsRepository) : Vie
                 }
         }
     }
+
+    fun exportData(cacheDir: File) {
+        if (_state.value.isExporting) return
+        val username = _state.value.currentUsername
+        _state.update { it.copy(isExporting = true, exportError = null) }
+        viewModelScope.launch {
+            repository.exportData(cacheDir, username)
+                .onSuccess { file -> _state.update { it.copy(isExporting = false, exportedFile = file) } }
+                .onFailure { error -> _state.update { it.copy(isExporting = false, exportError = error.message) } }
+        }
+    }
+
+    fun onExportedFileConsumed() = _state.update { it.copy(exportedFile = null) }
 }

@@ -89,6 +89,23 @@
                 android:value="true" />
         </service>
 
+        <!-- Hands a content:// Uri to the share/view Intent Data Export
+             (AccountSettingsScreen) launches after downloading the
+             exported JSON into cacheDir/exports - the exported file
+             itself is written by SettingsRepository.exportData(). Not
+             exported: only this app can ever address these Uris, and
+             grantUriPermissions scopes read access per-Intent to
+             whichever app the user picks from the share sheet. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
     </application>
 
 </manifest>

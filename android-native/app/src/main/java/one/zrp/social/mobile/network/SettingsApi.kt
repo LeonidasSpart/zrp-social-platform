@@ -1,12 +1,14 @@
 package one.zrp.social.mobile.network
 
 import okhttp3.MultipartBody
+import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
+import retrofit2.http.Streaming
 
 // ─── Profile edit (PUT /user) ───────────────────────────────────────
 // The real route (src/app/api/user/route.ts) only touches fields that
@@ -114,9 +116,9 @@ data class EmailPreferencesUpdateResponse(val success: Boolean, val preferences:
  * call, none of them reinvented. Deliberately scoped to the fields this
  * slice's native screens actually edit (profile text fields, Solana
  * receiving wallet, username, password, email, privacy toggles, account
- * deletion, avatar/banner, email notification preferences) - the
- * custom-URL/professional-category pickers and data export are real
- * backend features this slice does not yet cover natively (see
+ * deletion, avatar/banner, email notification preferences, data export)
+ * - the custom-URL/professional-category pickers are the one real
+ * backend feature this slice does not yet cover natively (see
  * SettingsRepository's KDoc).
  */
 interface SettingsApi {
@@ -163,4 +165,16 @@ interface SettingsApi {
 
     @PUT("user/email-preferences")
     suspend fun updateEmailPreferences(@Body request: Map<String, Boolean>): EmailPreferencesUpdateResponse
+
+    // Raw ResponseBody, not a Gson data class: the real route
+    // (src/app/api/settings/export-data/route.ts) returns a big,
+    // hand-shaped JSON blob (account/posts/comments/likes/reposts/
+    // bookmarks/stories/following/followers) meant to be saved as a
+    // file, not parsed and rendered in-app - same contract as the
+    // website's own plain <a href="/api/settings/export-data"> download
+    // link. @Streaming avoids buffering the whole body into memory
+    // before SettingsRepository.exportData() copies it straight to disk.
+    @Streaming
+    @GET("settings/export-data")
+    suspend fun exportData(): ResponseBody
 }

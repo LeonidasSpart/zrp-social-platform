@@ -22,6 +22,10 @@
     <string name="settings_username_cooldown_banner">⏳ Anda dapat mengubah nama pengguna lagi dalam %1$d hari</string>
     <string name="settings_err_username_min_length">Nama pengguna harus terdiri dari minimal 3 karakter</string>
     <string name="settings_err_username_same">Nama pengguna baru sama dengan yang saat ini</string>
+    <string name="settings_export_data_heading">Data Anda</string>
+    <string name="settings_export_data">Ekspor data saya</string>
+    <string name="settings_export_data_desc">Unduh salinan profil, postingan, komentar, suka, repost, markah, story, dan daftar mengikuti Anda sebagai file JSON.</string>
+    <string name="settings_export_data_error">Gagal mengekspor data Anda. Silakan coba lagi.</string>
     <string name="settings_delete_account">Hapus Akun</string>
     <string name="settings_joined">Bergabung %1$s</string>
     <string name="settings_display_name">Nama Tampilan</string>

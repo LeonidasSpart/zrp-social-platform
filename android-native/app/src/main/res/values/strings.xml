@@ -34,6 +34,10 @@
     <string name="settings_username_cooldown_banner">⏳ You can change your username again in %1$d days</string>
     <string name="settings_err_username_min_length">Username must be at least 3 characters</string>
     <string name="settings_err_username_same">New username is the same as current</string>
+    <string name="settings_export_data_heading">Your Data</string>
+    <string name="settings_export_data">Export my data</string>
+    <string name="settings_export_data_desc">Download a copy of your profile, posts, comments, likes, reposts, bookmarks, stories, and follow lists as a JSON file.</string>
+    <string name="settings_export_data_error">Couldn\'t export your data. Please try again.</string>
     <string name="settings_delete_account">Delete Account</string>
     <string name="settings_joined">Joined %1$s</string>
     <string name="settings_display_name">Display Name</string>

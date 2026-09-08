@@ -22,6 +22,10 @@
     <string name="settings_username_cooldown_banner">⏳ Mund ta ndryshoni përsëri emrin e përdoruesit pas %1$d ditësh</string>
     <string name="settings_err_username_min_length">Emri i përdoruesit duhet të jetë së paku 3 karaktere</string>
     <string name="settings_err_username_same">Emri i ri i përdoruesit është i njëjtë me atë aktual</string>
+    <string name="settings_export_data_heading">Të Dhënat Tuaja</string>
+    <string name="settings_export_data">Eksporto të dhënat e mia</string>
+    <string name="settings_export_data_desc">Shkarkoni një kopje të profilit, postimeve, komenteve, pëlqimeve, ripostimeve, faqerojtësve, historive dhe listave të ndjekjes si skedar JSON.</string>
+    <string name="settings_export_data_error">Nuk mund t\'i eksportojmë të dhënat tuaja. Ju lutemi provoni përsëri.</string>
     <string name="settings_delete_account">Fshi llogarinë</string>
     <string name="settings_joined">Anëtarësuar më %1$s</string>
     <string name="settings_display_name">Emri i shfaqur</string>
