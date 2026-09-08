@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.network.Post
+import one.zrp.social.mobile.network.PollVoteUser
 import one.zrp.social.mobile.network.PostsPage
 
 enum class FeedTab { FOR_YOU, FOLLOWING }
@@ -165,6 +166,29 @@ class HomeViewModel(private val repository: PostsRepository) : ViewModel() {
         }
     }
 
+    // Single-select, one vote per user - blocked client-side the same
+    // way Poll.tsx's own `if (selected !== null) return` guards it,
+    // matching the server's permanent PollVote unique constraint.
+    // Updates both tabs' cached state, same reasoning as editPost below
+    // (the same poll-post can legitimately appear in both).
+    fun votePoll(postId: String, pollId: String, optionIndex: Int) {
+        val alreadyVoted = (_forYou.value.posts + _following.value.posts)
+            .firstOrNull { it.id == postId }?.poll?.userVoteIndex != null
+        if (alreadyVoted) return
+
+        val previousForYou = _forYou.value.posts
+        val previousFollowing = _following.value.posts
+        _forYou.update { it.copy(posts = it.posts.map { post -> if (post.id == postId) applyOptimisticVote(post, optionIndex) else post }) }
+        _following.update { it.copy(posts = it.posts.map { post -> if (post.id == postId) applyOptimisticVote(post, optionIndex) else post }) }
+
+        viewModelScope.launch {
+            repository.votePoll(pollId, optionIndex).onFailure {
+                _forYou.update { it.copy(posts = previousForYou) }
+                _following.update { it.copy(posts = previousFollowing) }
+            }
+        }
+    }
+
     // Updates the edited post's content in both tabs' cached state, not
     // just the active one - the same post can legitimately appear in
     // both For You and Following. Applies the submitted content
@@ -225,6 +249,17 @@ class HomeViewModel(private val repository: PostsRepository) : ViewModel() {
             reposted = !wasReposted,
             _count = post._count.copy(reposts = post._count.reposts + if (wasReposted) -1 else 1),
         )
+    }
+
+    // The vote endpoint returns only {success: true} - no updated
+    // counts (see Poll's own KDoc) - so the +1 is applied locally the
+    // same way applyOptimisticLike bumps a like count, rather than
+    // refetching.
+    private fun applyOptimisticVote(post: Post, optionIndex: Int): Post {
+        val poll = post.poll ?: return post
+        val key = optionIndex.toString()
+        val newVotes = (poll.votes ?: emptyMap()) + (key to ((poll.votes?.get(key) ?: 0) + 1))
+        return post.copy(poll = poll.copy(votes = newVotes, votes_user = listOf(PollVoteUser(optionIndex))))
     }
 
     private suspend fun fetch(tab: FeedTab, cursor: String?) = when (tab) {

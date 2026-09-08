@@ -30,6 +30,37 @@ data class PostCounts(
     val quotedBy: Int? = null,
 )
 
+// The viewer's own vote on this poll, if any - GET /posts and GET
+// /posts/{id} both scope Poll.votes_user to `where: { userId }`
+// server-side, so this is always empty (not merely absent) for an
+// unauthenticated request or a poll the signed-in viewer hasn't voted
+// on, and holds exactly one entry once they have (single-select only -
+// see PollVote's own [pollId, userId] unique constraint).
+data class PollVoteUser(val optionIndex: Int)
+
+// options[i] is the label for option index i - votes/votes_user both
+// key off that same index, not a separate PollOption id, matching the
+// real schema (Poll.options: String[], no PollOption model exists).
+// `votes` is a denormalized {"index": count} map (JSON object keys
+// are always strings, even for numeric indices) kept in sync by the
+// vote endpoint - always present with real counts in list/detail
+// responses, visible to everyone regardless of whether they've voted
+// (results are never gated behind "vote to see results").
+data class Poll(
+    val id: String,
+    val question: String,
+    val options: List<String>,
+    val votes: Map<String, Int>? = null,
+    val expiresAt: String? = null,
+    val createdAt: String,
+    val updatedAt: String,
+    val votes_user: List<PollVoteUser>? = null,
+) {
+    fun voteCount(optionIndex: Int): Int = votes?.get(optionIndex.toString()) ?: 0
+    fun totalVotes(): Int = votes?.values?.sum() ?: 0
+    val userVoteIndex: Int? get() = votes_user?.firstOrNull()?.optionIndex
+}
+
 data class Post(
     val id: String,
     val content: String,
@@ -41,6 +72,7 @@ data class Post(
     val quotePost: Post?,
     val _count: PostCounts,
     val liked: Boolean?,
+    val poll: Poll? = null,
     // Unlike `liked`, none of the feed/profile list endpoints attach a
     // per-viewer repost flag to each post (checked against explore,
     // following, and profile posts routes) - only GET
@@ -109,13 +141,37 @@ data class ReactionToggleResponse(val reaction: Reaction?)
 // sending anything else (e.g. a real UTC ISO string) would schedule at
 // a different real-world moment than the same picked date/time does on
 // web.
+// Matches PostComposer.tsx's own pollData shape exactly (question/
+// options/expiresAt) - src/app/api/posts/route.ts only rejects a poll
+// with fewer than 2 options server-side; the composer's own 6-option/
+// 200-char-question/60-char-option caps are a client-side-only limit
+// on both platforms (no server enforcement), so native self-limits the
+// same way rather than relying on a backend check that doesn't exist.
+data class PollCreateRequest(
+    val question: String,
+    val options: List<String>,
+    val expiresAt: String? = null,
+)
+
 data class CreatePostRequest(
     val content: String,
     val quotePostId: String? = null,
     val imageUrls: List<String>? = null,
     val mediaType: String? = null,
     val scheduledAt: String? = null,
+    val poll: PollCreateRequest? = null,
 )
+
+data class PollVoteRequest(val optionIndex: Int)
+
+// POST /api/polls/{id}/vote returns only {success: true} - no updated
+// vote counts or poll object - matching Poll.tsx's own onVote()
+// callback pattern (it never trusts the vote response for fresh
+// numbers, only for confirmation the vote landed). Native applies the
+// same +1 optimistic local update every ViewModel already uses for
+// like/repost/bookmark counts rather than plumbing a refetch through
+// every screen that can render a poll.
+data class PollVoteResponse(val success: Boolean)
 
 data class UpdatePostRequest(val content: String)
 
@@ -171,6 +227,14 @@ interface PostsApi {
     // enforcement as delete/edit, server-side.
     @POST("posts/{id}/pin")
     suspend fun togglePin(@Path("id") postId: String): PinToggleResponse
+
+    // Single-select, one vote per user per poll (PollVote's own
+    // [pollId, userId] unique constraint) - voting again on an
+    // already-voted poll 400s with "Already voted", and the vote is
+    // permanent (no route exists to change or retract it), matching
+    // Poll.tsx's own `if (selected !== null) return` guard exactly.
+    @POST("polls/{id}/vote")
+    suspend fun votePoll(@Path("id") pollId: String, @Body request: PollVoteRequest): PollVoteResponse
 
     // Bare JSON array, not {items: ...} - see src/app/api/posts/[id]/
     // reaction/route.ts's GET handler, which returns prisma.reaction.

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.BookmarksRepository
 import one.zrp.social.mobile.network.Post
+import one.zrp.social.mobile.network.PollVoteUser
 
 data class BookmarksUiState(
     val posts: List<Post> = emptyList(),
@@ -119,6 +120,23 @@ class BookmarksViewModel(private val repository: BookmarksRepository) : ViewMode
         }
     }
 
+    // Single-select, one vote per user - blocked client-side the same
+    // way Poll.tsx's own `if (selected !== null) return` guards it.
+    fun votePoll(postId: String, pollId: String, optionIndex: Int) {
+        val alreadyVoted = _state.value.posts.firstOrNull { it.id == postId }?.poll?.userVoteIndex != null
+        if (alreadyVoted) return
+
+        val previousPosts = _state.value.posts
+        _state.update { state ->
+            state.copy(posts = state.posts.map { post -> if (post.id == postId) applyOptimisticVote(post, optionIndex) else post })
+        }
+        viewModelScope.launch {
+            repository.votePoll(pollId, optionIndex).onFailure {
+                _state.update { it.copy(posts = previousPosts) }
+            }
+        }
+    }
+
     // A deleted post disappears from the list the moment the server
     // confirms it, matching HomeViewModel/SearchViewModel/
     // ProfileViewModel's own deletePost - no optimistic removal, since
@@ -170,5 +188,15 @@ class BookmarksViewModel(private val repository: BookmarksRepository) : ViewMode
             reposted = !wasReposted,
             _count = post._count.copy(reposts = post._count.reposts + if (wasReposted) -1 else 1),
         )
+    }
+
+    // The vote endpoint returns only {success: true} - no updated
+    // counts (see Poll's own KDoc) - so the +1 is applied locally the
+    // same way applyOptimisticLike bumps a like count.
+    private fun applyOptimisticVote(post: Post, optionIndex: Int): Post {
+        val poll = post.poll ?: return post
+        val key = optionIndex.toString()
+        val newVotes = (poll.votes ?: emptyMap()) + (key to ((poll.votes?.get(key) ?: 0) + 1))
+        return post.copy(poll = poll.copy(votes = newVotes, votes_user = listOf(PollVoteUser(optionIndex))))
     }
 }

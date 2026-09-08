@@ -15,6 +15,8 @@ import one.zrp.social.mobile.network.MutedUser
 import one.zrp.social.mobile.network.PostsPage
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.PinToggleResponse
+import one.zrp.social.mobile.network.PollVoteRequest
+import one.zrp.social.mobile.network.PollVoteResponse
 import one.zrp.social.mobile.network.RepliesPage
 import one.zrp.social.mobile.network.RepostResponse
 import one.zrp.social.mobile.network.UpdatePostRequest
@@ -85,6 +87,10 @@ class ProfileRepository {
 
     suspend fun toggleRepost(postId: String): Result<RepostResponse> = runCatching {
         ApiClient.postsApi.toggleRepost(postId)
+    }
+
+    suspend fun votePoll(pollId: String, optionIndex: Int): Result<PollVoteResponse> = runCatching {
+        ApiClient.postsApi.votePoll(pollId, PollVoteRequest(optionIndex))
     }
 
     suspend fun toggleBookmark(postId: String): Result<BookmarkResponse> = runCatching {

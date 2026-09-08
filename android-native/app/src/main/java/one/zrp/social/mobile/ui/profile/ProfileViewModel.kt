@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.network.Post
+import one.zrp.social.mobile.network.PollVoteUser
 import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.network.UserReply
 
@@ -387,6 +388,30 @@ class ProfileViewModel(
         }
     }
 
+    // Single-select, one vote per user - blocked client-side the same
+    // way Poll.tsx's own `if (selected !== null) return` guards it.
+    fun votePoll(postId: String, pollId: String, optionIndex: Int) {
+        val current = _state.value
+        val alreadyVoted = (current.posts + current.mediaTab.posts + current.likesTab.posts + current.repostsTab.posts + listOfNotNull(current.pinnedPost))
+            .firstOrNull { it.id == postId }?.poll?.userVoteIndex != null
+        if (alreadyVoted) return
+
+        val previous = current
+        _state.update { it.mapPost(postId) { post -> applyOptimisticVote(post, optionIndex) } }
+
+        viewModelScope.launch {
+            repository.votePoll(pollId, optionIndex).onFailure {
+                _state.update { curr -> curr.copy(
+                    posts = previous.posts,
+                    pinnedPost = previous.pinnedPost,
+                    mediaTab = previous.mediaTab,
+                    likesTab = previous.likesTab,
+                    repostsTab = previous.repostsTab,
+                ) }
+            }
+        }
+    }
+
     fun toggleRepost(postId: String) {
         val previous = _state.value
         _state.update { it.mapPost(postId, ::applyOptimisticRepost) }
@@ -593,6 +618,16 @@ class ProfileViewModel(
             reposted = !wasReposted,
             _count = post._count.copy(reposts = post._count.reposts + if (wasReposted) -1 else 1),
         )
+    }
+
+    // The vote endpoint returns only {success: true} - no updated
+    // counts (see Poll's own KDoc) - so the +1 is applied locally the
+    // same way applyOptimisticLike bumps a like count.
+    private fun applyOptimisticVote(post: Post, optionIndex: Int): Post {
+        val poll = post.poll ?: return post
+        val key = optionIndex.toString()
+        val newVotes = (poll.votes ?: emptyMap()) + (key to ((poll.votes?.get(key) ?: 0) + 1))
+        return post.copy(poll = poll.copy(votes = newVotes, votes_user = listOf(PollVoteUser(optionIndex))))
     }
 
     private fun loadPosts(username: String, refresh: Boolean) {

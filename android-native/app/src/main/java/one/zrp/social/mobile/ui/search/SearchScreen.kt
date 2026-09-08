@@ -150,6 +150,7 @@ fun SearchScreen(
                 onViewReposts = onOpenReposts,
                 onViewQuotes = onOpenQuotes,
                 onOpenVideoViewer = onOpenVideoViewer,
+                onVoteClick = { postId, pollId, optionIndex -> viewModel.votePoll(postId, pollId, optionIndex) },
             )
         }
     }
@@ -325,6 +326,7 @@ private fun SearchResultsContent(
     onViewReposts: (String) -> Unit,
     onViewQuotes: (String) -> Unit,
     onOpenVideoViewer: (String) -> Unit,
+    onVoteClick: (postId: String, pollId: String, optionIndex: Int) -> Unit,
 ) {
     if (state.isSearching) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -407,6 +409,7 @@ private fun SearchResultsContent(
                     onAuthorClick = onAuthorClick,
                     onHashtagClick = onOpenHashtag,
                     onOpenVideoViewer = onOpenVideoViewer,
+                    onVoteClick = onVoteClick,
                 )
             }
         }

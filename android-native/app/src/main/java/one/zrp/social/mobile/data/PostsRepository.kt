@@ -7,6 +7,9 @@ import one.zrp.social.mobile.network.CreateReportRequest
 import one.zrp.social.mobile.network.FollowListPage
 import one.zrp.social.mobile.network.LikeResponse
 import one.zrp.social.mobile.network.Post
+import one.zrp.social.mobile.network.PollCreateRequest
+import one.zrp.social.mobile.network.PollVoteRequest
+import one.zrp.social.mobile.network.PollVoteResponse
 import one.zrp.social.mobile.network.PostsPage
 import one.zrp.social.mobile.network.RepostResponse
 import one.zrp.social.mobile.network.UpdatePostRequest
@@ -70,6 +73,7 @@ class PostsRepository {
         mediaUrls: List<String> = emptyList(),
         mediaType: String? = null,
         scheduledAt: String? = null,
+        poll: PollCreateRequest? = null,
     ): Result<Post> {
         return try {
             val request = CreatePostRequest(
@@ -78,6 +82,7 @@ class PostsRepository {
                 imageUrls = mediaUrls.ifEmpty { null },
                 mediaType = mediaType,
                 scheduledAt = scheduledAt,
+                poll = poll,
             )
             Result.success(ApiClient.postsApi.createPost(request).post)
         } catch (e: HttpException) {
@@ -85,6 +90,10 @@ class PostsRepository {
         } catch (e: Exception) {
             Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
         }
+    }
+
+    suspend fun votePoll(pollId: String, optionIndex: Int): Result<PollVoteResponse> = runCatching {
+        ApiClient.postsApi.votePoll(pollId, PollVoteRequest(optionIndex))
     }
 
     suspend fun getPost(postId: String): Result<Post> = runCatching {

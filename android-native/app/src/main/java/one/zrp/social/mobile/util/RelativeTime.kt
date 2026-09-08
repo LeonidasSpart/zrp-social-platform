@@ -19,11 +19,7 @@ private val isoFormat = ThreadLocal.withInitial {
 }
 
 fun formatRelativeTime(iso: String): String {
-    val millis = try {
-        isoFormat.get()!!.parse(iso)?.time
-    } catch (_: Exception) {
-        null
-    } ?: return ""
+    val millis = parseIsoMillis(iso) ?: return ""
 
     return DateUtils.getRelativeTimeSpanString(
         millis,
@@ -31,6 +27,15 @@ fun formatRelativeTime(iso: String): String {
         DateUtils.MINUTE_IN_MILLIS,
         DateUtils.FORMAT_ABBREV_RELATIVE,
     ).toString()
+}
+
+// Shared by anything else that needs the raw millis from one of the
+// API's own ISO-8601 timestamps (e.g. checking a poll's expiresAt
+// against "now") rather than a formatted label.
+fun parseIsoMillis(iso: String): Long? = try {
+    isoFormat.get()!!.parse(iso)?.time
+} catch (_: Exception) {
+    null
 }
 
 private val absoluteDateFormat = ThreadLocal.withInitial {

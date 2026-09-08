@@ -5,6 +5,8 @@ import one.zrp.social.mobile.network.BookmarkResponse
 import one.zrp.social.mobile.network.CreateReportRequest
 import one.zrp.social.mobile.network.LikeResponse
 import one.zrp.social.mobile.network.Post
+import one.zrp.social.mobile.network.PollVoteRequest
+import one.zrp.social.mobile.network.PollVoteResponse
 import one.zrp.social.mobile.network.PostsPage
 import one.zrp.social.mobile.network.RepostResponse
 import one.zrp.social.mobile.network.UpdatePostRequest
@@ -39,6 +41,10 @@ class BookmarksRepository {
 
     suspend fun toggleLike(postId: String): Result<LikeResponse> = runCatching {
         ApiClient.postsApi.toggleLike(postId)
+    }
+
+    suspend fun votePoll(pollId: String, optionIndex: Int): Result<PollVoteResponse> = runCatching {
+        ApiClient.postsApi.votePoll(pollId, PollVoteRequest(optionIndex))
     }
 
     suspend fun toggleRepost(postId: String): Result<RepostResponse> = runCatching {

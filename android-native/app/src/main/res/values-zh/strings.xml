@@ -198,6 +198,21 @@
     <string name="profile_share">分享</string>
     <string name="profile_protected_account">此账号为私密账号</string>
     <string name="profile_protected_message">关注此账号后即可查看其帖子和个人资料详情。</string>
+    <string name="poll_ended">已结束</string>
+    <string name="poll_voted">✓ 已投票</string>
+    <string name="poll_option_result">%1$d%% (%2$s 票)</string>
+    <string name="poll_ends_label">结束</string>
+    <string name="createpost_poll_question">投票问题...</string>
+    <string name="createpost_poll_option">选项 %1$d</string>
+    <string name="createpost_poll_add_option">添加选项</string>
+    <string name="createpost_poll_toggle_cd">添加投票</string>
+    <string name="createpost_poll_remove_cd">移除投票</string>
+    <string name="createpost_poll_remove_option_cd">移除选项</string>
+    <string name="poll_ends_clear_cd">清除到期时间</string>
+    <plurals name="poll_vote_count">
+        <item quantity="one">%1$d 票</item>
+        <item quantity="other">%1$d 票</item>
+    </plurals>
     <string name="nav_bookmarks">收藏</string>
     <string name="nav_sign_out">退出登录</string>
     <string name="notifications_empty">无 通知 还</string>

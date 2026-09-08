@@ -198,6 +198,21 @@
     <string name="profile_share">Paylaş</string>
     <string name="profile_protected_account">Bu hesap gizli</string>
     <string name="profile_protected_message">Gönderilerini ve profil bilgilerini görmek için bu hesabı takip edin.</string>
+    <string name="poll_ended">Sona erdi</string>
+    <string name="poll_voted">✓ Oy verildi</string>
+    <string name="poll_option_result">%1$d%% (%2$s oy)</string>
+    <string name="poll_ends_label">Bitiş</string>
+    <string name="createpost_poll_question">Anket sorusu...</string>
+    <string name="createpost_poll_option">Seçenek %1$d</string>
+    <string name="createpost_poll_add_option">Seçenek ekle</string>
+    <string name="createpost_poll_toggle_cd">Anket ekle</string>
+    <string name="createpost_poll_remove_cd">Anketi kaldır</string>
+    <string name="createpost_poll_remove_option_cd">Seçeneği kaldır</string>
+    <string name="poll_ends_clear_cd">Bitiş tarihini kaldır</string>
+    <plurals name="poll_vote_count">
+        <item quantity="one">%1$d oy</item>
+        <item quantity="other">%1$d oy</item>
+    </plurals>
     <string name="nav_bookmarks">Yer İmleri</string>
     <string name="nav_sign_out">Çıkış Yap</string>
     <string name="notifications_empty">Henüz bildirim yok</string>
