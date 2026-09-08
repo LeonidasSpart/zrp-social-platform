@@ -355,12 +355,12 @@ private fun NotificationRow(
                     enabled = followBackState == null,
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = Spacing.md, vertical = 4.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (followBackState == FollowBackState.DONE) {
+                        containerColor = if (followBackState == FollowBackState.DONE || followBackState == FollowBackState.REQUESTED) {
                             MaterialTheme.colorScheme.surfaceContainerHigh
                         } else {
                             ZrpRed
                         },
-                        contentColor = if (followBackState == FollowBackState.DONE) {
+                        contentColor = if (followBackState == FollowBackState.DONE || followBackState == FollowBackState.REQUESTED) {
                             MaterialTheme.colorScheme.onSurface
                         } else {
                             ZrpWhite
@@ -372,7 +372,11 @@ private fun NotificationRow(
                         CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp, color = ZrpWhite)
                     } else {
                         Text(
-                            text = if (followBackState == FollowBackState.DONE) "Following" else "Follow back",
+                            text = when (followBackState) {
+                                FollowBackState.DONE -> "Following"
+                                FollowBackState.REQUESTED -> "Requested"
+                                else -> "Follow back"
+                            },
                             style = MaterialTheme.typography.labelMedium,
                         )
                     }

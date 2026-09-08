@@ -271,6 +271,10 @@
     <string name="post_unmute_video_cd">取消视频静音</string>
     <string name="story_like_cd">赞这条动态</string>
     <string name="story_unlike_cd">取消赞</string>
+
+    <string name="story_mute_cd">静音动态声音</string>
+
+    <string name="story_unmute_cd">取消动态静音</string>
     <string name="comment_repost_cd">转发</string>
     <string name="comment_undo_repost_cd">取消转发</string>
     <string name="createpost_media_count_cd">%1$d/%2$d 媒体</string>
@@ -1513,6 +1517,15 @@
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">加入于</string>
     <string name="profile_charity_note">%1$s%% 的利润用于慈善事业</string>
+    <string name="profile_impact">影响力：已捐赠 %1$s 美元用于慈善</string>
+    <string name="profile_milestone_years">在 ZRP %1$d 年</string>
+    <string name="profile_milestone_six_months">在 ZRP 6 个月</string>
+    <string name="profile_milestone_new_member">新成员</string>
+    <string name="profile_milestone_posts_500">500+ 帖子</string>
+    <string name="profile_milestone_posts_100">100+ 帖子</string>
+    <string name="profile_milestone_posts_10">10+ 帖子</string>
+    <string name="profile_milestone_followers_1k">1K+ 关注者</string>
+    <string name="profile_milestone_followers_100">100+ 关注者</string>
 
     <!-- Home feed empty / error states -->
     <string name="home_empty_following_title">你的关注动态正在等你。</string>

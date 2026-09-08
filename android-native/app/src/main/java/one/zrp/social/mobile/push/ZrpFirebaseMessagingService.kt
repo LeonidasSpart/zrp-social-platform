@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -55,12 +56,35 @@ class ZrpFirebaseMessagingService : FirebaseMessagingService() {
         val title = message.notification?.title ?: message.data["title"] ?: getString(R.string.app_name)
         val body = message.notification?.body ?: message.data["body"] ?: return
 
-        showNotification(title, body)
+        showNotification(title, body, message.data["url"])
     }
 
-    private fun showNotification(title: String, body: String) {
-        val openIntent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+    private fun showNotification(title: String, body: String, url: String?) {
+        // sendFcmPush (src/lib/fcm.ts) always sends the same real
+        // in-app-relative `url` src/lib/push-notifications.ts's own
+        // sendPushNotification callers pass per notification type - e.g.
+        // /post/{postId} for a like or comment, /profile/{username} for a
+        // follow. Routing the tap through that real URL as a
+        // https://zrp.one deep link (rather than the bare "open
+        // MainActivity to wherever it was" Intent this used to build)
+        // reuses the same real, already-verified deep-link intent-filter
+        // AndroidManifest.xml declares for zrp.one links - the same
+        // mechanism ZrpNavHost's own composables already register
+        // per-route deepLinks for, not a new/invented navigation path.
+        // setPackage keeps this resolving straight to this app instead of
+        // a disambiguation dialog. A missing/blank url (defensive only -
+        // sendFcmPush always sends one) falls back to the previous
+        // generic "just open the app" behavior rather than crashing on a
+        // malformed Uri.
+        val openIntent = if (!url.isNullOrBlank()) {
+            Intent(Intent.ACTION_VIEW, Uri.parse("https://zrp.one$url")).apply {
+                setPackage(packageName)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+        } else {
+            Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
         }
         val pendingIntent = PendingIntent.getActivity(
             this,

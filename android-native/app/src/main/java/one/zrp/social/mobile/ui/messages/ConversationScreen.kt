@@ -20,11 +20,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -111,6 +115,7 @@ import one.zrp.social.mobile.util.formatRelativeTime
  * typing status all arrive live over the same real Socket.IO
  * connection the website uses (see ConversationViewModel's KDoc).
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ConversationScreen(
     partnerId: String,
@@ -307,7 +312,17 @@ fun ConversationScreen(
         return
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    // MainActivity opts into enableEdgeToEdge(), so AndroidManifest.xml's
+    // windowSoftInputMode="adjustResize" alone doesn't reserve space for
+    // the IME here - Compose draws behind it unless a real inset modifier
+    // asks for the space back. imePadding() on this screen's own root
+    // Column (rather than something higher up shared with other routes)
+    // adds bottom padding equal to the keyboard's height whenever it's
+    // visible, shrinking the LazyColumn below (its weight(1f) box) and
+    // lifting the composer row above the keyboard - real inset-driven
+    // layout, not a fixed dp guess, so it holds on any screen size. The
+    // top header Row is unaffected: it isn't inside the padded space.
+    Column(modifier = Modifier.fillMaxSize().imePadding()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -430,6 +445,23 @@ fun ConversationScreen(
             } else {
                 LaunchedEffect(state.messages.size) {
                     if (state.messages.isNotEmpty()) {
+                        listState.animateScrollToItem(state.messages.size - 1)
+                    }
+                }
+
+                // Opening the keyboard shrinks this LazyColumn's own
+                // height (imePadding() above eats the difference from
+                // the bottom of the screen), which by itself doesn't
+                // re-scroll anything - a list that was already scrolled
+                // to the last message can end up with that message
+                // pushed behind the keyboard instead of staying visible
+                // above it. Re-asserting the same "last message" scroll
+                // target used above whenever the IME's visibility flips
+                // keeps the most recent message in view the moment
+                // typing starts, not just on the next new message.
+                val imeVisible = WindowInsets.isImeVisible
+                LaunchedEffect(imeVisible) {
+                    if (imeVisible && state.messages.isNotEmpty()) {
                         listState.animateScrollToItem(state.messages.size - 1)
                     }
                 }

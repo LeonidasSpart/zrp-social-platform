@@ -111,12 +111,42 @@ describe("decompressBody", () => {
     expect(decompressBody(original, "identity").toString("utf-8")).toBe(html);
   });
 
-  it("falls back to the raw bytes (never throws) on a truncated/corrupt gzip stream", () => {
+  it("never throws on a truncated/corrupt gzip stream", () => {
     const compressed = zlib.gzipSync(original);
     const truncated = compressed.subarray(0, compressed.length - 5);
     expect(() => decompressBody(truncated, "gzip")).not.toThrow();
-    // Can't recover the original from a truncated stream - just must not crash.
     expect(Buffer.isBuffer(decompressBody(truncated, "gzip"))).toBe(true);
+  });
+
+  it("still decodes byte-for-byte on a complete, untruncated stream (finishFlush doesn't change the happy path)", () => {
+    expect(decompressBody(zlib.gzipSync(original), "gzip").toString("utf-8")).toBe(html);
+    expect(decompressBody(zlib.deflateSync(original), "deflate").toString("utf-8")).toBe(html);
+    expect(decompressBody(zlib.brotliCompressSync(original), "br").toString("utf-8")).toBe(html);
+  });
+
+  // Regression test for the actual link-preview bug: a real-world page
+  // (a heavy news site with a large hydration/ad-tech JSON payload deep
+  // in the document, well past </head>) whose *compressed* size exceeds
+  // safeFetch's maxBytes cap. The og:title tag sits in <head>, near the
+  // very start of the document - it should survive even though the
+  // stream is cut off long before its end, because the truncation lands
+  // in unrelated bulk far below it.
+  it("recovers og:title from <head> when the compressed stream is truncated by a byte cap well after </head>", () => {
+    const head = '<html><head><meta property="og:title" content="Real headline"><meta property="og:image" content="https://example.com/x.jpg"></head><body>';
+    // Realistic-entropy filler standing in for a modern page's inline
+    // hydration JSON/ad config - repetitive text compresses far better
+    // than real JSON ever does, which would understate the bug.
+    const filler = Array.from({ length: 20000 }, (_, i) => `{"id":"${i}-${Math.random().toString(36).slice(2)}","x":"${Math.random().toString(36).slice(2)}"}`).join(",");
+    const fullHtml = head + "<script>" + filler + "</script></body></html>";
+
+    const compressed = zlib.gzipSync(Buffer.from(fullHtml, "utf-8"));
+    const cap = 50_000;
+    expect(compressed.length).toBeGreaterThan(cap); // the scenario only matters if truncation actually happens
+    const truncated = compressed.subarray(0, cap);
+
+    const recovered = decompressBody(truncated, "gzip").toString("utf-8");
+    expect(recovered).toContain('property="og:title" content="Real headline"');
+    expect(recovered).toContain('property="og:image" content="https://example.com/x.jpg"');
   });
 });
 
@@ -235,5 +265,33 @@ describe("safeFetch (real local server)", () => {
     const result = await safeFetch(base, { isAddressAllowed: allowAll, maxBytes: 1_000 });
     expect(result.body.length).toBeLessThan(big.length);
     expect(result.body.length).toBeGreaterThan(0);
+  });
+
+  // End-to-end regression test for the link-preview bug: a gzip-
+  // compressed real-world-sized page whose compressed body exceeds
+  // maxBytes, served with a real Content-Encoding header - exercising
+  // the exact same code path route.ts's fetchGenericPreview() drives
+  // (safeFetch -> mid-stream maxBytes truncation -> decompressBody).
+  // The og:title tag, positioned in <head> as virtually every real site
+  // places it, must survive even though the response as a whole was cut
+  // off well before its end.
+  it("still yields a parseable <head> when a real gzip-compressed response is truncated by maxBytes", async () => {
+    const head = '<html><head><meta property="og:title" content="Real headline"></head><body>';
+    const filler = Array.from(
+      { length: 20_000 },
+      (_, i) => `{"id":"${i}-${Math.random().toString(36).slice(2)}"}`
+    ).join(",");
+    const fullHtml = head + "<script>" + filler + "</script></body></html>";
+    const compressed = zlib.gzipSync(Buffer.from(fullHtml, "utf-8"));
+
+    const base = await listen((_req, res) => {
+      res.writeHead(200, { "content-type": "text/html", "content-encoding": "gzip" });
+      res.end(compressed);
+    });
+
+    const cap = 50_000;
+    expect(compressed.length).toBeGreaterThan(cap);
+    const result = await safeFetch(base, { isAddressAllowed: allowAll, maxBytes: cap });
+    expect(result.body.toString("utf-8")).toContain('property="og:title" content="Real headline"');
   });
 });

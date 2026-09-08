@@ -7,9 +7,12 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -223,7 +226,18 @@ fun ProfileScreen(
                     if (shouldLoadMore) viewModel.loadMoreSelectedTab()
                 }
 
-                LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                // Bottom content padding beyond the Scaffold's own
+                // bottomBar-height innerPadding (see ZrpNavHost.kt's
+                // NavHost, which already reserves that) - without extra
+                // room here, the LAST post's own text can sit right at
+                // that boundary with no breathing space, reading as
+                // "hidden behind the bottom navigation" on a real
+                // device even though the bar itself never overlaps it.
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = Spacing.xxl),
+                ) {
                     item {
                         ProfileHeader(
                             profile = profile,
@@ -660,6 +674,19 @@ private fun ProfileHeader(
                             }
                         }
 
+                        // No Tip button here (web's page.tsx has one for a
+                        // creator with tipsEnabled): sending a tip is a
+                        // real on-chain Solana transaction, and this app
+                        // has no wallet integration at all yet - neither
+                        // CreatorApi.kt nor any other native API exposes a
+                        // send-tip endpoint, only the creator-side
+                        // tipsEnabled/solanaWallet settings for RECEIVING
+                        // one (CreatorScreen.kt, ProfileEditScreen.kt).
+                        // Adding a Tip button here without a real Mobile
+                        // Wallet Adapter flow behind it would be exactly
+                        // the fake/non-functional UI the master directive
+                        // forbids - this needs its own dedicated
+                        // wallet-integration pass, not a cosmetic add here.
                         IconButton(onClick = onMessageClick) {
                             Icon(Icons.Filled.MailOutline, contentDescription = stringResource(R.string.action_message))
                         }
@@ -829,19 +856,49 @@ private fun ProfileHeader(
 
             // Charity note - a real, static fact about ZRP's business
             // model (the same 35% used site-wide: footer.charityBadge,
-            // about.value3Desc, settings.platformFeeNote), NOT the
-            // page.tsx "impact: N meals" badge next to it on web - that
-            // number is Math.floor(Math.random() * 50) + 5, regenerated
-            // on every page load, not real per-account data. Reusing it
-            // natively would mean inventing fake data, which the master
-            // directive explicitly forbids; the honest fix is to drop
-            // it, not port a fake number faithfully.
+            // about.value3Desc, settings.platformFeeNote).
             Text(
                 text = stringResource(R.string.profile_charity_note, "35"),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = Spacing.xs),
             )
+
+            // Impact - the real per-account figure page.tsx renders next
+            // to the charity note (profile.charityContributionUsdc is now
+            // the real sum of this profile's own completed tips/purchases'
+            // charityAmount, computed server-side by
+            // getUserCharityContributionUsdc - see UserProfile's own
+            // KDoc). Always rendered (a real $0.00 for an account with no
+            // contributions yet is still real data, not a placeholder).
+            Text(
+                text = stringResource(
+                    R.string.profile_impact,
+                    String.format(java.util.Locale.US, "$%.2f", profile.charityContributionUsdc),
+                ),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 2.dp),
+            )
+
+            // Milestone badges - the same real, server-computed facts
+            // page.tsx renders (computeMilestones() in
+            // src/lib/milestones.ts), one native string resource per key
+            // so this can never disagree with web on wording. Empty for
+            // a brand-new account with none earned yet, matching web's
+            // own `milestones.length > 0` guard.
+            if (profile.milestones.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .padding(top = Spacing.xs)
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                ) {
+                    profile.milestones.forEach { milestone ->
+                        MilestoneBadge(milestone)
+                    }
+                }
+            }
         }
 
         Row(
@@ -995,6 +1052,45 @@ private fun ProfileMetaRow(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(start = Spacing.xs),
+        )
+    }
+}
+
+/**
+ * One earned milestone key -> its real, translated label - mirrors
+ * page.tsx's own MILESTONE_TRANSLATION_KEYS exactly, key for key, so
+ * native can never render a wording web doesn't also have. Falls back
+ * to the raw key for a fact type this native build doesn't recognize
+ * yet (a future computeMilestones() addition), matching page.tsx's own
+ * `if (!translationKey) return fact.key` fallback.
+ */
+@Composable
+private fun milestoneLabel(fact: one.zrp.social.mobile.network.MilestoneFact): String {
+    val n = fact.params?.get("n")
+    return when (fact.key) {
+        "years_on_zrp" -> stringResource(R.string.profile_milestone_years, n ?: 0)
+        "six_months" -> stringResource(R.string.profile_milestone_six_months)
+        "new_member" -> stringResource(R.string.profile_milestone_new_member)
+        "posts_500" -> stringResource(R.string.profile_milestone_posts_500)
+        "posts_100" -> stringResource(R.string.profile_milestone_posts_100)
+        "posts_10" -> stringResource(R.string.profile_milestone_posts_10)
+        "followers_1k" -> stringResource(R.string.profile_milestone_followers_1k)
+        "followers_100" -> stringResource(R.string.profile_milestone_followers_100)
+        else -> fact.key
+    }
+}
+
+@Composable
+private fun MilestoneBadge(fact: one.zrp.social.mobile.network.MilestoneFact) {
+    Surface(
+        shape = MaterialTheme.shapes.small,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    ) {
+        Text(
+            text = fact.icon + " " + milestoneLabel(fact),
+            style = MaterialTheme.typography.labelSmall,
+            maxLines = 1,
+            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = 4.dp),
         )
     }
 }

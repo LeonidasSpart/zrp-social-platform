@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -292,8 +293,9 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
     // (Home, Queue, and later Artist/Album/Playlist/Discover/Liked/
     // History), the native equivalent of the website's own
     // MusicPlayerProvider React context wrapping every /music/* page.
+    val appContext = LocalContext.current.applicationContext
     val musicPlayerViewModel: MusicPlayerViewModel = viewModel(
-        factory = remember { MusicPlayerViewModelFactory(MusicRepository()) },
+        factory = remember { MusicPlayerViewModelFactory(MusicRepository(), appContext) },
     )
 
     Scaffold(
@@ -503,6 +505,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                         userId = userId,
                         onClose = { navController.popBackStack() },
                         onAddStory = goToCreateStory,
+                        onOpenProfile = goToProfile,
                     )
                 }
             }
@@ -1106,6 +1109,15 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
             composable(
                 route = "post/{postId}/comments",
                 arguments = listOf(navArgument("postId") { type = NavType.StringType }),
+                // Matches the real "/post/{postId}" path
+                // src/lib/push-notifications.ts's sendPushNotification
+                // callers already send as the FCM `url` data field for a
+                // like or comment notification (see
+                // ZrpFirebaseMessagingService's own deep-link tap intent)
+                // - this is the screen web's own /post/{postId} route
+                // opens to, same as every other real goToComments call
+                // elsewhere in this NavHost.
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/post/{postId}" }),
             ) { backStackEntry ->
                 val postId = backStackEntry.arguments?.getString("postId")
                 if (postId != null) {

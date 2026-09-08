@@ -271,6 +271,10 @@
     <string name="post_unmute_video_cd">Video-Ton aktivieren</string>
     <string name="story_like_cd">Story gefällt mir</string>
     <string name="story_unlike_cd">Story gefällt mir nicht mehr</string>
+
+    <string name="story_mute_cd">Story-Ton stummschalten</string>
+
+    <string name="story_unmute_cd">Story-Ton aktivieren</string>
     <string name="comment_repost_cd">Repost</string>
     <string name="comment_undo_repost_cd">Repost rückgängig machen</string>
     <string name="createpost_media_count_cd">%1$d/%2$d Medien</string>
@@ -1513,6 +1517,15 @@
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Beigetreten</string>
     <string name="profile_charity_note">%1$s%% der Gewinne gehen an wohltätige Zwecke</string>
+    <string name="profile_impact">Wirkung: %1$s $ für wohltätige Zwecke gespendet</string>
+    <string name="profile_milestone_years">%1$d Jahre bei ZRP</string>
+    <string name="profile_milestone_six_months">6 Monate bei ZRP</string>
+    <string name="profile_milestone_new_member">Neues Mitglied</string>
+    <string name="profile_milestone_posts_500">500+ Beiträge</string>
+    <string name="profile_milestone_posts_100">100+ Beiträge</string>
+    <string name="profile_milestone_posts_10">10+ Beiträge</string>
+    <string name="profile_milestone_followers_1k">1K+ Follower</string>
+    <string name="profile_milestone_followers_100">100+ Follower</string>
 
     <!-- Home feed empty / error states -->
     <string name="home_empty_following_title">Dein Abonnements-Feed wartet auf dich.</string>
