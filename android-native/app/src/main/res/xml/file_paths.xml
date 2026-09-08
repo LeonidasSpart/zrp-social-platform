@@ -6,4 +6,9 @@
 -->
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
     <cache-path name="exports" path="exports/" />
+    <!-- ConversationScreen's own MediaRecorder writes here before
+         handing the file to the same real chatAudio UploadThing router
+         a picked attachment already uses - see ConversationScreen's own
+         stopAndSendRecording(). -->
+    <cache-path name="voice-messages" path="voice-messages/" />
 </paths>

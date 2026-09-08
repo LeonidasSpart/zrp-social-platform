@@ -133,6 +133,11 @@
     <string name="message_attach_image_cd">Bashkangjit imazh</string>
     <string name="message_attach_video_cd">Bashkangjit video</string>
     <string name="message_attach_document_cd">Bashkangjit dokument</string>
+    <string name="message_record_voice_cd">Regjistro një mesazh zanor</string>
+    <string name="chat_cancel_recording_cd">Anulo</string>
+    <string name="chat_recording_label">Duke regjistruar...</string>
+    <string name="chat_send_voice_message_cd">Dërgo</string>
+    <string name="chat_err_mic_access">Nuk mund të aksesohej mikrofoni. Kontrolloni lejet tuaja.</string>
     <string name="chat_attachment_fallback">Dokument</string>
     <string name="comment_post_cd">Posto komentin</string>
     <string name="action_show_password">Shfaq fjalëkalimin</string>

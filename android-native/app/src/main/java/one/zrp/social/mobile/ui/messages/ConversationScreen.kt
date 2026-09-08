@@ -2,11 +2,17 @@ package one.zrp.social.mobile.ui.messages
 
 import android.Manifest
 import android.content.Intent
+import android.media.MediaRecorder
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -33,8 +39,12 @@ import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.filled.Videocam
@@ -69,8 +79,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
@@ -211,6 +223,83 @@ fun ConversationScreen(
             val mimeType = contentResolver.getType(uri) ?: ""
             viewModel.onDocumentPicked(contentResolver, uri, name, mimeType, size)
         }
+    }
+
+    // Matches ChatInterface.tsx's own startRecording/stopAndSendRecording/
+    // cancelRecording - real MediaRecorder audio, not a picked file, so
+    // it's driven from this Screen (which owns Context/File the same way
+    // MediaUploadRepository's own KDoc establishes) rather than the
+    // ViewModel. MPEG_4/AAC output (audio/mp4) is the same format web's
+    // own mimeCandidates list already falls back to on browsers without
+    // WebM/Opus support - real, cross-platform-compatible audio, not a
+    // native-only format the chatAudio router wouldn't otherwise see.
+    var mediaRecorder by remember { mutableStateOf<MediaRecorder?>(null) }
+    var recordingFile by remember { mutableStateOf<java.io.File?>(null) }
+    var micAccessError by remember { mutableStateOf(false) }
+
+    fun startRecording() {
+        val dir = java.io.File(context.cacheDir, "voice-messages").apply { mkdirs() }
+        val file = java.io.File(dir, "voice-message-${System.currentTimeMillis()}.m4a")
+        val recorder = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            MediaRecorder(context)
+        } else {
+            @Suppress("DEPRECATION")
+            MediaRecorder()
+        }
+        try {
+            recorder.apply {
+                setAudioSource(MediaRecorder.AudioSource.MIC)
+                setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                setOutputFile(file.absolutePath)
+                prepare()
+                start()
+            }
+            mediaRecorder = recorder
+            recordingFile = file
+            viewModel.startRecordingTimer()
+        } catch (e: Exception) {
+            recorder.release()
+            micAccessError = true
+        }
+    }
+
+    val micPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted -> if (granted) startRecording() else micAccessError = true }
+
+    fun cancelRecording() {
+        val recorder = mediaRecorder
+        if (recorder != null) {
+            runCatching { recorder.stop() }
+            recorder.release()
+        }
+        mediaRecorder = null
+        recordingFile?.delete()
+        recordingFile = null
+        viewModel.cancelRecordingTimer()
+    }
+
+    fun stopAndSendRecording() {
+        val recorder = mediaRecorder ?: return
+        val file = recordingFile ?: return
+        // stop() throws if called within ~1s of start() (nothing was
+        // actually captured yet) - same case web's own onstop guards
+        // against by checking audioChunksRef.current.length === 0, just
+        // surfaced here as an exception instead of an empty chunk array.
+        // Treated the same way web treats it: discard, don't send.
+        val stopped = runCatching { recorder.stop() }.isSuccess
+        recorder.release()
+        mediaRecorder = null
+        recordingFile = null
+        if (!stopped) {
+            file.delete()
+            viewModel.cancelRecordingTimer()
+            return
+        }
+
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        viewModel.onVoiceRecorded(contentResolver, uri, file.name, "audio/mp4", file.length())
     }
 
     if (callState.phase != CallPhase.IDLE) {
@@ -437,59 +526,145 @@ fun ConversationScreen(
             )
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(
-                onClick = {
-                    imagePickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                },
-                enabled = !state.isUploadingAttachment,
-            ) {
-                Icon(Icons.Filled.AttachFile, contentDescription = stringResource(R.string.message_attach_image_cd))
-            }
-
-            IconButton(
-                onClick = {
-                    videoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly))
-                },
-                enabled = !state.isUploadingAttachment,
-            ) {
-                Icon(Icons.Filled.VideoLibrary, contentDescription = stringResource(R.string.message_attach_video_cd))
-            }
-
-            IconButton(
-                onClick = { documentPickerLauncher.launch(documentMimeTypes) },
-                enabled = !state.isUploadingAttachment,
-            ) {
-                Icon(Icons.Filled.Description, contentDescription = stringResource(R.string.message_attach_document_cd))
-            }
-
-            OutlinedTextField(
-                value = state.draft,
-                onValueChange = { viewModel.onDraftChange(it) },
-                placeholder = { Text(stringResource(R.string.chat_message_placeholder, partnerUsername)) },
-                enabled = !state.isSending,
-                modifier = Modifier.weight(1f),
+        if (micAccessError) {
+            Text(
+                text = stringResource(R.string.chat_err_mic_access),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
             )
+        }
 
-            Spacer(modifier = Modifier.width(8.dp))
-
-            IconButton(
-                onClick = { viewModel.send() },
-                enabled = state.draft.isNotBlank() && !state.isSending,
+        if (state.isRecording) {
+            // Matches ChatInterface.tsx's own isRecording sub-bar exactly:
+            // cancel (trash), a pulsing dot, the live m:ss timer, a
+            // "Recording..." label, and a send button - replacing the
+            // whole normal composer row rather than just swapping one
+            // button.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (state.isSending) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                } else {
+                IconButton(onClick = { cancelRecording() }) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = stringResource(R.string.chat_cancel_recording_cd),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                val pulseAlpha by rememberInfiniteTransition(label = "recordingPulse").animateFloat(
+                    initialValue = 1f,
+                    targetValue = 0.3f,
+                    animationSpec = infiniteRepeatable(animation = tween(700), repeatMode = RepeatMode.Reverse),
+                    label = "recordingPulseAlpha",
+                )
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFEF4444).copy(alpha = pulseAlpha)),
+                )
+
+                Text(
+                    text = formatRecordingTime(state.recordingSeconds),
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(start = Spacing.sm),
+                )
+                Text(
+                    text = stringResource(R.string.chat_recording_label),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = Spacing.sm),
+                )
+
+                IconButton(onClick = { stopAndSendRecording() }) {
                     Icon(
                         imageVector = Icons.Filled.Send,
-                        contentDescription = stringResource(R.string.message_send_cd),
+                        contentDescription = stringResource(R.string.chat_send_voice_message_cd),
                         tint = ZrpRed,
                     )
+                }
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(
+                    onClick = {
+                        imagePickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
+                    enabled = !state.isUploadingAttachment,
+                ) {
+                    Icon(Icons.Filled.AttachFile, contentDescription = stringResource(R.string.message_attach_image_cd))
+                }
+
+                IconButton(
+                    onClick = {
+                        videoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly))
+                    },
+                    enabled = !state.isUploadingAttachment,
+                ) {
+                    Icon(Icons.Filled.VideoLibrary, contentDescription = stringResource(R.string.message_attach_video_cd))
+                }
+
+                IconButton(
+                    onClick = { documentPickerLauncher.launch(documentMimeTypes) },
+                    enabled = !state.isUploadingAttachment,
+                ) {
+                    Icon(Icons.Filled.Description, contentDescription = stringResource(R.string.message_attach_document_cd))
+                }
+
+                OutlinedTextField(
+                    value = state.draft,
+                    onValueChange = { viewModel.onDraftChange(it) },
+                    placeholder = { Text(stringResource(R.string.chat_message_placeholder, partnerUsername)) },
+                    enabled = !state.isSending,
+                    modifier = Modifier.weight(1f),
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Matches ChatInterface.tsx's own Send-or-Mic swap: an
+                // empty draft shows the mic (tap to start recording), any
+                // typed text shows Send instead - the same toggle, not two
+                // independently-shown buttons.
+                if (state.draft.isNotBlank()) {
+                    IconButton(
+                        onClick = { viewModel.send() },
+                        enabled = !state.isSending,
+                    ) {
+                        if (state.isSending) {
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                        } else {
+                            Icon(
+                                imageVector = Icons.Filled.Send,
+                                contentDescription = stringResource(R.string.message_send_cd),
+                                tint = ZrpRed,
+                            )
+                        }
+                    }
+                } else {
+                    IconButton(
+                        onClick = {
+                            micAccessError = false
+                            micPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                        },
+                        enabled = !state.isUploadingAttachment,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Mic,
+                            contentDescription = stringResource(R.string.message_record_voice_cd),
+                            tint = ZrpRed,
+                        )
+                    }
                 }
             }
         }
@@ -612,6 +787,70 @@ private fun ChatVideoPlayer(url: String, modifier: Modifier = Modifier) {
             },
         )
     }
+}
+
+// Matches ChatInterface.tsx's own VOICE MESSAGE block (a slim
+// <audio controls preload="metadata">) - a play/pause toggle rather
+// than a full scrubber/seek bar, a reasonable first-cut simplification
+// for this same reason PostVideoPlayer/ChatVideoPlayer already
+// document. The raw "🎤 Voice message (m:ss)" content text renders
+// separately just above this (MessageBubble's own content Text, always
+// shown for non-blank content) - matching a real web quirk confirmed by
+// reading its own displayContent logic, which only ever strips the
+// unrelated "📷 Image" marker, never 🎬/🎤/📎 - so no duration label is
+// duplicated here.
+@Composable
+private fun ChatAudioPlayer(url: String, isOwnMessage: Boolean) {
+    val context = LocalContext.current
+    var isPlaying by remember(url) { mutableStateOf(false) }
+    val exoPlayer = remember(url) {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(MediaItem.fromUri(url))
+            prepare()
+        }
+    }
+    DisposableEffect(exoPlayer) {
+        val listener = object : Player.Listener {
+            override fun onIsPlayingChanged(playing: Boolean) {
+                isPlaying = playing
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_ENDED) {
+                    exoPlayer.seekTo(0)
+                    exoPlayer.pause()
+                }
+            }
+        }
+        exoPlayer.addListener(listener)
+        onDispose {
+            exoPlayer.removeListener(listener)
+            exoPlayer.release()
+        }
+    }
+
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                if (isOwnMessage) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = { if (isPlaying) exoPlayer.pause() else exoPlayer.play() }) {
+            Icon(
+                imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                contentDescription = null,
+                tint = if (isOwnMessage) Color.White else MaterialTheme.colorScheme.onSurface,
+            )
+        }
+    }
+}
+
+private fun formatRecordingTime(totalSeconds: Int): String {
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return "$minutes:${seconds.toString().padStart(2, '0')}"
 }
 
 // Matches ChatInterface.tsx's own FILE FALLBACK row (FileText icon +
@@ -756,6 +995,10 @@ private fun MessageBubble(
                             message.content.startsWith("🎬") -> ChatVideoPlayer(
                                 url = attachmentUrl,
                                 modifier = Modifier.widthIn(max = 220.dp),
+                            )
+                            message.content.startsWith("🎤") -> ChatAudioPlayer(
+                                url = attachmentUrl,
+                                isOwnMessage = isOwnMessage,
                             )
                             message.content.startsWith("📎") -> ChatFileRow(
                                 url = attachmentUrl,
