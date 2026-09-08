@@ -79,7 +79,7 @@ called and the real response being handled.
 | Edit own post | `PUT /api/posts/{id}` (text only, matches web) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Pin post (single slot) | `POST /api/posts/{id}/pin` → `{pinned}`, author-only | ✅ | ✅ | ✅ offered from the post menu on your own profile; the pinned post is fetched via `GET /api/posts/{id}` (the profile route reports only `pinnedPostId`), labelled above the Posts tab and filtered out of the list below | IMPLEMENTED |
 | Create post (text) | `POST /api/posts` | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Scheduled posts | `POST /api/posts` + `scheduledAt` (naive wall-clock) → stored with `status: "scheduled"`; published by the platform's own scheduled-post cron. Monthly per-plan cap enforced server-side with a 400 | ✅ | ✅ | ✅ composer control; the same naive `yyyy-MM-dd'T'HH:mm` the web sends, deliberately — see [F2](#f2-scheduled-posts-are-timed-in-the-servers-timezone-not-the-authors--open). No management surface, matching the web, which has none either | IMPLEMENTED |
+| Scheduled posts | `POST /api/posts` + `scheduledAt`, resolved through `resolveScheduledAt` — an ISO-8601 instant is parsed directly, a naive string is read in the server's zone. Stored with `status: "scheduled"`; published by the platform's own cron. Monthly per-plan cap enforced server-side with a 400 | ✅ | 🔶 still sends the naive string | ✅ composer control, sending a real UTC instant so the post publishes at the moment the author chose — see [F2](#f2-scheduled-posts-are-timed-in-the-servers-timezone-not-the-authors--fixed-server-web-and-ios). No management surface, matching the web, which has none either | IMPLEMENTED |
 | Quote post | `POST /api/posts` + `quotePostId` | ✅ | ✅ | ✅ (Quote action on every post, with a preview in the composer) | IMPLEMENTED |
 | Reposts list | `GET /api/posts/{id}/reposts` → `{items,nextCursor}` of users | ✅ | ✅ | ✅ reached from the post's repost count; shares one screen with followers/following, which answer the same shape | IMPLEMENTED |
 | Quotes list | `GET /api/posts/{id}/quotes` → `{items,nextCursor}` of posts | ✅ | ✅ | ✅ reached from the post's quote count, rendered with the standard post card | IMPLEMENTED |
@@ -610,7 +610,7 @@ browsing For You. Not built here.
 Found while auditing, per the isolation rules: reported here for their
 owners, not silently fixed from iOS.
 
-### F2. Scheduled posts are timed in the SERVER's timezone, not the author's — **FIXED server-side + web**
+### F2. Scheduled posts are timed in the SERVER's timezone, not the author's — **FIXED (server, web and iOS)**
 
 `POST /api/posts` used to store a bare `new Date(scheduledAt)`, and the
 composer sent whatever `<input type="datetime-local">` produces: a naive
@@ -640,28 +640,76 @@ a caller that supplies neither:
 computes correctly, since parsing happens in the author's own real
 timezone there) alongside the unchanged naive string.
 
-**Android and iOS remain on the legacy path** (they still send only the
-naive string) and are therefore still affected exactly as before - this
-was never something either could work around on their own, and still
-isn't. Both now have a real, documented, already-live backend contract to
-adopt without needing any further backend change:
+**iOS is now fixed** and takes path 1. `ScheduledInstant.string(from:)`
+replaces the old `WallClock.string(from:)` and writes
+`yyyy-MM-dd'T'HH:mm:ss'Z'` in UTC. The author's `Date` already holds the
+absolute moment their choice resolved to in their own timezone, so
+nothing on the client needs to know what that timezone was - rendering
+it as UTC is only how it is written down.
 
-- Android already tracks `scheduledAtMillis: Long?` internally
-  (`CreatePostViewModel.kt`) - `Instant.ofEpochMilli(scheduledAtMillis).toString()`
-  sent as `scheduledAt` directly satisfies path 1 above with no second
-  field needed at all.
-- iOS's `ComposeViewModel` already has a real `Date` before formatting it
-  through `WallClock.string(from:)` into the naive shape - switching that
-  one call to `ISO8601DateFormatter().string(from: scheduledAt)` would do
-  the same. Alternatively, either client can keep sending the naive
-  string and add `scheduledAtOffsetMinutes` (path 2) - e.g. Android's
-  `TimeZone.getDefault().getOffset(scheduledAtMillis) / 60000 * -1`, or
-  iOS's `-TimeZone.current.secondsFromGMT(for: scheduledAt) / 60` (the
-  sign flip in both matches `Date.prototype.getTimezoneOffset()`'s
-  convention: positive when local is *behind* UTC).
+Path 1 rather than path 2 for three reasons: one field instead of two,
+with nothing to keep in sync; no sign convention to get backwards; and
+it is the only one of the two that also fixes the poll expiry below,
+which knows nothing about `scheduledAtOffsetMinutes`.
 
-Not worked around from iOS - this remains real, separate client-side work
-for whoever picks it up, now with no backend blocker.
+Verified against the real `resolveScheduledAt`: a UTC+9 author choosing
+09:00 now sends `2026-09-15T00:00:00Z` and gets exactly that instant,
+where the old naive string produced `2026-09-15T09:00:00.000Z` - nine
+hours late. The Z-suffix branch is already covered by
+`src/lib/__tests__/scheduled-time.test.ts`, so no new backend test was
+needed and none was added.
+
+**Android remains on the legacy path.** Not this agent's code to change:
+`Instant.ofEpochMilli(scheduledAtMillis).toString()` sent as
+`scheduledAt` satisfies path 1 there with no second field either.
+
+### F3. A poll's `expiresAt` is still timed in the server's timezone — **OPEN (web/backend)**
+
+The F2 fix routed `scheduledAt` through `resolveScheduledAt`. A poll's
+end date in the same request was **not**: `POST /api/posts` still stores
+it with a bare `new Date(poll.expiresAt)`, and the poll branch reads no
+offset field at all.
+
+So the original bug survives there in full. The web composer's poll end
+date is an `<input type="datetime-local">` sending a naive string, which
+the server reads in its own zone - a poll an author in UTC+9 set to
+close at 23:00 actually closes at 23:00 UTC, nine hours late; west of
+UTC it closes early, cutting voting short.
+
+**iOS is not affected**, because the same ISO-8601 instant it now sends
+for `scheduledAt` is sent here too, and a bare `new Date` parses an
+instant correctly - that is precisely why an instant was the right
+choice rather than the offset field.
+
+Reported rather than fixed: the remedy is one line in `src/app/api/posts`
+(route the poll's `expiresAt` through `resolveScheduledAt` as well) plus
+the matching `scheduledAtOffsetMinutes`-style field in the web composer,
+and it belongs with whoever owns that route and that component. iOS
+needed no backend change and made none.
+
+### F4. Encoding a Swift `Date` into a request body silently sends a 2001 epoch — **FIXED (iOS)**
+
+Not a backend fault, but worth recording because it bit this app twice
+and would bite it again.
+
+`JSONEncoder`'s default date strategy is `.deferredToDate`: a bare
+number of **seconds since 2001-01-01**. Every route here hands the value
+to `new Date(...)`, which reads a number as **milliseconds since 1970**.
+The two are silently compatible in type and wildly incompatible in
+meaning, so nothing fails - a date simply lands in early 1970.
+
+Both occurrences are fixed:
+
+- A poll's `expiresAt` - every poll created from iOS with an end date
+  was created having already expired on 10 January 1970. No votes were
+  possible, and it read as a server bug.
+- An Opportunity listing's `deadline` - a deadline of 31 December 2026
+  was stored as 10 January 1970, so the listing arrived expired.
+
+Both now go through `ScheduledInstant`. An audit of every `Encodable`
+request type in the app found no third case, and the two doc comments on
+those fields say why they are strings so the next person does not
+"simplify" them back to a `Date`.
 
 ### F1. `POST /api/music/artists` erased bio, avatar and banner — **RESOLVED**
 

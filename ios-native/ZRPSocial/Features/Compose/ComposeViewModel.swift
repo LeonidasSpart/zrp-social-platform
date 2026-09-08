@@ -225,7 +225,7 @@ final class ComposeViewModel: ObservableObject {
             options: options
                 .prefix(Self.pollMaxOptions)
                 .map { String($0.prefix(Self.pollOptionMaxLength)) },
-            expiresAt: pollExpiry.map(WallClock.string(from:))
+            expiresAt: pollExpiry.map(ScheduledInstant.string(from:))
         )
     }
 
@@ -387,7 +387,7 @@ final class ComposeViewModel: ObservableObject {
             // as its content - what the website sends, so the post reads
             // the same in a timeline on either platform.
             poll: poll,
-            scheduledAt: (isScheduling ? scheduledAt : nil).map(WallClock.string(from:))
+            scheduledAt: (isScheduling ? scheduledAt : nil).map(ScheduledInstant.string(from:))
         )
 
         do {
