@@ -17,7 +17,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
-    const savedTheme = localStorage.getItem("theme") as Theme | null;
+    // localStorage can throw (rather than just returning null) in a
+    // storage-restricted context - Safari private browsing, some
+    // extensions, and notably Android WebView with domStorage disabled
+    // (the native app's own legal-pages WebView previously hit exactly
+    // this, surfacing as this app's own generic error boundary on every
+    // page, since this effect runs from the root layout). Falling back
+    // to system preference here matches the no-saved-preference branch
+    // below rather than leaving the whole app unrenderable.
+    let savedTheme: Theme | null = null;
+    try {
+      savedTheme = localStorage.getItem("theme") as Theme | null;
+    } catch {
+      // storage unavailable - fall through to system preference
+    }
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
     if (savedTheme) {
@@ -30,7 +43,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (mounted) {
       document.documentElement.classList.toggle("dark", theme === "dark");
-      localStorage.setItem("theme", theme);
+      try {
+        localStorage.setItem("theme", theme);
+      } catch {
+        // storage unavailable - theme still applies for this page load,
+        // it just won't persist across visits
+      }
 
       // Keep the iOS status bar style in sync with the active theme.
       // "black-translucent" overlays a translucent black tint over the

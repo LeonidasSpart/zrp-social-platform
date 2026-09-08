@@ -49,6 +49,7 @@ const PUBLIC_PATHS = [
   "/charity",
   "/contact",
   "/faq",
+  "/guidelines",
   "/help",
   "/investors",
   "/press",

@@ -1507,6 +1507,7 @@
     <string name="legal_terms">شروط الخدمة</string>
     <string name="legal_privacy">سياسة الخصوصية</string>
     <string name="legal_guidelines">إرشادات المجتمع</string>
+    <string name="legal_load_error">تعذر تحميل هذه الصفحة. تحقق من اتصالك وحاول مرة أخرى.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">انضم منذ</string>
     <string name="profile_charity_note">يذهب %1$s%% من الأرباح إلى الأعمال الخيرية</string>

@@ -1507,6 +1507,7 @@
     <string name="legal_terms">Условия использования</string>
     <string name="legal_privacy">Политика конфиденциальности</string>
     <string name="legal_guidelines">Правила сообщества</string>
+    <string name="legal_load_error">Не удалось загрузить страницу. Проверьте подключение и повторите попытку.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Присоединился</string>
     <string name="profile_charity_note">%1$s%% прибыли направляется на благотворительность</string>
