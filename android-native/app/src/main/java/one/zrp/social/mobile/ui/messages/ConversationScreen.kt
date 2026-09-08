@@ -1,6 +1,8 @@
 package one.zrp.social.mobile.ui.messages
 
 import android.Manifest
+import android.content.Intent
+import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,7 +33,10 @@ import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -62,7 +68,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MessagesRepository
@@ -154,6 +166,50 @@ fun ConversationScreen(
             val (name, size) = queryFileNameAndSize(contentResolver, uri)
             val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
             viewModel.onImagePicked(contentResolver, uri, name, mimeType, size)
+        }
+    }
+
+    // Matches ChatInterface.tsx's own handleVideoUpload - same real
+    // chatVideo UploadThing router (see ConversationViewModel.onVideoPicked).
+    // No safe MIME fallback here unlike the image picker above: the
+    // system Photo Picker's VideoOnly filter already guarantees a real
+    // video was chosen, but guessing a specific codec type if
+    // contentResolver.getType() ever returns null would risk silently
+    // bypassing onVideoPicked's own type check - an empty string simply
+    // (and correctly) fails that check instead.
+    val videoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri != null) {
+            val (name, size) = queryFileNameAndSize(contentResolver, uri)
+            val mimeType = contentResolver.getType(uri) ?: ""
+            viewModel.onVideoPicked(contentResolver, uri, name, mimeType, size)
+        }
+    }
+
+    // Matches ChatInterface.tsx's own handleDocumentUpload - the system
+    // document picker's own mimeType filter narrows the picker UI to
+    // real documents, same as OpenDocument()'s array below, and
+    // onDocumentPicked's own allow-list is the final real check (same
+    // belt-and-suspenders shape web's own client-side DOCUMENT_TYPES
+    // check has, despite the picker UI already filtering).
+    val documentMimeTypes = arrayOf(
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "text/plain",
+    )
+    val documentPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri != null) {
+            val (name, size) = queryFileNameAndSize(contentResolver, uri)
+            val mimeType = contentResolver.getType(uri) ?: ""
+            viewModel.onDocumentPicked(contentResolver, uri, name, mimeType, size)
         }
     }
 
@@ -361,9 +417,9 @@ fun ConversationScreen(
             }
         }
 
-        if (state.isUploadingImage) {
+        if (state.isUploadingAttachment) {
             LinearProgressIndicator(
-                progress = { state.imageUploadProgress },
+                progress = { state.attachmentUploadProgress },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp),
@@ -371,10 +427,10 @@ fun ConversationScreen(
             )
         }
 
-        val imageError = state.imageError
-        if (imageError != null) {
+        val attachmentError = state.attachmentError
+        if (attachmentError != null) {
             Text(
-                text = chatImageErrorMessage(imageError),
+                text = chatAttachmentErrorMessage(attachmentError),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
@@ -391,9 +447,25 @@ fun ConversationScreen(
                 onClick = {
                     imagePickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 },
-                enabled = !state.isUploadingImage,
+                enabled = !state.isUploadingAttachment,
             ) {
                 Icon(Icons.Filled.AttachFile, contentDescription = stringResource(R.string.message_attach_image_cd))
+            }
+
+            IconButton(
+                onClick = {
+                    videoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly))
+                },
+                enabled = !state.isUploadingAttachment,
+            ) {
+                Icon(Icons.Filled.VideoLibrary, contentDescription = stringResource(R.string.message_attach_video_cd))
+            }
+
+            IconButton(
+                onClick = { documentPickerLauncher.launch(documentMimeTypes) },
+                enabled = !state.isUploadingAttachment,
+            ) {
+                Icon(Icons.Filled.Description, contentDescription = stringResource(R.string.message_attach_document_cd))
             }
 
             OutlinedTextField(
@@ -482,20 +554,109 @@ fun ConversationScreen(
 }
 
 /**
- * Maps ConversationViewModel's ChatImageError (which cannot resolve
- * Android string resources itself) to a real translated string,
- * mirroring CreateStoryScreen's own storyMediaErrorMessage() and
- * CallScreen's own callErrorMessage(). The {size}/{error} placeholders
- * match how ChatInterface.tsx's own t("chat.errFileTooLarge", {size})
- * and t("chat.errSendFailed", {error}) interpolate.
+ * Maps ConversationViewModel's ChatAttachmentError (which cannot
+ * resolve Android string resources itself) to a real translated
+ * string, mirroring CreateStoryScreen's own storyMediaErrorMessage()
+ * and CallScreen's own callErrorMessage(). The {size} placeholder
+ * matches how ChatInterface.tsx's own t("chat.errFileTooLarge", {size})
+ * interpolates - reused verbatim for video/document too, per
+ * ChatAttachmentError's own KDoc on why that's a real web quirk, not a
+ * native shortcut.
  */
 @Composable
-private fun chatImageErrorMessage(error: ChatImageError): String = when (error) {
-    is ChatImageError.FileTooLarge ->
+private fun chatAttachmentErrorMessage(error: ChatAttachmentError): String = when (error) {
+    is ChatAttachmentError.FileTooLarge ->
         stringResource(R.string.chat_err_file_too_large).replace("{size}", error.maxMb.toString())
-    is ChatImageError.InvalidType -> stringResource(R.string.chat_err_invalid_file_type)
-    is ChatImageError.UploadFailed ->
+    is ChatAttachmentError.InvalidType -> stringResource(R.string.chat_err_invalid_file_type)
+    is ChatAttachmentError.UploadFailed ->
         stringResource(R.string.chat_err_image_upload_failed) + " " + error.detail
+}
+
+// Matches ChatInterface.tsx's own `<video controls preload="metadata">` -
+// a real seek bar/play-pause control (PlayerView's own default overlay,
+// via useController = true), not the autoplay-muted-loop preview
+// PostCard.tsx's own inline feed video gets (see PostCard.kt's
+// PostVideoPlayer). Fixed max width rather than tracking the real
+// video's own aspect ratio the way PostVideoPlayer does - a reasonable
+// first-cut simplification for a chat bubble's much smaller footprint,
+// not yet tested against odd aspect ratios on a real device.
+@OptIn(UnstableApi::class)
+@Composable
+private fun ChatVideoPlayer(url: String, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val exoPlayer = remember(url) {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(MediaItem.fromUri(url))
+            prepare()
+        }
+    }
+    DisposableEffect(exoPlayer) {
+        onDispose { exoPlayer.release() }
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .aspectRatio(16f / 9f)
+            .background(Color.Black)
+            .clip(RoundedCornerShape(12.dp)),
+    ) {
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = {
+                PlayerView(context).apply {
+                    player = exoPlayer
+                    useController = true
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                }
+            },
+        )
+    }
+}
+
+// Matches ChatInterface.tsx's own FILE FALLBACK row (FileText icon +
+// filename + Download icon, opened in a new tab) - here, an ACTION_VIEW
+// Intent lets whichever app the device already has (a PDF viewer,
+// Office app, etc.) handle the real file.
+@Composable
+private fun ChatFileRow(url: String, fileName: String, isOwnMessage: Boolean) {
+    val context = LocalContext.current
+    val displayName = fileName.ifBlank { stringResource(R.string.chat_attachment_fallback) }
+
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(
+                if (isOwnMessage) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
+            )
+            .clickable { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm)
+            .widthIn(max = 220.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Description,
+            contentDescription = null,
+            tint = if (isOwnMessage) Color.White else MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.size(22.dp),
+        )
+        Text(
+            text = displayName,
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (isOwnMessage) Color.White else MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .weight(1f, fill = false)
+                .padding(horizontal = Spacing.sm),
+        )
+        Icon(
+            imageVector = Icons.Filled.Download,
+            contentDescription = null,
+            tint = if (isOwnMessage) Color.White else MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.size(16.dp),
+        )
+    }
 }
 
 private fun queryFileNameAndSize(contentResolver: android.content.ContentResolver, uri: android.net.Uri): Pair<String, Long> {
@@ -576,15 +737,40 @@ private fun MessageBubble(
                         )
                     }
 
-                    if (message.imageUrl != null) {
-                        AsyncImage(
-                            model = message.imageUrl,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(160.dp)
-                                .clip(RoundedCornerShape(8.dp)),
-                        )
+                    val attachmentUrl = message.imageUrl
+                    if (attachmentUrl != null) {
+                        // Matches ChatInterface.tsx's own three-way branch on
+                        // the same content-prefix convention its composer
+                        // writes on send (🎬 video / 📎 file / else image) -
+                        // see ConversationViewModel's own onVideoPicked/
+                        // onDocumentPicked KDocs for why there's no separate
+                        // `type` field to switch on instead. Web additionally
+                        // falls back to this same file-row UI for a plain
+                        // image whose <img> itself fails to load (a broken
+                        // URL) - that specific edge case isn't reproduced
+                        // here, since Coil's own broken-image state already
+                        // renders a blank tile rather than crashing, and
+                        // every attachment this app itself sends is always
+                        // correctly prefixed to begin with.
+                        when {
+                            message.content.startsWith("🎬") -> ChatVideoPlayer(
+                                url = attachmentUrl,
+                                modifier = Modifier.widthIn(max = 220.dp),
+                            )
+                            message.content.startsWith("📎") -> ChatFileRow(
+                                url = attachmentUrl,
+                                fileName = message.content.removePrefix("📎").trim(),
+                                isOwnMessage = isOwnMessage,
+                            )
+                            else -> AsyncImage(
+                                model = attachmentUrl,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(160.dp)
+                                    .clip(RoundedCornerShape(8.dp)),
+                            )
+                        }
                     }
 
                     if (message.reactions.isNotEmpty()) {

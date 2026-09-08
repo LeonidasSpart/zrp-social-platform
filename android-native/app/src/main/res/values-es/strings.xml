@@ -131,6 +131,9 @@
     <string name="gif_search_placeholder">Buscar GIF...</string>
     <string name="action_clear">Borrar</string>
     <string name="message_attach_image_cd">Adjuntar imagen</string>
+    <string name="message_attach_video_cd">Adjuntar video</string>
+    <string name="message_attach_document_cd">Adjuntar documento</string>
+    <string name="chat_attachment_fallback">Documento</string>
     <string name="comment_post_cd">Publicar comentario</string>
     <string name="action_show_password">Mostrar contraseña</string>
     <string name="action_hide_password">Ocultar contraseña</string>

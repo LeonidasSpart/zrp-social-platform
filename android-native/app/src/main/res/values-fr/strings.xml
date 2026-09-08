@@ -131,6 +131,9 @@
     <string name="gif_search_placeholder">Rechercher des GIF...</string>
     <string name="action_clear">Effacer</string>
     <string name="message_attach_image_cd">Joindre une image</string>
+    <string name="message_attach_video_cd">Joindre une vidéo</string>
+    <string name="message_attach_document_cd">Joindre un document</string>
+    <string name="chat_attachment_fallback">Document</string>
     <string name="comment_post_cd">Publier le commentaire</string>
     <string name="action_show_password">Afficher le mot de passe</string>
     <string name="action_hide_password">Masquer le mot de passe</string>

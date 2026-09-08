@@ -131,6 +131,9 @@
     <string name="gif_search_placeholder">Поиск GIF...</string>
     <string name="action_clear">Очистить</string>
     <string name="message_attach_image_cd">Прикрепить изображение</string>
+    <string name="message_attach_video_cd">Прикрепить видео</string>
+    <string name="message_attach_document_cd">Прикрепить документ</string>
+    <string name="chat_attachment_fallback">Документ</string>
     <string name="comment_post_cd">Опубликовать комментарий</string>
     <string name="action_show_password">Показать пароль</string>
     <string name="action_hide_password">Скрыть пароль</string>
