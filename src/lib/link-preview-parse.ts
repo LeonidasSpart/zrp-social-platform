@@ -61,11 +61,24 @@ export function decodeHtmlEntities(text: string): string {
 // use for OG tags anyway, non-conformant but common) ───────────────────
 export function extractMeta(html: string, keys: string[]): string | null {
   for (const key of keys) {
+    // The content capture is split per quote character rather than one
+    // [^"']* pattern covering both: a shared exclusion set truncates at
+    // WHICHEVER quote comes first, so a double-quoted attribute
+    // containing a real apostrophe - extremely common in French text
+    // (20min.ch's French edition: "n'a pas", "l'incendie", "d'un") -
+    // would silently clip the description at that apostrophe. Excluding
+    // only the actual delimiter quote lets the other quote character
+    // appear freely inside the value, matching how a real HTML parser
+    // would read it.
     const patterns = [
-      new RegExp(`<meta[^>]+property=["']${key}["'][^>]+content=["']([^"']*)["']`, "i"),
-      new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]+property=["']${key}["']`, "i"),
-      new RegExp(`<meta[^>]+name=["']${key}["'][^>]+content=["']([^"']*)["']`, "i"),
-      new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]+name=["']${key}["']`, "i"),
+      new RegExp(`<meta[^>]+property=["']${key}["'][^>]+content="([^"]*)"`, "i"),
+      new RegExp(`<meta[^>]+property=["']${key}["'][^>]+content='([^']*)'`, "i"),
+      new RegExp(`<meta[^>]+content="([^"]*)"[^>]+property=["']${key}["']`, "i"),
+      new RegExp(`<meta[^>]+content='([^']*)'[^>]+property=["']${key}["']`, "i"),
+      new RegExp(`<meta[^>]+name=["']${key}["'][^>]+content="([^"]*)"`, "i"),
+      new RegExp(`<meta[^>]+name=["']${key}["'][^>]+content='([^']*)'`, "i"),
+      new RegExp(`<meta[^>]+content="([^"]*)"[^>]+name=["']${key}["']`, "i"),
+      new RegExp(`<meta[^>]+content='([^']*)'[^>]+name=["']${key}["']`, "i"),
     ];
     for (const pattern of patterns) {
       const match = html.match(pattern);
