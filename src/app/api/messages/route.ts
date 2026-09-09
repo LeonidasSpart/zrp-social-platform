@@ -6,6 +6,7 @@ import { sendPushNotification } from "@/lib/push-notifications";
 import { createNotification } from "@/lib/notifications";
 import { rateLimit } from "@/lib/rate-limit";
 import { getUserConversations } from "@/lib/conversations";
+import { isAllowedMediaUrl } from "@/lib/media-url";
 
 // Any message longer than this is far beyond anything a real DM needs -
 // content is unbounded text in the schema, so without a cap this was an
@@ -57,6 +58,18 @@ export async function POST(req: NextRequest) {
 
     if (content && content.length > MAX_MESSAGE_LENGTH) {
       return NextResponse.json({ error: "Message is too long" }, { status: 400 });
+    }
+
+    // ⚠️ SECURITY: a chat attachment is rendered straight into the
+    // recipient's conversation, so - exactly as for post media - it must
+    // come from a source ZRP itself hands out (an /api/upload result on
+    // UploadThing, or the GIF picker), never an arbitrary host or
+    // scheme. Write-side only; existing messages are untouched.
+    if (imageUrl && !isAllowedMediaUrl(imageUrl)) {
+      return NextResponse.json(
+        { error: "Attachments must be uploaded through ZRP or chosen from the GIF picker." },
+        { status: 400 }
+      );
     }
 
     if (!receiverId) {
