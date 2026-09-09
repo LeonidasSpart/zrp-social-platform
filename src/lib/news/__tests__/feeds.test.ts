@@ -1,11 +1,28 @@
 import { describe, it, expect } from "vitest";
-import { buildFeedRoster, EDITORIAL_BADGE_TYPE, EDITORIAL_EMAIL_DOMAIN, pilotFeedKeys } from "../feeds";
+import {
+  buildFeedRoster,
+  EDITORIAL_AVATAR_URL,
+  EDITORIAL_BADGE_TYPE,
+  EDITORIAL_COVER_URL,
+  EDITORIAL_EMAIL_DOMAIN,
+  pilotFeedKeys,
+} from "../feeds";
 import { COUNTRIES } from "../config";
 import { TRAVEL_LANGUAGES } from "../types";
 
 const ROSTER = buildFeedRoster();
 
 describe("editorial roster", () => {
+  // Real bug, found via production evidence: a root-relative URL like
+  // "/icon-512.png" resolves fine in a browser (against the page's own
+  // origin) but the Android app's image loader has no origin to resolve
+  // it against, so every editorial account's avatar and cover silently
+  // failed to load there while working on web.
+  it("gives every editorial account a fully-qualified avatar and cover URL, not a root-relative one", () => {
+    expect(EDITORIAL_AVATAR_URL).toMatch(/^https:\/\//);
+    expect(EDITORIAL_COVER_URL).toMatch(/^https:\/\//);
+  });
+
   it("defines at least the 100-feed initial target", () => {
     expect(ROSTER.length).toBeGreaterThanOrEqual(100);
   });
