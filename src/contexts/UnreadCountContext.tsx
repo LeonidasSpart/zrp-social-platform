@@ -68,16 +68,22 @@ export function UnreadCountProvider({ children }: { children: ReactNode }) {
   }, [isAuthenticated]);
 
   // Instant badge update on a new incoming message, rather than waiting
-  // up to 30s for the next poll - "receive-message" already exists and
-  // fires server-side the moment someone sends this person a message.
+  // up to 30s for the next poll - "receive-message" (1:1) and
+  // "receive-group-message" (group) both already exist and fire
+  // server-side the moment someone sends this person a message. Named
+  // handlers + off(event, handler) rather than a bare off(event) so this
+  // cleanup can never remove a listener some OTHER mounted component
+  // (e.g. an open group thread) registered for the same event on the
+  // same shared socket singleton.
   useEffect(() => {
     if (!session?.user?.id) return;
     const socket = getSocket(session.user.id);
-    socket.on("receive-message", () => {
-      fetchUnreadMessageCount();
-    });
+    const handleNewMessage = () => fetchUnreadMessageCount();
+    socket.on("receive-message", handleNewMessage);
+    socket.on("receive-group-message", handleNewMessage);
     return () => {
-      socket.off("receive-message");
+      socket.off("receive-message", handleNewMessage);
+      socket.off("receive-group-message", handleNewMessage);
     };
   }, [session?.user?.id]);
 
