@@ -452,14 +452,111 @@ data class AdminTicketReplyRequest(val message: String, val isInternal: Boolean)
 // `resolution || null`, so an empty string resolves with no note.
 data class ResolveTicketRequest(val resolution: String)
 
+// ─── Payment requests (/admin/payments) ──────────────────────────────
+// The manual payment queue behind a paid plan: a user files a
+// PaymentRequest carrying the plan they paid for and the transaction id
+// they paid with, and an admin verifies it - verifying is what actually
+// moves that user onto payment.plan. amount is a Prisma Decimal
+// server-side and reaches the client as a plain JSON number, the same
+// jsonWithDecimals convention as the ads/marketplace/HELP money fields
+// above. Every route here is requireAdmin (real ADMIN role only).
+data class AdminPaymentUser(
+    val id: String,
+    val username: String,
+    val name: String? = null,
+    val email: String? = null,
+)
+
+data class AdminPaymentRequest(
+    val id: String,
+    val plan: String,
+    val amount: Double,
+    val currency: String,
+    val transactionId: String?,
+    val status: String,
+    val createdAt: String,
+    val user: AdminPaymentUser,
+)
+
+// The verify route keys off the PaymentRequest id and 400s on anything
+// that isn't still "pending" - the queue only ever lists pending rows,
+// so that only fires when two admins work the same row at once.
+data class VerifyPaymentRequest(val paymentId: String)
+
+// ─── Withdrawals (/admin/withdrawals) ────────────────────────────────
+// Creator earnings payouts - NOT /admin/help-withdrawals, which is the
+// separate HELP-campaign fund release. Status is the real UPPERCASE
+// WithdrawalStatus enum (PENDING/PROCESSING/COMPLETED/FAILED/REJECTED);
+// amount is again a Decimal arriving as a plain number. Approving one
+// executes a real on-chain USDC transfer to walletAddress and cannot be
+// undone; rejecting releases the reserved amount back to the creator's
+// balance. Both are requireAdmin.
+data class AdminWithdrawalUser(
+    val id: String,
+    val username: String,
+    val name: String? = null,
+    val email: String? = null,
+)
+
+data class AdminWithdrawal(
+    val id: String,
+    val amount: Double,
+    val currency: String,
+    val walletAddress: String,
+    val status: String,
+    val transactionHash: String?,
+    val processedAt: String?,
+    val createdAt: String,
+    val user: AdminWithdrawalUser,
+)
+
+// ─── Upgrade requests (/upgrade-requests) ────────────────────────────
+// Deliberately not under /admin: this is the same route a user POSTs
+// their own upgrade request to, whose GET (the queue) and PUT (the
+// decision) halves are both requireAdmin. Approving writes
+// requestedPlan straight onto the requester's User.plan.
+data class AdminUpgradeRequestUser(
+    val id: String,
+    val username: String,
+    val name: String? = null,
+    val email: String? = null,
+    val plan: String? = null,
+)
+
+data class AdminUpgradeRequest(
+    val id: String,
+    val requestedPlan: String,
+    val paymentMethod: String?,
+    val message: String?,
+    val status: String,
+    val createdAt: String,
+    val user: AdminUpgradeRequestUser,
+)
+
+// action is "approve" or "deny" - the route 400s on anything else, and
+// on a request that isn't still "pending".
+data class UpgradeRequestActionRequest(val action: String)
+
+// ─── Plan management (PUT /admin/users/{id}/plan) ────────────────────
+// plan must be one of free/pro/business/enterprise - the route 400s on
+// anything else (see its own validPlans). ADMIN-only server-side
+// (requireAdmin), the same bar as role changes and user deletion.
+data class UpdateUserPlanRequest(val plan: String)
+
+// The plan route answers with the three selected columns only, not the
+// full admin user row - hence its own response type rather than reusing
+// AdminUser, whose non-null fields Gson would leave unset.
+data class AdminUserPlanResponse(val id: String, val username: String, val plan: String)
+
 /**
  * The same real ZRP admin backend the website's own /admin pages call -
  * this is a native surface onto the exact same routes, not a parallel
  * moderation system. Every route here is server-side gated by
  * requireStaff (ADMIN or MODERATOR - stats/reports/users-list/posts) or
- * requireAdmin (ADMIN only - role changes, user deletion, and every
- * support-ticket route) regardless of what this client sends;
- * AdminRepository's own KDoc covers how that maps to what the UI
+ * requireAdmin (ADMIN only - role changes, plan changes, user deletion,
+ * every support-ticket route and all four financial queues: payments,
+ * withdrawals and upgrade requests) regardless of what this client
+ * sends; AdminRepository's own KDoc covers how that maps to what the UI
  * shows/hides.
  */
 interface AdminApi {
@@ -610,4 +707,44 @@ interface AdminApi {
 
     @POST("admin/support/tickets/{id}/resolve")
     suspend fun resolveSupportTicket(@Path("id") id: String, @Body request: ResolveTicketRequest)
+
+    // The four financial queues below answer with a bare JSON array
+    // rather than the {rows,total,page,totalPages} envelope the rest of
+    // the admin API uses - the routes take no page parameter at all and
+    // return the whole queue, so their screens have no pager either.
+    @GET("admin/payments")
+    suspend fun getPendingPayments(): List<AdminPaymentRequest>
+
+    @POST("admin/payments/verify")
+    suspend fun verifyPayment(@Body request: VerifyPaymentRequest)
+
+    // status defaults to PENDING server-side; the screen always sends
+    // one explicitly so the filter chips and the queue stay in step.
+    @GET("admin/withdrawals")
+    suspend fun getWithdrawals(@Query("status") status: String): List<AdminWithdrawal>
+
+    // Both take no body - the withdrawal id in the path is the whole
+    // request, same as the ban toggle above.
+    @POST("admin/withdrawals/{id}/approve")
+    suspend fun approveWithdrawal(@Path("id") id: String)
+
+    @POST("admin/withdrawals/{id}/reject")
+    suspend fun rejectWithdrawal(@Path("id") id: String)
+
+    // Not "admin/upgrade-requests" - this route really does live at the
+    // API root (see AdminUpgradeRequest's own note).
+    @GET("upgrade-requests")
+    suspend fun getUpgradeRequests(@Query("status") status: String): List<AdminUpgradeRequest>
+
+    @PUT("upgrade-requests/{id}")
+    suspend fun reviewUpgradeRequest(
+        @Path("id") id: String,
+        @Body request: UpgradeRequestActionRequest,
+    )
+
+    @PUT("admin/users/{id}/plan")
+    suspend fun updateUserPlan(
+        @Path("id") id: String,
+        @Body request: UpdateUserPlanRequest,
+    ): AdminUserPlanResponse
 }
