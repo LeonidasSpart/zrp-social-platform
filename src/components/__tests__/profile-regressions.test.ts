@@ -138,3 +138,26 @@ describe("profile metadata", () => {
     expect(src).toContain('import PostCard from "@/components/PostCard"');
   });
 });
+
+describe("shorts caption", () => {
+  const src = read("src/app/shorts/page.tsx");
+
+  it("expands the caption in place instead of navigating", () => {
+    const idx = src.indexOf("toggleCaption(post.id)");
+    expect(idx).toBeGreaterThan(-1);
+    const block = src.slice(Math.max(0, idx - 400), idx + 200);
+    expect(block).toContain("stopPropagation");
+    expect(block).not.toContain("router.push");
+  });
+
+  it("announces the caption's expanded state", () => {
+    expect(src).toContain("aria-expanded={");
+    expect(src).toContain('t(\n                                  "rightPanel.showMore"');
+  });
+
+  it("reserves BottomNav's real footprint under the overlay", () => {
+    // BottomNav is a z-[9999] portal over this z-[100] screen; pb-8 was
+    // less than its h-14 + safe-area footprint, so it cut the author row.
+    expect(src).toContain("pb-[calc(3.5rem+env(safe-area-inset-bottom)+1rem)]");
+  });
+});
