@@ -281,6 +281,64 @@ export const SEED_SOURCES: SeedSource[] = [
     topics: ["WORLD", "POLITICS"],
     trustTier: 2,
   },
+
+  // ─── Regional coverage (tier 2) ──────────────────────────────
+  // BBC's own per-region World Service feeds, on the same
+  // feeds.bbci.co.uk host already fetching cleanly for bbc-world /
+  // bbc-business / bbc-technology above - added specifically to give
+  // Africa, Asia, Latin America and North America their own real
+  // region tag (see ingest.ts: a story's region/country comes
+  // directly from whichever source it was fetched from, not from
+  // analysing the article text), rather than everything defaulting to
+  // GLOBAL/WORLD. No source claiming to be Russia-specific is added
+  // here: the only widely-syndicated Russia-focused outlets are
+  // state-run and not independently verifiable as neutral, and no
+  // genuinely independent Russia-specific RSS feed was confirmed
+  // reachable to add responsibly instead of guessing one.
+  {
+    key: "bbc-africa",
+    name: "BBC News — Africa",
+    publisher: "BBC News",
+    feedUrl: "https://feeds.bbci.co.uk/news/world/africa/rss.xml",
+    homepageUrl: "https://www.bbc.com/news/world/africa",
+    region: "AFRICA",
+    language: "en",
+    topics: ["WORLD", "POLITICS"],
+    trustTier: 2,
+  },
+  {
+    key: "bbc-asia",
+    name: "BBC News — Asia",
+    publisher: "BBC News",
+    feedUrl: "https://feeds.bbci.co.uk/news/world/asia/rss.xml",
+    homepageUrl: "https://www.bbc.com/news/world/asia",
+    region: "ASIA",
+    language: "en",
+    topics: ["WORLD", "POLITICS"],
+    trustTier: 2,
+  },
+  {
+    key: "bbc-latin-america",
+    name: "BBC News — Latin America",
+    publisher: "BBC News",
+    feedUrl: "https://feeds.bbci.co.uk/news/world/latin_america/rss.xml",
+    homepageUrl: "https://www.bbc.com/news/world/latin_america",
+    region: "SOUTH_AMERICA",
+    language: "en",
+    topics: ["WORLD", "POLITICS"],
+    trustTier: 2,
+  },
+  {
+    key: "bbc-us-canada",
+    name: "BBC News — US & Canada",
+    publisher: "BBC News",
+    feedUrl: "https://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml",
+    homepageUrl: "https://www.bbc.com/news/world/us_and_canada",
+    region: "NORTH_AMERICA",
+    language: "en",
+    topics: ["WORLD", "POLITICS"],
+    trustTier: 2,
+  },
 ];
 
 export function seedSourceKeys(): string[] {
