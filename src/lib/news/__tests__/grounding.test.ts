@@ -90,6 +90,27 @@ describe("extractors", () => {
     expect(extractNumbers("up 4% to 1,250 in 2026")).toEqual(["4", "1250", "2026"]);
   });
 
+  // Real bug, found via production output: two unrelated numbers in
+  // different sentences or paragraphs were merged into one bogus token
+  // (e.g. "2026" and "01" became "202601"), which then matched nothing
+  // in the source material and failed the whole rendition for a figure
+  // the model never actually wrote.
+  it("does not merge two unrelated numbers across a sentence boundary", () => {
+    expect(extractNumbers("It happened in 2026. 01 officials confirmed it.")).toEqual([
+      "2026",
+      "1",
+    ]);
+  });
+
+  it("does not merge two unrelated numbers across a paragraph break", () => {
+    expect(extractNumbers("The toll was 47.\n\n200 more are missing.")).toEqual(["47", "200"]);
+  });
+
+  it("still treats European space-grouped thousands as one number", () => {
+    expect(extractNumbers("1 200 personnes")).toEqual(["1200"]);
+    expect(extractNumbers("12 345 678")).toEqual(["12345678"]);
+  });
+
   it("ignores short scare quotes and finds real quotations", () => {
     expect(extractQuotes('a "short" one')).toEqual([]);
     expect(extractQuotes('he said "this is a long enough quotation to matter"')).toEqual([
