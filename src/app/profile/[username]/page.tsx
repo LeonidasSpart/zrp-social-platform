@@ -1995,16 +1995,8 @@ export default function ProfilePage(
             />
 
             <span className="min-w-0 flex-1">
-              <span className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
+              <span className="block text-sm font-semibold text-gray-900 dark:text-white">
                 {t("profile.trustPassportTitle")}
-
-                {profile.badgeType && (
-                  <VerifiedBadge
-                    badgeType={
-                      profile.badgeType
-                    }
-                  />
-                )}
               </span>
 
               <span className="block truncate text-xs text-gray-500 dark:text-gray-400">
