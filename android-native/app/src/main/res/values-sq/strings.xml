@@ -1543,6 +1543,82 @@
     <string name="admin_posts_previous">Mëparshme</string>
     <string name="admin_posts_next">Tjetra</string>
     <string name="admin_posts_page_of">Faqja %1$s nga %2$s</string>
+    <!-- Admin: the seven staff review/management queues the website's own admin nav offers beyond Reports/Users/Posts (appeals, ads, marketplace, opportunity, HELP, journalists, music artists) - all requireStaff server-side, same as reports/posts -->
+    <string name="admin_dash_review_appeals">Shqyrto ankesat</string>
+    <string name="admin_dash_review_ads">Shqyrto reklamat</string>
+    <string name="admin_dash_review_marketplace">Shqyrto Marketplace</string>
+    <string name="admin_dash_review_opportunity">Shqyrto Opportunity</string>
+    <string name="admin_dash_review_help">Shqyrto fushatat HELP</string>
+    <string name="admin_dash_manage_journalists">Menaxho gazetarët</string>
+    <string name="admin_dash_manage_music_artists">Menaxho artistët</string>
+    <!-- Shared by the ads/marketplace/opportunity/HELP review queues - the same status enum and the same approve/reject/remove verbs, exactly as the web pages share them -->
+    <string name="admin_review_approve">Mirato</string>
+    <string name="admin_review_reject">Refuzo</string>
+    <string name="admin_review_remove">Hiq</string>
+    <string name="admin_review_by">Nga @%1$s</string>
+    <string name="admin_review_reason_label">Arsyeja: %1$s</string>
+    <string name="admin_review_status_pending_review">Në pritje të shqyrtimit</string>
+    <string name="admin_review_status_active">Aktiv</string>
+    <string name="admin_review_status_rejected">Refuzuar</string>
+    <string name="admin_review_status_removed">Hequr</string>
+    <!-- Admin appeals queue (src/app/admin/appeals) - status is the real lowercase Appeal enum -->
+    <string name="admin_appeals_title">Ankesat</string>
+    <string name="admin_appeals_no_appeals">Nuk ka ankesa.</string>
+    <string name="admin_appeals_resolve">Vendos</string>
+    <string name="admin_appeals_choose_decision">Zgjidh vendimin</string>
+    <string name="admin_appeals_status_pending">Në pritje</string>
+    <string name="admin_appeals_status_upheld">Lënë në fuqi</string>
+    <string name="admin_appeals_status_overturned">Rrëzuar</string>
+    <string name="admin_appeals_appealed_by">Ankesë nga @%1$s</string>
+    <string name="admin_appeals_resolution_note">Vendimi: %1$s</string>
+    <!-- Admin ad review queue (src/app/admin/ads) -->
+    <string name="admin_ads_title">Shqyrtimi i reklamave</string>
+    <string name="admin_ads_no_campaigns">Nuk ka fushata për shqyrtim.</string>
+    <string name="admin_ads_budget">%1$s %2$s · Buxheti %3$s</string>
+    <string name="admin_ads_rejection_placeholder">Shpjegoji reklamuesit arsyen e refuzimit...</string>
+    <!-- Admin marketplace review queue (src/app/admin/marketplace) -->
+    <string name="admin_marketplace_title">Shqyrtimi i Marketplace</string>
+    <string name="admin_marketplace_no_listings">Nuk ka shpallje për shqyrtim.</string>
+    <string name="admin_marketplace_price_on_request">Çmimi me kërkesë</string>
+    <!-- Admin Opportunity review queue (src/app/admin/opportunity) -->
+    <string name="admin_opportunity_title">Shqyrtimi i Opportunity</string>
+    <string name="admin_opportunity_no_listings">Nuk ka shpallje për shqyrtim.</string>
+    <!-- Admin HELP campaign review queue (src/app/admin/help) -->
+    <string name="admin_help_title">Shqyrtimi i HELP</string>
+    <string name="admin_help_no_campaigns">Nuk ka fushata për shqyrtim.</string>
+    <string name="admin_help_raised">%1$s nga %2$s %3$s të mbledhura</string>
+    <!-- Admin journalist applications (src/app/admin/journalists) - UPPERCASE JournalistStatus, plus the same direct grant-by-username the web page offers -->
+    <string name="admin_journalists_title">Gazetarët</string>
+    <string name="admin_journalists_search_placeholder">Kërko gazetarë...</string>
+    <string name="admin_journalists_no_applications">Nuk u gjet asnjë aplikim.</string>
+    <string name="admin_journalists_status_pending">Në pritje</string>
+    <string name="admin_journalists_status_verified">I verifikuar</string>
+    <string name="admin_journalists_status_suspended">I pezulluar</string>
+    <string name="admin_journalists_status_rejected">I refuzuar</string>
+    <string name="admin_journalists_suspend">Pezullo</string>
+    <string name="admin_journalists_restore">Rikthe</string>
+    <string name="admin_journalists_confirm_approve">Ta miratosh këtë aplikim gazetari?</string>
+    <string name="admin_journalists_confirm_restore">Ta rikthesh statusin e verifikuar të këtij gazetari?</string>
+    <string name="admin_journalists_reject_reason">Arsyeja e refuzimit</string>
+    <string name="admin_journalists_suspend_reason">Arsyeja e pezullimit</string>
+    <string name="admin_journalists_remove_reason">Arsyeja e heqjes</string>
+    <string name="admin_journalists_outlet">Media: %1$s</string>
+    <string name="admin_journalists_grant_title">Jep statusin e gazetarit</string>
+    <string name="admin_journalists_grant_desc">Bëje një përdorues ekzistues gazetar të verifikuar pa aplikim.</string>
+    <string name="admin_journalists_username_placeholder">emri i përdoruesit</string>
+    <string name="admin_journalists_grant">Jep</string>
+    <!-- Admin music artist roster (src/app/admin/music) - verify badge + a cascading delete of the artist's whole catalogue -->
+    <string name="admin_music_artists_title">Artistët e muzikës</string>
+    <string name="admin_music_artists_search_placeholder">Kërko artistë...</string>
+    <string name="admin_music_artists_none">Nuk u gjet asnjë artist.</string>
+    <string name="admin_music_artists_verified">I verifikuar</string>
+    <string name="admin_music_artists_unverified">I paverifikuar</string>
+    <string name="admin_music_artists_verify">Verifiko</string>
+    <string name="admin_music_artists_unverify">Hiq verifikimin</string>
+    <string name="admin_music_artists_delete">Fshi</string>
+    <string name="admin_music_artists_delete_confirm">Të fshihet %1$s dhe i gjithë katalogu? Humbin të gjitha këngët, albumet dhe ndjekësit. Nuk kthehet mbrapsht.</string>
+    <string name="admin_music_artists_counts">%1$d këngë · %2$d ndjekës</string>
+    <string name="admin_music_artists_verify_warning">Verifikimi e shënon këtë artist si të njohur zyrtarisht në ZRP Music.</string>
     <!-- Legal pages (Terms/Privacy/Guidelines) - link labels only, content lives in an in-app WebView pointed at the real zrp.one pages -->
     <string name="legal_section_title">Ligjore</string>
     <string name="legal_terms">Kushtet e Shërbimit</string>

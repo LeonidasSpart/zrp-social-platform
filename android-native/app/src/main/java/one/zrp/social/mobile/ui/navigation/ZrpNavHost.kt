@@ -39,7 +39,14 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.data.NotificationsRepository
 import one.zrp.social.mobile.network.MobileUser
+import one.zrp.social.mobile.ui.admin.AdminAdsScreen
+import one.zrp.social.mobile.ui.admin.AdminAppealsScreen
 import one.zrp.social.mobile.ui.admin.AdminDashboardScreen
+import one.zrp.social.mobile.ui.admin.AdminHelpScreen
+import one.zrp.social.mobile.ui.admin.AdminJournalistsScreen
+import one.zrp.social.mobile.ui.admin.AdminMarketplaceScreen
+import one.zrp.social.mobile.ui.admin.AdminMusicArtistsScreen
+import one.zrp.social.mobile.ui.admin.AdminOpportunityScreen
 import one.zrp.social.mobile.ui.admin.AdminPostsScreen
 import one.zrp.social.mobile.ui.admin.AdminReportsScreen
 import one.zrp.social.mobile.ui.admin.AdminUsersScreen
@@ -241,6 +248,13 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     val goToAdminReports: () -> Unit = { navController.navigate("admin/reports") }
     val goToAdminUsers: () -> Unit = { navController.navigate("admin/users") }
     val goToAdminPosts: () -> Unit = { navController.navigate("admin/posts") }
+    val goToAdminAppeals: () -> Unit = { navController.navigate("admin/appeals") }
+    val goToAdminAds: () -> Unit = { navController.navigate("admin/ads") }
+    val goToAdminMarketplace: () -> Unit = { navController.navigate("admin/marketplace") }
+    val goToAdminOpportunity: () -> Unit = { navController.navigate("admin/opportunity") }
+    val goToAdminHelp: () -> Unit = { navController.navigate("admin/help") }
+    val goToAdminJournalists: () -> Unit = { navController.navigate("admin/journalists") }
+    val goToAdminMusicArtists: () -> Unit = { navController.navigate("admin/music-artists") }
     val goToTerms: () -> Unit = { navController.navigate("legal/terms") }
     val goToPrivacyPolicy: () -> Unit = { navController.navigate("legal/privacy") }
     val goToGuidelines: () -> Unit = { navController.navigate("legal/guidelines") }
@@ -1111,6 +1125,13 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenUsers = goToAdminUsers,
                     onOpenPosts = goToAdminPosts,
                     onOpenReports = goToAdminReports,
+                    onOpenAppeals = goToAdminAppeals,
+                    onOpenAds = goToAdminAds,
+                    onOpenMarketplace = goToAdminMarketplace,
+                    onOpenOpportunity = goToAdminOpportunity,
+                    onOpenHelp = goToAdminHelp,
+                    onOpenJournalists = goToAdminJournalists,
+                    onOpenMusicArtists = goToAdminMusicArtists,
                 )
             }
             composable("admin/reports") {
@@ -1121,6 +1142,32 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
             }
             composable("admin/posts") {
                 AdminPostsScreen(onBack = { navController.popBackStack() })
+            }
+            // Every one of these is requireStaff server-side (see
+            // AdminApi's own KDoc), the same level as reports/posts -
+            // so, like those, they take no isAdmin flag: the entry
+            // point is already gated at the Settings row and the real
+            // boundary is the route itself.
+            composable("admin/appeals") {
+                AdminAppealsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/ads") {
+                AdminAdsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/marketplace") {
+                AdminMarketplaceScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/opportunity") {
+                AdminOpportunityScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/help") {
+                AdminHelpScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/journalists") {
+                AdminJournalistsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/music-artists") {
+                AdminMusicArtistsScreen(onBack = { navController.popBackStack() })
             }
             composable("creator") {
                 CreatorScreen(

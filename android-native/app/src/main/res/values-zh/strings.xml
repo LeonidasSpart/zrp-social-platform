@@ -1543,6 +1543,82 @@
     <string name="admin_posts_previous">上一页</string>
     <string name="admin_posts_next">下一页</string>
     <string name="admin_posts_page_of">页面 %1$s 的 %2$s</string>
+    <!-- Admin: the seven staff review/management queues the website's own admin nav offers beyond Reports/Users/Posts (appeals, ads, marketplace, opportunity, HELP, journalists, music artists) - all requireStaff server-side, same as reports/posts -->
+    <string name="admin_dash_review_appeals">审核申诉</string>
+    <string name="admin_dash_review_ads">审核广告</string>
+    <string name="admin_dash_review_marketplace">审核商城</string>
+    <string name="admin_dash_review_opportunity">审核机会</string>
+    <string name="admin_dash_review_help">审核 HELP 活动</string>
+    <string name="admin_dash_manage_journalists">管理记者</string>
+    <string name="admin_dash_manage_music_artists">管理音乐艺人</string>
+    <!-- Shared by the ads/marketplace/opportunity/HELP review queues - the same status enum and the same approve/reject/remove verbs, exactly as the web pages share them -->
+    <string name="admin_review_approve">批准</string>
+    <string name="admin_review_reject">拒绝</string>
+    <string name="admin_review_remove">移除</string>
+    <string name="admin_review_by">由 @%1$s 发布</string>
+    <string name="admin_review_reason_label">原因：%1$s</string>
+    <string name="admin_review_status_pending_review">待审核</string>
+    <string name="admin_review_status_active">进行中</string>
+    <string name="admin_review_status_rejected">已拒绝</string>
+    <string name="admin_review_status_removed">已移除</string>
+    <!-- Admin appeals queue (src/app/admin/appeals) - status is the real lowercase Appeal enum -->
+    <string name="admin_appeals_title">申诉</string>
+    <string name="admin_appeals_no_appeals">暂无申诉。</string>
+    <string name="admin_appeals_resolve">处理</string>
+    <string name="admin_appeals_choose_decision">选择裁定</string>
+    <string name="admin_appeals_status_pending">待处理</string>
+    <string name="admin_appeals_status_upheld">维持原判</string>
+    <string name="admin_appeals_status_overturned">已推翻</string>
+    <string name="admin_appeals_appealed_by">@%1$s 提出的申诉</string>
+    <string name="admin_appeals_resolution_note">裁定：%1$s</string>
+    <!-- Admin ad review queue (src/app/admin/ads) -->
+    <string name="admin_ads_title">广告审核</string>
+    <string name="admin_ads_no_campaigns">暂无待审核的活动。</string>
+    <string name="admin_ads_budget">%1$s %2$s · 预算 %3$s</string>
+    <string name="admin_ads_rejection_placeholder">向广告主说明拒绝原因……</string>
+    <!-- Admin marketplace review queue (src/app/admin/marketplace) -->
+    <string name="admin_marketplace_title">商城审核</string>
+    <string name="admin_marketplace_no_listings">暂无待审核的商品。</string>
+    <string name="admin_marketplace_price_on_request">价格面议</string>
+    <!-- Admin Opportunity review queue (src/app/admin/opportunity) -->
+    <string name="admin_opportunity_title">机会审核</string>
+    <string name="admin_opportunity_no_listings">暂无待审核的职位。</string>
+    <!-- Admin HELP campaign review queue (src/app/admin/help) -->
+    <string name="admin_help_title">HELP 审核</string>
+    <string name="admin_help_no_campaigns">暂无待审核的活动。</string>
+    <string name="admin_help_raised">已筹集 %1$s / %2$s %3$s</string>
+    <!-- Admin journalist applications (src/app/admin/journalists) - UPPERCASE JournalistStatus, plus the same direct grant-by-username the web page offers -->
+    <string name="admin_journalists_title">记者</string>
+    <string name="admin_journalists_search_placeholder">搜索记者……</string>
+    <string name="admin_journalists_no_applications">未找到申请。</string>
+    <string name="admin_journalists_status_pending">待处理</string>
+    <string name="admin_journalists_status_verified">已认证</string>
+    <string name="admin_journalists_status_suspended">已暂停</string>
+    <string name="admin_journalists_status_rejected">已拒绝</string>
+    <string name="admin_journalists_suspend">暂停</string>
+    <string name="admin_journalists_restore">恢复</string>
+    <string name="admin_journalists_confirm_approve">批准该记者申请？</string>
+    <string name="admin_journalists_confirm_restore">恢复该记者的认证状态？</string>
+    <string name="admin_journalists_reject_reason">拒绝原因</string>
+    <string name="admin_journalists_suspend_reason">暂停原因</string>
+    <string name="admin_journalists_remove_reason">移除原因</string>
+    <string name="admin_journalists_outlet">媒体：%1$s</string>
+    <string name="admin_journalists_grant_title">直接授予记者身份</string>
+    <string name="admin_journalists_grant_desc">无需申请，直接将现有用户设为认证记者。</string>
+    <string name="admin_journalists_username_placeholder">用户名</string>
+    <string name="admin_journalists_grant">授予</string>
+    <!-- Admin music artist roster (src/app/admin/music) - verify badge + a cascading delete of the artist's whole catalogue -->
+    <string name="admin_music_artists_title">音乐艺人</string>
+    <string name="admin_music_artists_search_placeholder">搜索艺人……</string>
+    <string name="admin_music_artists_none">未找到艺人。</string>
+    <string name="admin_music_artists_verified">已认证</string>
+    <string name="admin_music_artists_unverified">未认证</string>
+    <string name="admin_music_artists_verify">认证</string>
+    <string name="admin_music_artists_unverify">取消认证</string>
+    <string name="admin_music_artists_delete">删除</string>
+    <string name="admin_music_artists_delete_confirm">删除 %1$s 及其全部作品？所有单曲、专辑和粉丝都将一并删除，且无法撤销。</string>
+    <string name="admin_music_artists_counts">%1$d 首单曲 · %2$d 位粉丝</string>
+    <string name="admin_music_artists_verify_warning">认证会将该艺人标记为 ZRP Music 官方认可。</string>
     <!-- Legal pages (Terms/Privacy/Guidelines) - link labels only, content lives in an in-app WebView pointed at the real zrp.one pages -->
     <string name="legal_section_title">法律信息</string>
     <string name="legal_terms">服务条款</string>

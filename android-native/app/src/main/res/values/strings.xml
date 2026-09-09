@@ -1557,6 +1557,82 @@
     <string name="admin_posts_previous">Previous</string>
     <string name="admin_posts_next">Next</string>
     <string name="admin_posts_page_of">Page %1$s of %2$s</string>
+    <!-- Admin: the seven staff review/management queues the website's own admin nav offers beyond Reports/Users/Posts (appeals, ads, marketplace, opportunity, HELP, journalists, music artists) - all requireStaff server-side, same as reports/posts -->
+    <string name="admin_dash_review_appeals">Review Appeals</string>
+    <string name="admin_dash_review_ads">Review Ads</string>
+    <string name="admin_dash_review_marketplace">Review Marketplace</string>
+    <string name="admin_dash_review_opportunity">Review Opportunity</string>
+    <string name="admin_dash_review_help">Review HELP Campaigns</string>
+    <string name="admin_dash_manage_journalists">Manage Journalists</string>
+    <string name="admin_dash_manage_music_artists">Manage Music Artists</string>
+    <!-- Shared by the ads/marketplace/opportunity/HELP review queues - the same status enum and the same approve/reject/remove verbs, exactly as the web pages share them -->
+    <string name="admin_review_approve">Approve</string>
+    <string name="admin_review_reject">Reject</string>
+    <string name="admin_review_remove">Remove</string>
+    <string name="admin_review_by">By @%1$s</string>
+    <string name="admin_review_reason_label">Reason: %1$s</string>
+    <string name="admin_review_status_pending_review">Pending Review</string>
+    <string name="admin_review_status_active">Active</string>
+    <string name="admin_review_status_rejected">Rejected</string>
+    <string name="admin_review_status_removed">Removed</string>
+    <!-- Admin appeals queue (src/app/admin/appeals) - status is the real lowercase Appeal enum -->
+    <string name="admin_appeals_title">Appeals</string>
+    <string name="admin_appeals_no_appeals">No appeals to show.</string>
+    <string name="admin_appeals_resolve">Resolve</string>
+    <string name="admin_appeals_choose_decision">Choose Decision</string>
+    <string name="admin_appeals_status_pending">Pending</string>
+    <string name="admin_appeals_status_upheld">Upheld</string>
+    <string name="admin_appeals_status_overturned">Overturned</string>
+    <string name="admin_appeals_appealed_by">Appealed by @%1$s</string>
+    <string name="admin_appeals_resolution_note">Resolution: %1$s</string>
+    <!-- Admin ad review queue (src/app/admin/ads) -->
+    <string name="admin_ads_title">Ad Review</string>
+    <string name="admin_ads_no_campaigns">No campaigns to review.</string>
+    <string name="admin_ads_budget">%1$s %2$s · Budget %3$s</string>
+    <string name="admin_ads_rejection_placeholder">Tell the advertiser why this was rejected...</string>
+    <!-- Admin marketplace review queue (src/app/admin/marketplace) -->
+    <string name="admin_marketplace_title">Marketplace Review</string>
+    <string name="admin_marketplace_no_listings">No listings to review.</string>
+    <string name="admin_marketplace_price_on_request">Price on request</string>
+    <!-- Admin Opportunity review queue (src/app/admin/opportunity) -->
+    <string name="admin_opportunity_title">Opportunity Review</string>
+    <string name="admin_opportunity_no_listings">No listings to review.</string>
+    <!-- Admin HELP campaign review queue (src/app/admin/help) -->
+    <string name="admin_help_title">HELP Review</string>
+    <string name="admin_help_no_campaigns">No campaigns to review.</string>
+    <string name="admin_help_raised">%1$s of %2$s %3$s raised</string>
+    <!-- Admin journalist applications (src/app/admin/journalists) - UPPERCASE JournalistStatus, plus the same direct grant-by-username the web page offers -->
+    <string name="admin_journalists_title">Journalists</string>
+    <string name="admin_journalists_search_placeholder">Search journalists...</string>
+    <string name="admin_journalists_no_applications">No applications found.</string>
+    <string name="admin_journalists_status_pending">Pending</string>
+    <string name="admin_journalists_status_verified">Verified</string>
+    <string name="admin_journalists_status_suspended">Suspended</string>
+    <string name="admin_journalists_status_rejected">Rejected</string>
+    <string name="admin_journalists_suspend">Suspend</string>
+    <string name="admin_journalists_restore">Restore</string>
+    <string name="admin_journalists_confirm_approve">Approve this journalist application?</string>
+    <string name="admin_journalists_confirm_restore">Restore this journalist\'s verified status?</string>
+    <string name="admin_journalists_reject_reason">Rejection reason</string>
+    <string name="admin_journalists_suspend_reason">Suspension reason</string>
+    <string name="admin_journalists_remove_reason">Removal reason</string>
+    <string name="admin_journalists_outlet">Outlet: %1$s</string>
+    <string name="admin_journalists_grant_title">Grant journalist status</string>
+    <string name="admin_journalists_grant_desc">Make an existing user a verified journalist without an application.</string>
+    <string name="admin_journalists_username_placeholder">username</string>
+    <string name="admin_journalists_grant">Grant</string>
+    <!-- Admin music artist roster (src/app/admin/music) - verify badge + a cascading delete of the artist's whole catalogue -->
+    <string name="admin_music_artists_title">Music Artists</string>
+    <string name="admin_music_artists_search_placeholder">Search artists...</string>
+    <string name="admin_music_artists_none">No artists found.</string>
+    <string name="admin_music_artists_verified">Verified</string>
+    <string name="admin_music_artists_unverified">Unverified</string>
+    <string name="admin_music_artists_verify">Verify</string>
+    <string name="admin_music_artists_unverify">Unverify</string>
+    <string name="admin_music_artists_delete">Delete</string>
+    <string name="admin_music_artists_delete_confirm">Delete %1$s and their entire catalogue? Every track, album and follower goes with them. This cannot be undone.</string>
+    <string name="admin_music_artists_counts">%1$d tracks · %2$d followers</string>
+    <string name="admin_music_artists_verify_warning">Verifying marks this artist as officially recognised on ZRP Music.</string>
     <!-- Legal pages (Terms/Privacy/Guidelines/Help Center/Contact) - link labels only. Content is native (LegalScreen), fetched live from GET /api/legal/:page - no WebView. -->
     <string name="legal_section_title">Legal</string>
     <string name="legal_terms">Terms of Service</string>

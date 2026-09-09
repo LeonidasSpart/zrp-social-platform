@@ -1543,6 +1543,82 @@
     <string name="admin_posts_previous">السابق</string>
     <string name="admin_posts_next">التالي</string>
     <string name="admin_posts_page_of">صفحة %1$s من %2$s</string>
+    <!-- Admin: the seven staff review/management queues the website's own admin nav offers beyond Reports/Users/Posts (appeals, ads, marketplace, opportunity, HELP, journalists, music artists) - all requireStaff server-side, same as reports/posts -->
+    <string name="admin_dash_review_appeals">مراجعة الطعون</string>
+    <string name="admin_dash_review_ads">مراجعة الإعلانات</string>
+    <string name="admin_dash_review_marketplace">مراجعة المتجر</string>
+    <string name="admin_dash_review_opportunity">مراجعة الفرص</string>
+    <string name="admin_dash_review_help">مراجعة حملات HELP</string>
+    <string name="admin_dash_manage_journalists">إدارة الصحفيين</string>
+    <string name="admin_dash_manage_music_artists">إدارة فناني الموسيقى</string>
+    <!-- Shared by the ads/marketplace/opportunity/HELP review queues - the same status enum and the same approve/reject/remove verbs, exactly as the web pages share them -->
+    <string name="admin_review_approve">موافقة</string>
+    <string name="admin_review_reject">رفض</string>
+    <string name="admin_review_remove">إزالة</string>
+    <string name="admin_review_by">بواسطة @%1$s</string>
+    <string name="admin_review_reason_label">السبب: %1$s</string>
+    <string name="admin_review_status_pending_review">قيد المراجعة</string>
+    <string name="admin_review_status_active">نشط</string>
+    <string name="admin_review_status_rejected">مرفوض</string>
+    <string name="admin_review_status_removed">تمت الإزالة</string>
+    <!-- Admin appeals queue (src/app/admin/appeals) - status is the real lowercase Appeal enum -->
+    <string name="admin_appeals_title">الطعون</string>
+    <string name="admin_appeals_no_appeals">لا توجد طعون.</string>
+    <string name="admin_appeals_resolve">حسم الطعن</string>
+    <string name="admin_appeals_choose_decision">اختر القرار</string>
+    <string name="admin_appeals_status_pending">قيد الانتظار</string>
+    <string name="admin_appeals_status_upheld">مؤيَّد</string>
+    <string name="admin_appeals_status_overturned">ملغى</string>
+    <string name="admin_appeals_appealed_by">طعن من @%1$s</string>
+    <string name="admin_appeals_resolution_note">القرار: %1$s</string>
+    <!-- Admin ad review queue (src/app/admin/ads) -->
+    <string name="admin_ads_title">مراجعة الإعلانات</string>
+    <string name="admin_ads_no_campaigns">لا توجد حملات للمراجعة.</string>
+    <string name="admin_ads_budget">%1$s %2$s · الميزانية %3$s</string>
+    <string name="admin_ads_rejection_placeholder">اشرح للمعلن سبب الرفض...</string>
+    <!-- Admin marketplace review queue (src/app/admin/marketplace) -->
+    <string name="admin_marketplace_title">مراجعة المتجر</string>
+    <string name="admin_marketplace_no_listings">لا توجد إعلانات للمراجعة.</string>
+    <string name="admin_marketplace_price_on_request">السعر عند الطلب</string>
+    <!-- Admin Opportunity review queue (src/app/admin/opportunity) -->
+    <string name="admin_opportunity_title">مراجعة الفرص</string>
+    <string name="admin_opportunity_no_listings">لا توجد فرص للمراجعة.</string>
+    <!-- Admin HELP campaign review queue (src/app/admin/help) -->
+    <string name="admin_help_title">مراجعة HELP</string>
+    <string name="admin_help_no_campaigns">لا توجد حملات للمراجعة.</string>
+    <string name="admin_help_raised">تم جمع %1$s من %2$s %3$s</string>
+    <!-- Admin journalist applications (src/app/admin/journalists) - UPPERCASE JournalistStatus, plus the same direct grant-by-username the web page offers -->
+    <string name="admin_journalists_title">الصحفيون</string>
+    <string name="admin_journalists_search_placeholder">ابحث عن صحفيين...</string>
+    <string name="admin_journalists_no_applications">لم يتم العثور على طلبات.</string>
+    <string name="admin_journalists_status_pending">قيد الانتظار</string>
+    <string name="admin_journalists_status_verified">موثَّق</string>
+    <string name="admin_journalists_status_suspended">موقوف</string>
+    <string name="admin_journalists_status_rejected">مرفوض</string>
+    <string name="admin_journalists_suspend">إيقاف</string>
+    <string name="admin_journalists_restore">استعادة</string>
+    <string name="admin_journalists_confirm_approve">الموافقة على طلب الصحفي هذا؟</string>
+    <string name="admin_journalists_confirm_restore">استعادة حالة التوثيق لهذا الصحفي؟</string>
+    <string name="admin_journalists_reject_reason">سبب الرفض</string>
+    <string name="admin_journalists_suspend_reason">سبب الإيقاف</string>
+    <string name="admin_journalists_remove_reason">سبب الإزالة</string>
+    <string name="admin_journalists_outlet">الجهة: %1$s</string>
+    <string name="admin_journalists_grant_title">منح صفة صحفي</string>
+    <string name="admin_journalists_grant_desc">اجعل مستخدماً حالياً صحفياً موثقاً دون تقديم طلب.</string>
+    <string name="admin_journalists_username_placeholder">اسم المستخدم</string>
+    <string name="admin_journalists_grant">منح</string>
+    <!-- Admin music artist roster (src/app/admin/music) - verify badge + a cascading delete of the artist's whole catalogue -->
+    <string name="admin_music_artists_title">فنانو الموسيقى</string>
+    <string name="admin_music_artists_search_placeholder">ابحث عن فنانين...</string>
+    <string name="admin_music_artists_none">لم يتم العثور على فنانين.</string>
+    <string name="admin_music_artists_verified">موثَّق</string>
+    <string name="admin_music_artists_unverified">غير موثَّق</string>
+    <string name="admin_music_artists_verify">توثيق</string>
+    <string name="admin_music_artists_unverify">إلغاء التوثيق</string>
+    <string name="admin_music_artists_delete">حذف</string>
+    <string name="admin_music_artists_delete_confirm">حذف %1$s وكل كتالوجه؟ ستُفقد جميع المقاطع والألبومات والمتابعين. لا يمكن التراجع.</string>
+    <string name="admin_music_artists_counts">%1$d مقطعاً · %2$d متابعاً</string>
+    <string name="admin_music_artists_verify_warning">التوثيق يشير إلى أن هذا الفنان معترف به رسمياً في ZRP Music.</string>
     <!-- Legal pages (Terms/Privacy/Guidelines) - link labels only, content lives in an in-app WebView pointed at the real zrp.one pages -->
     <string name="legal_section_title">قانوني</string>
     <string name="legal_terms">شروط الخدمة</string>
