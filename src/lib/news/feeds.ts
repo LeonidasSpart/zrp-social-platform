@@ -90,6 +90,7 @@ const GLOBAL_DESKS: Array<{ key: string; name: string; topics: NewsTopic[] }> = 
   { key: "education", name: "ZRP Education", topics: ["EDUCATION"] },
   { key: "lifestyle", name: "ZRP Lifestyle", topics: ["LIFESTYLE"] },
   { key: "automotive", name: "ZRP Automotive", topics: ["AUTOMOTIVE"] },
+  { key: "gaming", name: "ZRP Gaming", topics: ["GAMING"] },
   { key: "breaking", name: "ZRP Breaking News", topics: ["BREAKING"] },
 ];
 

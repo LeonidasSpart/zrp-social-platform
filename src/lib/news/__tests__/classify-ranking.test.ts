@@ -25,6 +25,13 @@ describe("classifyTopic", () => {
       "CRYPTO"
     );
   });
+
+  it("routes video game coverage - PlayStation, Nintendo, Xbox - to GAMING", () => {
+    expect(classifyTopic("Sony reveals new PlayStation 6 hardware", null)).toBe("GAMING");
+    expect(classifyTopic("Nintendo announces new Switch console", null)).toBe("GAMING");
+    expect(classifyTopic("Microsoft unveils next Xbox console lineup", null)).toBe("GAMING");
+    expect(classifyTopic("Studio delays release of upcoming video game", null)).toBe("GAMING");
+  });
 });
 
 describe("detectBreaking / detectSensitive", () => {

@@ -16,7 +16,8 @@ type NewsCategory =
   | "SCIENCE"
   | "SPORTS"
   | "CULTURE"
-  | "COMMUNITY";
+  | "COMMUNITY"
+  | "GAMING";
 
 type NewsArticle = {
   id: string;
@@ -58,6 +59,7 @@ const categories: Array<{
   { value: "SPORTS", labelKey: "newsCategory.sports" },
   { value: "CULTURE", labelKey: "newsCategory.culture" },
   { value: "COMMUNITY", labelKey: "newsCategory.community" },
+  { value: "GAMING", labelKey: "newsCategory.gaming" },
 ];
 
 const CATEGORY_KEYS: Record<NewsCategory, TranslationKey> = {
@@ -72,6 +74,7 @@ const CATEGORY_KEYS: Record<NewsCategory, TranslationKey> = {
   SPORTS: "newsCategory.sports",
   CULTURE: "newsCategory.culture",
   COMMUNITY: "newsCategory.community",
+  GAMING: "newsCategory.gaming",
 };
 
 function formatDate(date: string | null) {
