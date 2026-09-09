@@ -177,6 +177,43 @@ jobs:
             echo "::warning::Release signing NOT configured or the provided secrets failed validation - this .aab is UNSIGNED. Do not upload it to Google Play Console."
           fi
 
+      # Reads the versionCode/versionName/applicationId Gradle actually
+      # embedded in the built bundle's manifest, rather than trusting that
+      # build.gradle's source values made it through unchanged. bundletool
+      # is Google's own tool for inspecting an .aab (an .aab's manifest is
+      # binary AXML inside a zip of per-module protobuf, so plain
+      # `aapt2 dump badging` - which only understands APKs - can't read it
+      # directly). Pinned to a fixed release so this step's behavior
+      # doesn't shift under an unrelated build. applicationId is asserted
+      # against the one Play Store listing both android/ and android-native/
+      # ship under (see app/build.gradle's own comment) - it must never
+      # silently change; versionCode/versionName are printed, not
+      # asserted, since the correct value is different on every release.
+      - name: Verify release AAB contents (versionCode/versionName/applicationId)
+        run: |
+          BUNDLETOOL_VERSION="1.15.6"
+          curl -fsSL -o "$RUNNER_TEMP/bundletool.jar" \
+            "https://github.com/google/bundletool/releases/download/${BUNDLETOOL_VERSION}/bundletool-all-${BUNDLETOOL_VERSION}.jar"
+
+          AAB_PATH="android-native/app/build/outputs/bundle/release/app-release.aab"
+          java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle="$AAB_PATH" > "$RUNNER_TEMP/manifest_dump.xml"
+
+          echo "── Decoded AndroidManifest.xml from the built .aab ──"
+          cat "$RUNNER_TEMP/manifest_dump.xml"
+
+          APP_ID=$(grep -oE 'package="[^"]*"' "$RUNNER_TEMP/manifest_dump.xml" | head -1 | cut -d'"' -f2)
+          VERSION_CODE=$(grep -oE 'versionCode="[^"]*"' "$RUNNER_TEMP/manifest_dump.xml" | head -1 | cut -d'"' -f2)
+          VERSION_NAME=$(grep -oE 'versionName="[^"]*"' "$RUNNER_TEMP/manifest_dump.xml" | head -1 | cut -d'"' -f2)
+
+          echo "applicationId=$APP_ID"
+          echo "versionCode=$VERSION_CODE"
+          echo "versionName=$VERSION_NAME"
+
+          if [ "$APP_ID" != "one.zrp.social" ]; then
+            echo "::error::Built .aab has applicationId '$APP_ID', expected 'one.zrp.social' - this would not update the existing Play Store listing."
+            exit 1
+          fi
+
       # A certificate's SHA-256 fingerprint is the public half of the
       # signing key pair - the same value Play Console itself displays
       # under App Integrity, and exactly what a

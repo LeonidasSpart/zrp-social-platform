@@ -26,6 +26,25 @@ describe("classifyTopic", () => {
     );
   });
 
+  // Real gap, found via production evidence: mainstream outlets almost
+  // always write "cryptocurrency", not the bare word "crypto". The old
+  // keyword list only matched "crypto" as its own whole token, which
+  // never fires inside "cryptocurrency" since normalizeText strips
+  // punctuation but never splits compound words - so ordinary crypto
+  // coverage from a general-news source was silently never classified
+  // as CRYPTO at all.
+  it("recognises 'cryptocurrency', not just the bare word 'crypto'", () => {
+    expect(classifyTopic("Regulators tighten rules on cryptocurrency exchanges", null)).toBe(
+      "CRYPTO"
+    );
+    expect(classifyTopic("Retailers see rising demand for digital currency payments", null)).toBe(
+      "CRYPTO"
+    );
+    expect(classifyTopic("Coinbase reports record quarterly trading volume", null)).toBe(
+      "CRYPTO"
+    );
+  });
+
   it("routes video game coverage - PlayStation, Nintendo, Xbox - to GAMING", () => {
     expect(classifyTopic("Sony reveals new PlayStation 6 hardware", null)).toBe("GAMING");
     expect(classifyTopic("Nintendo announces new Switch console", null)).toBe("GAMING");
