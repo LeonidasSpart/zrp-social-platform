@@ -89,7 +89,8 @@ describe("POST /api/mobile/auth/google", () => {
     mockedEncode.mockClear();
     process.env.NEXTAUTH_SECRET = "test-secret";
     process.env.NEXTAUTH_URL = "https://zrp.one";
-    process.env.GOOGLE_CLIENT_ID = "test-client-id";
+    process.env.GOOGLE_CLIENT_ID = "test-web-client-id";
+    process.env.GOOGLE_MOBILE_CLIENT_ID = "test-mobile-client-id";
   });
 
   it("400s when idToken is missing", async () => {
@@ -224,10 +225,45 @@ describe("POST /api/mobile/auth/google", () => {
     expect(mockedEncode).not.toHaveBeenCalled();
   });
 
-  it("500s with no details when GOOGLE_CLIENT_ID is not configured", async () => {
+  it("500s with no details when neither GOOGLE_CLIENT_ID nor GOOGLE_MOBILE_CLIENT_ID is configured", async () => {
     delete process.env.GOOGLE_CLIENT_ID;
+    delete process.env.GOOGLE_MOBILE_CLIENT_ID;
     const res = await callPOST(req({ idToken: "valid.token" }));
     expect(res.status).toBe(500);
     expect(verifyIdToken).not.toHaveBeenCalled();
+  });
+
+  // Android's Credential Manager mints tokens whose `aud` claim is
+  // GOOGLE_MOBILE_CLIENT_ID (a separate Web OAuth client, created in
+  // the same Google Cloud project as the app's own registered Android
+  // clients - see this route's own comment on why it can't reuse web's
+  // GOOGLE_CLIENT_ID, which lives in a different project). Sign-in must
+  // succeed even if GOOGLE_CLIENT_ID were ever unset, since the two are
+  // independent, and the real google-auth-library call must be given
+  // both as acceptable audiences, not just web's.
+  it("accepts a token whether it was verified against the web or the mobile client ID", async () => {
+    verifyIdToken.mockResolvedValueOnce({ getPayload: () => payload() });
+    findOrCreateOAuthUser.mockResolvedValueOnce(EXISTING_USER);
+
+    const res = await callPOST(req({ idToken: "valid.token" }));
+    expect(res.status).toBe(200);
+    expect(verifyIdToken).toHaveBeenCalledWith(
+      expect.objectContaining({
+        idToken: "valid.token",
+        audience: ["test-web-client-id", "test-mobile-client-id"],
+      })
+    );
+  });
+
+  it("still works with only GOOGLE_MOBILE_CLIENT_ID configured (GOOGLE_CLIENT_ID unset)", async () => {
+    delete process.env.GOOGLE_CLIENT_ID;
+    verifyIdToken.mockResolvedValueOnce({ getPayload: () => payload() });
+    findOrCreateOAuthUser.mockResolvedValueOnce(EXISTING_USER);
+
+    const res = await callPOST(req({ idToken: "valid.token" }));
+    expect(res.status).toBe(200);
+    expect(verifyIdToken).toHaveBeenCalledWith(
+      expect.objectContaining({ audience: ["test-mobile-client-id"] })
+    );
   });
 });
