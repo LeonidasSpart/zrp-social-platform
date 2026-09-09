@@ -88,9 +88,28 @@ android {
         // misconfigured GOOGLE_WEB_CLIENT_ID - this build surfaces the
         // actual configured (non-secret) client ID value directly in that
         // error message so the real cause can be confirmed from the
-        // device alone.
-        versionCode 9
-        versionName "4.0.4"
+        // device alone. versionCode 9 was built and committed here but
+        // was never uploaded to Play - versionCode 8 (4.0.4) remained the
+        // latest Internal Testing release, so it is the confirmed
+        // baseline for this bump, not 9. Since 8 shipped, GoogleAuth.kt
+        // gained a real second fix on top of the versionCode 9 diagnostic:
+        // an explicit "Sign in with Google" chooser (GetSignInWithGoogleOption)
+        // that retries automatically when the quiet GetGoogleIdOption path
+        // answers NoCredentialException, which is Google's own documented
+        // fallback for that exact failure and is expected to resolve it
+        // for real testers rather than just diagnosing it. Play Console
+        // also now carries a full admin parity pass built on this same
+        // main history: Support Tickets, the moderation/verification
+        // queues, financial workflows, internal ops tooling, and the ZRP
+        // News CMS + News Network console - all server-authorized via
+        // existing requireStaff/requireAdmin route checks, none of it
+        // changing end-user-facing behavior. That combination is a real
+        // milestone beyond 4.0.4, so this bumps to versionCode 10 /
+        // versionName "4.0.5", never reusing 9 or 8 per Play's
+        // monotonically-increasing versionCode requirement for this
+        // applicationId (see the versionCode 2/7 rejections above).
+        versionCode 10
+        versionName "4.0.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
