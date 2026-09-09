@@ -246,6 +246,69 @@ app.prepare().then(() => {
       socket.to(receiverId).emit("user-typing", { userId, isTyping });
     });
 
+    // ─── Group conversation rooms ─────────────────────────────────
+    // Prefixed ("group:<id>") specifically so it can never collide
+    // with a userId room - Conversation and User ids are both cuids
+    // in the same format, so an unprefixed room name could otherwise
+    // be ambiguous between "the user with this id" and "the group
+    // with this id".
+    async function isConversationMember(conversationId) {
+      const membership = await prisma.conversationParticipant.findUnique({
+        where: { conversationId_userId: { conversationId, userId } },
+      });
+      return membership !== null;
+    }
+
+    socket.on("join-conversation", async (conversationId) => {
+      if (!conversationId || typeof conversationId !== "string") return;
+      try {
+        // Real server-side membership check - never trust that a
+        // client asking to join a conversation room actually belongs
+        // to it, the same principle "join-room" above already applies
+        // to a user's own 1:1 room.
+        if (await isConversationMember(conversationId)) {
+          socket.join(`group:${conversationId}`);
+        }
+      } catch (err) {
+        console.error("join-conversation error:", err);
+      }
+    });
+
+    socket.on("leave-conversation", (conversationId) => {
+      if (!conversationId || typeof conversationId !== "string") return;
+      socket.leave(`group:${conversationId}`);
+    });
+
+    socket.on("send-group-message", async ({ conversationId, content, messageId }) => {
+      if (!conversationId || typeof conversationId !== "string") return;
+      if (!checkEventRateLimit(userId, "send-group-message", 30, 10_000)) return;
+
+      // Real membership check per send, not just once at join time - a
+      // socket can outlive a since-revoked membership until it
+      // reconnects.
+      try {
+        if (!(await isConversationMember(conversationId))) return;
+      } catch (err) {
+        console.error("send-group-message membership check error:", err);
+        return;
+      }
+
+      const message = {
+        id: messageId,
+        senderId: userId,
+        conversationId,
+        content,
+        createdAt: new Date().toISOString(),
+        read: false,
+      };
+      io.to(`group:${conversationId}`).emit("receive-group-message", message);
+    });
+
+    socket.on("typing-group", ({ conversationId, isTyping }) => {
+      if (!conversationId || typeof conversationId !== "string") return;
+      socket.to(`group:${conversationId}`).emit("user-typing-group", { conversationId, userId, isTyping });
+    });
+
     // ─── Delete / edit / reaction relay ──────────────────────────
     // Added because the client now emits these three events (real-time
     // sync for deleting/editing a message and toggling a reaction) but
@@ -254,18 +317,46 @@ app.prepare().then(() => {
     // the time these fire, so this is purely relaying the UI update to
     // the other participant, the same trust level send-message already
     // uses for receiverId (routing target, not an identity claim).
-    socket.on("delete-message", ({ messageId, receiverId }) => {
-      if (!messageId || !receiverId || typeof receiverId !== "string") return;
+    // Each of these three now also accepts a conversationId instead of
+    // a receiverId, for the real GROUP-message equivalent of the same
+    // edit/delete/reaction action - routed to the group's own room
+    // (see join-conversation's own KDoc on the "group:" prefix) rather
+    // than a single user's room. Unlike receiverId (a mere routing
+    // target, no DB-backed authorization needed since it's always the
+    // client's own already-REST-authorized action being relayed), a
+    // conversationId is checked against real membership first - a
+    // broadcast into an arbitrary room name is exactly the kind of
+    // thing that must not be trusted from an unverified client claim.
+    socket.on("delete-message", async ({ messageId, receiverId, conversationId }) => {
+      if (!messageId) return;
+      if (conversationId && typeof conversationId === "string") {
+        if (!(await isConversationMember(conversationId))) return;
+        io.to(`group:${conversationId}`).emit("message-deleted", { messageId });
+        return;
+      }
+      if (!receiverId || typeof receiverId !== "string") return;
       io.to(receiverId).emit("message-deleted", { messageId });
     });
 
-    socket.on("edit-message", ({ message, receiverId }) => {
-      if (!message || !receiverId || typeof receiverId !== "string") return;
+    socket.on("edit-message", async ({ message, receiverId, conversationId }) => {
+      if (!message) return;
+      if (conversationId && typeof conversationId === "string") {
+        if (!(await isConversationMember(conversationId))) return;
+        io.to(`group:${conversationId}`).emit("message-edited", { message });
+        return;
+      }
+      if (!receiverId || typeof receiverId !== "string") return;
       io.to(receiverId).emit("message-edited", { message });
     });
 
-    socket.on("message-reaction", ({ messageId, reactions, receiverId }) => {
-      if (!messageId || !receiverId || typeof receiverId !== "string") return;
+    socket.on("message-reaction", async ({ messageId, reactions, receiverId, conversationId }) => {
+      if (!messageId) return;
+      if (conversationId && typeof conversationId === "string") {
+        if (!(await isConversationMember(conversationId))) return;
+        io.to(`group:${conversationId}`).emit("reaction-updated", { messageId, reactions });
+        return;
+      }
+      if (!receiverId || typeof receiverId !== "string") return;
       io.to(receiverId).emit("reaction-updated", { messageId, reactions });
     });
 
