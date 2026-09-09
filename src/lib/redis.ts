@@ -19,6 +19,29 @@ let connecting: Promise<unknown> | null = null;
 const CONNECT_RETRY_COOLDOWN_MS = 5_000;
 let lastConnectFailureAt = 0;
 
+// ⚠️ Bounds the FIRST connection attempt only.
+//
+// node-redis's default reconnectStrategy retries forever with backoff
+// and never rejects created.connect() on its own - by design, once
+// connected it should keep trying to heal (that is exactly what makes
+// the mid-life-outage recovery above work, and what the TCP-proxy tests
+// in __tests__/redis.integration.test.ts verify). But that same
+// behaviour means a Redis that is unreachable from the very start
+// (wrong REDIS_URL, the service not up yet, a network partition from
+// boot) leaves `await created.connect()` pending forever - which, since
+// `connecting` is shared by every caller, would hang EVERY consumer of
+// Redis application-wide (rate limiting, link-preview caching, and the
+// news pipeline's lock) rather than just this one.
+//
+// So the initial attempt gets a bounded grace window. If it does not
+// become ready in time, this call reports unavailable (same as any
+// other failure) - but the client itself is kept and its connect()
+// promise is left to keep settling in the background, so a later call
+// still picks it up automatically once/if it does connect - exactly
+// the same isUsable() check the mid-life-recovery path already relies
+// on. Nothing about the mid-life recovery guarantee changes.
+const INITIAL_CONNECT_TIMEOUT_MS = 8_000;
+
 // ─── Load Redis only at runtime ──────────────────────────────────────
 async function loadRedis() {
   if (redisModule) {
@@ -111,8 +134,27 @@ export async function getRedisClient() {
       console.error("Redis client error:", err);
     });
 
-    await created.connect();
-    console.log("✅ Redis connected");
+    // Deliberately not `await`-ed directly: see INITIAL_CONNECT_TIMEOUT_MS
+    // above. Whatever this eventually does - resolve, reject, or keep
+    // retrying past our grace window - is handled here so it can never
+    // become an unhandled rejection once we've stopped waiting on it.
+    const connectAttempt = created.connect().then(
+      () => {
+        console.log("✅ Redis connected");
+      },
+      (err: Error) => {
+        console.error("Redis connect() attempt failed:", err);
+      }
+    );
+
+    await Promise.race([
+      connectAttempt,
+      new Promise((resolve) => setTimeout(resolve, INITIAL_CONNECT_TIMEOUT_MS)),
+    ]);
+
+    // Handed back regardless of whether the race above resolved because
+    // of a real connection or the timeout - isUsable() is what actually
+    // decides whether the CALLER gets it this time.
     return created;
   })();
 
