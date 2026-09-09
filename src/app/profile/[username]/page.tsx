@@ -43,6 +43,8 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import AnalyticsTab from "@/components/AnalyticsTab";
 import TipModal from "@/components/TipModal";
 import NativePaymentNotice from "@/components/NativePaymentNotice";
+import { SkeletonProfileHeader } from "@/components/skeletons/SkeletonProfileHeader";
+import { SkeletonFeed } from "@/components/skeletons/SkeletonFeed";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
 import { isNativeApp } from "@/lib/nativeAuth";
@@ -195,6 +197,10 @@ interface UserProfile {
 
   isFollowing: boolean;
   isBlocked: boolean;
+  // Does this profile follow the viewer back - X's "Follows you" signal.
+  // Independent of isFollowing (the other direction); see
+  // src/app/api/users/[username]/route.ts.
+  followsMe: boolean;
 
   followRequestStatus?: "pending" | "none";
 
@@ -967,10 +973,16 @@ export default function ProfilePage(
   // ─── Loading state ─────────────────────────────────────────────
 
   if (loading && !profile) {
+    // A shape-matched skeleton instead of a centred spinner on an
+    // otherwise blank page - the same real component
+    // (SkeletonProfileHeader) other loading states already use, just
+    // never wired up on the profile page itself before this.
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">
-          {t("action.loading")}
+      <div className="max-w-2xl mx-auto bg-white dark:bg-zrp-deepBlack min-h-screen">
+        <div className="h-48 bg-gray-100 dark:bg-gray-900" />
+        <SkeletonProfileHeader />
+        <div className="px-4 mt-2">
+          <SkeletonFeed count={3} />
         </div>
       </div>
     );
@@ -1492,6 +1504,22 @@ export default function ProfilePage(
               </Link>
             ) : (
               <>
+                {/* Blocked: this viewer has blocked this account. Follow,
+                    Message and Tip all imply an interaction that block is
+                    meant to prevent, so - like every mature reference
+                    profile - they're replaced with a single quiet
+                    indicator rather than left active and misleading. The
+                    only way back is the same More menu's own Unblock
+                    item, still reachable below. */}
+                {isBlocked && (
+                  <span className="inline-flex items-center gap-1.5 h-11 px-4 rounded-full text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 whitespace-nowrap">
+                    <Ban className="w-4 h-4" />
+                    {t("profile.blocked")}
+                  </span>
+                )}
+
+                {!isBlocked && (
+                  <>
                 {/* Follow */}
 
                 <button
@@ -1512,7 +1540,7 @@ export default function ProfilePage(
                   {followLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : isFollowRequested ? (
-                    "Requested"
+                    t("action.requested")
                   ) : isFollowing ? (
                     <>
                       <UserCheck className="w-4 h-4" />
@@ -1570,6 +1598,8 @@ export default function ProfilePage(
                       )}
                     </span>
                   </button>
+                )}
+                  </>
                 )}
 
                 {/* More */}
@@ -1702,9 +1732,23 @@ export default function ProfilePage(
               )}
           </div>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            @{profile.username}
-          </p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              @{profile.username}
+            </p>
+
+            {/* "Follows you" - the reverse of isFollowing (does THIS
+                account follow the viewer), a real reference-app signal
+                that was simply never computed before (see the API
+                route's own followsMe). Quiet, informational - a chip,
+                never a second accent competing with the Follow button
+                above. */}
+            {!isOwnProfile && profile.followsMe && (
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md">
+                {t("profile.followsYou")}
+              </span>
+            )}
+          </div>
 
           {/* Category reads as a caption on the person, so it sits
               with the rest of the metadata rather than between the
@@ -2146,9 +2190,18 @@ export default function ProfilePage(
 
       <div className="mt-4 px-4">
         {loading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-zrp-red" />
-          </div>
+          activeTab === "media" ? (
+            <div className="grid grid-cols-3 gap-0.5">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="aspect-square bg-gray-100 dark:bg-gray-800 animate-pulse"
+                />
+              ))}
+            </div>
+          ) : (
+            <SkeletonFeed count={3} />
+          )
         ) : !canViewPosts ? (
           renderProtectedMessage()
         ) : activeTab ===
@@ -2320,25 +2373,45 @@ export default function ProfilePage(
                 MEDIA
             ───────────────────────────────────────────────────── */}
 
-            {activeTab ===
-              "media" && (
-              <>
-                {posts.map(
-                  (post) => (
-                    <PostCard
-                      key={
-                        post.id
-                      }
-                      post={
-                        post
-                      }
-                      onUpdate={
-                        fetchPosts
-                      }
-                    />
-                  )
-                )}
-              </>
+            {/* A photo grid, not a column of full post cards - this tab
+                exists specifically to browse what someone has posted
+                visually (every reference profile does this), and a
+                column of full-width PostCards made scanning nine
+                photos mean nine long scrolls through captions and
+                action bars identical to the Posts tab. Each post here
+                already has a real imageUrl (the /media endpoint only
+                returns posts where one is set), so a plain square
+                thumbnail is real content, not a placeholder. */}
+            {activeTab === "media" && (
+              <div className="grid grid-cols-3 gap-0.5">
+                {posts.map((post) => (
+                  <Link
+                    key={post.id}
+                    href={`/post/${post.id}`}
+                    className="relative block aspect-square bg-gray-100 dark:bg-gray-800 overflow-hidden group"
+                  >
+                    {post.imageUrl && (
+                      <img
+                        src={post.imageUrl}
+                        alt=""
+                        className="w-full h-full object-cover transition group-hover:opacity-90"
+                      />
+                    )}
+
+                    <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/0 opacity-0 transition group-hover:bg-black/30 group-hover:opacity-100">
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-white">
+                        <Heart className="w-4 h-4" />
+                        {formatProfileCount(post._count.likes)}
+                      </span>
+
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-white">
+                        <MessageSquare className="w-4 h-4" />
+                        {formatProfileCount(post._count.comments)}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             )}
 
             {nextCursor && (
