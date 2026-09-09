@@ -61,9 +61,10 @@ private val STATUS_FILTERS = listOf("ALL", "ACTIVE", "BANNED")
 private val ASSIGNABLE_ROLES = listOf("USER", "MODERATOR", "ADMIN")
 
 /**
- * Ported from src/app/admin/users/page.tsx. isAdmin gates role-change
- * and delete controls - see AdminUsersViewModel's own KDoc for why
- * that's a UI-only convenience, not the real authorization boundary.
+ * Ported from src/app/admin/users/page.tsx. isAdmin gates the
+ * role-change, plan-change and delete controls - see
+ * AdminUsersViewModel's own KDoc for why that's a UI-only convenience,
+ * not the real authorization boundary.
  */
 @Composable
 fun AdminUsersScreen(isAdmin: Boolean, onBack: () -> Unit) {
@@ -148,6 +149,7 @@ fun AdminUsersScreen(isAdmin: Boolean, onBack: () -> Unit) {
                         isBusy = state.busyUserId == user.id,
                         onToggleBan = { viewModel.toggleBan(user.id) },
                         onChangeRole = { role -> viewModel.changeRole(user.id, role) },
+                        onChangePlan = { plan -> viewModel.requestPlanChange(user.id, plan) },
                         onDelete = { viewModel.requestDelete(user.id) },
                     )
                 }
@@ -172,6 +174,38 @@ fun AdminUsersScreen(isAdmin: Boolean, onBack: () -> Unit) {
                 }
             }
         }
+    }
+
+    // A plan change grants (or takes away) paid access on its own, with
+    // no payment or upgrade request behind it, so it confirms first -
+    // naming the user and the plan, the same way the payments and
+    // upgrade-request queues do.
+    val pendingPlan = state.pendingPlan
+    val pendingPlanUser = state.pendingPlanUserId?.let { id -> state.users.firstOrNull { it.id == id } }
+    if (pendingPlan != null && pendingPlanUser != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.cancelPlanChange() },
+            title = { Text(stringResource(R.string.admin_users_change_plan)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.admin_users_plan_confirm,
+                        pendingPlanUser.username,
+                        adminPlanLabel(pendingPlan),
+                    ),
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.confirmPlanChange() }) {
+                    Text(stringResource(R.string.admin_users_change_plan), color = ZrpRed)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.cancelPlanChange() }) {
+                    Text(stringResource(android.R.string.cancel))
+                }
+            },
+        )
     }
 
     val deleteId = state.pendingDeleteId
@@ -214,9 +248,11 @@ private fun UserRow(
     isBusy: Boolean,
     onToggleBan: () -> Unit,
     onChangeRole: (String) -> Unit,
+    onChangePlan: (String) -> Unit,
     onDelete: () -> Unit,
 ) {
     var roleMenuOpen by remember { mutableStateOf(false) }
+    var planMenuOpen by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -244,7 +280,15 @@ private fun UserRow(
             }
         }
 
-        Row(modifier = Modifier.padding(top = Spacing.sm), verticalAlignment = Alignment.CenterVertically) {
+        // Scrollable because this row now carries two chips plus the
+        // ban/delete controls, and a long role or plan label in a
+        // wordier locale would otherwise run off a narrow screen.
+        Row(
+            modifier = Modifier
+                .padding(top = Spacing.sm)
+                .horizontalScroll(rememberScrollState()),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Box {
                 Text(
                     text = roleFilterLabel(user.role),
@@ -263,6 +307,35 @@ private fun UserRow(
                             DropdownMenuItem(
                                 text = { Text(roleFilterLabel(role)) },
                                 onClick = { roleMenuOpen = false; onChangeRole(role) },
+                            )
+                        }
+                    }
+                }
+            }
+
+            // The same dropdown pattern as the role chip beside it,
+            // against PUT /admin/users/{id}/plan - also ADMIN-only
+            // server-side, so it's shown on the same isAdmin gate. The
+            // chip is neutral rather than ZrpRed: a plan is billing
+            // state, not a staff privilege.
+            Box(modifier = Modifier.padding(start = Spacing.sm)) {
+                Text(
+                    text = adminPlanLabel(user.plan),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .let { if (isAdmin) it.clickable { planMenuOpen = true } else it }
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                )
+                if (isAdmin) {
+                    DropdownMenu(expanded = planMenuOpen, onDismissRequest = { planMenuOpen = false }) {
+                        USER_PLANS.forEach { plan ->
+                            DropdownMenuItem(
+                                text = { Text(adminPlanLabel(plan)) },
+                                onClick = { planMenuOpen = false; onChangePlan(plan) },
                             )
                         }
                     }

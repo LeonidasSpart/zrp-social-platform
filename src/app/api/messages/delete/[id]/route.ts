@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { deleteUploadThingFiles } from "@/lib/uploadthing";
 import { rateLimit } from "@/lib/rate-limit";
+import { getConversationParticipant } from "@/lib/conversations";
 
 export async function DELETE(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -21,14 +22,27 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
   try {
     const message = await prisma.message.findUnique({
       where: { id: messageId },
-      select: { senderId: true, receiverId: true, imageUrl: true },
+      select: { senderId: true, receiverId: true, conversationId: true, imageUrl: true },
     });
 
     if (!message) {
       return NextResponse.json({ error: "Message not found" }, { status: 404 });
     }
 
-    if (message.senderId !== session.user.id && message.receiverId !== session.user.id) {
+    if (message.conversationId) {
+      // A real GROUP message: the sender may always delete their own
+      // message, same as 1:1; anyone else needs real OWNER moderation
+      // authority over the group, not just "I received this" the way
+      // 1:1's own either-party rule works (a group message has no
+      // single receiver to grant that to in the first place - see
+      // Message.receiverId's own schema KDoc).
+      if (message.senderId !== session.user.id) {
+        const membership = await getConversationParticipant(message.conversationId, session.user.id);
+        if (!membership || membership.role !== "OWNER") {
+          return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+        }
+      }
+    } else if (message.senderId !== session.user.id && message.receiverId !== session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 

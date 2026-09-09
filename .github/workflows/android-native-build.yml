@@ -63,6 +63,21 @@ jobs:
           GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
         run: ./gradlew assembleDebug --no-daemon "-PGOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID"
 
+      # The debug build now signs with the checked-in android-native/
+      # debug.keystore (see build.gradle's own comment) specifically so
+      # this fingerprint is STABLE across every run - unlike Gradle's
+      # default auto-generated debug keystore, which is a different
+      # certificate on every CI runner. Google Sign-In (Credential
+      # Manager) will not return a credential for a signing certificate
+      # that isn't registered as an Android OAuth client in the
+      # "zrp-social" Firebase/Google Cloud project - confirmed by
+      # google-services.json's own empty "oauth_client": []. Printing
+      # this here gives whoever owns that Console the exact value to
+      # register, once, for package "one.zrp.social".
+      - name: Print debug certificate fingerprint (for Google Sign-In setup)
+        run: |
+          keytool -list -v -keystore android-native/debug.keystore -alias androiddebugkey -storepass android 2>/dev/null | grep -E "SHA1:|SHA256:"
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
@@ -190,7 +205,7 @@ jobs:
             echo "No keystore was decoded this run - nothing to fingerprint."
             exit 0
           fi
-          keytool -list -v -keystore "$KEYSTORE_PATH" -alias "$ANDROID_KEY_ALIAS" -storepass "$ANDROID_KEYSTORE_PASSWORD" 2>/dev/null | grep "SHA256:"
+          keytool -list -v -keystore "$KEYSTORE_PATH" -alias "$ANDROID_KEY_ALIAS" -storepass "$ANDROID_KEYSTORE_PASSWORD" 2>/dev/null | grep -E "SHA1:|SHA256:"
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4

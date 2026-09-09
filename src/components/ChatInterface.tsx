@@ -25,6 +25,7 @@ import dynamic from "next/dynamic";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUnreadCount } from "@/contexts/UnreadCountContext";
+import { usePresence } from "@/contexts/PresenceContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ChatContactDrawer from "@/components/ChatContactDrawer";
 
@@ -107,7 +108,7 @@ export default function ChatInterface({
   const [sending, setSending] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [receiverTyping, setReceiverTyping] = useState(false);
-  const [socketConnected, setSocketConnected] = useState(false);
+  const { isOnline: isPartnerOnline, hasStatus, requestStatus } = usePresence();
 
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showContactInfo, setShowContactInfo] = useState(false);
@@ -431,22 +432,24 @@ export default function ChatInterface({
 
     const handleConnect = () => {
       console.log("✅ Socket connected");
-      setSocketConnected(true);
     };
 
     const handleDisconnect = () => {
       console.log("❌ Socket disconnected");
-      setSocketConnected(false);
     };
 
     const handleConnectError = (err: unknown) => {
       console.error("Socket error:", err);
-      setSocketConnected(false);
     };
 
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
     socket.on("connect_error", handleConnectError);
+
+    // Real presence for the person in this specific thread - see
+    // PresenceContext's own KDoc; this is the same one-time backfill
+    // request the conversation list uses, just for a single receiverId.
+    requestStatus(receiverId);
 
     setupSocketListeners();
     fetchMessages();
@@ -470,7 +473,7 @@ export default function ChatInterface({
       socket.off("message-edited");
       socket.off("reaction-updated");
     };
-  }, [userId, receiverId]);
+  }, [userId, receiverId, requestStatus]);
 
   // ---------------------------------------------------------------------------
   // Cleanup
@@ -1664,23 +1667,32 @@ export default function ChatInterface({
               <p className="text-xs font-medium text-zrp-red">
                 {t("chat.typing")}
               </p>
-            ) : (
+            ) : hasStatus(receiverId) ? (
+              // Real per-partner presence (server.js's own userStatus
+              // Map via "user-status"/"get-status") - replaces the
+              // previous socketConnected-based dot, which only ever
+              // reflected THIS device's own connection, never whether
+              // receiverId was actually online. Only rendered once a
+              // real answer has actually been heard for this receiverId
+              // (see PresenceContext's own hasStatus) rather than
+              // defaulting to a misleading "offline" the instant the
+              // thread opens.
               <div className="mt-0.5 hidden items-center gap-1 sm:flex">
                 <span
                   className={`h-2 w-2 rounded-full ${
-                    socketConnected
+                    isPartnerOnline(receiverId)
                       ? "bg-green-500"
-                      : "bg-red-500"
+                      : "bg-gray-400 dark:bg-gray-600"
                   }`}
                 />
 
                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {socketConnected
+                  {isPartnerOnline(receiverId)
                     ? t("chat.live")
                     : t("chat.offline")}
                 </span>
               </div>
-            )}
+            ) : null}
           </div>
         </button>
 
@@ -1764,7 +1776,7 @@ export default function ChatInterface({
           MESSAGES
       ====================================================================== */}
 
-      <main
+      <div
         ref={messagesContainerRef}
         className="
           relative
@@ -2769,7 +2781,7 @@ export default function ChatInterface({
             />
           </div>
         )}
-      </main>
+      </div>
 
       {/* =====================================================================
           REPLY PREVIEW

@@ -15,6 +15,11 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    <!-- Real background playback for ZRP Music (MusicPlaybackService) -
+         lets ExoPlayer keep playing, with real lock-screen/notification
+         controls, once the app is backgrounded. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
     <!-- allowBackup="false": the encrypted session token in TokenStore is
          bound to this device's Android Keystore, but the (encrypted)
@@ -68,6 +73,20 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- See MusicPlaybackService's own KDoc. exported="true" is
+             required for MediaSessionService itself (system components -
+             Bluetooth, Wear, Android Auto, the notification shade - bind
+             to it), not a general access hole; androidx.media3 handles
+             authorizing which callers may actually control playback. -->
+        <service
+            android:name=".service.MusicPlaybackService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
             </intent-filter>
         </service>
 

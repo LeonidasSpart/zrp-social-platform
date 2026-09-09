@@ -5,8 +5,11 @@ const { Server } = require("socket.io");
 const { PrismaClient } = require("@prisma/client");
 const { getToken } = require("next-auth/jwt");
 const {
+  groupRoom,
   isBlockedEitherWay,
+  isConversationMember,
   authorizeSendRelay,
+  authorizeGroupSendRelay,
   authorizeEditRelay,
   authorizeReactionRelay,
   authorizeDeleteRelay,
@@ -295,6 +298,77 @@ app.prepare().then(() => {
         socket.to(receiverId).emit("user-typing", { userId, isTyping: isTyping === true });
       } catch (err) {
         console.error("typing relay error:", err);
+      }
+    });
+
+    // ─── Group conversation rooms ─────────────────────────────────
+    // Prefixed ("group:<id>") specifically so it can never collide
+    // with a userId room - Conversation and User ids are both cuids
+    // in the same format, so an unprefixed room name could otherwise
+    // be ambiguous between "the user with this id" and "the group
+    // with this id". Membership is the ConversationParticipant row and
+    // is re-checked per event (cached briefly per socket for the
+    // keystroke-rate typing event), never just once at join time - a
+    // socket can outlive a since-revoked membership until it
+    // reconnects. See socket-authz.js.
+    const MEMBERSHIP_CACHE_TTL_MS = 30 * 1000;
+    async function isMemberCached(conversationId) {
+      if (!socket.data.memberCache) socket.data.memberCache = new Map();
+      const cached = socket.data.memberCache.get(conversationId);
+      const now = Date.now();
+      if (cached && cached.expiresAt > now) return cached.member;
+      const member = await isConversationMember(prisma, userId, conversationId);
+      if (socket.data.memberCache.size > 200) socket.data.memberCache.clear();
+      socket.data.memberCache.set(conversationId, { member, expiresAt: now + MEMBERSHIP_CACHE_TTL_MS });
+      return member;
+    }
+
+    socket.on("join-conversation", async (conversationId) => {
+      if (!conversationId || typeof conversationId !== "string") return;
+      if (!checkEventRateLimit(userId, "join-conversation", 30, 10_000)) return;
+      try {
+        // Real server-side membership check - never trust that a
+        // client asking to join a conversation room actually belongs
+        // to it, the same principle "join-room" above already applies
+        // to a user's own 1:1 room.
+        if (await isConversationMember(prisma, userId, conversationId)) {
+          socket.join(groupRoom(conversationId));
+        }
+      } catch (err) {
+        console.error("join-conversation error:", err);
+      }
+    });
+
+    socket.on("leave-conversation", (conversationId) => {
+      if (!conversationId || typeof conversationId !== "string") return;
+      socket.leave(groupRoom(conversationId));
+    });
+
+    // ⚠️ SECURITY: like send-message above, the relayed record is the
+    // row the REST route wrote (sender = this user, in this
+    // conversation), never the payload's `content`.
+    socket.on("send-group-message", async (payload) => {
+      if (!payload || typeof payload !== "object") return;
+      if (!checkEventRateLimit(userId, "send-group-message", 30, 10_000)) return;
+      try {
+        const relay = await authorizeGroupSendRelay(prisma, userId, payload);
+        if (!relay.ok) return;
+        io.to(relay.targetId).emit("receive-group-message", relay.message);
+      } catch (err) {
+        console.error("send-group-message relay error:", err);
+      }
+    });
+
+    socket.on("typing-group", async ({ conversationId, isTyping } = {}) => {
+      if (!conversationId || typeof conversationId !== "string") return;
+      if (!checkEventRateLimit(userId, "typing-group", 60, 10_000)) return;
+      try {
+        if (!(await isMemberCached(conversationId))) return;
+        socket
+          .to(groupRoom(conversationId))
+          .emit("user-typing-group", { conversationId, userId, isTyping: isTyping === true });
+      } catch (err) {
+        console.error("typing-group relay error:", err);
       }
     });
 

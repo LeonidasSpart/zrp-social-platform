@@ -133,3 +133,33 @@ fun PostSkeletonList(count: Int = 5, modifier: Modifier = Modifier) {
         repeat(count) { PostSkeleton(brush = brush) }
     }
 }
+
+/**
+ * Profile header loading placeholder, shaped like ProfileScreen's own
+ * real ProfileHeader (cover, overlapping avatar, name/handle lines)
+ * instead of the bare centred CircularProgressIndicator this screen
+ * showed on every first load before - the same real gap the website's
+ * own SkeletonProfileHeader now fixes there (see profile/page.tsx).
+ */
+@Composable
+fun ProfileHeaderSkeleton(modifier: Modifier = Modifier) {
+    val brush = rememberShimmerBrush()
+    Column(modifier = modifier.fillMaxWidth().clearAndSetSemantics {}) {
+        SkeletonBlock(
+            brush = brush,
+            shape = RoundedCornerShape(0.dp),
+            modifier = Modifier.fillMaxWidth().height(128.dp),
+        )
+        Column(modifier = Modifier.padding(horizontal = Spacing.lg)) {
+            SkeletonBlock(
+                brush = brush,
+                shape = CircleShape,
+                modifier = Modifier.padding(top = Spacing.sm).size(88.dp),
+            )
+            SkeletonBlock(brush = brush, modifier = Modifier.padding(top = Spacing.md).width(160.dp).height(16.dp))
+            SkeletonBlock(brush = brush, modifier = Modifier.padding(top = Spacing.xs).width(110.dp).height(12.dp))
+            SkeletonBlock(brush = brush, modifier = Modifier.padding(top = Spacing.md).fillMaxWidth().height(12.dp))
+            SkeletonBlock(brush = brush, modifier = Modifier.padding(top = Spacing.sm).fillMaxWidth(0.6f).height(12.dp))
+        }
+    }
+}

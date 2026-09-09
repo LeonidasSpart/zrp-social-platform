@@ -26,6 +26,7 @@ import one.zrp.social.mobile.network.SocketMessagePreview
 import one.zrp.social.mobile.network.SocketMessageReadPayload
 import one.zrp.social.mobile.network.SocketReactionUpdatedPayload
 import one.zrp.social.mobile.network.SocketTypingPayload
+import one.zrp.social.mobile.network.SocketUserStatusPayload
 import one.zrp.social.mobile.network.ZrpSocket
 import org.json.JSONArray
 import org.json.JSONObject
@@ -72,7 +73,6 @@ data class ConversationUiState(
     val editError: String? = null,
     val error: String? = null,
     val partnerTyping: Boolean = false,
-    val socketConnected: Boolean = false,
     // Derived from whichever loaded message first carries a real
     // sender/receiver - see ConversationViewModel's own load(). Null
     // only until the first page of history (or the poll) resolves it,
@@ -100,6 +100,24 @@ data class ConversationUiState(
     // owns the UI-facing timer and the post-recording upload+send.
     val isRecording: Boolean = false,
     val recordingSeconds: Int = 0,
+    // Scrolling to the top of a long conversation loads real older
+    // history (see loadOlderMessages) instead of the initial fetch's
+    // fixed newest-100 window being the hard ceiling on what's visible.
+    // hasMoreOlderMessages starts true (unknown) rather than false, so
+    // the very first scroll-to-top on a freshly opened conversation
+    // still attempts a real fetch instead of assuming there's nothing
+    // more - it flips to false only once the server itself says so
+    // (a null nextCursor).
+    val isLoadingOlderMessages: Boolean = false,
+    val hasMoreOlderMessages: Boolean = true,
+    // Real presence for partnerId specifically (server.js's own
+    // userStatus Map via "user-status"/"get-status" - see
+    // requestPartnerStatus's own KDoc). partnerStatusKnown is false
+    // until a real answer has actually been heard, so the header can
+    // tell "confirmed offline" apart from "no answer yet" instead of
+    // defaulting to a misleading offline the instant the screen opens.
+    val partnerOnline: Boolean = false,
+    val partnerStatusKnown: Boolean = false,
 )
 
 /**
@@ -136,10 +154,6 @@ class ConversationViewModel(
         val tokenStore = ApiClient.getTokenStore()
         val liveSocket = ZrpSocket.connect(tokenStore)
         socket = liveSocket
-
-        liveSocket.on(Socket.EVENT_CONNECT, Emitter.Listener { _state.update { it.copy(socketConnected = true) } })
-        liveSocket.on(Socket.EVENT_DISCONNECT, Emitter.Listener { _state.update { it.copy(socketConnected = false) } })
-        liveSocket.on(Socket.EVENT_CONNECT_ERROR, Emitter.Listener { _state.update { it.copy(socketConnected = false) } })
 
         liveSocket.on("receive-message", Emitter.Listener { args ->
             val preview = parsePayload(args, SocketMessagePreview::class.java) ?: return@Listener
@@ -198,6 +212,19 @@ class ConversationViewModel(
                 )
             }
         })
+
+        liveSocket.on("user-status", Emitter.Listener { args ->
+            val payload = parsePayload(args, SocketUserStatusPayload::class.java) ?: return@Listener
+            if (payload.userId == partnerId) {
+                _state.update { it.copy(partnerOnline = payload.status == "online", partnerStatusKnown = true) }
+            }
+        })
+
+        // One real "get-status" round trip for partnerId specifically -
+        // backfills their current state if it predates this socket's own
+        // connection; every online/offline transition after that already
+        // arrives unprompted via the "user-status" broadcast above.
+        liveSocket.emit("get-status", partnerId)
     }
 
     private fun <T> parsePayload(args: Array<out Any>, type: Class<T>): T? {
@@ -211,9 +238,6 @@ class ConversationViewModel(
 
     override fun onCleared() {
         socket?.let { liveSocket ->
-            liveSocket.off(Socket.EVENT_CONNECT)
-            liveSocket.off(Socket.EVENT_DISCONNECT)
-            liveSocket.off(Socket.EVENT_CONNECT_ERROR)
             liveSocket.off("receive-message")
             liveSocket.off("message-sent")
             liveSocket.off("user-typing")
@@ -221,6 +245,7 @@ class ConversationViewModel(
             liveSocket.off("message-deleted")
             liveSocket.off("message-edited")
             liveSocket.off("reaction-updated")
+            liveSocket.off("user-status")
             liveSocket.disconnect()
         }
         socket = null
@@ -630,9 +655,63 @@ class ConversationViewModel(
             while (true) {
                 delay(POLL_INTERVAL_MS)
                 repository.getConversationMessages(partnerId).onSuccess { list ->
-                    _state.update { it.copy(messages = list) }
+                    _state.update { it.copy(messages = mergeWithPolledWindow(it.messages, list)) }
                 }
             }
+        }
+    }
+
+    // The unpaginated fetch above always returns only the newest ~100
+    // messages (see GET /messages/{userId}'s own comment on why that
+    // shape can't change), so a wholesale replace - the original
+    // behavior - would silently discard any real older history
+    // loadOlderMessages() had already loaded beyond that window on
+    // every single poll tick. Anything strictly older than the poll's
+    // own oldest returned message is outside what an unpaginated fetch
+    // can confirm or refute either way, so it's left untouched; the
+    // poll's own window (same range it always fully owned) still
+    // replaces wholesale, so a same-window edit/delete/read-state
+    // change a missed socket event didn't deliver is still caught here
+    // exactly as before.
+    private fun mergeWithPolledWindow(current: List<ChatMessage>, polled: List<ChatMessage>): List<ChatMessage> {
+        if (polled.isEmpty()) return polled
+        val oldestPolledCreatedAt = polled.minOf { it.createdAt }
+        val olderHistory = current.filter { it.createdAt < oldestPolledCreatedAt }
+        return olderHistory + polled
+    }
+
+    // Mirrors the same real-history-only rule the initial load and poll
+    // both already follow - no invented/placeholder messages, and
+    // nothing beyond what GET /messages/{userId}'s own cursor page
+    // actually returns. Triggered by ConversationScreen once the
+    // LazyColumn's scroll position nears its own first item (see that
+    // screen's own LaunchedEffect on listState.firstVisibleItemIndex).
+    fun loadOlderMessages() {
+        if (_state.value.isLoadingOlderMessages || !_state.value.hasMoreOlderMessages) return
+        val oldestLoadedId = _state.value.messages.firstOrNull()?.id ?: return
+
+        _state.update { it.copy(isLoadingOlderMessages = true) }
+        viewModelScope.launch {
+            repository.getOlderMessages(partnerId, beforeMessageId = oldestLoadedId)
+                .onSuccess { page ->
+                    _state.update { current ->
+                        val existingIds = current.messages.map { it.id }.toSet()
+                        val newOlder = page.items.filterNot { it.id in existingIds }
+                        current.copy(
+                            messages = newOlder + current.messages,
+                            isLoadingOlderMessages = false,
+                            hasMoreOlderMessages = page.nextCursor != null,
+                        )
+                    }
+                }
+                .onFailure {
+                    // Left retryable: the next scroll-to-top attempt
+                    // (or the user scrolling away and back) simply
+                    // tries again, same as any other network hiccup in
+                    // this screen - no dedicated error banner for what
+                    // is a background load below the visible fold.
+                    _state.update { it.copy(isLoadingOlderMessages = false) }
+                }
         }
     }
 }

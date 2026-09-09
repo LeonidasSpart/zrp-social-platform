@@ -33,7 +33,7 @@ const MAX_REDIRECTS = 5;
 export function isDisallowedIPv4(ip: string): boolean {
   const parts = ip.split(".").map(Number);
   if (parts.length !== 4 || parts.some((p) => Number.isNaN(p))) return true;
-  const [a, b] = parts;
+  const [a, b, c] = parts;
 
   if (a === 0) return true; // 0.0.0.0/8
   if (a === 10) return true; // private
@@ -41,7 +41,15 @@ export function isDisallowedIPv4(ip: string): boolean {
   if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
   if (a === 169 && b === 254) return true; // link-local / cloud metadata
   if (a === 172 && b >= 16 && b <= 31) return true; // private
-  if (a === 192 && b === 0) return true; // IETF protocol assignments / TEST-NET tail
+  // Real bug, found via ZRP News Network source verification: this used
+  // to match the whole 192.0.0.0/16 (any b === 0) on the theory that it
+  // was "the TEST-NET tail", when the actually-reserved ranges are just
+  // two specific /24s inside it - 192.0.0.0/24 (IETF protocol
+  // assignments) and 192.0.2.0/24 (TEST-NET-1 documentation). The rest of
+  // 192.0.0.0/16 is ordinary allocated public space - confirmed by a real
+  // DNS lookup of swissinfo.ch and nasa.gov, both of which resolve inside
+  // it (192.0.66.x) and were being wrongly SSRF-blocked outright.
+  if (a === 192 && b === 0 && (c === 0 || c === 2)) return true; // 192.0.0.0/24 + 192.0.2.0/24
   if (a === 192 && b === 168) return true; // private
   if (a === 198 && (b === 18 || b === 19)) return true; // benchmarking
   if (a >= 224) return true; // multicast (224-239) + reserved (240-255) + broadcast
@@ -91,37 +99,73 @@ class SsrfBlockedError extends Error {
  * hands back only an allowed address so the connection can never land
  * on a private/internal target - even if the hostname's DNS record
  * later changes (rebinding).
+ *
+ * Real bug, confirmed by reproducing this exact code path against a
+ * real dual-stack host (20min.ch, which has both A and AAAA records):
+ * Node's http(s).request enables Happy Eyeballs (RFC 8305) by default
+ * for dual-stack hosts (net.js's autoSelectFamily, on since Node
+ * 18/20) - for those hosts it invokes this custom lookup with
+ * `options.all: true` and expects an *array* of {address, family}
+ * objects back, not the single (address, family) pair a plain
+ * dns.lookup-style callback gets. Calling back with only the single-
+ * address shape regardless of what was asked for - what this used to
+ * do unconditionally - throws inside Node's own internals ("Invalid IP
+ * address: undefined" from emitLookup), which the caller only ever
+ * sees as a generic request error indistinguishable from a real
+ * network failure. Every CDN-backed site with both an A and an AAAA
+ * record hits this, which is most major news/media sites - not an
+ * SSRF-guard misconfiguration or a blocked domain, a genuine shape
+ * mismatch with what Node itself calls this function with.
  */
-function makeSafeLookup(isAddressAllowed: IsAddressAllowedFn) {
+// Exported so the Happy-Eyeballs/dual-stack callback-shape handling
+// (options.all: true -> array callback) can be unit-tested directly
+// against a mocked dns.lookup, without needing a real dual-stack DNS
+// record - the same test-only rationale as IsAddressAllowedFn above.
+export function makeSafeLookup(isAddressAllowed: IsAddressAllowedFn) {
   return function safeLookup(
     hostname: string,
-    options: dns.LookupAllOptions | number,
-    callback: (err: NodeJS.ErrnoException | null, address: string, family: number) => void
+    options: dns.LookupAllOptions | dns.LookupOneOptions | number,
+    callback: (
+      err: NodeJS.ErrnoException | null,
+      addressOrAddresses?: string | dns.LookupAddress[],
+      family?: number
+    ) => void
   ) {
+    const wantsAll =
+      typeof options === "object" && options !== null && (options as dns.LookupAllOptions).all === true;
+
     const asIpFamily = net.isIP(hostname);
     if (asIpFamily) {
       if (!isAddressAllowed(hostname, asIpFamily)) {
-        callback(new SsrfBlockedError(), "", 0);
+        if (wantsAll) callback(new SsrfBlockedError(), []);
+        else callback(new SsrfBlockedError(), "", 0);
         return;
       }
-      callback(null, hostname, asIpFamily);
+      if (wantsAll) callback(null, [{ address: hostname, family: asIpFamily }]);
+      else callback(null, hostname, asIpFamily);
       return;
     }
 
     dns.lookup(hostname, { all: true, verbatim: true }, (err, addresses) => {
       if (err) {
-        callback(err, "", 0);
+        if (wantsAll) callback(err, []);
+        else callback(err, "", 0);
         return;
       }
 
-      const allowed = addresses.find((a) => isAddressAllowed(a.address, a.family));
+      const allAllowed = addresses.filter((a) => isAddressAllowed(a.address, a.family));
 
-      if (!allowed) {
-        callback(new SsrfBlockedError(), "", 0);
+      if (allAllowed.length === 0) {
+        if (wantsAll) callback(new SsrfBlockedError(), []);
+        else callback(new SsrfBlockedError(), "", 0);
         return;
       }
 
-      callback(null, allowed.address, allowed.family);
+      if (wantsAll) {
+        callback(null, allAllowed);
+      } else {
+        callback(null, allAllowed[0].address, allAllowed[0].family);
+      }
     });
   };
 }
@@ -136,17 +180,47 @@ function makeSafeLookup(isAddressAllowed: IsAddressAllowedFn) {
  * asked for it via Accept-Encoding - so without this, treating the
  * compressed bytes as UTF-8 text silently produces garbage that no
  * meta-tag regex will ever match, indistinguishable from "the page
- * really has no metadata." Failure here (e.g. a response truncated
- * mid-stream by the maxBytes cap below, which can land inside a gzip
- * frame) falls back to the raw bytes rather than throwing - the worst
- * case is the same "no metadata found" outcome this replaces.
+ * really has no metadata."
+ *
+ * A response truncated mid-stream by the maxBytes cap below lands
+ * inside a gzip/deflate/brotli frame - the compressed stream is
+ * genuinely incomplete. Node's default *Sync decompressors require a
+ * complete, validly-terminated stream and throw "unexpected end of
+ * file" on anything less, which - without `finishFlush` below - meant
+ * the *entire* decoded prefix was discarded, not just the truncated
+ * tail. That's a real bug in practice: a page's <meta property="og:*">
+ * tags sit in <head>, near the very start of the document, while the
+ * bulk of a modern page's weight (hydration JSON, ad-tech config,
+ * tracking pixels, related-content data) sits later, well after
+ * </head> - so a heavy real-world page (a news site with the usual
+ * ad-tech/analytics/CMP payload is routinely 500KB-1MB+ of raw HTML,
+ * compressing to well over the 200,000-byte cap) would get its
+ * completely-intact, completely-parseable <head> thrown away purely
+ * because *unrelated* bulk further down the same document pushed the
+ * compressed stream past maxBytes and left it unterminated. Passing
+ * `finishFlush: Z_SYNC_FLUSH` (gzip/deflate) / `BROTLI_OPERATION_FLUSH`
+ * (brotli) tells zlib to flush and return whatever it successfully
+ * decoded up to the truncation point instead of demanding the stream's
+ * final block - recovering the real, valid <head> content instead of
+ * losing 100% of it. A genuinely malformed stream (corrupt from the
+ * start, not just truncated) still throws and falls back to the raw
+ * bytes below - the worst case is unchanged, still just "no metadata
+ * found" rather than a crash.
  */
 export function decompressBody(body: Buffer, contentEncoding?: string): Buffer {
   const encoding = (contentEncoding || "").toLowerCase().trim();
   try {
-    if (encoding === "gzip" || encoding === "x-gzip") return zlib.gunzipSync(body);
-    if (encoding === "deflate") return zlib.inflateSync(body);
-    if (encoding === "br") return zlib.brotliDecompressSync(body);
+    if (encoding === "gzip" || encoding === "x-gzip") {
+      return zlib.gunzipSync(body, { finishFlush: zlib.constants.Z_SYNC_FLUSH });
+    }
+    if (encoding === "deflate") {
+      return zlib.inflateSync(body, { finishFlush: zlib.constants.Z_SYNC_FLUSH });
+    }
+    if (encoding === "br") {
+      return zlib.brotliDecompressSync(body, {
+        finishFlush: zlib.constants.BROTLI_OPERATION_FLUSH,
+      });
+    }
   } catch {
     // Truncated or malformed stream - the raw bytes are the best
     // fallback available.

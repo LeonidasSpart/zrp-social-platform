@@ -8,9 +8,24 @@ const authz = require("../../../socket-authz.js");
 // row, never from the client's payload, and call signaling is only
 // relayed between the two parties of a call that was actually placed.
 
-type Row = { id: string; senderId: string; receiverId: string; content?: string };
+type Row = {
+  id: string;
+  senderId: string;
+  receiverId: string | null;
+  conversationId?: string | null;
+  content?: string;
+  imageUrl?: string | null;
+  createdAt?: string;
+  read?: boolean;
+};
 
-function fakePrisma(rows: Row[], reactions: Array<{ messageId: string; emoji: string }> = [], blocks: Array<[string, string]> = []) {
+// members: conversationId -> userIds who are CURRENT ConversationParticipants
+function fakePrisma(
+  rows: Row[],
+  reactions: Array<{ messageId: string; emoji: string }> = [],
+  blocks: Array<[string, string]> = [],
+  members: Record<string, string[]> = {}
+) {
   return {
     message: {
       findUnique: vi.fn(async ({ where }: { where: { id: string } }) => rows.find((r) => r.id === where.id) ?? null),
@@ -28,13 +43,24 @@ function fakePrisma(rows: Row[], reactions: Array<{ messageId: string; emoji: st
         blocks.some(([a, b]) => where.OR.some((c) => c.blockerId === a && c.blockedId === b)) ? { id: "b" } : null
       ),
     },
+    conversationParticipant: {
+      findUnique: vi.fn(
+        async ({ where }: { where: { conversationId_userId: { conversationId: string; userId: string } } }) => {
+          const { conversationId, userId } = where.conversationId_userId;
+          return (members[conversationId] ?? []).includes(userId) ? { id: `${conversationId}:${userId}` } : null;
+        }
+      ),
+    },
   };
 }
 
 const rows: Row[] = [
   { id: "m1", senderId: "alice", receiverId: "bob", content: "hi bob" },
   { id: "m2", senderId: "carol", receiverId: "dave", content: "private" },
+  // Group message: no receiver, lives in conversation g1 (members alice, bob, erin).
+  { id: "g1m1", senderId: "erin", receiverId: null, conversationId: "g1", content: "hello group", imageUrl: null, createdAt: "2026-01-01T00:00:00.000Z", read: false },
 ];
+const groupMembers = { g1: ["alice", "bob", "erin"] };
 
 describe("send-message relay", () => {
   it("relays the stored row to its real receiver when the verified user is the sender", async () => {
@@ -101,6 +127,55 @@ describe("delete-message relay", () => {
     expect((await authz.authorizeDeleteRelay(fakePrisma(rows), "bob", { messageId: "gone", receiverId: "alice" })).ok).toBe(true);
     expect((await authz.authorizeDeleteRelay(fakePrisma(rows), "mallory", { messageId: "gone", receiverId: "bob" })).ok).toBe(false);
     expect((await authz.authorizeDeleteRelay(fakePrisma(rows), "alice", { messageId: "gone", receiverId: "alice" })).ok).toBe(false);
+  });
+});
+
+describe("group conversations (send-group-message / edit / reaction / delete with conversationId)", () => {
+  const prisma = () => fakePrisma(rows, [{ messageId: "g1m1", emoji: "🔥" }], [], groupMembers);
+
+  it("send-group-message relays the STORED row into the group room only for the sender who is still a member", async () => {
+    const r = await authz.authorizeGroupSendRelay(prisma(), "erin", { conversationId: "g1", messageId: "g1m1", content: "FORGED" });
+    expect(r.ok).toBe(true);
+    expect(r.targetId).toBe("group:g1");
+    expect(r.message.content).toBe("hello group");
+    expect(r.message.conversationId).toBe("g1");
+  });
+
+  it("send-group-message refuses a non-sender, a wrong conversation, and a member who has been removed", async () => {
+    expect((await authz.authorizeGroupSendRelay(prisma(), "alice", { conversationId: "g1", messageId: "g1m1" })).ok).toBe(false);
+    expect((await authz.authorizeGroupSendRelay(prisma(), "erin", { conversationId: "g2", messageId: "g1m1" })).ok).toBe(false);
+    const removed = fakePrisma(rows, [], [], { g1: ["alice", "bob"] }); // erin no longer a participant
+    expect((await authz.authorizeGroupSendRelay(removed, "erin", { conversationId: "g1", messageId: "g1m1" })).ok).toBe(false);
+  });
+
+  it("edit-message on a group message targets the group room from the row, ignoring any payload conversationId", async () => {
+    const r = await authz.authorizeEditRelay(prisma(), "erin", { conversationId: "g-evil", message: { id: "g1m1", content: "FORGED" } });
+    expect(r.ok).toBe(true);
+    expect(r.targetId).toBe("group:g1");
+    expect(r.message.content).toBe("hello group");
+    expect((await authz.authorizeEditRelay(prisma(), "alice", { message: { id: "g1m1" } })).ok).toBe(false);
+  });
+
+  it("message-reaction on a group message requires current membership and targets the group room", async () => {
+    const asMember = await authz.authorizeReactionRelay(prisma(), "bob", { messageId: "g1m1", conversationId: "g-evil", reactions: ["FORGED"] });
+    expect(asMember.ok).toBe(true);
+    expect(asMember.targetId).toBe("group:g1");
+    expect(asMember.reactions).toEqual([{ messageId: "g1m1", emoji: "🔥" }]);
+    expect((await authz.authorizeReactionRelay(prisma(), "mallory", { messageId: "g1m1" })).ok).toBe(false);
+  });
+
+  it("delete-message with a conversationId is relayed only for a current member (room abuse)", async () => {
+    const ok = await authz.authorizeDeleteRelay(prisma(), "alice", { messageId: "gone", conversationId: "g1" });
+    expect(ok.ok).toBe(true);
+    expect(ok.targetId).toBe("group:g1");
+    expect((await authz.authorizeDeleteRelay(prisma(), "mallory", { messageId: "gone", conversationId: "g1" })).ok).toBe(false);
+    expect((await authz.authorizeDeleteRelay(prisma(), "alice", { messageId: "gone", conversationId: "g-nope" })).ok).toBe(false);
+  });
+
+  it("isConversationMember / groupRoom", async () => {
+    expect(await authz.isConversationMember(prisma(), "alice", "g1")).toBe(true);
+    expect(await authz.isConversationMember(prisma(), "mallory", "g1")).toBe(false);
+    expect(authz.groupRoom("g1")).toBe("group:g1");
   });
 });
 

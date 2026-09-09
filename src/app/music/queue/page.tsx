@@ -30,7 +30,7 @@ export default function MusicQueuePage() {
         </div>
       </header>
 
-      <main className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
         {current && (
           <section>
             <div className="text-xs uppercase tracking-[0.2em] text-zrp-red font-bold mb-3">{t("music.queue.nowPlaying")}</div>
@@ -107,7 +107,7 @@ export default function MusicQueuePage() {
             </div>
           )}
         </section>
-      </main>
+      </div>
     </div>
   );
 }

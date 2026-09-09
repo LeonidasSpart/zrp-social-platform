@@ -2,80 +2,41 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, MessageCircle } from "lucide-react";
+import { Loader2, MessageCircle, Users, UserPlus } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import NewGroupModal from "@/components/NewGroupModal";
+import { useConversationList } from "@/lib/useConversationList";
+import { buildMessagePreview } from "@/lib/conversationPreview";
+import { usePresence } from "@/contexts/PresenceContext";
 
-interface Conversation {
-  partner: {
-    id: string;
-    username: string;
-    name: string | null;
-    avatarUrl: string | null;
-    badgeType: string | null;
-  };
-  lastMessage: {
-    id: string;
-    content: string;
-    createdAt: string;
-    senderId: string;
-  };
-  unreadCount: number;
-}
+const localeMap: Record<string, string> = {
+  en: "en-US",
+  fr: "fr-FR",
+  de: "de-DE",
+  it: "it-IT",
+};
 
 export default function MessagesIndexPage() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
+  const router = useRouter();
   const { t, language } = useLanguage();
+  const { conversations, loading, refresh } = useConversationList();
+  const [showNewGroup, setShowNewGroup] = useState(false);
+  const { isOnline, requestStatus } = usePresence();
 
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const localeMap: Record<string, string> = {
-    en: "en-US",
-    fr: "fr-FR",
-    de: "de-DE",
-    it: "it-IT",
-  };
-
+  // Real presence for every visible 1:1 partner - see PresenceContext's
+  // own KDoc on why requestStatus is safe to call repeatedly (it only
+  // ever asks once per userId, then trusts the live broadcast after).
+  // Group rows show a member-count chip instead of a single presence
+  // dot, since a group has many participants, not one partner.
   useEffect(() => {
-    if (status !== "authenticated") return;
-
-    let cancelled = false;
-
-    const fetchConversations = async () => {
-      try {
-        const res = await fetch("/api/messages", {
-          cache: "no-store",
-        });
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch conversations");
-        }
-
-        const data = await res.json();
-
-        if (!cancelled) {
-          setConversations(Array.isArray(data) ? data : []);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          console.error("Error fetching conversations:", error);
-          setConversations([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchConversations();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [status]);
+    conversations.forEach((conv) => {
+      if (conv.type === "direct") requestStatus(conv.partner.id);
+    });
+  }, [conversations, requestStatus]);
 
   const formatLastMessageDate = (date: string) => {
     try {
@@ -114,29 +75,13 @@ export default function MessagesIndexPage() {
     }
   };
 
-  const getLastMessagePreview = (
-    content: string,
-    isOwn: boolean
-  ) => {
-    const value = content?.trim() || "";
-
-    if (!value) {
-      return isOwn
-        ? t("messages.you", { msg: "" })
-        : "";
-    }
-
-    return isOwn
-      ? t("messages.you", { msg: value })
-      : value;
-  };
-
   /*
    * Mobile / tablet
    *
    * The desktop messages layout normally has its own persistent
    * conversation sidebar. On smaller screens this page becomes
-   * the conversation list.
+   * the conversation list - now a unified list of both real 1:1 and
+   * real GROUP conversations, sorted by most recent activity.
    */
   return (
     <div
@@ -162,6 +107,7 @@ export default function MessagesIndexPage() {
           className="
             flex
             items-center
+            justify-between
             flex-shrink-0
             px-4
             pt-4
@@ -185,6 +131,16 @@ export default function MessagesIndexPage() {
               </p>
             )}
           </div>
+
+          <button
+            type="button"
+            onClick={() => setShowNewGroup(true)}
+            className="p-2.5 rounded-full text-gray-500 hover:bg-gray-100 hover:text-zrp-red dark:text-gray-400 dark:hover:bg-gray-800 transition flex-shrink-0"
+            title={t("group.new")}
+            aria-label={t("group.new")}
+          >
+            <UserPlus className="w-5 h-5" />
+          </button>
         </header>
 
         {/* Conversation list */}
@@ -239,22 +195,115 @@ export default function MessagesIndexPage() {
           ) : (
             <div className="space-y-1 pb-3">
               {conversations.map((conv) => {
-                const partner = conv.partner;
+                if (conv.type === "direct") {
+                  const partner = conv.partner;
+                  const lastMsg = conv.lastMessage;
+                  const preview = buildMessagePreview({
+                    isGroup: false,
+                    isOwnMessage: lastMsg.senderId === session?.user?.id,
+                    senderName: "",
+                    content: lastMsg.content,
+                  });
+                  const displayName = partner.name || partner.username;
+                  const initial = displayName?.trim()?.[0]?.toUpperCase() || "?";
+
+                  return (
+                    <Link
+                      key={conv.key}
+                      href={conv.href}
+                      className="
+                        flex
+                        items-center
+                        gap-3
+                        w-full
+                        min-h-[72px]
+                        px-3
+                        py-2.5
+                        rounded-xl
+                        transition-colors
+                        active:bg-gray-100
+                        dark:active:bg-gray-800
+                        hover:bg-gray-50
+                        dark:hover:bg-gray-800/70
+                        focus:outline-none
+                        focus-visible:ring-2
+                        focus-visible:ring-zrp-red
+                      "
+                    >
+                      <div className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
+                        {partner.avatarUrl ? (
+                          <img
+                            src={partner.avatarUrl}
+                            alt={displayName}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-sm">
+                            {initial}
+                          </div>
+                        )}
+
+                        {/* Real presence dot - takes priority over the
+                            corner when both would render there, since the
+                            unread badge is a full pill with a count near
+                            the row's edge and won't collide with an
+                            avatar-corner dot. */}
+                        {isOnline(partner.id) && (
+                          <span className="absolute right-0 bottom-0 w-3 h-3 rounded-full bg-green-500 border-2 border-white dark:border-zrp-deepBlack" aria-hidden="true" />
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <p className="flex items-center gap-1 min-w-0 flex-1 text-sm font-semibold text-gray-900 dark:text-white">
+                            <span className="truncate">{displayName}</span>
+                            <VerifiedBadge badgeType={partner.badgeType} className="flex-shrink-0" />
+                          </p>
+                          <span className="text-[11px] text-gray-400 dark:text-gray-500 flex-shrink-0">
+                            {formatLastMessageDate(lastMsg.createdAt)}
+                          </span>
+                        </div>
+
+                        <p className="text-[11px] text-gray-400 dark:text-gray-500 truncate mt-0.5">
+                          @{partner.username}
+                        </p>
+
+                        <p
+                          className={`text-xs truncate mt-0.5 pr-1 ${
+                            conv.unreadCount > 0
+                              ? "font-semibold text-gray-800 dark:text-gray-200"
+                              : "text-gray-500 dark:text-gray-400"
+                          }`}
+                        >
+                          {preview.kind === "own" ? t("messages.you", { msg: preview.content }) : preview.content}
+                        </p>
+                      </div>
+
+                      {conv.unreadCount > 0 && (
+                        <span className="flex-shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-zrp-red text-white text-[10px] font-bold flex items-center justify-center">
+                          {conv.unreadCount > 99 ? "99+" : conv.unreadCount}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                }
+
+                // ─── Group row ────────────────────────────────────────
                 const lastMsg = conv.lastMessage;
-
-                const isOwn =
-                  lastMsg.senderId === session?.user?.id;
-
-                const displayName =
-                  partner.name || partner.username;
-
-                const initial =
-                  displayName?.trim()?.[0]?.toUpperCase() || "?";
+                const preview = lastMsg
+                  ? buildMessagePreview({
+                      isGroup: true,
+                      isOwnMessage: lastMsg.senderId === session?.user?.id,
+                      senderName: lastMsg.sender.name || lastMsg.sender.username,
+                      content: lastMsg.content,
+                    })
+                  : null;
 
                 return (
                   <Link
-                    key={partner.id}
-                    href={`/messages/${partner.username}`}
+                    key={conv.key}
+                    href={conv.href}
                     className="
                       flex
                       items-center
@@ -274,161 +323,54 @@ export default function MessagesIndexPage() {
                       focus-visible:ring-zrp-red
                     "
                   >
-                    {/* Avatar */}
-                    <div
-                      className="
-                        relative
-                        w-12
-                        h-12
-                        sm:w-13
-                        sm:h-13
-                        rounded-full
-                        bg-gray-200
-                        dark:bg-gray-700
-                        overflow-hidden
-                        flex-shrink-0
-                      "
-                    >
-                      {partner.avatarUrl ? (
-                        <img
-                          src={partner.avatarUrl}
-                          alt={displayName}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
+                    <div className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-zrp-red/10 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                      {conv.avatarUrl ? (
+                        <img src={conv.avatarUrl} alt={conv.name || ""} className="w-full h-full object-cover" loading="lazy" />
                       ) : (
-                        <div
-                          className="
-                            w-full
-                            h-full
-                            flex
-                            items-center
-                            justify-center
-                            text-gray-600
-                            dark:text-gray-300
-                            font-bold
-                            text-sm
-                          "
-                        >
-                          {initial}
-                        </div>
+                        <Users className="w-6 h-6 text-zrp-red" />
                       )}
 
-                      {/* Unread indicator */}
                       {conv.unreadCount > 0 && (
-                        <span
-                          className="
-                            absolute
-                            right-0
-                            bottom-0
-                            w-3
-                            h-3
-                            rounded-full
-                            bg-zrp-red
-                            border-2
-                            border-white
-                            dark:border-zrp-deepBlack
-                          "
-                        />
+                        <span className="absolute right-0 bottom-0 w-3 h-3 rounded-full bg-zrp-red border-2 border-white dark:border-zrp-deepBlack" />
                       )}
                     </div>
 
-                    {/* Conversation content */}
                     <div className="flex-1 min-w-0">
-                      {/* Name + date */}
                       <div className="flex items-center gap-2 min-w-0">
-                        <p
-                          className="
-                            flex
-                            items-center
-                            gap-1
-                            min-w-0
-                            flex-1
-                            text-sm
-                            font-semibold
-                            text-gray-900
-                            dark:text-white
-                          "
-                        >
-                          <span className="truncate">
-                            {displayName}
-                          </span>
-
-                          <VerifiedBadge
-                            badgeType={partner.badgeType}
-                            className="flex-shrink-0"
-                          />
+                        <p className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900 dark:text-white">
+                          {conv.name || t("group.new")}
                         </p>
-
-                        <span
-                          className="
-                            text-[11px]
-                            text-gray-400
-                            dark:text-gray-500
-                            flex-shrink-0
-                          "
-                        >
-                          {formatLastMessageDate(
-                            lastMsg.createdAt
-                          )}
-                        </span>
+                        {lastMsg && (
+                          <span className="text-[11px] text-gray-400 dark:text-gray-500 flex-shrink-0">
+                            {formatLastMessageDate(lastMsg.createdAt)}
+                          </span>
+                        )}
                       </div>
 
-                      {/* Username */}
-                      <p
-                        className="
-                          text-[11px]
-                          text-gray-400
-                          dark:text-gray-500
-                          truncate
-                          mt-0.5
-                        "
-                      >
-                        @{partner.username}
+                      <p className="text-[11px] text-gray-400 dark:text-gray-500 truncate mt-0.5">
+                        {t("group.memberCount", { count: conv.participantCount })}
                       </p>
 
-                      {/* Last message */}
                       <p
-                        className={`
-                          text-xs
-                          truncate
-                          mt-0.5
-                          pr-1
-                          ${
-                            conv.unreadCount > 0
-                              ? "font-semibold text-gray-800 dark:text-gray-200"
-                              : "text-gray-500 dark:text-gray-400"
-                          }
-                        `}
+                        className={`text-xs truncate mt-0.5 pr-1 ${
+                          conv.unreadCount > 0
+                            ? "font-semibold text-gray-800 dark:text-gray-200"
+                            : "text-gray-500 dark:text-gray-400"
+                        }`}
                       >
-                        {getLastMessagePreview(
-                          lastMsg.content,
-                          isOwn
-                        )}
+                        {preview
+                          ? preview.kind === "own"
+                            ? t("messages.you", { msg: preview.content })
+                            : preview.kind === "fromSender"
+                              ? t("group.lastMessagePrefix", { name: preview.senderName, msg: preview.content })
+                              : preview.content
+                          : ""}
                       </p>
                     </div>
 
-                    {/* Unread count */}
                     {conv.unreadCount > 0 && (
-                      <span
-                        className="
-                          flex-shrink-0
-                          min-w-[20px]
-                          h-5
-                          px-1.5
-                          rounded-full
-                          bg-zrp-red
-                          text-white
-                          text-[10px]
-                          font-bold
-                          flex
-                          items-center
-                          justify-center
-                        "
-                      >
-                        {conv.unreadCount > 99
-                          ? "99+"
-                          : conv.unreadCount}
+                      <span className="flex-shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-zrp-red text-white text-[10px] font-bold flex items-center justify-center">
+                        {conv.unreadCount > 99 ? "99+" : conv.unreadCount}
                       </span>
                     )}
                   </Link>
@@ -496,6 +438,17 @@ export default function MessagesIndexPage() {
           </p>
         </div>
       </section>
+
+      {showNewGroup && (
+        <NewGroupModal
+          onClose={() => setShowNewGroup(false)}
+          onCreated={(id) => {
+            setShowNewGroup(false);
+            refresh();
+            router.push(`/messages/group/${id}`);
+          }}
+        />
+      )}
     </div>
   );
 }

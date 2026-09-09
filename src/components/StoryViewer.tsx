@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
 import { X, Eye, Heart } from "lucide-react";
 
 interface Props {
@@ -203,13 +204,34 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
           </div>
         </div>
 
-        {/* User info */}
-        <div className="absolute top-12 left-4 flex items-center gap-2 text-white z-10">
+        {/* Author -> profile.
+
+            Two separate reasons a tap here did nothing. First, this
+            block was a plain <div>: the author's id and username were
+            right here in `group.user` but nothing was ever wired to
+            them, so there was no navigation to perform. Second - and
+            why simply adding an onClick would not have been enough -
+            the three story navigation zones below are `z-10` and span
+            the full height, the same z-index as this block but later in
+            the DOM, so the left "previous story" zone won the hit test
+            over the author's own name and avatar. It is a real link now,
+            it sits above those zones at z-20 like the like button
+            already does, and it stops the tap from also reaching them.
+            Closing the viewer first means the profile is not left
+            underneath a fullscreen overlay. */}
+        <Link
+          href={`/profile/${group.user.username}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          className="absolute top-12 left-4 z-20 flex items-center gap-2 rounded-full py-1 pe-3 text-white transition hover:bg-white/10 focus-visible:bg-white/10"
+        >
           <div className="w-8 h-8 rounded-full bg-gray-500 overflow-hidden">
             {group.user.avatarUrl ? (
               <img
                 src={group.user.avatarUrl}
-                alt={group.user.name || group.user.username}
+                alt=""
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -219,7 +241,7 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
             )}
           </div>
           <span className="font-medium text-sm">{group.user.name || group.user.username}</span>
-        </div>
+        </Link>
 
         {/* View count, top right */}
         <div className="absolute top-12 right-4 flex items-center gap-1 text-white/70 text-xs z-10 bg-black/30 px-2 py-1 rounded-full">

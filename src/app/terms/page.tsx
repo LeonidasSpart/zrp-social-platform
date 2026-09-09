@@ -33,7 +33,7 @@ export default function TermsPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter">
-      <main>
+      <div>
 
         {/* Hero */}
         <section className="relative overflow-hidden bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack py-16 sm:py-20 px-4">
@@ -752,7 +752,7 @@ export default function TermsPage() {
 
         </section>
 
-      </main>
+      </div>
     </div>
   );
 }

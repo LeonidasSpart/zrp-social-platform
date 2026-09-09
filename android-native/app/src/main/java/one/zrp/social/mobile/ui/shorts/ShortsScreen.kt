@@ -286,37 +286,41 @@ private fun ShortItem(
                 .padding(start = Spacing.lg, end = Spacing.sm, bottom = Spacing.lg),
             verticalAlignment = Alignment.Bottom,
         ) {
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable(onClick = onAuthorClick),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Avatar(url = post.author.avatarUrl, name = post.author.username, size = 40.dp)
-                Column(modifier = Modifier.padding(start = Spacing.md)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "@${post.author.username}",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f, fill = false),
-                        )
-                        VerifiedBadge(
-                            badgeType = post.author.badgeType,
-                        )
-                    }
-                    if (post.content.isNotBlank()) {
-                        Text(
-                            text = post.content,
-                            color = Color.White,
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(top = Spacing.xs),
-                        )
-                    }
+            // Author (avatar/name) and the caption are deliberately two
+            // separate clickable zones, not one shared Row - they used
+            // to be a single clickable(onAuthorClick) Row, so tapping the
+            // caption text itself (trying to read or expand it)
+            // navigated to the author's profile instead. Only the avatar/
+            // name row still does that; the caption's own tap target is
+            // ExpandableCaption's "View more"/"View less" toggle below.
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.clickable(onClick = onAuthorClick),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Avatar(url = post.author.avatarUrl, name = post.author.username, size = 40.dp)
+                    Text(
+                        text = "@${post.author.username}",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .padding(start = Spacing.md)
+                            .weight(1f, fill = false),
+                    )
+                    VerifiedBadge(
+                        badgeType = post.author.badgeType,
+                    )
+                }
+                if (post.content.isNotBlank()) {
+                    ExpandableCaption(
+                        text = post.content,
+                        // Lines up under the username, not the avatar -
+                        // same indent the caption already had as a child
+                        // of the avatar-width Column before this fix.
+                        modifier = Modifier.padding(start = 40.dp + Spacing.md, top = Spacing.xs),
+                    )
                 }
             }
 
@@ -365,6 +369,52 @@ private fun ShortItem(
                     },
                 )
             }
+        }
+    }
+}
+
+/**
+ * A Shorts caption: short text renders in full; text that overflows a
+ * bounded preview gets a "View more" toggle that expands it in place -
+ * no navigation, no dialog, nothing that leaves this screen. Overflow
+ * is real Compose measurement (TextLayoutResult.hasVisualOverflow), not
+ * a guessed character count, so it stays correct across font scaling,
+ * translated text (which can run longer/shorter than English), RTL
+ * layouts, and captions containing URLs/hashtags/mentions - all of
+ * which are just plain text runs here, same as the website's own
+ * unlinkified caption rendering elsewhere in this app.
+ */
+@Composable
+private fun ExpandableCaption(text: String, modifier: Modifier = Modifier) {
+    var expanded by remember(text) { mutableStateOf(false) }
+    var isOverflowing by remember(text) { mutableStateOf(false) }
+    val collapsedMaxLines = 2
+
+    Column(modifier = modifier) {
+        Text(
+            text = text,
+            color = Color.White,
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = if (expanded) Int.MAX_VALUE else collapsedMaxLines,
+            overflow = TextOverflow.Ellipsis,
+            onTextLayout = { result ->
+                if (!expanded) {
+                    isOverflowing = result.hasVisualOverflow
+                }
+            },
+        )
+        if (isOverflowing || expanded) {
+            Text(
+                text = stringResource(
+                    if (expanded) R.string.caption_view_less else R.string.caption_view_more,
+                ),
+                color = Color.White,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .clickable { expanded = !expanded },
+            )
         }
     }
 }

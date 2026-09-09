@@ -14,6 +14,22 @@ data class ProfileCounts(
     val following: Int = 0,
 )
 
+/**
+ * One earned milestone badge - `key` selects the real, already-translated
+ * label (see ProfileScreen's own milestoneLabel(), mirroring the website's
+ * MILESTONE_TRANSLATION_KEYS in page.tsx exactly, key for key) and
+ * `params.n` is the only numeric a label ever needs (years_on_zrp's own
+ * "%1$dyr"). Which facts a profile has earned is computed once, server-
+ * side, by computeMilestones() (src/lib/milestones.ts) - never
+ * recomputed here, so native can't silently disagree with web on
+ * thresholds.
+ */
+data class MilestoneFact(
+    val key: String,
+    val icon: String,
+    val params: Map<String, Int>?,
+)
+
 data class UserProfile(
     val id: String,
     val username: String,
@@ -40,6 +56,18 @@ data class UserProfile(
     val _count: ProfileCounts,
     val isFollowing: Boolean,
     val isBlocked: Boolean,
+    // Real figures from GET /users/{username} (src/app/api/users/
+    // [username]/route.ts) - the sum of this profile's own completed
+    // tips/purchases' charityAmount (src/lib/charity.ts) and the same
+    // computeMilestones() facts the website renders. Defaulted so a
+    // profile response from a moment before either field existed still
+    // deserializes instead of crashing on a missing key.
+    val charityContributionUsdc: Double = 0.0,
+    val milestones: List<MilestoneFact> = emptyList(),
+    // Does this profile follow the viewer back - X's "Follows you"
+    // signal, distinct from isFollowing (the other direction). Also new
+    // on the route, so defaulted the same way.
+    val followsMe: Boolean = false,
 )
 
 data class FollowToggleResponse(
@@ -140,14 +168,53 @@ data class UserRepliesPage(val items: List<UserReply>?, val nextCursor: String?)
 // getUserPosts maps UserPostsPage to PostsPage.
 data class RepliesPage(val replies: List<UserReply>, val nextCursor: String?)
 
+// GET /user/posts/stats - the signed-in user's own per-post analytics,
+// the exact endpoint the website's own AnalyticsTab.tsx fetches
+// (src/app/api/user/posts/stats/route.ts). It takes no parameters and
+// no username: the route resolves the author from the session itself,
+// which is why the Analytics tab only ever exists on your own profile.
+// Deliberately NOT /api/admin/analytics (the staff-only platform-wide
+// dashboard AdminApi wraps) and not /api/creator/studio (the 30-day
+// creator-plan-gated studio CreatorApi wraps) - three different real
+// features on three different routes.
+//
+// The route returns the 20 most recent posts, newest first, plus the
+// totals summed over exactly those same 20 - not over the account's
+// whole history - so the stat cards and the list below them always
+// describe the same set of posts.
+data class PostStatsCounts(val likes: Int, val comments: Int, val reposts: Int)
+
+data class PostStats(
+    val id: String,
+    val content: String,
+    val createdAt: String,
+    val views: Int,
+    val _count: PostStatsCounts,
+)
+
+data class PostStatsTotals(
+    val totalViews: Int,
+    val totalLikes: Int,
+    val totalComments: Int,
+    val totalReposts: Int,
+)
+
+data class UserPostStatsResponse(val posts: List<PostStats>?, val totalStats: PostStatsTotals?)
+
+// The repository-facing shape with a guaranteed non-null list and
+// totals, mapped from UserPostStatsResponse the same way getUserPosts
+// maps UserPostsPage to PostsPage.
+data class UserPostStats(val posts: List<PostStats>, val totals: PostStatsTotals)
+
 /**
  * The same profile endpoints the website itself uses - GET
  * /users/{username} for the profile header/stats, GET
  * /users/{username}/posts for their real posts (reusing PostsApi's
  * Post model, but NOT its PostsPage envelope - see UserPostsPage's
- * KDoc), the same follow toggle, and the profile page's other four
- * tabs (replies/media/likes/reposts), each backed by its own real
- * endpoint the same way. No profile data is invented natively.
+ * KDoc), the same follow toggle, the profile page's other four tabs
+ * (replies/media/likes/reposts), each backed by its own real endpoint
+ * the same way, and the own-profile-only Analytics tab (see
+ * UserPostStatsResponse). No profile data is invented natively.
  */
 interface UsersApi {
     @GET("users/{username}")
@@ -206,6 +273,12 @@ interface UsersApi {
 
     @GET("users/mute")
     suspend fun getMuteStatus(@Query("userId") userId: String): MuteStatusResponse
+
+    // Note the singular "user/" prefix - this is the session-scoped
+    // route family (user/username, user/email-preferences, ...), not
+    // the username-addressed "users/{username}" one above.
+    @GET("user/posts/stats")
+    suspend fun getOwnPostStats(): UserPostStatsResponse
 
     @GET("users/blocked")
     suspend fun getBlockedUsers(): List<BlockedUser>

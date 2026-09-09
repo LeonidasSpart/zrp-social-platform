@@ -71,10 +71,75 @@ async function authorizeSendRelay(prisma, userId, payload) {
   return { ok: true, message, targetId: message.receiverId };
 }
 
+/*
+ * Group conversations. A GROUP message row carries `conversationId` and
+ * a null `receiverId`; its real-time room is "group:<conversationId>"
+ * (prefixed so it can never collide with a userId room - both are
+ * cuids). Membership is the ConversationParticipant row and is checked
+ * per event, never just once at join time: a socket can outlive a
+ * since-revoked membership until it reconnects.
+ */
+function groupRoom(conversationId) {
+  return `group:${conversationId}`;
+}
+
+async function isConversationMember(prisma, userId, conversationId) {
+  const membership = await prisma.conversationParticipant.findUnique({
+    where: { conversationId_userId: { conversationId, userId } },
+    select: { id: true },
+  });
+  return membership !== null;
+}
+
+/**
+ * send-group-message: the message must exist, have been sent BY the
+ * verified user INTO the claimed conversation, and the user must still
+ * be a member. Returns the stored row to relay (the minimal shape the
+ * group clients hydrate from - see src/lib/groupMessageHydration.ts -
+ * built from the database, not from the payload's `content`).
+ */
+async function authorizeGroupSendRelay(prisma, userId, payload) {
+  const messageId = payload && payload.messageId;
+  const conversationId = payload && payload.conversationId;
+  if (!isNonEmptyString(messageId) || !isNonEmptyString(conversationId)) return { ok: false };
+
+  const message = await prisma.message.findUnique({
+    where: { id: messageId },
+    select: {
+      id: true,
+      senderId: true,
+      conversationId: true,
+      content: true,
+      imageUrl: true,
+      createdAt: true,
+      read: true,
+    },
+  });
+  if (!message) return { ok: false };
+  if (message.senderId !== userId || message.conversationId !== conversationId) return { ok: false };
+  if (!(await isConversationMember(prisma, userId, conversationId))) return { ok: false };
+
+  return {
+    ok: true,
+    message: {
+      id: message.id,
+      senderId: message.senderId,
+      conversationId: message.conversationId,
+      content: message.content,
+      imageUrl: message.imageUrl,
+      createdAt: message.createdAt,
+      read: message.read,
+    },
+    targetId: groupRoom(conversationId),
+  };
+}
+
 /**
  * edit-message: the message must exist and the verified user must be
  * its sender. The relayed record is the stored (already edited) row;
- * the client-supplied `message` object is ignored entirely.
+ * the client-supplied `message` object is ignored entirely. The target
+ * room comes from the row: the group's room for a group message, the
+ * receiver's room for a 1:1 message - never from the payload.
  */
 async function authorizeEditRelay(prisma, userId, payload) {
   const messageId = payload && payload.message && payload.message.id;
@@ -86,13 +151,19 @@ async function authorizeEditRelay(prisma, userId, payload) {
   });
   if (!message || message.senderId !== userId) return { ok: false };
 
+  if (message.conversationId) {
+    return { ok: true, message, targetId: groupRoom(message.conversationId) };
+  }
+  if (!message.receiverId) return { ok: false };
   return { ok: true, message, targetId: message.receiverId };
 }
 
 /**
- * message-reaction: the verified user must be a participant. The
- * relayed reaction list is loaded from the database; the target is the
- * OTHER participant, derived from the record rather than the payload.
+ * message-reaction: the verified user must be a participant - one of the
+ * two parties of a 1:1 message, or a current member of a group message's
+ * conversation. The relayed reaction list is loaded from the database;
+ * the target (the other party's room, or the group room) is derived
+ * from the record rather than the payload.
  */
 async function authorizeReactionRelay(prisma, userId, payload) {
   const messageId = payload && payload.messageId;
@@ -100,33 +171,50 @@ async function authorizeReactionRelay(prisma, userId, payload) {
 
   const message = await prisma.message.findUnique({
     where: { id: messageId },
-    select: { id: true, senderId: true, receiverId: true },
+    select: { id: true, senderId: true, receiverId: true, conversationId: true },
   });
   if (!message) return { ok: false };
-  if (message.senderId !== userId && message.receiverId !== userId) return { ok: false };
+
+  let targetId;
+  if (message.conversationId) {
+    if (!(await isConversationMember(prisma, userId, message.conversationId))) return { ok: false };
+    targetId = groupRoom(message.conversationId);
+  } else {
+    if (message.senderId !== userId && message.receiverId !== userId) return { ok: false };
+    targetId = message.senderId === userId ? message.receiverId : message.senderId;
+    if (!targetId) return { ok: false };
+  }
 
   const reactions = await prisma.messageReaction.findMany({
     where: { messageId },
     include: { user: { select: REACTION_USER_SELECT } },
   });
 
-  const targetId = message.senderId === userId ? message.receiverId : message.senderId;
   return { ok: true, messageId, reactions, targetId };
 }
 
 /**
  * delete-message: the row is already gone by the time this fires, so
- * ownership can't be checked against it. What can be checked is that a
- * conversation actually exists between the verified user and the
- * claimed receiver - which is the only thing the relay conveys ("a
- * message in our conversation was deleted"). Message ids are cuids, so
- * a fabricated id for a real message the sender isn't party to is not
- * guessable in practice.
+ * ownership can't be checked against it. What can be checked is that
+ * the verified user is actually party to the conversation the relay
+ * targets: a current member of the named group, or someone with a real
+ * 1:1 thread with the claimed receiver - which is the only thing the
+ * relay conveys ("a message in our conversation was deleted"). Message
+ * ids are cuids, so a fabricated id for a real message the sender isn't
+ * party to is not guessable in practice.
  */
 async function authorizeDeleteRelay(prisma, userId, payload) {
   const messageId = payload && payload.messageId;
+  if (!isNonEmptyString(messageId)) return { ok: false };
+
+  const conversationId = payload && payload.conversationId;
+  if (isNonEmptyString(conversationId)) {
+    if (!(await isConversationMember(prisma, userId, conversationId))) return { ok: false };
+    return { ok: true, messageId, targetId: groupRoom(conversationId) };
+  }
+
   const receiverId = payload && payload.receiverId;
-  if (!isNonEmptyString(messageId) || !isNonEmptyString(receiverId)) return { ok: false };
+  if (!isNonEmptyString(receiverId)) return { ok: false };
   if (receiverId === userId) return { ok: false };
 
   const any = await prisma.message.findFirst({
@@ -229,8 +317,11 @@ function createCallRegistry(options) {
 
 module.exports = {
   MESSAGE_RELAY_INCLUDE,
+  groupRoom,
   isBlockedEitherWay,
+  isConversationMember,
   authorizeSendRelay,
+  authorizeGroupSendRelay,
   authorizeEditRelay,
   authorizeReactionRelay,
   authorizeDeleteRelay,

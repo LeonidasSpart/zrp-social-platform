@@ -233,7 +233,7 @@ export default function MusicShell() {
         </div>
       </header>
 
-      <main className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-10">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-10">
         {/* Hero */}
         <section className="relative overflow-hidden rounded-[28px] bg-[#090909] text-white border border-white/10">
           <div className="absolute -right-32 -top-32 w-96 h-96 rounded-full bg-zrp-red/30 blur-3xl" />
@@ -642,7 +642,7 @@ export default function MusicShell() {
             </div>
           )}
         </section>
-      </main>
+      </div>
     </div>
   )
 

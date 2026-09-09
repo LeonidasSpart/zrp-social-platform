@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -52,6 +53,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.flow.SharedFlow
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.EditPostDialog
@@ -60,6 +62,7 @@ import one.zrp.social.mobile.ui.stories.StoriesRail
 import one.zrp.social.mobile.ui.components.EmptyStateAction
 import one.zrp.social.mobile.ui.components.PostSkeletonList
 import one.zrp.social.mobile.ui.components.ZrpEmptyState
+import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
@@ -82,6 +85,7 @@ fun HomeScreen(
     onDiscoverCreators: () -> Unit = {},
     onExploreMusic: () -> Unit = {},
     onExploreTopics: () -> Unit = {},
+    scrollToTopEvents: SharedFlow<Unit>? = null,
 ) {
     val viewModel: HomeViewModel = viewModel(
         factory = remember { HomeViewModelFactory(PostsRepository()) },
@@ -192,6 +196,19 @@ fun HomeScreen(
             ) {
                 val listState = rememberLazyListState()
 
+                // Only one LazyListState is ever live here (this Box's
+                // content, not the state itself, is what changes per
+                // tab - see this val's own placement above the
+                // activeTab branching below), so reacting to this one
+                // signal correctly scrolls whichever of For You/
+                // Following is actually on screen when Home is
+                // re-tapped, without knowing which tab that is.
+                LaunchedEffect(scrollToTopEvents) {
+                    scrollToTopEvents?.collect {
+                        listState.animateScrollToItem(0)
+                    }
+                }
+
                 val shouldLoadMore by remember {
                     derivedStateOf {
                         val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
@@ -275,7 +292,17 @@ fun HomeScreen(
                     var isSubmittingEdit by remember { mutableStateOf(false) }
                     var editError by remember { mutableStateOf<String?>(null) }
 
-                    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                    // Bottom content padding beyond the Scaffold's own
+                    // bottomBar-height innerPadding (ZrpNavHost.kt's
+                    // NavHost already reserves that) - the same real gap
+                    // fixed on ProfileScreen's own feed LazyColumn, for
+                    // the same reason: without it the last post's text
+                    // sits right at that boundary with no breathing room.
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = Spacing.xxl),
+                    ) {
                         itemsIndexed(state.posts, key = { _, post -> post.id }) { index, post ->
                             PostCard(
                                 post = post,

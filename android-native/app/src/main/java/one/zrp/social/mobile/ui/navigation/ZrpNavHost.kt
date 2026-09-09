@@ -14,12 +14,15 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -31,15 +34,34 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import kotlinx.coroutines.flow.MutableSharedFlow
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.data.NotificationsRepository
 import one.zrp.social.mobile.network.MobileUser
+import one.zrp.social.mobile.ui.admin.AdminAdsScreen
+import one.zrp.social.mobile.ui.admin.AdminAnalyticsScreen
+import one.zrp.social.mobile.ui.admin.AdminAppealsScreen
+import one.zrp.social.mobile.ui.admin.AdminAuditLogScreen
+import one.zrp.social.mobile.ui.admin.AdminCharityDisbursementsScreen
 import one.zrp.social.mobile.ui.admin.AdminDashboardScreen
+import one.zrp.social.mobile.ui.admin.AdminHelpScreen
+import one.zrp.social.mobile.ui.admin.AdminJournalistsScreen
+import one.zrp.social.mobile.ui.admin.AdminMarketplaceScreen
+import one.zrp.social.mobile.ui.admin.AdminMusicArtistsScreen
+import one.zrp.social.mobile.ui.admin.AdminNewsNetworkScreen
+import one.zrp.social.mobile.ui.admin.AdminNewsScreen
+import one.zrp.social.mobile.ui.admin.AdminOpportunityScreen
+import one.zrp.social.mobile.ui.admin.AdminPaymentsScreen
 import one.zrp.social.mobile.ui.admin.AdminPostsScreen
 import one.zrp.social.mobile.ui.admin.AdminReportsScreen
+import one.zrp.social.mobile.ui.admin.AdminStorageScreen
+import one.zrp.social.mobile.ui.admin.AdminSupportTicketDetailScreen
+import one.zrp.social.mobile.ui.admin.AdminSupportTicketsScreen
+import one.zrp.social.mobile.ui.admin.AdminUpgradeRequestsScreen
 import one.zrp.social.mobile.ui.admin.AdminUsersScreen
-import one.zrp.social.mobile.ui.legal.LegalWebViewScreen
+import one.zrp.social.mobile.ui.admin.AdminWithdrawalsScreen
+import one.zrp.social.mobile.ui.legal.LegalScreen
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
@@ -53,7 +75,13 @@ import one.zrp.social.mobile.ui.marketplace.ListingFormScreen
 import one.zrp.social.mobile.ui.marketplace.MarketplaceScreen
 import one.zrp.social.mobile.ui.marketplace.MyListingsScreen
 import one.zrp.social.mobile.ui.messages.ConversationScreen
+import one.zrp.social.mobile.ui.messages.GroupConversationScreen
+import one.zrp.social.mobile.ui.messages.GroupCreateScreen
+import one.zrp.social.mobile.ui.messages.GroupParticipantsScreen
+import one.zrp.social.mobile.ui.messages.MessageDeepLinkScreen
+import one.zrp.social.mobile.ui.messages.MessagesHomeScreen
 import one.zrp.social.mobile.ui.messages.MessagesScreen
+import one.zrp.social.mobile.ui.util.isTwoPane
 import one.zrp.social.mobile.ui.moderation.ModerationListMode
 import one.zrp.social.mobile.ui.moderation.ModerationListScreen
 import one.zrp.social.mobile.data.MusicRepository
@@ -134,16 +162,21 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * across the auth gate, a distinctly separate piece of work from the
  * routes themselves.
  */
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
-fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
+fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: WindowSizeClass) {
     val navController = rememberNavController()
     val isStaff = currentUser?.role == "ADMIN" || currentUser?.role == "MODERATOR"
     val isAdminRole = currentUser?.role == "ADMIN"
+    val currentUserId = currentUser?.id
     val goToProfile: (String) -> Unit = { username -> navController.navigate("profile/$username") }
     val goToTrustPassport: (String) -> Unit = { username -> navController.navigate("trust/$username") }
     val goToConversation: (partnerId: String, partnerUsername: String) -> Unit = { partnerId, partnerUsername ->
         navController.navigate("messages/$partnerId/$partnerUsername")
     }
+    val goToGroup: (conversationId: String) -> Unit = { id -> navController.navigate("messages/group/$id") }
+    val goToNewGroup: () -> Unit = { navController.navigate("messages/new-group") }
+    val goToGroupInfo: (conversationId: String) -> Unit = { id -> navController.navigate("messages/group/$id/info") }
     val goToComments: (String) -> Unit = { postId -> navController.navigate("post/$postId/comments") }
     val goToStoryViewer: (String) -> Unit = { userId -> navController.navigate("stories/$userId") }
     val goToCreateStory: () -> Unit = { navController.navigate("create-story") }
@@ -226,9 +259,29 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
     val goToAdminReports: () -> Unit = { navController.navigate("admin/reports") }
     val goToAdminUsers: () -> Unit = { navController.navigate("admin/users") }
     val goToAdminPosts: () -> Unit = { navController.navigate("admin/posts") }
+    val goToAdminAppeals: () -> Unit = { navController.navigate("admin/appeals") }
+    val goToAdminAds: () -> Unit = { navController.navigate("admin/ads") }
+    val goToAdminMarketplace: () -> Unit = { navController.navigate("admin/marketplace") }
+    val goToAdminOpportunity: () -> Unit = { navController.navigate("admin/opportunity") }
+    val goToAdminHelp: () -> Unit = { navController.navigate("admin/help") }
+    val goToAdminJournalists: () -> Unit = { navController.navigate("admin/journalists") }
+    val goToAdminMusicArtists: () -> Unit = { navController.navigate("admin/music-artists") }
+    val goToAdminNews: () -> Unit = { navController.navigate("admin/news") }
+    val goToAdminSupport: () -> Unit = { navController.navigate("admin/support") }
+    val goToAdminAnalytics: () -> Unit = { navController.navigate("admin/analytics") }
+    val goToAdminAuditLog: () -> Unit = { navController.navigate("admin/audit-log") }
+    val goToAdminStorage: () -> Unit = { navController.navigate("admin/storage") }
+    val goToAdminCharityDisbursements: () -> Unit = { navController.navigate("admin/charity-disbursements") }
+    val goToAdminSupportTicket: (String) -> Unit = { id -> navController.navigate("admin/support/$id") }
+    val goToAdminPayments: () -> Unit = { navController.navigate("admin/payments") }
+    val goToAdminWithdrawals: () -> Unit = { navController.navigate("admin/withdrawals") }
+    val goToAdminUpgradeRequests: () -> Unit = { navController.navigate("admin/upgrade-requests") }
+    val goToAdminNewsNetwork: () -> Unit = { navController.navigate("admin/news-network") }
     val goToTerms: () -> Unit = { navController.navigate("legal/terms") }
     val goToPrivacyPolicy: () -> Unit = { navController.navigate("legal/privacy") }
     val goToGuidelines: () -> Unit = { navController.navigate("legal/guidelines") }
+    val goToHelpCenter: () -> Unit = { navController.navigate("legal/help") }
+    val goToContact: () -> Unit = { navController.navigate("legal/contact") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
@@ -254,6 +307,17 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
         }
     }
 
+    // Tapping the Home tab while ALREADY on Home is a no-op as far as
+    // navigation goes (launchSingleTop above means there's nowhere to
+    // navigate to), so without this the feed just silently ignored the
+    // tap instead of returning to the top the way X/TikTok's own Home
+    // tab does. HomeScreen collects this and scrolls its active
+    // LazyListState (whichever of For You/Following is currently
+    // showing - HomeScreen only keeps one rememberLazyListState() live
+    // at a time) to the top; buffering one event means a tap that lands
+    // a beat before HomeScreen's collector starts still isn't lost.
+    val homeScrollToTopEvents = remember { MutableSharedFlow<Unit>(extraBufferCapacity = 1) }
+
     // Hoisted above the NavHost, not created inside NotificationsScreen's
     // own composable, so the badge survives navigating away from the
     // Notifications tab instead of resetting every time that screen
@@ -278,8 +342,9 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
     // (Home, Queue, and later Artist/Album/Playlist/Discover/Liked/
     // History), the native equivalent of the website's own
     // MusicPlayerProvider React context wrapping every /music/* page.
+    val appContext = LocalContext.current.applicationContext
     val musicPlayerViewModel: MusicPlayerViewModel = viewModel(
-        factory = remember { MusicPlayerViewModelFactory(MusicRepository()) },
+        factory = remember { MusicPlayerViewModelFactory(MusicRepository(), appContext) },
     )
 
     Scaffold(
@@ -293,6 +358,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     unreadBadgeViewModel.refresh()
                     unreadMessagesBadgeViewModel.refresh()
                 },
+                onHomeReselected = { homeScrollToTopEvents.tryEmit(Unit) },
             )
         },
     ) { innerPadding ->
@@ -318,6 +384,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onDiscoverCreators = goToExplorePeople,
                     onExploreMusic = goToMusic,
                     onExploreTopics = goToTrending,
+                    scrollToTopEvents = homeScrollToTopEvents,
                 )
             }
             composable(
@@ -372,7 +439,83 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
             composable(
                 route = ZrpDestination.Messages.route,
                 deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/messages" }),
-            ) { MessagesScreen(onOpenConversation = goToConversation) }
+            ) {
+                // Real WindowSizeClass-driven split (see WindowSize.kt's
+                // own isTwoPane KDoc) - a tablet/large-screen window gets
+                // the real two-pane list+thread layout in ONE screen
+                // (MessagesHomeScreen), never pushing a second nav
+                // destination for the thread; a phone-class window keeps
+                // this exact same push-to-full-screen behavior the app
+                // already had, unchanged.
+                if (windowSizeClass.isTwoPane() && currentUserId != null) {
+                    MessagesHomeScreen(
+                        currentUserId = currentUserId,
+                        onOpenProfile = goToProfile,
+                        onOpenGroupInfo = goToGroupInfo,
+                        onNewGroup = goToNewGroup,
+                    )
+                } else {
+                    MessagesScreen(
+                        onOpenConversation = goToConversation,
+                        onOpenGroup = goToGroup,
+                        onNewGroup = goToNewGroup,
+                    )
+                }
+            }
+            composable(
+                route = "messages/group/{conversationId}",
+                arguments = listOf(navArgument("conversationId") { type = NavType.StringType }),
+                // Matches the real url a group-message push notification
+                // carries (`/messages/group/{conversationId}` - see
+                // POST .../conversations/{id}/messages's own
+                // sendPushNotification call) - tapping that push lands
+                // directly on the real thread, the group equivalent of
+                // "messages/deeplink/{username}" for 1:1.
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/messages/group/{conversationId}" }),
+            ) { backStackEntry ->
+                val conversationId = backStackEntry.arguments?.getString("conversationId")
+                if (conversationId != null && currentUserId != null) {
+                    GroupConversationScreen(
+                        conversationId = conversationId,
+                        currentUserId = currentUserId,
+                        onBack = { navController.popBackStack() },
+                        onOpenInfo = { goToGroupInfo(conversationId) },
+                        onOpenProfile = goToProfile,
+                    )
+                }
+            }
+            composable("messages/new-group") {
+                GroupCreateScreen(
+                    onBack = { navController.popBackStack() },
+                    onCreated = { conversationId ->
+                        navController.navigate("messages/group/$conversationId") {
+                            popUpTo(ZrpDestination.Messages.route) { inclusive = false }
+                        }
+                    },
+                )
+            }
+            composable(
+                route = "messages/group/{conversationId}/info",
+                arguments = listOf(navArgument("conversationId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val conversationId = backStackEntry.arguments?.getString("conversationId")
+                if (conversationId != null && currentUserId != null) {
+                    GroupParticipantsScreen(
+                        conversationId = conversationId,
+                        currentUserId = currentUserId,
+                        onBack = { navController.popBackStack() },
+                        onLeft = {
+                            // Leaving pops all the way back to the
+                            // conversation list - the group's own info/
+                            // thread screens can no longer show anything
+                            // real once membership is gone (see
+                            // GroupParticipantsViewModel's own KDoc).
+                            navController.popBackStack(ZrpDestination.Messages.route, inclusive = false)
+                        },
+                        onOpenProfile = goToProfile,
+                    )
+                }
+            }
             composable(ZrpDestination.Profile.route) {
                 ProfileScreen(
                     username = null,
@@ -478,6 +621,28 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                 }
             }
             composable(
+                // A distinct Kotlin route from "messages/{userId}/{username}"
+                // above - Navigation Compose matches an incoming deep link
+                // by its uriPattern, not by this route string, so the two
+                // don't collide even though both ultimately show a
+                // conversation. This one exists because a "New Message"
+                // push notification's real url (sendPushNotification in
+                // src/app/api/messages/route.ts) only ever carries a
+                // username, never the partner's real id.
+                route = "messages/deeplink/{username}",
+                arguments = listOf(navArgument("username") { type = NavType.StringType }),
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/messages/{username}" }),
+            ) { backStackEntry ->
+                val username = backStackEntry.arguments?.getString("username")
+                if (username != null) {
+                    MessageDeepLinkScreen(
+                        username = username,
+                        onBack = { navController.popBackStack() },
+                        onOpenProfile = goToProfile,
+                    )
+                }
+            }
+            composable(
                 route = "stories/{userId}",
                 arguments = listOf(navArgument("userId") { type = NavType.StringType }),
             ) { backStackEntry ->
@@ -487,6 +652,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                         userId = userId,
                         onClose = { navController.popBackStack() },
                         onAddStory = goToCreateStory,
+                        onOpenProfile = goToProfile,
                     )
                 }
             }
@@ -930,6 +1096,8 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onOpenTerms = goToTerms,
                     onOpenPrivacyPolicy = goToPrivacyPolicy,
                     onOpenGuidelines = goToGuidelines,
+                    onOpenHelp = goToHelpCenter,
+                    onOpenContact = goToContact,
                 )
             }
             composable("settings/team") {
@@ -939,23 +1107,37 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                 ApiKeysScreen(onBack = { navController.popBackStack() })
             }
             composable("legal/terms") {
-                LegalWebViewScreen(
-                    url = "https://zrp.one/terms",
+                LegalScreen(
+                    page = "terms",
                     title = stringResource(R.string.legal_terms),
                     onBack = { navController.popBackStack() },
                 )
             }
             composable("legal/privacy") {
-                LegalWebViewScreen(
-                    url = "https://zrp.one/privacy",
+                LegalScreen(
+                    page = "privacy",
                     title = stringResource(R.string.legal_privacy),
                     onBack = { navController.popBackStack() },
                 )
             }
             composable("legal/guidelines") {
-                LegalWebViewScreen(
-                    url = "https://zrp.one/guidelines",
+                LegalScreen(
+                    page = "guidelines",
                     title = stringResource(R.string.legal_guidelines),
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("legal/help") {
+                LegalScreen(
+                    page = "help",
+                    title = stringResource(R.string.legal_help),
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("legal/contact") {
+                LegalScreen(
+                    page = "contact",
+                    title = stringResource(R.string.legal_contact),
                     onBack = { navController.popBackStack() },
                 )
             }
@@ -965,6 +1147,31 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onOpenUsers = goToAdminUsers,
                     onOpenPosts = goToAdminPosts,
                     onOpenReports = goToAdminReports,
+                    onOpenAppeals = goToAdminAppeals,
+                    onOpenAds = goToAdminAds,
+                    onOpenMarketplace = goToAdminMarketplace,
+                    onOpenOpportunity = goToAdminOpportunity,
+                    onOpenHelp = goToAdminHelp,
+                    onOpenJournalists = goToAdminJournalists,
+                    onOpenMusicArtists = goToAdminMusicArtists,
+                    onOpenNews = goToAdminNews,
+                    // The support tools and the three financial queues
+                    // are the admin sections the website itself gates
+                    // on the real ADMIN role instead of staff (every
+                    // /api/admin/support, /api/admin/payments,
+                    // /api/admin/withdrawals and /api/upgrade-requests
+                    // route is requireAdmin), so a MODERATOR never gets
+                    // their quick actions or the screens below.
+                    isAdmin = isAdminRole,
+                    onOpenSupport = goToAdminSupport,
+                    onOpenAnalytics = goToAdminAnalytics,
+                    onOpenAuditLog = goToAdminAuditLog,
+                    onOpenStorage = goToAdminStorage,
+                    onOpenCharityDisbursements = goToAdminCharityDisbursements,
+                    onOpenPayments = goToAdminPayments,
+                    onOpenWithdrawals = goToAdminWithdrawals,
+                    onOpenUpgradeRequests = goToAdminUpgradeRequests,
+                    onOpenNewsNetwork = goToAdminNewsNetwork,
                 )
             }
             composable("admin/reports") {
@@ -975,6 +1182,110 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
             }
             composable("admin/posts") {
                 AdminPostsScreen(onBack = { navController.popBackStack() })
+            }
+            // Every one of these is requireStaff server-side (see
+            // AdminApi's own KDoc), the same level as reports/posts -
+            // so, like those, they take no isAdmin flag: the entry
+            // point is already gated at the Settings row and the real
+            // boundary is the route itself.
+            composable("admin/appeals") {
+                AdminAppealsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/ads") {
+                AdminAdsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/marketplace") {
+                AdminMarketplaceScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/opportunity") {
+                AdminOpportunityScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/help") {
+                AdminHelpScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/journalists") {
+                AdminJournalistsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/music-artists") {
+                AdminMusicArtistsScreen(onBack = { navController.popBackStack() })
+            }
+            // The four internal ops screens below are requireAdmin
+            // server-side, exactly like the support tools - GET
+            // /admin/analytics, /admin/audit-log,
+            // /admin/cleanup-uploadthing and
+            // /admin/charity-disbursements all call requireAdmin(), not
+            // requireStaff(), so a MODERATOR never gets their quick
+            // actions on the dashboard either.
+            composable("admin/analytics") {
+                AdminAnalyticsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/audit-log") {
+                AdminAuditLogScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/storage") {
+                AdminStorageScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/charity-disbursements") {
+                AdminCharityDisbursementsScreen(onBack = { navController.popBackStack() })
+            }
+            // The ZRP News editorial desk - requireStaff server-side, so
+            // no isAdmin flag, same as the review queues above. Viewing
+            // an article opens the real native article screen.
+            composable("admin/news") {
+                AdminNewsScreen(
+                    onBack = { navController.popBackStack() },
+                    onViewArticle = goToNewsArticle,
+                )
+            }
+            composable("admin/support") {
+                AdminSupportTicketsScreen(
+                    isAdmin = isAdminRole,
+                    onBack = { navController.popBackStack() },
+                    onOpenTicket = goToAdminSupportTicket,
+                )
+            }
+            // The three financial queues, all requireAdmin server-side
+            // (verifying a payment, paying a creator out and approving
+            // a plan upgrade all move real money), so each takes the
+            // same isAdmin flag the support tools do.
+            composable("admin/payments") {
+                AdminPaymentsScreen(isAdmin = isAdminRole, onBack = { navController.popBackStack() })
+            }
+            composable("admin/withdrawals") {
+                AdminWithdrawalsScreen(isAdmin = isAdminRole, onBack = { navController.popBackStack() })
+            }
+            composable("admin/upgrade-requests") {
+                AdminUpgradeRequestsScreen(isAdmin = isAdminRole, onBack = { navController.popBackStack() })
+            }
+            // The News Network console (the automated editorial
+            // pipeline, not the /admin/news article CMS). Its five reads
+            // are requireStaff but every action it offers - pausing,
+            // running a cycle, provisioning feeds, enabling a source,
+            // rejecting or correcting a story, removing a published post
+            // - is requireAdmin, so it takes the same isAdmin flag the
+            // financial queues do. A published post opens in the app's
+            // own post view and a feed's account in its own profile:
+            // nothing here hands off to a browser.
+            composable("admin/news-network") {
+                AdminNewsNetworkScreen(
+                    isAdmin = isAdminRole,
+                    onBack = { navController.popBackStack() },
+                    onOpenPost = goToComments,
+                    onOpenProfile = goToProfile,
+                )
+            }
+            composable(
+                route = "admin/support/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    AdminSupportTicketDetailScreen(
+                        ticketId = id,
+                        isAdmin = isAdminRole,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
             }
             composable("creator") {
                 CreatorScreen(
@@ -1074,6 +1385,15 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
             composable(
                 route = "post/{postId}/comments",
                 arguments = listOf(navArgument("postId") { type = NavType.StringType }),
+                // Matches the real "/post/{postId}" path
+                // src/lib/push-notifications.ts's sendPushNotification
+                // callers already send as the FCM `url` data field for a
+                // like or comment notification (see
+                // ZrpFirebaseMessagingService's own deep-link tap intent)
+                // - this is the screen web's own /post/{postId} route
+                // opens to, same as every other real goToComments call
+                // elsewhere in this NavHost.
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/post/{postId}" }),
             ) { backStackEntry ->
                 val postId = backStackEntry.arguments?.getString("postId")
                 if (postId != null) {
@@ -1157,6 +1477,7 @@ private fun ZrpBottomBar(
     unreadMessageCount: Int,
     onNotificationsSelected: () -> Unit,
     onOtherTabSelected: () -> Unit,
+    onHomeReselected: () -> Unit,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
@@ -1173,6 +1494,15 @@ private fun ZrpBottomBar(
             NavigationBarItem(
                 selected = selected,
                 onClick = {
+                    // Re-tapping the tab you're already on is a
+                    // navigation no-op (see homeScrollToTopEvents' own
+                    // comment) - for Home specifically, that's the
+                    // signal to scroll the active feed back to the top
+                    // instead of doing anything nav-related.
+                    if (destination == ZrpDestination.Home && selected) {
+                        onHomeReselected()
+                        return@NavigationBarItem
+                    }
                     if (destination == ZrpDestination.Notifications) {
                         onNotificationsSelected()
                     } else {

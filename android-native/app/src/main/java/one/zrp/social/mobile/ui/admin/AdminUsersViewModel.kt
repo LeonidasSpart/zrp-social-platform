@@ -23,20 +23,27 @@ data class AdminUsersUiState(
     val totalPages: Int = 1,
     val busyUserId: String? = null,
     val pendingDeleteId: String? = null,
+    // The plan change waiting on its confirm dialog - the user it
+    // applies to and the plan they'd be moved onto.
+    val pendingPlanUserId: String? = null,
+    val pendingPlan: String? = null,
     val error: String? = null,
 )
 
 /**
  * Ported from src/app/admin/users/page.tsx - see AdminApi's own KDoc.
  * Ban toggling works for both ADMIN and MODERATOR (server-side
- * requireStaff); role changes and deletion are ADMIN-only server-side
- * (requireAdmin) - AdminUsersScreen only shows those controls when the
- * caller passes isAdmin=true, matching who the server would actually
- * accept the request from.
+ * requireStaff); role changes, plan changes and deletion are ADMIN-only
+ * server-side (requireAdmin) - AdminUsersScreen only shows those
+ * controls when the caller passes isAdmin=true, matching who the server
+ * would actually accept the request from.
  *
- * Deletion prompts a real confirm dialog (irreversible); banning does
- * not - it's a reversible toggle with its own always-visible undo
- * action right next to it, so a confirm step would only add friction.
+ * Deletion prompts a real confirm dialog (irreversible), and so does a
+ * plan change - PUT /admin/users/{id}/plan grants or revokes paid
+ * access outright, without any payment or upgrade request behind it, so
+ * it never fires straight off the dropdown. Banning does not - it's a
+ * reversible toggle with its own always-visible undo action right next
+ * to it, so a confirm step would only add friction.
  * admin_users_ban_confirm stays a real, extracted translation left
  * unused for that reason, matching this codebase's own precedent (see
  * SupportTicketsViewModel's KDoc) for a translated string that exists
@@ -110,6 +117,31 @@ class AdminUsersViewModel(private val repository: AdminRepository) : ViewModel()
                         current.copy(
                             busyUserId = null,
                             users = current.users.map { if (it.id == userId) it.copy(role = updated.role) else it },
+                        )
+                    }
+                }
+                .onFailure { error -> _state.update { it.copy(busyUserId = null, error = error.message) } }
+        }
+    }
+
+    fun requestPlanChange(userId: String, plan: String) =
+        _state.update { it.copy(pendingPlanUserId = userId, pendingPlan = plan) }
+
+    fun cancelPlanChange() = _state.update { it.copy(pendingPlanUserId = null, pendingPlan = null) }
+
+    fun confirmPlanChange() {
+        val userId = _state.value.pendingPlanUserId ?: return
+        val plan = _state.value.pendingPlan ?: return
+        _state.update {
+            it.copy(pendingPlanUserId = null, pendingPlan = null, busyUserId = userId, error = null)
+        }
+        viewModelScope.launch {
+            repository.updateUserPlan(userId, plan)
+                .onSuccess { updated ->
+                    _state.update { current ->
+                        current.copy(
+                            busyUserId = null,
+                            users = current.users.map { if (it.id == userId) it.copy(plan = updated.plan) else it },
                         )
                     }
                 }

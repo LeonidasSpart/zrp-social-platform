@@ -26,6 +26,7 @@ import {
   CheckCircle,
   ShieldCheck,
   MoreHorizontal,
+  ChevronRight,
   DollarSign,
   Lock,
   FileText,
@@ -40,9 +41,10 @@ import PostCard from "@/components/PostCard";
 import ActivityHeatmap from "@/components/ActivityHeatmap";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import AnalyticsTab from "@/components/AnalyticsTab";
-import PostComposer from "@/components/PostComposer";
 import TipModal from "@/components/TipModal";
 import NativePaymentNotice from "@/components/NativePaymentNotice";
+import { SkeletonProfileHeader } from "@/components/skeletons/SkeletonProfileHeader";
+import { SkeletonFeed } from "@/components/skeletons/SkeletonFeed";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
 import { isNativeApp } from "@/lib/nativeAuth";
@@ -195,6 +197,10 @@ interface UserProfile {
 
   isFollowing: boolean;
   isBlocked: boolean;
+  // Does this profile follow the viewer back - X's "Follows you" signal.
+  // Independent of isFollowing (the other direction); see
+  // src/app/api/users/[username]/route.ts.
+  followsMe: boolean;
 
   followRequestStatus?: "pending" | "none";
 
@@ -967,10 +973,16 @@ export default function ProfilePage(
   // ─── Loading state ─────────────────────────────────────────────
 
   if (loading && !profile) {
+    // A shape-matched skeleton instead of a centred spinner on an
+    // otherwise blank page - the same real component
+    // (SkeletonProfileHeader) other loading states already use, just
+    // never wired up on the profile page itself before this.
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">
-          {t("action.loading")}
+      <div className="max-w-2xl mx-auto bg-white dark:bg-zrp-deepBlack min-h-screen">
+        <div className="h-48 bg-gray-100 dark:bg-gray-900" />
+        <SkeletonProfileHeader />
+        <div className="px-4 mt-2">
+          <SkeletonFeed count={3} />
         </div>
       </div>
     );
@@ -1004,6 +1016,12 @@ export default function ProfilePage(
   // be `Math.floor(Math.random() * 50) + 5` "meals", a number with no
   // connection to anything real, regenerated on every page load.
   const charityContributionUsdc = profile.charityContributionUsdc;
+
+  // The passport's own translated description, reused verbatim. Writing
+  // a new summary line would mean inventing a trust claim and 11
+  // translations for it; the real signals it summarises (verification,
+  // join date) are rendered from this page's own data.
+  const trustSummary = t("profile.trustPassportDesc");
 
   const milestones = profile.milestones;
 
@@ -1319,16 +1337,25 @@ export default function ProfilePage(
           BANNER
       ─────────────────────────────────────────────────────────── */}
 
-      <div className="relative h-48 bg-gradient-to-r from-zrp-red/30 to-zrp-red/10">
+      {/* An account with no cover got a pale red gradient - the brand
+          colour used as decoration, and the first of three accents
+          stacked in the top 150px of this page. A cover is content; its
+          absence is not an occasion for brand colour, so the default is
+          now a quiet neutral field. The dark scrim exists to keep the
+          avatar and the camera button legible over a photograph, so it
+          is now drawn only when there is a photograph. */}
+      <div className="relative h-48 bg-gray-100 dark:bg-gray-900">
         {profile.coverUrl && (
-          <img
-            src={profile.coverUrl}
-            alt="Cover"
-            className="w-full h-full object-cover"
-          />
-        )}
+          <>
+            <img
+              src={profile.coverUrl}
+              alt="Cover"
+              className="w-full h-full object-cover"
+            />
 
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
+          </>
+        )}
 
         {isOwnProfile && (
           <div className="absolute bottom-2 right-2">
@@ -1339,7 +1366,10 @@ export default function ProfilePage(
               disabled={
                 uploadingBanner
               }
-              className="bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
+              className="flex items-center justify-center h-11 w-11 bg-black/50 text-white rounded-full hover:bg-black/70 transition"
+              aria-label={t(
+                "profile.changeBanner"
+              )}
               title={t(
                 "profile.changeBanner"
               )}
@@ -1372,7 +1402,12 @@ export default function ProfilePage(
         {/* Avatar + action buttons row */}
 
         <div className="flex items-start justify-between gap-3">
-          <div className="relative w-20 h-20 -mt-10 sm:w-28 sm:h-28 sm:-mt-16 rounded-full border-4 border-white dark:border-gray-900 shadow-lg overflow-hidden flex-shrink-0 group bg-white dark:bg-zrp-deepBlack">
+          <div // The ring reads as a ring only when it is the ground colour behind
+          // the page. It was gray-900 in dark mode while the page ground is
+          // zrp-deepBlack (#050505), so it drew as a visible grey band. The
+          // shadow goes with it: the ring already separates the avatar from
+          // any cover.
+          className="relative w-20 h-20 -mt-10 sm:w-28 sm:h-28 sm:-mt-16 rounded-full border-4 border-white dark:border-zrp-deepBlack overflow-hidden flex-shrink-0 group bg-white dark:bg-zrp-deepBlack">
             {profile.avatarUrl ? (
               <img
                 src={profile.avatarUrl}
@@ -1400,7 +1435,10 @@ export default function ProfilePage(
                   disabled={
                     uploadingAvatar
                   }
-                  className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white"
+                  className="absolute inset-0 bg-black/40 opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100 flex items-center justify-center text-white"
+                  aria-label={t(
+                    "profile.changeAvatar"
+                  )}
                   title={t(
                     "profile.changeAvatar"
                   )}
@@ -1427,20 +1465,24 @@ export default function ProfilePage(
             )}
           </div>
 
-          {/* Action buttons */}
-
-          <div className="flex flex-wrap gap-2 justify-end pt-2 flex-shrink-0">
+          {/* Primary actions sit on the avatar's line, right-aligned,
+              the way every mature profile does it: the identity block
+              below then reads as one uninterrupted column of name,
+              handle, category, bio and metadata. Batch 06 had moved
+              these under the identity block, which left the whole band
+              beside a 112px avatar empty and pushed the counts down. */}
+          <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
             {/* Share Profile */}
 
             <button
               onClick={
                 handleShareProfile
               }
-              className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 h-11 px-4 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
             >
               <Share2 className="w-4 h-4" />
 
-              <span className="hidden sm:inline">
+              <span>
                 {t(
                   "profile.share"
                 )}
@@ -1450,11 +1492,11 @@ export default function ProfilePage(
             {isOwnProfile ? (
               <Link
                 href="/settings"
-                className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+                className="inline-flex items-center gap-1.5 h-11 px-4 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
               >
                 <Pencil className="w-4 h-4" />
 
-                <span className="hidden sm:inline">
+                <span>
                   {t(
                     "profile.edit"
                   )}
@@ -1462,6 +1504,22 @@ export default function ProfilePage(
               </Link>
             ) : (
               <>
+                {/* Blocked: this viewer has blocked this account. Follow,
+                    Message and Tip all imply an interaction that block is
+                    meant to prevent, so - like every mature reference
+                    profile - they're replaced with a single quiet
+                    indicator rather than left active and misleading. The
+                    only way back is the same More menu's own Unblock
+                    item, still reachable below. */}
+                {isBlocked && (
+                  <span className="inline-flex items-center gap-1.5 h-11 px-4 rounded-full text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 whitespace-nowrap">
+                    <Ban className="w-4 h-4" />
+                    {t("profile.blocked")}
+                  </span>
+                )}
+
+                {!isBlocked && (
+                  <>
                 {/* Follow */}
 
                 <button
@@ -1471,7 +1529,7 @@ export default function ProfilePage(
                   disabled={
                     followLoading
                   }
-                  className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition whitespace-nowrap ${
+                  className={`inline-flex items-center gap-1.5 h-11 px-5 rounded-full text-sm font-semibold transition whitespace-nowrap ${
                     isFollowRequested
                       ? "bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 cursor-default"
                       : isFollowing
@@ -1482,12 +1540,12 @@ export default function ProfilePage(
                   {followLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : isFollowRequested ? (
-                    "Requested"
+                    t("action.requested")
                   ) : isFollowing ? (
                     <>
                       <UserCheck className="w-4 h-4" />
 
-                      <span className="hidden sm:inline">
+                      <span>
                         {t(
                           "action.following"
                         )}
@@ -1510,11 +1568,11 @@ export default function ProfilePage(
 
                 <Link
                   href={`/messages/${profile.username}`}
-                  className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+                  className="inline-flex items-center gap-1.5 h-11 px-4 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
                 >
                   <MessageCircle className="w-4 h-4" />
 
-                  <span className="hidden sm:inline">
+                  <span>
                     {t(
                       "action.message"
                     )}
@@ -1534,12 +1592,14 @@ export default function ProfilePage(
                   >
                     <DollarSign className="w-4 h-4" />
 
-                    <span className="hidden sm:inline">
+                    <span>
                       {t(
                         "profile.tip"
                       )}
                     </span>
                   </button>
+                )}
+                  </>
                 )}
 
                 {/* More */}
@@ -1556,12 +1616,15 @@ export default function ProfilePage(
                         !moreMenuOpen
                       )
                     }
-                    className="flex items-center gap-1 px-2 sm:px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap"
+                    className="inline-flex items-center justify-center h-11 w-11 border border-gray-300 dark:border-gray-600 rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                    aria-label={t("profile.moreActions")}
+                    aria-haspopup="menu"
+                    aria-expanded={moreMenuOpen}
                     title={t(
                       "profile.moreActions"
                     )}
                   >
-                    <MoreHorizontal className="w-4 h-4" />
+                    <MoreHorizontal className="w-5 h-5" aria-hidden="true" />
                   </button>
 
                   {moreMenuOpen && (
@@ -1669,15 +1732,33 @@ export default function ProfilePage(
               )}
           </div>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            @{profile.username}
-          </p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              @{profile.username}
+            </p>
 
-          {/* Professional category */}
+            {/* "Follows you" - the reverse of isFollowing (does THIS
+                account follow the viewer), a real reference-app signal
+                that was simply never computed before (see the API
+                route's own followsMe). Quiet, informational - a chip,
+                never a second accent competing with the Follow button
+                above. */}
+            {!isOwnProfile && profile.followsMe && (
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md">
+                {t("profile.followsYou")}
+              </span>
+            )}
+          </div>
+
+          {/* Category reads as a caption on the person, so it sits
+              with the rest of the metadata rather than between the
+              handle and the bio, where it interrupted the identity
+              line. Quiet, too: it is a fact about the account, not a
+              second brand accent competing with the actions above. */}
 
           {profile.category &&
             profile.showCategory && (
-              <p className="text-sm text-zrp-red font-medium mt-0.5">
+              <p className="mt-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                 {profile.category}
               </p>
             )}
@@ -1897,20 +1978,40 @@ export default function ProfilePage(
               CHARITY / IMPACT
           ─────────────────────────────────────────────────────── */}
 
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-            <span className="bg-zrp-red/10 text-zrp-red px-3 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap">
-              <Heart className="w-3.5 h-3.5" />
+          {/* One metadata line, where there used to be a red Impact
+              pill here and a blue gradient Trust Passport card below the
+              milestones - two saturated surfaces for two facts, inside
+              150px that already carried the banner. Both facts and both
+              destinations survive; only the surfaces are gone. The
+              trailing emoji goes too: the heart glyph already says it,
+              twice was decoration. text-gray-400 on white is 2.85:1 and
+              failed AA, so the line sits at the gray-500 floor. */}
+          {/* charityContributionUsdc is a real figure - the sum of this
+              account's own completed tips' charityAmount (src/lib/charity.ts).
+              For an account that has never been tipped it is genuinely
+              0, and "Impact: $0.00 contributed to charity" on every such
+              profile turns a real distinction into noise. So the
+              per-account figure appears only when there is one; the 35%
+              line stays, because it is true of the platform regardless
+              of this account. */}
+          <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-gray-500 dark:text-gray-400">
+            {charityContributionUsdc > 0 && (
+              <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                <Heart
+                  className="w-4 h-4"
+                  aria-hidden="true"
+                />
 
-              {t(
-                "profile.impact",
-                {
-                  amount: charityContributionUsdc.toFixed(2),
-                }
-              )}{" "}
-              🧡
-            </span>
+                {t(
+                  "profile.impact",
+                  {
+                    amount: charityContributionUsdc.toFixed(2),
+                  }
+                )}
+              </span>
+            )}
 
-            <span className="text-gray-400 text-xs">
+            <span>
               {t(
                 "profile.charityNote",
                 {
@@ -1919,6 +2020,39 @@ export default function ProfilePage(
               )}
             </span>
           </div>
+
+          {/* Trust Passport - a row of its own rather than a word in the
+              metadata line, because it is a destination, not a fact. It
+              stays quiet (a hairline, the page's own ground) but reads
+              unambiguously as something you open: full-width target, a
+              real chevron, and the signals it summarises are the
+              account's own - verification and how long it has been
+              here. Both come from data already on this page; nothing
+              here is a new or invented trust level. */}
+          <Link
+            href={`/trust/${profile.username}`}
+            className="mt-3 flex items-center gap-3 rounded-xl border border-gray-200 px-3 py-2.5 transition hover:border-gray-300 hover:bg-gray-50 dark:border-gray-800 dark:hover:border-gray-700 dark:hover:bg-white/[0.03]"
+          >
+            <ShieldCheck
+              className="w-5 h-5 shrink-0 text-gray-500 dark:text-gray-400"
+              aria-hidden="true"
+            />
+
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold text-gray-900 dark:text-white">
+                {t("profile.trustPassportTitle")}
+              </span>
+
+              <span className="block truncate text-xs text-gray-500 dark:text-gray-400">
+                {trustSummary}
+              </span>
+            </span>
+
+            <ChevronRight
+              className="w-4 h-4 shrink-0 text-gray-400"
+              aria-hidden="true"
+            />
+          </Link>
 
           {/* ───────────────────────────────────────────────────────
               MILESTONE BADGES
@@ -1956,44 +2090,6 @@ export default function ProfilePage(
             </div>
           )}
 
-          {/* ───────────────────────────────────────────────────────
-              ZRP TRUST PASSPORT
-              
-              NEW FEATURE.
-              Does not modify your existing profile API,
-              database schema, follow system, posts, or privacy.
-          ─────────────────────────────────────────────────────── */}
-
-          <Link
-            href={`/trust/${profile.username}`}
-            className="mt-4 group flex items-center justify-between gap-3 rounded-2xl border border-zrp-blue/20 bg-gradient-to-r from-zrp-blue/5 to-transparent dark:from-zrp-blue/10 dark:to-transparent px-4 py-3.5 hover:border-zrp-blue/40 hover:bg-zrp-blue/10 dark:hover:bg-zrp-blue/15 transition"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="flex-shrink-0 w-11 h-11 rounded-full bg-zrp-blue/10 flex items-center justify-center border border-zrp-blue/10">
-                <ShieldCheck className="w-6 h-6 text-zrp-blue" />
-              </div>
-
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    {t("profile.trustPassportTitle")}
-                  </span>
-
-                  <span className="text-[10px] font-bold uppercase tracking-wide text-zrp-red bg-zrp-red/10 px-1.5 py-0.5 rounded-full">
-                    {t("profile.trustPassportBadge")}
-                  </span>
-                </div>
-
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  {t("profile.trustPassportDesc")}
-                </p>
-              </div>
-            </div>
-
-            <span className="flex-shrink-0 text-zrp-blue text-sm font-semibold group-hover:translate-x-0.5 transition-transform">
-              {t("profile.trustPassportView")} →
-            </span>
-          </Link>
 
           {/* ───────────────────────────────────────────────────────
               ACTIVITY HEATMAP
@@ -2009,25 +2105,34 @@ export default function ProfilePage(
         </div>
       </div>
 
-      {/* ───────────────────────────────────────────────────────────
-          POST COMPOSER
-      ─────────────────────────────────────────────────────────── */}
-
-      {isOwnProfile && (
-        <div className="mt-4 px-4">
-          <PostComposer
-            onPostCreated={
-              fetchPosts
-            }
-          />
-        </div>
-      )}
+      {/* The composer used to render here as well as on Home. It is the
+          same component and the same action, and on a profile it sat
+          between the identity block and the tabs, pushing Posts /
+          Replies / Media below the fold on a phone. Composing belongs to
+          the feed; a profile is for reading one. Nothing is lost - the
+          composer on Home is the same one, reachable from every screen
+          via the bottom nav and the sidebar. */}
 
       {/* ───────────────────────────────────────────────────────────
           TABS
       ─────────────────────────────────────────────────────────── */}
 
-      <div className="flex mt-4 px-4 border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
+      {/* Six tabs do not fit a 320px phone, and the row scrolled with
+          nothing to say so - Media and Analytics were simply unreachable
+          unless you happened to swipe a strip that looked static. The
+          fade at the trailing edge is the affordance; scroll-snap makes
+          the swipe land on a tab rather than between two. */}
+      <div className="relative mt-4">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent dark:from-zrp-deepBlack lg:hidden"
+        />
+
+        <div
+          role="tablist"
+          aria-label={t("profile.posts")}
+          className="flex px-4 border-b border-gray-200 dark:border-gray-800 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+        >
         {visibleTabs.map(
           (tab) => {
             const TabIcon =
@@ -2046,7 +2151,9 @@ export default function ProfilePage(
                     tab
                   )
                 }
-                className={`relative flex-shrink-0 px-4 py-3 text-sm font-medium transition hover:bg-gray-50 dark:hover:bg-gray-800/50 whitespace-nowrap ${
+                role="tab"
+                aria-selected={activeTab === tab}
+                className={`relative flex-shrink-0 snap-start min-h-[44px] px-4 py-3 text-sm font-medium transition hover:bg-gray-50 dark:hover:bg-gray-800/50 whitespace-nowrap ${
                   activeTab ===
                   tab
                     ? "text-gray-900 dark:text-white"
@@ -2074,6 +2181,7 @@ export default function ProfilePage(
             );
           }
         )}
+        </div>
       </div>
 
       {/* ───────────────────────────────────────────────────────────
@@ -2082,9 +2190,18 @@ export default function ProfilePage(
 
       <div className="mt-4 px-4">
         {loading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-zrp-red" />
-          </div>
+          activeTab === "media" ? (
+            <div className="grid grid-cols-3 gap-0.5">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="aspect-square bg-gray-100 dark:bg-gray-800 animate-pulse"
+                />
+              ))}
+            </div>
+          ) : (
+            <SkeletonFeed count={3} />
+          )
         ) : !canViewPosts ? (
           renderProtectedMessage()
         ) : activeTab ===
@@ -2256,25 +2373,45 @@ export default function ProfilePage(
                 MEDIA
             ───────────────────────────────────────────────────── */}
 
-            {activeTab ===
-              "media" && (
-              <>
-                {posts.map(
-                  (post) => (
-                    <PostCard
-                      key={
-                        post.id
-                      }
-                      post={
-                        post
-                      }
-                      onUpdate={
-                        fetchPosts
-                      }
-                    />
-                  )
-                )}
-              </>
+            {/* A photo grid, not a column of full post cards - this tab
+                exists specifically to browse what someone has posted
+                visually (every reference profile does this), and a
+                column of full-width PostCards made scanning nine
+                photos mean nine long scrolls through captions and
+                action bars identical to the Posts tab. Each post here
+                already has a real imageUrl (the /media endpoint only
+                returns posts where one is set), so a plain square
+                thumbnail is real content, not a placeholder. */}
+            {activeTab === "media" && (
+              <div className="grid grid-cols-3 gap-0.5">
+                {posts.map((post) => (
+                  <Link
+                    key={post.id}
+                    href={`/post/${post.id}`}
+                    className="relative block aspect-square bg-gray-100 dark:bg-gray-800 overflow-hidden group"
+                  >
+                    {post.imageUrl && (
+                      <img
+                        src={post.imageUrl}
+                        alt=""
+                        className="w-full h-full object-cover transition group-hover:opacity-90"
+                      />
+                    )}
+
+                    <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/0 opacity-0 transition group-hover:bg-black/30 group-hover:opacity-100">
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-white">
+                        <Heart className="w-4 h-4" />
+                        {formatProfileCount(post._count.likes)}
+                      </span>
+
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-white">
+                        <MessageSquare className="w-4 h-4" />
+                        {formatProfileCount(post._count.comments)}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             )}
 
             {nextCursor && (

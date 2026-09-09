@@ -52,7 +52,7 @@ export default function MusicHistoryPage() {
         </div>
       </header>
 
-      <main className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {loading ? (
           <div className="py-16 flex justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-zrp-red border-t-transparent" />
@@ -67,7 +67,7 @@ export default function MusicHistoryPage() {
             emptyDescription={t("music.history.emptyBody")}
           />
         )}
-      </main>
+      </div>
     </div>
   );
 }

@@ -39,7 +39,7 @@ export default function InvestorsPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter">
-      <main>
+      <div>
 
         {/* Hero */}
         <section className="relative bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack py-20 px-4">
@@ -389,7 +389,7 @@ export default function InvestorsPage() {
 
         </section>
 
-      </main>
+      </div>
     </div>
   );
 }

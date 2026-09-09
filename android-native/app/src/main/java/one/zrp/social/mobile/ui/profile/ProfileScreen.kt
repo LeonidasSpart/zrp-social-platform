@@ -7,19 +7,27 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -32,6 +40,8 @@ import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LocationOn
@@ -40,9 +50,11 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -70,10 +82,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -82,15 +96,20 @@ import coil.compose.AsyncImage
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.network.Post
+import one.zrp.social.mobile.network.PostStats
+import one.zrp.social.mobile.network.PostStatsTotals
 import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.network.UserReply
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
+import one.zrp.social.mobile.ui.components.LinkifiedText
+import one.zrp.social.mobile.ui.components.ProfileHeaderSkeleton
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.home.PostCard
 import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.ui.theme.TouchTarget
 import one.zrp.social.mobile.ui.theme.ZrpBlue
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.ui.theme.ZrpWhite
@@ -136,6 +155,7 @@ fun ProfileScreen(
         ProfileTab.MEDIA -> state.mediaTab.isLoading && state.mediaTab.hasLoaded
         ProfileTab.LIKES -> state.likesTab.isLoading && state.likesTab.hasLoaded
         ProfileTab.REPOSTS -> state.repostsTab.isLoading && state.repostsTab.hasLoaded
+        ProfileTab.ANALYTICS -> state.analyticsTab.isLoading && state.analyticsTab.hasLoaded
     }
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshingSelectedTab,
@@ -151,9 +171,7 @@ fun ProfileScreen(
 
         when {
             state.isLoadingProfile -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
+                ProfileHeaderSkeleton()
             }
             profile == null -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -220,7 +238,18 @@ fun ProfileScreen(
                     if (shouldLoadMore) viewModel.loadMoreSelectedTab()
                 }
 
-                LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                // Bottom content padding beyond the Scaffold's own
+                // bottomBar-height innerPadding (see ZrpNavHost.kt's
+                // NavHost, which already reserves that) - without extra
+                // room here, the LAST post's own text can sit right at
+                // that boundary with no breathing space, reading as
+                // "hidden behind the bottom navigation" on a real
+                // device even though the bar itself never overlaps it.
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = Spacing.xxl),
+                ) {
                     item {
                         ProfileHeader(
                             profile = profile,
@@ -254,6 +283,8 @@ fun ProfileScreen(
                             onAvatarPicked = { uri -> viewModel.uploadAvatar(contentResolver, uri) },
                             onBannerPicked = { uri -> viewModel.uploadBanner(contentResolver, uri) },
                             onTrustPassportClick = { onOpenTrustPassport(profile.username) },
+                            onMentionClick = onAuthorClick,
+                            onHashtagClick = onOpenHashtag,
                         )
 
                         val mediaUploadError = state.mediaUploadError
@@ -279,6 +310,7 @@ fun ProfileScreen(
                         ProfileTabRow(
                             selectedTab = state.selectedTab,
                             showLikesTab = state.isOwnProfile || profile.publicLikes,
+                            showAnalyticsTab = state.isOwnProfile,
                             onTabSelected = { viewModel.selectTab(it) },
                         )
                     }
@@ -362,8 +394,18 @@ fun ProfileScreen(
                                 } else if (tab.posts.isEmpty() && tab.hasLoaded) {
                                     item { ProfileEmptyState(stringResource(R.string.profile_no_media)) }
                                 }
-                                itemsIndexed(tab.posts, key = { _, post -> post.id }) { _, post ->
-                                    ProfileTabPostCard(post = post, isPinned = false, showPin = false)
+                                // A photo grid, not a column of full post
+                                // cards - matches page.tsx's own media
+                                // grid (see that file's comment for why).
+                                // A LazyVerticalGrid nested inside this
+                                // LazyColumn would be the same double-
+                                // scrollable crash ADMIN's own stats grid
+                                // hit (see zrp-design-system's "Known
+                                // native debt"), so rows are chunked by
+                                // hand instead - three real Post items
+                                // per Row, one item per row of three.
+                                items(tab.posts.chunked(3), key = { row -> row.first().id }) { row ->
+                                    ProfileMediaGridRow(row, onOpenComments)
                                 }
                                 if (tab.isLoading && tab.hasLoaded) {
                                     item { ProfileTabLoadingMore() }
@@ -392,6 +434,46 @@ fun ProfileScreen(
                                 }
                                 itemsIndexed(tab.posts, key = { _, post -> post.id }) { _, post ->
                                     ProfileTabPostCard(post = post, isPinned = false, showPin = false)
+                                }
+                                if (tab.isLoading && tab.hasLoaded) {
+                                    item { ProfileTabLoadingMore() }
+                                }
+                            }
+                            // Own-profile only (ProfileTabRow never
+                            // offers this tab elsewhere), so there is no
+                            // second account whose numbers could show up
+                            // here - GET /user/posts/stats is scoped to
+                            // the session either way.
+                            ProfileTab.ANALYTICS -> {
+                                val tab = state.analyticsTab
+                                val stats = tab.stats
+                                if (stats != null && stats.posts.isNotEmpty()) {
+                                    item { ProfileAnalyticsTotals(stats.totals) }
+                                    item {
+                                        Text(
+                                            text = stringResource(R.string.profile_analytics_recent_posts),
+                                            style = MaterialTheme.typography.titleSmall,
+                                            modifier = Modifier.padding(
+                                                start = Spacing.lg,
+                                                end = Spacing.lg,
+                                                top = Spacing.md,
+                                                bottom = Spacing.xs,
+                                            ),
+                                        )
+                                    }
+                                    itemsIndexed(stats.posts, key = { _, post -> post.id }) { _, post ->
+                                        ProfileAnalyticsPostRow(post = post, onOpenPost = onOpenComments)
+                                    }
+                                } else if (!tab.hasLoaded && tab.isLoading) {
+                                    item { ProfileTabInitialLoading() }
+                                } else if (tab.failed) {
+                                    item { ProfileEmptyState(stringResource(R.string.profile_analytics_failed)) }
+                                } else if (tab.hasLoaded) {
+                                    // AnalyticsTab.tsx's own "No posts
+                                    // yet to analyse." - the endpoint
+                                    // answered, this account just has
+                                    // nothing to summarise yet.
+                                    item { ProfileEmptyState(stringResource(R.string.profile_analytics_no_posts)) }
                                 }
                                 if (tab.isLoading && tab.hasLoaded) {
                                     item { ProfileTabLoadingMore() }
@@ -514,6 +596,8 @@ private fun ProfileHeader(
     onMutedUsersClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onTrustPassportClick: () -> Unit,
+    onMentionClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
     val avatarPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -657,38 +741,81 @@ private fun ProfileHeader(
                             }
                         }
 
-                        IconButton(onClick = onMessageClick) {
-                            Icon(Icons.Filled.MailOutline, contentDescription = stringResource(R.string.action_message))
-                        }
+                        if (profile.isBlocked) {
+                            // This viewer has blocked this account. Message
+                            // and Follow both imply an interaction block is
+                            // meant to prevent, so - matching page.tsx's own
+                            // gating - they're replaced with a single quiet
+                            // indicator. The only way back is the same More
+                            // menu's Unblock item above.
+                            Surface(
+                                shape = MaterialTheme.shapes.extraLarge,
+                                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm),
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Block,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.profile_blocked_state),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(start = Spacing.xs),
+                                    )
+                                }
+                            }
+                        } else {
+                            // No Tip button here (web's page.tsx has one for a
+                            // creator with tipsEnabled): sending a tip is a
+                            // real on-chain Solana transaction, and this app
+                            // has no wallet integration at all yet - neither
+                            // CreatorApi.kt nor any other native API exposes a
+                            // send-tip endpoint, only the creator-side
+                            // tipsEnabled/solanaWallet settings for RECEIVING
+                            // one (CreatorScreen.kt, ProfileEditScreen.kt).
+                            // Adding a Tip button here without a real Mobile
+                            // Wallet Adapter flow behind it would be exactly
+                            // the fake/non-functional UI the master directive
+                            // forbids - this needs its own dedicated
+                            // wallet-integration pass, not a cosmetic add here.
+                            IconButton(onClick = onMessageClick) {
+                                Icon(Icons.Filled.MailOutline, contentDescription = stringResource(R.string.action_message))
+                            }
 
-                        Spacer(modifier = Modifier.width(Spacing.xs))
+                            Spacer(modifier = Modifier.width(Spacing.xs))
 
-                        Button(
-                            onClick = onFollowClick,
-                            enabled = !isTogglingFollow && !isFollowRequested,
-                            shape = MaterialTheme.shapes.large,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (profile.isFollowing || isFollowRequested) {
-                                    MaterialTheme.colorScheme.surfaceContainerHigh
-                                } else {
-                                    ZrpRed
-                                },
-                                contentColor = if (profile.isFollowing || isFollowRequested) {
-                                    MaterialTheme.colorScheme.onSurface
-                                } else {
-                                    ZrpWhite
-                                },
-                            ),
-                        ) {
-                            Text(
-                                stringResource(
-                                    when {
-                                        isFollowRequested -> R.string.action_requested
-                                        profile.isFollowing -> R.string.action_following
-                                        else -> R.string.action_follow
+                            Button(
+                                onClick = onFollowClick,
+                                enabled = !isTogglingFollow && !isFollowRequested,
+                                shape = MaterialTheme.shapes.large,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (profile.isFollowing || isFollowRequested) {
+                                        MaterialTheme.colorScheme.surfaceContainerHigh
+                                    } else {
+                                        ZrpRed
+                                    },
+                                    contentColor = if (profile.isFollowing || isFollowRequested) {
+                                        MaterialTheme.colorScheme.onSurface
+                                    } else {
+                                        ZrpWhite
                                     },
                                 ),
-                            )
+                            ) {
+                                Text(
+                                    stringResource(
+                                        when {
+                                            isFollowRequested -> R.string.action_requested
+                                            profile.isFollowing -> R.string.action_following
+                                            else -> R.string.action_follow
+                                        },
+                                    ),
+                                )
+                            }
                         }
                     }
                 }
@@ -736,10 +863,21 @@ private fun ProfileHeader(
 
         Column(modifier = Modifier.padding(start = Spacing.lg, end = Spacing.lg, top = Spacing.sm)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                // weight(fill = false) + single line: a display name is
+                // free text the account owner sets, so an unconstrained
+                // one took the whole row and pushed the verification
+                // badge and the private-account lock off the right edge
+                // entirely - most easily on a 320dp screen, but any
+                // long name did it. The name now yields to them and
+                // ellipsizes instead; the badge is never the thing that
+                // gets dropped.
                 Text(
                     text = profile.name ?: profile.username,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
                 VerifiedBadge(
                     badgeType = profile.badgeType,
@@ -756,11 +894,35 @@ private fun ProfileHeader(
                     )
                 }
             }
-            Text(
-                text = "@${profile.username}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "@${profile.username}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                // "Follows you" - the reverse of profile.isFollowing (does
+                // THIS account follow the viewer), matching page.tsx's own
+                // followsMe chip. Quiet - a filled chip, not a second
+                // accent competing with the Follow button above.
+                if (!isOwnProfile && profile.followsMe) {
+                    Surface(
+                        shape = MaterialTheme.shapes.small,
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        modifier = Modifier.padding(start = Spacing.xs),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.profile_follows_you),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            modifier = Modifier.padding(horizontal = Spacing.xs, vertical = 1.dp),
+                        )
+                    }
+                }
+            }
 
             // Professional category - a free-text field the account
             // owner sets themselves (ProfileEditScreen), shown only when
@@ -776,10 +938,21 @@ private fun ProfileHeader(
                 )
             }
 
+            // Bio - the same @mention/#hashtag/URL linkification
+            // page.tsx's own parseBio gives it, through the shared
+            // LinkifiedText every other content surface already uses
+            // (PostCard, CommentsScreen), so the regex and the
+            // trailing-punctuation trimming can never drift between the
+            // bio and a post body. onNonLinkClick is deliberately left
+            // unset: only the link spans themselves are tappable here,
+            // so plain bio text stays inert rather than turning the
+            // whole header into one large tap target.
             if (!profile.bio.isNullOrBlank()) {
-                Text(
+                LinkifiedText(
                     text = profile.bio,
                     style = MaterialTheme.typography.bodyMedium,
+                    onMentionClick = onMentionClick,
+                    onHashtagClick = onHashtagClick,
                     modifier = Modifier.padding(top = Spacing.xs),
                 )
             }
@@ -813,19 +986,56 @@ private fun ProfileHeader(
 
             // Charity note - a real, static fact about ZRP's business
             // model (the same 35% used site-wide: footer.charityBadge,
-            // about.value3Desc, settings.platformFeeNote), NOT the
-            // page.tsx "impact: N meals" badge next to it on web - that
-            // number is Math.floor(Math.random() * 50) + 5, regenerated
-            // on every page load, not real per-account data. Reusing it
-            // natively would mean inventing fake data, which the master
-            // directive explicitly forbids; the honest fix is to drop
-            // it, not port a fake number faithfully.
+            // about.value3Desc, settings.platformFeeNote).
             Text(
                 text = stringResource(R.string.profile_charity_note, "35"),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = Spacing.xs),
             )
+
+            // Impact - the real per-account figure page.tsx renders next
+            // to the charity note (profile.charityContributionUsdc is now
+            // the real sum of this profile's own completed tips/purchases'
+            // charityAmount, computed server-side by
+            // getUserCharityContributionUsdc - see UserProfile's own
+            // KDoc). Shown only when there is a figure to show, matching
+            // page.tsx's own `charityContributionUsdc > 0` guard: for an
+            // account that has never been tipped the sum is genuinely 0,
+            // and "Impact: $0.00 contributed to charity" on every such
+            // profile turns a real distinction into noise. The 35% note
+            // above stays either way - it is true of the platform
+            // regardless of this account.
+            if (profile.charityContributionUsdc > 0) {
+                Text(
+                    text = stringResource(
+                        R.string.profile_impact,
+                        String.format(java.util.Locale.US, "$%.2f", profile.charityContributionUsdc),
+                    ),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 2.dp),
+                )
+            }
+
+            // Milestone badges - the same real, server-computed facts
+            // page.tsx renders (computeMilestones() in
+            // src/lib/milestones.ts), one native string resource per key
+            // so this can never disagree with web on wording. Empty for
+            // a brand-new account with none earned yet, matching web's
+            // own `milestones.length > 0` guard.
+            if (profile.milestones.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .padding(top = Spacing.xs)
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                ) {
+                    profile.milestones.forEach { milestone ->
+                        MilestoneBadge(milestone)
+                    }
+                }
+            }
         }
 
         Row(
@@ -834,7 +1044,12 @@ private fun ProfileHeader(
                 .padding(horizontal = Spacing.lg, vertical = Spacing.md),
             horizontalArrangement = Arrangement.spacedBy(Spacing.xl),
         ) {
-            ProfileStat(count = profile._count.posts, label = stringResource(R.string.profile_posts))
+            // No Posts count here - real-device feedback flagged it as a
+            // redundant header stat when the Posts tab right below
+            // already represents post count naturally (matching both the
+            // reference X profile layout and page.tsx's own header,
+            // which has never shown one either - this was a native-only
+            // divergence, not something web parity required).
             ProfileStat(count = profile._count.followers, label = stringResource(R.string.profile_followers), onClick = onFollowersClick)
             // Matches page.tsx's own showFollowingCount: an account that
             // has turned publicFollowing off hides the real number
@@ -926,8 +1141,21 @@ private fun ProfileHeader(
 
 @Composable
 private fun ProfileStat(count: Int, label: String, onClick: (() -> Unit)? = null, displayOverride: String? = null) {
+    // Followers/Following are primary navigation off this screen, but
+    // the column is only a bold number over a small caption - roughly
+    // 36dp tall, under Android's 48dp accessible minimum - and a bare
+    // clickable() announces as plain text rather than something you can
+    // activate. Only the rows that actually navigate get the target and
+    // the role; the Posts count isn't tappable and shouldn't claim to be.
     Column(
-        modifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier,
+        modifier = if (onClick != null) {
+            Modifier
+                .heightIn(min = TouchTarget.min)
+                .clickable(onClick = onClick, role = Role.Button, onClickLabel = label)
+        } else {
+            Modifier
+        },
+        verticalArrangement = Arrangement.Center,
     ) {
         Text(
             text = displayOverride ?: formatCount(count),
@@ -970,22 +1198,65 @@ private fun ProfileMetaRow(
     }
 }
 
-// Matches page.tsx's own tabLabelMap/visibleTabs - five tabs, Likes
-// hidden whenever showLikesTab is false (the profile owner has turned
-// publicLikes off and this isn't their own profile).
+/**
+ * One earned milestone key -> its real, translated label - mirrors
+ * page.tsx's own MILESTONE_TRANSLATION_KEYS exactly, key for key, so
+ * native can never render a wording web doesn't also have. Falls back
+ * to the raw key for a fact type this native build doesn't recognize
+ * yet (a future computeMilestones() addition), matching page.tsx's own
+ * `if (!translationKey) return fact.key` fallback.
+ */
+@Composable
+private fun milestoneLabel(fact: one.zrp.social.mobile.network.MilestoneFact): String {
+    val n = fact.params?.get("n")
+    return when (fact.key) {
+        "years_on_zrp" -> stringResource(R.string.profile_milestone_years, n ?: 0)
+        "six_months" -> stringResource(R.string.profile_milestone_six_months)
+        "new_member" -> stringResource(R.string.profile_milestone_new_member)
+        "posts_500" -> stringResource(R.string.profile_milestone_posts_500)
+        "posts_100" -> stringResource(R.string.profile_milestone_posts_100)
+        "posts_10" -> stringResource(R.string.profile_milestone_posts_10)
+        "followers_1k" -> stringResource(R.string.profile_milestone_followers_1k)
+        "followers_100" -> stringResource(R.string.profile_milestone_followers_100)
+        else -> fact.key
+    }
+}
+
+@Composable
+private fun MilestoneBadge(fact: one.zrp.social.mobile.network.MilestoneFact) {
+    Surface(
+        shape = MaterialTheme.shapes.small,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    ) {
+        Text(
+            text = fact.icon + " " + milestoneLabel(fact),
+            style = MaterialTheme.typography.labelSmall,
+            maxLines = 1,
+            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = 4.dp),
+        )
+    }
+}
+
+// Matches page.tsx's own tabLabelMap/visibleTabs - Likes hidden
+// whenever showLikesTab is false (the profile owner has turned
+// publicLikes off and this isn't their own profile), and Analytics
+// present only on your own profile, exactly as visibleTabs drops it
+// for `!isOwnProfile`.
 @Composable
 private fun ProfileTabRow(
     selectedTab: ProfileTab,
     showLikesTab: Boolean,
+    showAnalyticsTab: Boolean,
     onTabSelected: (ProfileTab) -> Unit,
 ) {
-    val tabs = remember(showLikesTab) {
+    val tabs = remember(showLikesTab, showAnalyticsTab) {
         buildList {
             add(ProfileTab.POSTS)
             add(ProfileTab.REPLIES)
             add(ProfileTab.MEDIA)
             if (showLikesTab) add(ProfileTab.LIKES)
             add(ProfileTab.REPOSTS)
+            if (showAnalyticsTab) add(ProfileTab.ANALYTICS)
         }
     }
     ScrollableTabRow(selectedTabIndex = tabs.indexOf(selectedTab).coerceAtLeast(0), edgePadding = Spacing.lg) {
@@ -1006,6 +1277,7 @@ private fun profileTabLabel(tab: ProfileTab): String = when (tab) {
     ProfileTab.MEDIA -> stringResource(R.string.profile_media)
     ProfileTab.LIKES -> stringResource(R.string.profile_likes)
     ProfileTab.REPOSTS -> stringResource(R.string.profile_reposts)
+    ProfileTab.ANALYTICS -> stringResource(R.string.profile_analytics)
 }
 
 // Matches page.tsx's own renderProtectedMessage - shown across every
@@ -1072,6 +1344,175 @@ private fun ProfileTabInitialLoading() {
 private fun ProfileTabLoadingMore() {
     Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
         CircularProgressIndicator(modifier = Modifier.size(24.dp))
+    }
+}
+
+// One row of the Media tab's thumbnail grid - up to three square photos,
+// each tapping through to the real post (the same real /post/{id}
+// destination ProfileTabPostCard's own onClick already opens). No like/
+// comment count overlay the way page.tsx's own grid shows on :hover -
+// touch has no hover state, and a permanently-visible overlay would just
+// obscure the photo, so the tap target is the whole photo instead.
+@Composable
+private fun ProfileMediaGridRow(row: List<Post>, onOpenPost: (String) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        row.forEach { post ->
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .aspectRatio(1f)
+                    .clickable(onClick = { onOpenPost(post.id) }, role = Role.Button)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            ) {
+                val imageUrl = post.imageUrl
+                if (imageUrl != null) {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
+        }
+        // Pad an incomplete final row (1 or 2 photos) with empty
+        // weighted space so the last real thumbnail keeps a full row's
+        // width instead of stretching to fill the row alone.
+        repeat(3 - row.size) {
+            Spacer(modifier = Modifier.weight(1f))
+        }
+    }
+}
+
+// The four totals GET /user/posts/stats sums, the same four cards
+// AnalyticsTab.tsx puts above its list. Two plain Rows of equal-height
+// cards rather than a LazyVerticalGrid: this renders inside the
+// profile's own LazyColumn, and a nested lazy container there is the
+// same double-scrollable crash the media grid above avoids by chunking
+// its rows by hand.
+@Composable
+private fun ProfileAnalyticsTotals(totals: PostStatsTotals) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            ProfileAnalyticsStatCard(
+                label = stringResource(R.string.profile_analytics_total_views),
+                value = formatCount(totals.totalViews),
+                icon = Icons.Filled.Visibility,
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            )
+            ProfileAnalyticsStatCard(
+                label = stringResource(R.string.profile_analytics_total_likes),
+                value = formatCount(totals.totalLikes),
+                icon = Icons.Filled.Favorite,
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            ProfileAnalyticsStatCard(
+                label = stringResource(R.string.profile_analytics_total_comments),
+                value = formatCount(totals.totalComments),
+                icon = Icons.Filled.ChatBubbleOutline,
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            )
+            ProfileAnalyticsStatCard(
+                label = stringResource(R.string.profile_analytics_total_reposts),
+                value = formatCount(totals.totalReposts),
+                icon = Icons.Filled.Repeat,
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProfileAnalyticsStatCard(
+    label: String,
+    value: String,
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+) {
+    Surface(shape = MaterialTheme.shapes.medium, tonalElevation = 1.dp, modifier = modifier) {
+        Column(modifier = Modifier.padding(Spacing.md)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = Spacing.xs),
+                )
+            }
+            Text(text = value, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = Spacing.xs))
+        }
+    }
+}
+
+// One of the recent posts AnalyticsTab.tsx lists under the totals -
+// its text plus that post's own four real counts. Web's row is inert;
+// tapping this one opens the post, the same destination every other
+// post row on this screen already goes to.
+@Composable
+private fun ProfileAnalyticsPostRow(post: PostStats, onOpenPost: (String) -> Unit) {
+    val fallback = stringResource(R.string.creator_content_media_post_fallback)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = TouchTarget.min)
+            .clickable(onClick = { onOpenPost(post.id) }, role = Role.Button)
+            .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+    ) {
+        Text(
+            text = post.content.ifBlank { fallback },
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Row(
+            modifier = Modifier.padding(top = 2.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            ProfileAnalyticsMiniStat(Icons.Filled.Visibility, formatCount(post.views))
+            ProfileAnalyticsMiniStat(Icons.Filled.Favorite, formatCount(post._count.likes))
+            ProfileAnalyticsMiniStat(Icons.Filled.ChatBubbleOutline, formatCount(post._count.comments))
+            ProfileAnalyticsMiniStat(Icons.Filled.Repeat, formatCount(post._count.reposts))
+        }
+    }
+}
+
+@Composable
+private fun ProfileAnalyticsMiniStat(icon: ImageVector, value: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(12.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 2.dp),
+        )
     }
 }
 
