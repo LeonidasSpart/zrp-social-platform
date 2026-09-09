@@ -1,5 +1,12 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { isAllowedMediaUrl, isTrustedUploadUrl, parseMediaUrl, validateMediaUrls } from "../media-url";
+import {
+  isAllowedMediaUrl,
+  isTrustedUploadUrl,
+  parseMediaUrl,
+  validateMediaUrls,
+  validateTrustedUploadUrls,
+  UPLOAD_ONLY_ERROR,
+} from "../media-url";
 
 // Post media must come from the sources ZRP itself hands out
 // (UploadThing, GIPHY) - never an arbitrary client-chosen host, scheme
@@ -68,5 +75,63 @@ describe("validateMediaUrls", () => {
 
   it("an empty list (text-only post) is fine", () => {
     expect(validateMediaUrls([]).ok).toBe(true);
+  });
+});
+
+describe("validateTrustedUploadUrls (story / music / marketplace media)", () => {
+  it("accepts only ZRP upload storage, never GIPHY or extra hosts", () => {
+    expect(validateTrustedUploadUrls(["https://utfs.io/f/a.mp4", "https://zrp1abc.ufs.sh/f/b.jpg"]).ok).toBe(true);
+    expect(validateTrustedUploadUrls(["https://media1.giphy.com/x.gif"]).ok).toBe(false);
+    process.env.ALLOWED_MEDIA_HOSTS = "cdn.partner.example";
+    expect(validateTrustedUploadUrls(["https://cdn.partner.example/a.jpg"]).ok).toBe(false);
+  });
+
+  it("rejects localhost, private/link-local IPs, dangerous schemes, look-alikes and malformed values", () => {
+    const backslashTrick = "https://evil.example" + String.fromCharCode(92) + "@utfs.io/f/x.jpg";
+    const attacks: unknown[] = [
+      "https://localhost/f/x.jpg",
+      "https://127.0.0.1/f/x.jpg",
+      "https://10.0.0.1/f/x.jpg",
+      "https://172.16.0.1/f/x.jpg",
+      "https://192.168.0.1/f/x.jpg",
+      "https://169.254.169.254/latest/meta-data/",
+      "https://[::1]/f/x.jpg",
+      "https://0x7f000001/f/x.jpg",
+      "file:///etc/passwd",
+      "data:image/png;base64,AAAA",
+      "javascript:alert(1)",
+      "blob:https://zrp.one/uuid",
+      "http://utfs.io/f/x.jpg",
+      "https://utfs.io.evil.example/f/x.jpg",
+      "https://evilutfs.io/f/x.jpg",
+      "https://utfs.io@evil.example/f/x.jpg",
+      backslashTrick,
+      "https://evil.example/redirect?to=https://utfs.io/f/x.jpg",
+      "//utfs.io/f/x.jpg",
+      "utfs.io/f/x.jpg",
+      "https://utfs.io/f/" + "x".repeat(3000),
+      42,
+      null,
+      undefined,
+      {},
+    ];
+    for (const a of attacks) {
+      const r = validateTrustedUploadUrls([a]);
+      expect(r.ok, String(a)).toBe(false);
+      if (!r.ok) expect(r.error).toBe(UPLOAD_ONLY_ERROR);
+    }
+  });
+
+  it("a mixed list fails on the first untrusted entry", () => {
+    const r = validateTrustedUploadUrls(["https://utfs.io/f/ok.jpg", "https://evil.example/x.jpg", "https://utfs.io/f/ok2.jpg"]);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.url).toBe("https://evil.example/x.jpg");
+  });
+
+  it("allowExisting lets a stored legacy value be re-sent unchanged, but not a new untrusted one", () => {
+    const legacy = "https://legacy-cdn.example/old.jpg";
+    expect(validateTrustedUploadUrls([legacy], { allowExisting: [legacy, null] }).ok).toBe(true);
+    expect(validateTrustedUploadUrls(["https://legacy-cdn.example/new.jpg"], { allowExisting: [legacy] }).ok).toBe(false);
+    expect(validateTrustedUploadUrls([legacy, "https://utfs.io/f/new.jpg"], { allowExisting: [legacy] }).ok).toBe(true);
   });
 });

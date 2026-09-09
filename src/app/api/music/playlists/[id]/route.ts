@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { isTrustedUploadUrl, UPLOAD_ONLY_ERROR } from "@/lib/media-url";
 
 export const dynamic = "force-dynamic";
 
@@ -61,7 +62,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
   if (typeof body.description === "string" || body.description === null) data.description = body.description;
   if (typeof body.isPublic === "boolean") data.isPublic = body.isPublic;
-  if (typeof body.coverUrl === "string" || body.coverUrl === null) data.coverUrl = body.coverUrl;
+  if (typeof body.coverUrl === "string" || body.coverUrl === null) {
+    // ⚠️ SECURITY: a NEW cover must come from ZRP's own upload storage
+    // (a track's artwork, or an upload); re-sending the stored value is
+    // accepted unchanged. See src/lib/media-url.ts.
+    if (body.coverUrl && body.coverUrl !== playlist.coverUrl && !isTrustedUploadUrl(body.coverUrl)) {
+      return NextResponse.json({ error: UPLOAD_ONLY_ERROR }, { status: 400 });
+    }
+    data.coverUrl = body.coverUrl;
+  }
 
   const updated = await prisma.musicPlaylist.update({ where: { id }, data });
   return NextResponse.json(updated);

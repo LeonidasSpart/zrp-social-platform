@@ -99,6 +99,35 @@ export type MediaUrlValidation =
   | { ok: true }
   | { ok: false; error: string; url: string };
 
+export const UPLOAD_ONLY_ERROR = "Media must be uploaded through ZRP.";
+
+/**
+ * Validate URLs that may ONLY come from ZRP's own upload storage
+ * (stories, music audio/covers/artist images, marketplace listing
+ * media - none of which have a GIF picker). `allowExisting` lists the
+ * values already stored on the row being edited: an update that merely
+ * re-sends what is already there is accepted unchanged, so a row that
+ * predates this validation can still have its other fields edited, but
+ * no NEW untrusted URL can ever be introduced.
+ */
+export function validateTrustedUploadUrls(
+  urls: readonly unknown[],
+  options: { allowExisting?: readonly (string | null | undefined)[] } = {}
+): MediaUrlValidation {
+  const existing = new Set((options.allowExisting ?? []).filter((v): v is string => typeof v === "string"));
+  for (const candidate of urls) {
+    if (typeof candidate === "string" && existing.has(candidate)) continue;
+    if (!isTrustedUploadUrl(candidate)) {
+      return {
+        ok: false,
+        error: UPLOAD_ONLY_ERROR,
+        url: typeof candidate === "string" ? candidate : String(candidate),
+      };
+    }
+  }
+  return { ok: true };
+}
+
 /** Validate every URL a client wants to attach as post media. */
 export function validateMediaUrls(urls: readonly unknown[]): MediaUrlValidation {
   for (const candidate of urls) {

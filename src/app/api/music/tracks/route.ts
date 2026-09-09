@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getMusicPublishAccess, MUSIC_PUBLISH_DENIED_MESSAGE } from "@/lib/music/permissions";
+import { isTrustedUploadUrl, UPLOAD_ONLY_ERROR } from "@/lib/media-url";
+import { extractUploadThingKey } from "@/lib/uploadthing";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +30,24 @@ export async function POST(req: NextRequest) {
   const artist = await prisma.musicArtist.findFirst({ where: { id: artistId, userId: session.user.id } });
   if (!artist) return NextResponse.json({ error: "Artist profile not owned by current user" }, { status: 403 });
 
+  // ⚠️ SECURITY: audio and artwork must come from ZRP's own upload
+  // storage (every client uploads through the musicTrack UploadThing
+  // route), never an arbitrary host or scheme. The storage keys are
+  // derived from those URLs on the server - a client-supplied audioKey
+  // or coverKey used to be stored verbatim and later handed to
+  // UTApi.deleteFiles() on track deletion, so any user could have any
+  // file in ZRP's storage deleted by naming its key here. See
+  // src/lib/media-url.ts and src/lib/upload-ownership.ts.
+  if (!isTrustedUploadUrl(audioUrl)) {
+    return NextResponse.json({ error: UPLOAD_ONLY_ERROR }, { status: 400 });
+  }
+  const coverUrl = body.coverUrl ? String(body.coverUrl) : null;
+  if (coverUrl && !isTrustedUploadUrl(coverUrl)) {
+    return NextResponse.json({ error: UPLOAD_ONLY_ERROR }, { status: 400 });
+  }
+  const audioKey = extractUploadThingKey(audioUrl);
+  const coverKey = extractUploadThingKey(coverUrl);
+
   // Client-reported (read from the browser's own decode of the file
   // being uploaded), so it's sanity-bounded rather than trusted
   // outright - a bogus value just means the duration self-heals the
@@ -40,8 +60,8 @@ export async function POST(req: NextRequest) {
 
   const track = await prisma.musicTrack.create({
     data: {
-      title, audioUrl, audioKey: body.audioKey || null,
-      coverUrl: body.coverUrl || null, coverKey: body.coverKey || null,
+      title, audioUrl, audioKey,
+      coverUrl, coverKey,
       genre: body.genre || null, description: body.description || null, artistId,
       explicit: !!body.explicit,
       durationSec,
