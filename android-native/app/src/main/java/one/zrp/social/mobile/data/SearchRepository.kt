@@ -28,6 +28,15 @@ class SearchRepository {
         ApiClient.searchApi.getSuggestedUsers(limit)
     }
 
+    // type="users" backs the group-chat multi-select picker (new-group
+    // creation, add-participants) - the exact same real GET /search
+    // already-blocked/muted-exclusion this app's people search uses
+    // (see SearchApi's own KDoc), just narrowed to users only rather
+    // than also searching posts.
+    suspend fun searchUsers(query: String): Result<List<SearchUser>> = runCatching {
+        ApiClient.searchApi.search(query, type = "users").users
+    }
+
     suspend fun getTrendingHashtags(limit: Int = 10): Result<List<TrendingHashtag>> = runCatching {
         ApiClient.searchApi.getTrendingHashtags(limit)
     }

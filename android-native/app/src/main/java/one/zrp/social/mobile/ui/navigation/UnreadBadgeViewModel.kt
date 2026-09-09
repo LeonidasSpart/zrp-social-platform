@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.data.NotificationsRepository
+import one.zrp.social.mobile.util.aggregateUnreadCount
 
 /**
  * Backs the bottom nav's unread-notifications badge - real
@@ -52,11 +53,14 @@ class UnreadBadgeViewModelFactory(private val repository: NotificationsRepositor
 
 /**
  * Backs the bottom nav's unread-messages badge - real GET
- * /messages/unread, mirroring [UnreadBadgeViewModel] above for
- * notifications. No clear(): unlike Notifications, opening the
- * Messages tab (the conversation list) doesn't itself mark anything
- * read on web either - only opening a specific conversation does
- * (ConversationViewModel's own mark-read socket emit) - so there's no
+ * /messages/unread (1:1) PLUS every real GROUP conversation's own
+ * unreadCount (GET /conversations - see aggregateUnreadCount's own
+ * KDoc for why the two have to be summed client-side), mirroring
+ * [UnreadBadgeViewModel] above for notifications. No clear(): unlike
+ * Notifications, opening the Messages tab (the conversation list)
+ * doesn't itself mark anything read on web either - only opening a
+ * specific conversation does (ConversationViewModel/
+ * GroupConversationViewModel's own read-marking) - so there's no
  * "visiting this tab just cleared everything" moment to reflect
  * instantly the way Notifications has.
  */
@@ -70,7 +74,9 @@ class UnreadMessagesBadgeViewModel(private val repository: MessagesRepository) :
 
     fun refresh() {
         viewModelScope.launch {
-            repository.getUnreadCount().onSuccess { count -> _unreadCount.value = count }
+            val directCount = repository.getUnreadCount().getOrDefault(0)
+            val groupConversations = repository.getGroupConversations().getOrDefault(emptyList())
+            _unreadCount.value = aggregateUnreadCount(directCount, groupConversations)
         }
     }
 }
