@@ -58,16 +58,18 @@ android {
         // with that code had already been uploaded), so that bumped to
         // versionCode 3, then 4 once Play confirmed 3 was uploaded too,
         // then 5 for the V4.0.1 real-device validation build, then 6
-        // alongside versionName "4.0.2" - never reuse a versionCode Play
-        // has already seen for this applicationId. This build bumps to
-        // versionCode 7 / versionName "4.0.3" - the native stabilization
-        // pass (follow-back state, Marketplace video, ZRP Play crash
-        // fixes, AI branding, generic link previews, notification deep-
-        // links, messaging keyboard/IME, Story author navigation + video
-        // mute, ZRP Music real background playback via MediaSessionService,
-        // Admin Dashboard crash fix) for real-user Play testing.
-        versionCode 7
-        versionName "4.0.3"
+        // alongside versionName "4.0.2", then 7 alongside "4.0.3" - never
+        // reuse a versionCode Play has already seen for this
+        // applicationId. Play rejected an Internal Testing upload again
+        // with "Le code de version 7 a déjà été utilisé", so this bumps
+        // to versionCode 8 / versionName "4.0.4" - the 4.0.4 milestone
+        // (real presence consuming server.js's existing user-status/
+        // get-status broadcast, real group chat with its own Conversation/
+        // ConversationParticipant schema and Socket.IO events, tablet
+        // two-pane messaging, an advanced profile experience pass, and a
+        // link-preview regression fix) for real-user Play testing.
+        versionCode 8
+        versionName "4.0.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
