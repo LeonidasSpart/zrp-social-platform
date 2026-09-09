@@ -80,6 +80,9 @@ const COPY = {
   verify: "Verify",
   enable: "Enable",
   disable: "Disable",
+  setAvatar: "Set avatar",
+  setCover: "Set banner",
+  imageHint: "JPEG, PNG, GIF or WebP, max 5MB. This is the only way to change these - the account has no password and can never sign in to do it itself.",
   clearBackoff: "Clear backoff",
   remove: "Remove",
   removePrompt: "Why is this post being removed?",
@@ -319,6 +322,37 @@ export default function AdminNewsNetworkPage() {
       } catch {
         notify("error", "That action failed. Check your connection and try again.");
         return false;
+      } finally {
+        setBusy(null);
+      }
+    },
+    [loadAll, notify]
+  );
+
+  // Separate from act(): a file upload needs a multipart body with no
+  // Content-Type override (the browser sets its own boundary), which
+  // act() always forces to application/json.
+  const uploadFeedImage = useCallback(
+    async (feedId: string, kind: "avatarFile" | "coverFile", file: File): Promise<void> => {
+      setBusy(feedId);
+      setMessage(null);
+      try {
+        const formData = new FormData();
+        formData.append(kind, file);
+
+        const res = await fetch(`/api/admin/news-network/feeds/${feedId}`, {
+          method: "PATCH",
+          body: formData,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.success === false) {
+          notify("error", data.error || "That upload failed.");
+          return;
+        }
+        notify("success", kind === "avatarFile" ? "Avatar updated." : "Banner updated.");
+        await loadAll();
+      } catch {
+        notify("error", "That upload failed. Check your connection and try again.");
       } finally {
         setBusy(null);
       }
@@ -634,22 +668,60 @@ export default function AdminNewsNetworkPage() {
                       </p>
                     </div>
 
-                    <button
-                      type="button"
-                      disabled={busy === feed.id}
-                      aria-busy={busy === feed.id}
-                      onClick={() =>
-                        act(
-                          feed.id,
-                          `/api/admin/news-network/feeds/${feed.id}`,
-                          { method: "PATCH", body: JSON.stringify({ enabled: !feed.enabled }) },
-                          feed.enabled ? "Feed disabled." : "Feed enabled."
-                        )
-                      }
-                      className="flex-shrink-0 rounded-lg border border-gray-300 px-3 py-1.5 text-sm transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-600 dark:hover:bg-gray-700"
-                    >
-                      {feed.enabled ? COPY.disable : COPY.enable}
-                    </button>
+                    <div className="flex flex-shrink-0 flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={busy === feed.id}
+                        aria-busy={busy === feed.id}
+                        onClick={() =>
+                          act(
+                            feed.id,
+                            `/api/admin/news-network/feeds/${feed.id}`,
+                            { method: "PATCH", body: JSON.stringify({ enabled: !feed.enabled }) },
+                            feed.enabled ? "Feed disabled." : "Feed enabled."
+                          )
+                        }
+                        className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-600 dark:hover:bg-gray-700"
+                      >
+                        {feed.enabled ? COPY.disable : COPY.enable}
+                      </button>
+
+                      <label
+                        className={`cursor-pointer rounded-lg border border-gray-300 px-3 py-1.5 text-sm transition hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 ${busy === feed.id ? "cursor-not-allowed opacity-60" : ""}`}
+                        title={COPY.imageHint}
+                      >
+                        {COPY.setAvatar}
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/gif,image/webp"
+                          disabled={busy === feed.id}
+                          className="sr-only"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            e.target.value = "";
+                            if (file) uploadFeedImage(feed.id, "avatarFile", file);
+                          }}
+                        />
+                      </label>
+
+                      <label
+                        className={`cursor-pointer rounded-lg border border-gray-300 px-3 py-1.5 text-sm transition hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 ${busy === feed.id ? "cursor-not-allowed opacity-60" : ""}`}
+                        title={COPY.imageHint}
+                      >
+                        {COPY.setCover}
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/gif,image/webp"
+                          disabled={busy === feed.id}
+                          className="sr-only"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            e.target.value = "";
+                            if (file) uploadFeedImage(feed.id, "coverFile", file);
+                          }}
+                        />
+                      </label>
+                    </div>
                   </div>
                 </li>
               ))}
