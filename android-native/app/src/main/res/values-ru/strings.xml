@@ -334,6 +334,8 @@
     <string name="profile_likes">Отметки «Нравится»</string>
     <string name="profile_reposts">Репосты</string>
     <string name="profile_pinned">Закреплено</string>
+    <string name="profile_follows_you">Подписан(а) на вас</string>
+    <string name="profile_blocked_state">Заблокирован</string>
     <string name="profile_replying_to">Ответ пользователю</string>
     <string name="profile_no_posts">Пока нет публикаций.</string>
     <string name="profile_no_replies">Пока нет ответов.</string>

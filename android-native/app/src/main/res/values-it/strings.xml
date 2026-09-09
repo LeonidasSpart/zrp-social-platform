@@ -334,6 +334,8 @@
     <string name="profile_likes">Mi piace</string>
     <string name="profile_reposts">Repost</string>
     <string name="profile_pinned">In evidenza</string>
+    <string name="profile_follows_you">Ti segue</string>
+    <string name="profile_blocked_state">Bloccato</string>
     <string name="profile_replying_to">In risposta a</string>
     <string name="profile_no_posts">Ancora nessun post.</string>
     <string name="profile_no_replies">Ancora nessuna risposta.</string>

@@ -346,6 +346,8 @@
     <string name="profile_likes">Likes</string>
     <string name="profile_reposts">Reposts</string>
     <string name="profile_pinned">Pinned</string>
+    <string name="profile_follows_you">Follows you</string>
+    <string name="profile_blocked_state">Blocked</string>
     <string name="profile_replying_to">Replying to</string>
     <string name="profile_no_posts">No posts yet.</string>
     <string name="profile_no_replies">No replies yet.</string>

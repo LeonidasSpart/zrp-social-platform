@@ -334,6 +334,8 @@
     <string name="profile_likes">Pëlqime</string>
     <string name="profile_reposts">Ripublikimet</string>
     <string name="profile_pinned">Fiksuar</string>
+    <string name="profile_follows_you">Ju ndjek</string>
+    <string name="profile_blocked_state">Bllokuar</string>
     <string name="profile_replying_to">Duke iu përgjigjur</string>
     <string name="profile_no_posts">Nuk ka postime ende.</string>
     <string name="profile_no_replies">Nuk ka përgjigje ende.</string>

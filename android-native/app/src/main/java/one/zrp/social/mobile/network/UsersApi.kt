@@ -64,6 +64,10 @@ data class UserProfile(
     // deserializes instead of crashing on a missing key.
     val charityContributionUsdc: Double = 0.0,
     val milestones: List<MilestoneFact> = emptyList(),
+    // Does this profile follow the viewer back - X's "Follows you"
+    // signal, distinct from isFollowing (the other direction). Also new
+    // on the route, so defaulted the same way.
+    val followsMe: Boolean = false,
 )
 
 data class FollowToggleResponse(
