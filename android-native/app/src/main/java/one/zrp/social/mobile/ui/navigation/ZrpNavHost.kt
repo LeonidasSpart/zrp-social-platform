@@ -40,7 +40,10 @@ import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.data.NotificationsRepository
 import one.zrp.social.mobile.network.MobileUser
 import one.zrp.social.mobile.ui.admin.AdminAdsScreen
+import one.zrp.social.mobile.ui.admin.AdminAnalyticsScreen
 import one.zrp.social.mobile.ui.admin.AdminAppealsScreen
+import one.zrp.social.mobile.ui.admin.AdminAuditLogScreen
+import one.zrp.social.mobile.ui.admin.AdminCharityDisbursementsScreen
 import one.zrp.social.mobile.ui.admin.AdminDashboardScreen
 import one.zrp.social.mobile.ui.admin.AdminHelpScreen
 import one.zrp.social.mobile.ui.admin.AdminJournalistsScreen
@@ -52,6 +55,7 @@ import one.zrp.social.mobile.ui.admin.AdminOpportunityScreen
 import one.zrp.social.mobile.ui.admin.AdminPaymentsScreen
 import one.zrp.social.mobile.ui.admin.AdminPostsScreen
 import one.zrp.social.mobile.ui.admin.AdminReportsScreen
+import one.zrp.social.mobile.ui.admin.AdminStorageScreen
 import one.zrp.social.mobile.ui.admin.AdminSupportTicketDetailScreen
 import one.zrp.social.mobile.ui.admin.AdminSupportTicketsScreen
 import one.zrp.social.mobile.ui.admin.AdminUpgradeRequestsScreen
@@ -264,6 +268,10 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     val goToAdminMusicArtists: () -> Unit = { navController.navigate("admin/music-artists") }
     val goToAdminNews: () -> Unit = { navController.navigate("admin/news") }
     val goToAdminSupport: () -> Unit = { navController.navigate("admin/support") }
+    val goToAdminAnalytics: () -> Unit = { navController.navigate("admin/analytics") }
+    val goToAdminAuditLog: () -> Unit = { navController.navigate("admin/audit-log") }
+    val goToAdminStorage: () -> Unit = { navController.navigate("admin/storage") }
+    val goToAdminCharityDisbursements: () -> Unit = { navController.navigate("admin/charity-disbursements") }
     val goToAdminSupportTicket: (String) -> Unit = { id -> navController.navigate("admin/support/$id") }
     val goToAdminPayments: () -> Unit = { navController.navigate("admin/payments") }
     val goToAdminWithdrawals: () -> Unit = { navController.navigate("admin/withdrawals") }
@@ -1156,6 +1164,10 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     // their quick actions or the screens below.
                     isAdmin = isAdminRole,
                     onOpenSupport = goToAdminSupport,
+                    onOpenAnalytics = goToAdminAnalytics,
+                    onOpenAuditLog = goToAdminAuditLog,
+                    onOpenStorage = goToAdminStorage,
+                    onOpenCharityDisbursements = goToAdminCharityDisbursements,
                     onOpenPayments = goToAdminPayments,
                     onOpenWithdrawals = goToAdminWithdrawals,
                     onOpenUpgradeRequests = goToAdminUpgradeRequests,
@@ -1196,6 +1208,25 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
             }
             composable("admin/music-artists") {
                 AdminMusicArtistsScreen(onBack = { navController.popBackStack() })
+            }
+            // The four internal ops screens below are requireAdmin
+            // server-side, exactly like the support tools - GET
+            // /admin/analytics, /admin/audit-log,
+            // /admin/cleanup-uploadthing and
+            // /admin/charity-disbursements all call requireAdmin(), not
+            // requireStaff(), so a MODERATOR never gets their quick
+            // actions on the dashboard either.
+            composable("admin/analytics") {
+                AdminAnalyticsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/audit-log") {
+                AdminAuditLogScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/storage") {
+                AdminStorageScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/charity-disbursements") {
+                AdminCharityDisbursementsScreen(onBack = { navController.popBackStack() })
             }
             // The ZRP News editorial desk - requireStaff server-side, so
             // no isAdmin flag, same as the review queues above. Viewing

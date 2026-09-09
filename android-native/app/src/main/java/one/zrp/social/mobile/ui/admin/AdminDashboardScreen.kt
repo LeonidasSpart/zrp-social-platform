@@ -18,10 +18,14 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Article
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Hub
+import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Newspaper
+import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Storefront
@@ -63,15 +67,24 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * SettingsScreen), never shown to a non-staff user - every action here
  * would still 401/403 server-side even if it somehow were.
  *
- * isAdmin is narrower than that staff gate on purpose: the support
- * ticket tools and all three financial queues are ADMIN-only both
- * server-side (requireAdmin on every /api/admin/support,
- * /api/admin/payments, /api/admin/withdrawals and /api/upgrade-requests
- * route) and on the website itself (its support pages refuse anything
- * but role === 'ADMIN', and its admin nav only lists the financial
- * pages for a full admin), so a MODERATOR doesn't get those quick
- * actions. Every other quick action here is requireStaff, same as
- * Reports/Users/Posts, so those take no such gate.
+ * isAdmin is narrower than that staff gate on purpose, and it now
+ * covers seven sections rather than one. The support ticket tools and
+ * all three financial queues are ADMIN-only both server-side
+ * (requireAdmin on every /api/admin/support, /api/admin/payments,
+ * /api/admin/withdrawals and /api/upgrade-requests route) and on the
+ * website itself (its support pages refuse anything but
+ * role === 'ADMIN', and its admin nav only lists the financial pages
+ * for a full admin). The four internal ops tools below them are the
+ * same: GET /admin/analytics, GET /admin/audit-log, GET/POST
+ * /admin/cleanup-uploadthing and GET/POST /admin/charity-disbursements
+ * each open with requireAdmin(), not requireStaff() - checked route by
+ * route, not assumed from the group they sit in - so a MODERATOR gets
+ * none of any of these quick actions. Every other quick action here is
+ * requireStaff, same as Reports/Users/Posts, so those take no such gate.
+ *
+ * Two of the internal ops tools (the audit log and the charity ledger)
+ * have no web admin page at all; they are API-only on the website, so
+ * these screens are the first UI either platform has for them.
  */
 @Composable
 fun AdminDashboardScreen(
@@ -89,6 +102,10 @@ fun AdminDashboardScreen(
     onOpenNews: () -> Unit,
     isAdmin: Boolean,
     onOpenSupport: () -> Unit,
+    onOpenAnalytics: () -> Unit,
+    onOpenAuditLog: () -> Unit,
+    onOpenStorage: () -> Unit,
+    onOpenCharityDisbursements: () -> Unit,
     onOpenPayments: () -> Unit,
     onOpenWithdrawals: () -> Unit,
     onOpenUpgradeRequests: () -> Unit,
@@ -254,6 +271,42 @@ fun AdminDashboardScreen(
                     OutlinedButton(onClick = onOpenSupport, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
                         Icon(Icons.Filled.SupportAgent, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
                         Text(stringResource(R.string.admin_support_title))
+                    }
+                    OutlinedButton(
+                        onClick = onOpenAnalytics,
+                        modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+                    ) {
+                        Icon(Icons.Filled.Insights, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
+                        Text(stringResource(R.string.admin_analytics_title))
+                    }
+                    OutlinedButton(
+                        onClick = onOpenAuditLog,
+                        modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+                    ) {
+                        Icon(
+                            Icons.Filled.History,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = Spacing.sm),
+                        )
+                        Text(stringResource(R.string.admin_audit_title))
+                    }
+                    OutlinedButton(
+                        onClick = onOpenStorage,
+                        modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+                    ) {
+                        Icon(
+                            Icons.Filled.DeleteOutline,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = Spacing.sm),
+                        )
+                        Text(stringResource(R.string.admin_storage_title))
+                    }
+                    OutlinedButton(
+                        onClick = onOpenCharityDisbursements,
+                        modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+                    ) {
+                        Icon(Icons.Filled.Paid, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
+                        Text(stringResource(R.string.admin_charity_title))
                     }
                     OutlinedButton(onClick = onOpenPayments, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
                         Icon(Icons.Filled.Payments, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
