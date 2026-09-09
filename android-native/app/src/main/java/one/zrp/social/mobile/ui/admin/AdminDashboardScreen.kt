@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Flag
@@ -24,9 +25,11 @@ import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Paid
+import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.SupportAgent
+import androidx.compose.material.icons.filled.Upgrade
 import androidx.compose.material.icons.filled.VolunteerActivism
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.CircularProgressIndicator
@@ -57,26 +60,30 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * The native surface onto /admin (src/app/admin/page.tsx) - stat cards
  * from GET /admin/stats plus a quick action per admin section the
  * website's own admin nav offers (Users/Posts/Reports, the Appeals/Ads/
- * Marketplace/Opportunity/HELP/Journalists/Music review queues, and
- * Support Tickets). Entry point is gated at the Settings row (see
+ * Marketplace/Opportunity/HELP/Journalists/Music review queues, Support
+ * Tickets, and the Payments/Withdrawals/Upgrade Requests financial
+ * queues). Entry point is gated at the Settings row (see
  * SettingsScreen), never shown to a non-staff user - every action here
  * would still 401/403 server-side even if it somehow were.
  *
  * isAdmin is narrower than that staff gate on purpose, and it now
- * covers five sections rather than one. The support ticket tools are
- * ADMIN-only both server-side (requireAdmin on every /api/admin/support
- * route) and on the website itself (its support pages refuse anything
- * but role === 'ADMIN'). The four internal ops tools below them are the
+ * covers seven sections rather than one. The support ticket tools and
+ * all three financial queues are ADMIN-only both server-side
+ * (requireAdmin on every /api/admin/support, /api/admin/payments,
+ * /api/admin/withdrawals and /api/upgrade-requests route) and on the
+ * website itself (its support pages refuse anything but
+ * role === 'ADMIN', and its admin nav only lists the financial pages
+ * for a full admin). The four internal ops tools below them are the
  * same: GET /admin/analytics, GET /admin/audit-log, GET/POST
  * /admin/cleanup-uploadthing and GET/POST /admin/charity-disbursements
  * each open with requireAdmin(), not requireStaff() - checked route by
  * route, not assumed from the group they sit in - so a MODERATOR gets
- * none of their quick actions. Every other quick action here is
+ * none of any of these quick actions. Every other quick action here is
  * requireStaff, same as Reports/Users/Posts, so those take no such gate.
  *
- * Two of those four (the audit log and the charity ledger) have no web
- * admin page at all; they are API-only on the website, so these screens
- * are the first UI either platform has for them.
+ * Two of the internal ops tools (the audit log and the charity ledger)
+ * have no web admin page at all; they are API-only on the website, so
+ * these screens are the first UI either platform has for them.
  */
 @Composable
 fun AdminDashboardScreen(
@@ -91,12 +98,16 @@ fun AdminDashboardScreen(
     onOpenHelp: () -> Unit,
     onOpenJournalists: () -> Unit,
     onOpenMusicArtists: () -> Unit,
+    onOpenNews: () -> Unit,
     isAdmin: Boolean,
     onOpenSupport: () -> Unit,
     onOpenAnalytics: () -> Unit,
     onOpenAuditLog: () -> Unit,
     onOpenStorage: () -> Unit,
     onOpenCharityDisbursements: () -> Unit,
+    onOpenPayments: () -> Unit,
+    onOpenWithdrawals: () -> Unit,
+    onOpenUpgradeRequests: () -> Unit,
 ) {
     val viewModel: AdminDashboardViewModel = viewModel(
         factory = remember { AdminDashboardViewModelFactory(AdminRepository()) },
@@ -246,6 +257,14 @@ fun AdminDashboardScreen(
                     )
                     Text(stringResource(R.string.admin_dash_manage_music_artists))
                 }
+                // The ZRP News desk sits with the staff-wide actions,
+                // not below in the isAdmin block: both /api/admin/news
+                // routes are requireStaff (ADMIN or MODERATOR), the same
+                // bar as reports/posts and the review queues above.
+                OutlinedButton(onClick = onOpenNews, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
+                    Icon(Icons.Filled.Newspaper, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
+                    Text(stringResource(R.string.admin_dash_manage_news))
+                }
                 if (isAdmin) {
                     OutlinedButton(onClick = onOpenSupport, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
                         Icon(Icons.Filled.SupportAgent, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
@@ -286,6 +305,32 @@ fun AdminDashboardScreen(
                     ) {
                         Icon(Icons.Filled.Paid, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
                         Text(stringResource(R.string.admin_charity_title))
+                    }
+                    OutlinedButton(onClick = onOpenPayments, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
+                        Icon(Icons.Filled.Payments, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
+                        Text(stringResource(R.string.admin_dash_verify_payments))
+                    }
+                    OutlinedButton(
+                        onClick = onOpenWithdrawals,
+                        modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+                    ) {
+                        Icon(
+                            Icons.Filled.AccountBalanceWallet,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = Spacing.sm),
+                        )
+                        Text(stringResource(R.string.admin_dash_process_withdrawals))
+                    }
+                    OutlinedButton(
+                        onClick = onOpenUpgradeRequests,
+                        modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+                    ) {
+                        Icon(
+                            Icons.Filled.Upgrade,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = Spacing.sm),
+                        )
+                        Text(stringResource(R.string.admin_dash_review_upgrade_requests))
                     }
                 }
             }

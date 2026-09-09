@@ -49,13 +49,17 @@ import one.zrp.social.mobile.ui.admin.AdminHelpScreen
 import one.zrp.social.mobile.ui.admin.AdminJournalistsScreen
 import one.zrp.social.mobile.ui.admin.AdminMarketplaceScreen
 import one.zrp.social.mobile.ui.admin.AdminMusicArtistsScreen
+import one.zrp.social.mobile.ui.admin.AdminNewsScreen
 import one.zrp.social.mobile.ui.admin.AdminOpportunityScreen
+import one.zrp.social.mobile.ui.admin.AdminPaymentsScreen
 import one.zrp.social.mobile.ui.admin.AdminPostsScreen
 import one.zrp.social.mobile.ui.admin.AdminReportsScreen
 import one.zrp.social.mobile.ui.admin.AdminStorageScreen
 import one.zrp.social.mobile.ui.admin.AdminSupportTicketDetailScreen
 import one.zrp.social.mobile.ui.admin.AdminSupportTicketsScreen
+import one.zrp.social.mobile.ui.admin.AdminUpgradeRequestsScreen
 import one.zrp.social.mobile.ui.admin.AdminUsersScreen
+import one.zrp.social.mobile.ui.admin.AdminWithdrawalsScreen
 import one.zrp.social.mobile.ui.legal.LegalScreen
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
@@ -261,12 +265,16 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     val goToAdminHelp: () -> Unit = { navController.navigate("admin/help") }
     val goToAdminJournalists: () -> Unit = { navController.navigate("admin/journalists") }
     val goToAdminMusicArtists: () -> Unit = { navController.navigate("admin/music-artists") }
+    val goToAdminNews: () -> Unit = { navController.navigate("admin/news") }
     val goToAdminSupport: () -> Unit = { navController.navigate("admin/support") }
     val goToAdminAnalytics: () -> Unit = { navController.navigate("admin/analytics") }
     val goToAdminAuditLog: () -> Unit = { navController.navigate("admin/audit-log") }
     val goToAdminStorage: () -> Unit = { navController.navigate("admin/storage") }
     val goToAdminCharityDisbursements: () -> Unit = { navController.navigate("admin/charity-disbursements") }
     val goToAdminSupportTicket: (String) -> Unit = { id -> navController.navigate("admin/support/$id") }
+    val goToAdminPayments: () -> Unit = { navController.navigate("admin/payments") }
+    val goToAdminWithdrawals: () -> Unit = { navController.navigate("admin/withdrawals") }
+    val goToAdminUpgradeRequests: () -> Unit = { navController.navigate("admin/upgrade-requests") }
     val goToTerms: () -> Unit = { navController.navigate("legal/terms") }
     val goToPrivacyPolicy: () -> Unit = { navController.navigate("legal/privacy") }
     val goToGuidelines: () -> Unit = { navController.navigate("legal/guidelines") }
@@ -1144,17 +1152,23 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenHelp = goToAdminHelp,
                     onOpenJournalists = goToAdminJournalists,
                     onOpenMusicArtists = goToAdminMusicArtists,
-                    // The support tools are the one admin section the
-                    // website itself gates on the real ADMIN role
-                    // instead of staff (every /api/admin/support route
-                    // is requireAdmin), so a MODERATOR never gets the
-                    // quick action or the screens below.
+                    onOpenNews = goToAdminNews,
+                    // The support tools and the three financial queues
+                    // are the admin sections the website itself gates
+                    // on the real ADMIN role instead of staff (every
+                    // /api/admin/support, /api/admin/payments,
+                    // /api/admin/withdrawals and /api/upgrade-requests
+                    // route is requireAdmin), so a MODERATOR never gets
+                    // their quick actions or the screens below.
                     isAdmin = isAdminRole,
                     onOpenSupport = goToAdminSupport,
                     onOpenAnalytics = goToAdminAnalytics,
                     onOpenAuditLog = goToAdminAuditLog,
                     onOpenStorage = goToAdminStorage,
                     onOpenCharityDisbursements = goToAdminCharityDisbursements,
+                    onOpenPayments = goToAdminPayments,
+                    onOpenWithdrawals = goToAdminWithdrawals,
+                    onOpenUpgradeRequests = goToAdminUpgradeRequests,
                 )
             }
             composable("admin/reports") {
@@ -1211,12 +1225,34 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
             composable("admin/charity-disbursements") {
                 AdminCharityDisbursementsScreen(onBack = { navController.popBackStack() })
             }
+            // The ZRP News editorial desk - requireStaff server-side, so
+            // no isAdmin flag, same as the review queues above. Viewing
+            // an article opens the real native article screen.
+            composable("admin/news") {
+                AdminNewsScreen(
+                    onBack = { navController.popBackStack() },
+                    onViewArticle = goToNewsArticle,
+                )
+            }
             composable("admin/support") {
                 AdminSupportTicketsScreen(
                     isAdmin = isAdminRole,
                     onBack = { navController.popBackStack() },
                     onOpenTicket = goToAdminSupportTicket,
                 )
+            }
+            // The three financial queues, all requireAdmin server-side
+            // (verifying a payment, paying a creator out and approving
+            // a plan upgrade all move real money), so each takes the
+            // same isAdmin flag the support tools do.
+            composable("admin/payments") {
+                AdminPaymentsScreen(isAdmin = isAdminRole, onBack = { navController.popBackStack() })
+            }
+            composable("admin/withdrawals") {
+                AdminWithdrawalsScreen(isAdmin = isAdminRole, onBack = { navController.popBackStack() })
+            }
+            composable("admin/upgrade-requests") {
+                AdminUpgradeRequestsScreen(isAdmin = isAdminRole, onBack = { navController.popBackStack() })
             }
             composable(
                 route = "admin/support/{id}",

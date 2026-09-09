@@ -9,7 +9,9 @@ import one.zrp.social.mobile.network.AdminHelpResponse
 import one.zrp.social.mobile.network.AdminJournalistsResponse
 import one.zrp.social.mobile.network.AdminMarketplaceResponse
 import one.zrp.social.mobile.network.AdminMusicArtistsResponse
+import one.zrp.social.mobile.network.AdminNewsResponse
 import one.zrp.social.mobile.network.AdminOpportunityResponse
+import one.zrp.social.mobile.network.AdminPaymentRequest
 import one.zrp.social.mobile.network.AdminPostsResponse
 import one.zrp.social.mobile.network.AdminReport
 import one.zrp.social.mobile.network.AdminReportsResponse
@@ -21,8 +23,11 @@ import one.zrp.social.mobile.network.AdminSupportTicketDetail
 import one.zrp.social.mobile.network.AdminSupportTicketsResponse
 import one.zrp.social.mobile.network.AdminTicketReply
 import one.zrp.social.mobile.network.AdminTicketReplyRequest
+import one.zrp.social.mobile.network.AdminUpgradeRequest
 import one.zrp.social.mobile.network.AdminUser
+import one.zrp.social.mobile.network.AdminUserPlanResponse
 import one.zrp.social.mobile.network.AdminUsersResponse
+import one.zrp.social.mobile.network.AdminWithdrawal
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.GrantJournalistRequest
 import one.zrp.social.mobile.network.JournalistActionRequest
@@ -30,12 +35,17 @@ import one.zrp.social.mobile.network.ResolveAppealRequest
 import one.zrp.social.mobile.network.ResolveTicketRequest
 import one.zrp.social.mobile.network.RecordCharityDisbursementRequest
 import one.zrp.social.mobile.network.ReviewAdRequest
+import one.zrp.social.mobile.network.ReviewNewsArticleRequest
 import one.zrp.social.mobile.network.ReviewSubmissionRequest
+import one.zrp.social.mobile.network.SaveNewsArticleRequest
 import one.zrp.social.mobile.network.ToggleBanResponse
 import one.zrp.social.mobile.network.UpdateReportRequest
 import one.zrp.social.mobile.network.UpdateSupportTicketRequest
+import one.zrp.social.mobile.network.UpdateUserPlanRequest
 import one.zrp.social.mobile.network.UpdateUserRoleRequest
+import one.zrp.social.mobile.network.UpgradeRequestActionRequest
 import one.zrp.social.mobile.network.VerifyArtistRequest
+import one.zrp.social.mobile.network.VerifyPaymentRequest
 import one.zrp.social.mobile.network.zrpErrorMessage
 import retrofit2.HttpException
 
@@ -44,9 +54,9 @@ import retrofit2.HttpException
  * website's own /admin pages call - see AdminApi's own KDoc. Every
  * write here can still 401/403 server-side regardless of what the
  * calling screen shows (requireStaff for stats/reports/users-list/
- * posts, requireAdmin for role changes, user deletion, every
- * support-ticket call and all four internal ops calls below) - the
- * Settings entry point and in-screen
+ * posts, requireAdmin for role changes, plan changes, user deletion,
+ * every support-ticket call, every financial call and all four
+ * internal ops calls below) - the Settings entry point and in-screen
  * role gating exist only to keep a MODERATOR (or lower) from being
  * shown controls the server would reject anyway, never as the actual
  * authorization boundary.
@@ -395,6 +405,150 @@ class AdminRepository {
             Result.success(Unit)
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to record this disbursement."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // ─── Payments (ADMIN only, server-side) ──────────────────────────
+    suspend fun getPendingPayments(): Result<List<AdminPaymentRequest>> = runCatching {
+        ApiClient.adminApi.getPendingPayments()
+    }
+
+    // 400s on a payment another admin already verified ("Payment
+    // already processed") - worth surfacing verbatim, so zrpErrorMessage
+    // leads here the same way it does for every other write.
+    suspend fun verifyPayment(paymentId: String): Result<Unit> {
+        return try {
+            ApiClient.adminApi.verifyPayment(VerifyPaymentRequest(paymentId))
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to verify this payment."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // ─── Withdrawals (ADMIN only, server-side) ───────────────────────
+    suspend fun getWithdrawals(status: String): Result<List<AdminWithdrawal>> = runCatching {
+        ApiClient.adminApi.getWithdrawals(status)
+    }
+
+    // The approve route can fail after it has already claimed the row
+    // (the on-chain transfer itself failing), and its message says the
+    // amount went back to the creator's balance - exactly the kind of
+    // message that has to reach the admin verbatim rather than as a
+    // generic failure.
+    suspend fun approveWithdrawal(id: String): Result<Unit> {
+        return try {
+            ApiClient.adminApi.approveWithdrawal(id)
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to approve this withdrawal."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    suspend fun rejectWithdrawal(id: String): Result<Unit> {
+        return try {
+            ApiClient.adminApi.rejectWithdrawal(id)
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to reject this withdrawal."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // ─── Upgrade requests (ADMIN only, server-side) ──────────────────
+    suspend fun getUpgradeRequests(status: String): Result<List<AdminUpgradeRequest>> = runCatching {
+        ApiClient.adminApi.getUpgradeRequests(status)
+    }
+
+    // action is "approve" or "deny" - see AdminApi's own note.
+    suspend fun reviewUpgradeRequest(id: String, action: String): Result<Unit> {
+        return try {
+            ApiClient.adminApi.reviewUpgradeRequest(id, UpgradeRequestActionRequest(action))
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to process this request."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // ─── ZRP News CMS (STAFF, server-side) ───────────────────────────
+    // requireStaff, not requireAdmin - a MODERATOR really can run the
+    // News desk, same as reports/posts/appeals (see AdminApi's own
+    // note), so nothing here is gated client-side either.
+    suspend fun getNewsArticles(
+        status: String,
+        category: String,
+        search: String,
+        page: Int,
+        limit: Int,
+    ): Result<AdminNewsResponse> = runCatching {
+        ApiClient.adminApi.getNewsArticles(status, category, search, page, limit)
+    }
+
+    // The route 409s on a slug another article already owns and 400s on
+    // an authorId that isn't a real user - both messages name the exact
+    // problem and have to reach the editor verbatim, which is why
+    // zrpErrorMessage() leads here as it does for every other write.
+    suspend fun createNewsArticle(request: SaveNewsArticleRequest): Result<Unit> {
+        return try {
+            ApiClient.adminApi.createNewsArticle(request)
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to create this article."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    suspend fun updateNewsArticle(id: String, request: SaveNewsArticleRequest): Result<Unit> {
+        return try {
+            ApiClient.adminApi.updateNewsArticle(id, request)
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this article."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // status is "PUBLISHED" (approve) or "REJECTED" (send back);
+    // reviewNote is left null on approve so the route never touches the
+    // stored note - see ReviewNewsArticleRequest's own KDoc.
+    suspend fun reviewNewsArticle(id: String, status: String, reviewNote: String?): Result<Unit> {
+        return try {
+            ApiClient.adminApi.reviewNewsArticle(id, ReviewNewsArticleRequest(status, reviewNote))
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to review this article."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    suspend fun deleteNewsArticle(id: String): Result<Unit> {
+        return try {
+            ApiClient.adminApi.deleteNewsArticle(id)
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to delete this article."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // ─── Plan management (ADMIN only, server-side) ───────────────────
+    suspend fun updateUserPlan(userId: String, plan: String): Result<AdminUserPlanResponse> {
+        return try {
+            Result.success(ApiClient.adminApi.updateUserPlan(userId, UpdateUserPlanRequest(plan)))
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this user's plan."))
         } catch (e: Exception) {
             Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
         }
