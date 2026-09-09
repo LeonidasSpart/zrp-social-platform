@@ -10,6 +10,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.imePadding
@@ -94,7 +95,7 @@ import one.zrp.social.mobile.util.queryFileNameAndSize
  * field those would need, so wiring them in later is additive, not a
  * redesign).
  */
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun GroupConversationScreen(
     conversationId: String,
@@ -264,7 +265,6 @@ fun GroupConversationScreen(
                                 val targetIndex = state.messages.indexOfFirst { it.id == targetId }
                                 if (targetIndex >= 0) pendingScrollIndex = targetIndex + topOffset
                             },
-                            ownReaction = message.reactions.firstOrNull { it.user.id == currentUserId }?.emoji,
                         )
                     }
                 }
