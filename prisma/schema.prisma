@@ -416,6 +416,9 @@ model User {
 
   messageReactions MessageReaction[]
 
+  createdConversations     Conversation[]            @relation("Conversation_createdBy")
+  conversationParticipants ConversationParticipant[]
+
   pollVotes PollVote[]
   bookmarks Bookmark[]
 
@@ -799,8 +802,23 @@ model Message {
   senderId String
   sender   User   @relation("Message_sender", fields: [senderId], references: [id], onDelete: Cascade)
 
-  receiverId String
-  receiver   User   @relation("Message_receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  // Nullable, not removed: a real GROUP message has no single receiver
+  // (see ConversationParticipant's own KDoc), so receiverId is null on
+  // those rows going forward. Every EXISTING 1:1 message row already
+  // has a real receiverId and keeps it - this relaxation only widens
+  // what a NEW row is allowed to omit, it never touches existing data.
+  // GET /messages/{userId}'s own 1:1 query (senderId/receiverId based)
+  // is completely unaffected either way.
+  receiverId String?
+  receiver   User?   @relation("Message_receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  // Null for every existing (and every future) 1:1 message - those
+  // keep working through senderId/receiverId exactly as before. Set
+  // only on a message sent inside a real GROUP (or, in principle, a
+  // DIRECT) Conversation - see Conversation's own KDoc for why 1:1
+  // history was deliberately NOT backfilled onto this column.
+  conversationId String?
+  conversation   Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   read   Boolean @default(false)
   edited Boolean @default(false)
@@ -819,6 +837,80 @@ model Message {
   @@index([createdAt])
   @@index([senderId, receiverId])
   @@index([replyToId])
+  @@index([conversationId, createdAt])
+}
+
+enum ConversationType {
+  DIRECT
+  GROUP
+}
+
+enum ConversationParticipantRole {
+  OWNER
+  MEMBER
+}
+
+// A real GROUP conversation - deliberately NOT used to represent
+// existing 1:1 messaging retroactively. Every 1:1 message already in
+// this database (and every new one - see Message's own KDoc) keeps
+// working through senderId/receiverId with zero Conversation row
+// involved; backfilling one Conversation per historical DM pair was
+// considered and rejected as unnecessary migration risk for no real
+// benefit, since senderId/receiverId already fully identifies a DM
+// pair. This model exists purely to give a GROUP conversation the
+// participant list, name and read-state a plain sender/receiver pair
+// structurally cannot express.
+model Conversation {
+  id   String           @id @default(cuid())
+  type ConversationType
+
+  // GROUP-only presentation - always null for the DIRECT value this
+  // enum allows for future use, since a direct thread's name/avatar is
+  // always derived from the other participant instead, matching how
+  // 1:1 messaging already renders.
+  name      String?
+  avatarUrl String? @db.Text
+
+  createdById String?
+  createdBy   User?   @relation("Conversation_createdBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@index([type])
+}
+
+model ConversationParticipant {
+  id String @id @default(cuid())
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  role ConversationParticipantRole @default(MEMBER)
+
+  joinedAt DateTime @default(now())
+
+  // Per-participant read pointer, not a per-message Boolean fan-out:
+  // a GROUP message's read state genuinely differs per participant, so
+  // "unread" is computed server-side as messages in this conversation
+  // newer than lastReadAt, the same efficient pattern real group-chat
+  // products use instead of one row per (message, participant) pair.
+  lastReadAt DateTime?
+
+  // Removing a participant (kick, or leaving) deletes this row, which
+  // is the actual authorization boundary every group message-read/
+  // send/participant-list check queries against - it is never a soft
+  // "active: false" flag to remember to filter on. Their past messages
+  // stay in the conversation (Message.senderId is untouched), only
+  // their own future access is revoked.
+  @@unique([conversationId, userId])
+  @@index([userId])
 }
 
 model MessageReaction {
