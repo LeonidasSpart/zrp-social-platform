@@ -108,8 +108,22 @@ android {
         // versionName "4.0.5", never reusing 9 or 8 per Play's
         // monotonically-increasing versionCode requirement for this
         // applicationId (see the versionCode 2/7 rejections above).
-        versionCode 10
-        versionName "4.0.5"
+        // Bumps again to versionCode 11 / versionName "4.0.6" for two
+        // further, real fixes landed on top of 10: allowBackup is now
+        // false and androidx.security:security-crypto moved off its
+        // alpha build to the stable 1.1.0 release (same MasterKey API
+        // TokenStore already used - see AndroidManifest.xml's own
+        // comment), and editorial feed accounts (ZRP News World, ZRP
+        // Travel, ...) - which showed correctly on web but had no
+        // avatar, banner, or "editorial" badge on Android - are fixed:
+        // EDITORIAL_AVATAR_URL/EDITORIAL_COVER_URL are now fully-
+        // qualified https:// URLs instead of root-relative paths Coil
+        // has no origin to resolve, and VerifiedBadge.kt's BadgeStyles
+        // map now has the "editorial" entry it was missing (see
+        // VerifiedBadge.kt's own comment). Neither changes applicationId,
+        // signing, or deep links.
+        versionCode 11
+        versionName "4.0.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
