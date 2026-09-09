@@ -12,7 +12,24 @@
           "package_name": "one.zrp.social"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1039614279907-ma6pu1r2tulfnqvikoie8sq0vn3uul63.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "one.zrp.social",
+            "certificate_hash": "d1ed39eda44b9f1cb983b99562349a7678d97250"
+          }
+        },
+        {
+          "client_id": "1039614279907-qjs9a23re3iolb7f73poinlo6inm0a96.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "one.zrp.social",
+            "certificate_hash": "e2a7949b2228dffc3ff15481520df3a8c3dbad6b"
+          }
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCjyHeqoSVTiMabeuIHSBhnhDlgzZh7CbY"
