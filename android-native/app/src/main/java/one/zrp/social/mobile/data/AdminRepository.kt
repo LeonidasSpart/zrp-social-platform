@@ -6,6 +6,7 @@ import one.zrp.social.mobile.network.AdminHelpResponse
 import one.zrp.social.mobile.network.AdminJournalistsResponse
 import one.zrp.social.mobile.network.AdminMarketplaceResponse
 import one.zrp.social.mobile.network.AdminMusicArtistsResponse
+import one.zrp.social.mobile.network.AdminNewsResponse
 import one.zrp.social.mobile.network.AdminOpportunityResponse
 import one.zrp.social.mobile.network.AdminPaymentRequest
 import one.zrp.social.mobile.network.AdminPostsResponse
@@ -28,7 +29,9 @@ import one.zrp.social.mobile.network.JournalistActionRequest
 import one.zrp.social.mobile.network.ResolveAppealRequest
 import one.zrp.social.mobile.network.ResolveTicketRequest
 import one.zrp.social.mobile.network.ReviewAdRequest
+import one.zrp.social.mobile.network.ReviewNewsArticleRequest
 import one.zrp.social.mobile.network.ReviewSubmissionRequest
+import one.zrp.social.mobile.network.SaveNewsArticleRequest
 import one.zrp.social.mobile.network.ToggleBanResponse
 import one.zrp.social.mobile.network.UpdateReportRequest
 import one.zrp.social.mobile.network.UpdateSupportTicketRequest
@@ -383,6 +386,71 @@ class AdminRepository {
             Result.success(Unit)
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to process this request."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // ─── ZRP News CMS (STAFF, server-side) ───────────────────────────
+    // requireStaff, not requireAdmin - a MODERATOR really can run the
+    // News desk, same as reports/posts/appeals (see AdminApi's own
+    // note), so nothing here is gated client-side either.
+    suspend fun getNewsArticles(
+        status: String,
+        category: String,
+        search: String,
+        page: Int,
+        limit: Int,
+    ): Result<AdminNewsResponse> = runCatching {
+        ApiClient.adminApi.getNewsArticles(status, category, search, page, limit)
+    }
+
+    // The route 409s on a slug another article already owns and 400s on
+    // an authorId that isn't a real user - both messages name the exact
+    // problem and have to reach the editor verbatim, which is why
+    // zrpErrorMessage() leads here as it does for every other write.
+    suspend fun createNewsArticle(request: SaveNewsArticleRequest): Result<Unit> {
+        return try {
+            ApiClient.adminApi.createNewsArticle(request)
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to create this article."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    suspend fun updateNewsArticle(id: String, request: SaveNewsArticleRequest): Result<Unit> {
+        return try {
+            ApiClient.adminApi.updateNewsArticle(id, request)
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this article."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // status is "PUBLISHED" (approve) or "REJECTED" (send back);
+    // reviewNote is left null on approve so the route never touches the
+    // stored note - see ReviewNewsArticleRequest's own KDoc.
+    suspend fun reviewNewsArticle(id: String, status: String, reviewNote: String?): Result<Unit> {
+        return try {
+            ApiClient.adminApi.reviewNewsArticle(id, ReviewNewsArticleRequest(status, reviewNote))
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to review this article."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    suspend fun deleteNewsArticle(id: String): Result<Unit> {
+        return try {
+            ApiClient.adminApi.deleteNewsArticle(id)
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to delete this article."))
         } catch (e: Exception) {
             Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
         }
