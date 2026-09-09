@@ -37,12 +37,22 @@ android {
         minSdkVersion 24
         targetSdkVersion 36
 
-        // Google Sign-In (Credential Manager) - the OAuth Web client ID
-        // registered in the same Google Cloud project GOOGLE_CLIENT_ID
-        // already uses server-side (src/lib/auth.ts's GoogleProvider,
-        // src/app/api/mobile/auth/google/route.ts's audience check).
-        // Not a secret (client IDs are public identifiers, unlike a
-        // client secret) but still not hardcoded here, mirroring the
+        // Google Sign-In (Credential Manager) - this must be a Web-type
+        // OAuth client ID from the SAME Google Cloud project as this
+        // app's own registered Android OAuth clients (package
+        // "one.zrp.social" + each signing certificate's SHA-1, see
+        // google-services.json's own committed oauth_client entries and
+        // GoogleAuth.kt's own KDoc). This is NOT the website's own
+        // GOOGLE_CLIENT_ID (src/lib/auth.ts's GoogleProvider) - that
+        // lives in a different Google Cloud project entirely and cannot
+        // be reused here; reusing it is exactly the mistake that
+        // produces Credential Manager's ambiguous NoCredentialException
+        // even with a perfectly valid device/account (see
+        // src/app/api/mobile/auth/google/route.ts's own comment, which
+        // documents the same distinction server-side via the separate
+        // GOOGLE_MOBILE_CLIENT_ID env var this value must match). Not a
+        // secret (client IDs are public identifiers, unlike a client
+        // secret) but still not hardcoded here, mirroring the
         // keystore.properties pattern above: supplied via a Gradle
         // property so a build with none configured still compiles -
         // GoogleAuth.kt's own call simply fails at runtime with a clear
@@ -67,8 +77,19 @@ android {
         // get-status broadcast, real group chat with its own Conversation/
         // ConversationParticipant schema and Socket.IO events, tablet
         // two-pane messaging, an advanced profile experience pass, and a
-        // link-preview regression fix) for real-user Play testing.
-        versionCode 8
+        // link-preview regression fix) for real-user Play testing. Bumped
+        // again to versionCode 9 (versionName unchanged - still the 4.0.4
+        // milestone, no new feature here) to ship GoogleAuth.kt's own
+        // on-device NoCredentialException diagnostic: real Internal
+        // Testing users hit "Google Sign-In couldn't find an account to
+        // use" on versionCode 8 with a real Google account present, which
+        // this repo's own history (see GoogleAuth.kt's KDoc) already
+        // shows is ambiguous between a device-side cause and a
+        // misconfigured GOOGLE_WEB_CLIENT_ID - this build surfaces the
+        // actual configured (non-secret) client ID value directly in that
+        // error message so the real cause can be confirmed from the
+        // device alone.
+        versionCode 9
         versionName "4.0.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

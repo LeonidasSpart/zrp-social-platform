@@ -42,26 +42,37 @@ object GoogleAuth {
         } catch (e: GoogleIdTokenParsingException) {
             Result.failure(Exception("Couldn't verify that Google account. Please try again."))
         } catch (e: NoCredentialException) {
-            // Credential Manager throws this exact exception for two
-            // very different real causes, and it does not tell us
-            // which: (a) genuinely no Google account is usable on this
-            // device, or (b) - confirmed as the actual cause during
-            // V4.0.1 real-device testing, via google-services.json's
-            // own committed "oauth_client": [] - this app's signing
-            // certificate has no matching Android OAuth client
-            // registered in the "zrp-social" Google Cloud project, so
-            // Play Services refuses to return ANY credential regardless
-            // of how many accounts exist on the device. The previous
-            // message ("Add a Google account in your device settings")
-            // asserted cause (a) as fact, which sent real testing down
-            // the wrong path when the true cause was (b). Since this
-            // layer genuinely cannot distinguish the two, the message
-            // no longer claims to know which one it is - see
-            // build.gradle's own comment on the checked-in debug
-            // keystore, which is what makes cause (b) fixable at all by
-            // giving the debug build a stable, registerable fingerprint.
-            Log.e("GoogleAuth", "Credential Manager returned no credential (NoCredentialException) - see this file's own KDoc: either no usable Google account, or this app's signing cert isn't yet registered as an Android OAuth client for GOOGLE_WEB_CLIENT_ID's Google Cloud project.", e)
-            Result.failure(Exception("Google Sign-In couldn't find an account to use. Make sure a Google account is set up on this device, or try email sign-in instead."))
+            // Credential Manager throws this exact exception for several
+            // very different real causes, and it does not tell us which:
+            // (a) genuinely no Google account is usable on this device,
+            // (b) this app's signing certificate has no matching Android
+            // OAuth client registered in the "zrp-social" Google Cloud
+            // project (confirmed as the actual cause during V4.0.1
+            // real-device testing, via google-services.json's own
+            // then-empty "oauth_client": []; that cert is registered now
+            // - see google-services.json's own committed oauth_client
+            // entries), or (c) the value baked into BuildConfig as
+            // GOOGLE_WEB_CLIENT_ID (from the GOOGLE_WEB_CLIENT_ID repo
+            // secret, see build.gradle's own comment) isn't a valid
+            // Web-type OAuth client in that same Google Cloud project -
+            // e.g. empty, a typo, or accidentally the website's own
+            // GOOGLE_CLIENT_ID from a different project (see
+            // /api/mobile/auth/google/route.ts's own comment on why that
+            // specific mistake is easy to make and must not happen).
+            // A real Internal Testing tester has no adb/logcat access,
+            // so the exact configured (non-secret - OAuth client IDs are
+            // public identifiers, unlike a client secret) value is
+            // included directly in the surfaced message: an empty value
+            // here immediately confirms cause (c) without needing a
+            // device connected to a computer.
+            val configuredClientId = BuildConfig.GOOGLE_WEB_CLIENT_ID.ifBlank { "(not set)" }
+            Log.e("GoogleAuth", "Credential Manager returned no credential (NoCredentialException) - see this file's own KDoc. Configured GOOGLE_WEB_CLIENT_ID: $configuredClientId", e)
+            Result.failure(
+                Exception(
+                    "Google Sign-In couldn't find an account to use. Make sure a Google account is set up on this device, or try email sign-in instead. " +
+                        "(diagnostic: configured client ID = $configuredClientId)"
+                )
+            )
         } catch (e: GetCredentialException) {
             // Every other Credential Manager-level failure (provider
             // configuration, interrupted, unsupported) - still not a
