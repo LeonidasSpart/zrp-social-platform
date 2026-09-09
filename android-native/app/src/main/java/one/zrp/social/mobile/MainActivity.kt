@@ -10,6 +10,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -40,17 +43,25 @@ private enum class LoggedOutScreen { LOGIN, SIGNUP, FORGOT_PASSWORD }
 // resources after recreate() there, even though the stored preference
 // is correct - the "unreliable" symptom real-device reports described.
 class MainActivity : AppCompatActivity() {
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ZrpSocialApp()
+            // Real window-width detection (tablet/large-screen two-pane
+            // messaging - see WindowSize.kt's own isTwoPane KDoc), not a
+            // fixed dp guess - recomputes itself across a rotation/fold/
+            // multi-window resize since this Activity isn't configured
+            // to skip recreation on those config changes.
+            val windowSizeClass = calculateWindowSizeClass(this)
+            ZrpSocialApp(windowSizeClass = windowSizeClass)
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
-fun ZrpSocialApp() {
+fun ZrpSocialApp(windowSizeClass: WindowSizeClass) {
     // ApiClient.init() already ran in ZrpApplication.onCreate() before
     // this Activity exists, so AuthRepository() is safe to construct
     // here with no context of its own.
@@ -111,7 +122,11 @@ fun ZrpSocialApp() {
                             onFinished = { authViewModel.onOnboardingFinished() },
                         )
                     } else {
-                        ZrpNavHost(onLogout = { authViewModel.logout() }, currentUser = currentAuthState.user)
+                        ZrpNavHost(
+                            onLogout = { authViewModel.logout() },
+                            currentUser = currentAuthState.user,
+                            windowSizeClass = windowSizeClass,
+                        )
                     }
                 }
             }

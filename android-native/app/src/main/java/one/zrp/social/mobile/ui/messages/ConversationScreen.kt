@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.media.MediaRecorder
 import android.net.Uri
-import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -110,6 +109,7 @@ import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
+import one.zrp.social.mobile.util.queryFileNameAndSize
 
 /**
  * A single conversation - real message history and real sending
@@ -981,20 +981,6 @@ private fun ChatFileRow(url: String, fileName: String, isOwnMessage: Boolean) {
             modifier = Modifier.size(16.dp),
         )
     }
-}
-
-private fun queryFileNameAndSize(contentResolver: android.content.ContentResolver, uri: android.net.Uri): Pair<String, Long> {
-    var name = "upload"
-    var size = 0L
-    contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
-        if (cursor.moveToFirst()) {
-            if (nameIndex >= 0) name = cursor.getString(nameIndex) ?: name
-            if (sizeIndex >= 0) size = cursor.getLong(sizeIndex)
-        }
-    }
-    return name to size
 }
 
 // The corner nearest the sender's own side of the screen stays sharp -

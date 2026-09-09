@@ -14,6 +14,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -55,8 +57,13 @@ import one.zrp.social.mobile.ui.marketplace.ListingFormScreen
 import one.zrp.social.mobile.ui.marketplace.MarketplaceScreen
 import one.zrp.social.mobile.ui.marketplace.MyListingsScreen
 import one.zrp.social.mobile.ui.messages.ConversationScreen
+import one.zrp.social.mobile.ui.messages.GroupConversationScreen
+import one.zrp.social.mobile.ui.messages.GroupCreateScreen
+import one.zrp.social.mobile.ui.messages.GroupParticipantsScreen
 import one.zrp.social.mobile.ui.messages.MessageDeepLinkScreen
+import one.zrp.social.mobile.ui.messages.MessagesHomeScreen
 import one.zrp.social.mobile.ui.messages.MessagesScreen
+import one.zrp.social.mobile.ui.util.isTwoPane
 import one.zrp.social.mobile.ui.moderation.ModerationListMode
 import one.zrp.social.mobile.ui.moderation.ModerationListScreen
 import one.zrp.social.mobile.data.MusicRepository
@@ -137,16 +144,21 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * across the auth gate, a distinctly separate piece of work from the
  * routes themselves.
  */
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
-fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
+fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: WindowSizeClass) {
     val navController = rememberNavController()
     val isStaff = currentUser?.role == "ADMIN" || currentUser?.role == "MODERATOR"
     val isAdminRole = currentUser?.role == "ADMIN"
+    val currentUserId = currentUser?.id
     val goToProfile: (String) -> Unit = { username -> navController.navigate("profile/$username") }
     val goToTrustPassport: (String) -> Unit = { username -> navController.navigate("trust/$username") }
     val goToConversation: (partnerId: String, partnerUsername: String) -> Unit = { partnerId, partnerUsername ->
         navController.navigate("messages/$partnerId/$partnerUsername")
     }
+    val goToGroup: (conversationId: String) -> Unit = { id -> navController.navigate("messages/group/$id") }
+    val goToNewGroup: () -> Unit = { navController.navigate("messages/new-group") }
+    val goToGroupInfo: (conversationId: String) -> Unit = { id -> navController.navigate("messages/group/$id/info") }
     val goToComments: (String) -> Unit = { postId -> navController.navigate("post/$postId/comments") }
     val goToStoryViewer: (String) -> Unit = { userId -> navController.navigate("stories/$userId") }
     val goToCreateStory: () -> Unit = { navController.navigate("create-story") }
@@ -391,7 +403,83 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
             composable(
                 route = ZrpDestination.Messages.route,
                 deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/messages" }),
-            ) { MessagesScreen(onOpenConversation = goToConversation) }
+            ) {
+                // Real WindowSizeClass-driven split (see WindowSize.kt's
+                // own isTwoPane KDoc) - a tablet/large-screen window gets
+                // the real two-pane list+thread layout in ONE screen
+                // (MessagesHomeScreen), never pushing a second nav
+                // destination for the thread; a phone-class window keeps
+                // this exact same push-to-full-screen behavior the app
+                // already had, unchanged.
+                if (windowSizeClass.isTwoPane() && currentUserId != null) {
+                    MessagesHomeScreen(
+                        currentUserId = currentUserId,
+                        onOpenProfile = goToProfile,
+                        onOpenGroupInfo = goToGroupInfo,
+                        onNewGroup = goToNewGroup,
+                    )
+                } else {
+                    MessagesScreen(
+                        onOpenConversation = goToConversation,
+                        onOpenGroup = goToGroup,
+                        onNewGroup = goToNewGroup,
+                    )
+                }
+            }
+            composable(
+                route = "messages/group/{conversationId}",
+                arguments = listOf(navArgument("conversationId") { type = NavType.StringType }),
+                // Matches the real url a group-message push notification
+                // carries (`/messages/group/{conversationId}` - see
+                // POST .../conversations/{id}/messages's own
+                // sendPushNotification call) - tapping that push lands
+                // directly on the real thread, the group equivalent of
+                // "messages/deeplink/{username}" for 1:1.
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/messages/group/{conversationId}" }),
+            ) { backStackEntry ->
+                val conversationId = backStackEntry.arguments?.getString("conversationId")
+                if (conversationId != null && currentUserId != null) {
+                    GroupConversationScreen(
+                        conversationId = conversationId,
+                        currentUserId = currentUserId,
+                        onBack = { navController.popBackStack() },
+                        onOpenInfo = { goToGroupInfo(conversationId) },
+                        onOpenProfile = goToProfile,
+                    )
+                }
+            }
+            composable("messages/new-group") {
+                GroupCreateScreen(
+                    onBack = { navController.popBackStack() },
+                    onCreated = { conversationId ->
+                        navController.navigate("messages/group/$conversationId") {
+                            popUpTo(ZrpDestination.Messages.route) { inclusive = false }
+                        }
+                    },
+                )
+            }
+            composable(
+                route = "messages/group/{conversationId}/info",
+                arguments = listOf(navArgument("conversationId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val conversationId = backStackEntry.arguments?.getString("conversationId")
+                if (conversationId != null && currentUserId != null) {
+                    GroupParticipantsScreen(
+                        conversationId = conversationId,
+                        currentUserId = currentUserId,
+                        onBack = { navController.popBackStack() },
+                        onLeft = {
+                            // Leaving pops all the way back to the
+                            // conversation list - the group's own info/
+                            // thread screens can no longer show anything
+                            // real once membership is gone (see
+                            // GroupParticipantsViewModel's own KDoc).
+                            navController.popBackStack(ZrpDestination.Messages.route, inclusive = false)
+                        },
+                        onOpenProfile = goToProfile,
+                    )
+                }
+            }
             composable(ZrpDestination.Profile.route) {
                 ProfileScreen(
                     username = null,

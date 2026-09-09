@@ -181,6 +181,11 @@ dependencies {
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.material3:material3'
     implementation 'androidx.compose.material:material-icons-extended'
+    // Real window-size-class detection (tablet/large-screen two-pane
+    // messaging) - Google's own calculateWindowSizeClass(Activity), not
+    // a fixed dp guess. Version comes from the compose-bom platform
+    // import above, same as every other material3 artifact in this file.
+    implementation 'androidx.compose.material3:material3-window-size-class'
     // Home feed's pull-to-refresh (Phase 4) - Material2's
     // rememberPullRefreshState/pullRefresh/PullRefreshIndicator, not
     // Material3's newer PullToRefreshBox, since this app is otherwise
