@@ -166,7 +166,7 @@ export default async function NewsArticlePage({
   };
 
   return (
-    <main className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <script
         type="application/ld+json"
         // "</" is escaped so a title/excerpt containing "</script>" can't
@@ -300,6 +300,6 @@ export default async function NewsArticlePage({
           </Link>
         </footer>
       </article>
-    </main>
+    </div>
   );
 }

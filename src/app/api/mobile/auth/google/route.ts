@@ -25,15 +25,25 @@ function secureCookieName(): string {
 // app - no browser redirect, so NextAuth's own GoogleProvider (built
 // for the authorization-code flow the website's /login page uses)
 // can't take it as-is. This endpoint instead verifies that ID token
-// itself against the same GOOGLE_CLIENT_ID the website's provider
-// already trusts (Credential Manager's GetGoogleIdOption is configured
-// with that same Web client ID as its serverClientId, which is what
-// ends up in the token's `aud` claim - not a separate Android client
-// ID), then hands account linking/creation to the exact same
+// itself, then hands account linking/creation to the exact same
 // findOrCreateOAuthUser NextAuth's own signIn callback uses, so a user
 // who already has a ZRP account (created via web's Google login, or
 // any other method) links to it instead of getting a duplicate.
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+//
+// Two separate accepted audiences, not one - confirmed the hard way
+// during real Google Cloud Console configuration: Android's Credential
+// Manager requires its `serverClientId` (which becomes the token's
+// `aud` claim) to be a Web-type OAuth client in the SAME Google Cloud
+// project as the app's own registered Android OAuth clients (the ones
+// matching its package name + signing certificate SHA-1). The
+// website's own GOOGLE_CLIENT_ID lives in a different Google Cloud
+// project entirely, so Android cannot reuse it - GOOGLE_MOBILE_CLIENT_ID
+// is a second, separate Web client created specifically alongside the
+// Android app's own OAuth clients. Both are accepted here since web
+// and Android are still the same real user base linking to the same
+// accounts via the same findOrCreateOAuthUser - only the token's
+// origin differs, not the account-linking logic.
+const googleClient = new OAuth2Client();
 
 export async function POST(req: NextRequest) {
   // ⚠️ SECURITY: matches verifyCredentials's own IP-based limit (the
@@ -55,9 +65,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "idToken is required" }, { status: 400 });
   }
 
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  if (!clientId) {
-    console.error("Mobile Google login error: GOOGLE_CLIENT_ID is not configured");
+  // GOOGLE_CLIENT_ID is web's own Google Cloud project; GOOGLE_MOBILE_CLIENT_ID
+  // is the separate Web client created in the same project as Android's
+  // registered OAuth clients (see this file's own comment above on why
+  // these are two different values, not one shared client). Either is
+  // an acceptable audience - whichever platform the sign-in came from.
+  const acceptedAudiences = [process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_MOBILE_CLIENT_ID].filter(
+    (id): id is string => !!id
+  );
+  if (acceptedAudiences.length === 0) {
+    console.error("Mobile Google login error: neither GOOGLE_CLIENT_ID nor GOOGLE_MOBILE_CLIENT_ID is configured");
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
 
@@ -65,7 +82,7 @@ export async function POST(req: NextRequest) {
   try {
     const ticket = await googleClient.verifyIdToken({
       idToken: body.idToken,
-      audience: clientId,
+      audience: acceptedAudiences,
     });
     payload = ticket.getPayload();
   } catch {

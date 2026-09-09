@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Search, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import VerifiedBadge from "./VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -23,11 +23,9 @@ interface SuggestedUser {
 
 export default function RightPanel() {
   const { data: session } = useSession();
-  const router = useRouter();
   const pathname = usePathname();
   const { t } = useLanguage();
 
-  const [query, setQuery] = useState("");
   const [trending, setTrending] = useState<TrendingTag[]>([]);
   const [suggestions, setSuggestions] = useState<SuggestedUser[]>([]);
   const [loadingTrending, setLoadingTrending] = useState(true);
@@ -50,14 +48,6 @@ export default function RightPanel() {
       .catch(() => {})
       .finally(() => setLoadingSuggestions(false));
   }, [session]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (query.trim()) {
-      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-    }
-  };
 
   const handleFollow = async (userId: string, username: string) => {
     setFollowLoading(userId);
@@ -87,12 +77,20 @@ export default function RightPanel() {
     }
   };
 
-  if (
-    !session ||
-    pathname?.startsWith("/admin") ||
-    pathname?.startsWith("/onboarding") ||
-    pathname?.startsWith("/shorts")
-  ) {
+  // Suppressed on focused surfaces as well as the immersive ones.
+  //
+  // Trending, Who-to-follow and a second search field are discovery
+  // aids for a browsing context. On Settings they turned the page into
+  // four columns where the fourth was irrelevant to the task; on
+  // Messages they competed with a conversation that wants the width.
+  // Both are surfaces someone is on to finish something, not to browse.
+  //
+  // Nothing is removed from the product: search lives in the header at
+  // lg and above and as its own /search destination in both the sidebar
+  // and the bottom nav, and Explore covers trending and suggestions.
+  const FOCUSED_SURFACES = ["/admin", "/onboarding", "/shorts", "/settings", "/messages"];
+
+  if (!session || FOCUSED_SURFACES.some((path) => pathname?.startsWith(path))) {
     return null;
   }
 
@@ -113,44 +111,18 @@ export default function RightPanel() {
         scrollbar-hide
       "
     >
-      {/* ─── Search ─────────────────────────────────────────────── */}
-      <form onSubmit={handleSearch} className="mb-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t("rightPanel.searchPlaceholder")}
-            className="
-              w-full
-              pl-10
-              pr-4
-              py-2.5
-              bg-gray-100
-              dark:bg-gray-800
-              border
-              border-transparent
-              focus:border-zrp-red
-              focus:bg-white
-              dark:focus:bg-gray-900
-              rounded-full
-              text-sm
-              text-gray-900
-              dark:text-white
-              focus:outline-none
-              focus:ring-2
-              focus:ring-zrp-red
-              transition
-            "
-          />
-        </div>
-      </form>
+      {/* The rail's own search field is gone: the header now carries
+          one at lg and above, so from 1280px up (where this rail
+          appears) the two sat on screen together showing the same
+          placeholder and doing the same thing. The header's is the one
+          that survives, because it is also present on Settings,
+          Messages, Shorts, Admin and Onboarding - the surfaces this
+          rail deliberately hides on. Nothing is lost: same /search
+          route, still a destination in the sidebar and bottom nav. */}
 
       {/* ─── Trending ───────────────────────────────────────────── */}
-      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl mb-4 overflow-hidden">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white px-4 pt-3 pb-2">
+      <div className="mb-5 pb-5 border-b border-gray-200 dark:border-gray-800">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white pb-2">
           {t("rightPanel.trending")}
         </h2>
 
@@ -159,16 +131,16 @@ export default function RightPanel() {
             <Loader2 className="w-5 h-5 animate-spin text-zrp-red" />
           </div>
         ) : trending.length === 0 ? (
-          <p className="text-sm text-gray-400 px-4 pb-4">
+          <p className="text-sm text-gray-400">
             {t("rightPanel.noTrending")}
           </p>
         ) : (
-          <div className="pb-2 max-h-[280px] overflow-y-auto overscroll-contain scrollbar-hide">
+          <div className="-mx-2 max-h-[280px] overflow-y-auto overscroll-contain scrollbar-hide">
             {trending.map((item) => (
               <Link
                 key={item.tag}
                 href={`/hashtag/${item.tag}`}
-                className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                className="block px-2 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
               >
                 <p className="text-sm font-semibold text-gray-900 dark:text-white">
                   #{item.tag}
@@ -186,8 +158,8 @@ export default function RightPanel() {
       </div>
 
       {/* ─── Who to follow ──────────────────────────────────────── */}
-      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl mb-4 overflow-hidden">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white px-4 pt-3 pb-2">
+      <div className="mb-5">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white pb-2">
           {t("rightPanel.whoToFollow")}
         </h2>
 
@@ -196,18 +168,18 @@ export default function RightPanel() {
             <Loader2 className="w-5 h-5 animate-spin text-zrp-red" />
           </div>
         ) : suggestions.length === 0 ? (
-          <p className="text-sm text-gray-400 px-4 pb-4">
+          <p className="text-sm text-gray-400">
             {t("rightPanel.noSuggestions")}
           </p>
         ) : (
-          <div className="pb-2 max-h-[340px] overflow-y-auto overscroll-contain scrollbar-hide">
+          <div className="-mx-2 max-h-[340px] overflow-y-auto overscroll-contain scrollbar-hide">
             {suggestions.map((user) => {
               const alreadyFollowing = followingIds.has(user.id);
 
               return (
                 <div
                   key={user.id}
-                  className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
                 >
                   <Link
                     href={`/profile/${user.username}`}
@@ -278,7 +250,7 @@ export default function RightPanel() {
       </div>
 
       {/* ─── Footer ─────────────────────────────────────────────── */}
-      <div className="px-4 py-2 text-xs text-gray-400 dark:text-gray-500">
+      <div className="text-xs text-gray-400 dark:text-gray-500">
         <p>{t("rightPanel.footerText")}</p>
       </div>
     </aside>

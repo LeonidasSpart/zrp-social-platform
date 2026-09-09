@@ -121,7 +121,7 @@ export default function MusicPlaylistDetailPage() {
         </div>
       </header>
 
-      <main className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
         <section className="flex flex-col sm:flex-row items-center sm:items-end gap-6">
           <div className="w-40 h-40 sm:w-52 sm:h-52 rounded-2xl overflow-hidden bg-gray-200 dark:bg-white/5 shrink-0 shadow-xl flex items-center justify-center">
             {playlist.tracks[0] ? (
@@ -291,7 +291,7 @@ export default function MusicPlaylistDetailPage() {
             ))}
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

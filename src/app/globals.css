@@ -160,3 +160,48 @@ img, video, iframe, svg {
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari, and other WebKit browsers */
 }
+
+/* ─── Keyboard focus ────────────────────────────────────────────────
+   Interactive elements had no consistent focus indicator: form controls
+   set focus:ring-2 focus:ring-zrp-red individually, but links, buttons
+   and custom controls fell back to whatever the browser drew - which
+   Tailwind's preflight removes. Keyboard-only users could tab through
+   the header, the nav and every auth screen with nothing visible.
+
+   Scoped to :focus-visible so pointer users never see it, and to the
+   element types that don't already carry their own ring (inputs,
+   selects and textareas are excluded precisely because they do). */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[role="menuitem"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 2px solid #FF2D2D;
+  outline-offset: 2px;
+}
+
+/* ─── Reduced motion ────────────────────────────────────────────────
+   Nothing in the app honoured prefers-reduced-motion, while every route
+   change runs a framer-motion transition (PageTransition) and skeletons
+   shimmer continuously. This neutralises CSS-driven animation and
+   transition for users who have asked the OS for less motion.
+
+   Durations are collapsed rather than set to 0 so that transitionend /
+   animationend listeners still fire and no state machine stalls waiting
+   for an event that never arrives. framer-motion is handled separately
+   in JS via useReducedMotion(). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html {
+    scroll-behavior: auto !important;
+  }
+}

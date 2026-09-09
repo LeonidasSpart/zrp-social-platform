@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function NewsNotFound() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md text-center">
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-600/10 text-2xl font-bold text-red-600">
           404
@@ -24,6 +24,6 @@ export default function NewsNotFound() {
           Back to ZRP News
         </Link>
       </div>
-    </main>
+    </div>
   );
 }

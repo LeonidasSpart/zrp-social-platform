@@ -271,6 +271,10 @@
     <string name="post_unmute_video_cd">Включить звук видео</string>
     <string name="story_like_cd">Нравится история</string>
     <string name="story_unlike_cd">Не нравится история</string>
+
+    <string name="story_mute_cd">Выключить звук истории</string>
+
+    <string name="story_unmute_cd">Включить звук истории</string>
     <string name="comment_repost_cd">Репост</string>
     <string name="comment_undo_repost_cd">Отменить репост</string>
     <string name="createpost_media_count_cd">%1$d/%2$d медиафайлов</string>
@@ -1124,6 +1128,8 @@
     <string name="shorts_upload_err_too_large_plan">Это видео слишком большое для вашего тарифа. Попробуйте файл меньшего размера или улучшите тариф.</string>
     <string name="shorts_upload_err_url_gen_failed">Не удалось начать загрузку: обычно это временная проблема с подключением. Пожалуйста, попробуйте снова.</string>
     <string name="shorts_upload_err_internal_server">Что-то пошло не так на нашей стороне во время загрузки. Пожалуйста, попробуйте снова через некоторое время.</string>
+    <string name="caption_view_more">Показать больше</string>
+    <string name="caption_view_less">Показать меньше</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">Сумма (USDC)</string>
     <string name="creator_available_balance">Доступный баланс: {amount} $</string>
@@ -1507,7 +1513,29 @@
     <string name="legal_terms">Условия использования</string>
     <string name="legal_privacy">Политика конфиденциальности</string>
     <string name="legal_guidelines">Правила сообщества</string>
+    <string name="legal_help">Центр помощи</string>
+    <string name="legal_contact">Контакты</string>
+    <string name="legal_load_error">Не удалось загрузить страницу. Проверьте подключение и повторите попытку.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Присоединился</string>
     <string name="profile_charity_note">%1$s%% прибыли направляется на благотворительность</string>
+    <string name="profile_impact">Вклад: %1$s $ на благотворительность</string>
+    <string name="profile_milestone_years">%1$d г. на ZRP</string>
+    <string name="profile_milestone_six_months">6 месяцев на ZRP</string>
+    <string name="profile_milestone_new_member">Новый участник</string>
+    <string name="profile_milestone_posts_500">500+ публикаций</string>
+    <string name="profile_milestone_posts_100">100+ публикаций</string>
+    <string name="profile_milestone_posts_10">10+ публикаций</string>
+    <string name="profile_milestone_followers_1k">1K+ подписчиков</string>
+    <string name="profile_milestone_followers_100">100+ подписчиков</string>
+
+    <!-- Home feed empty / error states -->
+    <string name="home_empty_following_title">Ваша лента Подписки ждёт вас.</string>
+    <string name="home_empty_following_subtitle">Найдите людей, музыку и темы, на которые можно подписаться.</string>
+    <string name="feed_no_posts">Пока нет постов.</string>
+    <string name="feed_check_back_later">Загляните позже, чтобы увидеть популярный контент.</string>
+    <string name="feed_retry">Повторить</string>
+    <string name="home_cta_discover_creators">Найти авторов</string>
+    <string name="home_cta_explore_music">Открыть Music</string>
+    <string name="home_cta_explore_topics">Изучить темы</string>
 </resources>

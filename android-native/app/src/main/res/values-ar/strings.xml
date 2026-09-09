@@ -271,6 +271,10 @@
     <string name="post_unmute_video_cd">إلغاء كتم صوت الفيديو</string>
     <string name="story_like_cd">إعجاب بالقصة</string>
     <string name="story_unlike_cd">إلغاء الإعجاب بالقصة</string>
+
+    <string name="story_mute_cd">كتم صوت القصة</string>
+
+    <string name="story_unmute_cd">تفعيل صوت القصة</string>
     <string name="comment_repost_cd">إعادة النشر</string>
     <string name="comment_undo_repost_cd">التراجع عن إعادة النشر</string>
     <string name="createpost_media_count_cd">%1$d/%2$d من الوسائط</string>
@@ -1124,6 +1128,8 @@
     <string name="shorts_upload_err_too_large_plan">هذا الفيديو كبير جدًا بالنسبة لخطتك. جرّب ملفًا أصغر أو قم بترقية خطتك.</string>
     <string name="shorts_upload_err_url_gen_failed">تعذّر بدء الرفع - عادةً ما تكون هذه مشكلة اتصال مؤقتة. يرجى المحاولة مرة أخرى.</string>
     <string name="shorts_upload_err_internal_server">حدث خطأ ما من جانبنا أثناء الرفع. يرجى المحاولة مرة أخرى بعد قليل.</string>
+    <string name="caption_view_more">عرض المزيد</string>
+    <string name="caption_view_less">عرض أقل</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">المبلغ (USDC)</string>
     <string name="creator_available_balance">الرصيد المتاح: {amount}$</string>
@@ -1507,7 +1513,29 @@
     <string name="legal_terms">شروط الخدمة</string>
     <string name="legal_privacy">سياسة الخصوصية</string>
     <string name="legal_guidelines">إرشادات المجتمع</string>
+    <string name="legal_help">مركز المساعدة</string>
+    <string name="legal_contact">تواصل معنا</string>
+    <string name="legal_load_error">تعذر تحميل هذه الصفحة. تحقق من اتصالك وحاول مرة أخرى.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">انضم منذ</string>
     <string name="profile_charity_note">يذهب %1$s%% من الأرباح إلى الأعمال الخيرية</string>
+    <string name="profile_impact">الأثر: تم التبرع بـ %1$s$ للأعمال الخيرية</string>
+    <string name="profile_milestone_years">%1$d سنة على ZRP</string>
+    <string name="profile_milestone_six_months">6 أشهر على ZRP</string>
+    <string name="profile_milestone_new_member">عضو جديد</string>
+    <string name="profile_milestone_posts_500">500+ منشور</string>
+    <string name="profile_milestone_posts_100">100+ منشور</string>
+    <string name="profile_milestone_posts_10">10+ منشورات</string>
+    <string name="profile_milestone_followers_1k">1K+ متابع</string>
+    <string name="profile_milestone_followers_100">100+ متابع</string>
+
+    <!-- Home feed empty / error states -->
+    <string name="home_empty_following_title">موجز المتابَعين ينتظرك.</string>
+    <string name="home_empty_following_subtitle">اكتشف أشخاصاً وموسيقى ومواضيع لمتابعتها.</string>
+    <string name="feed_no_posts">لا توجد منشورات بعد.</string>
+    <string name="feed_check_back_later">عد لاحقًا لرؤية المحتوى الرائج.</string>
+    <string name="feed_retry">إعادة المحاولة</string>
+    <string name="home_cta_discover_creators">اكتشف المبدعين</string>
+    <string name="home_cta_explore_music">استكشف Music</string>
+    <string name="home_cta_explore_topics">استكشف المواضيع</string>
 </resources>

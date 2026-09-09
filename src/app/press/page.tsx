@@ -27,7 +27,7 @@ export default function PressKitPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter">
-      <main>
+      <div>
 
         {/* Hero: same visual style as Careers */}
         <section className="relative bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack py-20 px-4">
@@ -528,7 +528,7 @@ export default function PressKitPage() {
 
         </section>
 
-      </main>
+      </div>
     </div>
   );
 }

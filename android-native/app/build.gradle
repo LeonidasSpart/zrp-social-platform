@@ -56,15 +56,18 @@ android {
         // later Internal Testing upload with "Le code de version 2 a
         // déjà été utilisé" (versionCode 2 already used - a prior AAB
         // with that code had already been uploaded), so that bumped to
-        // versionCode 3. Play Console has now confirmed versionCode 3
-        // itself was uploaded too, so this bumps to versionCode 4 -
-        // never reuse a versionCode Play has already seen for this
-        // applicationId. versionName moves to "1.0.1" alongside it (a
-        // real, if minor, set of feature changes shipped since 1.0.0 -
-        // Appeals, Team Management, API Keys, composer drafts - not
-        // just a re-signed rebuild of the same content).
-        versionCode 4
-        versionName "1.0.1"
+        // versionCode 3, then 4 once Play confirmed 3 was uploaded too,
+        // then 5 for the V4.0.1 real-device validation build, then 6
+        // alongside versionName "4.0.2" - never reuse a versionCode Play
+        // has already seen for this applicationId. This build bumps to
+        // versionCode 7 / versionName "4.0.3" - the native stabilization
+        // pass (follow-back state, Marketplace video, ZRP Play crash
+        // fixes, AI branding, generic link previews, notification deep-
+        // links, messaging keyboard/IME, Story author navigation + video
+        // mute, ZRP Music real background playback via MediaSessionService,
+        // Admin Dashboard crash fix) for real-user Play testing.
+        versionCode 7
+        versionName "4.0.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -77,10 +80,33 @@ android {
                 keyPassword keystoreProperties['keyPassword']
             }
         }
+        // Without this, Gradle falls back to its own auto-generated
+        // ~/.android/debug.keystore - created fresh (different SHA-1)
+        // on every machine and, critically, on every single GitHub
+        // Actions run, since CI runners are ephemeral. Google Sign-In
+        // (Credential Manager's GetGoogleIdOption) refuses to return a
+        // credential from any app whose signing certificate isn't
+        // registered against an OAuth client in the same Google Cloud
+        // project as GOOGLE_WEB_CLIENT_ID - confirmed by
+        // google-services.json's own "oauth_client": [] (nothing
+        // registered at all yet). A constantly-changing debug
+        // fingerprint would make that registration impossible to keep
+        // working, so this checked-in keystore (see its own comment)
+        // exists purely to give the debug build ONE stable, real
+        // fingerprint that can actually be registered once. Standard,
+        // safe practice: a debug keystore's password is always the
+        // well-known Android default below, never a real secret.
+        debug {
+            storeFile rootProject.file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
     }
 
     buildTypes {
         debug {
+            signingConfig signingConfigs.debug
             // No applicationIdSuffix here (there was one, ".native", for
             // side-by-side installs with the existing Capacitor app
             // during earlier phases): Firebase/FCM requires the built
@@ -205,6 +231,13 @@ dependencies {
     // view class, media3-exoplayer the actual player/decoder.
     implementation 'androidx.media3:media3-exoplayer:1.4.1'
     implementation 'androidx.media3:media3-ui:1.4.1'
+
+    // Real background playback for ZRP Music (lock-screen/notification
+    // controls, foreground-service-backed playback that survives the
+    // app being backgrounded) - MusicPlaybackService.kt. Same 1.4.1
+    // version as the two media3 artifacts above to avoid a mixed-version
+    // resolution.
+    implementation 'androidx.media3:media3-session:1.4.1'
 
     // Push notifications (Phase 13) - real device registration tokens
     // and real message receipt via Firebase Cloud Messaging. The BoM

@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
@@ -124,8 +125,11 @@ fun ChatContactPopup(
                     text = partner.name ?: partner.username,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
-                VerifiedBadge(badgeType = partner.badgeType, modifier = Modifier.padding(start = 4.dp))
+                VerifiedBadge(badgeType = partner.badgeType)
             }
             Text(
                 text = "@${partner.username}",

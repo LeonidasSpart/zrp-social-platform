@@ -139,7 +139,7 @@ fun NewsArticleScreen(slug: String, onBack: () -> Unit, onOpenNewsList: () -> Un
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold,
                                 )
-                                VerifiedBadge(badgeType = article.author.badgeType, modifier = Modifier.padding(start = 2.dp))
+                                VerifiedBadge(badgeType = article.author.badgeType)
                             }
                             Text(
                                 text = "@${article.author.username}",

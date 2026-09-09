@@ -164,22 +164,43 @@ class ProfileViewModel(
     }
 
     fun refreshPosts() {
-        val username = resolvedUsername ?: return
-        loadPosts(username, refresh = true)
+        viewModelScope.launch {
+            val username = resolveUsername() ?: return@launch
+            loadPosts(username, refresh = true)
+        }
     }
 
     // Pull-to-refresh refreshes whichever tab is on screen, not always
     // Posts - the same "refresh what you're looking at" behavior
-    // HomeScreen's own refresh button gives the feed.
+    // HomeScreen's own refresh button gives the feed. For the own-
+    // profile case this also re-resolves the username rather than
+    // trusting resolvedUsername's cached value - this ViewModel can
+    // outlive an in-app rename (it's kept alive across bottom-nav tab
+    // switches), so a pull-to-refresh is the recovery path for a
+    // profile screen that was already open before the rename.
     fun refreshSelectedTab() {
-        val username = resolvedUsername ?: return
-        when (_state.value.selectedTab) {
-            ProfileTab.POSTS -> loadPosts(username, refresh = true)
-            ProfileTab.REPLIES -> loadReplies(username, refresh = true)
-            ProfileTab.MEDIA -> loadMedia(username, refresh = true)
-            ProfileTab.LIKES -> loadLikes(username, refresh = true)
-            ProfileTab.REPOSTS -> loadReposts(username, refresh = true)
+        viewModelScope.launch {
+            val username = resolveUsername() ?: return@launch
+            when (_state.value.selectedTab) {
+                ProfileTab.POSTS -> loadPosts(username, refresh = true)
+                ProfileTab.REPLIES -> loadReplies(username, refresh = true)
+                ProfileTab.MEDIA -> loadMedia(username, refresh = true)
+                ProfileTab.LIKES -> loadLikes(username, refresh = true)
+                ProfileTab.REPOSTS -> loadReposts(username, refresh = true)
+            }
         }
+    }
+
+    // Own-profile resolution always re-checks the current username
+    // (see ProfileRepository.getOwnUsername's own override) rather than
+    // trusting a previously cached resolvedUsername forever - someone
+    // else's profile is always keyed by the fixed requestedUsername
+    // passed in at navigation time, which never changes.
+    private suspend fun resolveUsername(): String? {
+        if (requestedUsername != null) return requestedUsername
+        return repository.getOwnUsername()
+            .onSuccess { resolvedUsername = it }
+            .getOrNull() ?: resolvedUsername
     }
 
     fun loadMore() {

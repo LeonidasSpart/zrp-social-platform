@@ -53,7 +53,8 @@ class SettingsRepository {
     }
 
     suspend fun getOwnUsername(): Result<String> = runCatching {
-        ApiClient.authApi.getSession().user?.username ?: throw IllegalStateException("Not signed in")
+        ApiClient.ownUsernameOverride
+            ?: (ApiClient.authApi.getSession().user?.username ?: throw IllegalStateException("Not signed in"))
     }
 
     suspend fun getProfile(username: String): Result<UserProfile> = runCatching {

@@ -28,6 +28,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VolumeOff
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -94,12 +96,25 @@ private const val STORY_DURATION_MS = 5000L
  * worked via Coil).
  */
 @Composable
-fun StoryViewerScreen(userId: String, onClose: () -> Unit, onAddStory: () -> Unit = {}) {
+fun StoryViewerScreen(
+    userId: String,
+    onClose: () -> Unit,
+    onAddStory: () -> Unit = {},
+    onOpenProfile: (username: String) -> Unit = {},
+) {
     val viewModel: StoryViewerViewModel = viewModel(
         factory = remember(userId) { StoryViewerViewModelFactory(StoriesRepository(), userId) },
     )
     val state by viewModel.state.collectAsState()
     var currentIndex by remember(userId) { mutableIntStateOf(0) }
+    // Persists across this author's stories (not reset per-story) so a
+    // user's mute choice carries forward the same way it would on any
+    // other short-form video surface (see Shorts' own muted state) -
+    // the website's <video> here has no muted attribute at all (sound
+    // on by default, browser autoplay policy permitting), which native
+    // matches by defaulting to unmuted rather than inventing a
+    // different default.
+    var videoMuted by remember(userId) { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -164,6 +179,7 @@ fun StoryViewerScreen(userId: String, onClose: () -> Unit, onAddStory: () -> Uni
                                 StoryVideoPlayer(
                                     url = story.mediaUrl,
                                     paused = paused,
+                                    muted = videoMuted,
                                     onProgress = { position, duration ->
                                         if (duration > 0) progress = (position.toFloat() / duration).coerceIn(0f, 1f)
                                     },
@@ -300,20 +316,38 @@ fun StoryViewerScreen(userId: String, onClose: () -> Unit, onAddStory: () -> Uni
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         val author = state.author
-                        Avatar(
-                            url = author?.avatarUrl,
-                            name = author?.name ?: author?.username ?: "?",
-                            size = 32.dp,
-                        )
-                        Text(
-                            text = author?.name ?: author?.username ?: "",
-                            color = Color.White,
-                            fontWeight = FontWeight.SemiBold,
-                            style = MaterialTheme.typography.bodyMedium,
+                        // Tapping the author here must go to their real
+                        // profile the same way every other author-click
+                        // surface in the app does (goToProfile in
+                        // ZrpNavHost, keyed by username) - not just look
+                        // clickable. Guarded on author being loaded since
+                        // this row can render for one frame before
+                        // state.author arrives.
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .weight(1f)
-                                .padding(start = 8.dp),
-                        )
+                                .clickable(
+                                    interactionSource = noRipple,
+                                    indication = null,
+                                    enabled = author != null,
+                                ) { author?.let { onOpenProfile(it.username) } },
+                        ) {
+                            Avatar(
+                                url = author?.avatarUrl,
+                                name = author?.name ?: author?.username ?: "?",
+                                size = 32.dp,
+                            )
+                            Text(
+                                text = author?.name ?: author?.username ?: "",
+                                color = Color.White,
+                                fontWeight = FontWeight.SemiBold,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 8.dp),
+                            )
+                        }
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -328,6 +362,18 @@ fun StoryViewerScreen(userId: String, onClose: () -> Unit, onAddStory: () -> Uni
                                 style = MaterialTheme.typography.labelSmall,
                                 modifier = Modifier.padding(start = 4.dp),
                             )
+                        }
+
+                        if (isVideo) {
+                            IconButton(onClick = { videoMuted = !videoMuted }) {
+                                Icon(
+                                    if (videoMuted) Icons.Filled.VolumeOff else Icons.Filled.VolumeUp,
+                                    contentDescription = stringResource(
+                                        if (videoMuted) R.string.story_unmute_cd else R.string.story_mute_cd,
+                                    ),
+                                    tint = Color.White,
+                                )
+                            }
                         }
 
                         IconButton(onClick = onClose) {
@@ -408,6 +454,7 @@ private fun HeartBurst(trigger: Int, modifier: Modifier = Modifier) {
 private fun StoryVideoPlayer(
     url: String,
     paused: Boolean,
+    muted: Boolean,
     onProgress: (positionMs: Long, durationMs: Long) -> Unit,
     onEnded: () -> Unit,
     modifier: Modifier = Modifier,
@@ -419,6 +466,10 @@ private fun StoryVideoPlayer(
             prepare()
             playWhenReady = true
         }
+    }
+
+    LaunchedEffect(muted) {
+        exoPlayer.volume = if (muted) 0f else 1f
     }
 
     DisposableEffect(exoPlayer) {

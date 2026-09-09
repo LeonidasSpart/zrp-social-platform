@@ -1585,7 +1585,7 @@ export default function HelpPage() {
 
       {/* MAIN */}
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <div className="grid md:grid-cols-3 gap-4 mb-12">
           <QuickCard
             icon={BookOpen}
@@ -1797,7 +1797,7 @@ export default function HelpPage() {
             ZRP Social
           </Link>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

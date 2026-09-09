@@ -14,10 +14,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -53,11 +54,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import one.zrp.social.mobile.ui.theme.IconSize
+import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.ui.theme.TouchTarget
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
@@ -72,6 +77,7 @@ import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.VerifiedBadge
+import one.zrp.social.mobile.ui.theme.ZrpGreen
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatCount
 
@@ -145,12 +151,16 @@ fun ShortsScreen(
             }
         }
 
+        // No statusBarsPadding() here: this screen is hosted inside
+        // ZrpNavHost's Scaffold, whose NavHost already applies
+        // Modifier.padding(innerPadding), and with no topBar that
+        // innerPadding.top *is* the status-bar inset. Adding it again
+        // pushed this row down by two status bars.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter)
-                .statusBarsPadding()
-                .padding(horizontal = 4.dp, vertical = 4.dp),
+                .padding(horizontal = Spacing.xs, vertical = Spacing.xs),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
@@ -178,7 +188,7 @@ fun ShortsScreen(
                     )
                 }
             } else {
-                Box(modifier = Modifier.size(48.dp))
+                Box(modifier = Modifier.size(TouchTarget.min))
             }
         }
     }
@@ -251,90 +261,208 @@ private fun ShortItem(
 
         val shareLabel = stringResource(R.string.shorts_share)
         val shareTitle = stringResource(R.string.shorts_share_post_by, post.author.name ?: post.author.username)
-        Column(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 12.dp, bottom = 90.dp)
-                .navigationBarsPadding(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-        ) {
-            ShortActionButton(
-                icon = if (post.liked == true) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                tint = if (post.liked == true) ZrpRed else Color.White,
-                count = post._count.likes,
-                contentDescription = stringResource(R.string.shorts_like),
-                onClick = onLike,
-            )
-            ShortActionButton(
-                icon = Icons.Filled.ChatBubbleOutline,
-                tint = Color.White,
-                count = post._count.comments,
-                contentDescription = stringResource(R.string.shorts_comment),
-                onClick = onComment,
-            )
-            ShortActionButton(
-                icon = Icons.Filled.Repeat,
-                tint = if (post.reposted == true) Color(0xFF22C55E) else Color.White,
-                count = post._count.reposts,
-                contentDescription = stringResource(R.string.shorts_repost),
-                onClick = onRepost,
-            )
-            IconButton(
-                onClick = {
-                    val sendIntent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, "https://zrp.one/post/${post.id}")
-                    }
-                    context.startActivity(Intent.createChooser(sendIntent, shareTitle))
-                },
-            ) {
-                Icon(Icons.Filled.Share, contentDescription = shareLabel, tint = Color.White, modifier = Modifier.size(28.dp))
-            }
-        }
 
+        // ── Bottom overlay ────────────────────────────────────────────
+        //
+        // Caption and action rail are one bottom-anchored row so they
+        // share a baseline and can never overlap. Previously the rail
+        // was Alignment.CenterEnd with padding(bottom = 90.dp) while the
+        // caption was Alignment.BottomStart with padding(bottom = 24.dp)
+        // - two different anchors, so the rail floated near the middle
+        // of the video (a bottom padding on a centre-anchored child
+        // shifts it *upwards* from the centre, which is exactly the
+        // "controls sit too high" real-device report), and on a narrow
+        // screen a long caption ran underneath it.
+        //
+        // No navigationBarsPadding() either: the Scaffold in ZrpNavHost
+        // already insets this content above both the bottom bar and the
+        // system navigation bar via NavHost's padding(innerPadding), so
+        // adding it here counted that inset a second time on top of the
+        // hardcoded 90dp.
         Row(
             modifier = Modifier
-                .align(Alignment.BottomStart)
-                .fillMaxWidth(0.75f)
-                .padding(start = 16.dp, end = 12.dp, bottom = 24.dp)
-                .navigationBarsPadding()
-                .clickable(onClick = onAuthorClick),
-            verticalAlignment = Alignment.CenterVertically,
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(start = Spacing.lg, end = Spacing.sm, bottom = Spacing.lg),
+            verticalAlignment = Alignment.Bottom,
         ) {
-            Avatar(url = post.author.avatarUrl, name = post.author.username, size = 40.dp)
-            Column(modifier = Modifier.padding(start = 10.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+            // Author (avatar/name) and the caption are deliberately two
+            // separate clickable zones, not one shared Row - they used
+            // to be a single clickable(onAuthorClick) Row, so tapping the
+            // caption text itself (trying to read or expand it)
+            // navigated to the author's profile instead. Only the avatar/
+            // name row still does that; the caption's own tap target is
+            // ExpandableCaption's "View more"/"View less" toggle below.
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.clickable(onClick = onAuthorClick),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Avatar(url = post.author.avatarUrl, name = post.author.username, size = 40.dp)
                     Text(
                         text = "@${post.author.username}",
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .padding(start = Spacing.md)
+                            .weight(1f, fill = false),
                     )
-                    VerifiedBadge(badgeType = post.author.badgeType, modifier = Modifier.padding(start = 4.dp))
+                    VerifiedBadge(
+                        badgeType = post.author.badgeType,
+                    )
                 }
                 if (post.content.isNotBlank()) {
-                    Text(
+                    ExpandableCaption(
                         text = post.content,
-                        color = Color.White,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(top = 2.dp),
+                        // Lines up under the username, not the avatar -
+                        // same indent the caption already had as a child
+                        // of the avatar-width Column before this fix.
+                        modifier = Modifier.padding(start = 40.dp + Spacing.md, top = Spacing.xs),
                     )
                 }
+            }
+
+            Spacer(modifier = Modifier.width(Spacing.sm))
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
+                ShortActionButton(
+                    icon = if (post.liked == true) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    tint = if (post.liked == true) ZrpRed else Color.White,
+                    count = post._count.likes,
+                    contentDescription = stringResource(R.string.shorts_like),
+                    onClick = onLike,
+                )
+                ShortActionButton(
+                    icon = Icons.Filled.ChatBubbleOutline,
+                    tint = Color.White,
+                    count = post._count.comments,
+                    contentDescription = stringResource(R.string.shorts_comment),
+                    onClick = onComment,
+                )
+                ShortActionButton(
+                    icon = Icons.Filled.Repeat,
+                    tint = if (post.reposted == true) ZrpGreen else Color.White,
+                    count = post._count.reposts,
+                    contentDescription = stringResource(R.string.shorts_repost),
+                    onClick = onRepost,
+                )
+                // Share carries no count - the backend has no share
+                // metric, and inventing one would be fake data. It uses
+                // the same control so the rail's rhythm and glyph size
+                // stay identical rather than a smaller odd-one-out.
+                ShortActionButton(
+                    icon = Icons.Filled.Share,
+                    tint = Color.White,
+                    count = null,
+                    contentDescription = shareLabel,
+                    onClick = {
+                        val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, "https://zrp.one/post/${post.id}")
+                        }
+                        context.startActivity(Intent.createChooser(sendIntent, shareTitle))
+                    },
+                )
             }
         }
     }
 }
 
+/**
+ * A Shorts caption: short text renders in full; text that overflows a
+ * bounded preview gets a "View more" toggle that expands it in place -
+ * no navigation, no dialog, nothing that leaves this screen. Overflow
+ * is real Compose measurement (TextLayoutResult.hasVisualOverflow), not
+ * a guessed character count, so it stays correct across font scaling,
+ * translated text (which can run longer/shorter than English), RTL
+ * layouts, and captions containing URLs/hashtags/mentions - all of
+ * which are just plain text runs here, same as the website's own
+ * unlinkified caption rendering elsewhere in this app.
+ */
 @Composable
-private fun ShortActionButton(icon: ImageVector, tint: Color, count: Int, contentDescription: String, onClick: () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        IconButton(onClick = onClick) {
-            Icon(icon, contentDescription = contentDescription, tint = tint, modifier = Modifier.size(32.dp))
+private fun ExpandableCaption(text: String, modifier: Modifier = Modifier) {
+    var expanded by remember(text) { mutableStateOf(false) }
+    var isOverflowing by remember(text) { mutableStateOf(false) }
+    val collapsedMaxLines = 2
+
+    Column(modifier = modifier) {
+        Text(
+            text = text,
+            color = Color.White,
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = if (expanded) Int.MAX_VALUE else collapsedMaxLines,
+            overflow = TextOverflow.Ellipsis,
+            onTextLayout = { result ->
+                if (!expanded) {
+                    isOverflowing = result.hasVisualOverflow
+                }
+            },
+        )
+        if (isOverflowing || expanded) {
+            Text(
+                text = stringResource(
+                    if (expanded) R.string.caption_view_less else R.string.caption_view_more,
+                ),
+                color = Color.White,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .clickable { expanded = !expanded },
+            )
         }
-        Text(text = formatCount(count), color = Color.White, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+    }
+}
+
+/**
+ * One rail control: glyph plus its real count.
+ *
+ * The icon and its label are a single clickable target rather than an
+ * IconButton with a caption floating underneath it - on a short-video
+ * rail the number is part of the affordance, and tapping it should do
+ * what tapping the icon does. Sized to at least the 48dp accessible
+ * minimum in both directions.
+ */
+@Composable
+private fun ShortActionButton(
+    icon: ImageVector,
+    tint: Color,
+    count: Int?,
+    contentDescription: String,
+    onClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .sizeIn(minWidth = TouchTarget.min, minHeight = TouchTarget.min)
+            .clickable(
+                onClick = onClick,
+                role = Role.Button,
+                onClickLabel = contentDescription,
+            )
+            .padding(vertical = Spacing.xs),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Icon(
+            icon,
+            contentDescription = contentDescription,
+            tint = tint,
+            modifier = Modifier.size(IconSize.lg),
+        )
+        if (count != null) {
+            Text(
+                text = formatCount(count),
+                color = Color.White,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = Spacing.xs),
+            )
+        }
     }
 }
 

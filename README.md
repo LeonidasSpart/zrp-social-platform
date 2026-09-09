@@ -29,6 +29,7 @@ visible but **not open source** — see [Licence and intellectual property](#lic
 - [ZRP Music](#zrp-music)
 - [Creator Studio](#creator-studio)
 - [ZRP AI](#zrp-ai)
+- [ZRP News Network](#zrp-news-network)
 - [ZRP Help](#zrp-help)
 - [Opportunities](#opportunities)
 - [Marketplace](#marketplace)
@@ -194,6 +195,40 @@ The assistant is served through an OpenAI-compatible client pointed at the
 DeepSeek API, configured at runtime. Usage is metered per account: daily
 message counts and per-response token limits vary by plan, and are enforced
 server-side.
+
+---
+
+## ZRP News Network
+
+An automated editorial system that publishes concise original news
+summaries through openly-labelled ZRP news desks — ZRP News World, ZRP
+News Switzerland, ZRP Travel and so on.
+
+Each desk is a normal ZRP account flagged as an editorial feed, so news
+posts can be followed, liked, commented on, reposted, reported and
+moderated exactly like any other post. None of them impersonates a
+person: they are named as ZRP desks, they say in their own bios that they
+are automated, they carry a distinct editorial badge, and they have no
+password, so no sign-in flow can authenticate as one.
+
+The pipeline polls publishers' own syndication feeds (obeying robots.txt,
+using conditional GETs, backing off on failure), collapses the same event
+reported by several outlets into one story with several attributions,
+writes an original summary — never a copy of an article — and publishes
+it with the source named and linked. Travel news is produced natively in
+English, French, German and Italian.
+
+Nothing is ever invented: every generated summary is validated against
+the source material for unsupported figures, fabricated quotations and
+model-written links, and a summary that fails is discarded rather than
+published. A cycle with no qualifying news publishes nothing.
+
+Administrators control the system from `/admin/news-network`: pause and
+resume, enable feeds and sources one at a time, inspect the source
+material behind every summary, publish corrections, and take posts down.
+
+Full documentation, including pilot activation steps, is in
+[`docs/zrp-news-network.md`](docs/zrp-news-network.md).
 
 ---
 

@@ -985,7 +985,14 @@ export default function HomePage() {
    */
 
   return (
-    <main className="w-full">
+    <div className="w-full">
+      {/* The feed deliberately shows no visible page title - a social
+          home does not need one - but the document still needs a
+          heading, and this page had none at all, so a screen reader had
+          no way to identify it. Reuses the existing nav.home string,
+          already translated into all 11 languages. */}
+      <h1 className="sr-only">{t("nav.home")}</h1>
+
       <div className="relative max-w-2xl mx-auto px-3 sm:px-4 pt-0 pb-3 sm:pb-5">
 
         {/* ==========================================================
@@ -1016,7 +1023,13 @@ export default function HomePage() {
             STORIES
         ========================================================== */}
 
-        <section className="-mt-2 mb-1 pr-8">
+        {/* pr-8 kept the story tiles clear of the floating refresh
+            button, but it also shortened the rule underneath by 32px -
+            invisible while everything was boxed, obvious now that the
+            hairline is what separates the sections. The inset moves
+            onto the scrolling row inside StoriesBar so the rule runs
+            the full column width, flush with the composer's. */}
+        <section className="-mt-2 mb-1">
           <StoriesBar />
         </section>
 
@@ -1024,7 +1037,11 @@ export default function HomePage() {
             POST COMPOSER
         ========================================================== */}
 
-        <section className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-zrp-deepBlack overflow-hidden">
+        {/* The composer draws its own hairline now. This wrapper used
+            to add a second one - a rounded, filled, bordered card whose
+            border sat one pixel outside the composer's own, so the
+            composer was boxed twice. */}
+        <section>
           <PostComposer
             onPostCreated={
               handlePostCreated
@@ -1483,6 +1500,6 @@ export default function HomePage() {
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 }

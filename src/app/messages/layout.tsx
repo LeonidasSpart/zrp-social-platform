@@ -85,9 +85,14 @@ export default function MessagesLayout({ children }: { children: React.ReactNode
     <div className="flex w-full">
       {/* ─── Persistent conversation list (desktop only) ──────────── */}
       <aside className="hidden lg:flex flex-col w-80 flex-shrink-0 h-screen sticky top-0 border-r border-gray-200 dark:border-gray-800 overflow-y-auto">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white px-4 pt-4 pb-2">
+        {/* h2, not h1: this aside is the persistent conversation list
+            beside the page, and messages/page.tsx already provides the
+            document's h1. At lg and above both were rendered and both
+            were visible, so the word "Messages" appeared twice as a
+            top-level heading in adjacent columns. */}
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white px-4 pt-4 pb-2">
           {t("messages.title")}
-        </h1>
+        </h2>
 
         {loading ? (
           <div className="flex justify-center py-8">

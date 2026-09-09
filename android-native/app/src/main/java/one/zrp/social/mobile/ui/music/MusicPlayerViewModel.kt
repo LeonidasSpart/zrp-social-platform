@@ -1,18 +1,33 @@
 package one.zrp.social.mobile.ui.music
 
-import android.media.AudioAttributes
-import android.media.MediaPlayer
+import android.content.ComponentName
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import one.zrp.social.mobile.data.MusicRepository
 import one.zrp.social.mobile.network.MusicTrack
+import one.zrp.social.mobile.service.MusicPlaybackService
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 data class MusicPlayerUiState(
     val currentTrack: MusicTrack? = null,
@@ -32,14 +47,60 @@ data class MusicPlayerUiState(
  * reads from rather than each page owning its own player. Music screens that
  * only browse (Artist/Album/Playlist detail, Discover, Liked, History)
  * take this as a parameter and call into it rather than each holding
- * their own MediaPlayer, matching how the website's own pages all share
+ * their own player, matching how the website's own pages all share
  * one player/queue instance.
+ *
+ * The actual playback engine is a MediaController bound to
+ * MusicPlaybackService's ExoPlayer, not a player this ViewModel owns
+ * directly - that's what makes playback survive the app being
+ * backgrounded, and gets ZRP Music a real lock-screen/notification
+ * media session for free (see MusicPlaybackService's own KDoc). Every
+ * public method below kept its exact prior signature so none of the
+ * ~15 screens that already call into this ViewModel needed to change.
  */
-class MusicPlayerViewModel(private val repository: MusicRepository) : ViewModel() {
+class MusicPlayerViewModel(
+    private val repository: MusicRepository,
+    private val context: Context,
+) : ViewModel() {
     private val _state = MutableStateFlow(MusicPlayerUiState())
     val state: StateFlow<MusicPlayerUiState> = _state.asStateFlow()
 
-    private var mediaPlayer: MediaPlayer? = null
+    private val playerListener = object : Player.Listener {
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            _state.update { it.copy(isPlaying = isPlaying) }
+        }
+
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            when (playbackState) {
+                Player.STATE_BUFFERING -> _state.update { it.copy(isBuffering = true) }
+                Player.STATE_READY -> _state.update { it.copy(isBuffering = false) }
+                Player.STATE_ENDED -> {
+                    _state.value.currentTrack?.let { reportProgress(it, completed = true) }
+                    advanceToNext()
+                }
+            }
+        }
+
+        override fun onPlayerError(error: PlaybackException) {
+            _state.update { it.copy(isPlaying = false, isBuffering = false, error = "Couldn't play this track.") }
+        }
+    }
+
+    // Built once and kept around specifically so onCleared() always has
+    // a valid future to hand to MediaController.releaseFuture() - the
+    // documented way to release a MediaController correctly regardless
+    // of whether the connection ever actually finished (e.g. the
+    // ViewModel is cleared while still connecting).
+    private val controllerFuture: ListenableFuture<MediaController> by lazy {
+        val token = SessionToken(context, ComponentName(context, MusicPlaybackService::class.java))
+        MediaController.Builder(context, token).buildAsync()
+    }
+
+    private val controllerDeferred: Deferred<MediaController> = viewModelScope.async {
+        val controller = controllerFuture.await()
+        controller.addListener(playerListener)
+        controller
+    }
 
     init {
         observePlaybackPosition()
@@ -47,14 +108,14 @@ class MusicPlayerViewModel(private val repository: MusicRepository) : ViewModel(
 
     private fun observePlaybackPosition() {
         viewModelScope.launch {
+            val controller = controllerDeferred.await()
             while (true) {
                 delay(500)
-                val player = mediaPlayer
-                if (player != null && _state.value.isPlaying) {
+                if (_state.value.isPlaying) {
                     _state.update {
                         it.copy(
-                            positionMs = player.currentPosition.toLong(),
-                            durationMs = player.duration.toLong().coerceAtLeast(0),
+                            positionMs = controller.currentPosition,
+                            durationMs = controller.duration.coerceAtLeast(0),
                         )
                     }
                 }
@@ -124,13 +185,9 @@ class MusicPlayerViewModel(private val repository: MusicRepository) : ViewModel(
     }
 
     fun togglePlayPause() {
-        val player = mediaPlayer ?: return
-        if (player.isPlaying) {
-            player.pause()
-            _state.update { it.copy(isPlaying = false) }
-        } else {
-            player.start()
-            _state.update { it.copy(isPlaying = true) }
+        viewModelScope.launch {
+            val controller = controllerDeferred.await()
+            if (controller.isPlaying) controller.pause() else controller.play()
         }
     }
 
@@ -166,9 +223,6 @@ class MusicPlayerViewModel(private val repository: MusicRepository) : ViewModel(
     }
 
     private fun play(track: MusicTrack) {
-        mediaPlayer?.release()
-        mediaPlayer = null
-
         _state.update {
             it.copy(
                 currentTrack = track,
@@ -180,32 +234,26 @@ class MusicPlayerViewModel(private val repository: MusicRepository) : ViewModel(
             )
         }
 
-        try {
-            val player = MediaPlayer()
-            mediaPlayer = player
-            player.setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
+        viewModelScope.launch {
+            val controller = controllerDeferred.await()
+            controller.setMediaItem(buildMediaItem(track))
+            controller.prepare()
+            controller.play()
+        }
+    }
+
+    private fun buildMediaItem(track: MusicTrack): MediaItem {
+        return MediaItem.Builder()
+            .setUri(track.audioUrl)
+            .setMediaId(track.id)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(track.title)
+                    .setArtist(track.artist.displayName)
+                    .setArtworkUri(track.coverUrl?.let(Uri::parse))
                     .build(),
             )
-            player.setDataSource(track.audioUrl)
-            player.setOnPreparedListener {
-                it.start()
-                _state.update { s -> s.copy(isPlaying = true, isBuffering = false) }
-            }
-            player.setOnCompletionListener {
-                reportProgress(track, completed = true)
-                advanceToNext()
-            }
-            player.setOnErrorListener { _, _, _ ->
-                _state.update { s -> s.copy(isPlaying = false, isBuffering = false, error = "Couldn't play this track.") }
-                true
-            }
-            player.prepareAsync()
-        } catch (e: Exception) {
-            _state.update { it.copy(isBuffering = false, error = "Couldn't play this track.") }
-        }
+            .build()
     }
 
     private fun advanceToNext() {
@@ -218,12 +266,17 @@ class MusicPlayerViewModel(private val repository: MusicRepository) : ViewModel(
         }
     }
 
+    // secondsPlayed reads the last polled positionMs (observePlaybackPosition
+    // updates it every 500ms) rather than querying the controller fresh -
+    // at most half a second of imprecision in a "seconds played" analytics
+    // figure, not worth a second suspend hop off this otherwise-synchronous
+    // call site (switchTo/advanceToNext both call this before starting the
+    // next track).
     private fun reportProgress(track: MusicTrack, completed: Boolean) {
-        val player = mediaPlayer
         val secondsPlayed = if (completed) {
-            track.durationSec ?: ((player?.duration ?: 0) / 1000)
+            track.durationSec ?: (_state.value.durationMs / 1000L).toInt()
         } else {
-            (player?.currentPosition ?: 0) / 1000
+            (_state.value.positionMs / 1000L).toInt()
         }
         viewModelScope.launch {
             repository.recordPlay(track.id, secondsPlayed, completed)
@@ -232,14 +285,30 @@ class MusicPlayerViewModel(private val repository: MusicRepository) : ViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        mediaPlayer?.release()
-        mediaPlayer = null
+        MediaController.releaseFuture(controllerFuture)
     }
 }
 
-class MusicPlayerViewModelFactory(private val repository: MusicRepository) : ViewModelProvider.Factory {
+private suspend fun <T> ListenableFuture<T>.await(): T = suspendCancellableCoroutine { cont ->
+    addListener(
+        {
+            try {
+                cont.resume(get())
+            } catch (e: Exception) {
+                cont.resumeWithException(e)
+            }
+        },
+        MoreExecutors.directExecutor(),
+    )
+    cont.invokeOnCancellation { cancel(false) }
+}
+
+class MusicPlayerViewModelFactory(
+    private val repository: MusicRepository,
+    private val context: Context,
+) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return MusicPlayerViewModel(repository) as T
+        return MusicPlayerViewModel(repository, context.applicationContext) as T
     }
 }

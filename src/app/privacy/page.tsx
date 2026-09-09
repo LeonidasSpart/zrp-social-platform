@@ -34,7 +34,7 @@ export default function PrivacyPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-zrp-deepBlack font-inter">
-      <main>
+      <div>
 
         {/* ─────────────────────────────────────────────────────────────
             HERO
@@ -910,7 +910,7 @@ export default function PrivacyPage() {
 
         </section>
 
-      </main>
+      </div>
     </div>
   );
 }

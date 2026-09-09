@@ -333,7 +333,7 @@ export default function TrustPassportPage(
    */
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-zrp-deepBlack">
+    <div className="min-h-screen bg-gray-50 dark:bg-zrp-deepBlack">
       <div className="max-w-2xl mx-auto min-h-screen bg-white dark:bg-zrp-deepBlack">
         {/* =========================================================
             HEADER
@@ -793,6 +793,6 @@ export default function TrustPassportPage(
           </Link>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

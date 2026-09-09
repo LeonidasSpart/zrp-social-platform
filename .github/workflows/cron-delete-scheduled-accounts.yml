@@ -1,0 +1,46 @@
+name: Cron - delete scheduled accounts
+
+# Calls GET /api/cron/delete-scheduled-accounts on a schedule so an
+# account whose 30-day deletion grace period (User.deletionScheduledFor,
+# set by POST /api/user/delete) has actually passed gets permanently
+# deleted. That route needs *some* external scheduler to call it.
+#
+# This repository has no in-repo declaration of how the app's other two
+# CRON_SECRET-gated routes (/api/cron/publish-scheduled-posts,
+# /api/cron/play-daily-rotation) are actually invoked in production -
+# no railway.json/railway.toml, no scheduled GitHub Actions workflow, no
+# cron-related npm script existed before this file. They are presumably
+# triggered by a Cron Job configured directly in the Railway project's
+# own dashboard, which is both invisible and off-limits to change from
+# here. Rather than guess at or touch that external configuration, this
+# workflow gives the new route its own independent, in-repo,
+# code-reviewable schedule - see ios-native/PARITY.md's F5 for the full
+# context. It does not modify or depend on however the other two routes
+# are scheduled.
+#
+# Requires a CRON_SECRET repository secret matching the CRON_SECRET
+# environment variable already configured on the deployed app (the same
+# secret those other two routes already require) - set once under this
+# repository's Settings > Secrets and variables > Actions. Until that
+# secret exists, every run of this workflow fails with a 401, loudly,
+# rather than silently doing nothing.
+on:
+  schedule:
+    # Once a day is more than enough for a 30-day grace period.
+    - cron: "17 3 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the delete-scheduled-accounts cron route
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://zrp.one/api/cron/delete-scheduled-accounts"

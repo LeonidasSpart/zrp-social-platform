@@ -38,6 +38,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -184,7 +185,7 @@ private fun FollowListRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                VerifiedBadge(badgeType = badgeType, size = 16.dp, modifier = Modifier.padding(start = Spacing.xs))
+                VerifiedBadge(badgeType = badgeType, size = BadgeSize.default)
             }
             Text(
                 text = "@$username",

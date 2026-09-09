@@ -229,6 +229,100 @@ enum HelpOfferStatus {
   DECLINED
 }
 
+// ─── ZRP NEWS NETWORK ────────────────────────────────────────────────
+// Enums for the automated editorial system. Deliberately separate from
+// NewsArticleCategory: that enum is the vocabulary of the *human*
+// journalist workflow and is hard-wired into the /news page filters and
+// their translation keys. Widening it to the 25 automation topics would
+// churn that UI (and eleven translation files) for no benefit, so the
+// automation gets its own topic vocabulary and leaves the journalist
+// one untouched.
+
+enum NewsRegion {
+  GLOBAL
+  NORTH_AMERICA
+  SOUTH_AMERICA
+  EUROPE
+  AFRICA
+  ASIA
+  MIDDLE_EAST
+  OCEANIA
+}
+
+enum NewsTopic {
+  WORLD
+  POLITICS
+  BUSINESS
+  ECONOMY
+  TECHNOLOGY
+  AI
+  SCIENCE
+  HEALTH
+  CRYPTO
+  FINANCE
+  SPORTS
+  ENTERTAINMENT
+  CULTURE
+  ENVIRONMENT
+  CLIMATE
+  SECURITY
+  EDUCATION
+  TRAVEL
+  TOURISM
+  TRANSPORTATION
+  AVIATION
+  AUTOMOTIVE
+  LIFESTYLE
+  LOCAL
+  BREAKING
+}
+
+enum NewsSourceStatus {
+  HEALTHY
+  WARNING
+  FAILED
+  DISABLED
+}
+
+enum NewsStoryStatus {
+  NEW
+  READY
+  PUBLISHED
+  REJECTED
+  SUPERSEDED
+}
+
+// How well corroborated a story is. Never inferred optimistically: a
+// story only reaches CONFIRMED when independent sources of sufficient
+// trust agree, and the label is rendered verbatim in the published post
+// so a developing story is never presented as settled fact.
+enum NewsConfidence {
+  CONFIRMED
+  DEVELOPING
+  UNCONFIRMED
+}
+
+enum NewsRenditionStatus {
+  PENDING
+  READY
+  FAILED
+  REJECTED
+}
+
+enum NewsPublicationStatus {
+  SCHEDULED
+  PUBLISHED
+  FAILED
+  REMOVED
+}
+
+enum NewsJobStatus {
+  RUNNING
+  SUCCEEDED
+  FAILED
+  SKIPPED
+}
+
 model User {
   id       String  @id @default(cuid())
   email    String  @unique
@@ -253,6 +347,13 @@ model User {
   isPrivate Boolean @default(false)
   isAdmin   Boolean @default(false)
   badgeType String?
+
+  // ⚠️ Marks an account as an official ZRP editorial/automated feed
+  // (ZRP News World, ZRP Travel, ...) rather than a person. Set only by
+  // the admin-gated provisioning endpoint; never by signup. The UI uses
+  // it to label these accounts as automated editorial feeds so they can
+  // never be mistaken for a human user - see src/lib/news/feeds.ts.
+  isEditorialFeed Boolean @default(false)
 
   category     String?
   showCategory Boolean @default(true)
@@ -392,15 +493,15 @@ model User {
   newsReviewsGiven NewsArticle[] @relation("NewsReviewedBy")
 
   // ─── ZRP OPPORTUNITY ─────────────────────────────────────────
-  opportunityListings     OpportunityListing[]     @relation("OpportunityPoster")
-  opportunityApplications OpportunityApplication[] @relation("OpportunityApplicant")
+  opportunityListings     OpportunityListing[]      @relation("OpportunityPoster")
+  opportunityApplications OpportunityApplication[]  @relation("OpportunityApplicant")
   opportunitySaved        OpportunitySavedListing[] @relation("OpportunitySaver")
 
   // ─── ZRP HELP ────────────────────────────────────────────────
-  helpCampaigns          HelpCampaign[]           @relation("HelpOrganizer")
-  helpContributions      HelpContribution[]       @relation("HelpContributor")
-  helpOffers             HelpOffer[]              @relation("HelpOfferer")
-  helpWithdrawalRequests HelpWithdrawalRequest[]  @relation("HelpWithdrawalOrganizer")
+  helpCampaigns          HelpCampaign[]          @relation("HelpOrganizer")
+  helpContributions      HelpContribution[]      @relation("HelpContributor")
+  helpOffers             HelpOffer[]             @relation("HelpOfferer")
+  helpWithdrawalRequests HelpWithdrawalRequest[] @relation("HelpWithdrawalOrganizer")
 
   // ─── ZRP MUSIC ─────────────────────────────────────────────
   musicArtist    MusicArtist?
@@ -408,6 +509,9 @@ model User {
   musicLikes     MusicLike[]
   musicFollows   MusicFollow[]
   musicHistory   MusicHistory[]
+
+  // ─── ZRP NEWS NETWORK ──────────────────────────────────────
+  newsFeed NewsFeed? @relation("EditorialFeedUser")
 }
 
 model JournalistProfile {
@@ -488,6 +592,10 @@ model Post {
 
   premiumPost PremiumPost?
   adCampaign  AdCampaign?
+
+  // Set when this post was published by the ZRP News Network
+  // automation, linking it back to its story, sources and rendition.
+  newsPublication NewsPublication?
 
   @@index([createdAt])
   @@index([authorId])
@@ -2146,4 +2254,356 @@ model MusicHistory {
 
   @@index([userId, createdAt])
   @@index([trackId])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// ZRP NEWS NETWORK
+// ════════════════════════════════════════════════════════════════════
+//
+// An automated *editorial* system, not a bot farm. Every identity it
+// publishes through is an openly-labelled ZRP editorial feed backed by
+// a normal User row, so following, liking, commenting, reporting,
+// blocking and moderation all work exactly as they do for any other
+// account - there is no parallel social system here, and no fabricated
+// human personas.
+//
+// Content flows: NewsSource -> NewsStorySource -> NewsStory (a
+// deduplicated real-world event) -> NewsRendition (one per language)
+// -> NewsPublication -> Post.
+
+// An official ZRP editorial identity (e.g. "ZRP News World"). One-to-one
+// with a User so it reuses the whole existing profile/social stack
+// rather than introducing a second account architecture.
+model NewsFeed {
+  id  String @id @default(cuid())
+  key String @unique // stable slug, e.g. "zrp-news-switzerland"
+
+  displayName String
+  description String? @db.Text
+
+  userId String @unique
+  user   User   @relation("EditorialFeedUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  region   NewsRegion @default(GLOBAL)
+  country  String? // ISO-3166-1 alpha-2, null for regional/global feeds
+  language String     @default("en")
+  timezone String     @default("UTC") // IANA zone, for local-hour scheduling
+
+  topics NewsTopic[] @default([])
+
+  // Feeds are provisioned disabled. Turning one on is an explicit,
+  // audited admin action - provisioning 100 identities must never mean
+  // 100 feeds start publishing.
+  enabled Boolean @default(false)
+  isPilot Boolean @default(false)
+
+  // Anti-spam envelope, enforced by the scheduler on every cycle.
+  minMinutesBetweenPosts Int @default(180)
+  maxPostsPerDay         Int @default(6)
+
+  lastPublishedAt DateTime?
+
+  publications NewsPublication[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([enabled])
+  @@index([region])
+  @@index([country])
+  @@index([language])
+}
+
+// A publicly available feed (RSS/Atom) or official announcement channel
+// we are permitted to summarise and link to. Full article text is never
+// stored or republished - see src/lib/news/ingest.ts.
+model NewsSource {
+  id  String @id @default(cuid())
+  key String @unique
+
+  name        String
+  publisher   String
+  feedUrl     String  @unique
+  homepageUrl String?
+
+  region   NewsRegion  @default(GLOBAL)
+  country  String?
+  language String      @default("en")
+  topics   NewsTopic[] @default([])
+
+  // 1 = official authority (government, airport, airline, regulator)
+  // 2 = established news organisation
+  // 3 = everything else. Cross-corroboration requirements are stricter
+  // the higher this number is.
+  trustTier Int     @default(2)
+  official  Boolean @default(false)
+
+  // Whether this source's preview images may be referenced. Defaults
+  // false: an image is only used when the source's own terms clearly
+  // allow it, which is a per-source editorial decision, not a guess.
+  allowImages Boolean @default(false)
+
+  // Attribution string that must accompany anything derived from this
+  // source, when the source requires wording of its own.
+  attribution String?
+
+  enabled Boolean          @default(true)
+  status  NewsSourceStatus @default(HEALTHY)
+
+  fetchIntervalMinutes Int @default(60)
+
+  lastFetchedAt DateTime?
+  lastSuccessAt DateTime?
+  lastErrorAt   DateTime?
+  lastError     String?   @db.Text
+
+  consecutiveFailures Int       @default(0)
+  backoffUntil        DateTime?
+
+  // Conditional-GET state, so a polite re-fetch costs the publisher a
+  // 304 rather than a full transfer.
+  etag         String?
+  lastModified String?
+
+  itemsIngested Int @default(0)
+
+  references NewsStorySource[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([enabled, backoffUntil])
+  @@index([status])
+  @@index([region])
+  @@index([country])
+}
+
+// One real-world event, after deduplication. Several sources reporting
+// the same thing collapse into a single story with several references,
+// which is what stops the feed filling with fifteen near-identical
+// posts about one airport closure.
+model NewsStory {
+  id String @id @default(cuid())
+
+  // Stable hash of the normalised headline + entity tokens. The unique
+  // constraint is the last line of defence against a double-ingest race
+  // creating two stories for one event.
+  fingerprint     String @unique
+  normalizedTitle String @db.Text
+
+  title String @db.Text
+
+  // The verbatim source material (headline + source-provided summary
+  // snippets) handed to the summariser. Retained so an admin can always
+  // compare what was published against what the sources actually said,
+  // and so groundedness checks are reproducible.
+  sourceMaterial String @db.Text
+
+  topic    NewsTopic  @default(WORLD)
+  region   NewsRegion @default(GLOBAL)
+  country  String?
+  language String     @default("en")
+
+  confidence NewsConfidence @default(DEVELOPING)
+  sensitive  Boolean        @default(false)
+  isBreaking Boolean        @default(false)
+  isTravel   Boolean        @default(false)
+
+  importance  Float @default(0)
+  sourceCount Int   @default(1)
+
+  imageUrl    String? @db.Text
+  imageCredit String?
+
+  status          NewsStoryStatus @default(NEW)
+  rejectionReason String?         @db.Text
+
+  firstSeenAt DateTime  @default(now())
+  lastSeenAt  DateTime  @default(now())
+  publishedAt DateTime?
+
+  // Corrections are additive and visible: the note is appended to every
+  // publication of the story rather than the original being silently
+  // rewritten out of existence.
+  correctionNote String?   @db.Text
+  correctedAt    DateTime?
+
+  references   NewsStorySource[]
+  renditions   NewsRendition[]
+  publications NewsPublication[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([topic])
+  @@index([region])
+  @@index([country])
+  @@index([isTravel])
+  @@index([status, importance])
+  @@index([firstSeenAt])
+  @@index([normalizedTitle])
+}
+
+// A single source's report of a story: the attribution record. `url` is
+// unique, which also makes re-ingesting the same article idempotent.
+model NewsStorySource {
+  id String @id @default(cuid())
+
+  storyId String
+  story   NewsStory @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  sourceId String
+  source   NewsSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  url     String  @unique @db.Text
+  title   String  @db.Text
+  excerpt String? @db.Text
+
+  imageUrl    String?   @db.Text
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([storyId])
+  @@index([sourceId])
+  @@index([publishedAt])
+}
+
+// The generated, publishable text for one story in one language. Always
+// an original concise summary written from `NewsStory.sourceMaterial`,
+// never a copy of a source article.
+model NewsRendition {
+  id String @id @default(cuid())
+
+  storyId String
+  story   NewsStory @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  language String
+
+  headline String @db.Text
+  body     String @db.Text
+
+  status NewsRenditionStatus @default(PENDING)
+  model  String?
+  error  String?             @db.Text
+
+  // Report from the groundedness validator (unsupported numbers, quotes
+  // or URLs found in the generated text). Kept for admin inspection.
+  validation Json?
+
+  publications NewsPublication[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([storyId, language])
+  @@index([status])
+  @@index([language])
+}
+
+// One rendition, published once, through one feed. `idempotencyKey` is
+// what makes a retried or overlapping pipeline run incapable of posting
+// the same story twice.
+model NewsPublication {
+  id String @id @default(cuid())
+
+  idempotencyKey String @unique
+
+  storyId String
+  story   NewsStory @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  renditionId String
+  rendition   NewsRendition @relation(fields: [renditionId], references: [id], onDelete: Cascade)
+
+  feedId String
+  feed   NewsFeed @relation(fields: [feedId], references: [id], onDelete: Cascade)
+
+  language String
+
+  postId String? @unique
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: SetNull)
+
+  status NewsPublicationStatus @default(SCHEDULED)
+
+  scheduledFor DateTime
+  publishedAt  DateTime?
+
+  attempts Int     @default(0)
+  error    String? @db.Text
+
+  removedAt     DateTime?
+  removedReason String?   @db.Text
+
+  correctionNote String?   @db.Text
+  correctedAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, scheduledFor])
+  @@index([feedId, publishedAt])
+  @@index([storyId])
+  @@index([language])
+  @@index([publishedAt])
+}
+
+// Telemetry for one pipeline cycle. Powers the admin dashboard's real
+// numbers - there is no estimated or hard-coded figure on that screen.
+model NewsJobRun {
+  id String @id @default(cuid())
+
+  trigger String        @default("cron") // "cron" | "manual"
+  status  NewsJobStatus @default(RUNNING)
+
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  sourcesFetched Int @default(0)
+  sourcesFailed  Int @default(0)
+  itemsIngested  Int @default(0)
+
+  storiesCreated      Int @default(0)
+  duplicatesPrevented Int @default(0)
+
+  renditionsGenerated Int @default(0)
+  renditionsFailed    Int @default(0)
+
+  published       Int @default(0)
+  publishFailures Int @default(0)
+
+  error   String? @db.Text
+  details Json?
+
+  @@index([status])
+  @@index([startedAt])
+}
+
+// Single-row global control panel for the automation. Ships paused.
+model NewsAutomationSetting {
+  id String @id @default("singleton")
+
+  paused Boolean @default(true)
+
+  enabledLanguages String[]     @default(["en", "fr", "de", "it"])
+  // Empty array means "no restriction" for each of these three.
+  enabledTopics    NewsTopic[]  @default([])
+  enabledRegions   NewsRegion[] @default([])
+  enabledCountries String[]     @default([])
+
+  maxPublicationsPerCycle Int @default(12)
+  maxPublicationsPerDay   Int @default(120)
+
+  // Floor between any two publications platform-wide, so even a
+  // misconfigured set of feeds cannot burst.
+  minMinutesBetweenPublications Int @default(4)
+
+  // Sensitive stories are never auto-published while this is on; they
+  // wait in the admin queue for a human.
+  requireHumanReviewForSensitive Boolean @default(true)
+
+  lastCycleAt DateTime?
+  nextCycleAt DateTime?
+
+  updatedAt DateTime @updatedAt
 }

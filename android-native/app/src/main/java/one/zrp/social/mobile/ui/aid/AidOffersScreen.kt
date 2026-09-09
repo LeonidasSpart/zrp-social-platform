@@ -135,7 +135,7 @@ private fun AidOfferRow(
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
                         )
-                        VerifiedBadge(badgeType = offerer?.badgeType, modifier = Modifier.padding(start = 2.dp))
+                        VerifiedBadge(badgeType = offerer?.badgeType)
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(

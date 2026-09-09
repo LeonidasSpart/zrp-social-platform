@@ -271,6 +271,10 @@
     <string name="post_unmute_video_cd">Aktifkan suara video</string>
     <string name="story_like_cd">Suka story</string>
     <string name="story_unlike_cd">Batal suka story</string>
+
+    <string name="story_mute_cd">Bisukan suara story</string>
+
+    <string name="story_unmute_cd">Aktifkan suara story</string>
     <string name="comment_repost_cd">Posting ulang</string>
     <string name="comment_undo_repost_cd">Batalkan posting ulang</string>
     <string name="createpost_media_count_cd">%1$d/%2$d media</string>
@@ -1124,6 +1128,8 @@
     <string name="shorts_upload_err_too_large_plan">Video ini terlalu besar untuk paket Anda. Coba file yang lebih kecil atau tingkatkan paket Anda.</string>
     <string name="shorts_upload_err_url_gen_failed">Tidak dapat memulai unggahan - ini biasanya masalah koneksi sementara. Silakan coba lagi.</string>
     <string name="shorts_upload_err_internal_server">Terjadi kesalahan di sistem kami saat mengunggah. Silakan coba lagi sesaat lagi.</string>
+    <string name="caption_view_more">Lihat selengkapnya</string>
+    <string name="caption_view_less">Lihat lebih sedikit</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">Jumlah (USDC)</string>
     <string name="creator_available_balance">Saldo tersedia: %1$s</string>
@@ -1507,7 +1513,29 @@
     <string name="legal_terms">Ketentuan Layanan</string>
     <string name="legal_privacy">Kebijakan Privasi</string>
     <string name="legal_guidelines">Pedoman Komunitas</string>
+    <string name="legal_help">Pusat Bantuan</string>
+    <string name="legal_contact">Kontak</string>
+    <string name="legal_load_error">Halaman ini gagal dimuat. Periksa koneksi Anda dan coba lagi.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Bergabung</string>
     <string name="profile_charity_note">%1$s%% dari keuntungan disumbangkan untuk amal</string>
+    <string name="profile_impact">Dampak: %1$s $ disumbangkan untuk amal</string>
+    <string name="profile_milestone_years">%1$d tahun di ZRP</string>
+    <string name="profile_milestone_six_months">6 bulan di ZRP</string>
+    <string name="profile_milestone_new_member">Anggota baru</string>
+    <string name="profile_milestone_posts_500">500+ postingan</string>
+    <string name="profile_milestone_posts_100">100+ postingan</string>
+    <string name="profile_milestone_posts_10">10+ postingan</string>
+    <string name="profile_milestone_followers_1k">1K+ pengikut</string>
+    <string name="profile_milestone_followers_100">100+ pengikut</string>
+
+    <!-- Home feed empty / error states -->
+    <string name="home_empty_following_title">Feed Mengikuti Anda sedang menunggu.</string>
+    <string name="home_empty_following_subtitle">Temukan orang, musik, dan topik untuk diikuti.</string>
+    <string name="feed_no_posts">Belum ada postingan.</string>
+    <string name="feed_check_back_later">Kunjungi lagi nanti untuk konten yang sedang tren.</string>
+    <string name="feed_retry">Coba Lagi</string>
+    <string name="home_cta_discover_creators">Temukan kreator</string>
+    <string name="home_cta_explore_music">Jelajahi Music</string>
+    <string name="home_cta_explore_topics">Jelajahi topik</string>
 </resources>

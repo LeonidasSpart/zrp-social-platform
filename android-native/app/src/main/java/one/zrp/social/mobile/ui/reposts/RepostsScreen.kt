@@ -38,6 +38,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 
@@ -137,8 +138,7 @@ fun RepostsScreen(
                                     )
                                     VerifiedBadge(
                                         badgeType = user.badgeType,
-                                        size = 16.dp,
-                                        modifier = Modifier.padding(start = Spacing.xs),
+                                        size = BadgeSize.default,
                                     )
                                 }
                                 Text(

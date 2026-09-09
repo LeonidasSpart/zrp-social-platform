@@ -3,15 +3,25 @@
 import { signIn } from "next-auth/react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import PasswordInput from "@/components/PasswordInput";
+import AuthShell from "@/components/auth/AuthShell";
 import { useLanguage } from "@/contexts/LanguageContext";
 import GoogleIcon from "@/components/icons/GoogleIcon";
 import AppleIcon from "@/components/icons/AppleIcon";
 import { useAppleSignInEnabled } from "@/hooks/useAppleSignInEnabled";
 import { isNativeApp, nativeGoogleSignIn, nativeAppleSignIn } from "@/lib/nativeAuth";
 import type { TranslationKey } from "@/lib/translations";
+
+// One definition per control shape, so the Google button, the Apple
+// button and the submit button can't drift apart the way three
+// hand-written class strings did.
+const FIELD_CLASS =
+  "w-full rounded-xl border border-gray-300 bg-white px-4 py-3.5 text-base text-gray-900 transition focus:border-transparent focus:ring-2 focus:ring-zrp-red dark:border-gray-600 dark:bg-gray-800 dark:text-white sm:py-3";
+
+const SOCIAL_BUTTON_CLASS =
+  "flex w-full items-center justify-center gap-3 rounded-full py-3.5 text-base font-medium shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60 sm:py-3";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
@@ -131,207 +141,184 @@ export default function LoginPage() {
     await signIn("apple", { callbackUrl: "/" });
   };
 
+  const isVerificationError =
+    error.includes("verify") || error.includes("verification");
+  const isBannedError = error.includes("banned");
+
   return (
-    <div className="min-h-screen flex bg-white dark:bg-zrp-deepBlack">
-      {/* ─── Left brand panel, desktop only ─────────────────────────── */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-zrp-darkRed via-zrp-red to-zrp-darkRed">
-        <div
-          className="absolute inset-0 opacity-[0.08]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, #fff 1.5px, transparent 1.5px)",
-            backgroundSize: "28px 28px",
-          }}
-        />
-        <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16 w-full">
-          <Link href="/" className="inline-block w-fit">
-            <Image
-              src="/logo.png"
-              alt="ZRP"
-              width={56}
-              height={56}
-              className="w-14 h-14 object-contain"
-            />
-          </Link>
+    <AuthShell heading={t("auth.signIn")} subheading={t("auth.signInSubtitle")}>
+      <button
+        type="button"
+        onClick={handleGoogleSignIn}
+        disabled={googleLoading}
+        aria-busy={googleLoading}
+        className={`${SOCIAL_BUTTON_CLASS} border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-white/5 dark:text-gray-100 dark:hover:bg-white/10`}
+      >
+        {googleLoading ? (
+          <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+        ) : (
+          <GoogleIcon className="h-5 w-5" />
+        )}
+        {googleLoading ? t("auth.signingIn") : t("auth.continueWithGoogle")}
+      </button>
 
-          <div>
-            <h1 className="font-orbitron font-bold text-white text-5xl xl:text-6xl leading-[1.05] mb-6">
-              {t("auth.welcomeTitle")}
-            </h1>
-            <p className="text-white/80 text-xl xl:text-2xl max-w-md leading-snug">
-              {t("about.subtitle")}
-            </p>
-          </div>
+      {appleSignInEnabled && (
+        <button
+          type="button"
+          onClick={handleAppleSignIn}
+          disabled={appleLoading}
+          aria-busy={appleLoading}
+          className={`${SOCIAL_BUTTON_CLASS} mt-3 bg-black text-white hover:bg-gray-900`}
+        >
+          {appleLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+          ) : (
+            <AppleIcon className="h-5 w-5" />
+          )}
+          {appleLoading ? t("auth.signingIn") : t("auth.continueWithApple")}
+        </button>
+      )}
 
-          <p className="text-white/60 text-sm">
-            {t("rightPanel.footerText")}
-          </p>
-        </div>
+      <div className="my-6 flex items-center gap-3">
+        <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+        <span className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+          {t("auth.or")}
+        </span>
+        <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
       </div>
 
-      {/* ─── Right / mobile form panel ───────────────────────────────── */}
-      <div className="flex-1 flex items-center justify-center px-4 py-12 sm:py-16">
-        <div className="w-full max-w-md">
-          {/* ─── Mobile & tablet hero, big and bold, like a native app ─── */}
-          <div className="lg:hidden text-center mb-10 sm:mb-14">
-            <Link href="/" className="inline-block mb-6 sm:mb-8">
-              <Image
-                src="/logo.png"
-                alt="ZRP"
-                width={96}
-                height={96}
-                className="w-20 h-20 sm:w-24 sm:h-24 object-contain mx-auto"
-                priority
-              />
-            </Link>
-            <h2 className="text-4xl sm:text-5xl font-orbitron font-bold text-gray-900 dark:text-white leading-[1.05]">
-              {t("auth.welcomeTitle")}
-            </h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-3 text-base sm:text-lg max-w-sm mx-auto">
-              {t("about.subtitle")}
-            </p>
-          </div>
-
-          <div className="hidden lg:block mb-8">
-            <h2 className="text-2xl font-orbitron font-bold text-gray-900 dark:text-white">
-              {t("auth.signIn")}
-            </h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">{t("auth.signInSubtitle")}</p>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            disabled={googleLoading}
-            className="w-full flex items-center justify-center gap-3 border border-gray-300 dark:border-gray-600 rounded-full py-3.5 sm:py-3 font-medium text-gray-700 dark:text-gray-100 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed text-base"
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          // role="alert" + aria-live: this block is injected after a
+          // failed submit, so without them a screen-reader user got no
+          // announcement at all - the form simply appeared to do
+          // nothing. text-red-600 (not 400/500) holds 4.5:1 on white.
+          <div
+            role="alert"
+            aria-live="polite"
+            className={`rounded-xl border p-3 text-sm ${
+              isVerificationError
+                ? "border-gray-300 bg-gray-50 text-gray-800 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-200"
+                : "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
+            }`}
           >
-            <GoogleIcon className="w-5 h-5" />
-            {googleLoading ? t("auth.signingIn") : t("auth.continueWithGoogle")}
-          </button>
+            {error}
 
-          {appleSignInEnabled && (
-            <button
-              type="button"
-              onClick={handleAppleSignIn}
-              disabled={appleLoading}
-              className="w-full flex items-center justify-center gap-3 rounded-full py-3.5 sm:py-3 font-medium text-white bg-black hover:bg-gray-900 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed text-base mt-3"
-            >
-              <AppleIcon className="w-5 h-5" />
-              {appleLoading ? t("auth.signingIn") : t("auth.continueWithApple")}
-            </button>
-          )}
-
-          <div className="flex items-center gap-3 my-6 sm:my-6">
-            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-            <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t("auth.or")}</span>
-            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className={`p-3 rounded-lg text-sm ${
-                error.includes("verify") || error.includes("verification")
-                  ? "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800"
-                  : error.includes("banned")
-                  ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
-                  : "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
-              }`}>
-                {error}
-                {error.includes("verify") && (
-                  <div className="mt-2">
-                    <button
-                      type="button"
-                      onClick={handleResendVerification}
-                      disabled={resendLoading}
-                      className="text-zrp-red dark:text-zrp-red underline text-sm hover:text-zrp-darkRed dark:hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {resendLoading ? t("auth.resendVerificationSending") : t("auth.resendVerification")}
-                    </button>
-                    {resendMessage ? (
-                      <p
-                        className={`text-xs mt-1 ${
-                          resendMessage.type === "success"
-                            ? "text-green-600 dark:text-green-400"
-                            : "text-red-600 dark:text-red-400"
-                        }`}
-                      >
-                        {resendMessage.text}
-                      </p>
-                    ) : (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {t("auth.checkSpam")}
-                      </p>
-                    )}
-                  </div>
-                )}
-                {error.includes("banned") && (
-                  <div className="mt-2">
-                    <a
-                      href="mailto:support@zrp.one?subject=Account%20Ban%20Appeal"
-                      className="text-zrp-red dark:text-zrp-red underline text-sm hover:text-zrp-darkRed dark:hover:text-red-300"
-                    >
-                      {t("auth.contactSupport")}
-                    </a>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {t("auth.banAppealNote")}
-                    </p>
-                  </div>
+            {isVerificationError && (
+              <div className="mt-2">
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={resendLoading}
+                  aria-busy={resendLoading}
+                  className="text-sm font-medium text-zrp-darkRed underline hover:text-zrp-red disabled:cursor-not-allowed disabled:opacity-60 dark:text-zrp-red dark:hover:text-red-300"
+                >
+                  {resendLoading
+                    ? t("auth.resendVerificationSending")
+                    : t("auth.resendVerification")}
+                </button>
+                {resendMessage ? (
+                  <p
+                    className={`mt-1 text-xs ${
+                      resendMessage.type === "success"
+                        ? "text-green-700 dark:text-green-400"
+                        : "text-red-700 dark:text-red-400"
+                    }`}
+                  >
+                    {resendMessage.text}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                    {t("auth.checkSpam")}
+                  </p>
                 )}
               </div>
             )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {t("auth.emailOrUsername")}
-              </label>
-              <input
-                type="text"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base"
-                placeholder={t("auth.emailOrUsernamePlaceholder")}
-                autoComplete="username"
-                required
-              />
-            </div>
+            {isBannedError && (
+              <div className="mt-2">
+                <a
+                  href="mailto:support@zrp.one?subject=Account%20Ban%20Appeal"
+                  className="text-sm font-medium text-zrp-darkRed underline hover:text-zrp-red dark:text-zrp-red dark:hover:text-red-300"
+                >
+                  {t("auth.contactSupport")}
+                </a>
+                <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                  {t("auth.banAppealNote")}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
-            <PasswordInput
-              id="password"
-              name="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              label={t("auth.password")}
-              placeholder={t("auth.password")}
-              required
-              autoComplete="current-password"
-            />
-
-            <div className="flex justify-end -mt-2">
-              <Link
-                href="/forgot-password"
-                className="text-sm text-zrp-darkRed dark:text-zrp-red hover:underline"
-              >
-                {t("auth.forgotPassword")}
-              </Link>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-zrp-darkRed hover:bg-zrp-red text-white py-3.5 sm:py-3 rounded-full font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm text-base"
-            >
-              {loading ? t("auth.signingIn") : t("auth.signIn")}
-            </button>
-          </form>
-
-          <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
-            {t("auth.noAccount")}{" "}
-            <Link href="/signup" className="text-zrp-darkRed dark:text-zrp-red hover:underline font-medium">
-              {t("auth.signUp")}
-            </Link>
-          </p>
+        <div>
+          {/* htmlFor/id: the label was previously associated with
+              nothing, so tapping it did not focus the field and screen
+              readers announced an unlabelled text input. */}
+          <label
+            htmlFor="login-identifier"
+            className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
+            {t("auth.emailOrUsername")}
+          </label>
+          <input
+            id="login-identifier"
+            name="identifier"
+            type="text"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={FIELD_CLASS}
+            placeholder={t("auth.emailOrUsernamePlaceholder")}
+            autoComplete="username"
+            required
+          />
         </div>
-      </div>
-    </div>
+
+        {/* The explicit class list matches FIELD_CLASS so the password
+            field sits flush with the one above it - PasswordInput's own
+            defaults are shorter and less rounded because Settings, its
+            other caller, is built on that smaller field size. */}
+        <PasswordInput
+          id="login-password"
+          name="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          label={t("auth.password")}
+          placeholder={t("auth.password")}
+          required
+          autoComplete="current-password"
+          className="rounded-xl px-4 py-3.5 text-base dark:bg-gray-800 sm:py-3"
+        />
+
+        <div className="-mt-2 flex justify-end">
+          <Link
+            href="/forgot-password"
+            className="rounded text-sm text-zrp-darkRed hover:underline dark:text-zrp-red"
+          >
+            {t("auth.forgotPassword")}
+          </Link>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          aria-busy={loading}
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-zrp-darkRed py-3.5 text-base font-semibold text-white shadow-sm transition hover:bg-zrp-red disabled:cursor-not-allowed disabled:opacity-60 sm:py-3"
+        >
+          {loading && <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />}
+          {loading ? t("auth.signingIn") : t("auth.signIn")}
+        </button>
+      </form>
+
+      <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+        {t("auth.noAccount")}{" "}
+        <Link
+          href="/signup"
+          className="rounded font-medium text-zrp-darkRed hover:underline dark:text-zrp-red"
+        >
+          {t("auth.signUp")}
+        </Link>
+      </p>
+    </AuthShell>
   );
 }

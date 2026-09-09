@@ -271,6 +271,10 @@
     <string name="post_unmute_video_cd">Rikthe zërin e videos</string>
     <string name="story_like_cd">Pëlqe story-n</string>
     <string name="story_unlike_cd">Hiq pëlqimin e story-t</string>
+
+    <string name="story_mute_cd">Hesht zërin e story-t</string>
+
+    <string name="story_unmute_cd">Aktivizo zërin e story-t</string>
     <string name="comment_repost_cd">Riposto</string>
     <string name="comment_undo_repost_cd">Anulo ripostimin</string>
     <string name="createpost_media_count_cd">%1$d/%2$d media</string>
@@ -1124,6 +1128,8 @@
     <string name="shorts_upload_err_too_large_plan">Kjo video është shumë e madhe për planin tënd. Provo një skedar më të vogël ose përmirëso planin tënd.</string>
     <string name="shorts_upload_err_url_gen_failed">Nuk mund të fillonte ngarkimi - kjo zakonisht është një problem i përkohshëm lidhjeje. Ju lutemi provoni përsëri.</string>
     <string name="shorts_upload_err_internal_server">Diçka shkoi keq nga ana jonë gjatë ngarkimit. Ju lutemi provoni përsëri pas pak.</string>
+    <string name="caption_view_more">Shiko më shumë</string>
+    <string name="caption_view_less">Shiko më pak</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">Shuma (USDC)</string>
     <string name="creator_available_balance">Bilanci i disponueshëm: {amount} $</string>
@@ -1507,7 +1513,29 @@
     <string name="legal_terms">Kushtet e Shërbimit</string>
     <string name="legal_privacy">Politika e Privatësisë</string>
     <string name="legal_guidelines">Udhëzimet e Komunitetit</string>
+    <string name="legal_help">Qendra e Ndihmës</string>
+    <string name="legal_contact">Kontakt</string>
+    <string name="legal_load_error">Kjo faqe nuk mund të ngarkohej. Kontrollo lidhjen tënde dhe provo përsëri.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Anëtarësuar më</string>
     <string name="profile_charity_note">%1$s%% e fitimeve shkojnë për bamirësi</string>
+    <string name="profile_impact">Ndikimi: %1$s $ dhuruar për bamirësi</string>
+    <string name="profile_milestone_years">%1$d vjet në ZRP</string>
+    <string name="profile_milestone_six_months">6 muaj në ZRP</string>
+    <string name="profile_milestone_new_member">Anëtar i ri</string>
+    <string name="profile_milestone_posts_500">500+ postime</string>
+    <string name="profile_milestone_posts_100">100+ postime</string>
+    <string name="profile_milestone_posts_10">10+ postime</string>
+    <string name="profile_milestone_followers_1k">1K+ ndjekës</string>
+    <string name="profile_milestone_followers_100">100+ ndjekës</string>
+
+    <!-- Home feed empty / error states -->
+    <string name="home_empty_following_title">Furnizimi juaj i ndjekjes po ju pret.</string>
+    <string name="home_empty_following_subtitle">Zbuloni njerëz, muzikë dhe tema për të ndjekur.</string>
+    <string name="feed_no_posts">Nuk ka postime ende.</string>
+    <string name="feed_check_back_later">Rikthehuni më vonë për përmbajtje kryesore.</string>
+    <string name="feed_retry">Riprovo</string>
+    <string name="home_cta_discover_creators">Zbuloni krijues</string>
+    <string name="home_cta_explore_music">Eksploro Music</string>
+    <string name="home_cta_explore_topics">Eksploro temat</string>
 </resources>

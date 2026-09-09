@@ -1,6 +1,7 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import zlib from "zlib";
 import http from "http";
+import dns from "dns";
 import type { AddressInfo } from "net";
 import {
   isDisallowedIPv4,
@@ -8,6 +9,7 @@ import {
   decompressBody,
   validateUrl,
   safeFetch,
+  makeSafeLookup,
   SsrfBlockedError,
 } from "../ssrf-guard";
 
@@ -111,12 +113,42 @@ describe("decompressBody", () => {
     expect(decompressBody(original, "identity").toString("utf-8")).toBe(html);
   });
 
-  it("falls back to the raw bytes (never throws) on a truncated/corrupt gzip stream", () => {
+  it("never throws on a truncated/corrupt gzip stream", () => {
     const compressed = zlib.gzipSync(original);
     const truncated = compressed.subarray(0, compressed.length - 5);
     expect(() => decompressBody(truncated, "gzip")).not.toThrow();
-    // Can't recover the original from a truncated stream - just must not crash.
     expect(Buffer.isBuffer(decompressBody(truncated, "gzip"))).toBe(true);
+  });
+
+  it("still decodes byte-for-byte on a complete, untruncated stream (finishFlush doesn't change the happy path)", () => {
+    expect(decompressBody(zlib.gzipSync(original), "gzip").toString("utf-8")).toBe(html);
+    expect(decompressBody(zlib.deflateSync(original), "deflate").toString("utf-8")).toBe(html);
+    expect(decompressBody(zlib.brotliCompressSync(original), "br").toString("utf-8")).toBe(html);
+  });
+
+  // Regression test for the actual link-preview bug: a real-world page
+  // (a heavy news site with a large hydration/ad-tech JSON payload deep
+  // in the document, well past </head>) whose *compressed* size exceeds
+  // safeFetch's maxBytes cap. The og:title tag sits in <head>, near the
+  // very start of the document - it should survive even though the
+  // stream is cut off long before its end, because the truncation lands
+  // in unrelated bulk far below it.
+  it("recovers og:title from <head> when the compressed stream is truncated by a byte cap well after </head>", () => {
+    const head = '<html><head><meta property="og:title" content="Real headline"><meta property="og:image" content="https://example.com/x.jpg"></head><body>';
+    // Realistic-entropy filler standing in for a modern page's inline
+    // hydration JSON/ad config - repetitive text compresses far better
+    // than real JSON ever does, which would understate the bug.
+    const filler = Array.from({ length: 20000 }, (_, i) => `{"id":"${i}-${Math.random().toString(36).slice(2)}","x":"${Math.random().toString(36).slice(2)}"}`).join(",");
+    const fullHtml = head + "<script>" + filler + "</script></body></html>";
+
+    const compressed = zlib.gzipSync(Buffer.from(fullHtml, "utf-8"));
+    const cap = 50_000;
+    expect(compressed.length).toBeGreaterThan(cap); // the scenario only matters if truncation actually happens
+    const truncated = compressed.subarray(0, cap);
+
+    const recovered = decompressBody(truncated, "gzip").toString("utf-8");
+    expect(recovered).toContain('property="og:title" content="Real headline"');
+    expect(recovered).toContain('property="og:image" content="https://example.com/x.jpg"');
   });
 });
 
@@ -139,6 +171,101 @@ describe("validateUrl", () => {
   it("accepts ordinary http/https URLs", () => {
     expect(() => validateUrl("https://example.com/page")).not.toThrow();
     expect(() => validateUrl("http://example.com/page")).not.toThrow();
+  });
+});
+
+// Real bug, reproduced against a real dual-stack host (20min.ch, which
+// has both A and AAAA records) via a throwaway CI job that imported
+// this exact code and ran it against the live site: Node's http(s)
+// .request enables Happy Eyeballs (RFC 8305) by default for dual-stack
+// hosts, and for those it invokes a custom `lookup` function (which
+// safeFetch passes as its own `lookup` option) with `options.all: true`,
+// expecting an *array* of {address, family} objects back - not the
+// single (address, family) pair a plain dns.lookup-style callback
+// gets. The previous implementation always called back with the
+// single-address shape regardless of what was asked for, which threw
+// inside Node's own internals ("Invalid IP address: undefined") for
+// every dual-stack site - most major news/media sites, 20min.ch
+// included - and safeFetch's caller only ever saw that as a generic
+// request error indistinguishable from a real network failure. These
+// tests exercise both callback shapes Node can actually invoke this
+// with, mocking dns.lookup so they don't depend on any real DNS record.
+describe("makeSafeLookup (Happy Eyeballs / dual-stack callback shape)", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const DUAL_STACK = [
+    { address: "203.0.113.10", family: 4 },
+    { address: "2001:db8::1", family: 6 },
+  ];
+
+  it("calls back with an array of allowed addresses when options.all is true (the Happy-Eyeballs shape)", async () => {
+    vi.spyOn(dns, "lookup").mockImplementation(((_hostname: string, _opts: unknown, cb: (err: null, addrs: typeof DUAL_STACK) => void) => {
+      cb(null, DUAL_STACK);
+    }) as unknown as typeof dns.lookup);
+
+    const lookup = makeSafeLookup(() => true);
+    const result = await new Promise<{ err: unknown; addr: unknown; family?: number }>((resolve) => {
+      lookup("dualstack.example.com", { all: true } as dns.LookupAllOptions, (err, addressOrAddresses, family) => {
+        resolve({ err, addr: addressOrAddresses, family });
+      });
+    });
+
+    expect(result.err).toBeNull();
+    expect(Array.isArray(result.addr)).toBe(true);
+    expect(result.addr).toEqual(DUAL_STACK);
+  });
+
+  it("calls back with a single (address, family) pair when options.all is not set (the plain dns.lookup shape)", async () => {
+    vi.spyOn(dns, "lookup").mockImplementation(((_hostname: string, _opts: unknown, cb: (err: null, addrs: typeof DUAL_STACK) => void) => {
+      cb(null, DUAL_STACK);
+    }) as unknown as typeof dns.lookup);
+
+    const lookup = makeSafeLookup(() => true);
+    const result = await new Promise<{ err: unknown; addr: unknown; family?: number }>((resolve) => {
+      lookup("dualstack.example.com", 4, (err, addressOrAddresses, family) => {
+        resolve({ err, addr: addressOrAddresses, family });
+      });
+    });
+
+    expect(result.err).toBeNull();
+    expect(typeof result.addr).toBe("string");
+    expect(result.addr).toBe(DUAL_STACK[0].address);
+    expect(result.family).toBe(DUAL_STACK[0].family);
+  });
+
+  it("filters out disallowed addresses in the array shape rather than passing every candidate through", async () => {
+    vi.spyOn(dns, "lookup").mockImplementation(((_hostname: string, _opts: unknown, cb: (err: null, addrs: typeof DUAL_STACK) => void) => {
+      cb(null, DUAL_STACK);
+    }) as unknown as typeof dns.lookup);
+
+    // Only the IPv6 address is "allowed" here - the real isAddressAllowed
+    // would do this when the IPv4 candidate resolves to a private range.
+    const lookup = makeSafeLookup((ip) => ip === "2001:db8::1");
+    const result = await new Promise<{ err: unknown; addr: unknown }>((resolve) => {
+      lookup("dualstack.example.com", { all: true } as dns.LookupAllOptions, (err, addressOrAddresses) => {
+        resolve({ err, addr: addressOrAddresses });
+      });
+    });
+
+    expect(result.err).toBeNull();
+    expect(result.addr).toEqual([{ address: "2001:db8::1", family: 6 }]);
+  });
+
+  it("rejects with SsrfBlockedError in the array shape when every candidate is disallowed", async () => {
+    vi.spyOn(dns, "lookup").mockImplementation(((_hostname: string, _opts: unknown, cb: (err: null, addrs: typeof DUAL_STACK) => void) => {
+      cb(null, DUAL_STACK);
+    }) as unknown as typeof dns.lookup);
+
+    const lookup = makeSafeLookup(() => false);
+    const result = await new Promise<{ err: unknown }>((resolve) => {
+      lookup("dualstack.example.com", { all: true } as dns.LookupAllOptions, (err) => {
+        resolve({ err });
+      });
+    });
+
+    expect(result.err).toBeInstanceOf(SsrfBlockedError);
   });
 });
 
@@ -235,5 +362,33 @@ describe("safeFetch (real local server)", () => {
     const result = await safeFetch(base, { isAddressAllowed: allowAll, maxBytes: 1_000 });
     expect(result.body.length).toBeLessThan(big.length);
     expect(result.body.length).toBeGreaterThan(0);
+  });
+
+  // End-to-end regression test for the link-preview bug: a gzip-
+  // compressed real-world-sized page whose compressed body exceeds
+  // maxBytes, served with a real Content-Encoding header - exercising
+  // the exact same code path route.ts's fetchGenericPreview() drives
+  // (safeFetch -> mid-stream maxBytes truncation -> decompressBody).
+  // The og:title tag, positioned in <head> as virtually every real site
+  // places it, must survive even though the response as a whole was cut
+  // off well before its end.
+  it("still yields a parseable <head> when a real gzip-compressed response is truncated by maxBytes", async () => {
+    const head = '<html><head><meta property="og:title" content="Real headline"></head><body>';
+    const filler = Array.from(
+      { length: 20_000 },
+      (_, i) => `{"id":"${i}-${Math.random().toString(36).slice(2)}"}`
+    ).join(",");
+    const fullHtml = head + "<script>" + filler + "</script></body></html>";
+    const compressed = zlib.gzipSync(Buffer.from(fullHtml, "utf-8"));
+
+    const base = await listen((_req, res) => {
+      res.writeHead(200, { "content-type": "text/html", "content-encoding": "gzip" });
+      res.end(compressed);
+    });
+
+    const cap = 50_000;
+    expect(compressed.length).toBeGreaterThan(cap);
+    const result = await safeFetch(base, { isAddressAllowed: allowAll, maxBytes: cap });
+    expect(result.body.toString("utf-8")).toContain('property="og:title" content="Real headline"');
   });
 });

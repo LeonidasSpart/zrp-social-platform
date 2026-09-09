@@ -283,6 +283,10 @@
     <string name="post_unmute_video_cd">Unmute video</string>
     <string name="story_like_cd">Like story</string>
     <string name="story_unlike_cd">Unlike story</string>
+
+    <string name="story_mute_cd">Mute story audio</string>
+
+    <string name="story_unmute_cd">Unmute story audio</string>
     <string name="comment_repost_cd">Repost</string>
     <string name="comment_undo_repost_cd">Undo repost</string>
     <string name="createpost_media_count_cd">%1$d/%2$d media</string>
@@ -1136,6 +1140,8 @@
     <string name="shorts_upload_err_too_large_plan">This video is too large for your plan. Try a smaller file or upgrade your plan.</string>
     <string name="shorts_upload_err_url_gen_failed">Couldn\'t start the upload - this is usually a temporary connection issue. Please try again.</string>
     <string name="shorts_upload_err_internal_server">Something went wrong on our end while uploading. Please try again in a moment.</string>
+    <string name="caption_view_more">View more</string>
+    <string name="caption_view_less">View less</string>
     <!-- "Shorts" is a proper noun, left untranslated in every one of web's own 11 language blocks (nav.shorts) - present only here so every locale falls back to this single default value. -->
     <string name="shorts_title">Shorts</string>
     <!-- ZRP Creator Studio (native parity) -->
@@ -1516,12 +1522,34 @@
     <string name="admin_posts_previous">Previous</string>
     <string name="admin_posts_next">Next</string>
     <string name="admin_posts_page_of">Page %1$s of %2$s</string>
-    <!-- Legal pages (Terms/Privacy/Guidelines) - link labels only, content lives in an in-app WebView pointed at the real zrp.one pages -->
+    <!-- Legal pages (Terms/Privacy/Guidelines/Help Center/Contact) - link labels only. Content is native (LegalScreen), fetched live from GET /api/legal/:page - no WebView. -->
     <string name="legal_section_title">Legal</string>
     <string name="legal_terms">Terms of Service</string>
     <string name="legal_privacy">Privacy Policy</string>
     <string name="legal_guidelines">Community Guidelines</string>
+    <string name="legal_help">Help Center</string>
+    <string name="legal_contact">Contact</string>
+    <string name="legal_load_error">Couldn\'t load this page. Check your connection and try again.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Joined</string>
     <string name="profile_charity_note">%1$s%% of profits go to charity</string>
+    <string name="profile_impact">Impact: %1$s contributed to charity</string>
+    <string name="profile_milestone_years">%1$dyr on ZRP</string>
+    <string name="profile_milestone_six_months">6 months on ZRP</string>
+    <string name="profile_milestone_new_member">New member</string>
+    <string name="profile_milestone_posts_500">500+ posts</string>
+    <string name="profile_milestone_posts_100">100+ posts</string>
+    <string name="profile_milestone_posts_10">10+ posts</string>
+    <string name="profile_milestone_followers_1k">1K+ followers</string>
+    <string name="profile_milestone_followers_100">100+ followers</string>
+
+    <!-- Home feed empty / error states -->
+    <string name="home_empty_following_title">Your Following feed is waiting for you.</string>
+    <string name="home_empty_following_subtitle">Discover people, music and topics to follow.</string>
+    <string name="feed_no_posts">No posts yet.</string>
+    <string name="feed_check_back_later">Check back later for trending content.</string>
+    <string name="feed_retry">Retry</string>
+    <string name="home_cta_discover_creators">Discover creators</string>
+    <string name="home_cta_explore_music">Explore Music</string>
+    <string name="home_cta_explore_topics">Explore topics</string>
 </resources>

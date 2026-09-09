@@ -24,6 +24,18 @@ object ApiClient {
     private lateinit var tokenStore: TokenStore
     private lateinit var composerDraftStore: ComposerDraftStore
 
+    // The freshest known username right after a successful in-app
+    // rename (PUT /api/user/username's own response, set by
+    // AccountSettingsViewModel) - consulted ahead of the session
+    // endpoint by ProfileRepository/SettingsRepository's own
+    // getOwnUsername(). The active session JWT only re-fetches a
+    // renamed username on its own 5-minute-throttled recheck (see
+    // auth.ts), so without this, the very next "view my own profile"
+    // right after a rename can still resolve the old, now-404ing
+    // username. Cleared on logout.
+    @Volatile
+    var ownUsernameOverride: String? = null
+
     fun init(context: Context) {
         if (::tokenStore.isInitialized) return
         tokenStore = TokenStore(context.applicationContext)
@@ -119,4 +131,5 @@ object ApiClient {
     val appealsApi: AppealsApi by lazy { retrofit.create(AppealsApi::class.java) }
     val teamApi: TeamApi by lazy { retrofit.create(TeamApi::class.java) }
     val apiKeysApi: ApiKeysApi by lazy { retrofit.create(ApiKeysApi::class.java) }
+    val legalApi: LegalApi by lazy { retrofit.create(LegalApi::class.java) }
 }

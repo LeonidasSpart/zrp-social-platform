@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -31,6 +32,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import kotlinx.coroutines.flow.MutableSharedFlow
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.data.NotificationsRepository
@@ -39,7 +41,7 @@ import one.zrp.social.mobile.ui.admin.AdminDashboardScreen
 import one.zrp.social.mobile.ui.admin.AdminPostsScreen
 import one.zrp.social.mobile.ui.admin.AdminReportsScreen
 import one.zrp.social.mobile.ui.admin.AdminUsersScreen
-import one.zrp.social.mobile.ui.legal.LegalWebViewScreen
+import one.zrp.social.mobile.ui.legal.LegalScreen
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
@@ -229,6 +231,8 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
     val goToTerms: () -> Unit = { navController.navigate("legal/terms") }
     val goToPrivacyPolicy: () -> Unit = { navController.navigate("legal/privacy") }
     val goToGuidelines: () -> Unit = { navController.navigate("legal/guidelines") }
+    val goToHelpCenter: () -> Unit = { navController.navigate("legal/help") }
+    val goToContact: () -> Unit = { navController.navigate("legal/contact") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
@@ -254,6 +258,17 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
         }
     }
 
+    // Tapping the Home tab while ALREADY on Home is a no-op as far as
+    // navigation goes (launchSingleTop above means there's nowhere to
+    // navigate to), so without this the feed just silently ignored the
+    // tap instead of returning to the top the way X/TikTok's own Home
+    // tab does. HomeScreen collects this and scrolls its active
+    // LazyListState (whichever of For You/Following is currently
+    // showing - HomeScreen only keeps one rememberLazyListState() live
+    // at a time) to the top; buffering one event means a tap that lands
+    // a beat before HomeScreen's collector starts still isn't lost.
+    val homeScrollToTopEvents = remember { MutableSharedFlow<Unit>(extraBufferCapacity = 1) }
+
     // Hoisted above the NavHost, not created inside NotificationsScreen's
     // own composable, so the badge survives navigating away from the
     // Notifications tab instead of resetting every time that screen
@@ -278,8 +293,9 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
     // (Home, Queue, and later Artist/Album/Playlist/Discover/Liked/
     // History), the native equivalent of the website's own
     // MusicPlayerProvider React context wrapping every /music/* page.
+    val appContext = LocalContext.current.applicationContext
     val musicPlayerViewModel: MusicPlayerViewModel = viewModel(
-        factory = remember { MusicPlayerViewModelFactory(MusicRepository()) },
+        factory = remember { MusicPlayerViewModelFactory(MusicRepository(), appContext) },
     )
 
     Scaffold(
@@ -293,6 +309,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     unreadBadgeViewModel.refresh()
                     unreadMessagesBadgeViewModel.refresh()
                 },
+                onHomeReselected = { homeScrollToTopEvents.tryEmit(Unit) },
             )
         },
     ) { innerPadding ->
@@ -315,6 +332,10 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onOpenQuotes = goToQuotes,
                     onOpenHashtag = goToHashtag,
                     onOpenVideoViewer = goToVideoViewer,
+                    onDiscoverCreators = goToExplorePeople,
+                    onExploreMusic = goToMusic,
+                    onExploreTopics = goToTrending,
+                    scrollToTopEvents = homeScrollToTopEvents,
                 )
             }
             composable(
@@ -484,6 +505,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                         userId = userId,
                         onClose = { navController.popBackStack() },
                         onAddStory = goToCreateStory,
+                        onOpenProfile = goToProfile,
                     )
                 }
             }
@@ -927,6 +949,8 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                     onOpenTerms = goToTerms,
                     onOpenPrivacyPolicy = goToPrivacyPolicy,
                     onOpenGuidelines = goToGuidelines,
+                    onOpenHelp = goToHelpCenter,
+                    onOpenContact = goToContact,
                 )
             }
             composable("settings/team") {
@@ -936,23 +960,37 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                 ApiKeysScreen(onBack = { navController.popBackStack() })
             }
             composable("legal/terms") {
-                LegalWebViewScreen(
-                    url = "https://zrp.one/terms",
+                LegalScreen(
+                    page = "terms",
                     title = stringResource(R.string.legal_terms),
                     onBack = { navController.popBackStack() },
                 )
             }
             composable("legal/privacy") {
-                LegalWebViewScreen(
-                    url = "https://zrp.one/privacy",
+                LegalScreen(
+                    page = "privacy",
                     title = stringResource(R.string.legal_privacy),
                     onBack = { navController.popBackStack() },
                 )
             }
             composable("legal/guidelines") {
-                LegalWebViewScreen(
-                    url = "https://zrp.one/guidelines",
+                LegalScreen(
+                    page = "guidelines",
                     title = stringResource(R.string.legal_guidelines),
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("legal/help") {
+                LegalScreen(
+                    page = "help",
+                    title = stringResource(R.string.legal_help),
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("legal/contact") {
+                LegalScreen(
+                    page = "contact",
+                    title = stringResource(R.string.legal_contact),
                     onBack = { navController.popBackStack() },
                 )
             }
@@ -1071,6 +1109,15 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
             composable(
                 route = "post/{postId}/comments",
                 arguments = listOf(navArgument("postId") { type = NavType.StringType }),
+                // Matches the real "/post/{postId}" path
+                // src/lib/push-notifications.ts's sendPushNotification
+                // callers already send as the FCM `url` data field for a
+                // like or comment notification (see
+                // ZrpFirebaseMessagingService's own deep-link tap intent)
+                // - this is the screen web's own /post/{postId} route
+                // opens to, same as every other real goToComments call
+                // elsewhere in this NavHost.
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/post/{postId}" }),
             ) { backStackEntry ->
                 val postId = backStackEntry.arguments?.getString("postId")
                 if (postId != null) {
@@ -1154,6 +1201,7 @@ private fun ZrpBottomBar(
     unreadMessageCount: Int,
     onNotificationsSelected: () -> Unit,
     onOtherTabSelected: () -> Unit,
+    onHomeReselected: () -> Unit,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
@@ -1170,6 +1218,15 @@ private fun ZrpBottomBar(
             NavigationBarItem(
                 selected = selected,
                 onClick = {
+                    // Re-tapping the tab you're already on is a
+                    // navigation no-op (see homeScrollToTopEvents' own
+                    // comment) - for Home specifically, that's the
+                    // signal to scroll the active feed back to the top
+                    // instead of doing anything nav-related.
+                    if (destination == ZrpDestination.Home && selected) {
+                        onHomeReselected()
+                        return@NavigationBarItem
+                    }
                     if (destination == ZrpDestination.Notifications) {
                         onNotificationsSelected()
                     } else {

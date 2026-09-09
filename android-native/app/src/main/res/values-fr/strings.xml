@@ -271,6 +271,10 @@
     <string name="post_unmute_video_cd">Réactiver le son de la vidéo</string>
     <string name="story_like_cd">Aimer la story</string>
     <string name="story_unlike_cd">Ne plus aimer la story</string>
+
+    <string name="story_mute_cd">Couper le son de la story</string>
+
+    <string name="story_unmute_cd">Activer le son de la story</string>
     <string name="comment_repost_cd">Republier</string>
     <string name="comment_undo_repost_cd">Annuler la republication</string>
     <string name="createpost_media_count_cd">%1$d/%2$d médias</string>
@@ -1124,6 +1128,8 @@
     <string name="shorts_upload_err_too_large_plan">Cette vidéo est trop volumineuse pour votre forfait. Essayez un fichier plus petit ou améliorez votre forfait.</string>
     <string name="shorts_upload_err_url_gen_failed">Impossible de démarrer le téléversement - il s\'agit généralement d\'un problème de connexion temporaire. Veuillez réessayer.</string>
     <string name="shorts_upload_err_internal_server">Une erreur s\'est produite de notre côté pendant le téléversement. Veuillez réessayer dans un instant.</string>
+    <string name="caption_view_more">Voir plus</string>
+    <string name="caption_view_less">Voir moins</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">Montant (USDC)</string>
     <string name="creator_available_balance">Solde disponible : {amount} $</string>
@@ -1507,7 +1513,29 @@
     <string name="legal_terms">Conditions d\'utilisation</string>
     <string name="legal_privacy">Politique de confidentialité</string>
     <string name="legal_guidelines">Règles de la communauté</string>
+    <string name="legal_help">Centre d\'aide</string>
+    <string name="legal_contact">Contact</string>
+    <string name="legal_load_error">Impossible de charger cette page. Vérifiez votre connexion et réessayez.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Inscrit(e) depuis</string>
     <string name="profile_charity_note">%1$s%% des bénéfices sont reversés à des associations caritatives</string>
+    <string name="profile_impact">Impact : %1$s $ reversés à la charité</string>
+    <string name="profile_milestone_years">%1$d ans sur ZRP</string>
+    <string name="profile_milestone_six_months">6 mois sur ZRP</string>
+    <string name="profile_milestone_new_member">Nouveau membre</string>
+    <string name="profile_milestone_posts_500">500+ publications</string>
+    <string name="profile_milestone_posts_100">100+ publications</string>
+    <string name="profile_milestone_posts_10">10+ publications</string>
+    <string name="profile_milestone_followers_1k">1K+ abonnés</string>
+    <string name="profile_milestone_followers_100">100+ abonnés</string>
+
+    <!-- Home feed empty / error states -->
+    <string name="home_empty_following_title">Votre fil Abonnements vous attend.</string>
+    <string name="home_empty_following_subtitle">Découvrez des personnes, de la musique et des sujets à suivre.</string>
+    <string name="feed_no_posts">Aucune publication pour le moment.</string>
+    <string name="feed_check_back_later">Revenez plus tard pour du contenu tendance.</string>
+    <string name="feed_retry">Réessayer</string>
+    <string name="home_cta_discover_creators">Découvrir des créateurs</string>
+    <string name="home_cta_explore_music">Explorer Music</string>
+    <string name="home_cta_explore_topics">Explorer les sujets</string>
 </resources>

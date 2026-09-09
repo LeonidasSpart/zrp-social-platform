@@ -106,7 +106,7 @@ fun AdCard(
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                     )
-                    VerifiedBadge(badgeType = post.author.badgeType, modifier = Modifier.padding(start = 3.dp))
+                    VerifiedBadge(badgeType = post.author.badgeType)
                 }
 
                 // The actual tracked, billed ad click.

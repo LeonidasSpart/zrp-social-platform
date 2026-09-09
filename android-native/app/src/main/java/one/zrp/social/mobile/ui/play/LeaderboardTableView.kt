@@ -58,7 +58,7 @@ fun LeaderboardTableView(entries: List<PlayLeaderboardEntry>, ownUserId: String?
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
-                        VerifiedBadge(badgeType = entry.user.badgeType, modifier = Modifier.padding(start = 2.dp))
+                        VerifiedBadge(badgeType = entry.user.badgeType)
                     }
                     Text(
                         text = stringResource(R.string.play_level, entry.level),

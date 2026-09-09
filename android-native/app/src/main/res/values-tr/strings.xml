@@ -271,6 +271,10 @@
     <string name="post_unmute_video_cd">Video sesini aç</string>
     <string name="story_like_cd">Hikayeyi beğen</string>
     <string name="story_unlike_cd">Hikaye beğenisini kaldır</string>
+
+    <string name="story_mute_cd">Hikaye sesini kapat</string>
+
+    <string name="story_unmute_cd">Hikaye sesini aç</string>
     <string name="comment_repost_cd">Yeniden paylaş</string>
     <string name="comment_undo_repost_cd">Yeniden paylaşımı geri al</string>
     <string name="createpost_media_count_cd">%1$d/%2$d medya</string>
@@ -1124,6 +1128,8 @@
     <string name="shorts_upload_err_too_large_plan">Bu video, planınız için çok büyük. Daha küçük bir dosya deneyin veya planınızı yükseltin.</string>
     <string name="shorts_upload_err_url_gen_failed">Yükleme başlatılamadı - bu genellikle geçici bir bağlantı sorunudur. Lütfen tekrar deneyin.</string>
     <string name="shorts_upload_err_internal_server">Yükleme sırasında bizim tarafımızda bir sorun oluştu. Lütfen birazdan tekrar deneyin.</string>
+    <string name="caption_view_more">Daha fazla göster</string>
+    <string name="caption_view_less">Daha az göster</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">Tutar (USDC)</string>
     <string name="creator_available_balance">Kullanılabilir bakiye: %1$s</string>
@@ -1507,7 +1513,29 @@
     <string name="legal_terms">Kullanım Koşulları</string>
     <string name="legal_privacy">Gizlilik Politikası</string>
     <string name="legal_guidelines">Topluluk Kuralları</string>
+    <string name="legal_help">Yardım Merkezi</string>
+    <string name="legal_contact">İletişim</string>
+    <string name="legal_load_error">Bu sayfa yüklenemedi. Bağlantınızı kontrol edip tekrar deneyin.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Katılma tarihi</string>
     <string name="profile_charity_note">Kârın %%%1$s\'si hayır kurumuna bağışlanıyor</string>
+    <string name="profile_impact">Etki: Hayır kurumuna %1$s $ bağışlandı</string>
+    <string name="profile_milestone_years">ZRP\'de %1$d yıl</string>
+    <string name="profile_milestone_six_months">ZRP\'de 6 ay</string>
+    <string name="profile_milestone_new_member">Yeni üye</string>
+    <string name="profile_milestone_posts_500">500+ gönderi</string>
+    <string name="profile_milestone_posts_100">100+ gönderi</string>
+    <string name="profile_milestone_posts_10">10+ gönderi</string>
+    <string name="profile_milestone_followers_1k">1K+ takipçi</string>
+    <string name="profile_milestone_followers_100">100+ takipçi</string>
+
+    <!-- Home feed empty / error states -->
+    <string name="home_empty_following_title">Takip edilenler akışın seni bekliyor.</string>
+    <string name="home_empty_following_subtitle">Takip edilecek kişileri, müziği ve konuları keşfet.</string>
+    <string name="feed_no_posts">Henüz gönderi yok.</string>
+    <string name="feed_check_back_later">Popüler içerikler için daha sonra tekrar kontrol edin.</string>
+    <string name="feed_retry">Yeniden Dene</string>
+    <string name="home_cta_discover_creators">İçerik üreticileri keşfet</string>
+    <string name="home_cta_explore_music">Music\'i keşfet</string>
+    <string name="home_cta_explore_topics">Konuları keşfet</string>
 </resources>

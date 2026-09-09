@@ -20,6 +20,7 @@ import {
   HeartHandshake,
   Wallet,
   Music2,
+  Rss,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
@@ -63,9 +64,14 @@ export default function AdminLayout({
   const isFullAdmin =
     session?.user?.isAdmin || session?.user?.role === "ADMIN";
 
+  // `label` carries a literal string for entries whose name is a ZRP
+  // product name rather than translatable copy ("ZRP News Network"),
+  // the same way a product name is not translated anywhere else in the
+  // app. Everything else keeps using the shared dictionary.
   const navItems: Array<{
     href: string;
-    labelKey: TranslationKey;
+    labelKey?: TranslationKey;
+    label?: string;
     icon: typeof LayoutDashboard;
   }> = [
     {
@@ -87,6 +93,11 @@ export default function AdminLayout({
       href: "/admin/news",
       labelKey: "nav.news",
       icon: Newspaper,
+    },
+    {
+      href: "/admin/news-network",
+      label: "ZRP News Network",
+      icon: Rss,
     },
     {
       href: "/admin/journalists",
@@ -182,7 +193,7 @@ export default function AdminLayout({
                   >
                     <item.icon className="h-5 w-5" />
 
-                    <span>{t(item.labelKey)}</span>
+                    <span>{item.labelKey ? t(item.labelKey) : item.label}</span>
                   </Link>
                 );
               })}
@@ -191,7 +202,7 @@ export default function AdminLayout({
         </aside>
 
         {/* Main Content */}
-        <main className="min-w-0 flex-1">{children}</main>
+        <div className="min-w-0 flex-1">{children}</div>
       </div>
     </div>
   );

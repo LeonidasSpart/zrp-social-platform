@@ -72,6 +72,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
@@ -97,6 +98,7 @@ import one.zrp.social.mobile.network.TranslateRequest
 import one.zrp.social.mobile.ui.components.AddReactionDialog
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.LinkifiedText
+import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.TouchTarget
@@ -132,6 +134,9 @@ private val videoExtensions = setOf(
 // Wikipedia-style .../wiki/Example_(disambiguation) link intact.
 private val FIRST_URL_REGEX = Regex("""(https?://\S+)|(www\.\S+)""")
 private val FIRST_URL_TRAILING_PUNCTUATION = Regex("""[.,!?;:'"\]}]+$""")
+
+// Matches PostCard.tsx's own CONTENT_TRUNCATE_LENGTH exactly.
+private const val POST_CONTENT_TRUNCATE_LENGTH = 280
 
 private fun extractFirstUrl(content: String): String? {
     val match = FIRST_URL_REGEX.find(content) ?: return null
@@ -261,6 +266,7 @@ fun PostCard(
     var showTranslation by remember(post.id) { mutableStateOf(false) }
     var translating by remember(post.id) { mutableStateOf(false) }
     var translateError by remember(post.id) { mutableStateOf(false) }
+    var contentExpanded by remember(post.id) { mutableStateOf(false) }
 
     fun handleTranslate() {
         if (translatedText != null) {
@@ -398,7 +404,7 @@ fun PostCard(
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
                         )
-                        VerifiedBadge(badgeType = post.author.badgeType, modifier = Modifier.padding(start = 3.dp))
+                        VerifiedBadge(badgeType = post.author.badgeType)
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "@${post.author.username}",
@@ -464,8 +470,21 @@ fun PostCard(
                 }
 
                 if (post.content.isNotBlank()) {
+                    // Matches PostCard.tsx's own CONTENT_TRUNCATE_LENGTH
+                    // (280) exactly - the full post.content is always
+                    // kept in memory and passed to every action below
+                    // (edit, translate, share); only the rendered text
+                    // is ever shortened, and only until Show more is
+                    // tapped. Previously this rendered the entire
+                    // content unclamped, unlike every other ZRP surface.
+                    val isLongContent = post.content.length > POST_CONTENT_TRUNCATE_LENGTH
+                    val displayedContent = if (isLongContent && !contentExpanded) {
+                        post.content.take(POST_CONTENT_TRUNCATE_LENGTH) + "..."
+                    } else {
+                        post.content
+                    }
                     LinkifiedText(
-                        text = post.content,
+                        text = displayedContent,
                         style = MaterialTheme.typography.bodyMedium,
                         onMentionClick = onAuthorClick,
                         onHashtagClick = onHashtagClick,
@@ -473,6 +492,19 @@ fun PostCard(
                         suppressUrl = if (linkPreviewFound) previewUrl else null,
                         modifier = Modifier.padding(top = 4.dp),
                     )
+                    if (isLongContent) {
+                        // Byte-for-byte match of web's own hardcoded,
+                        // untranslated "Show more"/"Show less" copy -
+                        // see this file's own localization note above.
+                        Text(
+                            text = if (contentExpanded) "Show less" else "Show more",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = ZrpRed,
+                            modifier = Modifier
+                                .padding(top = 1.dp)
+                                .clickable { contentExpanded = !contentExpanded },
+                        )
+                    }
                 }
 
                 if (isVideo && post.imageUrl != null) {
@@ -730,11 +762,19 @@ private fun ImageLightbox(images: List<String>, initialIndex: Int, onDismiss: ()
         val pagerState = rememberPagerState(initialPage = initialIndex) { images.size }
         Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
             HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+                // Tap the image again to close, matching how every other
+                // mobile image viewer behaves - previously the only way
+                // out was the small top-right X, which meant scrolling
+                // all the way back up to reach it. clickable's tap
+                // gesture doesn't fight the pager's own drag-to-swipe
+                // gesture, so swiping between images is unaffected.
                 AsyncImage(
                     model = images[page],
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(onClick = onDismiss),
                 )
             }
             Row(
@@ -800,7 +840,26 @@ private fun PostVideoPlayer(url: String, onOpenViewer: () -> Unit, modifier: Mod
         val listener = object : Player.Listener {
             override fun onVideoSizeChanged(videoSize: VideoSize) {
                 if (videoSize.width > 0 && videoSize.height > 0) {
-                    aspectRatio = (videoSize.width.toFloat() / videoSize.height.toFloat())
+                    // VideoSize.width/height are the CODED frame
+                    // dimensions, not the displayed ones - a phone
+                    // shot vertically is very often encoded as a
+                    // landscape frame plus a 90/270 rotation flag
+                    // (unappliedRotationDegrees), meant to be rotated
+                    // at render time. PlayerView's own internal
+                    // AspectRatioFrameLayout already accounts for this
+                    // when it fits the actual video surface, but this
+                    // state feeds the OUTER Compose Box's shape - left
+                    // unrotated, that Box came out landscape-shaped for
+                    // a portrait video, and RESIZE_MODE_FIT then had no
+                    // choice but to shrink the correctly-rotated video
+                    // way down to fit inside it, letterboxed on both
+                    // sides: the exact "video is tiny inside a huge
+                    // black area" bug, and exactly why it only hit
+                    // certain videos - the ones with rotation metadata.
+                    val rotated = videoSize.unappliedRotationDegrees == 90 || videoSize.unappliedRotationDegrees == 270
+                    val displayWidth = if (rotated) videoSize.height else videoSize.width
+                    val displayHeight = if (rotated) videoSize.width else videoSize.height
+                    aspectRatio = displayWidth.toFloat() / displayHeight.toFloat()
                 }
             }
         }
@@ -978,14 +1037,17 @@ private fun QuotedPostPreview(quotedPost: Post, onClick: () -> Unit) {
                 text = quotedPost.author.name ?: quotedPost.author.username,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = Spacing.xs),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .padding(start = Spacing.xs)
+                    .weight(1f, fill = false),
             )
-            VerifiedBadge(badgeType = quotedPost.author.badgeType, size = 14.dp, modifier = Modifier.padding(start = 2.dp))
+            VerifiedBadge(badgeType = quotedPost.author.badgeType, size = BadgeSize.small)
             Text(
                 text = "@${quotedPost.author.username}",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = Spacing.xs),
             )
         }
         if (quotedPost.content.isNotBlank()) {

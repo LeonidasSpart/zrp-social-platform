@@ -20,6 +20,7 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Favorite
@@ -48,13 +49,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.NotificationsRepository
 import one.zrp.social.mobile.network.PostAuthor
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.VerifiedBadge
+import one.zrp.social.mobile.ui.components.ZrpEmptyState
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpBlue
 import one.zrp.social.mobile.ui.theme.ZrpGreen
@@ -136,21 +140,16 @@ fun NotificationsScreen(
                                 modifier = Modifier.padding(24.dp),
                             )
                         } else {
-                            // Matches the website's own two-line empty state
-                            // (notifications.empty + notifications.emptyDesc).
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text = stringResource(R.string.notifications_empty),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    style = MaterialTheme.typography.titleSmall,
-                                )
-                                Text(
-                                    text = stringResource(R.string.notifications_empty_desc),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.padding(top = 4.dp),
-                                )
-                            }
+                            // The website's same two-line empty state
+                            // (notifications.empty + notifications.emptyDesc),
+                            // now through the shared ZrpEmptyState so it is
+                            // composed like every other empty screen in the
+                            // app rather than as its own bare column.
+                            ZrpEmptyState(
+                                icon = Icons.Filled.NotificationsNone,
+                                title = stringResource(R.string.notifications_empty),
+                                body = stringResource(R.string.notifications_empty_desc),
+                            )
                         }
                     }
                 }
@@ -314,11 +313,17 @@ private fun NotificationRow(
                     text = primaryUser?.name ?: primaryUser?.username ?: "Someone",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
+                // This row continues with more text after the badge
+                // ("liked your post"), so unlike every other usage it
+                // needs a gap on both sides.
                 VerifiedBadge(
                     badgeType = primaryUser?.badgeType,
-                    size = 14.dp,
-                    modifier = Modifier.padding(start = 3.dp, end = 3.dp),
+                    size = BadgeSize.small,
+                    trailingGap = Spacing.xs,
                 )
                 Text(
                     text = describeNotificationSuffix(group.type, others),
@@ -350,12 +355,12 @@ private fun NotificationRow(
                     enabled = followBackState == null,
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = Spacing.md, vertical = 4.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (followBackState == FollowBackState.DONE) {
+                        containerColor = if (followBackState == FollowBackState.DONE || followBackState == FollowBackState.REQUESTED) {
                             MaterialTheme.colorScheme.surfaceContainerHigh
                         } else {
                             ZrpRed
                         },
-                        contentColor = if (followBackState == FollowBackState.DONE) {
+                        contentColor = if (followBackState == FollowBackState.DONE || followBackState == FollowBackState.REQUESTED) {
                             MaterialTheme.colorScheme.onSurface
                         } else {
                             ZrpWhite
@@ -367,7 +372,11 @@ private fun NotificationRow(
                         CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp, color = ZrpWhite)
                     } else {
                         Text(
-                            text = if (followBackState == FollowBackState.DONE) "Following" else "Follow back",
+                            text = when (followBackState) {
+                                FollowBackState.DONE -> "Following"
+                                FollowBackState.REQUESTED -> "Requested"
+                                else -> "Follow back"
+                            },
                             style = MaterialTheme.typography.labelMedium,
                         )
                     }
