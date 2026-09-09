@@ -1724,4 +1724,51 @@
     <string name="home_cta_discover_creators">Найти авторов</string>
     <string name="home_cta_explore_music">Открыть Music</string>
     <string name="home_cta_explore_topics">Изучить темы</string>
+
+    <!-- Admin: ZRP News editorial desk (AdminNewsScreen) - ported from
+         src/app/admin/news/page.tsx, driving the real /api/admin/news
+         routes. Wording taken from that page's own translation keys. -->
+    <string name="admin_news_subtitle">Создавайте, редактируйте и управляйте статьями ZRP News.</string>
+    <string name="admin_news_new_article">Новая статья</string>
+    <string name="admin_news_stat_total_articles">Всего статей</string>
+    <string name="admin_news_stat_published_on_page">Опубликовано на странице</string>
+    <string name="admin_news_stat_drafts_on_page">Черновиков на странице</string>
+    <string name="admin_news_search_placeholder">Поиск по заголовку, слагу или содержанию...</string>
+    <string name="admin_news_all_statuses">Все статусы</string>
+    <string name="admin_news_all_categories">Все категории</string>
+    <string name="admin_news_no_articles_found">Статьи не найдены</string>
+    <string name="admin_news_create_first_article">Создайте свою первую статью ZRP News.</string>
+    <string name="admin_news_create_article_button">Создать статью</string>
+    <string name="admin_news_by_author">автор: %1$s</string>
+    <string name="admin_news_approve_title">Одобрить и опубликовать</string>
+    <string name="admin_news_reject_title">Отклонить материал</string>
+    <string name="admin_news_view_article_title">Просмотреть статью</string>
+    <string name="admin_news_edit_article_title">Редактировать статью</string>
+    <string name="admin_news_delete_article_title">Удалить статью</string>
+    <string name="admin_news_feedback_prefix">Отзыв: %1$s</string>
+    <string name="admin_news_edit_title">Редактировать статью</string>
+    <string name="admin_news_create_title">Создать статью</string>
+    <string name="admin_news_editing_slug">Редактирование %1$s</string>
+    <string name="admin_news_publish_new_desc">Опубликуйте новую статью в ZRP News.</string>
+    <string name="admin_news_cover_image_url_label">URL обложки</string>
+    <string name="admin_news_url_placeholder">https://...</string>
+    <string name="admin_news_author_id_label">ID автора</string>
+    <string name="admin_news_author_id_placeholder">ID пользователя-автора статьи</string>
+    <string name="admin_news_author_id_hint">Используйте существующий ID пользователя ZRP для редакционного автора.</string>
+    <string name="admin_news_published_at_label">Опубликовано</string>
+    <string name="admin_news_featured_title">Рекомендуемая статья</string>
+    <string name="admin_news_featured_desc">Показывать эту статью как рекомендуемую на ZRP News.</string>
+    <string name="admin_news_saving">Сохранение...</string>
+    <string name="admin_news_update_article">Обновить статью</string>
+    <string name="admin_news_err_content_required">Содержание обязательно.</string>
+    <string name="admin_news_err_author_id_required">ID автора обязателен.</string>
+    <string name="admin_news_confirm_delete">Удалить «%1$s»?\n\nЭто действие нельзя отменить.</string>
+    <string name="admin_news_prompt_reject_feedback">Отзыв для журналиста (виден ему, необязательно):</string>
+    <string name="admin_news_not_published">Не опубликовано</string>
+    <string name="admin_news_success_created">Статья успешно создана.</string>
+    <string name="admin_news_success_updated">Статья успешно обновлена.</string>
+    <string name="admin_news_success_deleted">Статья успешно удалена.</string>
+    <string name="admin_news_success_approved_published">Статья одобрена и опубликована.</string>
+    <string name="admin_news_success_sent_back">Статья возвращена журналисту.</string>
+    <string name="admin_dash_manage_news">Управление новостями</string>
 </resources>

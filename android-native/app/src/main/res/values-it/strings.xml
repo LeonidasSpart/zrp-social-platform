@@ -1724,4 +1724,51 @@
     <string name="home_cta_discover_creators">Scopri creator</string>
     <string name="home_cta_explore_music">Esplora Music</string>
     <string name="home_cta_explore_topics">Esplora argomenti</string>
+
+    <!-- Admin: ZRP News editorial desk (AdminNewsScreen) - ported from
+         src/app/admin/news/page.tsx, driving the real /api/admin/news
+         routes. Wording taken from that page's own translation keys. -->
+    <string name="admin_news_subtitle">Crea, modifica e gestisci gli articoli di ZRP News.</string>
+    <string name="admin_news_new_article">Nuovo articolo</string>
+    <string name="admin_news_stat_total_articles">Articoli totali</string>
+    <string name="admin_news_stat_published_on_page">Pubblicati nella pagina</string>
+    <string name="admin_news_stat_drafts_on_page">Bozze nella pagina</string>
+    <string name="admin_news_search_placeholder">Cerca titolo, slug o contenuto...</string>
+    <string name="admin_news_all_statuses">Tutti gli stati</string>
+    <string name="admin_news_all_categories">Tutte le categorie</string>
+    <string name="admin_news_no_articles_found">Nessun articolo trovato</string>
+    <string name="admin_news_create_first_article">Crea il tuo primo articolo di ZRP News.</string>
+    <string name="admin_news_create_article_button">Crea articolo</string>
+    <string name="admin_news_by_author">di %1$s</string>
+    <string name="admin_news_approve_title">Approva e pubblica</string>
+    <string name="admin_news_reject_title">Rifiuta l\'invio</string>
+    <string name="admin_news_view_article_title">Visualizza articolo</string>
+    <string name="admin_news_edit_article_title">Modifica articolo</string>
+    <string name="admin_news_delete_article_title">Elimina articolo</string>
+    <string name="admin_news_feedback_prefix">Feedback: %1$s</string>
+    <string name="admin_news_edit_title">Modifica articolo di notizie</string>
+    <string name="admin_news_create_title">Crea articolo di notizie</string>
+    <string name="admin_news_editing_slug">Modifica di %1$s</string>
+    <string name="admin_news_publish_new_desc">Pubblica un nuovo articolo su ZRP News.</string>
+    <string name="admin_news_cover_image_url_label">URL immagine di copertina</string>
+    <string name="admin_news_url_placeholder">https://...</string>
+    <string name="admin_news_author_id_label">ID dell\'autore</string>
+    <string name="admin_news_author_id_placeholder">ID utente dell\'autore dell\'articolo</string>
+    <string name="admin_news_author_id_hint">Usa l\'ID utente ZRP esistente per l\'autore editoriale.</string>
+    <string name="admin_news_published_at_label">Pubblicato il</string>
+    <string name="admin_news_featured_title">Articolo in evidenza</string>
+    <string name="admin_news_featured_desc">Mostra questo articolo come storia in evidenza su ZRP News.</string>
+    <string name="admin_news_saving">Salvataggio in corso...</string>
+    <string name="admin_news_update_article">Aggiorna articolo</string>
+    <string name="admin_news_err_content_required">Il contenuto è obbligatorio.</string>
+    <string name="admin_news_err_author_id_required">L\'ID dell\'autore è obbligatorio.</string>
+    <string name="admin_news_confirm_delete">Eliminare \"%1$s\"?\n\nQuesta azione non può essere annullata.</string>
+    <string name="admin_news_prompt_reject_feedback">Feedback per il giornalista (visibile a lui, facoltativo):</string>
+    <string name="admin_news_not_published">Non pubblicato</string>
+    <string name="admin_news_success_created">Articolo di notizie creato con successo.</string>
+    <string name="admin_news_success_updated">Articolo di notizie aggiornato con successo.</string>
+    <string name="admin_news_success_deleted">Articolo di notizie eliminato con successo.</string>
+    <string name="admin_news_success_approved_published">Articolo approvato e pubblicato.</string>
+    <string name="admin_news_success_sent_back">Articolo rimandato al giornalista.</string>
+    <string name="admin_dash_manage_news">Gestisci notizie</string>
 </resources>

@@ -1724,4 +1724,51 @@
     <string name="home_cta_discover_creators">اكتشف المبدعين</string>
     <string name="home_cta_explore_music">استكشف Music</string>
     <string name="home_cta_explore_topics">استكشف المواضيع</string>
+
+    <!-- Admin: ZRP News editorial desk (AdminNewsScreen) - ported from
+         src/app/admin/news/page.tsx, driving the real /api/admin/news
+         routes. Wording taken from that page's own translation keys. -->
+    <string name="admin_news_subtitle">أنشئ مقالات أخبار ZRP وحرّرها وأدرها.</string>
+    <string name="admin_news_new_article">مقال جديد</string>
+    <string name="admin_news_stat_total_articles">إجمالي المقالات</string>
+    <string name="admin_news_stat_published_on_page">المنشورة في الصفحة</string>
+    <string name="admin_news_stat_drafts_on_page">المسودات في الصفحة</string>
+    <string name="admin_news_search_placeholder">ابحث بالعنوان أو الرابط المختصر أو المحتوى...</string>
+    <string name="admin_news_all_statuses">جميع الحالات</string>
+    <string name="admin_news_all_categories">جميع الفئات</string>
+    <string name="admin_news_no_articles_found">لم يتم العثور على مقالات</string>
+    <string name="admin_news_create_first_article">أنشئ أول مقال لك في أخبار ZRP.</string>
+    <string name="admin_news_create_article_button">إنشاء مقال</string>
+    <string name="admin_news_by_author">بواسطة %1$s</string>
+    <string name="admin_news_approve_title">الموافقة والنشر</string>
+    <string name="admin_news_reject_title">رفض الإرسال</string>
+    <string name="admin_news_view_article_title">عرض المقال</string>
+    <string name="admin_news_edit_article_title">تعديل المقال</string>
+    <string name="admin_news_delete_article_title">حذف المقال</string>
+    <string name="admin_news_feedback_prefix">ملاحظات: %1$s</string>
+    <string name="admin_news_edit_title">تعديل مقال الأخبار</string>
+    <string name="admin_news_create_title">إنشاء مقال أخبار</string>
+    <string name="admin_news_editing_slug">تعديل %1$s</string>
+    <string name="admin_news_publish_new_desc">انشر مقالًا جديدًا على أخبار ZRP.</string>
+    <string name="admin_news_cover_image_url_label">رابط صورة الغلاف</string>
+    <string name="admin_news_url_placeholder">https://...</string>
+    <string name="admin_news_author_id_label">معرّف الكاتب</string>
+    <string name="admin_news_author_id_placeholder">معرّف المستخدم لكاتب المقال</string>
+    <string name="admin_news_author_id_hint">استخدم معرّف مستخدم ZRP موجود للكاتب التحريري.</string>
+    <string name="admin_news_published_at_label">تاريخ النشر</string>
+    <string name="admin_news_featured_title">مقال مميز</string>
+    <string name="admin_news_featured_desc">عرض هذا المقال كقصة مميزة على أخبار ZRP.</string>
+    <string name="admin_news_saving">جارٍ الحفظ...</string>
+    <string name="admin_news_update_article">تحديث المقال</string>
+    <string name="admin_news_err_content_required">المحتوى مطلوب.</string>
+    <string name="admin_news_err_author_id_required">معرّف الكاتب مطلوب.</string>
+    <string name="admin_news_confirm_delete">هل تريد حذف \"%1$s\"؟\n\nلا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="admin_news_prompt_reject_feedback">ملاحظات للصحفي (تظهر له، اختياري):</string>
+    <string name="admin_news_not_published">غير منشور</string>
+    <string name="admin_news_success_created">تم إنشاء مقال الأخبار بنجاح.</string>
+    <string name="admin_news_success_updated">تم تحديث مقال الأخبار بنجاح.</string>
+    <string name="admin_news_success_deleted">تم حذف مقال الأخبار بنجاح.</string>
+    <string name="admin_news_success_approved_published">تمت الموافقة على المقال ونشره.</string>
+    <string name="admin_news_success_sent_back">تم إرجاع المقال إلى الصحفي.</string>
+    <string name="admin_dash_manage_news">إدارة الأخبار</string>
 </resources>

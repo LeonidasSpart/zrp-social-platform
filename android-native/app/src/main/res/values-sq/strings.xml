@@ -1724,4 +1724,51 @@
     <string name="home_cta_discover_creators">Zbuloni krijues</string>
     <string name="home_cta_explore_music">Eksploro Music</string>
     <string name="home_cta_explore_topics">Eksploro temat</string>
+
+    <!-- Admin: ZRP News editorial desk (AdminNewsScreen) - ported from
+         src/app/admin/news/page.tsx, driving the real /api/admin/news
+         routes. Wording taken from that page's own translation keys. -->
+    <string name="admin_news_subtitle">Krijo, redakto dhe menaxho artikujt e ZRP News.</string>
+    <string name="admin_news_new_article">Artikull i Ri</string>
+    <string name="admin_news_stat_total_articles">Artikuj Gjithsej</string>
+    <string name="admin_news_stat_published_on_page">Të Publikuar në Faqe</string>
+    <string name="admin_news_stat_drafts_on_page">Draftet në Faqe</string>
+    <string name="admin_news_search_placeholder">Kërko titull, slug ose përmbajtje...</string>
+    <string name="admin_news_all_statuses">Të gjitha Statuset</string>
+    <string name="admin_news_all_categories">Të gjitha Kategoritë</string>
+    <string name="admin_news_no_articles_found">Nuk u gjetën artikuj</string>
+    <string name="admin_news_create_first_article">Krijo artikullin tënd të parë të ZRP News.</string>
+    <string name="admin_news_create_article_button">Krijo Artikull</string>
+    <string name="admin_news_by_author">nga %1$s</string>
+    <string name="admin_news_approve_title">Aprovo dhe publiko</string>
+    <string name="admin_news_reject_title">Refuzo dorëzimin</string>
+    <string name="admin_news_view_article_title">Shiko artikullin</string>
+    <string name="admin_news_edit_article_title">Redakto artikullin</string>
+    <string name="admin_news_delete_article_title">Fshi artikullin</string>
+    <string name="admin_news_feedback_prefix">Feedback: %1$s</string>
+    <string name="admin_news_edit_title">Redakto Artikullin e Lajmeve</string>
+    <string name="admin_news_create_title">Krijo Artikull Lajmesh</string>
+    <string name="admin_news_editing_slug">Duke redaktuar %1$s</string>
+    <string name="admin_news_publish_new_desc">Publiko një artikull të ri në ZRP News.</string>
+    <string name="admin_news_cover_image_url_label">URL e Fotos Kryesore</string>
+    <string name="admin_news_url_placeholder">https://...</string>
+    <string name="admin_news_author_id_label">ID e Autorit</string>
+    <string name="admin_news_author_id_placeholder">ID e përdoruesit të autorit të artikullit</string>
+    <string name="admin_news_author_id_hint">Përdor ID-në ekzistuese të përdoruesit ZRP për autorin editorial.</string>
+    <string name="admin_news_published_at_label">Publikuar Më</string>
+    <string name="admin_news_featured_title">Artikull i veçuar</string>
+    <string name="admin_news_featured_desc">Shfaq këtë artikull si histori të veçuar në ZRP News.</string>
+    <string name="admin_news_saving">Duke ruajtur...</string>
+    <string name="admin_news_update_article">Përditëso Artikullin</string>
+    <string name="admin_news_err_content_required">Përmbajtja është e detyrueshme.</string>
+    <string name="admin_news_err_author_id_required">ID e autorit është e detyrueshme.</string>
+    <string name="admin_news_confirm_delete">Të fshihet \"%1$s\"?\n\nKy veprim nuk mund të zhbëhet.</string>
+    <string name="admin_news_prompt_reject_feedback">Feedback për gazetarin (i shfaqet atij, opsional):</string>
+    <string name="admin_news_not_published">I papublikuar</string>
+    <string name="admin_news_success_created">Artikulli i lajmeve u krijua me sukses.</string>
+    <string name="admin_news_success_updated">Artikulli i lajmeve u përditësua me sukses.</string>
+    <string name="admin_news_success_deleted">Artikulli i lajmeve u fshi me sukses.</string>
+    <string name="admin_news_success_approved_published">Artikulli u aprovua dhe u publikua.</string>
+    <string name="admin_news_success_sent_back">Artikulli iu dërgua përsëri gazetarit.</string>
+    <string name="admin_dash_manage_news">Menaxho Lajmet</string>
 </resources>

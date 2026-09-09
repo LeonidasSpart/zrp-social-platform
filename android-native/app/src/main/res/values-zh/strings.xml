@@ -1724,4 +1724,51 @@
     <string name="home_cta_discover_creators">发现创作者</string>
     <string name="home_cta_explore_music">探索 Music</string>
     <string name="home_cta_explore_topics">探索话题</string>
+
+    <!-- Admin: ZRP News editorial desk (AdminNewsScreen) - ported from
+         src/app/admin/news/page.tsx, driving the real /api/admin/news
+         routes. Wording taken from that page's own translation keys. -->
+    <string name="admin_news_subtitle">创建、编辑和管理 ZRP 新闻文章。</string>
+    <string name="admin_news_new_article">新建文章</string>
+    <string name="admin_news_stat_total_articles">文章总数</string>
+    <string name="admin_news_stat_published_on_page">本页已发布</string>
+    <string name="admin_news_stat_drafts_on_page">本页草稿</string>
+    <string name="admin_news_search_placeholder">搜索标题、短链接或内容...</string>
+    <string name="admin_news_all_statuses">所有状态</string>
+    <string name="admin_news_all_categories">所有分类</string>
+    <string name="admin_news_no_articles_found">未找到文章</string>
+    <string name="admin_news_create_first_article">创建您的第一篇 ZRP 新闻文章。</string>
+    <string name="admin_news_create_article_button">创建文章</string>
+    <string name="admin_news_by_author">作者：%1$s</string>
+    <string name="admin_news_approve_title">批准并发布</string>
+    <string name="admin_news_reject_title">拒绝投稿</string>
+    <string name="admin_news_view_article_title">查看文章</string>
+    <string name="admin_news_edit_article_title">编辑文章</string>
+    <string name="admin_news_delete_article_title">删除文章</string>
+    <string name="admin_news_feedback_prefix">反馈：%1$s</string>
+    <string name="admin_news_edit_title">编辑新闻文章</string>
+    <string name="admin_news_create_title">创建新闻文章</string>
+    <string name="admin_news_editing_slug">正在编辑 %1$s</string>
+    <string name="admin_news_publish_new_desc">在 ZRP 新闻上发布新文章。</string>
+    <string name="admin_news_cover_image_url_label">封面图片链接</string>
+    <string name="admin_news_url_placeholder">https://...</string>
+    <string name="admin_news_author_id_label">作者 ID</string>
+    <string name="admin_news_author_id_placeholder">文章作者的用户 ID</string>
+    <string name="admin_news_author_id_hint">使用现有 ZRP 用户 ID 作为编辑作者。</string>
+    <string name="admin_news_published_at_label">发布时间</string>
+    <string name="admin_news_featured_title">精选文章</string>
+    <string name="admin_news_featured_desc">将此文章显示为 ZRP 新闻的精选故事。</string>
+    <string name="admin_news_saving">保存中...</string>
+    <string name="admin_news_update_article">更新文章</string>
+    <string name="admin_news_err_content_required">内容为必填项。</string>
+    <string name="admin_news_err_author_id_required">作者 ID 为必填项。</string>
+    <string name="admin_news_confirm_delete">删除“%1$s”？\n\n此操作无法撤销。</string>
+    <string name="admin_news_prompt_reject_feedback">给记者的反馈（将展示给记者，可选）：</string>
+    <string name="admin_news_not_published">未发布</string>
+    <string name="admin_news_success_created">新闻文章创建成功。</string>
+    <string name="admin_news_success_updated">新闻文章更新成功。</string>
+    <string name="admin_news_success_deleted">新闻文章删除成功。</string>
+    <string name="admin_news_success_approved_published">文章已批准并发布。</string>
+    <string name="admin_news_success_sent_back">文章已退回给记者。</string>
+    <string name="admin_dash_manage_news">管理新闻</string>
 </resources>
