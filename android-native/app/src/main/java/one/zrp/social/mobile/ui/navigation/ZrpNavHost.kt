@@ -49,6 +49,7 @@ import one.zrp.social.mobile.ui.admin.AdminHelpScreen
 import one.zrp.social.mobile.ui.admin.AdminJournalistsScreen
 import one.zrp.social.mobile.ui.admin.AdminMarketplaceScreen
 import one.zrp.social.mobile.ui.admin.AdminMusicArtistsScreen
+import one.zrp.social.mobile.ui.admin.AdminNewsNetworkScreen
 import one.zrp.social.mobile.ui.admin.AdminNewsScreen
 import one.zrp.social.mobile.ui.admin.AdminOpportunityScreen
 import one.zrp.social.mobile.ui.admin.AdminPaymentsScreen
@@ -275,6 +276,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     val goToAdminPayments: () -> Unit = { navController.navigate("admin/payments") }
     val goToAdminWithdrawals: () -> Unit = { navController.navigate("admin/withdrawals") }
     val goToAdminUpgradeRequests: () -> Unit = { navController.navigate("admin/upgrade-requests") }
+    val goToAdminNewsNetwork: () -> Unit = { navController.navigate("admin/news-network") }
     val goToTerms: () -> Unit = { navController.navigate("legal/terms") }
     val goToPrivacyPolicy: () -> Unit = { navController.navigate("legal/privacy") }
     val goToGuidelines: () -> Unit = { navController.navigate("legal/guidelines") }
@@ -1169,6 +1171,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenPayments = goToAdminPayments,
                     onOpenWithdrawals = goToAdminWithdrawals,
                     onOpenUpgradeRequests = goToAdminUpgradeRequests,
+                    onOpenNewsNetwork = goToAdminNewsNetwork,
                 )
             }
             composable("admin/reports") {
@@ -1253,6 +1256,23 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
             }
             composable("admin/upgrade-requests") {
                 AdminUpgradeRequestsScreen(isAdmin = isAdminRole, onBack = { navController.popBackStack() })
+            }
+            // The News Network console (the automated editorial
+            // pipeline, not the /admin/news article CMS). Its five reads
+            // are requireStaff but every action it offers - pausing,
+            // running a cycle, provisioning feeds, enabling a source,
+            // rejecting or correcting a story, removing a published post
+            // - is requireAdmin, so it takes the same isAdmin flag the
+            // financial queues do. A published post opens in the app's
+            // own post view and a feed's account in its own profile:
+            // nothing here hands off to a browser.
+            composable("admin/news-network") {
+                AdminNewsNetworkScreen(
+                    isAdmin = isAdminRole,
+                    onBack = { navController.popBackStack() },
+                    onOpenPost = goToComments,
+                    onOpenProfile = goToProfile,
+                )
             }
             composable(
                 route = "admin/support/{id}",

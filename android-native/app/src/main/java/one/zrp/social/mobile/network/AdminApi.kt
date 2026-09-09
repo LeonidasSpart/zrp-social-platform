@@ -1,12 +1,16 @@
 package one.zrp.social.mobile.network
 
 import com.google.gson.JsonElement
+import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.HTTP
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -857,6 +861,390 @@ data class UpdateUserPlanRequest(val plan: String)
 // AdminUser, whose non-null fields Gson would leave unset.
 data class AdminUserPlanResponse(val id: String, val username: String, val plan: String)
 
+// ─── News Network (/admin/news-network) ──────────────────────────────
+// The automated editorial pipeline: RSS/source ingestion -> story
+// clustering -> per-language summaries -> scheduled publication to
+// provisioned editorial feed accounts. This is NOT the journalist news
+// CMS (/admin/news, NewsArticle) - a different feature on different
+// models entirely.
+//
+// Auth here is deliberately split and NOT uniform: every read
+// (status/feeds/sources/stories/publications) is requireStaff, while
+// every write - pausing automation, running a cycle, provisioning feeds,
+// enabling a feed or source, seeding/verifying sources, rejecting or
+// correcting a story, removing a publication - is requireAdmin. The GET
+// half of the settings route is the one read that is requireAdmin too,
+// which is why nothing here calls it: the same values it returns already
+// come back inside the status response, under requireStaff.
+//
+// Every date is a Prisma DateTime serialised as an ISO-8601 string, and
+// every enum arrives as its real UPPERCASE Prisma value.
+
+data class AdminNewsAutomationStatus(
+    val paused: Boolean = true,
+    val lastCycleAt: String? = null,
+    val nextCycleAt: String? = null,
+    val requireHumanReviewForSensitive: Boolean = true,
+    val enabledLanguages: List<String> = emptyList(),
+    val maxPublicationsPerCycle: Int = 0,
+    val maxPublicationsPerDay: Int = 0,
+    val minMinutesBetweenPublications: Int = 0,
+)
+
+// The whole NewsJobRun row (the route sends findFirst() unfiltered), of
+// which the console reads the status and, on a FAILED run, the error.
+data class AdminNewsJobRun(
+    val id: String,
+    val trigger: String? = null,
+    val status: String,
+    val startedAt: String,
+    val finishedAt: String? = null,
+    val sourcesFetched: Int = 0,
+    val sourcesFailed: Int = 0,
+    val itemsIngested: Int = 0,
+    val storiesCreated: Int = 0,
+    val duplicatesPrevented: Int = 0,
+    val renditionsGenerated: Int = 0,
+    val renditionsFailed: Int = 0,
+    val published: Int = 0,
+    val publishFailures: Int = 0,
+    val error: String? = null,
+)
+
+data class AdminNewsFeedCounts(val total: Int = 0, val enabled: Int = 0)
+data class AdminNewsPublicationCounts(
+    val today: Int = 0,
+    val travelToday: Int = 0,
+    val scheduled: Int = 0,
+    val failed: Int = 0,
+)
+data class AdminNewsStoryCounts(val ready: Int = 0, val pendingSensitiveReview: Int = 0)
+data class AdminNewsRenditionCounts(val failedToday: Int = 0)
+
+data class AdminNewsLanguageCount(val language: String, val count: Int = 0)
+data class AdminNewsCountryCount(val country: String? = null, val count: Int = 0)
+data class AdminNewsTopicCount(val topic: String, val count: Int = 0)
+data class AdminNewsDistribution(
+    val languages: List<AdminNewsLanguageCount> = emptyList(),
+    val countries: List<AdminNewsCountryCount> = emptyList(),
+    val topics: List<AdminNewsTopicCount> = emptyList(),
+)
+
+// The route seeds all four keys at zero before merging the real groupBy
+// counts in, so every one of them is always present.
+data class AdminNewsSourceHealth(
+    val HEALTHY: Int = 0,
+    val WARNING: Int = 0,
+    val FAILED: Int = 0,
+    val DISABLED: Int = 0,
+)
+
+data class AdminNewsNetworkStatusResponse(
+    val status: AdminNewsAutomationStatus = AdminNewsAutomationStatus(),
+    val lastRun: AdminNewsJobRun? = null,
+    val feeds: AdminNewsFeedCounts = AdminNewsFeedCounts(),
+    val publications: AdminNewsPublicationCounts = AdminNewsPublicationCounts(),
+    val stories: AdminNewsStoryCounts = AdminNewsStoryCounts(),
+    val renditions: AdminNewsRenditionCounts = AdminNewsRenditionCounts(),
+    val duplicatesPreventedToday: Int = 0,
+    val distribution: AdminNewsDistribution = AdminNewsDistribution(),
+    val sourceHealth: AdminNewsSourceHealth = AdminNewsSourceHealth(),
+)
+
+// ── Feeds ──
+// A feed's account is created with no password and can never sign in,
+// which is why `banned` is worth showing and why its avatar/banner can
+// only ever be changed through the admin PATCH below.
+data class AdminNewsFeedUser(
+    val id: String,
+    val username: String,
+    val avatarUrl: String? = null,
+    val banned: Boolean = false,
+)
+data class AdminNewsFeedPublicationCount(val publications: Int = 0)
+
+data class AdminNewsFeed(
+    val id: String,
+    val key: String,
+    val displayName: String,
+    val description: String? = null,
+    val region: String,
+    val country: String? = null,
+    val language: String,
+    val timezone: String? = null,
+    val topics: List<String> = emptyList(),
+    val enabled: Boolean = false,
+    val isPilot: Boolean = false,
+    val minMinutesBetweenPosts: Int = 0,
+    val maxPostsPerDay: Int = 0,
+    val lastPublishedAt: String? = null,
+    val user: AdminNewsFeedUser,
+    val _count: AdminNewsFeedPublicationCount = AdminNewsFeedPublicationCount(),
+)
+
+// `defined` is how many feeds the roster defines in code, `provisioned`
+// how many rows exist - the console shows enabled/defined, so it never
+// claims a feed exists that has not been provisioned yet.
+data class AdminNewsFeedRoster(val defined: Int = 0, val provisioned: Int = 0)
+
+data class AdminNewsFeedsResponse(
+    val feeds: List<AdminNewsFeed> = emptyList(),
+    val roster: AdminNewsFeedRoster? = null,
+)
+
+// enabled is the only field the console sends: the cadence fields the
+// route also accepts (minMinutesBetweenPosts 30-1440, maxPostsPerDay
+// 0-24) are display-only on the website's own console too.
+data class UpdateNewsFeedRequest(val enabled: Boolean)
+
+// scope is "pilot" or "all" - anything else is read as "pilot"
+// server-side. Every feed is created DISABLED either way.
+data class ProvisionNewsFeedsRequest(val scope: String)
+
+data class AdminNewsProvisionSkip(val key: String, val reason: String? = null)
+data class AdminNewsProvisionResponse(
+    val scope: String? = null,
+    val requested: Int = 0,
+    val created: List<String> = emptyList(),
+    val updated: List<String> = emptyList(),
+    val skipped: List<AdminNewsProvisionSkip> = emptyList(),
+)
+
+// ── Sources ──
+data class AdminNewsSourceReferenceCount(val references: Int = 0)
+
+data class AdminNewsSource(
+    val id: String,
+    val key: String,
+    val name: String,
+    val publisher: String,
+    val feedUrl: String,
+    val homepageUrl: String? = null,
+    val region: String,
+    val country: String? = null,
+    val language: String,
+    val topics: List<String> = emptyList(),
+    val trustTier: Int = 2,
+    val official: Boolean = false,
+    val allowImages: Boolean = false,
+    val attribution: String? = null,
+    val enabled: Boolean = true,
+    // The real NewsSourceStatus enum: HEALTHY/WARNING/FAILED/DISABLED.
+    val status: String,
+    val fetchIntervalMinutes: Int = 60,
+    val lastFetchedAt: String? = null,
+    val lastSuccessAt: String? = null,
+    val lastErrorAt: String? = null,
+    val lastError: String? = null,
+    val consecutiveFailures: Int = 0,
+    val backoffUntil: String? = null,
+    val itemsIngested: Int = 0,
+    val _count: AdminNewsSourceReferenceCount = AdminNewsSourceReferenceCount(),
+)
+
+data class AdminNewsSourcesResponse(val sources: List<AdminNewsSource> = emptyList())
+
+// Both halves are nullable and Gson omits nulls, so this sends exactly
+// one field per call - the same two separate PATCH bodies the website's
+// console sends ({enabled} and {clearBackoff:true}). Clearing backoff
+// also resets consecutiveFailures/lastError and puts the source back to
+// HEALTHY server-side.
+data class UpdateNewsSourceRequest(
+    val enabled: Boolean? = null,
+    val clearBackoff: Boolean? = null,
+)
+
+data class AdminNewsSeedResponse(
+    val created: List<String> = emptyList(),
+    val existing: List<String> = emptyList(),
+)
+
+// Verification answers 200 with ok=false for a feed that could not be
+// fetched or parsed - a failed verification is a real result, not an
+// HTTP error, and nothing about the source's health is touched by it.
+data class AdminNewsVerifySample(
+    val title: String? = null,
+    val link: String? = null,
+    val publishedAt: String? = null,
+    val hasSummary: Boolean = false,
+    val hasImage: Boolean = false,
+)
+data class AdminNewsVerifiedSource(
+    val id: String,
+    val key: String,
+    val name: String,
+    val feedUrl: String,
+)
+data class AdminNewsSourceVerifyResponse(
+    val source: AdminNewsVerifiedSource? = null,
+    val robotsAllowed: Boolean = false,
+    val ok: Boolean = false,
+    val error: String? = null,
+    val itemCount: Int = 0,
+    val sample: List<AdminNewsVerifySample> = emptyList(),
+)
+
+// ── Editorial queue (stories) ──
+data class AdminNewsReferenceSource(
+    val id: String,
+    val name: String,
+    val publisher: String,
+    val trustTier: Int = 2,
+)
+data class AdminNewsStoryReference(
+    val id: String,
+    val url: String,
+    val title: String,
+    val excerpt: String? = null,
+    val publishedAt: String? = null,
+    val source: AdminNewsReferenceSource,
+)
+
+// One generated summary in one language. status is the real
+// NewsRenditionStatus enum (PENDING/READY/FAILED/REJECTED); a
+// non-READY rendition carries the reason in `error`.
+data class AdminNewsRendition(
+    val id: String,
+    val language: String,
+    val headline: String = "",
+    val body: String = "",
+    val status: String,
+    val model: String? = null,
+    val error: String? = null,
+)
+
+data class AdminNewsStoryPublication(
+    val id: String,
+    val language: String,
+    val status: String,
+    val publishedAt: String? = null,
+    val postId: String? = null,
+    val feedId: String? = null,
+)
+
+data class AdminNewsStory(
+    val id: String,
+    val title: String,
+    // The verbatim source material handed to the summariser, kept so an
+    // admin can compare what the sources said against what was written.
+    val sourceMaterial: String = "",
+    val topic: String,
+    val region: String,
+    val country: String? = null,
+    val language: String? = null,
+    // NewsConfidence: CONFIRMED/DEVELOPING/UNCONFIRMED.
+    val confidence: String,
+    val sensitive: Boolean = false,
+    val isBreaking: Boolean = false,
+    val isTravel: Boolean = false,
+    // Prisma Float, so a JSON number - the console shows it to 2dp.
+    val importance: Double = 0.0,
+    val sourceCount: Int = 0,
+    // NewsStoryStatus: NEW/READY/PUBLISHED/REJECTED/SUPERSEDED.
+    val status: String,
+    val rejectionReason: String? = null,
+    val firstSeenAt: String,
+    val publishedAt: String? = null,
+    val correctionNote: String? = null,
+    val correctedAt: String? = null,
+    val references: List<AdminNewsStoryReference> = emptyList(),
+    val renditions: List<AdminNewsRendition> = emptyList(),
+    val publications: List<AdminNewsStoryPublication> = emptyList(),
+)
+
+data class AdminNewsStoriesResponse(val stories: List<AdminNewsStory> = emptyList())
+
+// action is "reject" (reason required, stored as rejectionReason) or
+// "correct" (note required, appended visibly to every live post for the
+// story). The route's third action, "publish" (language + feedId, the
+// manual human-review path for a sensitive story), is not offered here
+// because the website's own console does not offer it either.
+data class NewsStoryActionRequest(
+    val action: String,
+    val reason: String? = null,
+    val note: String? = null,
+)
+
+// ── Publications ──
+data class AdminNewsPublicationFeedUser(val username: String)
+data class AdminNewsPublicationFeed(
+    val key: String,
+    val displayName: String,
+    val user: AdminNewsPublicationFeedUser,
+)
+data class AdminNewsPublicationRendition(
+    val headline: String = "",
+    val language: String,
+    val status: String? = null,
+)
+data class AdminNewsPublicationStory(
+    val id: String,
+    val title: String,
+    val topic: String,
+    val region: String? = null,
+    val country: String? = null,
+    val confidence: String,
+    val sensitive: Boolean = false,
+    val correctionNote: String? = null,
+)
+
+data class AdminNewsPublication(
+    val id: String,
+    val language: String,
+    // NewsPublicationStatus: SCHEDULED/PUBLISHED/FAILED/REMOVED.
+    val status: String,
+    val scheduledFor: String,
+    val publishedAt: String? = null,
+    // Null for anything not published (or whose post was deleted) - the
+    // "view the post" action only exists when this is set.
+    val postId: String? = null,
+    val attempts: Int = 0,
+    val error: String? = null,
+    val removedAt: String? = null,
+    val removedReason: String? = null,
+    val feed: AdminNewsPublicationFeed,
+    val rendition: AdminNewsPublicationRendition,
+    val story: AdminNewsPublicationStory,
+)
+
+data class AdminNewsPublicationsResponse(
+    val publications: List<AdminNewsPublication> = emptyList(),
+)
+
+// The reason is stored on the publication record permanently; the route
+// falls back to "Removed by an administrator" for an empty one.
+data class RemoveNewsPublicationRequest(val reason: String)
+
+// ── Automation settings / manual cycle ──
+// Only `paused` is sent: it is the platform kill switch, and the numeric
+// limits the same route accepts are bounded server-side and left to the
+// website's settings surface.
+data class UpdateNewsAutomationRequest(val paused: Boolean)
+
+// A manual cycle answers 200 even when it did not run (paused, or the
+// distributed lock was held) - `ran` says which, and `reason` says why
+// not, so the console reports what actually happened instead of
+// claiming a cycle finished.
+data class AdminNewsCycleResult(
+    val ran: Boolean = false,
+    val jobRunId: String? = null,
+    val reason: String? = null,
+    val sourcesFetched: Int = 0,
+    val sourcesFailed: Int = 0,
+    val itemsIngested: Int = 0,
+    val storiesCreated: Int = 0,
+    val duplicatesPrevented: Int = 0,
+    val renditionsGenerated: Int = 0,
+    val renditionsFailed: Int = 0,
+    val published: Int = 0,
+    val publishFailures: Int = 0,
+    val scheduled: Int = 0,
+    val storiesExpired: Int = 0,
+    val generationBudgetExhausted: Boolean = false,
+)
+
+data class AdminNewsCycleResponse(val result: AdminNewsCycleResult = AdminNewsCycleResult())
+
 /**
  * The same real ZRP admin backend the website's own /admin pages call -
  * this is a native surface onto the exact same routes, not a parallel
@@ -1092,6 +1480,76 @@ interface AdminApi {
         @Path("id") id: String,
         @Body request: UpdateUserPlanRequest,
     ): AdminUserPlanResponse
+
+    // ─── News Network (the automated editorial pipeline) ─────────────
+    // The five reads the console opens with, exactly as the website's
+    // own console loads them (all five in parallel, no pagination, the
+    // two list routes capped at the same limit it asks for).
+    @GET("admin/news-network/status")
+    suspend fun getNewsNetworkStatus(): AdminNewsNetworkStatusResponse
+
+    @GET("admin/news-network/feeds")
+    suspend fun getNewsNetworkFeeds(): AdminNewsFeedsResponse
+
+    @GET("admin/news-network/sources")
+    suspend fun getNewsNetworkSources(): AdminNewsSourcesResponse
+
+    // limit is capped at 100 server-side and falls back to 50.
+    @GET("admin/news-network/stories")
+    suspend fun getNewsNetworkStories(@Query("limit") limit: Int): AdminNewsStoriesResponse
+
+    @GET("admin/news-network/publications")
+    suspend fun getNewsNetworkPublications(@Query("limit") limit: Int): AdminNewsPublicationsResponse
+
+    // The kill switch. Takes effect on the very next cycle, and anything
+    // already scheduled stops publishing while paused.
+    @PATCH("admin/news-network/settings")
+    suspend fun updateNewsAutomation(@Body request: UpdateNewsAutomationRequest)
+
+    // Rate limited to 4 an hour server-side on top of the pipeline's own
+    // distributed lock, and it respects `paused` exactly like the cron
+    // route - this is not a way to publish while paused.
+    @POST("admin/news-network/run")
+    suspend fun runNewsNetworkCycle(): AdminNewsCycleResponse
+
+    @POST("admin/news-network/feeds/provision")
+    suspend fun provisionNewsFeeds(@Body request: ProvisionNewsFeedsRequest): AdminNewsProvisionResponse
+
+    @PATCH("admin/news-network/feeds/{id}")
+    suspend fun updateNewsFeed(@Path("id") id: String, @Body request: UpdateNewsFeedRequest)
+
+    // Same path, multipart body: the route branches on the content type
+    // and reads either "avatarFile" or "coverFile" from the form. This
+    // is the ONLY way an editorial feed's avatar/banner can be changed -
+    // its account has no password and can never sign in to use the
+    // ordinary self-service /user/update-avatar route.
+    @Multipart
+    @PATCH("admin/news-network/feeds/{id}")
+    suspend fun uploadNewsFeedImage(@Path("id") id: String, @Part part: MultipartBody.Part)
+
+    @POST("admin/news-network/sources/seed")
+    suspend fun seedNewsSources(): AdminNewsSeedResponse
+
+    @PATCH("admin/news-network/sources/{id}")
+    suspend fun updateNewsSource(@Path("id") id: String, @Body request: UpdateNewsSourceRequest)
+
+    // One live fetch and parse, reported back. Ingests nothing, creates
+    // no story, publishes nothing, and deliberately leaves the source's
+    // health fields alone.
+    @POST("admin/news-network/sources/{id}/verify")
+    suspend fun verifyNewsSource(@Path("id") id: String): AdminNewsSourceVerifyResponse
+
+    @PATCH("admin/news-network/stories/{id}")
+    suspend fun updateNewsStory(@Path("id") id: String, @Body request: NewsStoryActionRequest)
+
+    // A DELETE that carries a body - the removal reason is stored on the
+    // publication record - which @DELETE cannot express, hence @HTTP
+    // (the same shape PushApi already uses for its own DELETE + body).
+    @HTTP(method = "DELETE", path = "admin/news-network/publications/{id}", hasBody = true)
+    suspend fun removeNewsPublication(
+        @Path("id") id: String,
+        @Body request: RemoveNewsPublicationRequest,
+    )
 
     // ─── ZRP News CMS ────────────────────────────────────────────────
     // An empty status/category/search is sent as an empty query value:

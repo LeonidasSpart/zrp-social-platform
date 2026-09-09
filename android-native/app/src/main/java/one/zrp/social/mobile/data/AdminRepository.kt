@@ -1,5 +1,7 @@
 package one.zrp.social.mobile.data
 
+import android.content.ContentResolver
+import android.net.Uri
 import one.zrp.social.mobile.network.AdminAdsResponse
 import one.zrp.social.mobile.network.AdminAnalyticsResponse
 import one.zrp.social.mobile.network.AdminAppealsResponse
@@ -9,7 +11,16 @@ import one.zrp.social.mobile.network.AdminHelpResponse
 import one.zrp.social.mobile.network.AdminJournalistsResponse
 import one.zrp.social.mobile.network.AdminMarketplaceResponse
 import one.zrp.social.mobile.network.AdminMusicArtistsResponse
+import one.zrp.social.mobile.network.AdminNewsCycleResult
+import one.zrp.social.mobile.network.AdminNewsFeedsResponse
+import one.zrp.social.mobile.network.AdminNewsNetworkStatusResponse
+import one.zrp.social.mobile.network.AdminNewsProvisionResponse
+import one.zrp.social.mobile.network.AdminNewsPublicationsResponse
 import one.zrp.social.mobile.network.AdminNewsResponse
+import one.zrp.social.mobile.network.AdminNewsSeedResponse
+import one.zrp.social.mobile.network.AdminNewsSourceVerifyResponse
+import one.zrp.social.mobile.network.AdminNewsSourcesResponse
+import one.zrp.social.mobile.network.AdminNewsStoriesResponse
 import one.zrp.social.mobile.network.AdminOpportunityResponse
 import one.zrp.social.mobile.network.AdminPaymentRequest
 import one.zrp.social.mobile.network.AdminPostsResponse
@@ -31,6 +42,9 @@ import one.zrp.social.mobile.network.AdminWithdrawal
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.GrantJournalistRequest
 import one.zrp.social.mobile.network.JournalistActionRequest
+import one.zrp.social.mobile.network.NewsStoryActionRequest
+import one.zrp.social.mobile.network.ProvisionNewsFeedsRequest
+import one.zrp.social.mobile.network.RemoveNewsPublicationRequest
 import one.zrp.social.mobile.network.ResolveAppealRequest
 import one.zrp.social.mobile.network.ResolveTicketRequest
 import one.zrp.social.mobile.network.RecordCharityDisbursementRequest
@@ -39,6 +53,9 @@ import one.zrp.social.mobile.network.ReviewNewsArticleRequest
 import one.zrp.social.mobile.network.ReviewSubmissionRequest
 import one.zrp.social.mobile.network.SaveNewsArticleRequest
 import one.zrp.social.mobile.network.ToggleBanResponse
+import one.zrp.social.mobile.network.UpdateNewsAutomationRequest
+import one.zrp.social.mobile.network.UpdateNewsFeedRequest
+import one.zrp.social.mobile.network.UpdateNewsSourceRequest
 import one.zrp.social.mobile.network.UpdateReportRequest
 import one.zrp.social.mobile.network.UpdateSupportTicketRequest
 import one.zrp.social.mobile.network.UpdateUserPlanRequest
@@ -46,6 +63,7 @@ import one.zrp.social.mobile.network.UpdateUserRoleRequest
 import one.zrp.social.mobile.network.UpgradeRequestActionRequest
 import one.zrp.social.mobile.network.VerifyArtistRequest
 import one.zrp.social.mobile.network.VerifyPaymentRequest
+import one.zrp.social.mobile.network.buildNamedFileMultipart
 import one.zrp.social.mobile.network.zrpErrorMessage
 import retrofit2.HttpException
 
@@ -549,6 +567,184 @@ class AdminRepository {
             Result.success(ApiClient.adminApi.updateUserPlan(userId, UpdateUserPlanRequest(plan)))
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this user's plan."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // ─── News Network (reads staff-wide, every write ADMIN-only) ─────
+    // The five reads the console opens with are requireStaff; every
+    // write below is requireAdmin server-side (see AdminApi's own note),
+    // so a MODERATOR who somehow reached this screen would still be
+    // refused by the route on any action.
+    suspend fun getNewsNetworkStatus(): Result<AdminNewsNetworkStatusResponse> = runCatching {
+        ApiClient.adminApi.getNewsNetworkStatus()
+    }
+
+    suspend fun getNewsNetworkFeeds(): Result<AdminNewsFeedsResponse> = runCatching {
+        ApiClient.adminApi.getNewsNetworkFeeds()
+    }
+
+    suspend fun getNewsNetworkSources(): Result<AdminNewsSourcesResponse> = runCatching {
+        ApiClient.adminApi.getNewsNetworkSources()
+    }
+
+    suspend fun getNewsNetworkStories(limit: Int): Result<AdminNewsStoriesResponse> = runCatching {
+        ApiClient.adminApi.getNewsNetworkStories(limit)
+    }
+
+    suspend fun getNewsNetworkPublications(limit: Int): Result<AdminNewsPublicationsResponse> = runCatching {
+        ApiClient.adminApi.getNewsNetworkPublications(limit)
+    }
+
+    suspend fun setNewsAutomationPaused(paused: Boolean): Result<Unit> {
+        return try {
+            ApiClient.adminApi.updateNewsAutomation(UpdateNewsAutomationRequest(paused))
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update the automation setting."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // 429s once four manual cycles have been run in an hour, and that
+    // message ("Too many requests...") is exactly what the admin needs
+    // to see - hence zrpErrorMessage ahead of the fallback, as
+    // everywhere else. A 200 can still carry ran=false with a reason
+    // (paused, or another cycle holds the lock), which is a real result
+    // the caller reports rather than an error.
+    suspend fun runNewsNetworkCycle(): Result<AdminNewsCycleResult> {
+        return try {
+            Result.success(ApiClient.adminApi.runNewsNetworkCycle().result)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "The cycle failed to run."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // scope is "pilot" or "all". Both create every feed DISABLED, and
+    // re-running is safe: existing feeds are refreshed without losing an
+    // admin's enable/disable or cadence choices.
+    suspend fun provisionNewsFeeds(scope: String): Result<AdminNewsProvisionResponse> {
+        return try {
+            Result.success(ApiClient.adminApi.provisionNewsFeeds(ProvisionNewsFeedsRequest(scope)))
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to provision the editorial feeds."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    suspend fun setNewsFeedEnabled(feedId: String, enabled: Boolean): Result<Unit> {
+        return try {
+            ApiClient.adminApi.updateNewsFeed(feedId, UpdateNewsFeedRequest(enabled))
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this feed."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // field is "avatarFile" or "coverFile" - the route decides which
+    // image it is from which form field arrives, so this is passed
+    // through rather than inferred anywhere else.
+    suspend fun uploadNewsFeedImage(
+        feedId: String,
+        contentResolver: ContentResolver,
+        uri: Uri,
+        field: String,
+    ): Result<Unit> {
+        return try {
+            ApiClient.adminApi.uploadNewsFeedImage(feedId, buildNamedFileMultipart(contentResolver, uri, field))
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            // The route's own validation messages (wrong type, over 5MB)
+            // are the useful ones here.
+            Result.failure(Exception(e.zrpErrorMessage() ?: "That upload failed."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    suspend fun seedNewsSources(): Result<AdminNewsSeedResponse> {
+        return try {
+            Result.success(ApiClient.adminApi.seedNewsSources())
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to install the starter sources."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    suspend fun setNewsSourceEnabled(sourceId: String, enabled: Boolean): Result<Unit> {
+        return try {
+            ApiClient.adminApi.updateNewsSource(sourceId, UpdateNewsSourceRequest(enabled = enabled))
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this source."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    suspend fun clearNewsSourceBackoff(sourceId: String): Result<Unit> {
+        return try {
+            ApiClient.adminApi.updateNewsSource(sourceId, UpdateNewsSourceRequest(clearBackoff = true))
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to clear the backoff."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // A failed verification comes back as a 200 with ok=false, so this
+    // succeeds with the report and lets the caller present it - only a
+    // transport/auth failure is a Result.failure here.
+    suspend fun verifyNewsSource(sourceId: String): Result<AdminNewsSourceVerifyResponse> {
+        return try {
+            Result.success(ApiClient.adminApi.verifyNewsSource(sourceId))
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Verification failed."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    suspend fun rejectNewsStory(storyId: String, reason: String): Result<Unit> {
+        return try {
+            ApiClient.adminApi.updateNewsStory(storyId, NewsStoryActionRequest(action = "reject", reason = reason))
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to reject this story."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // The note is appended visibly to every live post for the story
+    // rather than the original being rewritten, so this changes what
+    // readers already saw - never fired without a confirmation.
+    suspend fun correctNewsStory(storyId: String, note: String): Result<Unit> {
+        return try {
+            ApiClient.adminApi.updateNewsStory(storyId, NewsStoryActionRequest(action = "correct", note = note))
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to publish the correction."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    suspend fun removeNewsPublication(publicationId: String, reason: String): Result<Unit> {
+        return try {
+            ApiClient.adminApi.removeNewsPublication(publicationId, RemoveNewsPublicationRequest(reason))
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to remove this post."))
         } catch (e: Exception) {
             Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
         }
