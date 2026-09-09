@@ -12,10 +12,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,6 +40,8 @@ import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LocationOn
@@ -46,9 +50,11 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -76,6 +82,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -89,10 +96,13 @@ import coil.compose.AsyncImage
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.network.Post
+import one.zrp.social.mobile.network.PostStats
+import one.zrp.social.mobile.network.PostStatsTotals
 import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.network.UserReply
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
+import one.zrp.social.mobile.ui.components.LinkifiedText
 import one.zrp.social.mobile.ui.components.ProfileHeaderSkeleton
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.components.BadgeSize
@@ -145,6 +155,7 @@ fun ProfileScreen(
         ProfileTab.MEDIA -> state.mediaTab.isLoading && state.mediaTab.hasLoaded
         ProfileTab.LIKES -> state.likesTab.isLoading && state.likesTab.hasLoaded
         ProfileTab.REPOSTS -> state.repostsTab.isLoading && state.repostsTab.hasLoaded
+        ProfileTab.ANALYTICS -> state.analyticsTab.isLoading && state.analyticsTab.hasLoaded
     }
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshingSelectedTab,
@@ -272,6 +283,8 @@ fun ProfileScreen(
                             onAvatarPicked = { uri -> viewModel.uploadAvatar(contentResolver, uri) },
                             onBannerPicked = { uri -> viewModel.uploadBanner(contentResolver, uri) },
                             onTrustPassportClick = { onOpenTrustPassport(profile.username) },
+                            onMentionClick = onAuthorClick,
+                            onHashtagClick = onOpenHashtag,
                         )
 
                         val mediaUploadError = state.mediaUploadError
@@ -297,6 +310,7 @@ fun ProfileScreen(
                         ProfileTabRow(
                             selectedTab = state.selectedTab,
                             showLikesTab = state.isOwnProfile || profile.publicLikes,
+                            showAnalyticsTab = state.isOwnProfile,
                             onTabSelected = { viewModel.selectTab(it) },
                         )
                     }
@@ -425,6 +439,46 @@ fun ProfileScreen(
                                     item { ProfileTabLoadingMore() }
                                 }
                             }
+                            // Own-profile only (ProfileTabRow never
+                            // offers this tab elsewhere), so there is no
+                            // second account whose numbers could show up
+                            // here - GET /user/posts/stats is scoped to
+                            // the session either way.
+                            ProfileTab.ANALYTICS -> {
+                                val tab = state.analyticsTab
+                                val stats = tab.stats
+                                if (stats != null && stats.posts.isNotEmpty()) {
+                                    item { ProfileAnalyticsTotals(stats.totals) }
+                                    item {
+                                        Text(
+                                            text = stringResource(R.string.profile_analytics_recent_posts),
+                                            style = MaterialTheme.typography.titleSmall,
+                                            modifier = Modifier.padding(
+                                                start = Spacing.lg,
+                                                end = Spacing.lg,
+                                                top = Spacing.md,
+                                                bottom = Spacing.xs,
+                                            ),
+                                        )
+                                    }
+                                    itemsIndexed(stats.posts, key = { _, post -> post.id }) { _, post ->
+                                        ProfileAnalyticsPostRow(post = post, onOpenPost = onOpenComments)
+                                    }
+                                } else if (!tab.hasLoaded && tab.isLoading) {
+                                    item { ProfileTabInitialLoading() }
+                                } else if (tab.failed) {
+                                    item { ProfileEmptyState(stringResource(R.string.profile_analytics_failed)) }
+                                } else if (tab.hasLoaded) {
+                                    // AnalyticsTab.tsx's own "No posts
+                                    // yet to analyse." - the endpoint
+                                    // answered, this account just has
+                                    // nothing to summarise yet.
+                                    item { ProfileEmptyState(stringResource(R.string.profile_analytics_no_posts)) }
+                                }
+                                if (tab.isLoading && tab.hasLoaded) {
+                                    item { ProfileTabLoadingMore() }
+                                }
+                            }
                         }
                     }
                 }
@@ -542,6 +596,8 @@ private fun ProfileHeader(
     onMutedUsersClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onTrustPassportClick: () -> Unit,
+    onMentionClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
     val avatarPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -882,10 +938,21 @@ private fun ProfileHeader(
                 )
             }
 
+            // Bio - the same @mention/#hashtag/URL linkification
+            // page.tsx's own parseBio gives it, through the shared
+            // LinkifiedText every other content surface already uses
+            // (PostCard, CommentsScreen), so the regex and the
+            // trailing-punctuation trimming can never drift between the
+            // bio and a post body. onNonLinkClick is deliberately left
+            // unset: only the link spans themselves are tappable here,
+            // so plain bio text stays inert rather than turning the
+            // whole header into one large tap target.
             if (!profile.bio.isNullOrBlank()) {
-                Text(
+                LinkifiedText(
                     text = profile.bio,
                     style = MaterialTheme.typography.bodyMedium,
+                    onMentionClick = onMentionClick,
+                    onHashtagClick = onHashtagClick,
                     modifier = Modifier.padding(top = Spacing.xs),
                 )
             }
@@ -932,17 +999,24 @@ private fun ProfileHeader(
             // the real sum of this profile's own completed tips/purchases'
             // charityAmount, computed server-side by
             // getUserCharityContributionUsdc - see UserProfile's own
-            // KDoc). Always rendered (a real $0.00 for an account with no
-            // contributions yet is still real data, not a placeholder).
-            Text(
-                text = stringResource(
-                    R.string.profile_impact,
-                    String.format(java.util.Locale.US, "$%.2f", profile.charityContributionUsdc),
-                ),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 2.dp),
-            )
+            // KDoc). Shown only when there is a figure to show, matching
+            // page.tsx's own `charityContributionUsdc > 0` guard: for an
+            // account that has never been tipped the sum is genuinely 0,
+            // and "Impact: $0.00 contributed to charity" on every such
+            // profile turns a real distinction into noise. The 35% note
+            // above stays either way - it is true of the platform
+            // regardless of this account.
+            if (profile.charityContributionUsdc > 0) {
+                Text(
+                    text = stringResource(
+                        R.string.profile_impact,
+                        String.format(java.util.Locale.US, "$%.2f", profile.charityContributionUsdc),
+                    ),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 2.dp),
+                )
+            }
 
             // Milestone badges - the same real, server-computed facts
             // page.tsx renders (computeMilestones() in
@@ -1163,22 +1237,26 @@ private fun MilestoneBadge(fact: one.zrp.social.mobile.network.MilestoneFact) {
     }
 }
 
-// Matches page.tsx's own tabLabelMap/visibleTabs - five tabs, Likes
-// hidden whenever showLikesTab is false (the profile owner has turned
-// publicLikes off and this isn't their own profile).
+// Matches page.tsx's own tabLabelMap/visibleTabs - Likes hidden
+// whenever showLikesTab is false (the profile owner has turned
+// publicLikes off and this isn't their own profile), and Analytics
+// present only on your own profile, exactly as visibleTabs drops it
+// for `!isOwnProfile`.
 @Composable
 private fun ProfileTabRow(
     selectedTab: ProfileTab,
     showLikesTab: Boolean,
+    showAnalyticsTab: Boolean,
     onTabSelected: (ProfileTab) -> Unit,
 ) {
-    val tabs = remember(showLikesTab) {
+    val tabs = remember(showLikesTab, showAnalyticsTab) {
         buildList {
             add(ProfileTab.POSTS)
             add(ProfileTab.REPLIES)
             add(ProfileTab.MEDIA)
             if (showLikesTab) add(ProfileTab.LIKES)
             add(ProfileTab.REPOSTS)
+            if (showAnalyticsTab) add(ProfileTab.ANALYTICS)
         }
     }
     ScrollableTabRow(selectedTabIndex = tabs.indexOf(selectedTab).coerceAtLeast(0), edgePadding = Spacing.lg) {
@@ -1199,6 +1277,7 @@ private fun profileTabLabel(tab: ProfileTab): String = when (tab) {
     ProfileTab.MEDIA -> stringResource(R.string.profile_media)
     ProfileTab.LIKES -> stringResource(R.string.profile_likes)
     ProfileTab.REPOSTS -> stringResource(R.string.profile_reposts)
+    ProfileTab.ANALYTICS -> stringResource(R.string.profile_analytics)
 }
 
 // Matches page.tsx's own renderProtectedMessage - shown across every
@@ -1305,6 +1384,135 @@ private fun ProfileMediaGridRow(row: List<Post>, onOpenPost: (String) -> Unit) {
         repeat(3 - row.size) {
             Spacer(modifier = Modifier.weight(1f))
         }
+    }
+}
+
+// The four totals GET /user/posts/stats sums, the same four cards
+// AnalyticsTab.tsx puts above its list. Two plain Rows of equal-height
+// cards rather than a LazyVerticalGrid: this renders inside the
+// profile's own LazyColumn, and a nested lazy container there is the
+// same double-scrollable crash the media grid above avoids by chunking
+// its rows by hand.
+@Composable
+private fun ProfileAnalyticsTotals(totals: PostStatsTotals) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            ProfileAnalyticsStatCard(
+                label = stringResource(R.string.profile_analytics_total_views),
+                value = formatCount(totals.totalViews),
+                icon = Icons.Filled.Visibility,
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            )
+            ProfileAnalyticsStatCard(
+                label = stringResource(R.string.profile_analytics_total_likes),
+                value = formatCount(totals.totalLikes),
+                icon = Icons.Filled.Favorite,
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            ProfileAnalyticsStatCard(
+                label = stringResource(R.string.profile_analytics_total_comments),
+                value = formatCount(totals.totalComments),
+                icon = Icons.Filled.ChatBubbleOutline,
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            )
+            ProfileAnalyticsStatCard(
+                label = stringResource(R.string.profile_analytics_total_reposts),
+                value = formatCount(totals.totalReposts),
+                icon = Icons.Filled.Repeat,
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProfileAnalyticsStatCard(
+    label: String,
+    value: String,
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+) {
+    Surface(shape = MaterialTheme.shapes.medium, tonalElevation = 1.dp, modifier = modifier) {
+        Column(modifier = Modifier.padding(Spacing.md)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = Spacing.xs),
+                )
+            }
+            Text(text = value, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = Spacing.xs))
+        }
+    }
+}
+
+// One of the recent posts AnalyticsTab.tsx lists under the totals -
+// its text plus that post's own four real counts. Web's row is inert;
+// tapping this one opens the post, the same destination every other
+// post row on this screen already goes to.
+@Composable
+private fun ProfileAnalyticsPostRow(post: PostStats, onOpenPost: (String) -> Unit) {
+    val fallback = stringResource(R.string.creator_content_media_post_fallback)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = TouchTarget.min)
+            .clickable(onClick = { onOpenPost(post.id) }, role = Role.Button)
+            .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+    ) {
+        Text(
+            text = post.content.ifBlank { fallback },
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Row(
+            modifier = Modifier.padding(top = 2.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            ProfileAnalyticsMiniStat(Icons.Filled.Visibility, formatCount(post.views))
+            ProfileAnalyticsMiniStat(Icons.Filled.Favorite, formatCount(post._count.likes))
+            ProfileAnalyticsMiniStat(Icons.Filled.ChatBubbleOutline, formatCount(post._count.comments))
+            ProfileAnalyticsMiniStat(Icons.Filled.Repeat, formatCount(post._count.reposts))
+        }
+    }
+}
+
+@Composable
+private fun ProfileAnalyticsMiniStat(icon: ImageVector, value: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(12.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 2.dp),
+        )
     }
 }
 

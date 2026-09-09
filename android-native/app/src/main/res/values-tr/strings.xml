@@ -1555,6 +1555,15 @@
     <string name="profile_joined">Katılma tarihi</string>
     <string name="profile_charity_note">Kârın %%%1$s\'si hayır kurumuna bağışlanıyor</string>
     <string name="profile_impact">Etki: Hayır kurumuna %1$s $ bağışlandı</string>
+    <!-- Profile Analytics tab (own profile only) - GET /api/user/posts/stats, the same real endpoint web's AnalyticsTab.tsx calls -->
+    <string name="profile_analytics">Analitik</string>
+    <string name="profile_analytics_total_views">Toplam görüntülenme</string>
+    <string name="profile_analytics_total_likes">Toplam beğeni</string>
+    <string name="profile_analytics_total_comments">Toplam yorum</string>
+    <string name="profile_analytics_total_reposts">Toplam yeniden paylaşım</string>
+    <string name="profile_analytics_recent_posts">Son gönderiler</string>
+    <string name="profile_analytics_no_posts">Analiz edilecek gönderi henüz yok.</string>
+    <string name="profile_analytics_failed">Analitiğiniz yüklenemedi. Bağlantınızı kontrol edip tekrar deneyin.</string>
     <string name="profile_milestone_years">ZRP\'de %1$d yıl</string>
     <string name="profile_milestone_six_months">ZRP\'de 6 ay</string>
     <string name="profile_milestone_new_member">Yeni üye</string>

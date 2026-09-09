@@ -1569,6 +1569,15 @@
     <string name="profile_joined">Joined</string>
     <string name="profile_charity_note">%1$s%% of profits go to charity</string>
     <string name="profile_impact">Impact: %1$s contributed to charity</string>
+    <!-- Profile Analytics tab (own profile only) - GET /api/user/posts/stats, the same real endpoint web's AnalyticsTab.tsx calls -->
+    <string name="profile_analytics">Analytics</string>
+    <string name="profile_analytics_total_views">Total views</string>
+    <string name="profile_analytics_total_likes">Total likes</string>
+    <string name="profile_analytics_total_comments">Total comments</string>
+    <string name="profile_analytics_total_reposts">Total reposts</string>
+    <string name="profile_analytics_recent_posts">Recent posts</string>
+    <string name="profile_analytics_no_posts">No posts yet to analyse.</string>
+    <string name="profile_analytics_failed">Couldn\'t load your analytics. Check your connection and try again.</string>
     <string name="profile_milestone_years">%1$dyr on ZRP</string>
     <string name="profile_milestone_six_months">6 months on ZRP</string>
     <string name="profile_milestone_new_member">New member</string>

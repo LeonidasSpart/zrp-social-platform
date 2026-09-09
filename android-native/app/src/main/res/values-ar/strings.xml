@@ -1555,6 +1555,15 @@
     <string name="profile_joined">انضم منذ</string>
     <string name="profile_charity_note">يذهب %1$s%% من الأرباح إلى الأعمال الخيرية</string>
     <string name="profile_impact">الأثر: تم التبرع بـ %1$s$ للأعمال الخيرية</string>
+    <!-- Profile Analytics tab (own profile only) - GET /api/user/posts/stats, the same real endpoint web's AnalyticsTab.tsx calls -->
+    <string name="profile_analytics">التحليلات</string>
+    <string name="profile_analytics_total_views">إجمالي المشاهدات</string>
+    <string name="profile_analytics_total_likes">إجمالي الإعجابات</string>
+    <string name="profile_analytics_total_comments">إجمالي التعليقات</string>
+    <string name="profile_analytics_total_reposts">إجمالي إعادات النشر</string>
+    <string name="profile_analytics_recent_posts">أحدث المنشورات</string>
+    <string name="profile_analytics_no_posts">لا توجد منشورات لتحليلها بعد.</string>
+    <string name="profile_analytics_failed">تعذّر تحميل تحليلاتك. تحقّق من اتصالك وحاول مرة أخرى.</string>
     <string name="profile_milestone_years">%1$d سنة على ZRP</string>
     <string name="profile_milestone_six_months">6 أشهر على ZRP</string>
     <string name="profile_milestone_new_member">عضو جديد</string>
