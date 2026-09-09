@@ -32,9 +32,39 @@ function normalizeNumber(raw: string): string {
   return raw.replace(/[.,\s'’]/g, "");
 }
 
+/*
+ * Real bug, found via production output: the previous pattern
+ * (`\d[\d.,'’\s]*\d`) let ANY run of digits/separators/whitespace count
+ * as one number, with no limit on how much whitespace could sit
+ * between two digit groups. Two completely unrelated numbers in
+ * different sentences - "...in 2026. 01 officials..." - or different
+ * paragraphs - "The toll was 47.\n\n200 more are missing." - got
+ * silently merged into one bogus token ("202601", "47200"). That
+ * token matches nothing in the source material (it never existed as a
+ * single number anywhere), so validateGrounded rejected the whole
+ * rendition as an "unsupported figure" the model never actually wrote.
+ *
+ * Only two separator shapes are genuinely part of one number:
+ *  - punctuation immediately followed by a digit, no space: "1,400",
+ *    "1.400", "1'400" (thousands or decimal separators)
+ *  - a single space immediately followed by exactly three digits,
+ *    possibly repeated: "1 200", "12 345 678" (European/French
+ *    space-grouped thousands)
+ * Anything else - a separator not immediately followed by a digit, or
+ * more than one whitespace character, as at a sentence or paragraph
+ * boundary - ends the number instead of bridging into the next one.
+ *
+ * This narrows, rather than removes, the false-merge risk: two
+ * genuinely unrelated numbers exactly one space apart where the second
+ * happens to be exactly three digits ("scored 47 200 attended") would
+ * still merge. That is a rare coincidence next to the previous
+ * behaviour, which merged across arbitrarily many sentences.
+ */
+const NUMBER_PATTERN = /\d{1,3}(?: \d{3})+(?:[.,]\d+)?|\d+(?:[.,'’]\d+)*|\d/g;
+
 /** Every number-like token in a piece of text, in normalized form. */
 export function extractNumbers(text: string): string[] {
-  const matches = text.match(/\d[\d.,'’\s]*\d|\d/g) || [];
+  const matches = text.match(NUMBER_PATTERN) || [];
   return matches
     .map((match) => normalizeNumber(match).replace(/^0+(?=\d)/, ""))
     .filter((value) => value.length > 0);
