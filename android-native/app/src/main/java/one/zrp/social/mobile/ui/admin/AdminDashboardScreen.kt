@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.filled.Hub
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Payments
@@ -91,6 +92,7 @@ fun AdminDashboardScreen(
     onOpenPayments: () -> Unit,
     onOpenWithdrawals: () -> Unit,
     onOpenUpgradeRequests: () -> Unit,
+    onOpenNewsNetwork: () -> Unit,
 ) {
     val viewModel: AdminDashboardViewModel = viewModel(
         factory = remember { AdminDashboardViewModelFactory(AdminRepository()) },
@@ -278,6 +280,23 @@ fun AdminDashboardScreen(
                             modifier = Modifier.padding(end = Spacing.sm),
                         )
                         Text(stringResource(R.string.admin_dash_review_upgrade_requests))
+                    }
+                    // The automated editorial pipeline console. Every
+                    // action it offers is requireAdmin server-side (the
+                    // kill switch, manual cycles, provisioning editorial
+                    // accounts, taking a published post down), so it
+                    // belongs in this block rather than the staff-wide
+                    // one above.
+                    OutlinedButton(
+                        onClick = onOpenNewsNetwork,
+                        modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+                    ) {
+                        Icon(
+                            Icons.Filled.Hub,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = Spacing.sm),
+                        )
+                        Text(stringResource(R.string.admin_dash_news_network))
                     }
                 }
             }
