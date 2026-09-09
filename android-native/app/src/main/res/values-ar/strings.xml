@@ -253,6 +253,7 @@
     <string name="message_record_voice_cd">تسجيل رسالة صوتية</string>
     <string name="chat_cancel_recording_cd">إلغاء</string>
     <string name="chat_recording_label">جارٍ التسجيل...</string>
+    <string name="chat_message_actions_cd">خيارات الرسالة</string>
     <string name="chat_send_voice_message_cd">إرسال</string>
     <string name="chat_err_mic_access">تعذر الوصول إلى الميكروفون. يرجى التحقق من الأذونات.</string>
     <string name="chat_attachment_fallback">مستند</string>

@@ -253,6 +253,7 @@
     <string name="message_record_voice_cd">Grabar un mensaje de voz</string>
     <string name="chat_cancel_recording_cd">Cancelar</string>
     <string name="chat_recording_label">Grabando...</string>
+    <string name="chat_message_actions_cd">Opciones del mensaje</string>
     <string name="chat_send_voice_message_cd">Enviar</string>
     <string name="chat_err_mic_access">No se pudo acceder a tu micrófono. Comprueba tus permisos.</string>
     <string name="chat_attachment_fallback">Documento</string>

@@ -55,6 +55,7 @@ import one.zrp.social.mobile.ui.marketplace.ListingFormScreen
 import one.zrp.social.mobile.ui.marketplace.MarketplaceScreen
 import one.zrp.social.mobile.ui.marketplace.MyListingsScreen
 import one.zrp.social.mobile.ui.messages.ConversationScreen
+import one.zrp.social.mobile.ui.messages.MessageDeepLinkScreen
 import one.zrp.social.mobile.ui.messages.MessagesScreen
 import one.zrp.social.mobile.ui.moderation.ModerationListMode
 import one.zrp.social.mobile.ui.moderation.ModerationListScreen
@@ -492,6 +493,28 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?) {
                         partnerUsername = username,
                         onBack = { navController.popBackStack() },
                         onOpenProfile = { goToProfile(username) },
+                    )
+                }
+            }
+            composable(
+                // A distinct Kotlin route from "messages/{userId}/{username}"
+                // above - Navigation Compose matches an incoming deep link
+                // by its uriPattern, not by this route string, so the two
+                // don't collide even though both ultimately show a
+                // conversation. This one exists because a "New Message"
+                // push notification's real url (sendPushNotification in
+                // src/app/api/messages/route.ts) only ever carries a
+                // username, never the partner's real id.
+                route = "messages/deeplink/{username}",
+                arguments = listOf(navArgument("username") { type = NavType.StringType }),
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/messages/{username}" }),
+            ) { backStackEntry ->
+                val username = backStackEntry.arguments?.getString("username")
+                if (username != null) {
+                    MessageDeepLinkScreen(
+                        username = username,
+                        onBack = { navController.popBackStack() },
+                        onOpenProfile = goToProfile,
                     )
                 }
             }

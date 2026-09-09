@@ -73,6 +73,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -80,6 +81,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -443,10 +447,40 @@ fun ConversationScreen(
                     }
                 }
             } else {
-                LaunchedEffect(state.messages.size) {
+                // The loading-older spinner below is its own LazyColumn
+                // item, ahead of every real message - any scroll target
+                // expressed as a plain state.messages index has to shift
+                // by this same amount to land on the message it actually
+                // means, not on whatever real message happens to sit one
+                // slot earlier in the composed list.
+                val topOffset = if (state.isLoadingOlderMessages) 1 else 0
+
+                // Keyed on the LAST message's own id rather than the raw
+                // list size - loadOlderMessages() below also changes
+                // state.messages.size by prepending real history to the
+                // FRONT of the list, which must never re-trigger a jump
+                // back down to the bottom while someone is scrolled up
+                // reading it. A genuinely new message (sent or received)
+                // always changes which id is last; prepended history
+                // never does.
+                val lastMessageId = state.messages.lastOrNull()?.id
+                LaunchedEffect(lastMessageId) {
                     if (state.messages.isNotEmpty()) {
-                        listState.animateScrollToItem(state.messages.size - 1)
+                        listState.animateScrollToItem(state.messages.size - 1 + topOffset)
                     }
+                }
+
+                // Real pagination, not a fixed window: GET /messages/{userId}
+                // only ever returns the newest ~100 messages otherwise (see
+                // ConversationViewModel's own mergeWithPolledWindow KDoc), so
+                // without this, scrolling up in a long conversation just hit
+                // a hard wall. Fires once the first visible row nears the
+                // very top of what's currently loaded - loadOlderMessages()
+                // itself is a no-op while already loading or once the
+                // server's own nextCursor says there's nothing further back.
+                LaunchedEffect(listState) {
+                    snapshotFlow { listState.firstVisibleItemIndex }
+                        .collect { index -> if (index <= 2) viewModel.loadOlderMessages() }
                 }
 
                 // Opening the keyboard shrinks this LazyColumn's own
@@ -462,7 +496,7 @@ fun ConversationScreen(
                 val imeVisible = WindowInsets.isImeVisible
                 LaunchedEffect(imeVisible) {
                     if (imeVisible && state.messages.isNotEmpty()) {
-                        listState.animateScrollToItem(state.messages.size - 1)
+                        listState.animateScrollToItem(state.messages.size - 1 + topOffset)
                     }
                 }
 
@@ -472,6 +506,18 @@ fun ConversationScreen(
                         .fillMaxSize()
                         .padding(horizontal = 12.dp),
                 ) {
+                    if (state.isLoadingOlderMessages) {
+                        item(key = "loading-older") {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = Spacing.sm),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                            }
+                        }
+                    }
                     items(state.messages, key = { it.id }) { message ->
                         MessageBubble(
                             message = message,
@@ -483,7 +529,7 @@ fun ConversationScreen(
                             onAddReactionClick = { reactingToMessageId = message.id },
                             onReplyPreviewClick = { targetId ->
                                 val index = state.messages.indexOfFirst { it.id == targetId }
-                                if (index >= 0) pendingScrollIndex = index
+                                if (index >= 0) pendingScrollIndex = index + topOffset
                             },
                             ownReaction = message.reactions.firstOrNull { it.user.id != partnerId }?.emoji,
                         )
@@ -965,6 +1011,7 @@ private fun MessageBubble(
     onReplyPreviewClick: (String) -> Unit,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
+    val actionsLabel = stringResource(R.string.chat_message_actions_cd)
 
     Row(
         modifier = Modifier
@@ -978,7 +1025,21 @@ private fun MessageBubble(
                 color = if (isOwnMessage) ZrpRed else MaterialTheme.colorScheme.surfaceContainerHigh,
                 modifier = Modifier
                     .widthIn(max = 280.dp)
-                    .combinedClickable(onClick = {}, onLongClick = { menuOpen = true }),
+                    .combinedClickable(onClick = {}, onLongClick = { menuOpen = true })
+                    // Long-press-only reply/react/edit/delete had no
+                    // discoverable path for anyone navigating by
+                    // TalkBack - combinedClickable's own onLongClick
+                    // exposes a long-click action, but with no label
+                    // explaining what it does. A real, labeled custom
+                    // action surfaces this same menuOpen = true in
+                    // TalkBack's own local context menu instead, without
+                    // adding a second always-visible on-screen control
+                    // to every bubble in a dense message list.
+                    .semantics {
+                        customActions = listOf(
+                            CustomAccessibilityAction(actionsLabel) { menuOpen = true; true },
+                        )
+                    },
             ) {
                 Column(modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm)) {
                     val replyTo = message.replyTo

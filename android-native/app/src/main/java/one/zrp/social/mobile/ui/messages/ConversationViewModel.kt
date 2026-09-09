@@ -100,6 +100,16 @@ data class ConversationUiState(
     // owns the UI-facing timer and the post-recording upload+send.
     val isRecording: Boolean = false,
     val recordingSeconds: Int = 0,
+    // Scrolling to the top of a long conversation loads real older
+    // history (see loadOlderMessages) instead of the initial fetch's
+    // fixed newest-100 window being the hard ceiling on what's visible.
+    // hasMoreOlderMessages starts true (unknown) rather than false, so
+    // the very first scroll-to-top on a freshly opened conversation
+    // still attempts a real fetch instead of assuming there's nothing
+    // more - it flips to false only once the server itself says so
+    // (a null nextCursor).
+    val isLoadingOlderMessages: Boolean = false,
+    val hasMoreOlderMessages: Boolean = true,
 )
 
 /**
@@ -630,9 +640,63 @@ class ConversationViewModel(
             while (true) {
                 delay(POLL_INTERVAL_MS)
                 repository.getConversationMessages(partnerId).onSuccess { list ->
-                    _state.update { it.copy(messages = list) }
+                    _state.update { it.copy(messages = mergeWithPolledWindow(it.messages, list)) }
                 }
             }
+        }
+    }
+
+    // The unpaginated fetch above always returns only the newest ~100
+    // messages (see GET /messages/{userId}'s own comment on why that
+    // shape can't change), so a wholesale replace - the original
+    // behavior - would silently discard any real older history
+    // loadOlderMessages() had already loaded beyond that window on
+    // every single poll tick. Anything strictly older than the poll's
+    // own oldest returned message is outside what an unpaginated fetch
+    // can confirm or refute either way, so it's left untouched; the
+    // poll's own window (same range it always fully owned) still
+    // replaces wholesale, so a same-window edit/delete/read-state
+    // change a missed socket event didn't deliver is still caught here
+    // exactly as before.
+    private fun mergeWithPolledWindow(current: List<ChatMessage>, polled: List<ChatMessage>): List<ChatMessage> {
+        if (polled.isEmpty()) return polled
+        val oldestPolledCreatedAt = polled.minOf { it.createdAt }
+        val olderHistory = current.filter { it.createdAt < oldestPolledCreatedAt }
+        return olderHistory + polled
+    }
+
+    // Mirrors the same real-history-only rule the initial load and poll
+    // both already follow - no invented/placeholder messages, and
+    // nothing beyond what GET /messages/{userId}'s own cursor page
+    // actually returns. Triggered by ConversationScreen once the
+    // LazyColumn's scroll position nears its own first item (see that
+    // screen's own LaunchedEffect on listState.firstVisibleItemIndex).
+    fun loadOlderMessages() {
+        if (_state.value.isLoadingOlderMessages || !_state.value.hasMoreOlderMessages) return
+        val oldestLoadedId = _state.value.messages.firstOrNull()?.id ?: return
+
+        _state.update { it.copy(isLoadingOlderMessages = true) }
+        viewModelScope.launch {
+            repository.getOlderMessages(partnerId, beforeMessageId = oldestLoadedId)
+                .onSuccess { page ->
+                    _state.update { current ->
+                        val existingIds = current.messages.map { it.id }.toSet()
+                        val newOlder = page.items.filterNot { it.id in existingIds }
+                        current.copy(
+                            messages = newOlder + current.messages,
+                            isLoadingOlderMessages = false,
+                            hasMoreOlderMessages = page.nextCursor != null,
+                        )
+                    }
+                }
+                .onFailure {
+                    // Left retryable: the next scroll-to-top attempt
+                    // (or the user scrolling away and back) simply
+                    // tries again, same as any other network hiccup in
+                    // this screen - no dedicated error banner for what
+                    // is a background load below the visible fold.
+                    _state.update { it.copy(isLoadingOlderMessages = false) }
+                }
         }
     }
 }
