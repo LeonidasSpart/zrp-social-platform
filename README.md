@@ -440,7 +440,9 @@ include:
   defaults to `1`, Railway's edge — only change it if another trusted
   proxy/CDN is placed in front), `ALLOWED_MEDIA_HOSTS` (comma-separated
   extra hosts, exact or `.suffix`, accepted as post media in addition to
-  UploadThing and GIPHY)
+  UploadThing and GIPHY), `LEGACY_PASSWORD_MIGRATION=off` (skips the
+  automatic boot-time plaintext-to-bcrypt password migration `server.js`
+  runs after listening; leave unset in production)
 
 Behaviour that depends on an unset variable degrades rather than crashing
 where the code allows it — for example, the Apple provider is registered

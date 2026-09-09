@@ -12,6 +12,7 @@ const {
   authorizeDeleteRelay,
   createCallRegistry,
 } = require("./socket-authz");
+const { runLegacyPasswordMigrationAtStartup } = require("./legacy-passwords");
 
 // Minimal cookie-header parser, written inline rather than requiring
 // the "cookie" package - this file is the process entrypoint, so a
@@ -434,5 +435,18 @@ app.prepare().then(() => {
   const port = process.env.PORT || 8080;
   server.listen(port, () => {
     console.log(`> Ready on http://localhost:${port}`);
+
+    // ⚠️ SECURITY: the login path accepts bcrypt hashes only (see
+    // src/lib/auth.ts). Any account whose stored password is still the
+    // legacy plaintext value is hashed in place here, automatically, on
+    // every boot - so the removal of the plaintext fallback never needs
+    // a manual migration step and never locks anyone out for longer
+    // than the seconds this takes. Once the data is clean this is a
+    // single COUNT per boot. Runs after listen() so health checks pass
+    // while it works; a failure is logged and retried next boot. Set
+    // LEGACY_PASSWORD_MIGRATION=off to skip (e.g. a read-only replica).
+    if (process.env.LEGACY_PASSWORD_MIGRATION !== "off") {
+      runLegacyPasswordMigrationAtStartup(prisma);
+    }
   });
 });
