@@ -1,7 +1,10 @@
 package one.zrp.social.mobile.data
 
 import one.zrp.social.mobile.network.AdminAdsResponse
+import one.zrp.social.mobile.network.AdminAnalyticsResponse
 import one.zrp.social.mobile.network.AdminAppealsResponse
+import one.zrp.social.mobile.network.AdminAuditLogResponse
+import one.zrp.social.mobile.network.AdminCharityDisbursementsResponse
 import one.zrp.social.mobile.network.AdminHelpResponse
 import one.zrp.social.mobile.network.AdminJournalistsResponse
 import one.zrp.social.mobile.network.AdminMarketplaceResponse
@@ -11,6 +14,8 @@ import one.zrp.social.mobile.network.AdminPostsResponse
 import one.zrp.social.mobile.network.AdminReport
 import one.zrp.social.mobile.network.AdminReportsResponse
 import one.zrp.social.mobile.network.AdminStats
+import one.zrp.social.mobile.network.AdminStorageCleanupResult
+import one.zrp.social.mobile.network.AdminStorageScan
 import one.zrp.social.mobile.network.AdminSupportStats
 import one.zrp.social.mobile.network.AdminSupportTicketDetail
 import one.zrp.social.mobile.network.AdminSupportTicketsResponse
@@ -23,6 +28,7 @@ import one.zrp.social.mobile.network.GrantJournalistRequest
 import one.zrp.social.mobile.network.JournalistActionRequest
 import one.zrp.social.mobile.network.ResolveAppealRequest
 import one.zrp.social.mobile.network.ResolveTicketRequest
+import one.zrp.social.mobile.network.RecordCharityDisbursementRequest
 import one.zrp.social.mobile.network.ReviewAdRequest
 import one.zrp.social.mobile.network.ReviewSubmissionRequest
 import one.zrp.social.mobile.network.ToggleBanResponse
@@ -38,8 +44,9 @@ import retrofit2.HttpException
  * website's own /admin pages call - see AdminApi's own KDoc. Every
  * write here can still 401/403 server-side regardless of what the
  * calling screen shows (requireStaff for stats/reports/users-list/
- * posts, requireAdmin for role changes, user deletion and every
- * support-ticket call below) - the Settings entry point and in-screen
+ * posts, requireAdmin for role changes, user deletion, every
+ * support-ticket call and all four internal ops calls below) - the
+ * Settings entry point and in-screen
  * role gating exist only to keep a MODERATOR (or lower) from being
  * shown controls the server would reject anyway, never as the actual
  * authorization boundary.
@@ -308,6 +315,86 @@ class AdminRepository {
             Result.success(Unit)
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to resolve this ticket."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // ─── Internal ops tooling (ADMIN only, server-side) ──────────────
+    suspend fun getAnalytics(): Result<AdminAnalyticsResponse> = runCatching {
+        ApiClient.adminApi.getAnalytics()
+    }
+
+    // Every filter is passed straight through: null means "no filter"
+    // (see AdminApi's own note), and cursor is null for the first page.
+    suspend fun getAuditLog(
+        action: String?,
+        targetType: String?,
+        targetId: String?,
+        cursor: String?,
+    ): Result<AdminAuditLogResponse> = runCatching {
+        ApiClient.adminApi.getAuditLog(action, targetType, targetId, cursor)
+    }
+
+    // Both storage calls answer a failure as {success:false, error} with
+    // a 500, so zrpErrorMessage() surfaces the route's own wording
+    // ("Failed to scan UploadThing storage") rather than a bare status -
+    // the same thing the website's own storage page displays.
+    suspend fun scanStorage(): Result<AdminStorageScan> {
+        return try {
+            Result.success(ApiClient.adminApi.scanStorage())
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to scan UploadThing storage."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // Irreversible: deletes every orphan the route's own re-run scan
+    // finds eligible. The caller is expected to have confirmed the real
+    // count/size with the user first - see AdminStorageScreen.
+    suspend fun cleanUpStorage(): Result<AdminStorageCleanupResult> {
+        return try {
+            Result.success(ApiClient.adminApi.cleanUpStorage())
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to clean up UploadThing storage."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    suspend fun getCharityDisbursements(): Result<AdminCharityDisbursementsResponse> = runCatching {
+        ApiClient.adminApi.getCharityDisbursements()
+    }
+
+    // The route validates beneficiary/cause/amount/date itself and 400s
+    // with a specific message for each, so that message is surfaced
+    // verbatim - the form's own checks only exist to stop an obviously
+    // incomplete financial record from being sent at all.
+    suspend fun recordCharityDisbursement(
+        beneficiaryName: String,
+        cause: String,
+        amount: Double,
+        currency: String,
+        disbursedAt: String,
+        note: String,
+        proofUrl: String,
+    ): Result<Unit> {
+        return try {
+            ApiClient.adminApi.recordCharityDisbursement(
+                RecordCharityDisbursementRequest(
+                    beneficiaryName = beneficiaryName,
+                    cause = cause,
+                    amount = amount,
+                    currency = currency,
+                    disbursedAt = disbursedAt,
+                    note = note,
+                    proofUrl = proofUrl,
+                ),
+            )
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to record this disbursement."))
         } catch (e: Exception) {
             Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
         }

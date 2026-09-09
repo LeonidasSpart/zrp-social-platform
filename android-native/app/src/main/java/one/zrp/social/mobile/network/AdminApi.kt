@@ -1,5 +1,6 @@
 package one.zrp.social.mobile.network
 
+import com.google.gson.JsonElement
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -452,15 +453,192 @@ data class AdminTicketReplyRequest(val message: String, val isInternal: Boolean)
 // `resolution || null`, so an empty string resolves with no note.
 data class ResolveTicketRequest(val resolution: String)
 
+// ─── Platform analytics (GET /admin/analytics) ───────────────────────
+// requireAdmin (real ADMIN role only), the same gate the website's own
+// /admin/analytics page sits behind. Every number below is an aggregate
+// the route computes server-side - nothing here is derived on-device.
+data class AdminAnalyticsSummary(
+    val users: Int = 0,
+    val posts: Int = 0,
+    val comments: Int = 0,
+    val likes: Int = 0,
+    val reposts: Int = 0,
+)
+
+// One day of the route's own 30-day $queryRaw series - real independent
+// per-type counts (a source tag carried through the UNION plus a
+// conditional COUNT() per column; an earlier version of this route
+// unioned all 5 tables into one bare `id` column and ran the identical
+// COUNT() expression for every output column, which made all 5 values
+// equal by construction - fixed server-side, not something this
+// client needs to work around). `date` is a serialised SQL DATE, i.e.
+// an ISO-8601 timestamp string, not a bare yyyy-MM-dd. Fields are Long
+// rather than Int purely to be a safe superset of whatever integer
+// width the route's COUNT()::int cast actually produces on the wire -
+// Gson deserializes a JSON integer into either without issue.
+data class AdminAnalyticsDaily(
+    val date: String,
+    val users: Long = 0,
+    val posts: Long = 0,
+    val comments: Long = 0,
+    val likes: Long = 0,
+    val reposts: Long = 0,
+)
+
+data class AdminAnalyticsPostAuthor(val username: String, val name: String?)
+data class AdminAnalyticsPostCounts(val likes: Int = 0, val comments: Int = 0, val reposts: Int = 0)
+data class AdminAnalyticsTopPost(
+    val id: String,
+    val content: String,
+    val createdAt: String,
+    val author: AdminAnalyticsPostAuthor,
+    val _count: AdminAnalyticsPostCounts = AdminAnalyticsPostCounts(),
+    // likes + comments + reposts, summed by the route itself before it
+    // re-sorts and slices its top ten - never recomputed client-side.
+    val engagement: Int = 0,
+)
+
+data class AdminAnalyticsEngagement(
+    val avgLikesPerPost: Double = 0.0,
+    val avgCommentsPerPost: Double = 0.0,
+    val totalLikes: Int = 0,
+    val totalComments: Int = 0,
+    val totalPosts: Int = 0,
+)
+
+data class AdminAnalyticsResponse(
+    val summary: AdminAnalyticsSummary = AdminAnalyticsSummary(),
+    val daily: List<AdminAnalyticsDaily> = emptyList(),
+    val topPosts: List<AdminAnalyticsTopPost> = emptyList(),
+    val engagement: AdminAnalyticsEngagement = AdminAnalyticsEngagement(),
+)
+
+// ─── Audit log (GET /admin/audit-log) ────────────────────────────────
+// requireAdmin. This route has no web page at all - the native screen
+// is the first UI for it on either platform. The entries are the raw
+// AuditLog rows logAdminAction() writes (src/lib/audit-log.ts),
+// returned by the route without any reshaping, so every field below is
+// a real column on that model. `metadata` is free-form JSON whose keys
+// differ per action (the disbursement writer stores beneficiaryName/
+// cause/amount, a ban writer stores something else entirely), so it
+// stays an unparsed JsonElement and is displayed as the stored JSON
+// rather than being forced into one fixed shape.
+data class AdminAuditEntry(
+    val id: String,
+    val actorId: String,
+    val actorUsername: String?,
+    val action: String,
+    val targetType: String?,
+    val targetId: String?,
+    val metadata: JsonElement?,
+    val createdAt: String,
+)
+
+// Cursor pagination rather than page numbers: nextCursor is the id the
+// next request continues from, and is null once the list is exhausted.
+data class AdminAuditLogResponse(
+    val entries: List<AdminAuditEntry> = emptyList(),
+    val nextCursor: String? = null,
+)
+
+// ─── Storage cleanup (GET/POST /admin/cleanup-uploadthing) ───────────
+// requireAdmin - a destructive, irreversible storage operation the
+// route deliberately keeps away from moderators. GET is a dry run that
+// only reports; POST deletes exactly the orphan set that same scan
+// found eligible. Anything uploaded in the last 24 hours is never
+// deleted - the route holds it back (heldForReview*) because every
+// upload flow in this app writes its database row in a second step, so
+// a brand-new unreferenced file may still be mid-publish.
+data class AdminOrphanFile(
+    val key: String,
+    val name: String?,
+    val size: Long = 0,
+    val uploadedAt: Long = 0,
+    val status: String?,
+)
+
+data class AdminStorageScan(
+    val success: Boolean = false,
+    val totalFilesInUploadThing: Int = 0,
+    val totalReferencedInDb: Int = 0,
+    val nonUploadedStatusCount: Int = 0,
+    val orphanedCount: Int = 0,
+    val orphanedSizeMB: Double = 0.0,
+    val heldForReviewCount: Int = 0,
+    val heldForReviewSizeMB: Double = 0.0,
+    // The route caps these at 200 orphans / 50 held-back files so a
+    // huge scan doesn't blow up the payload - the counts and sizes
+    // above always describe the whole scan regardless of what's listed.
+    val sample: List<AdminOrphanFile> = emptyList(),
+    val heldForReviewSample: List<AdminOrphanFile> = emptyList(),
+)
+
+// `deleted` is what UploadThing actually confirmed removed, which can
+// be lower than orphanedCount if a chunk failed partway through.
+data class AdminStorageCleanupResult(
+    val success: Boolean = false,
+    val orphanedCount: Int = 0,
+    val orphanedSizeMB: Double = 0.0,
+    val heldForReviewCount: Int = 0,
+    val deleted: Int = 0,
+)
+
+// ─── Charity disbursements (GET/POST /admin/charity-disbursements) ───
+// requireAdmin - real-world charity payouts ZRP has made, entered by an
+// admin who is vouching for them. Like the audit log this route has no
+// web admin page; the records it holds are the same ones the public
+// /charity ledger renders through GET /api/transparency/charity.
+//
+// amount is a String, not a Double: this route returns the Prisma row
+// as-is rather than through lib/serialize-decimal's jsonWithDecimals,
+// and a Prisma Decimal serialises to a JSON string ("1500.25"). It is
+// kept verbatim and only parsed at the point of display.
+data class AdminCharityDisbursement(
+    val id: String,
+    val beneficiaryName: String,
+    val cause: String,
+    val amount: String,
+    val currency: String,
+    val disbursedAt: String,
+    val note: String?,
+    val proofUrl: String?,
+    val recordedById: String?,
+    val recordedByUsername: String?,
+    val createdAt: String?,
+)
+
+data class AdminCharityDisbursementsResponse(
+    val disbursements: List<AdminCharityDisbursement> = emptyList(),
+)
+
+// cause must be one of orphanages/schools/hospitals/climate (the
+// route's own CAUSES list) and amount a finite number greater than
+// zero - anything else 400s. disbursedAt is sent as yyyy-MM-dd, which
+// the route parses with new Date() and rejects if it's invalid or in
+// the future. currency/note/proofUrl are sent as plain (possibly
+// empty) strings rather than omitted: the route already treats a blank
+// currency as "USD" and a blank note/proofUrl as null, and Gson would
+// drop a null field entirely.
+data class RecordCharityDisbursementRequest(
+    val beneficiaryName: String,
+    val cause: String,
+    val amount: Double,
+    val currency: String,
+    val disbursedAt: String,
+    val note: String,
+    val proofUrl: String,
+)
+
 /**
  * The same real ZRP admin backend the website's own /admin pages call -
  * this is a native surface onto the exact same routes, not a parallel
  * moderation system. Every route here is server-side gated by
  * requireStaff (ADMIN or MODERATOR - stats/reports/users-list/posts) or
- * requireAdmin (ADMIN only - role changes, user deletion, and every
- * support-ticket route) regardless of what this client sends;
- * AdminRepository's own KDoc covers how that maps to what the UI
- * shows/hides.
+ * requireAdmin (ADMIN only - role changes, user deletion, every
+ * support-ticket route, and all four internal ops routes: analytics,
+ * audit log, storage cleanup and charity disbursements) regardless of
+ * what this client sends; AdminRepository's own KDoc covers how that
+ * maps to what the UI shows/hides.
  */
 interface AdminApi {
     @GET("admin/stats")
@@ -610,4 +788,39 @@ interface AdminApi {
 
     @POST("admin/support/tickets/{id}/resolve")
     suspend fun resolveSupportTicket(@Path("id") id: String, @Body request: ResolveTicketRequest)
+
+    // ─── Internal ops tooling (every route below is requireAdmin) ────
+    @GET("admin/analytics")
+    suspend fun getAnalytics(): AdminAnalyticsResponse
+
+    // Every filter here is nullable because this route reads an absent
+    // parameter as "no filter" (`searchParams.get(...) || undefined`),
+    // and Retrofit drops a null @Query instead of sending an empty one
+    // - an empty string would be a filter for the empty string. cursor
+    // is likewise null on the first page.
+    @GET("admin/audit-log")
+    suspend fun getAuditLog(
+        @Query("action") action: String?,
+        @Query("targetType") targetType: String?,
+        @Query("targetId") targetId: String?,
+        @Query("cursor") cursor: String?,
+    ): AdminAuditLogResponse
+
+    @GET("admin/cleanup-uploadthing")
+    suspend fun scanStorage(): AdminStorageScan
+
+    // No request body - the route re-runs its own scan and deletes what
+    // that finds, so there is nothing for the client to send (and
+    // nothing it could send to widen the deletion set).
+    @POST("admin/cleanup-uploadthing")
+    suspend fun cleanUpStorage(): AdminStorageCleanupResult
+
+    @GET("admin/charity-disbursements")
+    suspend fun getCharityDisbursements(): AdminCharityDisbursementsResponse
+
+    // The 201 response is the created row without anything the list
+    // doesn't already carry, so nothing here parses it - the screen
+    // reloads the ledger instead, same as every other write above.
+    @POST("admin/charity-disbursements")
+    suspend fun recordCharityDisbursement(@Body request: RecordCharityDisbursementRequest)
 }
