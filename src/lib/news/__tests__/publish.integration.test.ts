@@ -86,6 +86,7 @@ describe.skipIf(!hasRealDatabaseUrl)("news publication (integration, real Postgr
     await db.newsSource.deleteMany({ where: { id: sourceId } });
     await db.newsFeed.deleteMany({ where: { id: feedId } });
     await db.post.deleteMany({ where: { authorId: feedUserId } });
+    await db.newsArticle.deleteMany({ where: { authorId: feedUserId } });
     await db.user.deleteMany({ where: { id: feedUserId } });
   });
 
@@ -95,6 +96,7 @@ describe.skipIf(!hasRealDatabaseUrl)("news publication (integration, real Postgr
   beforeEach(async () => {
     await db.newsPublication.deleteMany({ where: { feedId } });
     await db.post.deleteMany({ where: { authorId: feedUserId } });
+    await db.newsArticle.deleteMany({ where: { authorId: feedUserId } });
     await db.newsStory.deleteMany({ where: { references: { some: { sourceId } } } });
 
     const story = await db.newsStory.create({
@@ -286,6 +288,80 @@ describe.skipIf(!hasRealDatabaseUrl)("news publication (integration, real Postgr
     const story = await db.newsStory.findUniqueOrThrow({ where: { id: storyId } });
     expect(story.correctionNote).toBe("Only departures are affected.");
     expect(story.correctedAt).not.toBeNull();
+  });
+
+  it("also creates the /news-facing NewsArticle for a published story", async () => {
+    const reserved = await reservePublication(db, slot());
+    await publishDuePublication(db, reserved!.id, NOW);
+
+    const reference = await db.newsStorySource.findFirstOrThrow({ where: { storyId } });
+    const article = await db.newsArticle.findFirstOrThrow({ where: { sourceUrl: reference.url } });
+
+    expect(article.title).toBe("Geneva airport closed after overnight storm");
+    expect(article.content).toContain("Departures are suspended.");
+    expect(article.status).toBe("PUBLISHED");
+    expect(article.authorId).toBe(feedUserId);
+    // country: "CH" takes priority over topic in the category mapping.
+    expect(article.category).toBe("SWITZERLAND");
+    expect(article.publishedAt).not.toBeNull();
+  });
+
+  it("does not create a second NewsArticle when the same story publishes again in another language", async () => {
+    await db.newsRendition.create({
+      data: {
+        storyId,
+        language: "fr",
+        headline: "Aéroport de Genève fermé après une tempête nocturne",
+        body: "Les départs sont suspendus.",
+        status: "READY",
+      },
+    });
+
+    await publishDuePublication(db, (await reservePublication(db, slot()))!.id, NOW);
+    await publishDuePublication(
+      db,
+      (await reservePublication(db, { ...slot(), language: "fr" }))!.id,
+      NOW
+    );
+
+    const reference = await db.newsStorySource.findFirstOrThrow({ where: { storyId } });
+    const articles = await db.newsArticle.findMany({ where: { sourceUrl: reference.url } });
+    expect(articles).toHaveLength(1);
+    // The first publication to land wins - never silently overwritten by
+    // a later language's rendition.
+    expect(articles[0].title).toBe("Geneva airport closed after overnight storm");
+  });
+
+  it("removes the NewsArticle on takedown, mirroring the post's own removal", async () => {
+    const reserved = await reservePublication(db, slot());
+    await publishDuePublication(db, reserved!.id, NOW);
+
+    const reference = await db.newsStorySource.findFirstOrThrow({ where: { storyId } });
+    expect(await db.newsArticle.findFirst({ where: { sourceUrl: reference.url } })).not.toBeNull();
+
+    await removePublication(db, reserved!.id, "Source retracted the story", NOW);
+
+    expect(await db.newsArticle.findFirst({ where: { sourceUrl: reference.url } })).toBeNull();
+  });
+
+  it("mirrors a correction onto the NewsArticle, replacing rather than stacking on a second correction", async () => {
+    const reserved = await reservePublication(db, slot());
+    await publishDuePublication(db, reserved!.id, NOW);
+
+    await applyCorrection(db, storyId, "Only departures are affected.", NOW);
+
+    const reference = await db.newsStorySource.findFirstOrThrow({ where: { storyId } });
+    const once = await db.newsArticle.findFirstOrThrow({ where: { sourceUrl: reference.url } });
+    expect(once.content).toContain("Departures are suspended.");
+    expect(once.content).toContain("CORRECTION: Only departures are affected.");
+
+    await applyCorrection(db, storyId, "Correction: all flights are affected.", NOW);
+
+    const twice = await db.newsArticle.findFirstOrThrow({ where: { sourceUrl: reference.url } });
+    expect(twice.content).toContain("CORRECTION: Correction: all flights are affected.");
+    expect(twice.content).not.toContain("Only departures are affected.");
+    // Still exactly one correction marker, not two stacked.
+    expect(twice.content.split("CORRECTION: ")).toHaveLength(2);
   });
 });
 
