@@ -334,6 +334,8 @@
     <string name="profile_likes">点赞</string>
     <string name="profile_reposts">转发</string>
     <string name="profile_pinned">已置顶</string>
+    <string name="profile_follows_you">关注你</string>
+    <string name="profile_blocked_state">已屏蔽</string>
     <string name="profile_replying_to">回复</string>
     <string name="profile_no_posts">暂无帖子。</string>
     <string name="profile_no_replies">暂无回复。</string>

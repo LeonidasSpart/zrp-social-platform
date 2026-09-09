@@ -334,6 +334,8 @@
     <string name="profile_likes">Suka</string>
     <string name="profile_reposts">Repost</string>
     <string name="profile_pinned">Disematkan</string>
+    <string name="profile_follows_you">Mengikuti Anda</string>
+    <string name="profile_blocked_state">Diblokir</string>
     <string name="profile_replying_to">Membalas kepada</string>
     <string name="profile_no_posts">Belum ada postingan.</string>
     <string name="profile_no_replies">Belum ada balasan.</string>
