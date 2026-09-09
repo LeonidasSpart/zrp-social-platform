@@ -33,7 +33,7 @@ const MAX_REDIRECTS = 5;
 export function isDisallowedIPv4(ip: string): boolean {
   const parts = ip.split(".").map(Number);
   if (parts.length !== 4 || parts.some((p) => Number.isNaN(p))) return true;
-  const [a, b] = parts;
+  const [a, b, c] = parts;
 
   if (a === 0) return true; // 0.0.0.0/8
   if (a === 10) return true; // private
@@ -41,7 +41,15 @@ export function isDisallowedIPv4(ip: string): boolean {
   if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
   if (a === 169 && b === 254) return true; // link-local / cloud metadata
   if (a === 172 && b >= 16 && b <= 31) return true; // private
-  if (a === 192 && b === 0) return true; // IETF protocol assignments / TEST-NET tail
+  // Real bug, found via ZRP News Network source verification: this used
+  // to match the whole 192.0.0.0/16 (any b === 0) on the theory that it
+  // was "the TEST-NET tail", when the actually-reserved ranges are just
+  // two specific /24s inside it - 192.0.0.0/24 (IETF protocol
+  // assignments) and 192.0.2.0/24 (TEST-NET-1 documentation). The rest of
+  // 192.0.0.0/16 is ordinary allocated public space - confirmed by a real
+  // DNS lookup of swissinfo.ch and nasa.gov, both of which resolve inside
+  // it (192.0.66.x) and were being wrongly SSRF-blocked outright.
+  if (a === 192 && b === 0 && (c === 0 || c === 2)) return true; // 192.0.0.0/24 + 192.0.2.0/24
   if (a === 192 && b === 168) return true; // private
   if (a === 198 && (b === 18 || b === 19)) return true; // benchmarking
   if (a >= 224) return true; // multicast (224-239) + reserved (240-255) + broadcast

@@ -46,6 +46,22 @@ describe("isDisallowedIPv4", () => {
     expect(isDisallowedIPv4("93.184.216.34")).toBe(false);
   });
 
+  it("blocks only the two reserved /24s inside 192.0.0.0/16, not the whole block", () => {
+    expect(isDisallowedIPv4("192.0.0.1")).toBe(true); // 192.0.0.0/24 - IETF protocol assignments
+    expect(isDisallowedIPv4("192.0.2.1")).toBe(true); // 192.0.2.0/24 - TEST-NET-1
+  });
+
+  // Real bug, found via ZRP News Network source verification: the
+  // previous check matched any address with b === 0 (the whole
+  // 192.0.0.0/16), so real public sites resolving inside it - swissinfo.ch
+  // and nasa.gov both resolve to 192.0.66.x - were wrongly SSRF-blocked.
+  it("allows ordinary public IPs elsewhere in 192.0.0.0/16", () => {
+    expect(isDisallowedIPv4("192.0.66.156")).toBe(false); // swissinfo.ch
+    expect(isDisallowedIPv4("192.0.66.108")).toBe(false); // nasa.gov
+    expect(isDisallowedIPv4("192.0.1.1")).toBe(false);
+    expect(isDisallowedIPv4("192.0.255.1")).toBe(false);
+  });
+
   it("treats a malformed address as disallowed (fail closed)", () => {
     expect(isDisallowedIPv4("not-an-ip")).toBe(true);
     expect(isDisallowedIPv4("1.2.3")).toBe(true);
