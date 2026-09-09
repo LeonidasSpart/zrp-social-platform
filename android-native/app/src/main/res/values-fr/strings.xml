@@ -1555,6 +1555,15 @@
     <string name="profile_joined">Inscrit(e) depuis</string>
     <string name="profile_charity_note">%1$s%% des bénéfices sont reversés à des associations caritatives</string>
     <string name="profile_impact">Impact : %1$s $ reversés à la charité</string>
+    <!-- Profile Analytics tab (own profile only) - GET /api/user/posts/stats, the same real endpoint web's AnalyticsTab.tsx calls -->
+    <string name="profile_analytics">Statistiques</string>
+    <string name="profile_analytics_total_views">Vues totales</string>
+    <string name="profile_analytics_total_likes">J\'aime totaux</string>
+    <string name="profile_analytics_total_comments">Commentaires totaux</string>
+    <string name="profile_analytics_total_reposts">Reposts totaux</string>
+    <string name="profile_analytics_recent_posts">Publications récentes</string>
+    <string name="profile_analytics_no_posts">Aucune publication à analyser pour l\'instant.</string>
+    <string name="profile_analytics_failed">Impossible de charger vos statistiques. Vérifiez votre connexion et réessayez.</string>
     <string name="profile_milestone_years">%1$d ans sur ZRP</string>
     <string name="profile_milestone_six_months">6 mois sur ZRP</string>
     <string name="profile_milestone_new_member">Nouveau membre</string>

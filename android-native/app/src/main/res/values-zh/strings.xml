@@ -1555,6 +1555,15 @@
     <string name="profile_joined">加入于</string>
     <string name="profile_charity_note">%1$s%% 的利润用于慈善事业</string>
     <string name="profile_impact">影响力：已捐赠 %1$s 美元用于慈善</string>
+    <!-- Profile Analytics tab (own profile only) - GET /api/user/posts/stats, the same real endpoint web's AnalyticsTab.tsx calls -->
+    <string name="profile_analytics">数据分析</string>
+    <string name="profile_analytics_total_views">总浏览量</string>
+    <string name="profile_analytics_total_likes">总点赞数</string>
+    <string name="profile_analytics_total_comments">总评论数</string>
+    <string name="profile_analytics_total_reposts">总转发数</string>
+    <string name="profile_analytics_recent_posts">最近的帖子</string>
+    <string name="profile_analytics_no_posts">暂无可分析的帖子。</string>
+    <string name="profile_analytics_failed">无法加载你的数据分析。请检查网络连接后重试。</string>
     <string name="profile_milestone_years">在 ZRP %1$d 年</string>
     <string name="profile_milestone_six_months">在 ZRP 6 个月</string>
     <string name="profile_milestone_new_member">新成员</string>

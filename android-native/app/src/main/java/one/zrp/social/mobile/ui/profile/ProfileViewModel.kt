@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.PollVoteUser
+import one.zrp.social.mobile.network.UserPostStats
 import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.network.UserReply
 
@@ -24,8 +25,11 @@ import one.zrp.social.mobile.network.UserReply
 enum class MediaUploadTarget { AVATAR, BANNER }
 
 // Matches page.tsx's own TabType - the profile page's five real content
-// tabs (analytics is a sixth, own-profile-only tab covered separately).
-enum class ProfileTab { POSTS, REPLIES, MEDIA, LIKES, REPOSTS }
+// tabs plus ANALYTICS, which page.tsx's visibleTabs filter keeps to the
+// signed-in user's own profile and which ProfileTabRow gates the same
+// way (its endpoint is session-scoped, so there is no other profile it
+// could ever describe).
+enum class ProfileTab { POSTS, REPLIES, MEDIA, LIKES, REPOSTS, ANALYTICS }
 
 data class ProfileTabPostsState(
     val posts: List<Post> = emptyList(),
@@ -41,6 +45,17 @@ data class ProfileRepliesState(
     val endReached: Boolean = false,
     val isLoading: Boolean = false,
     val hasLoaded: Boolean = false,
+)
+
+// The Analytics tab is a single unpaginated snapshot (GET
+// /user/posts/stats returns the 20 most recent posts and the totals
+// over exactly those), so it has no cursor and no endReached - unlike
+// every other tab's state.
+data class ProfileAnalyticsState(
+    val stats: UserPostStats? = null,
+    val isLoading: Boolean = false,
+    val hasLoaded: Boolean = false,
+    val failed: Boolean = false,
 )
 
 data class ProfileUiState(
@@ -68,6 +83,7 @@ data class ProfileUiState(
     val mediaTab: ProfileTabPostsState = ProfileTabPostsState(),
     val likesTab: ProfileTabPostsState = ProfileTabPostsState(),
     val repostsTab: ProfileTabPostsState = ProfileTabPostsState(),
+    val analyticsTab: ProfileAnalyticsState = ProfileAnalyticsState(),
     // PostCard.tsx computes post ownership per-post
     // (session.user.id === post.author.id), never from which profile
     // is being viewed - it has to, since a signed-in user's own posts
@@ -145,6 +161,7 @@ class ProfileViewModel(
                             mediaTab = ProfileTabPostsState(),
                             likesTab = ProfileTabPostsState(),
                             repostsTab = ProfileTabPostsState(),
+                            analyticsTab = ProfileAnalyticsState(),
                         )
                     }
                     if (!isOwnProfile) {
@@ -187,6 +204,7 @@ class ProfileViewModel(
                 ProfileTab.MEDIA -> loadMedia(username, refresh = true)
                 ProfileTab.LIKES -> loadLikes(username, refresh = true)
                 ProfileTab.REPOSTS -> loadReposts(username, refresh = true)
+                ProfileTab.ANALYTICS -> loadAnalytics()
             }
         }
     }
@@ -243,6 +261,7 @@ class ProfileViewModel(
             ProfileTab.MEDIA -> if (!_state.value.mediaTab.hasLoaded) loadMedia(username, refresh = true)
             ProfileTab.LIKES -> if (!_state.value.likesTab.hasLoaded) loadLikes(username, refresh = true)
             ProfileTab.REPOSTS -> if (!_state.value.repostsTab.hasLoaded) loadReposts(username, refresh = true)
+            ProfileTab.ANALYTICS -> if (!_state.value.analyticsTab.hasLoaded) loadAnalytics()
         }
     }
 
@@ -270,6 +289,42 @@ class ProfileViewModel(
                 val tab = _state.value.repostsTab
                 if (!tab.isLoading && !tab.endReached && tab.nextCursor != null) loadReposts(username, refresh = false)
             }
+            // Analytics is a single unpaginated snapshot (see
+            // ProfileAnalyticsState) - there is nothing to continue.
+            ProfileTab.ANALYTICS -> Unit
+        }
+    }
+
+    // GET /user/posts/stats resolves the author from the session, so
+    // unlike every other tab's loader this takes no username - and it
+    // is only ever reachable from the own-profile tab row.
+    private fun loadAnalytics() {
+        _state.update { it.copy(analyticsTab = it.analyticsTab.copy(isLoading = true, failed = false)) }
+        viewModelScope.launch {
+            repository.getOwnPostStats()
+                .onSuccess { stats ->
+                    _state.update {
+                        it.copy(
+                            analyticsTab = it.analyticsTab.copy(
+                                stats = stats,
+                                isLoading = false,
+                                hasLoaded = true,
+                                failed = false,
+                            ),
+                        )
+                    }
+                }
+                .onFailure {
+                    _state.update {
+                        it.copy(
+                            analyticsTab = it.analyticsTab.copy(
+                                isLoading = false,
+                                hasLoaded = true,
+                                failed = true,
+                            ),
+                        )
+                    }
+                }
         }
     }
 

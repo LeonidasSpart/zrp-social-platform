@@ -1555,6 +1555,15 @@
     <string name="profile_joined">Bergabung</string>
     <string name="profile_charity_note">%1$s%% dari keuntungan disumbangkan untuk amal</string>
     <string name="profile_impact">Dampak: %1$s $ disumbangkan untuk amal</string>
+    <!-- Profile Analytics tab (own profile only) - GET /api/user/posts/stats, the same real endpoint web's AnalyticsTab.tsx calls -->
+    <string name="profile_analytics">Analitik</string>
+    <string name="profile_analytics_total_views">Total tayangan</string>
+    <string name="profile_analytics_total_likes">Total suka</string>
+    <string name="profile_analytics_total_comments">Total komentar</string>
+    <string name="profile_analytics_total_reposts">Total repost</string>
+    <string name="profile_analytics_recent_posts">Postingan terbaru</string>
+    <string name="profile_analytics_no_posts">Belum ada postingan untuk dianalisis.</string>
+    <string name="profile_analytics_failed">Tidak dapat memuat analitik Anda. Periksa koneksi Anda dan coba lagi.</string>
     <string name="profile_milestone_years">%1$d tahun di ZRP</string>
     <string name="profile_milestone_six_months">6 bulan di ZRP</string>
     <string name="profile_milestone_new_member">Anggota baru</string>

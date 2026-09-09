@@ -1555,6 +1555,15 @@
     <string name="profile_joined">Anëtarësuar më</string>
     <string name="profile_charity_note">%1$s%% e fitimeve shkojnë për bamirësi</string>
     <string name="profile_impact">Ndikimi: %1$s $ dhuruar për bamirësi</string>
+    <!-- Profile Analytics tab (own profile only) - GET /api/user/posts/stats, the same real endpoint web's AnalyticsTab.tsx calls -->
+    <string name="profile_analytics">Analitika</string>
+    <string name="profile_analytics_total_views">Shikime gjithsej</string>
+    <string name="profile_analytics_total_likes">Pëlqime gjithsej</string>
+    <string name="profile_analytics_total_comments">Komente gjithsej</string>
+    <string name="profile_analytics_total_reposts">Ripostime gjithsej</string>
+    <string name="profile_analytics_recent_posts">Postimet e fundit</string>
+    <string name="profile_analytics_no_posts">Ende nuk ka postime për t\'u analizuar.</string>
+    <string name="profile_analytics_failed">Analitika juaj nuk u ngarkua dot. Kontrolloni lidhjen dhe provoni sërish.</string>
     <string name="profile_milestone_years">%1$d vjet në ZRP</string>
     <string name="profile_milestone_six_months">6 muaj në ZRP</string>
     <string name="profile_milestone_new_member">Anëtar i ri</string>
