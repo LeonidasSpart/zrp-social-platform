@@ -1128,6 +1128,8 @@
     <string name="shorts_upload_err_too_large_plan">Questo video è troppo grande per il tuo piano. Prova un file più piccolo o aggiorna il tuo piano.</string>
     <string name="shorts_upload_err_url_gen_failed">Impossibile avviare il caricamento: di solito si tratta di un problema di connessione temporaneo. Riprova.</string>
     <string name="shorts_upload_err_internal_server">Si è verificato un errore da parte nostra durante il caricamento. Riprova tra un momento.</string>
+    <string name="caption_view_more">Mostra altro</string>
+    <string name="caption_view_less">Mostra meno</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">Importo (USDC)</string>
     <string name="creator_available_balance">Saldo disponibile: {amount} $</string>

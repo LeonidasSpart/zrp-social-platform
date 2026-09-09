@@ -1128,6 +1128,8 @@
     <string name="shorts_upload_err_too_large_plan">هذا الفيديو كبير جدًا بالنسبة لخطتك. جرّب ملفًا أصغر أو قم بترقية خطتك.</string>
     <string name="shorts_upload_err_url_gen_failed">تعذّر بدء الرفع - عادةً ما تكون هذه مشكلة اتصال مؤقتة. يرجى المحاولة مرة أخرى.</string>
     <string name="shorts_upload_err_internal_server">حدث خطأ ما من جانبنا أثناء الرفع. يرجى المحاولة مرة أخرى بعد قليل.</string>
+    <string name="caption_view_more">عرض المزيد</string>
+    <string name="caption_view_less">عرض أقل</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">المبلغ (USDC)</string>
     <string name="creator_available_balance">الرصيد المتاح: {amount}$</string>

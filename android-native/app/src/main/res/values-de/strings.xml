@@ -1128,6 +1128,8 @@
     <string name="shorts_upload_err_too_large_plan">Dieses Video ist für deinen Plan zu groß. Versuche eine kleinere Datei oder upgrade deinen Plan.</string>
     <string name="shorts_upload_err_url_gen_failed">Der Upload konnte nicht gestartet werden - das liegt normalerweise an einem vorübergehenden Verbindungsproblem. Bitte versuche es erneut.</string>
     <string name="shorts_upload_err_internal_server">Beim Hochladen ist auf unserer Seite etwas schiefgelaufen. Bitte versuche es in Kürze erneut.</string>
+    <string name="caption_view_more">Mehr anzeigen</string>
+    <string name="caption_view_less">Weniger anzeigen</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">Betrag (USDC)</string>
     <string name="creator_available_balance">Verfügbares Guthaben: {amount} $</string>

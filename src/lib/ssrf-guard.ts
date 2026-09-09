@@ -91,37 +91,73 @@ class SsrfBlockedError extends Error {
  * hands back only an allowed address so the connection can never land
  * on a private/internal target - even if the hostname's DNS record
  * later changes (rebinding).
+ *
+ * Real bug, confirmed by reproducing this exact code path against a
+ * real dual-stack host (20min.ch, which has both A and AAAA records):
+ * Node's http(s).request enables Happy Eyeballs (RFC 8305) by default
+ * for dual-stack hosts (net.js's autoSelectFamily, on since Node
+ * 18/20) - for those hosts it invokes this custom lookup with
+ * `options.all: true` and expects an *array* of {address, family}
+ * objects back, not the single (address, family) pair a plain
+ * dns.lookup-style callback gets. Calling back with only the single-
+ * address shape regardless of what was asked for - what this used to
+ * do unconditionally - throws inside Node's own internals ("Invalid IP
+ * address: undefined" from emitLookup), which the caller only ever
+ * sees as a generic request error indistinguishable from a real
+ * network failure. Every CDN-backed site with both an A and an AAAA
+ * record hits this, which is most major news/media sites - not an
+ * SSRF-guard misconfiguration or a blocked domain, a genuine shape
+ * mismatch with what Node itself calls this function with.
  */
-function makeSafeLookup(isAddressAllowed: IsAddressAllowedFn) {
+// Exported so the Happy-Eyeballs/dual-stack callback-shape handling
+// (options.all: true -> array callback) can be unit-tested directly
+// against a mocked dns.lookup, without needing a real dual-stack DNS
+// record - the same test-only rationale as IsAddressAllowedFn above.
+export function makeSafeLookup(isAddressAllowed: IsAddressAllowedFn) {
   return function safeLookup(
     hostname: string,
-    options: dns.LookupAllOptions | number,
-    callback: (err: NodeJS.ErrnoException | null, address: string, family: number) => void
+    options: dns.LookupAllOptions | dns.LookupOneOptions | number,
+    callback: (
+      err: NodeJS.ErrnoException | null,
+      addressOrAddresses?: string | dns.LookupAddress[],
+      family?: number
+    ) => void
   ) {
+    const wantsAll =
+      typeof options === "object" && options !== null && (options as dns.LookupAllOptions).all === true;
+
     const asIpFamily = net.isIP(hostname);
     if (asIpFamily) {
       if (!isAddressAllowed(hostname, asIpFamily)) {
-        callback(new SsrfBlockedError(), "", 0);
+        if (wantsAll) callback(new SsrfBlockedError(), []);
+        else callback(new SsrfBlockedError(), "", 0);
         return;
       }
-      callback(null, hostname, asIpFamily);
+      if (wantsAll) callback(null, [{ address: hostname, family: asIpFamily }]);
+      else callback(null, hostname, asIpFamily);
       return;
     }
 
     dns.lookup(hostname, { all: true, verbatim: true }, (err, addresses) => {
       if (err) {
-        callback(err, "", 0);
+        if (wantsAll) callback(err, []);
+        else callback(err, "", 0);
         return;
       }
 
-      const allowed = addresses.find((a) => isAddressAllowed(a.address, a.family));
+      const allAllowed = addresses.filter((a) => isAddressAllowed(a.address, a.family));
 
-      if (!allowed) {
-        callback(new SsrfBlockedError(), "", 0);
+      if (allAllowed.length === 0) {
+        if (wantsAll) callback(new SsrfBlockedError(), []);
+        else callback(new SsrfBlockedError(), "", 0);
         return;
       }
 
-      callback(null, allowed.address, allowed.family);
+      if (wantsAll) {
+        callback(null, allAllowed);
+      } else {
+        callback(null, allAllowed[0].address, allAllowed[0].family);
+      }
     });
   };
 }

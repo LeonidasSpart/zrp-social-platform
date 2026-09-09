@@ -298,7 +298,7 @@ export default function PostCard({
   showInlineComments = true,
 }: PostCardProps) {
   const { data: session } = useSession();
-  const { language: uiLanguage } = useLanguage();
+  const { language: uiLanguage, t } = useLanguage();
 
   const [liked, setLiked] = useState(post.liked || false);
 
@@ -1584,16 +1584,34 @@ export default function PostCard({
 
           <div className="flex-1 min-w-0">
 
-            {/* HEADER */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 flex-wrap">
+            {/* HEADER
 
+                One line, and the display name is the only part allowed
+                to give up width. It was `flex-wrap` with every child
+                free to size itself, so a long name pushed @username,
+                the timestamp and the type chip onto a second row and
+                changed the card's height - the "text evicts its
+                siblings" trap this codebase has hit repeatedly. The
+                name now truncates and everything after it is shrink-0,
+                so the byline is one row at every width and every name
+                length. */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+
+                {/* A floor, so a very long name at 320px truncates to
+                    something readable instead of "M…". The handle below
+                    is the part that gives way once this floor is hit -
+                    it can shrink to nothing without the row ever
+                    overflowing. */}
                 <Link
                   href={`/profile/${post.author.username}`}
+                  className="min-w-[4rem]"
                 >
-                  <span className="font-semibold hover:underline text-gray-900 dark:text-white inline-flex items-center gap-1">
-                    {post.author.name ||
-                      post.author.username}
+                  <span className="font-semibold hover:underline text-gray-900 dark:text-white flex items-center gap-1 min-w-0">
+                    <span className="truncate">
+                      {post.author.name ||
+                        post.author.username}
+                    </span>
 
                     <VerifiedBadge
                       badgeType={
@@ -1605,35 +1623,64 @@ export default function PostCard({
 
                 <Link
                   href={`/profile/${post.author.username}`}
+                  className="min-w-0 shrink-[6]"
                 >
-                  <span className="text-gray-500 dark:text-gray-400 text-sm hover:underline">
+                  {/* Flexbox shrinks siblings in proportion, not in
+                      order, so an equal-shrink handle took as much of
+                      the squeeze as the name and "Design Audit" came
+                      out as "Design..." at 390px. Weighting the handle
+                      6x makes it absorb the squeeze first: the name
+                      stays whole until the handle has nothing left to
+                      give. The max-width still stops a pathologically
+                      long handle from pushing the timestamp out. */}
+                  <span className="block max-w-[10rem] truncate text-gray-500 dark:text-gray-400 text-sm hover:underline">
                     @{post.author.username}
                   </span>
                 </Link>
 
-                <span className="text-gray-400 dark:text-gray-500 text-sm">
+                {/* text-gray-400 on white is 2.85:1 and fails AA. The
+                    design system's floor for metadata is gray-500. */}
+                <span
+                  aria-hidden="true"
+                  className="shrink-0 text-gray-500 dark:text-gray-500 text-sm"
+                >
                   ·
                 </span>
 
-                <span className="text-gray-400 dark:text-gray-500 text-sm">
+                <time
+                  dateTime={new Date(
+                    post.createdAt
+                  ).toISOString()}
+                  title={new Date(
+                    post.createdAt
+                  ).toLocaleString()}
+                  className="shrink-0 text-gray-500 dark:text-gray-400 text-sm"
+                >
                   {timeAgo(
                     post.createdAt
                   )}
-                </span>
+                </time>
 
+                {/* Quiet hairline chips. These were a filled blue pill
+                    and a filled purple one - purple is not in the ZRP
+                    palette at all, and two saturated fills in the
+                    byline compete with the post's own content. They
+                    also shipped as hardcoded English; composer.* has
+                    both words already translated into all 11
+                    languages. */}
                 {postType ===
                   "RECRUITMENT" && (
-                  <span className="inline-flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">
+                  <span className="inline-flex shrink-0 items-center gap-1 text-xs text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 px-2 py-0.5 rounded-full">
                     <Briefcase className="w-3 h-3" />
-                    Recruitment
+                    {t("composer.recruitment")}
                   </span>
                 )}
 
                 {postType ===
                   "ARTICLE" && (
-                  <span className="inline-flex items-center gap-1 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full">
+                  <span className="inline-flex shrink-0 items-center gap-1 text-xs text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 px-2 py-0.5 rounded-full">
                     <FileText className="w-3 h-3" />
-                    Article
+                    {t("composer.article")}
                   </span>
                 )}
               </div>
@@ -1649,11 +1696,22 @@ export default function PostCard({
                       disabled={
                         pinLoading
                       }
-                      className={`transition p-1 ${
+                      className={`transition p-1 rounded-full ${
                         isPinned
                           ? "text-blue-500 hover:text-blue-600"
-                          : "text-gray-400 hover:text-blue-500"
+                          : "text-gray-500 hover:text-blue-500"
                       }`}
+                      // Still English: there is no translated pin
+                      // string anywhere in the dictionary to reuse, and
+                      // machine-translating one into 11 languages is
+                      // not something to do silently. aria-label at
+                      // least gives the button a name instead of none.
+                      aria-label={
+                        isPinned
+                          ? "Unpin from profile"
+                          : "Pin to profile"
+                      }
+                      aria-pressed={isPinned}
                       title={
                         isPinned
                           ? "Unpin from profile"
@@ -1674,7 +1732,9 @@ export default function PostCard({
                         true
                       )
                     }
-                    className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition p-1"
+                    aria-label={t("action.edit")}
+                    title={t("action.edit")}
+                    className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition p-1 rounded-full"
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
@@ -1685,7 +1745,9 @@ export default function PostCard({
                         true
                       )
                     }
-                    className="text-gray-400 hover:text-red-500 transition p-1"
+                    aria-label={t("action.delete")}
+                    title={t("action.delete")}
+                    className="text-gray-500 hover:text-red-500 transition p-1 rounded-full"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -1697,7 +1759,9 @@ export default function PostCard({
                       true
                     )
                   }
-                  className="text-gray-400 hover:text-red-500 transition p-1"
+                  aria-label={t("report.modalTitle")}
+                  title={t("report.modalTitle")}
+                  className="text-gray-500 hover:text-red-500 transition p-1 rounded-full"
                 >
                   <Flag className="w-4 h-4" />
                 </button>
@@ -1911,12 +1975,17 @@ export default function PostCard({
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-semibold text-sm text-gray-900 dark:text-white">
+                      {/* Same one-line rule as the card's own byline
+                          above - this nested one had the identical
+                          flex-wrap/unconstrained-name shape. */}
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="font-semibold text-sm text-gray-900 dark:text-white truncate min-w-[4rem]">
                           {post.quotePost.author.name || post.quotePost.author.username}
                         </span>
-                        <VerifiedBadge badgeType={post.quotePost.author.badgeType} />
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="shrink-0 flex items-center">
+                          <VerifiedBadge badgeType={post.quotePost.author.badgeType} />
+                        </span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 truncate min-w-0">
                           @{post.quotePost.author.username}
                         </span>
                       </div>
@@ -2026,7 +2095,7 @@ export default function PostCard({
                         </p>
 
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Recruitment
+                          {t("composer.recruitment")}
                         </p>
                       </div>
                     </div>
@@ -2074,10 +2143,12 @@ export default function PostCard({
                   <div className="mt-3 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
 
                     <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-purple-500" />
+                      {/* was text-purple-500 - purple is not in the
+                          ZRP palette. */}
+                      <FileText className="w-4 h-4 text-gray-500 dark:text-gray-400" />
 
                       <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                        Article
+                        {t("composer.article")}
                       </span>
                     </div>
 
@@ -2227,7 +2298,7 @@ export default function PostCard({
                         ref={
                           videoContainerRef
                         }
-                        className="relative w-full max-h-[75vh] bg-black flex items-center justify-center"
+                        className="relative w-full max-h-[75dvh] bg-black flex items-center justify-center"
                         style={{
                           aspectRatio:
                             videoAspectRatio,
@@ -2358,7 +2429,7 @@ export default function PostCard({
                             post.imageUrl
                           }
                           alt="Post image"
-                          className="block max-w-full max-h-[75vh] mx-auto"
+                          className="block max-w-full max-h-[75dvh] mx-auto"
                           loading="lazy"
                         />
 
@@ -2382,7 +2453,9 @@ export default function PostCard({
                     !showComments
                   )
                 }
-                className={`group flex items-center gap-1 text-sm ${
+                aria-label={`${t("action.reply")} (${commentsCount})`}
+                aria-expanded={showComments}
+                className={`group flex items-center gap-1 text-sm rounded-full ${
                   commentsEnabled
                     ? "text-gray-500 dark:text-gray-400"
                     : "text-gray-300 dark:text-gray-500 cursor-not-allowed opacity-50"
@@ -2394,14 +2467,14 @@ export default function PostCard({
                 <span
                   className={`p-2 rounded-full transition ${
                     commentsEnabled
-                      ? "group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:text-blue-500"
+                      ? "group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:text-blue-500 group-focus-visible:bg-blue-50 dark:group-focus-visible:bg-blue-900/20 group-focus-visible:text-blue-500"
                       : ""
                   }`}
                 >
                   <MessageCircle className="w-[18px] h-[18px]" />
                 </span>
 
-                <span className="group-hover:text-blue-500 transition whitespace-nowrap">
+                <span className="group-hover:text-blue-500 group-focus-visible:text-blue-500 transition whitespace-nowrap">
                   {formatCount(
                     commentsCount
                   )}
@@ -2416,13 +2489,16 @@ export default function PostCard({
                       !repostDropdownOpen
                     )
                   }
-                  className={`group flex items-center text-sm ${
+                  aria-label={t("action.repost")}
+                  aria-haspopup="menu"
+                  aria-expanded={repostDropdownOpen}
+                  className={`group flex items-center text-sm rounded-full ${
                     reposted
                       ? "text-green-500"
                       : "text-gray-500 dark:text-gray-400"
                   } transition`}
                 >
-                  <span className="p-2 rounded-full transition group-hover:bg-green-50 dark:group-hover:bg-green-900/20 group-hover:text-green-500">
+                  <span className="p-2 rounded-full transition group-hover:bg-green-50 dark:group-hover:bg-green-900/20 group-hover:text-green-500 group-focus-visible:bg-green-50 dark:group-focus-visible:bg-green-900/20 group-focus-visible:text-green-500">
                     <Repeat
                       className={`w-[18px] h-[18px] ${
                         reposted
@@ -2432,7 +2508,7 @@ export default function PostCard({
                     />
                   </span>
 
-                  <span className="group-hover:text-green-500 transition -ml-1 whitespace-nowrap">
+                  <span className="group-hover:text-green-500 group-focus-visible:text-green-500 transition -ml-1 whitespace-nowrap">
                     {formatCount(
                       repostsCount +
                         (post._count
@@ -2520,13 +2596,15 @@ export default function PostCard({
                 onClick={
                   handleLike
                 }
-                className={`group flex items-center gap-1 text-sm ${
+                aria-label={`${t("action.like")} (${likesCount})`}
+                aria-pressed={liked}
+                className={`group flex items-center gap-1 text-sm rounded-full ${
                   liked
                     ? "text-red-500"
                     : "text-gray-500 dark:text-gray-400"
                 } transition`}
               >
-                <span className="p-2 rounded-full transition group-hover:bg-red-50 dark:group-hover:bg-red-900/20 group-hover:text-red-500">
+                <span className="p-2 rounded-full transition group-hover:bg-red-50 dark:group-hover:bg-red-900/20 group-hover:text-red-500 group-focus-visible:bg-red-50 dark:group-focus-visible:bg-red-900/20 group-focus-visible:text-red-500">
                   <Heart
                     className={`w-[18px] h-[18px] ${
                       liked
@@ -2536,7 +2614,7 @@ export default function PostCard({
                   />
                 </span>
 
-                <span className="group-hover:text-red-500 transition -ml-1 whitespace-nowrap">
+                <span className="group-hover:text-red-500 group-focus-visible:text-red-500 transition -ml-1 whitespace-nowrap">
                   {formatCount(
                     likesCount
                   )}
@@ -2545,7 +2623,7 @@ export default function PostCard({
 
               {/* VIEWS */}
               <span
-                className="flex items-center gap-1 text-sm text-gray-400 dark:text-gray-500 whitespace-nowrap"
+                className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-500 whitespace-nowrap"
                 title={`${viewsCount.toLocaleString()} views`}
               >
                 <span className="p-2">
@@ -2572,13 +2650,11 @@ export default function PostCard({
                   className={`group p-2 rounded-full transition hover:bg-blue-50 dark:hover:bg-blue-900/20 ${
                     bookmarked
                       ? "text-blue-500"
-                      : "text-gray-400 dark:text-gray-500 hover:text-blue-500"
+                      : "text-gray-500 dark:text-gray-500 hover:text-blue-500 focus-visible:text-blue-500"
                   }`}
-                  title={
-                    bookmarked
-                      ? "Remove bookmark"
-                      : "Bookmark"
-                  }
+                  aria-label={t("nav.bookmarks")}
+                  aria-pressed={bookmarked}
+                  title={t("nav.bookmarks")}
                 >
                   <Bookmark
                     className={`w-[18px] h-[18px] ${
@@ -2593,7 +2669,9 @@ export default function PostCard({
                   onClick={
                     handleShare
                   }
-                  className="p-2 rounded-full transition text-gray-400 dark:text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-500"
+                  aria-label={t("shorts.share")}
+                  title={t("shorts.share")}
+                  className="p-2 rounded-full transition text-gray-500 dark:text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-500 focus-visible:text-blue-500"
                 >
                   <Share2 className="w-[18px] h-[18px]" />
                 </button>
@@ -2655,6 +2733,8 @@ export default function PostCard({
                       true
                     )
                   }
+                  aria-label={t("chat.addEmoji")}
+                  title={t("chat.addEmoji")}
                   className="text-sm px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
                 >
                   <Plus className="w-4 h-4" />

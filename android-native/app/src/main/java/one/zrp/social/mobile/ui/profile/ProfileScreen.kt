@@ -907,7 +907,12 @@ private fun ProfileHeader(
                 .padding(horizontal = Spacing.lg, vertical = Spacing.md),
             horizontalArrangement = Arrangement.spacedBy(Spacing.xl),
         ) {
-            ProfileStat(count = profile._count.posts, label = stringResource(R.string.profile_posts))
+            // No Posts count here - real-device feedback flagged it as a
+            // redundant header stat when the Posts tab right below
+            // already represents post count naturally (matching both the
+            // reference X profile layout and page.tsx's own header,
+            // which has never shown one either - this was a native-only
+            // divergence, not something web parity required).
             ProfileStat(count = profile._count.followers, label = stringResource(R.string.profile_followers), onClick = onFollowersClick)
             // Matches page.tsx's own showFollowingCount: an account that
             // has turned publicFollowing off hides the real number

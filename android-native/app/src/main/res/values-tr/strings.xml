@@ -1128,6 +1128,8 @@
     <string name="shorts_upload_err_too_large_plan">Bu video, planınız için çok büyük. Daha küçük bir dosya deneyin veya planınızı yükseltin.</string>
     <string name="shorts_upload_err_url_gen_failed">Yükleme başlatılamadı - bu genellikle geçici bir bağlantı sorunudur. Lütfen tekrar deneyin.</string>
     <string name="shorts_upload_err_internal_server">Yükleme sırasında bizim tarafımızda bir sorun oluştu. Lütfen birazdan tekrar deneyin.</string>
+    <string name="caption_view_more">Daha fazla göster</string>
+    <string name="caption_view_less">Daha az göster</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">Tutar (USDC)</string>
     <string name="creator_available_balance">Kullanılabilir bakiye: %1$s</string>

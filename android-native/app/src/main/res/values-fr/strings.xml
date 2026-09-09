@@ -1128,6 +1128,8 @@
     <string name="shorts_upload_err_too_large_plan">Cette vidéo est trop volumineuse pour votre forfait. Essayez un fichier plus petit ou améliorez votre forfait.</string>
     <string name="shorts_upload_err_url_gen_failed">Impossible de démarrer le téléversement - il s\'agit généralement d\'un problème de connexion temporaire. Veuillez réessayer.</string>
     <string name="shorts_upload_err_internal_server">Une erreur s\'est produite de notre côté pendant le téléversement. Veuillez réessayer dans un instant.</string>
+    <string name="caption_view_more">Voir plus</string>
+    <string name="caption_view_less">Voir moins</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">Montant (USDC)</string>
     <string name="creator_available_balance">Solde disponible : {amount} $</string>

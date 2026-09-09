@@ -1128,6 +1128,8 @@
     <string name="shorts_upload_err_too_large_plan">Video ini terlalu besar untuk paket Anda. Coba file yang lebih kecil atau tingkatkan paket Anda.</string>
     <string name="shorts_upload_err_url_gen_failed">Tidak dapat memulai unggahan - ini biasanya masalah koneksi sementara. Silakan coba lagi.</string>
     <string name="shorts_upload_err_internal_server">Terjadi kesalahan di sistem kami saat mengunggah. Silakan coba lagi sesaat lagi.</string>
+    <string name="caption_view_more">Lihat selengkapnya</string>
+    <string name="caption_view_less">Lihat lebih sedikit</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">Jumlah (USDC)</string>
     <string name="creator_available_balance">Saldo tersedia: %1$s</string>

@@ -4,10 +4,12 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Bookmark, ArrowLeft, Heart, MessageCircle, Repeat } from "lucide-react";
+import { Bookmark, Heart, MessageCircle, Repeat } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import PageHeader from "@/components/ui/PageHeader";
+import EmptyState from "@/components/ui/EmptyState";
 
 interface Post {
   id: string;
@@ -131,35 +133,37 @@ export default function BookmarksPage() {
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/" className="text-gray-500 hover:text-gray-700 transition">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <Bookmark className="w-6 h-6 text-yellow-500" />
-          {t("bookmarks.title")}
-        </h1>
-        <span className="text-sm text-gray-500 ml-auto">{t("bookmarks.savedCount", { n: bookmarks.length })}</span>
-      </div>
+      {/* One page header for the app: same geometry, same 44px back
+          target, same truncating title, same trailing slot - instead of
+          each surface hand-rolling its own row. The back control keeps
+          exactly the destination it had (home), rather than switching to
+          history.back(), so nothing about navigation changes here. */}
+      <PageHeader
+        icon={Bookmark}
+        title={t("bookmarks.title")}
+        back={() => router.push("/")}
+        trailing={
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {t("bookmarks.savedCount", { n: bookmarks.length })}
+          </span>
+        }
+        className="-mx-4 mb-6"
+      />
 
       {error ? (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
           {error}
         </div>
       ) : bookmarks.length === 0 ? (
-        <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-8 border border-gray-200 dark:border-gray-700 text-center">
-          <Bookmark className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 dark:text-gray-400">{t("bookmarks.empty")}</p>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-            {t("bookmarks.emptyDesc")}
-          </p>
-          <Link
-            href="/"
-            className="inline-block mt-4 text-blue-600 hover:underline text-sm"
-          >
-            {t("bookmarks.explorePosts")}
-          </Link>
-        </div>
+        <EmptyState
+          icon={Bookmark}
+          title={t("bookmarks.empty")}
+          body={t("bookmarks.emptyDesc")}
+          primaryAction={{
+            label: t("bookmarks.explorePosts"),
+            onClick: () => router.push("/"),
+          }}
+        />
       ) : (
         <div className="space-y-4">
           {bookmarks.map((item) => {

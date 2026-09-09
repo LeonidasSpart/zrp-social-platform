@@ -1140,6 +1140,8 @@
     <string name="shorts_upload_err_too_large_plan">This video is too large for your plan. Try a smaller file or upgrade your plan.</string>
     <string name="shorts_upload_err_url_gen_failed">Couldn\'t start the upload - this is usually a temporary connection issue. Please try again.</string>
     <string name="shorts_upload_err_internal_server">Something went wrong on our end while uploading. Please try again in a moment.</string>
+    <string name="caption_view_more">View more</string>
+    <string name="caption_view_less">View less</string>
     <!-- "Shorts" is a proper noun, left untranslated in every one of web's own 11 language blocks (nav.shorts) - present only here so every locale falls back to this single default value. -->
     <string name="shorts_title">Shorts</string>
     <!-- ZRP Creator Studio (native parity) -->

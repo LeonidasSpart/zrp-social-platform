@@ -1128,6 +1128,8 @@
     <string name="shorts_upload_err_too_large_plan">Это видео слишком большое для вашего тарифа. Попробуйте файл меньшего размера или улучшите тариф.</string>
     <string name="shorts_upload_err_url_gen_failed">Не удалось начать загрузку: обычно это временная проблема с подключением. Пожалуйста, попробуйте снова.</string>
     <string name="shorts_upload_err_internal_server">Что-то пошло не так на нашей стороне во время загрузки. Пожалуйста, попробуйте снова через некоторое время.</string>
+    <string name="caption_view_more">Показать больше</string>
+    <string name="caption_view_less">Показать меньше</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">Сумма (USDC)</string>
     <string name="creator_available_balance">Доступный баланс: {amount} $</string>

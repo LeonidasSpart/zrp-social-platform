@@ -1,6 +1,7 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import zlib from "zlib";
 import http from "http";
+import dns from "dns";
 import type { AddressInfo } from "net";
 import {
   isDisallowedIPv4,
@@ -8,6 +9,7 @@ import {
   decompressBody,
   validateUrl,
   safeFetch,
+  makeSafeLookup,
   SsrfBlockedError,
 } from "../ssrf-guard";
 
@@ -169,6 +171,101 @@ describe("validateUrl", () => {
   it("accepts ordinary http/https URLs", () => {
     expect(() => validateUrl("https://example.com/page")).not.toThrow();
     expect(() => validateUrl("http://example.com/page")).not.toThrow();
+  });
+});
+
+// Real bug, reproduced against a real dual-stack host (20min.ch, which
+// has both A and AAAA records) via a throwaway CI job that imported
+// this exact code and ran it against the live site: Node's http(s)
+// .request enables Happy Eyeballs (RFC 8305) by default for dual-stack
+// hosts, and for those it invokes a custom `lookup` function (which
+// safeFetch passes as its own `lookup` option) with `options.all: true`,
+// expecting an *array* of {address, family} objects back - not the
+// single (address, family) pair a plain dns.lookup-style callback
+// gets. The previous implementation always called back with the
+// single-address shape regardless of what was asked for, which threw
+// inside Node's own internals ("Invalid IP address: undefined") for
+// every dual-stack site - most major news/media sites, 20min.ch
+// included - and safeFetch's caller only ever saw that as a generic
+// request error indistinguishable from a real network failure. These
+// tests exercise both callback shapes Node can actually invoke this
+// with, mocking dns.lookup so they don't depend on any real DNS record.
+describe("makeSafeLookup (Happy Eyeballs / dual-stack callback shape)", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const DUAL_STACK = [
+    { address: "203.0.113.10", family: 4 },
+    { address: "2001:db8::1", family: 6 },
+  ];
+
+  it("calls back with an array of allowed addresses when options.all is true (the Happy-Eyeballs shape)", async () => {
+    vi.spyOn(dns, "lookup").mockImplementation(((_hostname: string, _opts: unknown, cb: (err: null, addrs: typeof DUAL_STACK) => void) => {
+      cb(null, DUAL_STACK);
+    }) as unknown as typeof dns.lookup);
+
+    const lookup = makeSafeLookup(() => true);
+    const result = await new Promise<{ err: unknown; addr: unknown; family?: number }>((resolve) => {
+      lookup("dualstack.example.com", { all: true } as dns.LookupAllOptions, (err, addressOrAddresses, family) => {
+        resolve({ err, addr: addressOrAddresses, family });
+      });
+    });
+
+    expect(result.err).toBeNull();
+    expect(Array.isArray(result.addr)).toBe(true);
+    expect(result.addr).toEqual(DUAL_STACK);
+  });
+
+  it("calls back with a single (address, family) pair when options.all is not set (the plain dns.lookup shape)", async () => {
+    vi.spyOn(dns, "lookup").mockImplementation(((_hostname: string, _opts: unknown, cb: (err: null, addrs: typeof DUAL_STACK) => void) => {
+      cb(null, DUAL_STACK);
+    }) as unknown as typeof dns.lookup);
+
+    const lookup = makeSafeLookup(() => true);
+    const result = await new Promise<{ err: unknown; addr: unknown; family?: number }>((resolve) => {
+      lookup("dualstack.example.com", 4, (err, addressOrAddresses, family) => {
+        resolve({ err, addr: addressOrAddresses, family });
+      });
+    });
+
+    expect(result.err).toBeNull();
+    expect(typeof result.addr).toBe("string");
+    expect(result.addr).toBe(DUAL_STACK[0].address);
+    expect(result.family).toBe(DUAL_STACK[0].family);
+  });
+
+  it("filters out disallowed addresses in the array shape rather than passing every candidate through", async () => {
+    vi.spyOn(dns, "lookup").mockImplementation(((_hostname: string, _opts: unknown, cb: (err: null, addrs: typeof DUAL_STACK) => void) => {
+      cb(null, DUAL_STACK);
+    }) as unknown as typeof dns.lookup);
+
+    // Only the IPv6 address is "allowed" here - the real isAddressAllowed
+    // would do this when the IPv4 candidate resolves to a private range.
+    const lookup = makeSafeLookup((ip) => ip === "2001:db8::1");
+    const result = await new Promise<{ err: unknown; addr: unknown }>((resolve) => {
+      lookup("dualstack.example.com", { all: true } as dns.LookupAllOptions, (err, addressOrAddresses) => {
+        resolve({ err, addr: addressOrAddresses });
+      });
+    });
+
+    expect(result.err).toBeNull();
+    expect(result.addr).toEqual([{ address: "2001:db8::1", family: 6 }]);
+  });
+
+  it("rejects with SsrfBlockedError in the array shape when every candidate is disallowed", async () => {
+    vi.spyOn(dns, "lookup").mockImplementation(((_hostname: string, _opts: unknown, cb: (err: null, addrs: typeof DUAL_STACK) => void) => {
+      cb(null, DUAL_STACK);
+    }) as unknown as typeof dns.lookup);
+
+    const lookup = makeSafeLookup(() => false);
+    const result = await new Promise<{ err: unknown }>((resolve) => {
+      lookup("dualstack.example.com", { all: true } as dns.LookupAllOptions, (err) => {
+        resolve({ err });
+      });
+    });
+
+    expect(result.err).toBeInstanceOf(SsrfBlockedError);
   });
 });
 
