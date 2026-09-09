@@ -66,6 +66,29 @@ interface GenericPreviewResult {
   transient: boolean;
 }
 
+// Many European multi-language publishers (20min.ch's /fr/, /de/, /it/
+// paths among them) key their response on Accept-Language, not just the
+// URL path: a request that doesn't declare the page's own language can
+// get a redirect to the site's default-locale variant, a consent/cookie
+// wall in a different language than the article, or otherwise-thinner
+// markup missing the real og:title/og:description - independent of
+// whether the URL itself is perfectly valid. A hardcoded "en-US,en"
+// header was silently mismatched against, e.g., a French article. Most
+// news-site URL schemes put the language as the first path segment, so
+// pull it from there when it looks like a real ISO 639-1 code, and still
+// send it alongside (not instead of) English so a host that ignores the
+// hint entirely still gets a request it can serve.
+function languageHintFromUrl(url: string): string | null {
+  const match = new URL(url).pathname.match(/^\/([a-z]{2})(?:[-/]|$)/i);
+  return match ? match[1].toLowerCase() : null;
+}
+
+function buildAcceptLanguage(url: string): string {
+  const hint = languageHintFromUrl(url);
+  if (!hint || hint === "en") return "en-US,en;q=0.9";
+  return `${hint};q=1.0,en-US;q=0.8,en;q=0.7`;
+}
+
 async function fetchGenericPreview(url: string): Promise<GenericPreviewResult> {
   try {
     const res = await safeFetch(url, {
@@ -85,7 +108,7 @@ async function fetchGenericPreview(url: string): Promise<GenericPreviewResult> {
           "Mozilla/5.0 (compatible; ZRPLinkPreview/1.0; +https://zrp.one)",
         Accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Language": buildAcceptLanguage(url),
         "Accept-Encoding": "gzip, deflate, br",
       },
     });

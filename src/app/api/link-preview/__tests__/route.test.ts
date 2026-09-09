@@ -161,6 +161,48 @@ describe("GET /api/link-preview", () => {
     expect(body.siteName).toBe("20 minutes");
   });
 
+  // Real user report: this exact URL (a French /fr/story/ article) showed
+  // only the raw link, never a preview card, on both Web and Android.
+  // Sandboxed dev environments can't make a live outbound request to
+  // confirm what 20min.ch actually returns for it, so this asserts the
+  // one concrete, fixable defect found by code review instead: the
+  // request sent no Accept-Language matching the article's own language,
+  // which is a documented way for multi-language publishers to serve a
+  // thinner/consent-walled response. This also locks in that the exact
+  // reported URL parses correctly end-to-end once real OG tags are
+  // present, so a future regression here is caught even though the live
+  // network behavior itself couldn't be verified from this environment.
+  it("sends an Accept-Language matching the URL's own /fr/ path segment for the reported football-article URL", async () => {
+    mockedSafeFetch.mockResolvedValueOnce(
+      htmlResponse(`
+        <html><head>
+          <meta property="og:title" content="Atteinte d'un cancer, elle voit son club faire un geste emouvant">
+          <meta property="og:description" content="Un geste qui a touche toute la communaute du club">
+          <meta property="og:image" content="https://media.20min.ch/image/football-geste.jpg">
+          <meta property="og:site_name" content="20 minutes">
+          <meta property="og:type" content="article">
+        </head></html>`)
+    );
+    const url =
+      "https://www.20min.ch/fr/story/football-atteinte-d-un-cancer-elle-voit-son-club-faire-un-geste-emouvant-103629744";
+    const res = await callGET(req(url));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.title).toBe("Atteinte d'un cancer, elle voit son club faire un geste emouvant");
+    expect(body.image).toBe("https://media.20min.ch/image/football-geste.jpg");
+
+    expect(mockedSafeFetch).toHaveBeenCalledTimes(1);
+    const [, options] = mockedSafeFetch.mock.calls[0];
+    expect(options?.headers?.["Accept-Language"]).toBe("fr;q=1.0,en-US;q=0.8,en;q=0.7");
+  });
+
+  it("falls back to plain en-US Accept-Language for a URL with no language path segment", async () => {
+    mockedSafeFetch.mockResolvedValueOnce(htmlResponse(`<html><head></head></html>`));
+    await callGET(req("https://example.com/blank-page-no-lang"));
+    const [, options] = mockedSafeFetch.mock.calls[0];
+    expect(options?.headers?.["Accept-Language"]).toBe("en-US,en;q=0.9");
+  });
+
   it("does not apply SSRF blocking to a real public 20min.ch URL - only the outbound fetch layer decides, and it's mocked to succeed here", async () => {
     mockedSafeFetch.mockResolvedValueOnce(htmlResponse(`<html><head></head></html>`));
     const res = await callGET(req("https://www.20min.ch/fr/video/example-123"));
