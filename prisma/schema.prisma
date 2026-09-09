@@ -110,6 +110,7 @@ enum NewsArticleCategory {
   SPORTS
   CULTURE
   COMMUNITY
+  GAMING
 }
 
 enum ListingCategory {
@@ -275,6 +276,7 @@ enum NewsTopic {
   LIFESTYLE
   LOCAL
   BREAKING
+  GAMING
 }
 
 enum NewsSourceStatus {

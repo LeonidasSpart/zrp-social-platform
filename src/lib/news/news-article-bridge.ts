@@ -44,6 +44,7 @@ export function mapToArticleCategory(story: {
     ENTERTAINMENT: "CULTURE",
     CULTURE: "CULTURE",
     LIFESTYLE: "CULTURE",
+    GAMING: "GAMING",
   };
 
   const mapped = byTopic[story.topic];
