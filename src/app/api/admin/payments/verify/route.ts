@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { invalidateUserAuthState } from "@/lib/auth-state";
 import { logAdminAction } from "@/lib/audit-log";
 
 export async function POST(req: NextRequest) {
@@ -27,6 +28,7 @@ export async function POST(req: NextRequest) {
     where: { id: payment.userId },
     data: { plan: payment.plan },
   });
+  invalidateUserAuthState(payment.userId);
 
   await prisma.paymentRequest.update({
     where: { id: paymentId },

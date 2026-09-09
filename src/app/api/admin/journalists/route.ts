@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { JournalistStatus, Prisma } from "@prisma/client";
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { invalidateUserAuthState } from "@/lib/auth-state";
 import { syncJournalistBadge } from "@/lib/journalist";
 
 const PROFILE_INCLUDE = {
@@ -162,6 +163,7 @@ export async function POST(request: NextRequest) {
           }),
       prisma.user.update({ where: { id: targetUser.id }, data: { role: "JOURNALIST" } }),
     ]);
+    invalidateUserAuthState(targetUser.id);
 
     await syncJournalistBadge(targetUser.id, "VERIFIED");
 

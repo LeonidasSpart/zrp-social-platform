@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { invalidateUserAuthState } from "@/lib/auth-state";
 
 export async function PUT(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -24,6 +25,7 @@ export async function PUT(req: NextRequest) {
     where: { id: session.user.id },
     data: { plan: "free" },
   });
+  invalidateUserAuthState(session.user.id);
 
   return NextResponse.json({ plan: user.plan });
 }

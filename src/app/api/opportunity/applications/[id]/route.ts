@@ -2,7 +2,10 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+// ⚠️ SECURITY: getVerifiedToken is a drop-in for getToken() that overlays the
+// database's current role/isAdmin/plan/banned onto the decoded JWT and
+// returns null for a banned or deleted account - see src/lib/auth-guards.ts.
+import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
 import { APPLICATION_STATUSES, type ApplicationStatus } from "@/lib/opportunity";

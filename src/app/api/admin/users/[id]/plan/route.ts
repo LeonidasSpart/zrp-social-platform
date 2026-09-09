@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { invalidateUserAuthState } from "@/lib/auth-state";
 
 export async function PUT(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -19,6 +20,7 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
     data: { plan },
     select: { id: true, username: true, plan: true },
   });
+  invalidateUserAuthState(params.id);
 
   return NextResponse.json(user);
 }
