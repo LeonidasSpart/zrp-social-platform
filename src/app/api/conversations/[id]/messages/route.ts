@@ -6,6 +6,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
 import { getConversationParticipant } from "@/lib/conversations";
 import { sendPushNotification } from "@/lib/push-notifications";
+import { isAllowedMediaUrl } from "@/lib/media-url";
 
 const MAX_MESSAGE_LENGTH = 10000;
 
@@ -91,6 +92,17 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     }
     if (content && content.length > MAX_MESSAGE_LENGTH) {
       return NextResponse.json({ error: "Message is too long" }, { status: 400 });
+    }
+
+    // ⚠️ SECURITY: same rule as 1:1 chat and posts - an attachment is
+    // rendered straight into every member's thread, so it must come from
+    // a source ZRP itself hands out (UploadThing, the GIF picker), never
+    // an arbitrary host or scheme. See src/lib/media-url.ts.
+    if (imageUrl && !isAllowedMediaUrl(imageUrl)) {
+      return NextResponse.json(
+        { error: "Attachments must be uploaded through ZRP or chosen from the GIF picker." },
+        { status: 400 }
+      );
     }
 
     // Replying only to a real message already in THIS conversation -

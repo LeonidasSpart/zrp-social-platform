@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/db';
 import { authOptions } from '@/lib/auth';
 import { notifyTicketCreated } from '@/lib/notifications';
+import { getRequestIp } from '@/lib/rate-limit';
 
 // ─── GET: List user's own tickets ──────────────────────────────
 export async function GET(req: NextRequest) {
@@ -122,12 +123,10 @@ export async function POST(req: NextRequest) {
         userAgent:
           req.headers.get('user-agent') || undefined,
 
-        // Next.js 15 / NextRequest does not expose req.ip.
-        // Prefer proxy-provided client IP headers.
-        ipAddress:
-          req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-          req.headers.get('x-real-ip') ||
-          undefined,
+        // Next.js 15 / NextRequest does not expose req.ip. Resolved with
+        // the same trusted-proxy rule as the rate limiters so the stored
+        // address is the one our edge proxy saw, not a client-chosen one.
+        ipAddress: getRequestIp(req),
 
         referrer:
           req.headers.get('referer') || undefined,

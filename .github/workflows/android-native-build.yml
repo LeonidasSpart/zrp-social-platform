@@ -89,6 +89,16 @@ jobs:
   release:
     name: Build release AAB
     runs-on: ubuntu-latest
+    # ⚠️ SECURITY: the release (signing) job runs ONLY for trusted
+    # triggers - a push to main or a manual workflow_dispatch - never
+    # for a pull_request. GitHub withholds repository secrets from PRs
+    # opened from a fork, but a PR from a branch in this same repository
+    # receives them, and this job used to run for every such PR: anyone
+    # able to open a same-repo PR could have modified this workflow (or
+    # the Gradle files it invokes) in that same PR to exfiltrate the
+    # production upload keystore. PRs still get the full debug-APK build
+    # job above as their end-to-end check.
+    if: github.event_name != 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v4

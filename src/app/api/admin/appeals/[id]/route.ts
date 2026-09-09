@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { invalidateUserAuthState } from "@/lib/auth-state";
 import { logAdminAction } from "@/lib/audit-log";
 import { createNotification } from "@/lib/notifications";
 
@@ -57,6 +58,7 @@ export async function PUT(
         where: { id: appeal.userId },
         data: { banned: false },
       });
+      invalidateUserAuthState(appeal.userId);
       await logAdminAction({
         actor: adminCheck.session,
         action: "user.unban",

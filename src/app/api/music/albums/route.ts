@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getMusicPublishAccess, MUSIC_PUBLISH_DENIED_MESSAGE } from "@/lib/music/permissions";
 import { attachAlbumDurations } from "@/lib/music/album-aggregates";
+import { isTrustedUploadUrl, UPLOAD_ONLY_ERROR } from "@/lib/media-url";
+import { extractUploadThingKey } from "@/lib/uploadthing";
 
 export const dynamic = "force-dynamic";
 
@@ -56,13 +58,21 @@ export async function POST(req: NextRequest) {
   const artist = await prisma.musicArtist.findFirst({ where: { id: artistId, userId: session.user.id } });
   if (!artist) return NextResponse.json({ error: "Artist profile not owned by current user" }, { status: 403 });
 
+  // ⚠️ SECURITY: artwork must come from ZRP's own upload storage; the
+  // storage key is derived from the URL server-side, never taken from
+  // the client (see src/lib/upload-ownership.ts).
+  const coverUrl = body.coverUrl ? String(body.coverUrl) : null;
+  if (coverUrl && !isTrustedUploadUrl(coverUrl)) {
+    return NextResponse.json({ error: UPLOAD_ONLY_ERROR }, { status: 400 });
+  }
+
   const album = await prisma.musicAlbum.create({
     data: {
       artistId,
       title,
       description: body.description || null,
-      coverUrl: body.coverUrl || null,
-      coverKey: body.coverKey || null,
+      coverUrl,
+      coverKey: extractUploadThingKey(coverUrl),
       releaseDate: body.releaseDate ? new Date(body.releaseDate) : null,
     },
   });

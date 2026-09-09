@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaff } from "@/lib/admin";
-import { getToken } from "next-auth/jwt";
+// ⚠️ SECURITY: getVerifiedToken is a drop-in for getToken() that overlays the
+// database's current role/isAdmin/plan/banned onto the decoded JWT and
+// returns null for a banned or deleted account - see src/lib/auth-guards.ts.
+import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
 import { logAdminAction } from "@/lib/audit-log";

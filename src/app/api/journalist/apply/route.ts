@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { invalidateUserAuthState } from "@/lib/auth-state";
 
 /**
  * POST /api/journalist/apply
@@ -86,6 +87,7 @@ export async function POST(request: NextRequest) {
 
       return updatedProfile;
     });
+    invalidateUserAuthState(session.user.id);
 
     return NextResponse.json({ success: true, profile }, { status: 201 });
   } catch (error) {

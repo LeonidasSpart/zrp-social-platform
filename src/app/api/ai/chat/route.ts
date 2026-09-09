@@ -2,7 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/db";
 import { authOptions } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
+import {
+  aiUsageDateKey,
+  recordAiTokens,
+  releaseAiMessage,
+  reserveAiMessage,
+} from "@/lib/ai-quota";
 import OpenAI from "openai";
+
+// ⚠️ SECURITY: abuse limits that were missing entirely. A message is
+// forwarded verbatim into the model's context (billed per token), so
+// its length is capped; the whole JSON body is capped before parsing
+// so a multi-megabyte payload is rejected without being buffered; and
+// a per-IP limit sits alongside the per-user daily quota so a burst
+// from one address can't exhaust many accounts' quotas at once.
+const MAX_MESSAGE_CHARS = 4000;
+const MAX_BODY_BYTES = 64 * 1024;
+const AI_IP_RATE_LIMIT = { limit: 30, window: 60, type: "ai-chat" };
 
 // ─── Initialize DeepSeek Client lazily ───────────────────────────
 // IMPORTANT:
@@ -40,12 +57,39 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const ipLimit = await rateLimit(req, AI_IP_RATE_LIMIT);
+    if (!ipLimit.success) {
+      return ipLimit.response!;
+    }
+
+    const declaredLength = parseInt(req.headers.get("content-length") || "0", 10);
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+      return NextResponse.json(
+        { error: "Request too large" },
+        { status: 413 }
+      );
+    }
+
     const body = await req.json();
     const { message, conversationId, stream = true } = body;
 
-    if (!message?.trim()) {
+    if (typeof message !== "string" || !message.trim()) {
       return NextResponse.json(
         { error: "Message is required" },
+        { status: 400 }
+      );
+    }
+
+    if (message.length > MAX_MESSAGE_CHARS) {
+      return NextResponse.json(
+        { error: `Message too long (max ${MAX_MESSAGE_CHARS} characters)` },
+        { status: 400 }
+      );
+    }
+
+    if (conversationId !== undefined && conversationId !== null && typeof conversationId !== "string") {
+      return NextResponse.json(
+        { error: "Invalid conversation" },
         { status: 400 }
       );
     }
@@ -58,30 +102,11 @@ export async function POST(req: NextRequest) {
       RATE_LIMITS[plan as keyof typeof RATE_LIMITS] ||
       RATE_LIMITS.free;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const usage = await prisma.aIDailyUsage.findUnique({
-      where: {
-        userId_date: {
-          userId: session.user.id,
-          date: today,
-        },
-      },
-    });
-
-    if (usage && usage.messages >= limits.messagesPerDay) {
-      return NextResponse.json(
-        {
-          error: `Daily limit reached (${limits.messagesPerDay} messages). Upgrade your plan for more.`,
-          limit: limits.messagesPerDay,
-          used: usage.messages,
-        },
-        { status: 429 }
-      );
-    }
+    const today = aiUsageDateKey();
 
     // ─── Get or create conversation ───────────────────────────────
+    // Looked up BEFORE the quota slot is reserved so a request for
+    // someone else's conversation is refused without touching usage.
     let conversation;
 
     if (conversationId) {
@@ -105,7 +130,36 @@ export async function POST(req: NextRequest) {
           { status: 403 }
         );
       }
-    } else {
+    }
+
+    // ⚠️ SECURITY: the daily slot is reserved atomically here, before
+    // the model is called, so concurrent requests can't all pass a
+    // stale "used < limit" read - see src/lib/ai-quota.ts. The slot is
+    // released again below if the provider never produces a response.
+    const reservation = await reserveAiMessage(
+      session.user.id,
+      limits.messagesPerDay,
+      today
+    );
+
+    if (!reservation.ok) {
+      return NextResponse.json(
+        {
+          error: `Daily limit reached (${limits.messagesPerDay} messages). Upgrade your plan for more.`,
+          limit: limits.messagesPerDay,
+          used: reservation.used,
+        },
+        { status: 429 }
+      );
+    }
+
+    // What the client shows as "remaining today" after this message.
+    const remainingAfter = Math.max(
+      limits.messagesPerDay - reservation.used,
+      0
+    );
+
+    if (!conversation) {
       conversation = await prisma.aIConversation.create({
         data: {
           userId: session.user.id,
@@ -264,41 +318,15 @@ If someone asks who you are, say:
                       }),
                     ]);
 
-                    await prisma.aIDailyUsage.upsert({
-                      where: {
-                        userId_date: {
-                          userId:
-                            session.user.id,
-                          date: today,
-                        },
-                      },
-
-                      update: {
-                        messages: {
-                          increment: 1,
-                        },
-
-                        tokensUsed: {
-                          increment:
-                            Math.floor(
-                              fullResponse.length /
-                                4
-                            ),
-                        },
-                      },
-
-                      create: {
-                        userId:
-                          session.user.id,
-                        date: today,
-                        messages: 1,
-                        tokensUsed:
-                          Math.floor(
-                            fullResponse.length /
-                              4
-                          ),
-                      },
-                    });
+                    // The message slot was already counted by the
+                    // reservation above; only the tokens are new.
+                    await recordAiTokens(
+                      session.user.id,
+                      Math.floor(
+                        fullResponse.length / 4
+                      ),
+                      today
+                    );
 
                     controller.enqueue(
                       encoder.encode(
@@ -308,10 +336,7 @@ If someone asks who you are, say:
                             assistantMessage.id,
                           conversationId:
                             conversation.id,
-                          remaining:
-                            limits.messagesPerDay -
-                            (usage?.messages || 0) -
-                            1,
+                          remaining: remainingAfter,
                         })}\n\n`
                       )
                     );
@@ -325,6 +350,12 @@ If someone asks who you are, say:
                       (event as any).error?.message ||
                       "Stream failed";
 
+                    // Nothing was produced - give the slot back.
+                    await releaseAiMessage(
+                      session.user.id,
+                      today
+                    ).catch(() => {});
+
                     controller.enqueue(
                       encoder.encode(
                         `data: ${JSON.stringify({
@@ -337,6 +368,11 @@ If someone asks who you are, say:
                   }
                 }
               } catch (error) {
+                await releaseAiMessage(
+                  session.user.id,
+                  today
+                ).catch(() => {});
+
                 controller.enqueue(
                   encoder.encode(
                     `data: ${JSON.stringify({
@@ -408,38 +444,13 @@ If someone asks who you are, say:
           }),
         ]);
 
-        await prisma.aIDailyUsage.upsert({
-          where: {
-            userId_date: {
-              userId: session.user.id,
-              date: today,
-            },
-          },
-
-          update: {
-            messages: {
-              increment: 1,
-            },
-
-            tokensUsed: {
-              increment:
-                Math.floor(
-                  fullResponse.length / 4
-                ),
-            },
-          },
-
-          create: {
-            userId:
-              session.user.id,
-            date: today,
-            messages: 1,
-            tokensUsed:
-              Math.floor(
-                fullResponse.length / 4
-              ),
-          },
-        });
+        // The message slot was already counted by the reservation
+        // above; only the tokens are new.
+        await recordAiTokens(
+          session.user.id,
+          Math.floor(fullResponse.length / 4),
+          today
+        );
 
         const duration =
           Date.now() - startTime;
@@ -453,10 +464,7 @@ If someone asks who you are, say:
           provider:
             "deepseek-responses-api",
           duration,
-          remaining:
-            limits.messagesPerDay -
-            (usage?.messages || 0) -
-            1,
+          remaining: remainingAfter,
         });
       }
     } catch (error: any) {
@@ -464,6 +472,13 @@ If someone asks who you are, say:
         "DeepSeek Responses API error:",
         error
       );
+
+      // The provider never answered - the reserved slot is refunded so
+      // an outage on their side doesn't consume the user's quota.
+      await releaseAiMessage(
+        session.user.id,
+        today
+      ).catch(() => {});
 
       return NextResponse.json(
         {

@@ -2,12 +2,16 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+// ⚠️ SECURITY: getVerifiedToken is a drop-in for getToken() that overlays the
+// database's current role/isAdmin/plan/banned onto the decoded JWT and
+// returns null for a banned or deleted account - see src/lib/auth-guards.ts.
+import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
 import { checkImagesPerListing, checkActiveListingsCount, getUserPlan } from "@/lib/limits";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
+import { validateTrustedUploadUrls } from "@/lib/media-url";
 import { Prisma } from "@prisma/client";
 
 const CATEGORIES = [
@@ -171,6 +175,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "At least one photo is required." }, { status: 400 });
     }
 
+    // ⚠️ SECURITY: listing photos and video are rendered to every
+    // marketplace visitor and deleted from storage with the listing, so
+    // they must come from ZRP's own upload storage (every client uploads
+    // through the listingMedia UploadThing route) - never an arbitrary
+    // host, scheme or someone else's file. See src/lib/media-url.ts.
+    const cleanVideoUrl = typeof videoUrl === "string" && videoUrl ? videoUrl : null;
+    const mediaCheck = validateTrustedUploadUrls([...cleanImageUrls, ...(cleanVideoUrl ? [cleanVideoUrl] : [])]);
+    if (!mediaCheck.ok) {
+      return NextResponse.json({ error: mediaCheck.error }, { status: 400 });
+    }
+
     const plan = getUserPlan({ plan: token.plan as string | undefined });
     const imagesCheck = checkImagesPerListing(cleanImageUrls.length, plan);
     if (!imagesCheck.allowed) {
@@ -199,7 +214,7 @@ export async function POST(req: NextRequest) {
         priceOnRequest: wantsPriceOnRequest,
         location: typeof location === "string" && location.trim() ? location.trim() : null,
         imageUrls: cleanImageUrls,
-        videoUrl: typeof videoUrl === "string" && videoUrl ? videoUrl : null,
+        videoUrl: cleanVideoUrl,
         // Every listing goes through moderator approval before it's
         // visible to anyone but the seller - same policy as AdCampaign.
         status: "PENDING_REVIEW",

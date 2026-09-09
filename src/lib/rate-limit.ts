@@ -7,10 +7,98 @@ export interface RateLimitConfig {
   type: string;
 }
 
+/*
+ * ============================================================
+ * Client IP resolution (trusted-proxy semantics)
+ * ============================================================
+ *
+ * ⚠️ SECURITY: this used to take the FIRST entry of X-Forwarded-For.
+ * That entry is whatever the client itself chose to send - a caller
+ * could set `X-Forwarded-For: 1.2.3.4` and get a fresh rate-limit
+ * bucket on every request, defeating the login/API/upload limits
+ * entirely. The production host (Railway) terminates TLS at its edge
+ * proxy and APPENDS the real connecting address to X-Forwarded-For, so
+ * the only entry that can't be forged by the client is the one added
+ * by our own trusted proxy: counting from the RIGHT, the Nth entry
+ * where N is the number of trusted proxy hops in front of the app.
+ *
+ * TRUSTED_PROXY_HOPS defaults to 1 (Railway's single edge proxy). If
+ * another trusted reverse proxy/CDN is ever placed in front of it,
+ * set it to that hop count. It is never read from the request.
+ *
+ * X-Real-IP is only consulted when no X-Forwarded-For exists at all
+ * (it's a single-value header some proxies set instead), and the final
+ * fallback is a fixed loopback bucket - direct, un-proxied traffic only
+ * happens in local development.
+ */
+
+function trustedProxyHops(): number {
+  const raw = parseInt(process.env.TRUSTED_PROXY_HOPS || "", 10);
+  return Number.isFinite(raw) && raw >= 1 ? raw : 1;
+}
+
+// Loose shape check so a forged/garbage header value can't smuggle
+// arbitrary text into rate-limit keys (or logs). IPv4, IPv6 (incl.
+// IPv4-mapped) and nothing else.
+const IP_SHAPE = /^[0-9a-fA-F.:]{3,45}$/;
+
+function normalizeIp(value: string | null | undefined): string | null {
+  if (!value) return null;
+  let ip = value.trim();
+  // Strip an IPv4 port suffix ("1.2.3.4:5678") some proxies include.
+  const v4Port = ip.match(/^(\d{1,3}(?:\.\d{1,3}){3}):\d+$/);
+  if (v4Port) ip = v4Port[1];
+  // Strip bracketed IPv6 ("[::1]:5678" / "[::1]").
+  const v6Bracket = ip.match(/^\[([0-9a-fA-F:.]+)\](?::\d+)?$/);
+  if (v6Bracket) ip = v6Bracket[1];
+  return IP_SHAPE.test(ip) ? ip : null;
+}
+
+/**
+ * Resolve the client IP from a plain headers object - the shape
+ * NextAuth's `authorize()` callback receives, where there's no
+ * NextRequest. Applies the exact same trusted-proxy rule as
+ * getRequestIp() so the login limiter can't disagree with every other
+ * limiter about who a request is from.
+ */
+export function getClientIpFromHeaders(
+  headers:
+    | Headers
+    | Record<string, string | string[] | undefined>
+    | null
+    | undefined
+): string {
+  const read = (name: string): string | null => {
+    if (!headers) return null;
+    if (typeof (headers as Headers).get === "function") {
+      return (headers as Headers).get(name);
+    }
+    const record = headers as Record<string, string | string[] | undefined>;
+    const value = record[name] ?? record[name.toLowerCase()];
+    return Array.isArray(value) ? value.join(",") : value ?? null;
+  };
+
+  const forwarded = read("x-forwarded-for");
+  if (forwarded) {
+    const parts = forwarded
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+    if (parts.length > 0) {
+      const index = Math.max(0, parts.length - trustedProxyHops());
+      const ip = normalizeIp(parts[index]);
+      if (ip) return ip;
+    }
+  }
+
+  const real = normalizeIp(read("x-real-ip"));
+  if (real) return real;
+
+  return "127.0.0.1";
+}
+
 function getClientIp(req: NextRequest): string {
-  const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim();
-  return req.headers.get("x-real-ip") || "127.0.0.1";
+  return getClientIpFromHeaders(req.headers);
 }
 
 /*
@@ -105,20 +193,30 @@ export async function checkRateLimitKey(
       return localRateLimit(fullKey, limit, windowSeconds);
     }
 
-    const current = await redis.get(fullKey);
-    const count = current ? parseInt(current, 10) : 0;
+    // ⚠️ SECURITY: this used to be GET → (SET | INCR), two round trips
+    // with no atomicity - N concurrent requests could all read the same
+    // count and all be admitted, so a burst of parallel requests
+    // sailed past the limit. INCR is atomic in Redis, so every
+    // concurrent caller gets a distinct, strictly increasing count and
+    // exactly `limit` of them are admitted per window.
+    const count = await redis.incr(fullKey);
 
-    if (count === 0) {
-      await redis.set(fullKey, "1", { EX: windowSeconds });
-      return { success: true, retryAfter: 0 };
+    if (count === 1) {
+      // First hit in this window: start the window clock.
+      await redis.expire(fullKey, windowSeconds);
     }
 
-    if (count >= limit) {
-      const ttl = await redis.ttl(fullKey);
+    if (count > limit) {
+      let ttl = await redis.ttl(fullKey);
+      if (ttl < 0) {
+        // Key somehow lost its expiry (e.g. an EXPIRE that failed after
+        // the INCR) - re-arm it rather than leaving a permanent block.
+        await redis.expire(fullKey, windowSeconds);
+        ttl = windowSeconds;
+      }
       return { success: false, retryAfter: ttl > 0 ? ttl : windowSeconds };
     }
 
-    await redis.incr(fullKey);
     return { success: true, retryAfter: 0 };
   } catch (error) {
     console.error("Rate limit error:", error);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { isTrustedUploadUrl, UPLOAD_ONLY_ERROR } from "@/lib/media-url";
 
 // ─── GET: Fetch stories ──────────────────────────────────────────────
 export async function GET(req: NextRequest) {
@@ -95,6 +96,14 @@ export async function POST(req: NextRequest) {
       { error: "Invalid mediaType. Must be 'image' or 'video'." },
       { status: 400 }
     );
+  }
+
+  // ⚠️ SECURITY: a story's media is rendered full-screen to every
+  // follower, so it must come from ZRP's own upload storage (every
+  // client uploads through the storyMedia UploadThing route) - never an
+  // arbitrary client-supplied host or scheme. See src/lib/media-url.ts.
+  if (mediaUrl && !isTrustedUploadUrl(mediaUrl)) {
+    return NextResponse.json({ error: UPLOAD_ONLY_ERROR }, { status: 400 });
   }
 
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);

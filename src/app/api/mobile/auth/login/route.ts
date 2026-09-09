@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { encode } from "next-auth/jwt";
 import { getFeatureStatus } from "@/lib/permissions";
 import { CredentialsAuthError, verifyCredentials } from "@/lib/auth";
+import { getRequestIp } from "@/lib/rate-limit";
 
 // 30 days, matching NextAuth's own default session.maxAge (authOptions
 // never overrides it) - the token this issues must expire on the same
@@ -26,13 +27,11 @@ function secureCookieName(): string {
   return secure ? "__Secure-next-auth.session-token" : "next-auth.session-token";
 }
 
+// Same trusted-proxy resolution every other limiter uses - the
+// previous "first X-Forwarded-For entry" was client-controlled and let
+// a brute-forcer rotate a fake header to dodge the login-attempt limit.
 function clientIp(req: NextRequest): string {
-  const forwardedFor = req.headers.get("x-forwarded-for");
-  return (
-    forwardedFor?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "unknown"
-  );
+  return getRequestIp(req);
 }
 
 export async function POST(req: NextRequest) {

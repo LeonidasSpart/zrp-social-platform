@@ -2,14 +2,18 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+// ⚠️ SECURITY: getVerifiedToken is a drop-in for getToken() that overlays the
+// database's current role/isAdmin/plan/banned onto the decoded JWT and
+// returns null for a banned or deleted account - see src/lib/auth-guards.ts.
+import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
 import { checkImagesPerListing, getUserPlan } from "@/lib/limits";
 import { isSessionAdmin } from "@/lib/admin";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { deleteUploadThingFiles } from "@/lib/uploadthing";
+import { deleteUploadsIfUnreferenced } from "@/lib/upload-ownership";
+import { validateTrustedUploadUrls } from "@/lib/media-url";
 
 const CATEGORIES = [
   "LUXURY_CARS",
@@ -166,6 +170,19 @@ export async function PUT(
       }
     }
 
+    // ⚠️ SECURITY: any NEW photo or video must come from ZRP's own
+    // upload storage; values already stored on this listing (which the
+    // edit form re-sends) are accepted unchanged. See src/lib/media-url.ts.
+    const cleanVideoUrl =
+      videoUrl !== undefined ? (typeof videoUrl === "string" && videoUrl ? videoUrl : null) : undefined;
+    const mediaCheck = validateTrustedUploadUrls(
+      [...(cleanImageUrls ?? []), ...(cleanVideoUrl ? [cleanVideoUrl] : [])],
+      { allowExisting: [...existing.imageUrls, existing.videoUrl] }
+    );
+    if (!mediaCheck.ok) {
+      return NextResponse.json({ error: mediaCheck.error }, { status: 400 });
+    }
+
     // Any substantive edit to a live listing sends it back through
     // moderation - otherwise an approved listing could be swapped for
     // something completely different (bait-and-switch) without ever
@@ -191,7 +208,7 @@ export async function PUT(
           : {}),
         ...(location !== undefined ? { location: location?.trim() || null } : {}),
         ...(cleanImageUrls !== undefined ? { imageUrls: cleanImageUrls } : {}),
-        ...(videoUrl !== undefined ? { videoUrl: videoUrl || null } : {}),
+        ...(cleanVideoUrl !== undefined ? { videoUrl: cleanVideoUrl } : {}),
         ...(existing.status === "ACTIVE" && substantiveChange
           ? { status: "PENDING_REVIEW", rejectionReason: null, reviewedBy: null, reviewedAt: null }
           : {}),
@@ -232,7 +249,11 @@ export async function DELETE(
 
     await prisma.listing.delete({ where: { id } });
 
-    await deleteUploadThingFiles([...existing.imageUrls, existing.videoUrl]);
+    // ⚠️ SECURITY: storage files are only deleted when NOTHING in the
+    // database still references them - never blind-deleted, so a
+    // listing that (before this hardening) pointed at someone else's
+    // file cannot destroy it. See src/lib/upload-ownership.ts.
+    await deleteUploadsIfUnreferenced([...existing.imageUrls, existing.videoUrl]);
 
     return NextResponse.json({ success: true });
   } catch (error) {

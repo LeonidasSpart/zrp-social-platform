@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 // stay on requireAdmin.
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { invalidateUserAuthState } from "@/lib/auth-state";
 import { logAdminAction } from "@/lib/audit-log";
 
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -26,6 +27,10 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
       where: { id: userId },
       data: { banned: !user.banned },
     });
+
+    // A ban must bite immediately: drop the cached auth state so the
+    // next request from this user (any route, any client) sees it.
+    invalidateUserAuthState(userId);
 
     await logAdminAction({
       actor: adminCheck.session,

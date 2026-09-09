@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { getUserGroupConversations } from "@/lib/conversations";
+import { isAllowedMediaUrl } from "@/lib/media-url";
 
 const MAX_GROUP_NAME_LENGTH = 100;
 // A group needs at least this many OTHER real members beyond the
@@ -56,6 +57,11 @@ export async function POST(req: NextRequest) {
     }
     if (!Array.isArray(participantIds) || participantIds.some((id) => typeof id !== "string")) {
       return NextResponse.json({ error: "participantIds must be a list of user ids" }, { status: 400 });
+    }
+    // ⚠️ SECURITY: a group avatar is rendered for every member, so it
+    // must come from ZRP's own upload storage - see src/lib/media-url.ts.
+    if (typeof avatarUrl === "string" && avatarUrl && !isAllowedMediaUrl(avatarUrl)) {
+      return NextResponse.json({ error: "Group avatar must be uploaded through ZRP." }, { status: 400 });
     }
 
     // Real ids only, deduplicated, self excluded (the creator is added

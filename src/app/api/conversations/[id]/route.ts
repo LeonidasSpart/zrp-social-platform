@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { getConversationParticipant } from "@/lib/conversations";
+import { isAllowedMediaUrl } from "@/lib/media-url";
 
 const MAX_GROUP_NAME_LENGTH = 100;
 
@@ -80,6 +81,11 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
       data.name = name.trim();
     }
     if (avatarUrl !== undefined) {
+      // ⚠️ SECURITY: a group avatar is rendered for every member, so it
+      // must come from ZRP's own upload storage - see src/lib/media-url.ts.
+      if (typeof avatarUrl === "string" && avatarUrl && !isAllowedMediaUrl(avatarUrl)) {
+        return NextResponse.json({ error: "Group avatar must be uploaded through ZRP." }, { status: 400 });
+      }
       data.avatarUrl = typeof avatarUrl === "string" && avatarUrl ? avatarUrl : null;
     }
 
