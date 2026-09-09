@@ -253,6 +253,7 @@
     <string name="message_record_voice_cd">录制语音消息</string>
     <string name="chat_cancel_recording_cd">取消</string>
     <string name="chat_recording_label">录音中...</string>
+    <string name="chat_message_actions_cd">消息选项</string>
     <string name="chat_send_voice_message_cd">发送</string>
     <string name="chat_err_mic_access">无法访问你的麦克风，请检查你的权限设置。</string>
     <string name="chat_attachment_fallback">文档</string>

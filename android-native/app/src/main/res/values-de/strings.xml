@@ -253,6 +253,7 @@
     <string name="message_record_voice_cd">Sprachnachricht aufnehmen</string>
     <string name="chat_cancel_recording_cd">Abbrechen</string>
     <string name="chat_recording_label">Aufnahme läuft...</string>
+    <string name="chat_message_actions_cd">Nachrichtenoptionen</string>
     <string name="chat_send_voice_message_cd">Senden</string>
     <string name="chat_err_mic_access">Zugriff auf das Mikrofon nicht möglich. Bitte überprüfe deine Berechtigungen.</string>
     <string name="chat_attachment_fallback">Dokument</string>

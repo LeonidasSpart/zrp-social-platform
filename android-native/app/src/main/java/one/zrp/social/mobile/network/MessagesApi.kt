@@ -6,6 +6,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 data class MessageReaction(
     val id: String,
@@ -78,6 +79,18 @@ data class SocketMessageReadPayload(val messageId: String)
 data class SocketReactionUpdatedPayload(val messageId: String, val reactions: List<MessageReaction>)
 data class SocketTypingPayload(val userId: String, val isTyping: Boolean)
 
+// The real cursor-aware envelope GET /messages/{userId} switches to the
+// moment a client sends cursor and/or limit (see the route's own
+// comment on why: the bare-array shape below stays byte-for-byte
+// identical for every client that never asks for a page, so this is
+// additive, not a breaking contract change). Used only by
+// getOlderConversationMessages - the initial/poll fetch keeps using the
+// plain array endpoint, unchanged.
+data class MessagesPage(
+    val items: List<ChatMessage>,
+    val nextCursor: String?,
+)
+
 data class ConversationSummary(
     val partner: PostAuthor,
     val lastMessage: ChatMessage,
@@ -121,6 +134,17 @@ interface MessagesApi {
 
     @GET("messages/{userId}")
     suspend fun getConversationMessages(@Path("userId") userId: String): List<ChatMessage>
+
+    // The same real endpoint above, but sending `cursor` opts into the
+    // route's own paginated envelope (see MessagesPage's KDoc) - how
+    // ConversationScreen loads history older than its initial window
+    // when scrolling to the top of a long conversation.
+    @GET("messages/{userId}")
+    suspend fun getOlderConversationMessages(
+        @Path("userId") userId: String,
+        @Query("cursor") cursor: String,
+        @Query("limit") limit: Int = 50,
+    ): MessagesPage
 
     @POST("messages")
     suspend fun sendMessage(@Body request: SendMessageRequest): ChatMessage

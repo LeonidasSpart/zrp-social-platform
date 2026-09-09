@@ -6,6 +6,7 @@ import one.zrp.social.mobile.network.ConversationSummary
 import one.zrp.social.mobile.network.EditMessageRequest
 import one.zrp.social.mobile.network.MessageReactionRequest
 import one.zrp.social.mobile.network.MessageReactionResponse
+import one.zrp.social.mobile.network.MessagesPage
 import one.zrp.social.mobile.network.SendMessageRequest
 import one.zrp.social.mobile.network.zrpErrorMessage
 import retrofit2.HttpException
@@ -17,6 +18,14 @@ class MessagesRepository {
 
     suspend fun getConversationMessages(userId: String): Result<List<ChatMessage>> = runCatching {
         ApiClient.messagesApi.getConversationMessages(userId)
+    }
+
+    // beforeMessageId is the oldest message currently held locally -
+    // the cursor contract (see MessagesPage's KDoc) returns the real
+    // page immediately preceding it, chronological-ascending within
+    // that page, ready to prepend as-is.
+    suspend fun getOlderMessages(userId: String, beforeMessageId: String): Result<MessagesPage> = runCatching {
+        ApiClient.messagesApi.getOlderConversationMessages(userId, cursor = beforeMessageId)
     }
 
     suspend fun sendMessage(
