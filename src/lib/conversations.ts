@@ -106,3 +106,90 @@ export async function getUserConversations(userId: string): Promise<Conversation
 
   return Array.from(conversationMap.values());
 }
+
+// ─── Group conversations ──────────────────────────────────────────────
+
+const GROUP_MESSAGE_INCLUDE = {
+  sender: { select: PARTNER_SELECT },
+} as const;
+
+type GroupMessage = Prisma.MessageGetPayload<{ include: typeof GROUP_MESSAGE_INCLUDE }>;
+
+export interface GroupConversationSummary {
+  id: string;
+  name: string | null;
+  avatarUrl: string | null;
+  participantCount: number;
+  lastMessage: GroupMessage | null;
+  unreadCount: number;
+}
+
+/**
+ * Real server-side membership check every group route (REST and
+ * Socket.IO alike) must run before returning or acting on anything
+ * conversation-scoped - removing a participant deletes their row (see
+ * ConversationParticipant's own KDoc), so "is this row still there" is
+ * the entire authorization boundary. Never trust a client-claimed
+ * conversationId/userId pairing without this.
+ */
+export async function getConversationParticipant(conversationId: string, userId: string) {
+  return prisma.conversationParticipant.findUnique({
+    where: { conversationId_userId: { conversationId, userId } },
+  });
+}
+
+/**
+ * One entry per GROUP conversation this user currently belongs to
+ * (their own ConversationParticipant row still exists - see
+ * getConversationParticipant's own KDoc on why that's the real
+ * membership boundary, not a soft flag). unreadCount is computed from
+ * lastReadAt rather than a per-message-per-user row - see
+ * ConversationParticipant's own schema KDoc for why.
+ */
+export async function getUserGroupConversations(userId: string): Promise<GroupConversationSummary[]> {
+  const memberships = await prisma.conversationParticipant.findMany({
+    where: { userId, conversation: { type: "GROUP" } },
+    select: {
+      conversationId: true,
+      lastReadAt: true,
+      conversation: {
+        select: {
+          id: true,
+          name: true,
+          avatarUrl: true,
+          _count: { select: { participants: true } },
+        },
+      },
+    },
+  });
+
+  if (memberships.length === 0) return [];
+
+  return Promise.all(
+    memberships.map(async (m) => {
+      const [lastMessage, unreadCount] = await Promise.all([
+        prisma.message.findFirst({
+          where: { conversationId: m.conversationId },
+          orderBy: { createdAt: "desc" },
+          include: GROUP_MESSAGE_INCLUDE,
+        }),
+        prisma.message.count({
+          where: {
+            conversationId: m.conversationId,
+            senderId: { not: userId },
+            createdAt: m.lastReadAt ? { gt: m.lastReadAt } : undefined,
+          },
+        }),
+      ]);
+
+      return {
+        id: m.conversation.id,
+        name: m.conversation.name,
+        avatarUrl: m.conversation.avatarUrl,
+        participantCount: m.conversation._count.participants,
+        lastMessage,
+        unreadCount,
+      };
+    })
+  );
+}
