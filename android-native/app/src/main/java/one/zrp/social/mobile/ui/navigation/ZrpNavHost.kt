@@ -42,6 +42,8 @@ import one.zrp.social.mobile.network.MobileUser
 import one.zrp.social.mobile.ui.admin.AdminDashboardScreen
 import one.zrp.social.mobile.ui.admin.AdminPostsScreen
 import one.zrp.social.mobile.ui.admin.AdminReportsScreen
+import one.zrp.social.mobile.ui.admin.AdminSupportTicketDetailScreen
+import one.zrp.social.mobile.ui.admin.AdminSupportTicketsScreen
 import one.zrp.social.mobile.ui.admin.AdminUsersScreen
 import one.zrp.social.mobile.ui.legal.LegalScreen
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
@@ -241,6 +243,8 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     val goToAdminReports: () -> Unit = { navController.navigate("admin/reports") }
     val goToAdminUsers: () -> Unit = { navController.navigate("admin/users") }
     val goToAdminPosts: () -> Unit = { navController.navigate("admin/posts") }
+    val goToAdminSupport: () -> Unit = { navController.navigate("admin/support") }
+    val goToAdminSupportTicket: (String) -> Unit = { id -> navController.navigate("admin/support/$id") }
     val goToTerms: () -> Unit = { navController.navigate("legal/terms") }
     val goToPrivacyPolicy: () -> Unit = { navController.navigate("legal/privacy") }
     val goToGuidelines: () -> Unit = { navController.navigate("legal/guidelines") }
@@ -1111,6 +1115,13 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenUsers = goToAdminUsers,
                     onOpenPosts = goToAdminPosts,
                     onOpenReports = goToAdminReports,
+                    // The support tools are the one admin section the
+                    // website itself gates on the real ADMIN role
+                    // instead of staff (every /api/admin/support route
+                    // is requireAdmin), so a MODERATOR never gets the
+                    // quick action or the screens below.
+                    isAdmin = isAdminRole,
+                    onOpenSupport = goToAdminSupport,
                 )
             }
             composable("admin/reports") {
@@ -1121,6 +1132,26 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
             }
             composable("admin/posts") {
                 AdminPostsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/support") {
+                AdminSupportTicketsScreen(
+                    isAdmin = isAdminRole,
+                    onBack = { navController.popBackStack() },
+                    onOpenTicket = goToAdminSupportTicket,
+                )
+            }
+            composable(
+                route = "admin/support/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                if (id != null) {
+                    AdminSupportTicketDetailScreen(
+                        ticketId = id,
+                        isAdmin = isAdminRole,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
             }
             composable("creator") {
                 CreatorScreen(
