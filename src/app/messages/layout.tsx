@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Loader2, MessageCircle } from "lucide-react";
 import { getSocket } from "@/lib/socket-client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePresence } from "@/contexts/PresenceContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
 interface Conversation {
@@ -30,6 +31,7 @@ export default function MessagesLayout({ children }: { children: React.ReactNode
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const { t, language } = useLanguage();
+  const { isOnline, requestStatus } = usePresence();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const socketRef = useRef<any>(null);
@@ -74,6 +76,15 @@ export default function MessagesLayout({ children }: { children: React.ReactNode
       fetchConversations();
     }
   }, [pathname, status]);
+
+  // Real presence for every visible row - requestStatus is a one-time
+  // "have we ever heard this userId's status" backfill (see
+  // PresenceContext's own KDoc); every partner already gets kept live
+  // afterward by the same "user-status" broadcast every other
+  // connected client also receives.
+  useEffect(() => {
+    conversations.forEach((conv) => requestStatus(conv.partner.id));
+  }, [conversations, requestStatus]);
 
   if (!session) {
     return <>{children}</>;
@@ -121,7 +132,7 @@ export default function MessagesLayout({ children }: { children: React.ReactNode
                       : "hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
+                  <div className="relative w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
                     {partner.avatarUrl ? (
                       <img
                         src={partner.avatarUrl}
@@ -132,6 +143,12 @@ export default function MessagesLayout({ children }: { children: React.ReactNode
                       <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-sm">
                         {(partner.name || partner.username)[0].toUpperCase()}
                       </div>
+                    )}
+                    {isOnline(partner.id) && (
+                      <span
+                        className="absolute right-0 bottom-0 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white dark:border-zrp-deepBlack"
+                        aria-hidden="true"
+                      />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
