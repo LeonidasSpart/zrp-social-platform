@@ -109,6 +109,7 @@ fun MessagesScreen(onOpenConversation: (partnerId: String, partnerUsername: Stri
                     items(state.conversations, key = { it.partner.id }) { conversation ->
                         ConversationRow(
                             conversation = conversation,
+                            isOnline = state.presence[conversation.partner.id] == true,
                             onClick = { onOpenConversation(conversation.partner.id, conversation.partner.username) },
                         )
                         HorizontalDivider()
@@ -126,7 +127,7 @@ fun MessagesScreen(onOpenConversation: (partnerId: String, partnerUsername: Stri
 }
 
 @Composable
-private fun ConversationRow(conversation: ConversationSummary, onClick: () -> Unit) {
+private fun ConversationRow(conversation: ConversationSummary, isOnline: Boolean, onClick: () -> Unit) {
     val partner = conversation.partner
     val lastMessage = conversation.lastMessage
     // "Photo" stays English-only on purpose - it's a native-only fallback with
@@ -154,7 +155,27 @@ private fun ConversationRow(conversation: ConversationSummary, onClick: () -> Un
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Avatar(url = partner.avatarUrl, name = partner.name ?: partner.username, size = 48.dp)
+        Box {
+            Avatar(url = partner.avatarUrl, name = partner.name ?: partner.username, size = 48.dp)
+            // Real presence (server.js's own userStatus Map via
+            // "user-status"/"get-status" - see MessagesViewModel's own
+            // KDoc), not a decorative element - only ever rendered once
+            // isOnline is true, so no dot at all is the honest "no
+            // answer yet or offline" state, matching this row's own
+            // absence-means-unknown contract.
+            if (isOnline) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(14.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(2.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF22C55E)),
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.width(12.dp))
 

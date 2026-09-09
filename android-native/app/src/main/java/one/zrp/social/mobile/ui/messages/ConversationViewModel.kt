@@ -26,6 +26,7 @@ import one.zrp.social.mobile.network.SocketMessagePreview
 import one.zrp.social.mobile.network.SocketMessageReadPayload
 import one.zrp.social.mobile.network.SocketReactionUpdatedPayload
 import one.zrp.social.mobile.network.SocketTypingPayload
+import one.zrp.social.mobile.network.SocketUserStatusPayload
 import one.zrp.social.mobile.network.ZrpSocket
 import org.json.JSONArray
 import org.json.JSONObject
@@ -72,7 +73,6 @@ data class ConversationUiState(
     val editError: String? = null,
     val error: String? = null,
     val partnerTyping: Boolean = false,
-    val socketConnected: Boolean = false,
     // Derived from whichever loaded message first carries a real
     // sender/receiver - see ConversationViewModel's own load(). Null
     // only until the first page of history (or the poll) resolves it,
@@ -110,6 +110,14 @@ data class ConversationUiState(
     // (a null nextCursor).
     val isLoadingOlderMessages: Boolean = false,
     val hasMoreOlderMessages: Boolean = true,
+    // Real presence for partnerId specifically (server.js's own
+    // userStatus Map via "user-status"/"get-status" - see
+    // requestPartnerStatus's own KDoc). partnerStatusKnown is false
+    // until a real answer has actually been heard, so the header can
+    // tell "confirmed offline" apart from "no answer yet" instead of
+    // defaulting to a misleading offline the instant the screen opens.
+    val partnerOnline: Boolean = false,
+    val partnerStatusKnown: Boolean = false,
 )
 
 /**
@@ -146,10 +154,6 @@ class ConversationViewModel(
         val tokenStore = ApiClient.getTokenStore()
         val liveSocket = ZrpSocket.connect(tokenStore)
         socket = liveSocket
-
-        liveSocket.on(Socket.EVENT_CONNECT, Emitter.Listener { _state.update { it.copy(socketConnected = true) } })
-        liveSocket.on(Socket.EVENT_DISCONNECT, Emitter.Listener { _state.update { it.copy(socketConnected = false) } })
-        liveSocket.on(Socket.EVENT_CONNECT_ERROR, Emitter.Listener { _state.update { it.copy(socketConnected = false) } })
 
         liveSocket.on("receive-message", Emitter.Listener { args ->
             val preview = parsePayload(args, SocketMessagePreview::class.java) ?: return@Listener
@@ -208,6 +212,19 @@ class ConversationViewModel(
                 )
             }
         })
+
+        liveSocket.on("user-status", Emitter.Listener { args ->
+            val payload = parsePayload(args, SocketUserStatusPayload::class.java) ?: return@Listener
+            if (payload.userId == partnerId) {
+                _state.update { it.copy(partnerOnline = payload.status == "online", partnerStatusKnown = true) }
+            }
+        })
+
+        // One real "get-status" round trip for partnerId specifically -
+        // backfills their current state if it predates this socket's own
+        // connection; every online/offline transition after that already
+        // arrives unprompted via the "user-status" broadcast above.
+        liveSocket.emit("get-status", partnerId)
     }
 
     private fun <T> parsePayload(args: Array<out Any>, type: Class<T>): T? {
@@ -221,9 +238,6 @@ class ConversationViewModel(
 
     override fun onCleared() {
         socket?.let { liveSocket ->
-            liveSocket.off(Socket.EVENT_CONNECT)
-            liveSocket.off(Socket.EVENT_DISCONNECT)
-            liveSocket.off(Socket.EVENT_CONNECT_ERROR)
             liveSocket.off("receive-message")
             liveSocket.off("message-sent")
             liveSocket.off("user-typing")
@@ -231,6 +245,7 @@ class ConversationViewModel(
             liveSocket.off("message-deleted")
             liveSocket.off("message-edited")
             liveSocket.off("reaction-updated")
+            liveSocket.off("user-status")
             liveSocket.disconnect()
         }
         socket = null
