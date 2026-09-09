@@ -25,8 +25,15 @@ import { COUNTRIES } from "./config";
  * modified, recoloured or regenerated anywhere in this system.
  */
 
-export const EDITORIAL_AVATAR_URL = "/icon-512.png";
-export const EDITORIAL_COVER_URL = "/og-image.png";
+/*
+ * Absolute, not root-relative: a relative path resolves fine in a
+ * browser (against the page's own origin) but has no origin to resolve
+ * against in the Android/iOS apps' image loaders, which silently fail
+ * to load it - found via production evidence that editorial accounts
+ * showed no avatar or cover on Android while working fine on web.
+ */
+export const EDITORIAL_AVATAR_URL = "https://zrp.one/icon-512.png";
+export const EDITORIAL_COVER_URL = "https://zrp.one/og-image.png";
 
 /**
  * The badge these accounts carry. Registered in VerifiedBadge.tsx with

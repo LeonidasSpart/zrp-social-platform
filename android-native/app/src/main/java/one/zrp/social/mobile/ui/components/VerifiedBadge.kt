@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Newspaper
+import androidx.compose.material.icons.filled.RssFeed
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -41,6 +42,12 @@ private val BadgeStyles: Map<String, BadgeStyle> = mapOf(
     // the "team" staff badge despite both leaning on ZRP red - matched
     // here rather than reusing the same seal shape for both.
     "journalist" to BadgeStyle(Color(0xFFFF2D2D), "Verified Journalist", Icons.Filled.Newspaper),
+    // ZRP News Network editorial feed (ZRP News World, ZRP Travel, ...).
+    // Same ZRP brand red as journalist because both mark official ZRP
+    // editorial identities, but an RssFeed glyph so an automated feed is
+    // never mistaken for a verified human journalist - matches
+    // VerifiedBadge.tsx's "editorial" entry exactly.
+    "editorial" to BadgeStyle(Color(0xFFFF2D2D), "Official ZRP editorial feed (automated)", Icons.Filled.RssFeed),
 )
 
 /**
