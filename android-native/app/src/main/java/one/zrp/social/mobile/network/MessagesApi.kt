@@ -79,6 +79,13 @@ data class SocketMessageReadPayload(val messageId: String)
 data class SocketReactionUpdatedPayload(val messageId: String, val reactions: List<MessageReaction>)
 data class SocketTypingPayload(val userId: String, val isTyping: Boolean)
 
+// server.js's own real userStatus Map, broadcast to every connected
+// client on "user-status" (connect/disconnect - see the handler's own
+// comment on why this isn't scoped to a room) and answerable on demand
+// per-userId via "get-status". status is always literally "online" or
+// "offline" - never any other value.
+data class SocketUserStatusPayload(val userId: String, val status: String)
+
 // The real cursor-aware envelope GET /messages/{userId} switches to the
 // moment a client sends cursor and/or limit (see the route's own
 // comment on why: the bare-array shape below stays byte-for-byte
