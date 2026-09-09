@@ -128,7 +128,7 @@ has its own gap and cap.
 | `prisma migrate deploy` (or `db push`) for `20260908220000_zrp_news_network` | new tables and the `User.isEditorialFeed` column |
 | `CRON_SECRET` set on the app **and** as a repository secret | the cron route fails closed without it |
 | `DEEPSEEK_API_KEY` | summarisation and localisation |
-| `REDIS_URL` | the pipeline lock. **Without Redis the pipeline refuses to run** — see `lock.ts` for why this fails closed |
+| `REDIS_URL` | the pipeline lock. **Without Redis the pipeline refuses to run** — see `lock.ts` for why this fails closed. A transient Redis outage now heals on its own: the client recovers and the next cycle runs, with no redeploy |
 | Nothing else | no new npm dependency was added |
 
 ---
@@ -162,6 +162,35 @@ Un-pausing the automation (`paused` ships `true`) is the last switch, not
 the first.
 
 ---
+
+## Validation status
+
+Validated against real backing services — a real Redis server, real HTTP
+origin servers, the real `openai` SDK over real sockets, and real
+Postgres:
+
+| Area | Status |
+| --- | --- |
+| Redis lock, cache, contention, TTL, recovery | ✅ real server |
+| HTTP fetch, redirects, 304s, gzip, timeouts, malformed bodies | ✅ real sockets |
+| robots.txt refusal before any feed request | ✅ real sockets |
+| Model integration: auth, 5xx, 429 retries, timeouts, bad output | ✅ real `openai` SDK |
+| Groundedness rejection of a hallucinated figure | ✅ end to end |
+| EN/FR/DE/IT publication and partial-failure safety | ✅ real Postgres |
+| Deduplication, repeated and concurrent cycles | ✅ real Postgres + Redis |
+| Cron auth and the real cron route, run twice | ✅ end to end |
+| Admin verify action | ✅ real origin server |
+
+**Not yet verified, and required before the pilot:**
+
+1. A real request to `api.deepseek.com` with the production key. The
+   build environment's network policy denies every external host, so the
+   model integration was validated against a local OpenAI-compatible
+   endpoint using the production client factory — the wire protocol,
+   timeouts and error handling are covered, the upstream service is not.
+2. A real connection to Railway's Redis instance.
+3. Every seeded feed URL. None has ever been fetched. Run the admin
+   verify action on each one first — see the pilot steps below.
 
 ## Tests
 
