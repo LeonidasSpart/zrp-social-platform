@@ -15,7 +15,13 @@ vi.mock("@/lib/ssrf-guard", async (importOriginal) => {
   return { ...actual, safeFetch };
 });
 vi.mock("../robots", () => ({ isFeedUrlAllowed }));
-vi.mock("../generate", () => ({ generateRenditions }));
+// Spread the real module so only generateRenditions is stubbed: the
+// pipeline also imports the model timeout/retry constants from here,
+// and a bare object mock silently turns those into undefined.
+vi.mock("../generate", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../generate")>();
+  return { ...actual, generateRenditions };
+});
 
 import { prisma } from "@/lib/db";
 import { runPipelineCycle } from "../pipeline";
