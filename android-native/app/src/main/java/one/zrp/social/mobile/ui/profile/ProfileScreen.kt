@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -91,6 +93,7 @@ import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.network.UserReply
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
+import one.zrp.social.mobile.ui.components.ProfileHeaderSkeleton
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.VerifiedBadge
@@ -157,9 +160,7 @@ fun ProfileScreen(
 
         when {
             state.isLoadingProfile -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
+                ProfileHeaderSkeleton()
             }
             profile == null -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -379,8 +380,18 @@ fun ProfileScreen(
                                 } else if (tab.posts.isEmpty() && tab.hasLoaded) {
                                     item { ProfileEmptyState(stringResource(R.string.profile_no_media)) }
                                 }
-                                itemsIndexed(tab.posts, key = { _, post -> post.id }) { _, post ->
-                                    ProfileTabPostCard(post = post, isPinned = false, showPin = false)
+                                // A photo grid, not a column of full post
+                                // cards - matches page.tsx's own media
+                                // grid (see that file's comment for why).
+                                // A LazyVerticalGrid nested inside this
+                                // LazyColumn would be the same double-
+                                // scrollable crash ADMIN's own stats grid
+                                // hit (see zrp-design-system's "Known
+                                // native debt"), so rows are chunked by
+                                // hand instead - three real Post items
+                                // per Row, one item per row of three.
+                                items(tab.posts.chunked(3), key = { row -> row.first().id }) { row ->
+                                    ProfileMediaGridRow(row, onOpenComments)
                                 }
                                 if (tab.isLoading && tab.hasLoaded) {
                                     item { ProfileTabLoadingMore() }
@@ -674,51 +685,81 @@ private fun ProfileHeader(
                             }
                         }
 
-                        // No Tip button here (web's page.tsx has one for a
-                        // creator with tipsEnabled): sending a tip is a
-                        // real on-chain Solana transaction, and this app
-                        // has no wallet integration at all yet - neither
-                        // CreatorApi.kt nor any other native API exposes a
-                        // send-tip endpoint, only the creator-side
-                        // tipsEnabled/solanaWallet settings for RECEIVING
-                        // one (CreatorScreen.kt, ProfileEditScreen.kt).
-                        // Adding a Tip button here without a real Mobile
-                        // Wallet Adapter flow behind it would be exactly
-                        // the fake/non-functional UI the master directive
-                        // forbids - this needs its own dedicated
-                        // wallet-integration pass, not a cosmetic add here.
-                        IconButton(onClick = onMessageClick) {
-                            Icon(Icons.Filled.MailOutline, contentDescription = stringResource(R.string.action_message))
-                        }
+                        if (profile.isBlocked) {
+                            // This viewer has blocked this account. Message
+                            // and Follow both imply an interaction block is
+                            // meant to prevent, so - matching page.tsx's own
+                            // gating - they're replaced with a single quiet
+                            // indicator. The only way back is the same More
+                            // menu's Unblock item above.
+                            Surface(
+                                shape = MaterialTheme.shapes.extraLarge,
+                                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm),
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Block,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.profile_blocked_state),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(start = Spacing.xs),
+                                    )
+                                }
+                            }
+                        } else {
+                            // No Tip button here (web's page.tsx has one for a
+                            // creator with tipsEnabled): sending a tip is a
+                            // real on-chain Solana transaction, and this app
+                            // has no wallet integration at all yet - neither
+                            // CreatorApi.kt nor any other native API exposes a
+                            // send-tip endpoint, only the creator-side
+                            // tipsEnabled/solanaWallet settings for RECEIVING
+                            // one (CreatorScreen.kt, ProfileEditScreen.kt).
+                            // Adding a Tip button here without a real Mobile
+                            // Wallet Adapter flow behind it would be exactly
+                            // the fake/non-functional UI the master directive
+                            // forbids - this needs its own dedicated
+                            // wallet-integration pass, not a cosmetic add here.
+                            IconButton(onClick = onMessageClick) {
+                                Icon(Icons.Filled.MailOutline, contentDescription = stringResource(R.string.action_message))
+                            }
 
-                        Spacer(modifier = Modifier.width(Spacing.xs))
+                            Spacer(modifier = Modifier.width(Spacing.xs))
 
-                        Button(
-                            onClick = onFollowClick,
-                            enabled = !isTogglingFollow && !isFollowRequested,
-                            shape = MaterialTheme.shapes.large,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (profile.isFollowing || isFollowRequested) {
-                                    MaterialTheme.colorScheme.surfaceContainerHigh
-                                } else {
-                                    ZrpRed
-                                },
-                                contentColor = if (profile.isFollowing || isFollowRequested) {
-                                    MaterialTheme.colorScheme.onSurface
-                                } else {
-                                    ZrpWhite
-                                },
-                            ),
-                        ) {
-                            Text(
-                                stringResource(
-                                    when {
-                                        isFollowRequested -> R.string.action_requested
-                                        profile.isFollowing -> R.string.action_following
-                                        else -> R.string.action_follow
+                            Button(
+                                onClick = onFollowClick,
+                                enabled = !isTogglingFollow && !isFollowRequested,
+                                shape = MaterialTheme.shapes.large,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (profile.isFollowing || isFollowRequested) {
+                                        MaterialTheme.colorScheme.surfaceContainerHigh
+                                    } else {
+                                        ZrpRed
+                                    },
+                                    contentColor = if (profile.isFollowing || isFollowRequested) {
+                                        MaterialTheme.colorScheme.onSurface
+                                    } else {
+                                        ZrpWhite
                                     },
                                 ),
-                            )
+                            ) {
+                                Text(
+                                    stringResource(
+                                        when {
+                                            isFollowRequested -> R.string.action_requested
+                                            profile.isFollowing -> R.string.action_following
+                                            else -> R.string.action_follow
+                                        },
+                                    ),
+                                )
+                            }
                         }
                     }
                 }
@@ -797,13 +838,35 @@ private fun ProfileHeader(
                     )
                 }
             }
-            Text(
-                text = "@${profile.username}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "@${profile.username}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                // "Follows you" - the reverse of profile.isFollowing (does
+                // THIS account follow the viewer), matching page.tsx's own
+                // followsMe chip. Quiet - a filled chip, not a second
+                // accent competing with the Follow button above.
+                if (!isOwnProfile && profile.followsMe) {
+                    Surface(
+                        shape = MaterialTheme.shapes.small,
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        modifier = Modifier.padding(start = Spacing.xs),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.profile_follows_you),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            modifier = Modifier.padding(horizontal = Spacing.xs, vertical = 1.dp),
+                        )
+                    }
+                }
+            }
 
             // Professional category - a free-text field the account
             // owner sets themselves (ProfileEditScreen), shown only when
@@ -1202,6 +1265,46 @@ private fun ProfileTabInitialLoading() {
 private fun ProfileTabLoadingMore() {
     Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
         CircularProgressIndicator(modifier = Modifier.size(24.dp))
+    }
+}
+
+// One row of the Media tab's thumbnail grid - up to three square photos,
+// each tapping through to the real post (the same real /post/{id}
+// destination ProfileTabPostCard's own onClick already opens). No like/
+// comment count overlay the way page.tsx's own grid shows on :hover -
+// touch has no hover state, and a permanently-visible overlay would just
+// obscure the photo, so the tap target is the whole photo instead.
+@Composable
+private fun ProfileMediaGridRow(row: List<Post>, onOpenPost: (String) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        row.forEach { post ->
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .aspectRatio(1f)
+                    .clickable(onClick = { onOpenPost(post.id) }, role = Role.Button)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            ) {
+                val imageUrl = post.imageUrl
+                if (imageUrl != null) {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
+        }
+        // Pad an incomplete final row (1 or 2 photos) with empty
+        // weighted space so the last real thumbnail keeps a full row's
+        // width instead of stretching to fill the row alone.
+        repeat(3 - row.size) {
+            Spacer(modifier = Modifier.weight(1f))
+        }
     }
 }
 

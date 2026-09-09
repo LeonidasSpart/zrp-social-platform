@@ -38,6 +38,37 @@ describe("extractMeta", () => {
   it("returns null when no candidate key is present", () => {
     expect(extractMeta("<html><head></head></html>", ["og:title"])).toBeNull();
   });
+
+  // Regression: a shared [^"']* exclusion set for the content capture
+  // used to truncate at whichever quote character came first,
+  // regardless of which one actually delimited the attribute - so a
+  // double-quoted content value containing a real apostrophe (routine
+  // in French text, e.g. 20min.ch's French edition: "n'a", "l'incendie",
+  // "d'un") got silently clipped mid-sentence. See extractMeta's own
+  // comment for the fix (content capture split per quote character).
+  it("does not truncate double-quoted content at an embedded apostrophe", () => {
+    expect(
+      extractMeta(
+        '<meta property="og:description" content="Personne n\'a ete blesse, selon la police">',
+        ["og:description"]
+      )
+    ).toBe("Personne n'a ete blesse, selon la police");
+  });
+
+  it("does not truncate double-quoted content at an embedded apostrophe, content-before-property order", () => {
+    expect(
+      extractMeta(
+        '<meta content="L\'incendie s\'est declare vers minuit" property="og:description">',
+        ["og:description"]
+      )
+    ).toBe("L'incendie s'est declare vers minuit");
+  });
+
+  it("does not truncate single-quoted content at an embedded double quote", () => {
+    expect(
+      extractMeta(`<meta property='og:title' content='He said "hello" to everyone'>`, ["og:title"])
+    ).toBe('He said "hello" to everyone');
+  });
 });
 
 describe("extractTitleTag", () => {

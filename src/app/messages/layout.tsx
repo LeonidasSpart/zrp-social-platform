@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, MessageCircle, Users, UserPlus } from "lucide-react";
@@ -9,6 +9,7 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import NewGroupModal from "@/components/NewGroupModal";
 import { useConversationList } from "@/lib/useConversationList";
 import { buildMessagePreview } from "@/lib/conversationPreview";
+import { usePresence } from "@/contexts/PresenceContext";
 import { useSession } from "next-auth/react";
 
 const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
@@ -20,6 +21,17 @@ export default function MessagesLayout({ children }: { children: React.ReactNode
   const { t, language } = useLanguage();
   const { conversations, loading, refresh } = useConversationList();
   const [showNewGroup, setShowNewGroup] = useState(false);
+  const { isOnline, requestStatus } = usePresence();
+
+  // Real presence for every visible 1:1 partner - requestStatus is a
+  // one-time-per-userId backfill (see PresenceContext's own KDoc);
+  // group rows show a member-count chip instead of a single presence
+  // dot, since a group has many participants, not one partner.
+  useEffect(() => {
+    conversations.forEach((conv) => {
+      if (conv.type === "direct") requestStatus(conv.partner.id);
+    });
+  }, [conversations, requestStatus]);
 
   if (!session) {
     return <>{children}</>;
@@ -85,7 +97,7 @@ export default function MessagesLayout({ children }: { children: React.ReactNode
                       isActive ? "bg-zrp-red/10" : "hover:bg-gray-100 dark:hover:bg-gray-800"
                     }`}
                   >
-                    <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
+                    <div className="relative w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
                       {partner.avatarUrl ? (
                         <img
                           src={partner.avatarUrl}
@@ -96,6 +108,12 @@ export default function MessagesLayout({ children }: { children: React.ReactNode
                         <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-sm">
                           {(partner.name || partner.username)[0].toUpperCase()}
                         </div>
+                      )}
+                      {isOnline(partner.id) && (
+                        <span
+                          className="absolute right-0 bottom-0 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white dark:border-zrp-deepBlack"
+                          aria-hidden="true"
+                        />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">

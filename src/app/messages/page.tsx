@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -10,6 +10,7 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import NewGroupModal from "@/components/NewGroupModal";
 import { useConversationList } from "@/lib/useConversationList";
 import { buildMessagePreview } from "@/lib/conversationPreview";
+import { usePresence } from "@/contexts/PresenceContext";
 
 const localeMap: Record<string, string> = {
   en: "en-US",
@@ -24,6 +25,18 @@ export default function MessagesIndexPage() {
   const { t, language } = useLanguage();
   const { conversations, loading, refresh } = useConversationList();
   const [showNewGroup, setShowNewGroup] = useState(false);
+  const { isOnline, requestStatus } = usePresence();
+
+  // Real presence for every visible 1:1 partner - see PresenceContext's
+  // own KDoc on why requestStatus is safe to call repeatedly (it only
+  // ever asks once per userId, then trusts the live broadcast after).
+  // Group rows show a member-count chip instead of a single presence
+  // dot, since a group has many participants, not one partner.
+  useEffect(() => {
+    conversations.forEach((conv) => {
+      if (conv.type === "direct") requestStatus(conv.partner.id);
+    });
+  }, [conversations, requestStatus]);
 
   const formatLastMessageDate = (date: string) => {
     try {
@@ -231,8 +244,13 @@ export default function MessagesIndexPage() {
                           </div>
                         )}
 
-                        {conv.unreadCount > 0 && (
-                          <span className="absolute right-0 bottom-0 w-3 h-3 rounded-full bg-zrp-red border-2 border-white dark:border-zrp-deepBlack" />
+                        {/* Real presence dot - takes priority over the
+                            corner when both would render there, since the
+                            unread badge is a full pill with a count near
+                            the row's edge and won't collide with an
+                            avatar-corner dot. */}
+                        {isOnline(partner.id) && (
+                          <span className="absolute right-0 bottom-0 w-3 h-3 rounded-full bg-green-500 border-2 border-white dark:border-zrp-deepBlack" aria-hidden="true" />
                         )}
                       </div>
 

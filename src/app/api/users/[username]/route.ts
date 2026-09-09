@@ -167,15 +167,28 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
     // ─── FOLLOW / BLOCK STATUS ──────────────────────────────────────
     let isFollowing = false;
     let isBlocked = false;
+    // Does THIS profile follow the viewer back - the reference app's
+    // "Follows you" signal. Distinct from `isFollowing` (the other
+    // direction) and safe to add: one extra findUnique on a table
+    // already queried above, no schema change.
+    let followsMe = false;
 
     if (session?.user?.id && session.user.id !== user.id) {
       // Independent lookups (no shared dependency), previously sequential.
-      const [follow, block] = await Promise.all([
+      const [follow, followBack, block] = await Promise.all([
         prisma.follow.findUnique({
           where: {
             followerId_followingId: {
               followerId: session.user.id,
               followingId: user.id,
+            },
+          },
+        }),
+        prisma.follow.findUnique({
+          where: {
+            followerId_followingId: {
+              followerId: user.id,
+              followingId: session.user.id,
             },
           },
         }),
@@ -189,6 +202,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
         }),
       ]);
       isFollowing = !!follow;
+      followsMe = !!followBack;
       isBlocked = !!block;
     }
 
@@ -220,6 +234,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       solanaWallet: isOwner || user.creatorProfile?.tipsEnabled ? solanaWallet : null,
       isFollowing,
       isBlocked,
+      followsMe,
       charityContributionUsdc,
       milestones,
     });

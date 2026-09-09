@@ -367,25 +367,31 @@ fun ConversationScreen(
                     }
                     // Matches ChatInterface.tsx's own header status row - a
                     // "Typing..." indicator (from the real "user-typing" socket
-                    // event) takes priority over the live/offline connection
-                    // dot, exactly like web's own receiverTyping-vs-socketConnected
-                    // conditional.
+                    // event) takes priority over the presence dot, exactly like
+                    // web's own receiverTyping-vs-presence conditional. The dot
+                    // itself is real per-partner presence (server.js's own
+                    // userStatus Map, via "user-status"/"get-status") - not
+                    // this device's own socket connection state, which is what
+                    // it showed before. Only rendered once a real answer has
+                    // actually been heard for partnerId (partnerStatusKnown),
+                    // rather than defaulting to a misleading "offline" the
+                    // instant the screen opens.
                     if (state.partnerTyping) {
                         Text(
                             text = stringResource(R.string.chat_typing),
                             style = MaterialTheme.typography.labelSmall,
                             color = ZrpRed,
                         )
-                    } else {
+                    } else if (state.partnerStatusKnown) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
                                     .size(6.dp)
                                     .clip(CircleShape)
-                                    .background(if (state.socketConnected) Color(0xFF22C55E) else Color(0xFFEF4444)),
+                                    .background(if (state.partnerOnline) Color(0xFF22C55E) else Color(0xFF9CA3AF)),
                             )
                             Text(
-                                text = stringResource(if (state.socketConnected) R.string.chat_live else R.string.chat_offline),
+                                text = stringResource(if (state.partnerOnline) R.string.chat_live else R.string.chat_offline),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(start = 4.dp),
