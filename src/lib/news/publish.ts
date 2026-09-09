@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import { composePostContent, isPostLengthValid, MAX_POST_LENGTH } from "./format";
+import { correctNewsArticle, maybeCreateNewsArticle, removeNewsArticle } from "./news-article-bridge";
 import { idempotencyKeyFor, type PlannedSlot } from "./scheduler";
 
 /*
@@ -189,6 +190,21 @@ export async function publishDuePublication(
         data: { status: "PUBLISHED", publishedAt: publication.story.publishedAt ?? now },
       });
 
+      await maybeCreateNewsArticle(tx, {
+        storyId: publication.storyId,
+        topic: publication.story.topic,
+        region: publication.story.region,
+        country: publication.story.country,
+        isBreaking: publication.story.isBreaking,
+        headline: publication.rendition.headline,
+        body: publication.rendition.body,
+        imageUrl,
+        sourceName: sources[0].publisher,
+        sourceUrl: sources[0].url,
+        authorId: publication.feed.userId,
+        now,
+      });
+
       return post.id;
     });
 
@@ -229,7 +245,10 @@ export async function removePublication(
 ): Promise<void> {
   const publication = await db.newsPublication.findUnique({
     where: { id: publicationId },
-    select: { postId: true },
+    select: {
+      postId: true,
+      story: { select: { references: { select: { url: true }, take: 1 } } },
+    },
   });
 
   if (!publication) return;
@@ -241,6 +260,9 @@ export async function removePublication(
         // still needs to be marked removed.
       });
     }
+
+    const sourceUrl = publication.story.references[0]?.url;
+    if (sourceUrl) await removeNewsArticle(tx, sourceUrl);
 
     await tx.newsPublication.update({
       where: { id: publicationId },
@@ -311,6 +333,10 @@ export async function applyCorrection(
     ]);
 
     updated += 1;
+  }
+
+  if (sources[0]) {
+    await correctNewsArticle(db, sources[0].url, correctionNote);
   }
 
   return updated;
