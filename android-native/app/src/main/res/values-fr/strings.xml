@@ -1699,7 +1699,7 @@
     <string name="admin_analytics_avg_likes_per_post">J\'aime moy. par publication</string>
     <string name="admin_analytics_avg_comments_per_post">Commentaires moy. par publication</string>
     <string name="admin_analytics_total_posts">Total des publications</string>
-    <string name="admin_analytics_total_likes">J\\'aime totaux</string>
+    <string name="admin_analytics_total_likes">J\'aime totaux</string>
     <string name="admin_analytics_total_comments">Commentaires totaux</string>
     <string name="admin_analytics_daily_activity">Activité quotidienne</string>
     <string name="admin_analytics_no_daily">Aucune activité enregistrée ces 30 derniers jours.</string>
