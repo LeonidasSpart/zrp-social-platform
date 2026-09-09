@@ -19,6 +19,7 @@ const CATEGORY_KEYS: Record<string, TranslationKey> = {
   SPORTS: "newsCategory.sports",
   CULTURE: "newsCategory.culture",
   COMMUNITY: "newsCategory.community",
+  GAMING: "newsCategory.gaming",
 };
 
 export const dynamic = "force-dynamic";

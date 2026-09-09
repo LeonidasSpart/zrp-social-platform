@@ -339,6 +339,73 @@ export const SEED_SOURCES: SeedSource[] = [
     topics: ["WORLD", "POLITICS"],
     trustTier: 2,
   },
+
+  // ─── Gaming (tier 2/3) ────────────────────────────────────────
+  // Per-platform coverage so PlayStation, Nintendo and Xbox each have a
+  // real dedicated source rather than relying on general-news outlets
+  // to occasionally mention a console. All three are Hookshot Media
+  // (formerly Nlife Media) sites on the same feeds.<brand>.com
+  // platform as Eurogamer/Time Extension, each publisher-operated
+  // specifically for machine consumption like every other source here.
+  // ⚠️ Same caveat as every entry above: not fetched from this build
+  // environment - verify before enabling.
+  {
+    key: "pushsquare-ps",
+    name: "Push Square",
+    publisher: "Push Square (Hookshot Media)",
+    feedUrl: "https://www.pushsquare.com/feeds/latest",
+    homepageUrl: "https://www.pushsquare.com/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["GAMING"],
+    trustTier: 3,
+  },
+  {
+    key: "nintendolife",
+    name: "Nintendo Life",
+    publisher: "Nintendo Life (Hookshot Media)",
+    feedUrl: "https://www.nintendolife.com/feeds/latest",
+    homepageUrl: "https://www.nintendolife.com/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["GAMING"],
+    trustTier: 3,
+  },
+  {
+    key: "purexbox",
+    name: "Pure Xbox",
+    publisher: "Pure Xbox (Hookshot Media)",
+    feedUrl: "https://www.purexbox.com/feeds/latest",
+    homepageUrl: "https://www.purexbox.com/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["GAMING"],
+    trustTier: 3,
+  },
+  {
+    key: "playstation-blog",
+    name: "PlayStation.Blog",
+    publisher: "Sony Interactive Entertainment",
+    feedUrl: "https://blog.playstation.com/feed/",
+    homepageUrl: "https://blog.playstation.com/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["GAMING"],
+    trustTier: 1,
+    official: true,
+  },
+  {
+    key: "xbox-wire",
+    name: "Xbox Wire",
+    publisher: "Microsoft",
+    feedUrl: "https://news.xbox.com/en-us/feed/",
+    homepageUrl: "https://news.xbox.com/en-us/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["GAMING"],
+    trustTier: 1,
+    official: true,
+  },
 ];
 
 export function seedSourceKeys(): string[] {
