@@ -105,6 +105,13 @@ describe("profile metadata", () => {
     expect(src).not.toMatch(/badgeType\s*===\s*["']verified["']\s*\?\s*<svg/);
   });
 
+  it("shows the verification badge once, beside the display name only", () => {
+    // It was briefly repeated inside the Trust Passport row, where it
+    // said nothing the badge next to the name had not already said.
+    const trust = src.slice(src.indexOf("profile.trustPassportTitle"));
+    expect(trust.slice(0, 400)).not.toContain("VerifiedBadge");
+  });
+
   it("gives the profile tabs real tab semantics", () => {
     expect(src).toContain('role="tablist"');
     expect(src).toContain('role="tab"');
