@@ -15,6 +15,26 @@ import { acquirePipelineLock } from "../lock";
  */
 const hasRedis = !!(process.env.REDIS_URL || process.env.REDIS_PUBLIC_URL);
 
+/**
+ * Closes a client without assuming which teardown method this
+ * node-redis version exposes (destroy/disconnect/quit differ across
+ * v4 minors). Best-effort: this is test cleanup, not an assertion.
+ * Module-scoped so every describe block below can share it.
+ */
+async function closeClient(candidate: any): Promise<void> {
+  if (!candidate) return;
+  for (const method of ["disconnect", "quit", "destroy"]) {
+    if (typeof candidate[method] === "function") {
+      try {
+        await candidate[method]();
+      } catch {
+        // Already gone - nothing to clean up.
+      }
+      return;
+    }
+  }
+}
+
 describe.skipIf(!hasRedis)("Redis integration (real server)", () => {
   beforeAll(async () => {
     const redis = await getRedisClient();
@@ -173,25 +193,6 @@ describe.skipIf(!hasRedis)("Redis resilience (real server behind a breakable pro
     });
   });
 
-  /**
-   * Closes a client without assuming which teardown method this
-   * node-redis version exposes (destroy/disconnect/quit differ across
-   * v4 minors). Best-effort: this is test cleanup, not an assertion.
-   */
-  async function closeClient(candidate: any): Promise<void> {
-    if (!candidate) return;
-    for (const method of ["disconnect", "quit", "destroy"]) {
-      if (typeof candidate[method] === "function") {
-        try {
-          await candidate[method]();
-        } catch {
-          // Already gone - nothing to clean up.
-        }
-        return;
-      }
-    }
-  }
-
   function cutConnections() {
     broken = true;
     live.forEach((socket) => socket.destroy());
@@ -284,5 +285,138 @@ describe.skipIf(!hasRedis)("Redis resilience (real server behind a breakable pro
 
       await closeClient(Array.from(distinct)[0]);
     });
+  }, 30000);
+});
+
+/*
+ * Regression coverage for a second, distinct hang - found while
+ * preparing a Railway-console validation script and confirmed by
+ * probing getRedisClient() and acquirePipelineLock() directly.
+ *
+ * The mid-life-outage tests above prove recovery AFTER a connection
+ * that once succeeded. This is different: Redis unreachable from the
+ * very first attempt (wrong REDIS_URL, the service not up yet, a
+ * partition from boot). node-redis's default reconnectStrategy retries
+ * forever and never rejects connect() on its own, so before the fix
+ * `await created.connect()` inside getRedisClient() simply never
+ * settled - and because `connecting` is shared by every caller, that
+ * hung EVERY consumer of Redis application-wide (rate limiting,
+ * link-preview caching, and the news pipeline's lock), not just this
+ * one, for as long as the process ran.
+ */
+describe("Redis cold-start unreachability (never connects, not merely dropped)", () => {
+  const UNREACHABLE_URL = "redis://127.0.0.1:19998";
+  // Comfortably above INITIAL_CONNECT_TIMEOUT_MS (8s in src/lib/redis.ts)
+  // so a regression (an unbounded hang) fails this test rather than
+  // timing the whole suite out silently.
+  const MUST_SETTLE_WITHIN_MS = 15_000;
+
+  afterEach(() => {
+    vi.resetModules();
+  });
+
+  it("getRedisClient() reports unavailable instead of hanging forever", async () => {
+    const originalUrl = process.env.REDIS_URL;
+    process.env.REDIS_URL = UNREACHABLE_URL;
+    vi.resetModules();
+
+    try {
+      const redisModule = await import("@/lib/redis");
+
+      const started = Date.now();
+      const result = await Promise.race([
+        redisModule.getRedisClient(),
+        new Promise((resolve) => setTimeout(() => resolve("DID_NOT_SETTLE"), MUST_SETTLE_WITHIN_MS)),
+      ]);
+
+      expect(result, "must not hang past its own bounded connect window").not.toBe("DID_NOT_SETTLE");
+      expect(result).toBeNull();
+      expect(Date.now() - started).toBeLessThan(MUST_SETTLE_WITHIN_MS);
+    } finally {
+      if (originalUrl === undefined) delete process.env.REDIS_URL;
+      else process.env.REDIS_URL = originalUrl;
+    }
+  }, 20000);
+
+  it("acquirePipelineLock() fails closed quickly rather than hanging the whole cycle", async () => {
+    const originalUrl = process.env.REDIS_URL;
+    process.env.REDIS_URL = UNREACHABLE_URL;
+    vi.resetModules();
+
+    try {
+      const lockModule = await import("../lock");
+
+      const started = Date.now();
+      const result = await Promise.race([
+        lockModule.acquirePipelineLock(60),
+        new Promise((resolve) => setTimeout(() => resolve("DID_NOT_SETTLE"), MUST_SETTLE_WITHIN_MS)),
+      ]);
+
+      expect(result, "a cycle must fail closed, not hang, when Redis was never reachable").not.toBe(
+        "DID_NOT_SETTLE"
+      );
+      expect(result).toBeNull();
+      expect(Date.now() - started).toBeLessThan(MUST_SETTLE_WITHIN_MS);
+    } finally {
+      if (originalUrl === undefined) delete process.env.REDIS_URL;
+      else process.env.REDIS_URL = originalUrl;
+    }
+  }, 20000);
+
+  it("a later call recovers automatically if that same unreachable Redis eventually comes up", async () => {
+    // Uses a real proxy (like the mid-life tests) so the "eventually
+    // comes up" half of this is genuine, not simulated.
+    const port = 48210;
+    let live: any[] = [];
+    let broken = true;
+    const net2 = await import("net");
+    const proxy = net2.createServer((incoming: any) => {
+      if (broken) return incoming.destroy();
+      const out = net2.connect(6379, "127.0.0.1");
+      incoming.pipe(out);
+      out.pipe(incoming);
+      incoming.on("error", () => {});
+      out.on("error", () => {});
+      live.push(incoming, out);
+    });
+    await new Promise<void>((resolve) => proxy.listen(port, "127.0.0.1", () => resolve()));
+
+    const originalUrl = process.env.REDIS_URL;
+    process.env.REDIS_URL = `redis://127.0.0.1:${port}`;
+    vi.resetModules();
+
+    try {
+      const redisModule = await import("@/lib/redis");
+
+      // First call: unreachable from the start, bounded failure.
+      const first = await redisModule.getRedisClient();
+      expect(first).toBeNull();
+
+      // The real Redis becomes reachable through the proxy.
+      broken = false;
+
+      // node-redis's own background reconnectStrategy (never destroyed,
+      // never given up on) should pick this up without anyone calling
+      // getRedisClient() again in the meantime - poll until it does.
+      let recovered = null;
+      for (let attempt = 0; attempt < 20; attempt += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        recovered = await redisModule.getRedisClient();
+        if (recovered) break;
+      }
+
+      expect(recovered, "must recover once the same client's background retry succeeds").not.toBeNull();
+      expect(await (recovered as any).ping()).toBe("PONG");
+
+      await closeClient(recovered);
+    } finally {
+      broken = true;
+      live.forEach((s) => s.destroy());
+      live = [];
+      await new Promise<void>((resolve) => proxy.close(() => resolve()));
+      if (originalUrl === undefined) delete process.env.REDIS_URL;
+      else process.env.REDIS_URL = originalUrl;
+      vi.resetModules();
+    }
   }, 30000);
 });
