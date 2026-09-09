@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Loader2, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePresence } from "@/contexts/PresenceContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
 interface Conversation {
@@ -27,6 +28,7 @@ interface Conversation {
 export default function MessagesIndexPage() {
   const { data: session, status } = useSession();
   const { t, language } = useLanguage();
+  const { isOnline, requestStatus } = usePresence();
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,6 +78,13 @@ export default function MessagesIndexPage() {
       cancelled = true;
     };
   }, [status]);
+
+  // Real presence for every visible row - see PresenceContext's own
+  // KDoc on why requestStatus is safe to call repeatedly (it only ever
+  // asks once per userId, then trusts the live broadcast afterward).
+  useEffect(() => {
+    conversations.forEach((conv) => requestStatus(conv.partner.id));
+  }, [conversations, requestStatus]);
 
   const formatLastMessageDate = (date: string) => {
     try {
@@ -314,8 +323,12 @@ export default function MessagesIndexPage() {
                         </div>
                       )}
 
-                      {/* Unread indicator */}
-                      {conv.unreadCount > 0 && (
+                      {/* Real presence dot - takes priority over the
+                          corner when both would render there, since the
+                          unread badge is a full pill with a count near
+                          the row's edge and won't collide with an
+                          avatar-corner dot. */}
+                      {isOnline(partner.id) && (
                         <span
                           className="
                             absolute
@@ -324,11 +337,12 @@ export default function MessagesIndexPage() {
                             w-3
                             h-3
                             rounded-full
-                            bg-zrp-red
+                            bg-green-500
                             border-2
                             border-white
                             dark:border-zrp-deepBlack
                           "
+                          aria-hidden="true"
                         />
                       )}
                     </div>
