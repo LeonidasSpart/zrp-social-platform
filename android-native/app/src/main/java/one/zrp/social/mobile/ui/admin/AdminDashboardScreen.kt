@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,11 +44,17 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
  * The native surface onto /admin (src/app/admin/page.tsx) - stat cards
- * from GET /admin/stats plus the same three quick actions the website
- * offers (Users/Posts/Reports), which is the real scope of that page.
+ * from GET /admin/stats plus the quick actions the website offers
+ * (Users/Posts/Reports, and Support Tickets from its own admin nav).
  * Entry point is gated at the Settings row (see SettingsScreen), never
  * shown to a non-staff user - every action here would still 401/403
  * server-side even if it somehow were.
+ *
+ * isAdmin is narrower than that staff gate on purpose: the support
+ * ticket tools are ADMIN-only both server-side (requireAdmin on every
+ * /api/admin/support route) and on the website itself (its support
+ * pages refuse anything but role === 'ADMIN'), so a MODERATOR doesn't
+ * get the quick action for them.
  */
 @Composable
 fun AdminDashboardScreen(
@@ -55,6 +62,8 @@ fun AdminDashboardScreen(
     onOpenUsers: () -> Unit,
     onOpenPosts: () -> Unit,
     onOpenReports: () -> Unit,
+    isAdmin: Boolean,
+    onOpenSupport: () -> Unit,
 ) {
     val viewModel: AdminDashboardViewModel = viewModel(
         factory = remember { AdminDashboardViewModelFactory(AdminRepository()) },
@@ -164,6 +173,12 @@ fun AdminDashboardScreen(
                 OutlinedButton(onClick = onOpenPosts, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
                     Icon(Icons.Filled.Article, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
                     Text(stringResource(R.string.admin_dash_manage_posts))
+                }
+                if (isAdmin) {
+                    OutlinedButton(onClick = onOpenSupport, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
+                        Icon(Icons.Filled.SupportAgent, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
+                        Text(stringResource(R.string.admin_support_title))
+                    }
                 }
             }
         }

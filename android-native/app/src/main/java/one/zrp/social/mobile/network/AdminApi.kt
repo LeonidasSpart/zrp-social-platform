@@ -99,14 +99,121 @@ data class AdminPost(
 )
 data class AdminPostsResponse(val posts: List<AdminPost>, val total: Int, val page: Int, val totalPages: Int)
 
+// ─── Support tickets (/admin/support/tickets) ────────────────────────
+// The admin view of EVERY user's tickets - a different surface from the
+// caller's own tickets in SupportApi. Every route under
+// /api/admin/support/tickets is gated by requireAdmin (real ADMIN role
+// only, never MODERATOR), matching the website's own
+// /admin/support pages, which themselves render "Access denied. Admin
+// only." for anything but role === 'ADMIN'.
+data class AdminTicketUser(
+    val id: String,
+    val username: String,
+    val email: String? = null,
+    val avatarUrl: String? = null,
+    val plan: String? = null,
+)
+
+data class AdminTicketAdmin(val id: String, val username: String, val email: String? = null)
+
+data class AdminTicketReplyUser(
+    val id: String,
+    val username: String,
+    val avatarUrl: String? = null,
+    val role: String? = null,
+)
+
+// isInternal is the one real field separating a public reply (which the
+// ticket's owner sees on their own /support/tickets/{id} page) from an
+// admin-only internal note - see the reply route's own body
+// destructuring: { message, isInternal }.
+data class AdminTicketReply(
+    val id: String,
+    val message: String,
+    val isInternal: Boolean = false,
+    val createdAt: String,
+    val user: AdminTicketReplyUser,
+)
+
+data class AdminTicketReplyCount(val replies: Int = 0)
+
+// GET /admin/support/tickets list row - matches the route's own include
+// (user, assignedAdmin, _count) exactly.
+data class AdminSupportTicket(
+    val id: String,
+    val subject: String,
+    val category: String,
+    val priority: String,
+    val status: String,
+    val createdAt: String,
+    val user: AdminTicketUser,
+    val assignedAdmin: AdminTicketAdmin? = null,
+    val _count: AdminTicketReplyCount = AdminTicketReplyCount(),
+)
+
+data class AdminSupportPagination(val page: Int, val limit: Int, val total: Int, val pages: Int)
+
+data class AdminSupportTicketsResponse(
+    val tickets: List<AdminSupportTicket>,
+    val pagination: AdminSupportPagination,
+)
+
+// GET /admin/support/tickets/stats - five real counts, nothing derived.
+data class AdminSupportStats(
+    val open: Int,
+    val inProgress: Int,
+    val awaitingReply: Int,
+    val resolved: Int,
+    val total: Int,
+)
+
+// GET /admin/support/tickets/{id} - the full ticket with its whole
+// reply thread (internal notes included, ordered oldest-first by the
+// route itself).
+data class AdminSupportTicketDetail(
+    val id: String,
+    val subject: String,
+    val message: String,
+    val category: String,
+    val priority: String,
+    val status: String,
+    val createdAt: String,
+    val resolution: String? = null,
+    val resolvedAt: String? = null,
+    val user: AdminTicketUser,
+    val assignedAdmin: AdminTicketAdmin? = null,
+    val replies: List<AdminTicketReply> = emptyList(),
+)
+
+// PUT /admin/support/tickets/{id}. status/priority are validated
+// server-side against the same enums the detail screen offers.
+// assignedTo is deliberately a non-null String: the route treats both
+// '' and null as "unassign" (see its own `assignedTo === '' ||
+// assignedTo === null` branch), and Gson omits null fields entirely -
+// an omitted assignedTo would read as `undefined` server-side and leave
+// the existing assignment untouched, so clearing one has to be sent as
+// the empty string.
+data class UpdateSupportTicketRequest(
+    val status: String,
+    val priority: String,
+    val assignedTo: String,
+)
+
+data class AdminTicketReplyRequest(val message: String, val isInternal: Boolean)
+
+// POST /admin/support/tickets/{id}/resolve - the route stores
+// `resolution || null`, so an empty string resolves with no note.
+data class ResolveTicketRequest(val resolution: String)
+
 /**
  * The same real ZRP admin backend the website's own /admin pages call -
  * this is a native surface onto the exact same routes, not a parallel
  * moderation system. Every route here is server-side gated by
  * requireStaff (ADMIN or MODERATOR - stats/reports/users-list/posts) or
- * requireAdmin (ADMIN only - role changes, user deletion) regardless of
- * what this client sends; AdminRepository's own KDoc covers how that
- * maps to what the UI shows/hides.
+ * requireAdmin (ADMIN only - role changes, user deletion, and every
+ * support-ticket route) regardless of what this client sends;
+ * AdminRepository's own KDoc covers how that maps to what the UI
+ * shows/hides.
  */
 interface AdminApi {
     @GET("admin/stats")
@@ -140,4 +247,40 @@ interface AdminApi {
 
     @DELETE("admin/posts/{id}")
     suspend fun deletePost(@Path("id") id: String)
+
+    // An empty status/priority/category is sent as an empty query value
+    // and read as falsy server-side (`if (status) where.status = ...`),
+    // i.e. "no filter" - exactly what the website's own admin support
+    // page sends from its own empty <select> options.
+    @GET("admin/support/tickets")
+    suspend fun getSupportTickets(
+        @Query("status") status: String,
+        @Query("priority") priority: String,
+        @Query("category") category: String,
+        @Query("page") page: Int,
+    ): AdminSupportTicketsResponse
+
+    @GET("admin/support/tickets/stats")
+    suspend fun getSupportTicketStats(): AdminSupportStats
+
+    @GET("admin/support/tickets/{id}")
+    suspend fun getSupportTicket(@Path("id") id: String): AdminSupportTicketDetail
+
+    // The PUT/resolve responses come back without the replies include,
+    // so nothing here consumes them - the detail screen re-reads the
+    // ticket after every write instead of patching a partial row in.
+    @PUT("admin/support/tickets/{id}")
+    suspend fun updateSupportTicket(@Path("id") id: String, @Body request: UpdateSupportTicketRequest)
+
+    @DELETE("admin/support/tickets/{id}")
+    suspend fun deleteSupportTicket(@Path("id") id: String)
+
+    @POST("admin/support/tickets/{id}/reply")
+    suspend fun replyToSupportTicket(
+        @Path("id") id: String,
+        @Body request: AdminTicketReplyRequest,
+    ): AdminTicketReply
+
+    @POST("admin/support/tickets/{id}/resolve")
+    suspend fun resolveSupportTicket(@Path("id") id: String, @Body request: ResolveTicketRequest)
 }
