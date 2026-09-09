@@ -1837,4 +1837,51 @@
     <string name="admin_news_network_cycle_done">Zyklus beendet: %1$d veröffentlicht, %2$d eingeplant.</string>
     <string name="admin_news_network_cycle_skipped">Der Zyklus wurde nicht ausgeführt: %1$s</string>
     <string name="admin_news_network_cycle_skipped_generic">Der Zyklus wurde nicht ausgeführt.</string>
+
+    <!-- Admin: ZRP News editorial desk (AdminNewsScreen) - ported from
+         src/app/admin/news/page.tsx, driving the real /api/admin/news
+         routes. Wording taken from that page's own translation keys. -->
+    <string name="admin_news_subtitle">Erstelle, bearbeite und verwalte ZRP-News-Artikel.</string>
+    <string name="admin_news_new_article">Neuer Artikel</string>
+    <string name="admin_news_stat_total_articles">Artikel insgesamt</string>
+    <string name="admin_news_stat_published_on_page">Veröffentlicht auf Seite</string>
+    <string name="admin_news_stat_drafts_on_page">Entwürfe auf Seite</string>
+    <string name="admin_news_search_placeholder">Titel, Slug oder Inhalt suchen...</string>
+    <string name="admin_news_all_statuses">Alle Status</string>
+    <string name="admin_news_all_categories">Alle Kategorien</string>
+    <string name="admin_news_no_articles_found">Keine Artikel gefunden</string>
+    <string name="admin_news_create_first_article">Erstelle deinen ersten ZRP-News-Artikel.</string>
+    <string name="admin_news_create_article_button">Artikel erstellen</string>
+    <string name="admin_news_by_author">von %1$s</string>
+    <string name="admin_news_approve_title">Genehmigen &amp; veröffentlichen</string>
+    <string name="admin_news_reject_title">Einreichung ablehnen</string>
+    <string name="admin_news_view_article_title">Artikel ansehen</string>
+    <string name="admin_news_edit_article_title">Artikel bearbeiten</string>
+    <string name="admin_news_delete_article_title">Artikel löschen</string>
+    <string name="admin_news_feedback_prefix">Feedback: %1$s</string>
+    <string name="admin_news_edit_title">News-Artikel bearbeiten</string>
+    <string name="admin_news_create_title">News-Artikel erstellen</string>
+    <string name="admin_news_editing_slug">Bearbeite %1$s</string>
+    <string name="admin_news_publish_new_desc">Veröffentliche einen neuen Artikel auf ZRP News.</string>
+    <string name="admin_news_cover_image_url_label">Titelbild-URL</string>
+    <string name="admin_news_url_placeholder">https://...</string>
+    <string name="admin_news_author_id_label">Autor-ID</string>
+    <string name="admin_news_author_id_placeholder">Benutzer-ID des Artikelautors</string>
+    <string name="admin_news_author_id_hint">Verwende die vorhandene ZRP-Benutzer-ID für den redaktionellen Autor.</string>
+    <string name="admin_news_published_at_label">Veröffentlicht am</string>
+    <string name="admin_news_featured_title">Empfohlener Artikel</string>
+    <string name="admin_news_featured_desc">Diesen Artikel als empfohlene Geschichte auf ZRP News anzeigen.</string>
+    <string name="admin_news_saving">Wird gespeichert...</string>
+    <string name="admin_news_update_article">Artikel aktualisieren</string>
+    <string name="admin_news_err_content_required">Inhalt ist erforderlich.</string>
+    <string name="admin_news_err_author_id_required">Autor-ID ist erforderlich.</string>
+    <string name="admin_news_confirm_delete">„%1$s“ löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.</string>
+    <string name="admin_news_prompt_reject_feedback">Feedback für den Journalisten (wird ihm angezeigt, optional):</string>
+    <string name="admin_news_not_published">Nicht veröffentlicht</string>
+    <string name="admin_news_success_created">Nachrichtenartikel erfolgreich erstellt.</string>
+    <string name="admin_news_success_updated">Nachrichtenartikel erfolgreich aktualisiert.</string>
+    <string name="admin_news_success_deleted">Nachrichtenartikel erfolgreich gelöscht.</string>
+    <string name="admin_news_success_approved_published">Artikel genehmigt und veröffentlicht.</string>
+    <string name="admin_news_success_sent_back">Artikel an den Journalisten zurückgeschickt.</string>
+    <string name="admin_dash_manage_news">Nachrichten verwalten</string>
 </resources>

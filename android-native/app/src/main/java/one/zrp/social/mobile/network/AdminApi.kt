@@ -541,6 +541,138 @@ data class AdminUpgradeRequest(
 // on a request that isn't still "pending".
 data class UpgradeRequestActionRequest(val action: String)
 
+// ─── ZRP News CMS (/admin/news) ──────────────────────────────────────
+// The editorial back office behind ZRP News: the full NewsArticle CRUD
+// the website's own /admin/news page drives, plus the approve/reject
+// half of the journalist submission workflow (a journalist's article
+// arrives here as PENDING_REVIEW and an editor moves it to PUBLISHED or
+// REJECTED with a note the journalist sees on their own dashboard).
+//
+// Both routes are requireStaff (ADMIN *or* MODERATOR), NOT requireAdmin
+// - see the SECURITY FIX comment at the top of the real route.ts. That
+// is the same bar as reports/posts/appeals, so this screen takes no
+// isAdmin flag.
+//
+// Nothing here is money-carrying: the only numeric field on the model is
+// `views`, a plain Prisma Int, so no Decimal/jsonWithDecimals
+// string-vs-number question arises. The route returns the article rows
+// straight from Prisma (no serializer), so every field below is the raw
+// model field.
+data class AdminNewsAuthor(
+    val id: String,
+    val username: String,
+    val name: String?,
+    val avatarUrl: String?,
+    val badgeType: String?,
+)
+
+// The GET list/detail responses use `include: { author: {...} }` with no
+// `select` on the article itself, so every scalar column of NewsArticle
+// comes back - including the four journalist-workflow columns
+// (submittedAt/reviewNote/reviewedAt/reviewedById) the website's own page
+// type only declares two of.
+data class AdminNewsArticle(
+    val id: String,
+    val title: String,
+    val slug: String,
+    val excerpt: String?,
+    val content: String,
+    val coverImage: String?,
+    val sourceName: String?,
+    val sourceUrl: String?,
+    // The real UPPERCASE NewsArticleCategory enum - the same 11 values
+    // NewsApi's own NEWS_CATEGORIES already lists.
+    val category: String,
+    // The real UPPERCASE NewsArticleStatus enum:
+    // DRAFT/PENDING_REVIEW/PUBLISHED/REJECTED/ARCHIVED.
+    val status: String,
+    val authorId: String,
+    val views: Int,
+    val featured: Boolean,
+    val publishedAt: String?,
+    val submittedAt: String?,
+    val reviewNote: String?,
+    val reviewedAt: String?,
+    val reviewedById: String?,
+    val createdAt: String,
+    val updatedAt: String,
+    val author: AdminNewsAuthor,
+)
+
+data class AdminNewsPagination(
+    val page: Int = 1,
+    val limit: Int = 20,
+    val total: Int = 0,
+    val totalPages: Int = 1,
+    val hasMore: Boolean = false,
+)
+
+data class AdminNewsResponse(
+    val success: Boolean = false,
+    val articles: List<AdminNewsArticle> = emptyList(),
+    val pagination: AdminNewsPagination? = null,
+)
+
+/**
+ * The create/update body, sent verbatim to POST /admin/news and
+ * PUT /admin/news/{id} (which the route aliases to its PATCH handler).
+ *
+ * Every optional text field here is a NON-NULL String carrying "" for
+ * "empty" rather than a nullable one carrying null, and that is
+ * load-bearing rather than stylistic: Retrofit's Gson converter is built
+ * with plain `GsonConverterFactory.create()` (see ApiClient), which
+ * OMITS null fields entirely. On the update half, an omitted field reads
+ * as `undefined` server-side and means "leave this column untouched",
+ * while an explicit empty value is coerced to NULL by the route's own
+ * `typeof x === "string" && x.trim() ? x.trim() : null` branches. So
+ * sending null for a cleared excerpt/cover image/source would silently
+ * fail to clear it, whereas "" clears it exactly the way the website's
+ * own editor (which posts an explicit null) does. The same "" is
+ * indistinguishable from null on the create half, which treats both as
+ * "not provided".
+ *
+ * publishedAt follows the same rule: "" means "no publish date", which
+ * the route reads as null on update and, on create, lets fall through to
+ * its "status is PUBLISHED, so stamp now()" branch - identical to the
+ * website posting null. When set it must be a full ISO-8601 instant.
+ *
+ * `views` is deliberately absent: the website's own editor never sends
+ * it either, so the counter is left to the public article page.
+ */
+data class SaveNewsArticleRequest(
+    val title: String,
+    val slug: String,
+    val excerpt: String,
+    val content: String,
+    val coverImage: String,
+    val sourceName: String,
+    val sourceUrl: String,
+    val category: String,
+    val status: String,
+    val authorId: String,
+    val featured: Boolean,
+    val publishedAt: String,
+)
+
+/**
+ * The one-field editorial decision on a journalist's PENDING_REVIEW
+ * submission - PATCH /admin/news/{id} with nothing but the new status,
+ * exactly what the website's own reviewArticle() posts.
+ *
+ * reviewNote is nullable here on purpose, the mirror image of the rule
+ * above: on approve the website sends no reviewNote key at all, so the
+ * journalist's existing note is left untouched, and Gson dropping a null
+ * reproduces that exactly. On reject it is always sent - as the typed
+ * feedback, or as "" when the editor left the box empty, which the route
+ * coerces to null just as the website's own `reviewNote || null` does.
+ *
+ * Moving a PENDING_REVIEW article to PUBLISHED or REJECTED is also what
+ * makes the route stamp reviewedAt/reviewedById and write the
+ * `news_article.update_status` audit-log entry - server-side, from the
+ * session, never from anything this client sends.
+ */
+data class ReviewNewsArticleRequest(val status: String, val reviewNote: String? = null)
+
 // ─── Plan management (PUT /admin/users/{id}/plan) ────────────────────
 // plan must be one of free/pro/business/enterprise - the route 400s on
 // anything else (see its own validPlans). ADMIN-only server-side
@@ -1205,4 +1337,39 @@ interface AdminApi {
         @Path("id") id: String,
         @Body request: RemoveNewsPublicationRequest,
     )
+
+    // ─── ZRP News CMS ────────────────────────────────────────────────
+    // An empty status/category/search is sent as an empty query value:
+    // the route only applies status/category when the value is a real
+    // NewsArticleStatus/NewsArticleCategory and reads search through
+    // `?.trim() || ""`, so "" is "no filter" for all three - exactly
+    // what the website's own empty <select> options and empty search box
+    // send. limit is sent explicitly at the website's own 20.
+    @GET("admin/news")
+    suspend fun getNewsArticles(
+        @Query("status") status: String,
+        @Query("category") category: String,
+        @Query("search") search: String,
+        @Query("page") page: Int,
+        @Query("limit") limit: Int,
+    ): AdminNewsResponse
+
+    // Create/update/review/delete all answer with {success, article} (or
+    // {success, message}) rather than a bare row, but nothing here
+    // consumes that: the list screen reloads the current page after
+    // every write, exactly like the website's own page does.
+    @POST("admin/news")
+    suspend fun createNewsArticle(@Body request: SaveNewsArticleRequest)
+
+    // PUT, not PATCH - the website's own editor sends PUT and the route
+    // aliases `export { PATCH as PUT }` for it (see the BUG FIX note in
+    // the real route). Both verbs hit the identical handler.
+    @PUT("admin/news/{id}")
+    suspend fun updateNewsArticle(@Path("id") id: String, @Body request: SaveNewsArticleRequest)
+
+    @PATCH("admin/news/{id}")
+    suspend fun reviewNewsArticle(@Path("id") id: String, @Body request: ReviewNewsArticleRequest)
+
+    @DELETE("admin/news/{id}")
+    suspend fun deleteNewsArticle(@Path("id") id: String)
 }

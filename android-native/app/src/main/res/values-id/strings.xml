@@ -1837,4 +1837,51 @@
     <string name="admin_news_network_cycle_done">Siklus selesai: %1$d diterbitkan, %2$d dijadwalkan.</string>
     <string name="admin_news_network_cycle_skipped">Siklus tidak berjalan: %1$s</string>
     <string name="admin_news_network_cycle_skipped_generic">Siklus tidak berjalan.</string>
+
+    <!-- Admin: ZRP News editorial desk (AdminNewsScreen) - ported from
+         src/app/admin/news/page.tsx, driving the real /api/admin/news
+         routes. Wording taken from that page's own translation keys. -->
+    <string name="admin_news_subtitle">Buat, edit, dan kelola artikel ZRP News.</string>
+    <string name="admin_news_new_article">Artikel Baru</string>
+    <string name="admin_news_stat_total_articles">Total Artikel</string>
+    <string name="admin_news_stat_published_on_page">Diterbitkan di Halaman</string>
+    <string name="admin_news_stat_drafts_on_page">Draf di Halaman</string>
+    <string name="admin_news_search_placeholder">Cari judul, slug, atau konten...</string>
+    <string name="admin_news_all_statuses">Semua Status</string>
+    <string name="admin_news_all_categories">Semua Kategori</string>
+    <string name="admin_news_no_articles_found">Tidak ada artikel yang ditemukan</string>
+    <string name="admin_news_create_first_article">Buat artikel ZRP News pertama Anda.</string>
+    <string name="admin_news_create_article_button">Buat Artikel</string>
+    <string name="admin_news_by_author">oleh %1$s</string>
+    <string name="admin_news_approve_title">Setujui &amp; terbitkan</string>
+    <string name="admin_news_reject_title">Tolak pengajuan</string>
+    <string name="admin_news_view_article_title">Lihat artikel</string>
+    <string name="admin_news_edit_article_title">Edit artikel</string>
+    <string name="admin_news_delete_article_title">Hapus artikel</string>
+    <string name="admin_news_feedback_prefix">Masukan: %1$s</string>
+    <string name="admin_news_edit_title">Edit Artikel Berita</string>
+    <string name="admin_news_create_title">Buat Artikel Berita</string>
+    <string name="admin_news_editing_slug">Mengedit %1$s</string>
+    <string name="admin_news_publish_new_desc">Terbitkan artikel baru ke ZRP News.</string>
+    <string name="admin_news_cover_image_url_label">URL Gambar Sampul</string>
+    <string name="admin_news_url_placeholder">https://...</string>
+    <string name="admin_news_author_id_label">ID Penulis</string>
+    <string name="admin_news_author_id_placeholder">ID pengguna penulis artikel</string>
+    <string name="admin_news_author_id_hint">Gunakan ID pengguna ZRP yang sudah ada untuk penulis editorial.</string>
+    <string name="admin_news_published_at_label">Diterbitkan Pada</string>
+    <string name="admin_news_featured_title">Artikel unggulan</string>
+    <string name="admin_news_featured_desc">Tampilkan artikel ini sebagai berita unggulan di ZRP News.</string>
+    <string name="admin_news_saving">Menyimpan...</string>
+    <string name="admin_news_update_article">Perbarui Artikel</string>
+    <string name="admin_news_err_content_required">Konten wajib diisi.</string>
+    <string name="admin_news_err_author_id_required">ID penulis wajib diisi.</string>
+    <string name="admin_news_confirm_delete">Hapus \"%1$s\"?\n\nTindakan ini tidak dapat dibatalkan.</string>
+    <string name="admin_news_prompt_reject_feedback">Masukan untuk jurnalis (ditampilkan kepada mereka, opsional):</string>
+    <string name="admin_news_not_published">Belum diterbitkan</string>
+    <string name="admin_news_success_created">Artikel berita berhasil dibuat.</string>
+    <string name="admin_news_success_updated">Artikel berita berhasil diperbarui.</string>
+    <string name="admin_news_success_deleted">Artikel berita berhasil dihapus.</string>
+    <string name="admin_news_success_approved_published">Artikel disetujui dan diterbitkan.</string>
+    <string name="admin_news_success_sent_back">Artikel dikirim kembali ke jurnalis.</string>
+    <string name="admin_dash_manage_news">Kelola Berita</string>
 </resources>

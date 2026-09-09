@@ -86,6 +86,7 @@ fun AdminDashboardScreen(
     onOpenHelp: () -> Unit,
     onOpenJournalists: () -> Unit,
     onOpenMusicArtists: () -> Unit,
+    onOpenNews: () -> Unit,
     isAdmin: Boolean,
     onOpenSupport: () -> Unit,
     onOpenPayments: () -> Unit,
@@ -240,6 +241,14 @@ fun AdminDashboardScreen(
                         modifier = Modifier.padding(end = Spacing.sm),
                     )
                     Text(stringResource(R.string.admin_dash_manage_music_artists))
+                }
+                // The ZRP News desk sits with the staff-wide actions,
+                // not below in the isAdmin block: both /api/admin/news
+                // routes are requireStaff (ADMIN or MODERATOR), the same
+                // bar as reports/posts and the review queues above.
+                OutlinedButton(onClick = onOpenNews, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
+                    Icon(Icons.Filled.Newspaper, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
+                    Text(stringResource(R.string.admin_dash_manage_news))
                 }
                 if (isAdmin) {
                     OutlinedButton(onClick = onOpenSupport, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {

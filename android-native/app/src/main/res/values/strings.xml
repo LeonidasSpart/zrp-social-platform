@@ -1853,4 +1853,51 @@
     <string name="admin_news_network_cycle_done">Cycle finished: %1$d published, %2$d scheduled.</string>
     <string name="admin_news_network_cycle_skipped">The cycle did not run: %1$s</string>
     <string name="admin_news_network_cycle_skipped_generic">The cycle did not run.</string>
+
+    <!-- Admin: ZRP News editorial desk (AdminNewsScreen) - ported from
+         src/app/admin/news/page.tsx, driving the real /api/admin/news
+         routes. Wording taken from that page's own translation keys. -->
+    <string name="admin_news_subtitle">Create, edit and manage ZRP News articles.</string>
+    <string name="admin_news_new_article">New Article</string>
+    <string name="admin_news_stat_total_articles">Total Articles</string>
+    <string name="admin_news_stat_published_on_page">Published on Page</string>
+    <string name="admin_news_stat_drafts_on_page">Drafts on Page</string>
+    <string name="admin_news_search_placeholder">Search title, slug or content...</string>
+    <string name="admin_news_all_statuses">All Statuses</string>
+    <string name="admin_news_all_categories">All Categories</string>
+    <string name="admin_news_no_articles_found">No articles found</string>
+    <string name="admin_news_create_first_article">Create your first ZRP News article.</string>
+    <string name="admin_news_create_article_button">Create Article</string>
+    <string name="admin_news_by_author">by %1$s</string>
+    <string name="admin_news_approve_title">Approve &amp; publish</string>
+    <string name="admin_news_reject_title">Reject submission</string>
+    <string name="admin_news_view_article_title">View article</string>
+    <string name="admin_news_edit_article_title">Edit article</string>
+    <string name="admin_news_delete_article_title">Delete article</string>
+    <string name="admin_news_feedback_prefix">Feedback: %1$s</string>
+    <string name="admin_news_edit_title">Edit News Article</string>
+    <string name="admin_news_create_title">Create News Article</string>
+    <string name="admin_news_editing_slug">Editing %1$s</string>
+    <string name="admin_news_publish_new_desc">Publish a new article to ZRP News.</string>
+    <string name="admin_news_cover_image_url_label">Cover Image URL</string>
+    <string name="admin_news_url_placeholder">https://...</string>
+    <string name="admin_news_author_id_label">Author ID</string>
+    <string name="admin_news_author_id_placeholder">User ID of the article author</string>
+    <string name="admin_news_author_id_hint">Use the existing ZRP user ID for the editorial author.</string>
+    <string name="admin_news_published_at_label">Published At</string>
+    <string name="admin_news_featured_title">Featured article</string>
+    <string name="admin_news_featured_desc">Show this article as the featured story on ZRP News.</string>
+    <string name="admin_news_saving">Saving...</string>
+    <string name="admin_news_update_article">Update Article</string>
+    <string name="admin_news_err_content_required">Content is required.</string>
+    <string name="admin_news_err_author_id_required">Author ID is required.</string>
+    <string name="admin_news_confirm_delete">Delete \"%1$s\"?\n\nThis action cannot be undone.</string>
+    <string name="admin_news_prompt_reject_feedback">Feedback for the journalist (shown to them, optional):</string>
+    <string name="admin_news_not_published">Not published</string>
+    <string name="admin_news_success_created">News article created successfully.</string>
+    <string name="admin_news_success_updated">News article updated successfully.</string>
+    <string name="admin_news_success_deleted">News article deleted successfully.</string>
+    <string name="admin_news_success_approved_published">Article approved and published.</string>
+    <string name="admin_news_success_sent_back">Article sent back to the journalist.</string>
+    <string name="admin_dash_manage_news">Manage News</string>
 </resources>

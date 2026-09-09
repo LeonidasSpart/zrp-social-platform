@@ -47,6 +47,7 @@ import one.zrp.social.mobile.ui.admin.AdminJournalistsScreen
 import one.zrp.social.mobile.ui.admin.AdminMarketplaceScreen
 import one.zrp.social.mobile.ui.admin.AdminMusicArtistsScreen
 import one.zrp.social.mobile.ui.admin.AdminNewsNetworkScreen
+import one.zrp.social.mobile.ui.admin.AdminNewsScreen
 import one.zrp.social.mobile.ui.admin.AdminOpportunityScreen
 import one.zrp.social.mobile.ui.admin.AdminPaymentsScreen
 import one.zrp.social.mobile.ui.admin.AdminPostsScreen
@@ -261,6 +262,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     val goToAdminHelp: () -> Unit = { navController.navigate("admin/help") }
     val goToAdminJournalists: () -> Unit = { navController.navigate("admin/journalists") }
     val goToAdminMusicArtists: () -> Unit = { navController.navigate("admin/music-artists") }
+    val goToAdminNews: () -> Unit = { navController.navigate("admin/news") }
     val goToAdminSupport: () -> Unit = { navController.navigate("admin/support") }
     val goToAdminSupportTicket: (String) -> Unit = { id -> navController.navigate("admin/support/$id") }
     val goToAdminPayments: () -> Unit = { navController.navigate("admin/payments") }
@@ -1144,6 +1146,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenHelp = goToAdminHelp,
                     onOpenJournalists = goToAdminJournalists,
                     onOpenMusicArtists = goToAdminMusicArtists,
+                    onOpenNews = goToAdminNews,
                     // The support tools and the three financial queues
                     // are the admin sections the website itself gates
                     // on the real ADMIN role instead of staff (every
@@ -1193,6 +1196,15 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
             }
             composable("admin/music-artists") {
                 AdminMusicArtistsScreen(onBack = { navController.popBackStack() })
+            }
+            // The ZRP News editorial desk - requireStaff server-side, so
+            // no isAdmin flag, same as the review queues above. Viewing
+            // an article opens the real native article screen.
+            composable("admin/news") {
+                AdminNewsScreen(
+                    onBack = { navController.popBackStack() },
+                    onViewArticle = goToNewsArticle,
+                )
             }
             composable("admin/support") {
                 AdminSupportTicketsScreen(

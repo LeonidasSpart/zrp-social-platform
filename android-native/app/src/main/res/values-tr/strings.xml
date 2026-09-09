@@ -1837,4 +1837,51 @@
     <string name="admin_news_network_cycle_done">Döngü bitti: %1$d yayınlandı, %2$d zamanlandı.</string>
     <string name="admin_news_network_cycle_skipped">Döngü çalışmadı: %1$s</string>
     <string name="admin_news_network_cycle_skipped_generic">Döngü çalışmadı.</string>
+
+    <!-- Admin: ZRP News editorial desk (AdminNewsScreen) - ported from
+         src/app/admin/news/page.tsx, driving the real /api/admin/news
+         routes. Wording taken from that page's own translation keys. -->
+    <string name="admin_news_subtitle">ZRP News makalelerini oluşturun, düzenleyin ve yönetin.</string>
+    <string name="admin_news_new_article">Yeni Makale</string>
+    <string name="admin_news_stat_total_articles">Toplam Makale</string>
+    <string name="admin_news_stat_published_on_page">Sayfada Yayınlanan</string>
+    <string name="admin_news_stat_drafts_on_page">Sayfadaki Taslaklar</string>
+    <string name="admin_news_search_placeholder">Başlık, slug veya içerik ara...</string>
+    <string name="admin_news_all_statuses">Tüm Durumlar</string>
+    <string name="admin_news_all_categories">Tüm Kategoriler</string>
+    <string name="admin_news_no_articles_found">Makale bulunamadı</string>
+    <string name="admin_news_create_first_article">İlk ZRP News makalenizi oluşturun.</string>
+    <string name="admin_news_create_article_button">Makale Oluştur</string>
+    <string name="admin_news_by_author">%1$s tarafından</string>
+    <string name="admin_news_approve_title">Onayla ve yayınla</string>
+    <string name="admin_news_reject_title">Gönderimi reddet</string>
+    <string name="admin_news_view_article_title">Makaleyi görüntüle</string>
+    <string name="admin_news_edit_article_title">Makaleyi düzenle</string>
+    <string name="admin_news_delete_article_title">Makaleyi sil</string>
+    <string name="admin_news_feedback_prefix">Geri bildirim: %1$s</string>
+    <string name="admin_news_edit_title">Haber Makalesini Düzenle</string>
+    <string name="admin_news_create_title">Haber Makalesi Oluştur</string>
+    <string name="admin_news_editing_slug">%1$s düzenleniyor</string>
+    <string name="admin_news_publish_new_desc">ZRP News\'e yeni bir makale yayınlayın.</string>
+    <string name="admin_news_cover_image_url_label">Kapak Görseli URL\'si</string>
+    <string name="admin_news_url_placeholder">https://...</string>
+    <string name="admin_news_author_id_label">Yazar Kimliği</string>
+    <string name="admin_news_author_id_placeholder">Makale yazarının kullanıcı kimliği</string>
+    <string name="admin_news_author_id_hint">Editoryal yazar için mevcut ZRP kullanıcı kimliğini kullanın.</string>
+    <string name="admin_news_published_at_label">Yayınlanma Tarihi</string>
+    <string name="admin_news_featured_title">Öne çıkan makale</string>
+    <string name="admin_news_featured_desc">Bu makaleyi ZRP News\'te öne çıkan haber olarak gösterin.</string>
+    <string name="admin_news_saving">Kaydediliyor...</string>
+    <string name="admin_news_update_article">Makaleyi Güncelle</string>
+    <string name="admin_news_err_content_required">İçerik gereklidir.</string>
+    <string name="admin_news_err_author_id_required">Yazar kimliği gereklidir.</string>
+    <string name="admin_news_confirm_delete">\"%1$s\" silinsin mi?\n\nBu işlem geri alınamaz.</string>
+    <string name="admin_news_prompt_reject_feedback">Gazeteciye yönelik geri bildirim (kendisine gösterilir, isteğe bağlı):</string>
+    <string name="admin_news_not_published">Yayınlanmadı</string>
+    <string name="admin_news_success_created">Haber makalesi başarıyla oluşturuldu.</string>
+    <string name="admin_news_success_updated">Haber makalesi başarıyla güncellendi.</string>
+    <string name="admin_news_success_deleted">Haber makalesi başarıyla silindi.</string>
+    <string name="admin_news_success_approved_published">Makale onaylandı ve yayınlandı.</string>
+    <string name="admin_news_success_sent_back">Makale gazeteciye geri gönderildi.</string>
+    <string name="admin_dash_manage_news">Haberleri Yönet</string>
 </resources>

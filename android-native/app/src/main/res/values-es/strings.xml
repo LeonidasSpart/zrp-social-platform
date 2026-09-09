@@ -1837,4 +1837,51 @@
     <string name="admin_news_network_cycle_done">Ciclo terminado: %1$d publicadas, %2$d programadas.</string>
     <string name="admin_news_network_cycle_skipped">El ciclo no se ejecutó: %1$s</string>
     <string name="admin_news_network_cycle_skipped_generic">El ciclo no se ejecutó.</string>
+
+    <!-- Admin: ZRP News editorial desk (AdminNewsScreen) - ported from
+         src/app/admin/news/page.tsx, driving the real /api/admin/news
+         routes. Wording taken from that page's own translation keys. -->
+    <string name="admin_news_subtitle">Crea, edita y gestiona los artículos de ZRP News.</string>
+    <string name="admin_news_new_article">Nuevo artículo</string>
+    <string name="admin_news_stat_total_articles">Artículos totales</string>
+    <string name="admin_news_stat_published_on_page">Publicados en la página</string>
+    <string name="admin_news_stat_drafts_on_page">Borradores en la página</string>
+    <string name="admin_news_search_placeholder">Buscar título, slug o contenido...</string>
+    <string name="admin_news_all_statuses">Todos los estados</string>
+    <string name="admin_news_all_categories">Todas las categorías</string>
+    <string name="admin_news_no_articles_found">No se encontraron artículos</string>
+    <string name="admin_news_create_first_article">Crea tu primer artículo de ZRP News.</string>
+    <string name="admin_news_create_article_button">Crear artículo</string>
+    <string name="admin_news_by_author">por %1$s</string>
+    <string name="admin_news_approve_title">Aprobar y publicar</string>
+    <string name="admin_news_reject_title">Rechazar envío</string>
+    <string name="admin_news_view_article_title">Ver artículo</string>
+    <string name="admin_news_edit_article_title">Editar artículo</string>
+    <string name="admin_news_delete_article_title">Eliminar artículo</string>
+    <string name="admin_news_feedback_prefix">Comentario: %1$s</string>
+    <string name="admin_news_edit_title">Editar artículo de noticias</string>
+    <string name="admin_news_create_title">Crear artículo de noticias</string>
+    <string name="admin_news_editing_slug">Editando %1$s</string>
+    <string name="admin_news_publish_new_desc">Publica un nuevo artículo en ZRP News.</string>
+    <string name="admin_news_cover_image_url_label">URL de la imagen de portada</string>
+    <string name="admin_news_url_placeholder">https://...</string>
+    <string name="admin_news_author_id_label">ID del autor</string>
+    <string name="admin_news_author_id_placeholder">ID de usuario del autor del artículo</string>
+    <string name="admin_news_author_id_hint">Usa el ID de un usuario de ZRP existente para el autor editorial.</string>
+    <string name="admin_news_published_at_label">Publicado el</string>
+    <string name="admin_news_featured_title">Artículo destacado</string>
+    <string name="admin_news_featured_desc">Mostrar este artículo como historia destacada en ZRP News.</string>
+    <string name="admin_news_saving">Guardando...</string>
+    <string name="admin_news_update_article">Actualizar artículo</string>
+    <string name="admin_news_err_content_required">El contenido es obligatorio.</string>
+    <string name="admin_news_err_author_id_required">El ID del autor es obligatorio.</string>
+    <string name="admin_news_confirm_delete">¿Eliminar «%1$s»?\n\nEsta acción no se puede deshacer.</string>
+    <string name="admin_news_prompt_reject_feedback">Comentarios para el periodista (visible para él, opcional):</string>
+    <string name="admin_news_not_published">No publicado</string>
+    <string name="admin_news_success_created">Artículo de noticias creado correctamente.</string>
+    <string name="admin_news_success_updated">Artículo de noticias actualizado correctamente.</string>
+    <string name="admin_news_success_deleted">Artículo de noticias eliminado correctamente.</string>
+    <string name="admin_news_success_approved_published">Artículo aprobado y publicado.</string>
+    <string name="admin_news_success_sent_back">Artículo devuelto al periodista.</string>
+    <string name="admin_dash_manage_news">Gestionar noticias</string>
 </resources>
