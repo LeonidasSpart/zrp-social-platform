@@ -4,6 +4,14 @@ const next = require("next");
 const { Server } = require("socket.io");
 const { PrismaClient } = require("@prisma/client");
 const { getToken } = require("next-auth/jwt");
+const {
+  isBlockedEitherWay,
+  authorizeSendRelay,
+  authorizeEditRelay,
+  authorizeReactionRelay,
+  authorizeDeleteRelay,
+  createCallRegistry,
+} = require("./socket-authz");
 
 // Minimal cookie-header parser, written inline rather than requiring
 // the "cookie" package - this file is the process entrypoint, so a
@@ -105,6 +113,12 @@ app.prepare().then(() => {
     bucket.count += 1;
     return bucket.count <= limit;
   }
+  // ─── Call signaling state ─────────────────────────────────────────
+  // Which calls are ringing/active between which two users - see
+  // socket-authz.js. accept/reject/end are only relayed for a call
+  // that was actually placed, and only by one of its two parties.
+  const calls = createCallRegistry();
+
   // Periodic sweep so eventBuckets/connectionCounts can't grow
   // unbounded from users who connect once and never come back.
   setInterval(() => {
@@ -112,7 +126,25 @@ app.prepare().then(() => {
     eventBuckets.forEach((bucket, key) => {
       if (bucket.resetAt <= now) eventBuckets.delete(key);
     });
+    calls.sweep();
   }, 5 * 60 * 1000).unref();
+
+  // ─── Per-socket cache of "is this user blocked either way" ────────
+  // Typing indicators fire on every keystroke; a DB lookup per
+  // keystroke would be wasteful, but blocked users must not be able to
+  // make a victim's chat show "typing…" either. Cache per socket for a
+  // short window.
+  const BLOCK_CACHE_TTL_MS = 60 * 1000;
+  async function isBlockedCached(socket, otherUserId) {
+    if (!socket.data.blockCache) socket.data.blockCache = new Map();
+    const cached = socket.data.blockCache.get(otherUserId);
+    const now = Date.now();
+    if (cached && cached.expiresAt > now) return cached.blocked;
+    const blocked = await isBlockedEitherWay(prisma, socket.data.userId, otherUserId);
+    if (socket.data.blockCache.size > 500) socket.data.blockCache.clear();
+    socket.data.blockCache.set(otherUserId, { blocked, expiresAt: now + BLOCK_CACHE_TTL_MS });
+    return blocked;
+  }
 
   // ─── Handshake authentication ────────────────────────────────────
   // Previously every event handler below trusted whatever userId /
@@ -176,11 +208,22 @@ app.prepare().then(() => {
         return next(new Error("Unauthorized"));
       }
 
-      if (token.banned) {
+      const userId = String(token.id);
+
+      // ⚠️ SECURITY: the banned flag inside the JWT is a snapshot from
+      // when the token was minted - a user banned after that (or an
+      // account since deleted) still carried a token saying
+      // banned: false, and this handshake let them straight in to
+      // message and call for the token's whole 30-day lifetime. Ask
+      // the database, the same way src/lib/auth-state.ts does for the
+      // HTTP side.
+      const account = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { banned: true },
+      });
+      if (!account || account.banned || token.banned) {
         return next(new Error("Account banned"));
       }
-
-      const userId = String(token.id);
       const currentCount = connectionCounts.get(userId) || 0;
       if (currentCount >= MAX_CONNECTIONS_PER_USER) {
         return next(new Error("Too many active connections"));
@@ -222,51 +265,76 @@ app.prepare().then(() => {
     });
 
     // ─── Messaging ──────────────────────────────────────────────
-    // senderId is now always the verified identity, never trusted
-    // from the payload - a client can no longer make a message appear
-    // to come from anyone but themselves.
-    socket.on("send-message", async ({ receiverId, content, messageId }) => {
-      if (!receiverId || typeof receiverId !== "string") return;
+    // ⚠️ SECURITY: every relay below is now authorized against the
+    // database record rather than the client's description of it -
+    // see socket-authz.js for the full write-up. In short: the REST
+    // route has already performed the send/edit/delete/reaction; the
+    // socket's only job is to tell the OTHER participant about it, and
+    // the "what" and the "who" are both loaded from the row the REST
+    // route wrote, never taken from the payload. The payload shapes
+    // the web, iOS and Android clients emit are unchanged.
+    socket.on("send-message", async (payload) => {
+      if (!payload || typeof payload !== "object") return;
       if (!checkEventRateLimit(userId, "send-message", 30, 10_000)) return;
-
-      const message = {
-        id: messageId,
-        senderId: userId,
-        receiverId,
-        content,
-        createdAt: new Date().toISOString(),
-        read: false,
-      };
-      io.to(receiverId).emit("receive-message", message);
-      io.to(userId).emit("message-sent", message);
+      try {
+        const relay = await authorizeSendRelay(prisma, userId, payload);
+        if (!relay.ok) return;
+        io.to(relay.targetId).emit("receive-message", relay.message);
+        io.to(userId).emit("message-sent", relay.message);
+      } catch (err) {
+        console.error("send-message relay error:", err);
+      }
     });
 
-    socket.on("typing", ({ receiverId, isTyping }) => {
-      if (!receiverId || typeof receiverId !== "string") return;
-      socket.to(receiverId).emit("user-typing", { userId, isTyping });
+    socket.on("typing", async ({ receiverId, isTyping } = {}) => {
+      if (!receiverId || typeof receiverId !== "string" || receiverId === userId) return;
+      if (!checkEventRateLimit(userId, "typing", 60, 10_000)) return;
+      try {
+        if (await isBlockedCached(socket, receiverId)) return;
+        socket.to(receiverId).emit("user-typing", { userId, isTyping: isTyping === true });
+      } catch (err) {
+        console.error("typing relay error:", err);
+      }
     });
 
     // ─── Delete / edit / reaction relay ──────────────────────────
-    // Added because the client now emits these three events (real-time
-    // sync for deleting/editing a message and toggling a reaction) but
-    // nothing here was listening for them - the REST calls that
-    // actually perform the delete/edit/reaction already succeeded by
-    // the time these fire, so this is purely relaying the UI update to
-    // the other participant, the same trust level send-message already
-    // uses for receiverId (routing target, not an identity claim).
-    socket.on("delete-message", ({ messageId, receiverId }) => {
-      if (!messageId || !receiverId || typeof receiverId !== "string") return;
-      io.to(receiverId).emit("message-deleted", { messageId });
+    socket.on("delete-message", async (payload) => {
+      if (!payload || typeof payload !== "object") return;
+      if (!checkEventRateLimit(userId, "delete-message", 30, 10_000)) return;
+      try {
+        const relay = await authorizeDeleteRelay(prisma, userId, payload);
+        if (!relay.ok) return;
+        io.to(relay.targetId).emit("message-deleted", { messageId: relay.messageId });
+      } catch (err) {
+        console.error("delete-message relay error:", err);
+      }
     });
 
-    socket.on("edit-message", ({ message, receiverId }) => {
-      if (!message || !receiverId || typeof receiverId !== "string") return;
-      io.to(receiverId).emit("message-edited", { message });
+    socket.on("edit-message", async (payload) => {
+      if (!payload || typeof payload !== "object") return;
+      if (!checkEventRateLimit(userId, "edit-message", 30, 10_000)) return;
+      try {
+        const relay = await authorizeEditRelay(prisma, userId, payload);
+        if (!relay.ok) return;
+        io.to(relay.targetId).emit("message-edited", { message: relay.message });
+      } catch (err) {
+        console.error("edit-message relay error:", err);
+      }
     });
 
-    socket.on("message-reaction", ({ messageId, reactions, receiverId }) => {
-      if (!messageId || !receiverId || typeof receiverId !== "string") return;
-      io.to(receiverId).emit("reaction-updated", { messageId, reactions });
+    socket.on("message-reaction", async (payload) => {
+      if (!payload || typeof payload !== "object") return;
+      if (!checkEventRateLimit(userId, "message-reaction", 60, 10_000)) return;
+      try {
+        const relay = await authorizeReactionRelay(prisma, userId, payload);
+        if (!relay.ok) return;
+        io.to(relay.targetId).emit("reaction-updated", {
+          messageId: relay.messageId,
+          reactions: relay.reactions,
+        });
+      } catch (err) {
+        console.error("message-reaction relay error:", err);
+      }
     });
 
     socket.on("mark-read", async ({ messageId }) => {
@@ -291,32 +359,55 @@ app.prepare().then(() => {
     // ─── Call Signaling ──────────────────────────────────────────
     // callerId is now always the verified identity - a client can no
     // longer place a call that appears to originate from another user.
-    socket.on("call-user", ({ receiverId, signal, callerName, isVideo }) => {
-      if (!receiverId || typeof receiverId !== "string") return;
+    //
+    // ⚠️ SECURITY: accept-call / reject-call / end-call are only
+    // relayed for a call that was actually placed via call-user, and
+    // only by one of that call's two parties - previously any user
+    // could send "call-accepted" (carrying an arbitrary WebRTC answer)
+    // or "call-ended" to anyone at all. A call can't be placed to a
+    // user who has blocked the caller (or vice versa) either. The
+    // callerName shown to the callee is the caller's real name from
+    // the database, not whatever the payload claimed.
+    socket.on("call-user", async ({ receiverId, signal, isVideo } = {}) => {
+      if (!receiverId || typeof receiverId !== "string" || receiverId === userId) return;
       if (!checkEventRateLimit(userId, "call-user", 10, 30_000)) return;
-      console.log(`📞 call-user from ${userId} to ${receiverId}`);
-      io.to(receiverId).emit("incoming-call", {
-        callerId: userId,
-        callerName,
-        signal,
-        isVideo,
-      });
+      try {
+        if (await isBlockedCached(socket, receiverId)) return;
+        const caller = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { name: true, username: true },
+        });
+        if (!caller) return;
+        calls.start(userId, receiverId);
+        console.log(`📞 call-user from ${userId} to ${receiverId}`);
+        io.to(receiverId).emit("incoming-call", {
+          callerId: userId,
+          callerName: caller.name || caller.username,
+          signal,
+          isVideo: isVideo === true,
+        });
+      } catch (err) {
+        console.error("call-user relay error:", err);
+      }
     });
 
-    socket.on("accept-call", ({ callerId, signal }) => {
+    socket.on("accept-call", ({ callerId, signal } = {}) => {
       if (!callerId || typeof callerId !== "string") return;
+      if (!calls.accept(userId, callerId)) return;
       console.log(`✅ accept-call from ${userId} to ${callerId}`);
       io.to(callerId).emit("call-accepted", { signal });
     });
 
-    socket.on("reject-call", ({ callerId }) => {
+    socket.on("reject-call", ({ callerId } = {}) => {
       if (!callerId || typeof callerId !== "string") return;
+      if (!calls.reject(userId, callerId)) return;
       console.log(`❌ reject-call from ${userId} to ${callerId}`);
       io.to(callerId).emit("call-rejected");
     });
 
-    socket.on("end-call", ({ callerId }) => {
+    socket.on("end-call", ({ callerId } = {}) => {
       if (!callerId || typeof callerId !== "string") return;
+      if (!calls.end(userId, callerId)) return;
       console.log(`🔚 end-call from ${userId} to ${callerId}`);
       io.to(callerId).emit("call-ended");
     });
@@ -325,6 +416,11 @@ app.prepare().then(() => {
     socket.on("disconnect", () => {
       const remaining = (connectionCounts.get(userId) || 1) - 1;
       if (remaining <= 0) {
+        // Last connection gone: forget any call this user was party
+        // to so the registry can't hold a stale entry forever. Only on
+        // the LAST socket - a second tab closing must not wipe a call
+        // that is still running in the first one.
+        calls.dropUser(userId);
         connectionCounts.delete(userId);
         userStatus.delete(userId);
         socket.broadcast.emit("user-status", { userId, status: "offline" });
