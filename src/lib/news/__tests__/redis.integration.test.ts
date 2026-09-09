@@ -363,7 +363,16 @@ describe("Redis cold-start unreachability (never connects, not merely dropped)",
     }
   }, 20000);
 
-  it("a later call recovers automatically if that same unreachable Redis eventually comes up", async () => {
+  // Unlike its two siblings above (which target an address nothing ever
+  // listens on and so need no real Redis at all), this test's "eventually
+  // comes up" half proxies through to a real Redis expected at
+  // 127.0.0.1:6379 - so, same as the other two describe blocks in this
+  // file, it only runs when one has actually been configured for this
+  // run (via hasRedis) rather than assuming a local Redis happens to be
+  // up. Found by running the full suite in a fresh environment with no
+  // local Redis: this test failed there even though nothing about the
+  // fix it exercises had changed - it was simply never gated like this.
+  it.skipIf(!hasRedis)("a later call recovers automatically if that same unreachable Redis eventually comes up", async () => {
     // Uses a real proxy (like the mid-life tests) so the "eventually
     // comes up" half of this is genuine, not simulated.
     const port = 48210;
