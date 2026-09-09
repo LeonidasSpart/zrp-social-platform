@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+// ⚠️ SECURITY: getVerifiedToken is a drop-in for getToken() that overlays the
+// database's current role/isAdmin/plan/banned onto the decoded JWT and
+// returns null for a banned or deleted account - see src/lib/auth-guards.ts.
+import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { canAccessApi } from "@/lib/permissions";
+import { apiKeyExpiryFor } from "@/lib/api-auth";
 import crypto from "crypto";
 
 // ─── Helper: Generate a secure API key ─────────────────────────────
@@ -102,11 +106,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Optional expiration (default: 365 days)
-    let expiresAt: Date | undefined;
-    if (expiresInDays && typeof expiresInDays === "number" && expiresInDays > 0) {
-      expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
-    }
+    // ⚠️ SECURITY: every key gets an expiry. The comment here always said
+    // "default: 365 days", but the code only set one when the client
+    // asked for it - a request that omitted expiresInDays produced a key
+    // that never expired (and validateApiKey accepts a null expiresAt),
+    // so the intended default was silently "forever". Now: omitted →
+    // DEFAULT_KEY_LIFETIME_DAYS; anything asked for is clamped to
+    // [1, MAX_KEY_LIFETIME_DAYS]. Keys that already exist are not
+    // touched by this (see api-auth.ts for how existing keys are read).
+    const expiresAt = apiKeyExpiryFor(expiresInDays);
 
     const { plain, hash } = generateApiKey();
 
