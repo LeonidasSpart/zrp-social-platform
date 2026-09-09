@@ -16,7 +16,7 @@ const TOPIC_KEYWORDS: Array<{ topic: NewsTopic; weight: number; words: string[] 
   { topic: "TRAVEL", weight: 3, words: ["travel", "traveller", "traveler", "tourist", "visa", "passport", "border crossing", "travel advisory", "voyage", "reise", "viaggio"] },
   { topic: "TOURISM", weight: 3, words: ["tourism", "destination", "hotel", "resort", "sightseeing", "tourisme", "tourismus", "turismo"] },
   { topic: "TRANSPORTATION", weight: 3, words: ["rail", "railway", "train", "metro", "ferry", "highway", "motorway", "bus service", "bahn", "treno"] },
-  { topic: "CRYPTO", weight: 3, words: ["crypto", "bitcoin", "ethereum", "blockchain", "stablecoin", "token", "defi"] },
+  { topic: "CRYPTO", weight: 3, words: ["crypto", "cryptocurrency", "cryptocurrencies", "digital currency", "bitcoin", "ethereum", "blockchain", "stablecoin", "defi", "coinbase", "binance"] },
   { topic: "AI", weight: 3, words: ["artificial intelligence", "machine learning", "chatbot", "llm", "neural network", "openai", "anthropic"] },
   { topic: "CLIMATE", weight: 2, words: ["climate", "emissions", "global warming", "carbon", "cop29", "cop30", "klima", "clima"] },
   { topic: "ENVIRONMENT", weight: 2, words: ["environment", "pollution", "wildlife", "biodiversity", "deforestation", "recycling"] },
