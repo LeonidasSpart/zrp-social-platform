@@ -1543,6 +1543,82 @@
     <string name="admin_posts_previous">Önceki</string>
     <string name="admin_posts_next">Sonraki</string>
     <string name="admin_posts_page_of">Sayfa %1$s / %2$s</string>
+    <!-- Admin: the seven staff review/management queues the website's own admin nav offers beyond Reports/Users/Posts (appeals, ads, marketplace, opportunity, HELP, journalists, music artists) - all requireStaff server-side, same as reports/posts -->
+    <string name="admin_dash_review_appeals">İtirazları incele</string>
+    <string name="admin_dash_review_ads">Reklamları incele</string>
+    <string name="admin_dash_review_marketplace">Marketplace\'i incele</string>
+    <string name="admin_dash_review_opportunity">Opportunity\'yi incele</string>
+    <string name="admin_dash_review_help">HELP kampanyalarını incele</string>
+    <string name="admin_dash_manage_journalists">Gazetecileri yönet</string>
+    <string name="admin_dash_manage_music_artists">Müzik sanatçılarını yönet</string>
+    <!-- Shared by the ads/marketplace/opportunity/HELP review queues - the same status enum and the same approve/reject/remove verbs, exactly as the web pages share them -->
+    <string name="admin_review_approve">Onayla</string>
+    <string name="admin_review_reject">Reddet</string>
+    <string name="admin_review_remove">Kaldır</string>
+    <string name="admin_review_by">@%1$s tarafından</string>
+    <string name="admin_review_reason_label">Sebep: %1$s</string>
+    <string name="admin_review_status_pending_review">İnceleme bekliyor</string>
+    <string name="admin_review_status_active">Aktif</string>
+    <string name="admin_review_status_rejected">Reddedildi</string>
+    <string name="admin_review_status_removed">Kaldırıldı</string>
+    <!-- Admin appeals queue (src/app/admin/appeals) - status is the real lowercase Appeal enum -->
+    <string name="admin_appeals_title">İtirazlar</string>
+    <string name="admin_appeals_no_appeals">Gösterilecek itiraz yok.</string>
+    <string name="admin_appeals_resolve">Karara bağla</string>
+    <string name="admin_appeals_choose_decision">Karar seç</string>
+    <string name="admin_appeals_status_pending">Beklemede</string>
+    <string name="admin_appeals_status_upheld">Onandı</string>
+    <string name="admin_appeals_status_overturned">Bozuldu</string>
+    <string name="admin_appeals_appealed_by">@%1$s tarafından itiraz</string>
+    <string name="admin_appeals_resolution_note">Karar: %1$s</string>
+    <!-- Admin ad review queue (src/app/admin/ads) -->
+    <string name="admin_ads_title">Reklam incelemesi</string>
+    <string name="admin_ads_no_campaigns">İncelenecek kampanya yok.</string>
+    <string name="admin_ads_budget">%1$s %2$s · Bütçe %3$s</string>
+    <string name="admin_ads_rejection_placeholder">Reklamverene ret sebebini açıkla...</string>
+    <!-- Admin marketplace review queue (src/app/admin/marketplace) -->
+    <string name="admin_marketplace_title">Marketplace incelemesi</string>
+    <string name="admin_marketplace_no_listings">İncelenecek ilan yok.</string>
+    <string name="admin_marketplace_price_on_request">Fiyat sorunuz</string>
+    <!-- Admin Opportunity review queue (src/app/admin/opportunity) -->
+    <string name="admin_opportunity_title">Opportunity incelemesi</string>
+    <string name="admin_opportunity_no_listings">İncelenecek ilan yok.</string>
+    <!-- Admin HELP campaign review queue (src/app/admin/help) -->
+    <string name="admin_help_title">HELP incelemesi</string>
+    <string name="admin_help_no_campaigns">İncelenecek kampanya yok.</string>
+    <string name="admin_help_raised">%1$s / %2$s %3$s toplandı</string>
+    <!-- Admin journalist applications (src/app/admin/journalists) - UPPERCASE JournalistStatus, plus the same direct grant-by-username the web page offers -->
+    <string name="admin_journalists_title">Gazeteciler</string>
+    <string name="admin_journalists_search_placeholder">Gazeteci ara...</string>
+    <string name="admin_journalists_no_applications">Başvuru bulunamadı.</string>
+    <string name="admin_journalists_status_pending">Beklemede</string>
+    <string name="admin_journalists_status_verified">Doğrulanmış</string>
+    <string name="admin_journalists_status_suspended">Askıya alınmış</string>
+    <string name="admin_journalists_status_rejected">Reddedildi</string>
+    <string name="admin_journalists_suspend">Askıya al</string>
+    <string name="admin_journalists_restore">Geri yükle</string>
+    <string name="admin_journalists_confirm_approve">Bu gazeteci başvurusu onaylansın mı?</string>
+    <string name="admin_journalists_confirm_restore">Bu gazetecinin doğrulanmış durumu geri yüklensin mi?</string>
+    <string name="admin_journalists_reject_reason">Ret sebebi</string>
+    <string name="admin_journalists_suspend_reason">Askıya alma sebebi</string>
+    <string name="admin_journalists_remove_reason">Kaldırma sebebi</string>
+    <string name="admin_journalists_outlet">Yayın: %1$s</string>
+    <string name="admin_journalists_grant_title">Gazeteci statüsü ver</string>
+    <string name="admin_journalists_grant_desc">Mevcut bir kullanıcıyı başvuru olmadan doğrulanmış gazeteci yap.</string>
+    <string name="admin_journalists_username_placeholder">kullanıcı adı</string>
+    <string name="admin_journalists_grant">Ver</string>
+    <!-- Admin music artist roster (src/app/admin/music) - verify badge + a cascading delete of the artist's whole catalogue -->
+    <string name="admin_music_artists_title">Müzik sanatçıları</string>
+    <string name="admin_music_artists_search_placeholder">Sanatçı ara...</string>
+    <string name="admin_music_artists_none">Sanatçı bulunamadı.</string>
+    <string name="admin_music_artists_verified">Doğrulanmış</string>
+    <string name="admin_music_artists_unverified">Doğrulanmamış</string>
+    <string name="admin_music_artists_verify">Doğrula</string>
+    <string name="admin_music_artists_unverify">Doğrulamayı kaldır</string>
+    <string name="admin_music_artists_delete">Sil</string>
+    <string name="admin_music_artists_delete_confirm">%1$s ve tüm kataloğu silinsin mi? Tüm parçalar, albümler ve takipçiler gider. Geri alınamaz.</string>
+    <string name="admin_music_artists_counts">%1$d parça · %2$d takipçi</string>
+    <string name="admin_music_artists_verify_warning">Doğrulama, bu sanatçıyı ZRP Music\'te resmen tanınmış olarak işaretler.</string>
     <string name="admin_access_denied">Erişim reddedildi. Yalnızca yönetici.</string>
     <string name="admin_support_title">Destek Talepleri</string>
     <string name="admin_support_all_status">Tüm Durumlar</string>

@@ -14,10 +14,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Article
+import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.filled.LibraryMusic
+import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.SupportAgent
+import androidx.compose.material.icons.filled.VolunteerActivism
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,17 +51,19 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
  * The native surface onto /admin (src/app/admin/page.tsx) - stat cards
- * from GET /admin/stats plus the quick actions the website offers
- * (Users/Posts/Reports, and Support Tickets from its own admin nav).
- * Entry point is gated at the Settings row (see SettingsScreen), never
- * shown to a non-staff user - every action here would still 401/403
- * server-side even if it somehow were.
+ * from GET /admin/stats plus a quick action per admin section the
+ * website's own admin nav offers (Users/Posts/Reports, the Appeals/Ads/
+ * Marketplace/Opportunity/HELP/Journalists/Music review queues, and
+ * Support Tickets). Entry point is gated at the Settings row (see
+ * SettingsScreen), never shown to a non-staff user - every action here
+ * would still 401/403 server-side even if it somehow were.
  *
  * isAdmin is narrower than that staff gate on purpose: the support
  * ticket tools are ADMIN-only both server-side (requireAdmin on every
  * /api/admin/support route) and on the website itself (its support
  * pages refuse anything but role === 'ADMIN'), so a MODERATOR doesn't
- * get the quick action for them.
+ * get the quick action for them. Every other quick action here is
+ * requireStaff, same as Reports/Users/Posts, so those take no such gate.
  */
 @Composable
 fun AdminDashboardScreen(
@@ -62,6 +71,13 @@ fun AdminDashboardScreen(
     onOpenUsers: () -> Unit,
     onOpenPosts: () -> Unit,
     onOpenReports: () -> Unit,
+    onOpenAppeals: () -> Unit,
+    onOpenAds: () -> Unit,
+    onOpenMarketplace: () -> Unit,
+    onOpenOpportunity: () -> Unit,
+    onOpenHelp: () -> Unit,
+    onOpenJournalists: () -> Unit,
+    onOpenMusicArtists: () -> Unit,
     isAdmin: Boolean,
     onOpenSupport: () -> Unit,
 ) {
@@ -173,6 +189,45 @@ fun AdminDashboardScreen(
                 OutlinedButton(onClick = onOpenPosts, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
                     Icon(Icons.Filled.Article, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
                     Text(stringResource(R.string.admin_dash_manage_posts))
+                }
+                OutlinedButton(onClick = onOpenAppeals, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
+                    Icon(Icons.Filled.Gavel, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
+                    Text(stringResource(R.string.admin_dash_review_appeals))
+                }
+                OutlinedButton(onClick = onOpenAds, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
+                    Icon(Icons.Filled.Campaign, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
+                    Text(stringResource(R.string.admin_dash_review_ads))
+                }
+                OutlinedButton(onClick = onOpenMarketplace, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
+                    Icon(Icons.Filled.Storefront, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
+                    Text(stringResource(R.string.admin_dash_review_marketplace))
+                }
+                OutlinedButton(onClick = onOpenOpportunity, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
+                    Icon(Icons.Filled.Work, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
+                    Text(stringResource(R.string.admin_dash_review_opportunity))
+                }
+                OutlinedButton(onClick = onOpenHelp, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
+                    Icon(
+                        Icons.Filled.VolunteerActivism,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = Spacing.sm),
+                    )
+                    Text(stringResource(R.string.admin_dash_review_help))
+                }
+                OutlinedButton(onClick = onOpenJournalists, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
+                    Icon(Icons.Filled.Newspaper, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
+                    Text(stringResource(R.string.admin_dash_manage_journalists))
+                }
+                OutlinedButton(
+                    onClick = onOpenMusicArtists,
+                    modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+                ) {
+                    Icon(
+                        Icons.Filled.LibraryMusic,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = Spacing.sm),
+                    )
+                    Text(stringResource(R.string.admin_dash_manage_music_artists))
                 }
                 if (isAdmin) {
                     OutlinedButton(onClick = onOpenSupport, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {

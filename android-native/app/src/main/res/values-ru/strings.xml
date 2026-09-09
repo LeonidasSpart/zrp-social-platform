@@ -1543,6 +1543,82 @@
     <string name="admin_posts_previous">Предыдущая</string>
     <string name="admin_posts_next">Следующая</string>
     <string name="admin_posts_page_of">страница %1$s из %2$s</string>
+    <!-- Admin: the seven staff review/management queues the website's own admin nav offers beyond Reports/Users/Posts (appeals, ads, marketplace, opportunity, HELP, journalists, music artists) - all requireStaff server-side, same as reports/posts -->
+    <string name="admin_dash_review_appeals">Проверить апелляции</string>
+    <string name="admin_dash_review_ads">Проверить рекламу</string>
+    <string name="admin_dash_review_marketplace">Проверить Marketplace</string>
+    <string name="admin_dash_review_opportunity">Проверить Opportunity</string>
+    <string name="admin_dash_review_help">Проверить кампании HELP</string>
+    <string name="admin_dash_manage_journalists">Управление журналистами</string>
+    <string name="admin_dash_manage_music_artists">Управление артистами</string>
+    <!-- Shared by the ads/marketplace/opportunity/HELP review queues - the same status enum and the same approve/reject/remove verbs, exactly as the web pages share them -->
+    <string name="admin_review_approve">Одобрить</string>
+    <string name="admin_review_reject">Отклонить</string>
+    <string name="admin_review_remove">Удалить</string>
+    <string name="admin_review_by">От @%1$s</string>
+    <string name="admin_review_reason_label">Причина: %1$s</string>
+    <string name="admin_review_status_pending_review">На проверке</string>
+    <string name="admin_review_status_active">Активно</string>
+    <string name="admin_review_status_rejected">Отклонено</string>
+    <string name="admin_review_status_removed">Удалено</string>
+    <!-- Admin appeals queue (src/app/admin/appeals) - status is the real lowercase Appeal enum -->
+    <string name="admin_appeals_title">Апелляции</string>
+    <string name="admin_appeals_no_appeals">Апелляций нет.</string>
+    <string name="admin_appeals_resolve">Решить</string>
+    <string name="admin_appeals_choose_decision">Выберите решение</string>
+    <string name="admin_appeals_status_pending">На рассмотрении</string>
+    <string name="admin_appeals_status_upheld">Оставлено в силе</string>
+    <string name="admin_appeals_status_overturned">Отменено</string>
+    <string name="admin_appeals_appealed_by">Апелляция от @%1$s</string>
+    <string name="admin_appeals_resolution_note">Решение: %1$s</string>
+    <!-- Admin ad review queue (src/app/admin/ads) -->
+    <string name="admin_ads_title">Проверка рекламы</string>
+    <string name="admin_ads_no_campaigns">Нет кампаний для проверки.</string>
+    <string name="admin_ads_budget">%1$s %2$s · Бюджет %3$s</string>
+    <string name="admin_ads_rejection_placeholder">Объясните рекламодателю причину отказа...</string>
+    <!-- Admin marketplace review queue (src/app/admin/marketplace) -->
+    <string name="admin_marketplace_title">Проверка Marketplace</string>
+    <string name="admin_marketplace_no_listings">Нет объявлений для проверки.</string>
+    <string name="admin_marketplace_price_on_request">Цена по запросу</string>
+    <!-- Admin Opportunity review queue (src/app/admin/opportunity) -->
+    <string name="admin_opportunity_title">Проверка Opportunity</string>
+    <string name="admin_opportunity_no_listings">Нет вакансий для проверки.</string>
+    <!-- Admin HELP campaign review queue (src/app/admin/help) -->
+    <string name="admin_help_title">Проверка HELP</string>
+    <string name="admin_help_no_campaigns">Нет кампаний для проверки.</string>
+    <string name="admin_help_raised">Собрано %1$s из %2$s %3$s</string>
+    <!-- Admin journalist applications (src/app/admin/journalists) - UPPERCASE JournalistStatus, plus the same direct grant-by-username the web page offers -->
+    <string name="admin_journalists_title">Журналисты</string>
+    <string name="admin_journalists_search_placeholder">Поиск журналистов...</string>
+    <string name="admin_journalists_no_applications">Заявки не найдены.</string>
+    <string name="admin_journalists_status_pending">На рассмотрении</string>
+    <string name="admin_journalists_status_verified">Подтверждён</string>
+    <string name="admin_journalists_status_suspended">Приостановлен</string>
+    <string name="admin_journalists_status_rejected">Отклонён</string>
+    <string name="admin_journalists_suspend">Приостановить</string>
+    <string name="admin_journalists_restore">Восстановить</string>
+    <string name="admin_journalists_confirm_approve">Одобрить эту заявку журналиста?</string>
+    <string name="admin_journalists_confirm_restore">Восстановить статус подтверждённого журналиста?</string>
+    <string name="admin_journalists_reject_reason">Причина отклонения</string>
+    <string name="admin_journalists_suspend_reason">Причина приостановки</string>
+    <string name="admin_journalists_remove_reason">Причина удаления</string>
+    <string name="admin_journalists_outlet">Издание: %1$s</string>
+    <string name="admin_journalists_grant_title">Выдать статус журналиста</string>
+    <string name="admin_journalists_grant_desc">Сделайте существующего пользователя подтверждённым журналистом без заявки.</string>
+    <string name="admin_journalists_username_placeholder">имя пользователя</string>
+    <string name="admin_journalists_grant">Выдать</string>
+    <!-- Admin music artist roster (src/app/admin/music) - verify badge + a cascading delete of the artist's whole catalogue -->
+    <string name="admin_music_artists_title">Музыкальные артисты</string>
+    <string name="admin_music_artists_search_placeholder">Поиск артистов...</string>
+    <string name="admin_music_artists_none">Артисты не найдены.</string>
+    <string name="admin_music_artists_verified">Подтверждён</string>
+    <string name="admin_music_artists_unverified">Не подтверждён</string>
+    <string name="admin_music_artists_verify">Подтвердить</string>
+    <string name="admin_music_artists_unverify">Снять подтверждение</string>
+    <string name="admin_music_artists_delete">Удалить</string>
+    <string name="admin_music_artists_delete_confirm">Удалить %1$s и весь каталог? Все треки, альбомы и подписчики будут потеряны. Отменить нельзя.</string>
+    <string name="admin_music_artists_counts">%1$d треков · %2$d подписчиков</string>
+    <string name="admin_music_artists_verify_warning">Подтверждение отмечает артиста как официально признанного в ZRP Music.</string>
     <string name="admin_access_denied">Доступ запрещён. Только для администраторов.</string>
     <string name="admin_support_title">Обращения в поддержку</string>
     <string name="admin_support_all_status">Все статусы</string>
