@@ -84,6 +84,8 @@ const COPY = {
   setCover: "Set banner",
   imageHint: "JPEG, PNG, GIF or WebP, max 5MB. This is the only way to change these - the account has no password and can never sign in to do it itself.",
   clearBackoff: "Clear backoff",
+  allowImages: "Allow images",
+  blockImages: "Block images",
   remove: "Remove",
   removePrompt: "Why is this post being removed?",
   rejectPrompt: "Why is this story being rejected?",
@@ -160,6 +162,7 @@ interface SourceRow {
   feedUrl: string;
   status: "HEALTHY" | "WARNING" | "FAILED" | "DISABLED";
   enabled: boolean;
+  allowImages: boolean;
   trustTier: number;
   consecutiveFailures: number;
   lastError: string | null;
@@ -835,6 +838,24 @@ export default function AdminNewsNetworkPage() {
                           {COPY.clearBackoff}
                         </button>
                       )}
+
+                      <button
+                        type="button"
+                        disabled={busy === `images-${source.id}`}
+                        aria-busy={busy === `images-${source.id}`}
+                        title="Only enable once you've confirmed this publisher's terms allow reusing its images."
+                        onClick={() =>
+                          act(
+                            `images-${source.id}`,
+                            `/api/admin/news-network/sources/${source.id}`,
+                            { method: "PATCH", body: JSON.stringify({ allowImages: !source.allowImages }) },
+                            source.allowImages ? "Images blocked for this source." : "Images allowed for this source."
+                          )
+                        }
+                        className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-600 dark:hover:bg-gray-700"
+                      >
+                        {source.allowImages ? COPY.blockImages : COPY.allowImages}
+                      </button>
 
                       <button
                         type="button"
