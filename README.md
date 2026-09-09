@@ -435,6 +435,12 @@ include:
   `SOLANA_WALLET_ADDRESS`, `SOLANA_PRIVATE_KEY`, `NEXT_PUBLIC_USDC_MINT`
 - **Observability and misc** — `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`,
   `CRON_SECRET`, `GIPHY_API_KEY`
+- **Security tuning (optional)** — `TRUSTED_PROXY_HOPS` (number of
+  trusted reverse proxies in front of the app for client-IP resolution;
+  defaults to `1`, Railway's edge — only change it if another trusted
+  proxy/CDN is placed in front), `ALLOWED_MEDIA_HOSTS` (comma-separated
+  extra hosts, exact or `.suffix`, accepted as post media in addition to
+  UploadThing and GIPHY)
 
 Behaviour that depends on an unset variable degrades rather than crashing
 where the code allows it — for example, the Apple provider is registered

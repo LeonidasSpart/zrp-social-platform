@@ -31,17 +31,55 @@ const nextConfig = {
         //   contain sensitive path info) to third-party sites when
         //   users click outbound links
         // - Strict-Transport-Security: forces HTTPS for future visits
-        // Deliberately NOT adding Content-Security-Policy or
-        // Permissions-Policy here - getting either wrong could silently
-        // break WebRTC calling, UploadThing, or Socket.io, and that
-        // needs a careful domain-by-domain audit rather than a blind
-        // addition.
+        // - Permissions-Policy: browser features this origin may use.
+        //   camera/microphone stay allowed for this origin only (WebRTC
+        //   calling in /messages needs both); everything listed as ()
+        //   is denied to this page AND any embedded frame.
+        // - Content-Security-Policy: ENFORCED only for frame-ancestors
+        //   (the CSP equivalent of X-Frame-Options: DENY, which modern
+        //   browsers prefer). Every other directive is delivered as
+        //   Report-Only below, so it observes and logs violations in
+        //   the browser console without ever blocking anything - the
+        //   origin inventory it encodes (UploadThing, GIPHY, YouTube
+        //   embeds, Google Analytics, Sentry, Solana RPC, Socket.IO)
+        //   was assembled from the code, not exercised against every
+        //   flow, and an enforced policy that misses one host would
+        //   silently break uploads, calls or embeds. Promote it to
+        //   enforcing only after a period with no genuine reports.
         source: "/:path*",
         headers: [
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(self), microphone=(self), geolocation=(), payment=(), usb=(), interest-cohort=()",
+          },
+          { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+          {
+            key: "Content-Security-Policy-Report-Only",
+            value: [
+              "default-src 'self'",
+              // Next.js injects inline bootstrapping scripts and GA is
+              // loaded from googletagmanager.com; nonces would need a
+              // middleware rewrite of every response, which is exactly
+              // the kind of invasive change this policy avoids while
+              // it is report-only.
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob: https:",
+              "media-src 'self' blob: https://utfs.io https://*.utfs.io https://*.ufs.sh https://*.giphy.com",
+              "font-src 'self' data:",
+              "connect-src 'self' https: wss:",
+              "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://accounts.google.com https://appleid.apple.com",
+              "worker-src 'self' blob:",
+              "form-action 'self' https://accounts.google.com https://appleid.apple.com",
+              "base-uri 'self'",
+              "object-src 'none'",
+              "frame-ancestors 'none'",
+            ].join("; "),
+          },
         ],
       },
       {
