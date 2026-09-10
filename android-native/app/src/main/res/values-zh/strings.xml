@@ -338,6 +338,8 @@
     <string name="feed_for_you">为你推荐</string>
     <string name="feed_following">正在关注</string>
     <string name="search_placeholder">搜索 用户, 帖子, 话题标签...</string>
+    <string name="search_discover_section_title">探索 ZRP</string>
+    <string name="search_discover_section_subtitle">音乐、市场、招聘、游戏、新闻、AI 等更多内容</string>
     <string name="search_users_tab">用户 (%1$d)</string>
     <string name="search_posts_tab">帖子 (%1$d)</string>
     <string name="search_no_users">未找到用户。</string>

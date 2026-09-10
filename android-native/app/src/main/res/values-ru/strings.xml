@@ -338,6 +338,8 @@
     <string name="feed_for_you">Для вас</string>
     <string name="feed_following">Подписки</string>
     <string name="search_placeholder">поиск пользователей, публикаций, хэштегов...</string>
+    <string name="search_discover_section_title">Исследуйте ZRP</string>
+    <string name="search_discover_section_subtitle">Музыка, маркетплейс, вакансии, игры, новости, ИИ и многое другое</string>
     <string name="search_users_tab">пользователей (%1$d)</string>
     <string name="search_posts_tab">публикаций (%1$d)</string>
     <string name="search_no_users">Пользователи не найдены.</string>

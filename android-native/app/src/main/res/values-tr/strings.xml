@@ -338,6 +338,8 @@
     <string name="feed_for_you">Senin için</string>
     <string name="feed_following">Takip Edilenler</string>
     <string name="search_placeholder">Kullanıcı, gönderi, hashtag ara...</string>
+    <string name="search_discover_section_title">ZRP\'yi Keşfet</string>
+    <string name="search_discover_section_subtitle">Müzik, pazar yeri, iş ilanları, oyunlar, haberler, yapay zeka ve daha fazlası</string>
     <string name="search_users_tab">Kullanıcılar (%1$d)</string>
     <string name="search_posts_tab">Gönderiler (%1$d)</string>
     <string name="search_no_users">Kullanıcı bulunamadı.</string>

@@ -254,6 +254,17 @@ private fun DiscoverContent(
     }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
+        // Previously these 8 rows opened directly with no heading at all -
+        // immediately followed by the Trending/Who-to-follow sections,
+        // which DO have their own headers - so nothing signalled that
+        // Music, Marketplace, a job board, a charity flow, games, News,
+        // Shorts and an AI chatbot all live behind the Search tab. This
+        // is the actual "menu is too complicated" complaint: not tap
+        // depth (most things are 1-2 taps away already), but zero
+        // labeling of what's here.
+        item {
+            DiscoverSectionHeader()
+        }
         item {
             MusicEntryRow(onClick = onOpenMusic)
         }
@@ -607,6 +618,26 @@ private fun AiEntryRow(onClick: () -> Unit) {
 // Matches HomeTrending.tsx/HomeCreatorsRow.tsx's own section-header +
 // "See all" link pairing exactly - both compact Discover teasers get
 // the same click-through to their real full-list page.
+// Sits above the 8 feature-vertical entry rows (Music/Marketplace/
+// Opportunity/Aid/Play/News/Shorts/AI) so they read as a distinct,
+// labeled group rather than blending into whatever comes above or
+// below them on this tab.
+@Composable
+private fun DiscoverSectionHeader() {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Text(
+            text = stringResource(R.string.search_discover_section_title),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = stringResource(R.string.search_discover_section_subtitle),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
 @Composable
 private fun SectionHeaderWithSeeAll(title: String, onSeeAllClick: () -> Unit) {
     Row(

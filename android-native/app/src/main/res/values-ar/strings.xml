@@ -338,6 +338,8 @@
     <string name="feed_for_you">لك</string>
     <string name="feed_following">المتابَعون</string>
     <string name="search_placeholder">بحث مستخدمون, منشورات, وسوم...</string>
+    <string name="search_discover_section_title">استكشف ZRP</string>
+    <string name="search_discover_section_subtitle">الموسيقى، السوق، الوظائف، الألعاب، الأخبار، الذكاء الاصطناعي والمزيد</string>
     <string name="search_users_tab">مستخدمون (%1$d)</string>
     <string name="search_posts_tab">منشورات (%1$d)</string>
     <string name="search_no_users">لم يتم العثور على مستخدمين.</string>

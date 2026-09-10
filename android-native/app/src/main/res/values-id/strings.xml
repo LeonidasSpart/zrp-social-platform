@@ -338,6 +338,8 @@
     <string name="feed_for_you">Untuk Anda</string>
     <string name="feed_following">Mengikuti</string>
     <string name="search_placeholder">Cari pengguna, postingan, tagar...</string>
+    <string name="search_discover_section_title">Jelajahi ZRP</string>
+    <string name="search_discover_section_subtitle">Musik, marketplace, lowongan kerja, game, berita, AI, dan lainnya</string>
     <string name="search_users_tab">Pengguna (%1$d)</string>
     <string name="search_posts_tab">Postingan (%1$d)</string>
     <string name="search_no_users">Pengguna tidak ditemukan.</string>
