@@ -417,6 +417,43 @@ export const SEED_SOURCES: SeedSource[] = [
     topics: ["CULTURE", "ENTERTAINMENT"],
     trustTier: 2,
   },
+  /*
+   * Business and Technology were the last two categories still resting
+   * on a single publisher (bbc-business, bbc-technology). That is the
+   * same shape that left Sports dark: one feed changes a path or has a
+   * bad morning and the category is empty, with nothing to say why.
+   *
+   * Same URL pattern as the Guardian feeds already in this roster, two
+   * of which the activation script fetched live in production
+   * (guardian-sport 40 items, guardian-culture 21). The pattern is
+   * proven; these two paths were not fetched from the machine this was
+   * written on, which has no egress to theguardian.com - so the
+   * activation script fetches every newly seeded source and disables
+   * any that does not return usable items rather than leaving a dead
+   * feed switched on.
+   */
+  {
+    key: "guardian-business",
+    name: "The Guardian — Business",
+    publisher: "The Guardian",
+    feedUrl: "https://www.theguardian.com/business/rss",
+    homepageUrl: "https://www.theguardian.com/business",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["BUSINESS", "ECONOMY", "FINANCE"],
+    trustTier: 2,
+  },
+  {
+    key: "guardian-technology",
+    name: "The Guardian — Technology",
+    publisher: "The Guardian",
+    feedUrl: "https://www.theguardian.com/technology/rss",
+    homepageUrl: "https://www.theguardian.com/technology",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["TECHNOLOGY", "AI"],
+    trustTier: 2,
+  },
 
   // ─── Switzerland ──────────────────────────────────────────────
   // swissinfo-eng above is the only CH-tagged source and its feed path
