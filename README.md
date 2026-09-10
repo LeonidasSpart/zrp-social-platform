@@ -458,8 +458,17 @@ include:
 - **Database and cache** — `DATABASE_URL`, `REDIS_URL`,
   `REDIS_PUBLIC_URL`
 - **Auth** — `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_ID`,
-  `GOOGLE_CLIENT_SECRET`, `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`,
-  `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY`, `APPLE_NATIVE_CLIENT_ID`
+  `GOOGLE_CLIENT_SECRET`, `GOOGLE_MOBILE_CLIENT_ID` (required for native
+  Android Google Sign-In specifically — see
+  `src/app/api/mobile/auth/google/route.ts`; a separate Web-type OAuth
+  client from `GOOGLE_CLIENT_ID`, created in the same Google Cloud
+  project as the Android app's registered OAuth clients, because
+  Android's Credential Manager `serverClientId` must live in that same
+  project. Without it, every native Google Sign-In attempt fails
+  server-side ID token verification with an audience mismatch, even
+  though `GOOGLE_CLIENT_ID`/web Google login work fine), `APPLE_CLIENT_ID`,
+  `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY`,
+  `APPLE_NATIVE_CLIENT_ID`
 - **Email** — `RESEND_API_KEY`, `EMAIL_FROM`
 - **Push** — `FIREBASE_SERVICE_ACCOUNT_JSON`, `VAPID_PUBLIC_KEY`,
   `VAPID_PRIVATE_KEY`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
