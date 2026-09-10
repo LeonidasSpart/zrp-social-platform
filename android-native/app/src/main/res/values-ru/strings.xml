@@ -563,6 +563,7 @@
     <string name="onboarding_err_follow_users">Не удалось подписаться на пользователей. Пожалуйста, попробуйте снова.</string>
     <string name="onboarding_err_skip">Не удалось пропустить. Пожалуйста, попробуйте снова.</string>
     <string name="auth_err_session_expired">Ваша сессия больше не действительна. Пожалуйста, войдите снова.</string>
+    <string name="auth_err_google_interrupted">Попытка входа через Google была прервана. Пожалуйста, попробуйте снова.</string>
     <!-- Music Phase 1: shared player + Queue -->
     <string name="music_nav_queue_title">Ваша очередь</string>
     <string name="music_nav_history_title">Недавно прослушанное</string>

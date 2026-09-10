@@ -563,6 +563,7 @@
     <string name="onboarding_err_follow_users">Échec du suivi des utilisateurs. Veuillez réessayer.</string>
     <string name="onboarding_err_skip">Échec de l\'ignorance de cette étape. Veuillez réessayer.</string>
     <string name="auth_err_session_expired">Votre session n\'est plus valide. Veuillez vous reconnecter.</string>
+    <string name="auth_err_google_interrupted">Votre tentative de connexion avec Google a été interrompue. Veuillez réessayer.</string>
     <!-- Music Phase 1: shared player + Queue -->
     <string name="music_nav_queue_title">Votre file d\'attente</string>
     <string name="music_nav_history_title">Écoutés récemment</string>
