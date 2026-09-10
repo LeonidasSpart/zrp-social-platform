@@ -58,6 +58,37 @@ describe("isSourceDue", () => {
       isSourceDue({ ...base, lastFetchedAt: new Date(NOW.getTime() - 90 * 60_000) }, NOW)
     ).toBe(true);
   });
+
+  /*
+   * Found in production: a cycle reported sourcesFetched: 0 with nothing
+   * wrong. Cycles run hourly and most sources poll hourly, so the two
+   * are exactly in phase - and a cycle that starts a few seconds earlier
+   * than the previous one did leaves every source just short of due,
+   * skipping ingestion for a whole hour.
+   */
+  it("polls a source that is a few seconds short of due rather than skipping a whole cycle", () => {
+    const lastFetchedAt = new Date(NOW.getTime() - 60 * 60_000 + 4_000);
+    expect(isSourceDue({ ...base, lastFetchedAt }, NOW)).toBe(true);
+  });
+
+  it("scales that tolerance to the interval instead of hard-coding seconds", () => {
+    // A 15-minute source gets 90 seconds of tolerance, not six minutes.
+    const fast = { ...base, fetchIntervalMinutes: 15 };
+    expect(
+      isSourceDue({ ...fast, lastFetchedAt: new Date(NOW.getTime() - 14 * 60_000) }, NOW)
+    ).toBe(true);
+    expect(
+      isSourceDue({ ...fast, lastFetchedAt: new Date(NOW.getTime() - 12 * 60_000) }, NOW)
+    ).toBe(false);
+  });
+
+  it("still refuses a source polled well inside its interval", () => {
+    // The tolerance must not turn an hourly source into a half-hourly
+    // one: at 45 minutes it is genuinely not due.
+    expect(
+      isSourceDue({ ...base, lastFetchedAt: new Date(NOW.getTime() - 45 * 60_000) }, NOW)
+    ).toBe(false);
+  });
 });
 
 describe("StoryIndex", () => {

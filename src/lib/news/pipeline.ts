@@ -2,7 +2,7 @@ import { NewsArticleCategory, type PrismaClient } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { acquirePipelineLock } from "./lock";
 import { buildStoryIndex, expireStaleStories, ingestSource, isSourceDue } from "./ingest";
-import { MAX_STORY_AGE_HOURS, MIN_PUBLISHABLE_SCORE } from "./ranking";
+import { ageHours, MAX_STORY_AGE_HOURS, MIN_PUBLISHABLE_SCORE } from "./ranking";
 import {
   generateRenditions,
   NEWS_MODEL_MAX_RETRIES,
@@ -49,6 +49,20 @@ const MAX_SOURCES_PER_CYCLE = 40;
  * cycle has to be able to produce more than a handful of summaries or
  * the categories starve no matter how much real news was ingested.
  */
+/**
+ * How fresh a story must still be to be worth retrying after a
+ * non-editorial generation failure (empty completion, unparseable
+ * JSON, timeout, provider error).
+ *
+ * Measured from the story's publication time, not from the first
+ * attempt, so it bounds retries without needing an attempt counter:
+ * with hourly cycles a story gets a handful of tries while it is fresh
+ * enough to matter, and one already older than this is rejected on its
+ * first failure rather than retried into irrelevance. Long enough to
+ * ride out a provider outage lasting several cycles.
+ */
+const GENERATION_RETRY_WINDOW_HOURS = 6;
+
 const MAX_GENERATIONS_PER_CYCLE = 24;
 
 /*
@@ -86,6 +100,15 @@ export interface CycleResult {
   duplicatesPrevented: number;
   renditionsGenerated: number;
   renditionsFailed: number;
+  /**
+   * Stories held back for another cycle because every language failed
+   * for a non-editorial reason (empty completion, unparseable JSON,
+   * timeout, provider error) rather than being rejected outright.
+   *
+   * Reported separately so a provider having a bad hour is visible as
+   * exactly that, instead of looking like a wave of rejected news.
+   */
+  renditionsRetryable: number;
   published: number;
   publishFailures: number;
   scheduled: number;
@@ -119,6 +142,7 @@ function emptyResult(reason: string): CycleResult {
     duplicatesPrevented: 0,
     renditionsGenerated: 0,
     renditionsFailed: 0,
+    renditionsRetryable: 0,
     published: 0,
     publishFailures: 0,
     scheduled: 0,
@@ -289,6 +313,10 @@ export async function runPipelineCycle(options: RunCycleOptions = {}): Promise<C
 
         let anyReady = false;
         let anySkippedForBudget = false;
+        // A summary the validator refused is a real editorial rejection.
+        // An empty response, unparseable JSON or a timeout is not: the
+        // story did nothing wrong and deserves another cycle.
+        let anyEditorialRejection = false;
 
         for (const outcome of outcomes) {
           if (outcome.skippedForBudget) {
@@ -328,6 +356,7 @@ export async function runPipelineCycle(options: RunCycleOptions = {}): Promise<C
             result.renditionsGenerated += 1;
           } else {
             result.renditionsFailed += 1;
+            if (outcome.validation) anyEditorialRejection = true;
           }
         }
 
@@ -341,13 +370,32 @@ export async function runPipelineCycle(options: RunCycleOptions = {}): Promise<C
           // cycle retries it rather than rejecting a story that was never
           // actually assessed.
           result.generationBudgetExhausted = true;
+        } else if (
+          !anyEditorialRejection &&
+          ageHours(story.firstSeenAt, now) < GENERATION_RETRY_WINDOW_HOURS
+        ) {
+          /*
+           * Every language failed for a reason that is ours, not the
+           * story's: an empty completion, unparseable JSON, a timeout, a
+           * provider error. Rejecting here throws away real news for a
+           * transient fault - a provider outage lasting one cycle used
+           * to permanently discard every story in flight, and a
+           * production sample of 187 failures found 102 of exactly this
+           * kind against 11 genuine groundedness rejections.
+           *
+           * Leave it NEW so the next cycle tries again. Retries are
+           * bounded twice over: by this window, and by the story ageing
+           * out entirely at MAX_STORY_AGE_HOURS.
+           */
+          result.renditionsRetryable += 1;
         } else {
           await db.newsStory.update({
             where: { id: story.id },
             data: {
               status: "REJECTED",
-              rejectionReason:
-                "No summary passed groundedness validation in any enabled language",
+              rejectionReason: anyEditorialRejection
+                ? "No summary passed groundedness validation in any enabled language"
+                : "Summary generation kept failing for a non-editorial reason; see the rendition error",
             },
           });
         }
@@ -477,6 +525,7 @@ export async function runPipelineCycle(options: RunCycleOptions = {}): Promise<C
         details: {
           scheduled: result.scheduled,
           storiesExpired: result.storiesExpired,
+          renditionsRetryable: result.renditionsRetryable,
           generationBudgetExhausted: result.generationBudgetExhausted,
           modelTimeoutMs: NEWS_MODEL_TIMEOUT_MS,
           modelMaxRetries: NEWS_MODEL_MAX_RETRIES,

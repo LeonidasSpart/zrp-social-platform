@@ -32,11 +32,19 @@ const hasRealDatabaseUrl =
 
 const db = prisma;
 
-function rssFor(items: Array<{ title: string; link: string; summary: string }>): string {
+/*
+ * `publishedAt` becomes the story's firstSeenAt, which is what its age
+ * is measured from - so a test driving a simulated clock has to date
+ * its items on that clock, not on the wall clock.
+ */
+function rssFor(
+  items: Array<{ title: string; link: string; summary: string }>,
+  publishedAt: Date = new Date()
+): string {
   return `<?xml version="1.0"?><rss version="2.0"><channel>${items
     .map(
       (item) =>
-        `<item><title>${item.title}</title><link>${item.link}</link><description>${item.summary}</description><pubDate>${new Date().toUTCString()}</pubDate></item>`
+        `<item><title>${item.title}</title><link>${item.link}</link><description>${item.summary}</description><pubDate>${publishedAt.toUTCString()}</pubDate></item>`
     )
     .join("")}</channel></rss>`;
 }
@@ -243,12 +251,22 @@ describe.skipIf(!hasRealDatabaseUrl)("editorial pipeline (integration, real Post
       );
     });
 
+    // A real groundedness rejection carries the validator's report; the
+    // pipeline uses its presence to tell an editorial refusal from a
+    // provider fault, so the fixture has to carry one too.
     generateRenditions.mockImplementation(async (languages: string[]) =>
       languages.map((language) => ({
         language,
         rendition: null,
         error: "Generated summary failed groundedness validation (unsupported figures: 480)",
-        validation: null,
+        validation: {
+          ok: false,
+          unsupportedNumbers: ["480"],
+          fabricatedQuotes: 0,
+          injectedUrls: [],
+          tooLong: false,
+          tooShort: false,
+        },
       }))
     );
 
@@ -267,6 +285,113 @@ describe.skipIf(!hasRealDatabaseUrl)("editorial pipeline (integration, real Post
       where: { references: { some: { source: { key: { in: sourceKeys } } } }, status: "REJECTED" },
     });
     expect(rejected.length).toBeGreaterThan(0);
+    // Rejected for what actually happened, not a stock message.
+    expect(rejected[0].rejectionReason).toContain("groundedness");
+  });
+
+  /*
+   * A provider fault is not the story's fault. A production sample of
+   * 187 rendition failures held 102 empty completions and unparseable
+   * responses against 11 genuine groundedness rejections - and every
+   * one of those 102 stories was thrown away permanently, so a provider
+   * having a bad hour emptied the categories for the rest of the day.
+   */
+  it("keeps a story for another cycle when the model fails for a reason that is not the story's", async () => {
+    safeFetch.mockImplementation(async (url: string) => {
+      const index = Number(url.match(/outlet(\d)/)?.[1] ?? 0);
+      return fetchResult(
+        rssFor([
+          {
+            title: `Distinct story number ${index} about a regional transport plan`,
+            link: `https://outlet${index}.example/${suffix}/transport-${index}`,
+            summary: "The plan was presented to the assembly.",
+          },
+        ], new Date("2026-02-03T11:30:00Z"))
+      );
+    });
+
+    // No validation report: an empty completion, not a refusal.
+    generateRenditions.mockImplementation(async (languages: string[]) =>
+      languages.map((language) => ({
+        language,
+        rendition: null,
+        error: "Model returned an empty response",
+        validation: null,
+      }))
+    );
+
+    const result = await runPipelineCycle({
+      trigger: "manual",
+      now: new Date("2026-02-03T12:00:00Z"),
+      db,
+      skipLock: true,
+    });
+
+    expect(result.renditionsFailed).toBeGreaterThan(0);
+    expect(result.renditionsRetryable).toBeGreaterThan(0);
+    expect(result.published).toBe(0);
+
+    const stories = await db.newsStory.findMany({
+      where: { references: { some: { source: { key: { in: sourceKeys } } } } },
+    });
+    expect(stories.length).toBeGreaterThan(0);
+    for (const story of stories) {
+      // Still NEW, so the next cycle picks it up - not discarded.
+      expect(story.status).toBe("NEW");
+      expect(story.rejectionReason).toBeNull();
+    }
+  });
+
+  it("gives up on a story the model never manages to summarise", async () => {
+    safeFetch.mockImplementation(async (url: string) => {
+      const index = Number(url.match(/outlet(\d)/)?.[1] ?? 0);
+      return fetchResult(
+        rssFor([
+          {
+            title: `Distinct story number ${index} about a museum funding round`,
+            link: `https://outlet${index}.example/${suffix}/museum-${index}`,
+            summary: "The funding was announced this morning.",
+          },
+        ], new Date("2026-02-03T11:30:00Z"))
+      );
+    });
+
+    generateRenditions.mockImplementation(async (languages: string[]) =>
+      languages.map((language) => ({
+        language,
+        rendition: null,
+        error: "Model returned an empty response",
+        validation: null,
+      }))
+    );
+
+    // Ingest now...
+    await runPipelineCycle({
+      trigger: "manual",
+      now: new Date("2026-02-03T12:00:00Z"),
+      db,
+      skipLock: true,
+    });
+
+    // ...and try again once the retry window has passed. Retrying
+    // forever would burn model calls on a story that cannot be written.
+    await runPipelineCycle({
+      trigger: "manual",
+      now: new Date("2026-02-03T19:00:00Z"),
+      db,
+      skipLock: true,
+    });
+
+    const stories = await db.newsStory.findMany({
+      where: { references: { some: { source: { key: { in: sourceKeys } } } } },
+    });
+    expect(stories.length).toBeGreaterThan(0);
+    for (const story of stories) {
+      expect(story.status).toBe("REJECTED");
+      // The reason says what really happened, so a provider problem is
+      // not filed away as an editorial one.
+      expect(story.rejectionReason).toContain("non-editorial");
+    }
   });
 
   it("records a source failure with backoff instead of inventing content", async () => {
