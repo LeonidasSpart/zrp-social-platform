@@ -45,6 +45,7 @@ const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
 import QuotePostModal from "./QuotePostModal";
 import VideoFeedViewer from "./VideoFeedViewer";
 import LinkPreviewCard from "./LinkPreviewCard";
+import Poll from "./Poll";
 import { extractFirstUrl } from "@/lib/link-preview-parse";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -112,6 +113,24 @@ interface PostCardProps {
         avatarUrl?: string | null;
         badgeType?: string | null;
       };
+    } | null;
+
+    isPoll?: boolean;
+    // Two different API shapes reach this prop: the feed endpoints
+    // (/api/posts, /api/posts/explore, profile/likes/reposts) return the
+    // raw Prisma relation as `votes_user: [{optionIndex}]`, while
+    // /api/posts/[id] (the single-post page) collapses that into a plain
+    // `userVote: number | null` and strips votes_user entirely. Both are
+    // accepted here so the poll renders correctly regardless of which
+    // route fetched the post.
+    poll?: {
+      id: string;
+      question: string;
+      options: string[];
+      votes: Record<string, number> | null;
+      expiresAt?: string | null;
+      votes_user?: { optionIndex: number }[];
+      userVote?: number | null;
     } | null;
   };
 
@@ -2007,6 +2026,22 @@ export default function PostCard({
                     </div>
                   </div>
                 </div>
+              )}
+
+              {/* POLL */}
+              {post.poll && (
+                <Poll
+                  pollId={post.poll.id}
+                  question={post.poll.question}
+                  options={post.poll.options}
+                  votes={post.poll.votes || {}}
+                  userVote={
+                    post.poll.userVote ??
+                    post.poll.votes_user?.[0]?.optionIndex
+                  }
+                  expiresAt={post.poll.expiresAt ?? undefined}
+                  onVote={() => onUpdate()}
+                />
               )}
 
               {/* LINK PREVIEW */}

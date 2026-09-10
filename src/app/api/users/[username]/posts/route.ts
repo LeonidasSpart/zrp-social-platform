@@ -97,6 +97,14 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
             },
           },
         },
+        poll: {
+          include: {
+            votes_user: {
+              where: viewerId ? { userId: viewerId } : undefined,
+              select: { optionIndex: true },
+            },
+          },
+        },
         _count: {
           select: {
             likes: true,

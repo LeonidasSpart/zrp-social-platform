@@ -75,6 +75,17 @@ interface Post {
   location?: string;
   applyUrl?: string;
   body?: string;
+
+  isPoll?: boolean;
+  poll?: {
+    id: string;
+    question: string;
+    options: string[];
+    votes: Record<string, number> | null;
+    expiresAt?: string | null;
+    votes_user?: { optionIndex: number }[];
+    userVote?: number | null;
+  } | null;
 }
 
 type FeedType = "for-you" | "following";

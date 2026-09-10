@@ -117,6 +117,14 @@ export async function GET(req: NextRequest) {
               },
             },
           },
+          poll: {
+            include: {
+              votes_user: {
+                where: userId ? { userId } : undefined,
+                select: { optionIndex: true },
+              },
+            },
+          },
           _count: {
             select: {
               likes: true,
