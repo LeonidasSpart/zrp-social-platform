@@ -85,7 +85,23 @@ export async function POST(req: NextRequest) {
       audience: acceptedAudiences,
     });
     payload = ticket.getPayload();
-  } catch {
+  } catch (err) {
+    // Previously a blind catch with no logging at all - "Invalid Google
+    // sign-in token" covered every possible cause (wrong/expired
+    // audience, an actual network failure reaching Google's JWKS
+    // endpoint, clock skew, a malformed token) with zero way to tell
+    // them apart from Railway's own logs. google-auth-library's
+    // verifyIdToken throws a plain Error whose message names the real
+    // reason (e.g. "Wrong recipient, payload audience != requested
+    // audience" for a client ID mismatch) - logging it costs nothing
+    // sensitive (the error never contains the token itself) and is the
+    // only way to distinguish "this token's audience doesn't match
+    // acceptedAudiences" from "Google's servers were unreachable" after
+    // the fact.
+    console.error(
+      "Mobile Google login error: ID token verification failed:",
+      err instanceof Error ? err.message : err
+    );
     return NextResponse.json({ error: "Invalid Google sign-in token" }, { status: 401 });
   }
 

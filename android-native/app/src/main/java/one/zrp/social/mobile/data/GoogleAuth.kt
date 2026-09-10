@@ -95,7 +95,16 @@ object GoogleAuth {
             .build()
 
         return try {
-            Result.success(requestWith(context, quiet))
+            val token = requestWith(context, quiet)
+            // Deliberately logged on success too, not just failure - see
+            // this class's own KDoc and AuthViewModel.loginWithGoogle's
+            // comment on why "the picker closed, then silence" is
+            // otherwise indistinguishable between three very different
+            // points of failure (Credential Manager itself, the
+            // /mobile/auth/google call, or the app's own post-login
+            // navigation). Length only, never the token itself.
+            Log.d("GoogleAuth", "ID token obtained via GetGoogleIdOption (quiet), length=${token.length}")
+            Result.success(token)
         } catch (e: GetCredentialCancellationException) {
             Result.failure(GoogleSignInCancelledException())
         } catch (e: NoCredentialException) {
@@ -106,7 +115,9 @@ object GoogleAuth {
                 e,
             )
             try {
-                Result.success(requestWith(context, explicit))
+                val token = requestWith(context, explicit)
+                Log.d("GoogleAuth", "ID token obtained via GetSignInWithGoogleOption (explicit), length=${token.length}")
+                Result.success(token)
             } catch (retry: GetCredentialCancellationException) {
                 Result.failure(GoogleSignInCancelledException())
             } catch (retry: GoogleIdTokenParsingException) {

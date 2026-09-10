@@ -152,6 +152,31 @@ describe("POST /api/mobile/auth/google", () => {
     expect(findOrCreateOAuthUser).not.toHaveBeenCalled();
   });
 
+  // Regression: the catch around verifyIdToken used to swallow the real
+  // failure reason entirely, so "Invalid Google sign-in token" covered
+  // everything from a genuine audience mismatch to a network failure
+  // reaching Google, with nothing in Railway's own logs to tell them
+  // apart. The response body must stay generic (never leak verification
+  // internals to the client), but the server's own log now names the
+  // real reason.
+  it("logs the real verification failure reason server-side without changing the generic client response", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    verifyIdToken.mockRejectedValueOnce(
+      new Error("Wrong recipient, payload audience != requested audience")
+    );
+
+    const res = await callPOST(req({ idToken: "mismatched-audience.token" }));
+
+    expect(res.status).toBe(401);
+    const body = await res.json();
+    expect(body.error).toBe("Invalid Google sign-in token");
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringContaining("ID token verification failed"),
+      expect.stringContaining("Wrong recipient")
+    );
+    errorSpy.mockRestore();
+  });
+
   // Scenario: invalid token - a token that verifies structurally but
   // carries no usable identity (missing/unverified email). Credential
   // Manager itself can hand back a token shaped like this if the
