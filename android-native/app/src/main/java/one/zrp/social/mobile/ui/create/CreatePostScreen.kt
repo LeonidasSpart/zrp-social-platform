@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -154,9 +155,27 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
     val maxImages = limits.imagesPerPost.coerceAtMost(4)
     val canAddMoreMedia = maxImages > 0 && state.mediaUrls.size < maxImages && state.mediaType != "video"
 
+    // The composer had no IME handling at all. The manifest asks for
+    // adjustResize, but under enableEdgeToEdge() (targetSdk 35+, see
+    // variables.gradle) the window no longer resizes for the keyboard -
+    // Compose has to inset for it, and nothing here did. So the keyboard
+    // opened straight over the bottom of this screen: with the poll
+    // builder open, the option fields and the Post button were covered
+    // with no way to reach them, which is exactly what real-device
+    // testing reported.
+    //
+    // imePadding() rather than a scroll container, deliberately: the
+    // main text field below takes .weight(1f) to fill the height, and a
+    // weighted child inside a verticalScroll has unbounded height and
+    // crashes. Insetting instead shrinks the Column by the keyboard,
+    // the weighted field gives up exactly that much room, and
+    // everything under it - poll options, toolbar, Post - stays on
+    // screen. No navigationBarsPadding here: ZrpNavHost's Scaffold
+    // already applies that inset and counting it twice is its own bug.
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .imePadding()
             .padding(16.dp),
     ) {
         if (quotePostId != null) {
