@@ -143,8 +143,26 @@ android {
         // convention (see the versionCode 9/10 history above) the next
         // build always strictly increments past the highest versionCode
         // ever committed here, not just the last one confirmed shipped.
-        versionCode 12
-        versionName "4.0.7"
+        //
+        // Bumps to versionCode 13 / versionName "4.0.8" for five fixes
+        // (PR #229): a real second layer for Google Sign-In
+        // (GoogleSignInAttemptMarker - detects the app's PROCESS being
+        // killed outright while the account picker has focus, which the
+        // configChanges/viewModelScope fix above does not cover, and
+        // surfaces a real error instead of silence); defensive hardening
+        // of Android poll voting against a reported crash on tap (root
+        // cause not confirmed - no crash-reporting SDK, no device); the
+        // Shorts composer's video preview no longer squishing to the
+        // wrong aspect ratio and crowding its own playback controls into
+        // the caption field; the fullscreen photo viewer's close button
+        // no longer sitting under the system status bar, and tapping the
+        // photo itself now closes it; and the Shorts-style action rail
+        // (like/comment/repost/share) no longer hidden behind BottomNav
+        // on mobile web/PWA/tablet. None of this changes applicationId,
+        // signing, or deep links. 12 was confirmed uploaded to Play
+        // Internal Testing.
+        versionCode 13
+        versionName "4.0.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
