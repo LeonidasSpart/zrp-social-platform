@@ -33,7 +33,8 @@ export type LegalPageId =
   | "careers"
   | "charity"
   | "press"
-  | "investors";
+  | "investors"
+  | "faq";
 
 export const LEGAL_PAGE_IDS: LegalPageId[] = [
   "terms",
@@ -46,6 +47,7 @@ export const LEGAL_PAGE_IDS: LegalPageId[] = [
   "charity",
   "press",
   "investors",
+  "faq",
 ];
 
 type CardItem = {
@@ -1507,6 +1509,670 @@ export const INVESTORS_CONFIG: PageConfig = {
   ],
 };
 
+// ─── FAQ (src/app/faq/page.tsx) ────────────────────────────────────────────
+// This is the standalone public /faq page - 57 questions across 12
+// categories, distinct from HELP_CONFIG's own smaller 36-item
+// help.faqSection (a different, older FAQ embedded inside the Help
+// Center). Each question becomes its own section (its title IS the
+// question, matching how every other section here already renders as
+// its own titled block - functionally the same "one question, one
+// expandable-feeling unit" shape the web page's accordion gives each
+// item). A category heading is prepended as an H() block into the
+// first section of that category rather than a separate empty
+// section, since a bare heading-only section has no real content of
+// its own. Quick-link category jump anchors and the live question/
+// category counts are UI-only chrome on the web page - not
+// resolvable content, so not reproduced.
+export const FAQ_CONFIG: PageConfig = {
+  title: ["faq.pageTitle"],
+  subtitle: ["faq.pageSubtitle"],
+  sections: [
+    // ── Getting Started ──
+    {
+      id: "what-is-zrp",
+      title: ["faq.whatIsZrp.q"],
+      body: [
+        H("faq.cat.gettingStarted"),
+        P("faq.whatIsZrp.p1Bold", "faq.whatIsZrp.p1"),
+        P("faq.whatIsZrp.p2"),
+        P("faq.whatIsZrp.p3"),
+        CALLOUT("faq.whatIsZrp.noteBold", "faq.whatIsZrp.noteText"),
+      ],
+    },
+    {
+      id: "how-to-register",
+      title: ["faq.howToRegister.q"],
+      body: [
+        P("faq.howToRegister.intro"),
+        BULLETS(
+          ["faq.howToRegister.step1Prefix", "faq.howToRegister.step1Link", "faq.howToRegister.step1Rest"],
+          ["faq.howToRegister.step2"],
+          ["faq.howToRegister.step3"],
+          ["faq.howToRegister.step4"],
+          ["faq.howToRegister.step5"],
+          ["faq.howToRegister.step6"]
+        ),
+        P("faq.howToRegister.note"),
+      ],
+    },
+    {
+      id: "how-to-login",
+      title: ["faq.howToLogin.q"],
+      body: [
+        P("faq.howToLogin.intro"),
+        BULLETS(
+          ["faq.howToLogin.step1Prefix", "faq.howToLogin.step1Link", "faq.howToLogin.step1Rest"],
+          ["faq.howToLogin.step2"],
+          ["faq.howToLogin.step3"],
+          ["faq.howToLogin.step4"]
+        ),
+        P("faq.howToLogin.note"),
+      ],
+    },
+    {
+      id: "password-reset",
+      title: ["faq.passwordReset.q"],
+      body: [
+        P("faq.passwordReset.intro"),
+        BULLETS(
+          ["faq.passwordReset.step1Prefix", "faq.passwordReset.step1Link", "faq.passwordReset.step1Rest"],
+          ["faq.passwordReset.step2"],
+          ["faq.passwordReset.step3"],
+          ["faq.passwordReset.step4"],
+          ["faq.passwordReset.step5"],
+          ["faq.passwordReset.step6"]
+        ),
+        P("faq.passwordReset.note"),
+      ],
+    },
+    // ── Profile & Media ──
+    {
+      id: "avatar-size",
+      title: ["faq.avatarSize.q"],
+      body: [
+        H("faq.cat.profileMedia"),
+        P("faq.avatarSize.intro"),
+        BULLETS(
+          ["faq.mediaLabel.maxFileSize", "faq.avatarSize.maxFileSizeVal"],
+          ["faq.mediaLabel.supportedFormats", "faq.avatarSize.formatsVal"],
+          ["faq.mediaLabel.recommendedResolution", "faq.avatarSize.resolutionVal"],
+          ["faq.mediaLabel.recommendedRatio", "faq.avatarSize.ratioVal"]
+        ),
+        P("faq.avatarSize.note"),
+      ],
+    },
+    {
+      id: "banner-size",
+      title: ["faq.bannerSize.q"],
+      body: [
+        P("faq.bannerSize.intro"),
+        BULLETS(
+          ["faq.mediaLabel.maxFileSize", "faq.bannerSize.maxFileSizeVal"],
+          ["faq.mediaLabel.supportedFormats", "faq.bannerSize.formatsVal"],
+          ["faq.mediaLabel.recommendedResolution", "faq.bannerSize.resolutionVal"],
+          ["faq.mediaLabel.recommendedRatio", "faq.bannerSize.ratioVal"]
+        ),
+      ],
+    },
+    {
+      id: "post-image-size",
+      title: ["faq.postImageSize.q"],
+      body: [
+        P("faq.postImageSize.intro"),
+        BULLETS(
+          ["faq.mediaLabel.maxFileSize", "faq.postImageSize.maxFileSizeVal"],
+          ["faq.mediaLabel.supportedFormats", "faq.postImageSize.formatsVal"],
+          ["faq.mediaLabel.recommendedResolution", "faq.postImageSize.resolutionVal"],
+          ["faq.mediaLabel.recommendedRatio", "faq.postImageSize.ratioVal"]
+        ),
+      ],
+    },
+    {
+      id: "post-video-size",
+      title: ["faq.postVideoSize.q"],
+      body: [
+        P("faq.postVideoSize.intro"),
+        BULLETS(
+          ["faq.mediaLabel.maxFileSize", "faq.postVideoSize.maxFileSizeVal"],
+          ["faq.mediaLabel.supportedFormats", "faq.postVideoSize.formatsVal"],
+          ["faq.mediaLabel.recommendedResolution", "faq.postVideoSize.resolutionVal"],
+          ["faq.mediaLabel.recommendedEncoding", "faq.postVideoSize.encodingVal"],
+          ["faq.mediaLabel.recommendedDuration", "faq.postVideoSize.durationVal"]
+        ),
+        P("faq.postVideoSize.note"),
+      ],
+    },
+    {
+      id: "chat-image-size",
+      title: ["faq.chatImageSize.q"],
+      body: [
+        BULLETS(
+          ["faq.mediaLabel.maxFileSize", "faq.chatImageSize.maxFileSizeVal"],
+          ["faq.mediaLabel.supportedFormats", "faq.chatImageSize.formatsVal"],
+          ["faq.mediaLabel.recommendedResolution", "faq.chatImageSize.resolutionVal"]
+        ),
+        P("faq.chatImageSize.note"),
+      ],
+    },
+    // ── Posts & Interactions ──
+    {
+      id: "how-to-post",
+      title: ["faq.howToPost.q"],
+      body: [
+        H("faq.cat.postsInteractions"),
+        P("faq.howToPost.intro"),
+        BULLETS(
+          ["faq.howToPost.step1"],
+          ["faq.howToPost.step2"],
+          ["faq.howToPost.step3"],
+          ["faq.howToPost.step4"],
+          ["faq.howToPost.step5"],
+          ["faq.howToPost.step6"]
+        ),
+        P("faq.howToPost.note"),
+      ],
+    },
+    {
+      id: "how-to-schedule-post",
+      title: ["faq.schedulePost.q"],
+      body: [
+        P("faq.schedulePost.intro"),
+        BULLETS(["faq.schedulePost.step1"], ["faq.schedulePost.step2"], ["faq.schedulePost.step3"], ["faq.schedulePost.step4"]),
+        P("faq.schedulePost.note"),
+      ],
+    },
+    {
+      id: "how-to-comment",
+      title: ["faq.howToComment.q"],
+      body: [
+        P("faq.howToComment.intro"),
+        BULLETS(["faq.howToComment.step1"], ["faq.howToComment.step2"], ["faq.howToComment.step3"], ["faq.howToComment.step4"]),
+        P("faq.howToComment.note"),
+      ],
+    },
+    {
+      id: "hashtags-mentions",
+      title: ["faq.hashtagsMentions.q"],
+      body: [
+        P("faq.hashtagsMentions.hashtagsBold", "faq.hashtagsMentions.hashtagsText"),
+        P("faq.hashtagsMentions.exampleLabel", "#ZRP"),
+        P("faq.hashtagsMentions.mentionsBold", "faq.hashtagsMentions.mentionsText"),
+        P("faq.hashtagsMentions.exampleLabel", "@username"),
+        P("faq.hashtagsMentions.note"),
+      ],
+    },
+    {
+      id: "how-to-pin-post",
+      title: ["faq.pinPost.q"],
+      body: [
+        BULLETS(["faq.pinPost.step1"], ["faq.pinPost.step2"], ["faq.pinPost.step3"], ["faq.pinPost.step4"]),
+        P("faq.pinPost.note"),
+      ],
+    },
+    // ── Messaging & Calls ──
+    {
+      id: "how-to-message",
+      title: ["faq.howToMessage.q"],
+      body: [
+        H("faq.cat.messagingCalls"),
+        BULLETS(["faq.howToMessage.step1"], ["faq.howToMessage.step2"], ["faq.howToMessage.step3"], ["faq.howToMessage.step4"]),
+        P("faq.howToMessage.note"),
+      ],
+    },
+    {
+      id: "how-to-call",
+      title: ["faq.howToCall.q"],
+      body: [
+        BULLETS(["faq.howToCall.step1"], ["faq.howToCall.step2"], ["faq.howToCall.step3"], ["faq.howToCall.step4"]),
+        P("faq.howToCall.note"),
+      ],
+    },
+    {
+      id: "read-receipts",
+      title: ["faq.readReceipts.q"],
+      body: [
+        P("faq.readReceipts.intro"),
+        BULLETS(
+          ["faq.readReceipts.singleBold", "faq.readReceipts.singleText"],
+          ["faq.readReceipts.doubleBold", "faq.readReceipts.doubleText"]
+        ),
+      ],
+    },
+    // ── Privacy & Safety ──
+    {
+      id: "privacy-policy-faq",
+      title: ["faq.privacyPolicyFaq.q"],
+      body: [
+        H("faq.cat.privacySafety"),
+        P("faq.privacyPolicyFaq.intro"),
+        BULLETS(
+          ["faq.privacyPolicyFaq.item1"],
+          ["faq.privacyPolicyFaq.item2"],
+          ["faq.privacyPolicyFaq.item3"],
+          ["faq.privacyPolicyFaq.item4"],
+          ["faq.privacyPolicyFaq.item5"]
+        ),
+        P("faq.privacyPolicyFaq.readMore", "faq.privacyPolicyFaq.readMoreLink", "."),
+      ],
+    },
+    {
+      id: "how-to-report",
+      title: ["faq.howToReport.q"],
+      body: [
+        BULLETS(
+          ["faq.howToReport.step1"],
+          ["faq.howToReport.step2"],
+          ["faq.howToReport.step3"],
+          ["faq.howToReport.step4"],
+          ["faq.howToReport.step5"],
+          ["faq.howToReport.step6"]
+        ),
+        P("faq.howToReport.note"),
+      ],
+    },
+    {
+      id: "how-to-block",
+      title: ["faq.howToBlock.q"],
+      body: [
+        BULLETS(["faq.howToBlock.step1"], ["faq.howToBlock.step2"], ["faq.howToBlock.step3"], ["faq.howToBlock.step4"]),
+        P("faq.howToBlock.note"),
+      ],
+    },
+    {
+      id: "delete-account-faq",
+      title: ["faq.deleteAccountFaq.q"],
+      body: [
+        P("faq.deleteAccountFaq.intro"),
+        BULLETS(
+          ["faq.deleteAccountFaq.step1Prefix", "faq.deleteAccountFaq.step1Link", "."],
+          ["faq.deleteAccountFaq.step2"],
+          ["faq.deleteAccountFaq.step3"],
+          ["faq.deleteAccountFaq.step4"],
+          ["faq.deleteAccountFaq.step5"]
+        ),
+        CALLOUT("faq.deleteAccountFaq.warningBold", "faq.deleteAccountFaq.warningText"),
+        P("faq.deleteAccountFaq.seeMorePrefix", "faq.deleteAccountFaq.seeMoreLink", "faq.deleteAccountFaq.seeMoreSuffix"),
+      ],
+    },
+    // ── ZRP Trust Passport ──
+    {
+      id: "what-is-trust-passport",
+      title: ["faq.whatIsTrustPassport.q"],
+      body: [
+        H("faq.cat.trustPassport"),
+        P("faq.whatIsTrustPassport.p1Bold", "faq.whatIsTrustPassport.p1"),
+        P("faq.whatIsTrustPassport.p2Prefix", "faq.whatIsTrustPassport.p2Bold", "faq.whatIsTrustPassport.p2"),
+        CALLOUT("faq.whatIsTrustPassport.calloutBold", "faq.whatIsTrustPassport.calloutText"),
+      ],
+    },
+    {
+      id: "trust-score-calculation",
+      title: ["faq.trustScoreCalc.q"],
+      body: [
+        P("faq.trustScoreCalc.p1"),
+        P("faq.trustScoreCalc.p2"),
+        BULLETS(
+          ["faq.trustScoreCalc.item1"],
+          ["faq.trustScoreCalc.item2"],
+          ["faq.trustScoreCalc.item3"],
+          ["faq.trustScoreCalc.item4"],
+          ["faq.trustScoreCalc.item5"],
+          ["faq.trustScoreCalc.item6"],
+          ["faq.trustScoreCalc.item7"],
+          ["faq.trustScoreCalc.item8"]
+        ),
+        P("faq.trustScoreCalc.note"),
+      ],
+    },
+    {
+      id: "trust-levels",
+      title: ["faq.trustLevels.q"],
+      body: [
+        P("faq.trustLevels.intro"),
+        CARDS(
+          card(["faq.trustLevels.level1Name"], ["faq.trustLevels.level1Desc"], ["0-34"]),
+          card(["faq.trustLevels.level2Name"], ["faq.trustLevels.level2Desc"], ["35-54"]),
+          card(["faq.trustLevels.level3Name"], ["faq.trustLevels.level3Desc"], ["55-74"]),
+          card(["faq.trustLevels.level4Name"], ["faq.trustLevels.level4Desc"], ["75-89"]),
+          card(["faq.trustLevels.level5Name"], ["faq.trustLevels.level5Desc"], ["90-100"])
+        ),
+      ],
+    },
+    {
+      id: "trust-score-change",
+      title: ["faq.trustScoreChange.q"],
+      body: [P("faq.trustScoreChange.p1"), P("faq.trustScoreChange.p2"), P("faq.trustScoreChange.note")],
+    },
+    {
+      id: "trust-score-not-popularity",
+      title: ["faq.trustNotPopularity.q"],
+      body: [
+        P("faq.trustNotPopularity.noBold", "faq.trustNotPopularity.p1"),
+        P("faq.trustNotPopularity.p2"),
+        P("faq.trustNotPopularity.p3"),
+      ],
+    },
+    {
+      id: "trust-score-not-identity",
+      title: ["faq.trustNotIdentity.q"],
+      body: [
+        P("faq.trustNotIdentity.p1Prefix", "faq.trustNotIdentity.p1Bold", "faq.trustNotIdentity.p1Suffix"),
+        P("faq.trustNotIdentity.p2"),
+        CALLOUT("faq.trustNotIdentity.warningBold", "faq.trustNotIdentity.warningText"),
+      ],
+    },
+    {
+      id: "trust-passport-private-data",
+      title: ["faq.trustPrivateData.q"],
+      body: [
+        P("faq.trustPrivateData.p1"),
+        P("faq.trustPrivateData.p2"),
+        BULLETS(
+          ["faq.trustPrivateData.item1"],
+          ["faq.trustPrivateData.item2"],
+          ["faq.trustPrivateData.item3"],
+          ["faq.trustPrivateData.item4"],
+          ["faq.trustPrivateData.item5"],
+          ["faq.trustPrivateData.item6"],
+          ["faq.trustPrivateData.item7"]
+        ),
+        P("faq.trustPrivateData.note"),
+      ],
+    },
+    {
+      id: "trust-passport-location",
+      title: ["faq.trustLocation.q"],
+      body: [
+        P("faq.trustLocation.p1Prefix", "faq.trustLocation.p1Bold", "."),
+        P("faq.trustLocation.p2"),
+        P("faq.trustLocation.note"),
+      ],
+    },
+    {
+      id: "trust-passport-verification",
+      title: ["faq.trustVerification.q"],
+      body: [
+        P("faq.trustVerification.p1"),
+        P("faq.trustVerification.p2Prefix", "faq.trustVerification.p2Bold", "."),
+        CARDS(
+          card(["faq.trustVerification.verifCardTitle"], ["faq.trustVerification.verifCardDesc"]),
+          card(["faq.trustVerification.passportCardTitle"], ["faq.trustVerification.passportCardDesc"])
+        ),
+      ],
+    },
+    {
+      id: "trust-passport-not-moderation",
+      title: ["faq.trustNotModeration.q"],
+      body: [P("faq.trustNotModeration.p1"), P("faq.trustNotModeration.p2"), P("faq.trustNotModeration.p3")],
+    },
+    {
+      id: "trust-passport-guarantee",
+      title: ["faq.trustGuarantee.q"],
+      body: [P("faq.trustGuarantee.p1"), P("faq.trustGuarantee.p2"), CALLOUT("faq.trustGuarantee.calloutText")],
+    },
+    // ── Charity & Impact ──
+    {
+      id: "charity-model",
+      title: ["faq.charityModel.q"],
+      body: [
+        H("faq.cat.charityImpact"),
+        P("faq.charityModel.p1Prefix", "faq.charityModel.p1Bold", "faq.charityModel.p1Suffix"),
+        P("faq.charityModel.p2"),
+        BULLETS(["faq.charityModel.item1"], ["faq.charityModel.item2"], ["faq.charityModel.item3"], ["faq.charityModel.item4"]),
+        CALLOUT("faq.charityModel.calloutBold", "faq.charityModel.calloutText"),
+      ],
+    },
+    {
+      id: "impact-badge",
+      title: ["faq.impactBadge.q"],
+      body: [P("faq.impactBadge.p1"), P("faq.impactBadge.note")],
+    },
+    // ── ZRP Market Plus ──
+    {
+      id: "what-is-market-plus",
+      title: ["faq.whatIsMarketPlus.q"],
+      body: [
+        H("faq.cat.marketPlus"),
+        P("faq.whatIsMarketPlus.p1Bold", "faq.whatIsMarketPlus.p1"),
+        P("faq.whatIsMarketPlus.p2"),
+        P("faq.whatIsMarketPlus.note"),
+      ],
+    },
+    {
+      id: "how-to-list-market",
+      title: ["faq.howToListMarket.q"],
+      body: [
+        P("faq.howToListMarket.intro"),
+        BULLETS(
+          ["faq.howToListMarket.step1"],
+          ["faq.howToListMarket.step2"],
+          ["faq.howToListMarket.step3"],
+          ["faq.howToListMarket.step4"],
+          ["faq.howToListMarket.step5"]
+        ),
+        P("faq.howToListMarket.note"),
+      ],
+    },
+    {
+      id: "market-plus-limits",
+      title: ["faq.marketLimits.q"],
+      body: [
+        P("faq.marketLimits.intro"),
+        BULLETS(
+          ["faq.marketLimits.freeLabel", ":", "faq.marketLimits.freeDesc"],
+          ["faq.marketLimits.proLabel", ":", "faq.marketLimits.proDesc"],
+          ["faq.marketLimits.businessLabel", ":", "faq.marketLimits.businessDesc"],
+          ["faq.marketLimits.enterpriseLabel", ":", "faq.marketLimits.enterpriseDesc"]
+        ),
+        P("faq.marketLimits.note"),
+      ],
+    },
+    {
+      id: "market-plus-moderation",
+      title: ["faq.marketModeration.q"],
+      body: [P("faq.marketModeration.p1"), P("faq.marketModeration.p2"), P("faq.marketModeration.note")],
+    },
+    {
+      id: "contact-seller-market",
+      title: ["faq.contactSeller.q"],
+      body: [P("faq.contactSeller.p1"), P("faq.contactSeller.p2")],
+    },
+    // ── Web3 & Digital ──
+    {
+      id: "web3-zrp",
+      title: ["faq.web3Zrp.q"],
+      body: [
+        H("faq.cat.web3Digital"),
+        P("faq.web3Zrp.p1"),
+        P("faq.web3Zrp.p2"),
+        P("faq.web3Zrp.p3"),
+        CALLOUT("faq.web3Zrp.calloutBold", "faq.web3Zrp.calloutText"),
+      ],
+    },
+    {
+      id: "digital-payments",
+      title: ["faq.digitalPayments.q"],
+      body: [P("faq.digitalPayments.p1"), P("faq.digitalPayments.p2"), P("faq.digitalPayments.p3"), P("faq.digitalPayments.note")],
+    },
+    {
+      id: "wallets",
+      title: ["faq.wallets.q"],
+      body: [
+        P("faq.wallets.p1"),
+        P("faq.wallets.p2"),
+        BULLETS(["faq.wallets.item1"], ["faq.wallets.item2"], ["faq.wallets.item3"], ["faq.wallets.item4"]),
+        CALLOUT("faq.wallets.warningBold", "faq.wallets.warningText"),
+      ],
+    },
+    {
+      id: "blockchain-transactions",
+      title: ["faq.blockchainTx.q"],
+      body: [P("faq.blockchainTx.p1"), P("faq.blockchainTx.p2"), P("faq.blockchainTx.note")],
+    },
+    {
+      id: "crypto-risk",
+      title: ["faq.cryptoRisk.q"],
+      body: [P("faq.cryptoRisk.p1"), P("faq.cryptoRisk.p2"), P("faq.cryptoRisk.note")],
+    },
+    {
+      id: "digital-identity",
+      title: ["faq.digitalIdentity.q"],
+      body: [P("faq.digitalIdentity.p1"), P("faq.digitalIdentity.p2"), P("faq.digitalIdentity.note")],
+    },
+    {
+      id: "zrp-token",
+      title: ["faq.zrpToken.q"],
+      body: [P("faq.zrpToken.p1"), P("faq.zrpToken.p2"), CALLOUT("faq.zrpToken.calloutBold", "faq.zrpToken.calloutText")],
+    },
+    // ── Administration ──
+    {
+      id: "admin-roles",
+      title: ["faq.adminRoles.q"],
+      body: [
+        H("faq.cat.administration"),
+        P("faq.adminRoles.p1"),
+        P("faq.adminRoles.userLabel", ":", "faq.adminRoles.userDesc"),
+        P("faq.adminRoles.modLabel", ":", "faq.adminRoles.modDesc"),
+        P("faq.adminRoles.adminLabel", ":", "faq.adminRoles.adminDesc"),
+        P("faq.adminRoles.note"),
+      ],
+    },
+    {
+      id: "verified-badge",
+      title: ["faq.verifiedBadge.q"],
+      body: [
+        BULLETS(
+          ["faq.verifiedBadge.verifiedLabel", ":", "faq.verifiedBadge.verifiedDesc"],
+          ["faq.verifiedBadge.orgLabel", ":", "faq.verifiedBadge.orgDesc"],
+          ["faq.verifiedBadge.govLabel", ":", "faq.verifiedBadge.govDesc"],
+          ["faq.verifiedBadge.teamLabel", ":", "faq.verifiedBadge.teamDesc"]
+        ),
+        CALLOUT("faq.verifiedBadge.calloutBold", "faq.verifiedBadge.calloutText"),
+        P("faq.verifiedBadge.note"),
+      ],
+    },
+    {
+      id: "enterprise-plan",
+      title: ["faq.enterprisePlan.q"],
+      body: [
+        P("faq.enterprisePlan.p1"),
+        BULLETS(
+          ["faq.enterprisePlan.item1"],
+          ["faq.enterprisePlan.item2"],
+          ["faq.enterprisePlan.item3"],
+          ["faq.enterprisePlan.item4"],
+          ["faq.enterprisePlan.item5"],
+          ["faq.enterprisePlan.item6"]
+        ),
+        P("faq.enterprisePlan.note"),
+      ],
+    },
+    // ── Support & Tickets ──
+    {
+      id: "support-tickets-faq",
+      title: ["faq.supportTickets.q"],
+      body: [
+        H("faq.cat.supportTickets"),
+        BULLETS(
+          ["faq.supportTickets.step1Prefix", "faq.supportTickets.step1Link", "faq.supportTickets.step1Suffix"],
+          ["faq.supportTickets.step2"],
+          ["faq.supportTickets.step3"],
+          ["faq.supportTickets.step4"],
+          ["faq.supportTickets.step5"]
+        ),
+        P("faq.supportTickets.note"),
+      ],
+    },
+    {
+      id: "track-support-tickets",
+      title: ["faq.trackTickets.q"],
+      body: [
+        BULLETS(
+          ["faq.trackTickets.step1Prefix", "faq.trackTickets.step1Link", "."],
+          ["faq.trackTickets.step2"],
+          ["faq.trackTickets.step3"],
+          ["faq.trackTickets.step4"]
+        ),
+      ],
+    },
+    {
+      id: "admin-ticket-management",
+      title: ["faq.adminTicketMgmt.q"],
+      body: [
+        P("faq.adminTicketMgmt.p1"),
+        BULLETS(
+          ["faq.adminTicketMgmt.item1"],
+          ["faq.adminTicketMgmt.item2"],
+          ["faq.adminTicketMgmt.item3"],
+          ["faq.adminTicketMgmt.item4"],
+          ["faq.adminTicketMgmt.item5"],
+          ["faq.adminTicketMgmt.item6"]
+        ),
+        P("faq.adminTicketMgmt.note"),
+      ],
+    },
+    {
+      id: "ticket-statuses",
+      title: ["faq.ticketStatuses.q"],
+      body: [
+        BULLETS(
+          ["OPEN", ":", "faq.ticketStatuses.openDesc"],
+          ["IN_PROGRESS", ":", "faq.ticketStatuses.inProgressDesc"],
+          ["AWAITING_REPLY", ":", "faq.ticketStatuses.awaitingReplyDesc"],
+          ["RESOLVED", ":", "faq.ticketStatuses.resolvedDesc"],
+          ["CLOSED", ":", "faq.ticketStatuses.closedDesc"]
+        ),
+      ],
+    },
+    // ── Legal & Account ──
+    {
+      id: "terms-faq",
+      title: ["faq.termsFaq.q"],
+      body: [
+        H("faq.cat.legalAccount"),
+        P("faq.termsFaq.p1Prefix", "faq.termsFaq.p1Link", "."),
+        P("faq.termsFaq.note"),
+      ],
+    },
+    {
+      id: "community-guidelines-faq",
+      title: ["faq.communityGuidelines.q"],
+      body: [P("faq.communityGuidelines.p1"), P("faq.communityGuidelines.p2")],
+    },
+    {
+      id: "account-suspension",
+      title: ["faq.accountSuspension.q"],
+      body: [
+        P("faq.accountSuspension.p1"),
+        P("faq.accountSuspension.p2"),
+        BULLETS(
+          ["faq.accountSuspension.item1"],
+          ["faq.accountSuspension.item2"],
+          ["faq.accountSuspension.item3"],
+          ["faq.accountSuspension.item4"],
+          ["faq.accountSuspension.item5"]
+        ),
+        P("faq.accountSuspension.note"),
+      ],
+    },
+    {
+      id: "appeal-moderation",
+      title: ["faq.appealModeration.q"],
+      body: [
+        P("faq.appealModeration.p1"),
+        BULLETS(
+          ["faq.appealModeration.step1"],
+          ["faq.appealModeration.step2"],
+          ["faq.appealModeration.step3"],
+          ["faq.appealModeration.step4"],
+          ["faq.appealModeration.step5"]
+        ),
+        P("faq.appealModeration.note"),
+      ],
+    },
+  ],
+};
+
 export const LEGAL_CONFIGS: Record<LegalPageId, PageConfig> = {
   terms: TERMS_CONFIG,
   privacy: PRIVACY_CONFIG,
@@ -1518,4 +2184,5 @@ export const LEGAL_CONFIGS: Record<LegalPageId, PageConfig> = {
   charity: CHARITY_CONFIG,
   press: PRESS_CONFIG,
   investors: INVESTORS_CONFIG,
+  faq: FAQ_CONFIG,
 };

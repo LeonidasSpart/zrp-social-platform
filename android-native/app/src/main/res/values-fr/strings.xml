@@ -1700,6 +1700,7 @@
     <string name="legal_charity">Charité</string>
     <string name="legal_press">Kit presse</string>
     <string name="legal_investors">Investisseurs</string>
+    <string name="legal_faq">FAQ</string>
     <string name="transparency_title">Transparence de la modération</string>
     <string name="transparency_privacy_note">Cette page n\'affiche que des totaux agrégés. Elle n\'inclut jamais de noms d\'utilisateur, de contenu de messages ou de publications, ni qui a signalé quoi: la confidentialité de la modération reste protégée comme toujours.</string>
     <string name="transparency_err_load">Impossible de charger les données de transparence pour le moment. Veuillez réessayer plus tard.</string>
