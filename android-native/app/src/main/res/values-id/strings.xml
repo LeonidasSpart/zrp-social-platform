@@ -1696,6 +1696,7 @@
     <string name="legal_help">Pusat Bantuan</string>
     <string name="legal_contact">Kontak</string>
     <string name="legal_about">Tentang ZRP</string>
+    <string name="legal_careers">Karier</string>
     <string name="legal_load_error">Halaman ini gagal dimuat. Periksa koneksi Anda dan coba lagi.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Bergabung</string>

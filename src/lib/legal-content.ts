@@ -23,7 +23,7 @@
  */
 import { Language, translations } from "@/lib/translations";
 
-export type LegalPageId = "terms" | "privacy" | "guidelines" | "help" | "contact" | "about";
+export type LegalPageId = "terms" | "privacy" | "guidelines" | "help" | "contact" | "about" | "careers";
 
 export const LEGAL_PAGE_IDS: LegalPageId[] = [
   "terms",
@@ -32,6 +32,7 @@ export const LEGAL_PAGE_IDS: LegalPageId[] = [
   "help",
   "contact",
   "about",
+  "careers",
 ];
 
 type CardItem = {
@@ -735,6 +736,58 @@ export const ABOUT_CONFIG: PageConfig = {
   ],
 };
 
+// ─── Careers (src/app/careers/page.tsx) ───────────────────────────────────
+// The hero's own two CTAs (mailto:careers@zrp.one, a link back to
+// /about) and the closing section's mailto button aren't reproduced as
+// tappable actions - matching CONTACT_CONFIG's own precedent, every
+// address here is plain informational text (LegalCardView's `meta`
+// lines render as plain Text, not a link) rather than a second,
+// divergent way to leave the app beyond LegalScreen's own "no link
+// back to zrp.one" design.
+export const CAREERS_CONFIG: PageConfig = {
+  title: ["careers.heroTitle1", "careers.heroTitle2"],
+  subtitle: ["careers.heroSubtitle"],
+  sections: [
+    {
+      id: "values",
+      title: ["careers.valuesHeading"],
+      body: [
+        CARDS(
+          card(["🗽", "careers.value1Title"], ["careers.value1Desc"]),
+          card(["🔒", "careers.value2Title"], ["careers.value2Desc"]),
+          card(["🧡", "careers.value3Title"], ["careers.value3Desc"]),
+        ),
+      ],
+    },
+    {
+      id: "open-positions",
+      title: ["careers.openPositionsHeading"],
+      body: [
+        CARDS(
+          card(["careers.noOpenRolesTitle"], ["careers.noOpenRolesDesc"], ["careers@zrp.one"]),
+        ),
+      ],
+    },
+    {
+      id: "what-we-look-for",
+      title: ["careers.lookingForHeading"],
+      body: [
+        BULLETS(
+          ["careers.lookFor1"],
+          ["careers.lookFor2"],
+          ["careers.lookFor3"],
+          ["careers.lookFor4"],
+        ),
+      ],
+    },
+    {
+      id: "closing",
+      title: ["careers.closingTitle"],
+      body: [P("careers.closingDesc"), CARDS(card([], undefined, ["careers@zrp.one"]))],
+    },
+  ],
+};
+
 // ─── Help Center (src/app/help/page.tsx sections, 01-17) ─────────────────
 
 function faqItems(count: number): { question: string[]; answer: string[] }[] {
@@ -1199,4 +1252,5 @@ export const LEGAL_CONFIGS: Record<LegalPageId, PageConfig> = {
   help: HELP_CONFIG,
   contact: CONTACT_CONFIG,
   about: ABOUT_CONFIG,
+  careers: CAREERS_CONFIG,
 };
