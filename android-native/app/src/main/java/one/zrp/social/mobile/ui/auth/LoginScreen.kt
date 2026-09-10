@@ -1,5 +1,6 @@
 package one.zrp.social.mobile.ui.auth
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -53,14 +54,20 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 fun LoginScreen(
     formState: LoginFormState,
     onLogin: (identifier: String, password: String) -> Unit,
-    onGoogleIdToken: (String) -> Unit,
+    onGoogleSignIn: (Context) -> Unit,
     onSignUp: () -> Unit,
     onForgotPassword: () -> Unit,
 ) {
     var identifier by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    val isSubmitting = formState is LoginFormState.Submitting
+    // Password and Google sign-in are distinct LoginFormState variants
+    // (see AuthViewModel's own comment) so each button's spinner
+    // reflects only the action it was actually asked to perform, while
+    // formBusy still disables the whole form during either.
+    val passwordSubmitting = formState is LoginFormState.Submitting
+    val googleSubmitting = formState is LoginFormState.SubmittingGoogle
+    val isSubmitting = passwordSubmitting || googleSubmitting
 
     Column(
         modifier = Modifier
@@ -143,6 +150,13 @@ fun LoginScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 12.dp),
             )
+        } else if (formState is LoginFormState.GoogleInterrupted) {
+            Text(
+                text = stringResource(R.string.auth_err_google_interrupted),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 12.dp),
+            )
         }
 
         Button(
@@ -154,7 +168,7 @@ fun LoginScreen(
                 .padding(top = 24.dp)
                 .height(50.dp),
         ) {
-            if (isSubmitting) {
+            if (passwordSubmitting) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
                     color = MaterialTheme.colorScheme.onPrimary,
@@ -176,7 +190,7 @@ fun LoginScreen(
             modifier = Modifier.padding(top = 16.dp),
         )
 
-        GoogleSignInButton(enabled = !isSubmitting, onIdToken = onGoogleIdToken)
+        GoogleSignInButton(enabled = !isSubmitting, loading = googleSubmitting, onClick = onGoogleSignIn)
 
         Row(modifier = Modifier.padding(top = 16.dp)) {
             Text(

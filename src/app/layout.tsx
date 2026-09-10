@@ -13,6 +13,7 @@ import NativeAppBridge from "@/components/NativeAppBridge";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { UnreadCountProvider } from "@/contexts/UnreadCountContext";
+import { PresenceProvider } from "@/contexts/PresenceContext";
 import PageTransition from "@/components/PageTransition";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
@@ -349,6 +350,7 @@ export default function RootLayout({
                   >
                     <AuthProvider>
                       <UnreadCountProvider>
+                      <PresenceProvider>
                         <GoogleAnalytics />
                         <NativeAppBridge />
 
@@ -379,6 +381,7 @@ export default function RootLayout({
                         <ServiceWorkerRegistration />
 
                         <BottomNav />
+                      </PresenceProvider>
                       </UnreadCountProvider>
                     </AuthProvider>
                   </Suspense>

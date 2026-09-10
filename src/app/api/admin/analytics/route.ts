@@ -21,24 +21,41 @@ export async function GET(req: NextRequest) {
     ]);
 
     // ─── 2. Daily stats (last 30 days) ──────────────────────────────
+    // Two real bugs fixed here:
+    // 1. The old query unioned all 5 tables into one bare `id` column
+    //    with no source-table tag, then ran the identical
+    //    COUNT(DISTINCT CASE WHEN ...) expression for all 5 output
+    //    columns - so every row's users/posts/comments/likes/reposts
+    //    values were mathematically guaranteed to be equal (all just
+    //    "total rows that day across every table combined", repeated
+    //    5 times). A `source` column carried through the UNION and a
+    //    conditional COUNT per source is what actually produces 5
+    //    independent per-type counts.
+    // 2. Postgres COUNT() returns bigint, which Prisma's $queryRaw
+    //    surfaces as a JS BigInt - and JSON.stringify (inside
+    //    NextResponse.json below) throws "Do not know how to
+    //    serialize a BigInt" on that, which this route's own
+    //    try/catch was swallowing into a plain 500 any time there was
+    //    real activity in the last 30 days. Casting each COUNT to
+    //    ::int keeps it a normal number the whole way through.
     const dailyStats = await prisma.$queryRaw`
       SELECT
         DATE("createdAt") as date,
-        COUNT(DISTINCT CASE WHEN "createdAt" >= ${thirtyDaysAgo} THEN id END) as users,
-        COUNT(DISTINCT CASE WHEN "createdAt" >= ${thirtyDaysAgo} THEN id END) as posts,
-        COUNT(DISTINCT CASE WHEN "createdAt" >= ${thirtyDaysAgo} THEN id END) as comments,
-        COUNT(DISTINCT CASE WHEN "createdAt" >= ${thirtyDaysAgo} THEN id END) as likes,
-        COUNT(DISTINCT CASE WHEN "createdAt" >= ${thirtyDaysAgo} THEN id END) as reposts
+        COUNT(*) FILTER (WHERE source = 'user')::int as users,
+        COUNT(*) FILTER (WHERE source = 'post')::int as posts,
+        COUNT(*) FILTER (WHERE source = 'comment')::int as comments,
+        COUNT(*) FILTER (WHERE source = 'like')::int as likes,
+        COUNT(*) FILTER (WHERE source = 'repost')::int as reposts
       FROM (
-        SELECT id, "createdAt" FROM "User" WHERE "createdAt" >= ${thirtyDaysAgo}
+        SELECT id, "createdAt", 'user' as source FROM "User" WHERE "createdAt" >= ${thirtyDaysAgo}
         UNION ALL
-        SELECT id, "createdAt" FROM "Post" WHERE "createdAt" >= ${thirtyDaysAgo}
+        SELECT id, "createdAt", 'post' as source FROM "Post" WHERE "createdAt" >= ${thirtyDaysAgo}
         UNION ALL
-        SELECT id, "createdAt" FROM "Comment" WHERE "createdAt" >= ${thirtyDaysAgo}
+        SELECT id, "createdAt", 'comment' as source FROM "Comment" WHERE "createdAt" >= ${thirtyDaysAgo}
         UNION ALL
-        SELECT id, "createdAt" FROM "Like" WHERE "createdAt" >= ${thirtyDaysAgo}
+        SELECT id, "createdAt", 'like' as source FROM "Like" WHERE "createdAt" >= ${thirtyDaysAgo}
         UNION ALL
-        SELECT id, "createdAt" FROM "Repost" WHERE "createdAt" >= ${thirtyDaysAgo}
+        SELECT id, "createdAt", 'repost' as source FROM "Repost" WHERE "createdAt" >= ${thirtyDaysAgo}
       ) t
       GROUP BY DATE("createdAt")
       ORDER BY date ASC

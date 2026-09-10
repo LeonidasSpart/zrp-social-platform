@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.media.MediaRecorder
 import android.net.Uri
-import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -110,6 +109,7 @@ import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
+import one.zrp.social.mobile.util.queryFileNameAndSize
 
 /**
  * A single conversation - real message history and real sending
@@ -367,25 +367,31 @@ fun ConversationScreen(
                     }
                     // Matches ChatInterface.tsx's own header status row - a
                     // "Typing..." indicator (from the real "user-typing" socket
-                    // event) takes priority over the live/offline connection
-                    // dot, exactly like web's own receiverTyping-vs-socketConnected
-                    // conditional.
+                    // event) takes priority over the presence dot, exactly like
+                    // web's own receiverTyping-vs-presence conditional. The dot
+                    // itself is real per-partner presence (server.js's own
+                    // userStatus Map, via "user-status"/"get-status") - not
+                    // this device's own socket connection state, which is what
+                    // it showed before. Only rendered once a real answer has
+                    // actually been heard for partnerId (partnerStatusKnown),
+                    // rather than defaulting to a misleading "offline" the
+                    // instant the screen opens.
                     if (state.partnerTyping) {
                         Text(
                             text = stringResource(R.string.chat_typing),
                             style = MaterialTheme.typography.labelSmall,
                             color = ZrpRed,
                         )
-                    } else {
+                    } else if (state.partnerStatusKnown) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
                                     .size(6.dp)
                                     .clip(CircleShape)
-                                    .background(if (state.socketConnected) Color(0xFF22C55E) else Color(0xFFEF4444)),
+                                    .background(if (state.partnerOnline) Color(0xFF22C55E) else Color(0xFF9CA3AF)),
                             )
                             Text(
-                                text = stringResource(if (state.socketConnected) R.string.chat_live else R.string.chat_offline),
+                                text = stringResource(if (state.partnerOnline) R.string.chat_live else R.string.chat_offline),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(start = 4.dp),
@@ -975,20 +981,6 @@ private fun ChatFileRow(url: String, fileName: String, isOwnMessage: Boolean) {
             modifier = Modifier.size(16.dp),
         )
     }
-}
-
-private fun queryFileNameAndSize(contentResolver: android.content.ContentResolver, uri: android.net.Uri): Pair<String, Long> {
-    var name = "upload"
-    var size = 0L
-    contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
-        if (cursor.moveToFirst()) {
-            if (nameIndex >= 0) name = cursor.getString(nameIndex) ?: name
-            if (sizeIndex >= 0) size = cursor.getLong(sizeIndex)
-        }
-    }
-    return name to size
 }
 
 // The corner nearest the sender's own side of the screen stays sharp -

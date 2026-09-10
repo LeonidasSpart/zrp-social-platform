@@ -110,9 +110,10 @@ import one.zrp.social.mobile.util.ViewedPostsTracker
 import one.zrp.social.mobile.util.formatCount
 import one.zrp.social.mobile.util.formatRelativeTime
 import one.zrp.social.mobile.util.parseIsoMillis
+import one.zrp.social.mobile.util.pollOptionFraction
+import one.zrp.social.mobile.util.pollOptionPercentage
 import java.text.DateFormat
 import java.util.Locale
-import kotlin.math.roundToInt
 
 // The exact same video-vs-image heuristic PostCard.tsx itself uses
 // (mediaType, URL extension, and URL path patterns together, since
@@ -1111,7 +1112,7 @@ private fun PollBlock(poll: Poll, onVote: (Int) -> Unit, modifier: Modifier = Mo
         ) {
             poll.options.forEachIndexed { index, label ->
                 val count = poll.voteCount(index)
-                val percentage = if (totalVotes > 0) ((count * 100f) / totalVotes).roundToInt() else 0
+                val percentage = pollOptionPercentage(count, totalVotes)
                 PollOptionRow(
                     label = label,
                     percentage = percentage,
@@ -1193,7 +1194,7 @@ private fun PollOptionRow(
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .fillMaxWidth(fraction = (percentage / 100f).coerceIn(0f, 1f))
+                    .fillMaxWidth(fraction = pollOptionFraction(percentage))
                     .background(ZrpBlue.copy(alpha = 0.12f)),
             )
         }

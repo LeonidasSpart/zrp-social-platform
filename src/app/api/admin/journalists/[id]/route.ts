@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { invalidateUserAuthState } from "@/lib/auth-state";
 import { syncJournalistBadge } from "@/lib/journalist";
 import { logAdminAction } from "@/lib/audit-log";
 
@@ -142,6 +143,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       }),
       prisma.user.update({ where: { id: userId }, data: { role: newRole } }),
     ]);
+    invalidateUserAuthState(userId);
 
     await syncJournalistBadge(userId, newStatus);
 

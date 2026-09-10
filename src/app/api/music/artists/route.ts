@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { isTrustedUploadUrl, UPLOAD_ONLY_ERROR } from "@/lib/media-url";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,22 @@ export async function POST(req: NextRequest) {
   if ("bio" in body) profileUpdate.bio = body.bio || null;
   if ("avatarUrl" in body) profileUpdate.avatarUrl = body.avatarUrl || null;
   if ("bannerUrl" in body) profileUpdate.bannerUrl = body.bannerUrl || null;
+
+  // ⚠️ SECURITY: an artist's avatar/banner is rendered on every artist
+  // page, so a NEW value must come from ZRP's own upload storage (the
+  // Artist Profile tab uploads through the avatar/banner UploadThing
+  // routes). Re-sending the value already stored is accepted unchanged.
+  // See src/lib/media-url.ts.
+  const current = await prisma.musicArtist.findUnique({
+    where: { userId: session.user.id },
+    select: { avatarUrl: true, bannerUrl: true },
+  });
+  for (const field of ["avatarUrl", "bannerUrl"] as const) {
+    const next = profileUpdate[field];
+    if (next && next !== current?.[field] && !isTrustedUploadUrl(next)) {
+      return NextResponse.json({ error: UPLOAD_ONLY_ERROR }, { status: 400 });
+    }
+  }
 
   const artist = await prisma.musicArtist.upsert({
     where: { userId: session.user.id },

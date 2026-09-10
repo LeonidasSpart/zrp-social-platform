@@ -63,6 +63,17 @@ jobs:
           GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
         run: ./gradlew assembleDebug --no-daemon "-PGOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID"
 
+      # JVM unit tests (src/test) - pure-Kotlin logic like PollMath.kt's
+      # vote/percentage math that doesn't need an emulator. assembleDebug
+      # above does NOT run these (it only compiles the main source set),
+      # so without this step a broken test file would silently sit in
+      # the repo unverified.
+      - name: Run unit tests
+        working-directory: android-native
+        env:
+          GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+        run: ./gradlew testDebugUnitTest --no-daemon "-PGOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID"
+
       # The debug build now signs with the checked-in android-native/
       # debug.keystore (see build.gradle's own comment) specifically so
       # this fingerprint is STABLE across every run - unlike Gradle's
@@ -89,6 +100,16 @@ jobs:
   release:
     name: Build release AAB
     runs-on: ubuntu-latest
+    # ⚠️ SECURITY: the release (signing) job runs ONLY for trusted
+    # triggers - a push to main or a manual workflow_dispatch - never
+    # for a pull_request. GitHub withholds repository secrets from PRs
+    # opened from a fork, but a PR from a branch in this same repository
+    # receives them, and this job used to run for every such PR: anyone
+    # able to open a same-repo PR could have modified this workflow (or
+    # the Gradle files it invokes) in that same PR to exfiltrate the
+    # production upload keystore. PRs still get the full debug-APK build
+    # job above as their end-to-end check.
+    if: github.event_name != 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -175,6 +196,43 @@ jobs:
             echo "Release signing: CONFIGURED - this .aab is signed."
           else
             echo "::warning::Release signing NOT configured or the provided secrets failed validation - this .aab is UNSIGNED. Do not upload it to Google Play Console."
+          fi
+
+      # Reads the versionCode/versionName/applicationId Gradle actually
+      # embedded in the built bundle's manifest, rather than trusting that
+      # build.gradle's source values made it through unchanged. bundletool
+      # is Google's own tool for inspecting an .aab (an .aab's manifest is
+      # binary AXML inside a zip of per-module protobuf, so plain
+      # `aapt2 dump badging` - which only understands APKs - can't read it
+      # directly). Pinned to a fixed release so this step's behavior
+      # doesn't shift under an unrelated build. applicationId is asserted
+      # against the one Play Store listing both android/ and android-native/
+      # ship under (see app/build.gradle's own comment) - it must never
+      # silently change; versionCode/versionName are printed, not
+      # asserted, since the correct value is different on every release.
+      - name: Verify release AAB contents (versionCode/versionName/applicationId)
+        run: |
+          BUNDLETOOL_VERSION="1.15.6"
+          curl -fsSL -o "$RUNNER_TEMP/bundletool.jar" \
+            "https://github.com/google/bundletool/releases/download/${BUNDLETOOL_VERSION}/bundletool-all-${BUNDLETOOL_VERSION}.jar"
+
+          AAB_PATH="android-native/app/build/outputs/bundle/release/app-release.aab"
+          java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle="$AAB_PATH" > "$RUNNER_TEMP/manifest_dump.xml"
+
+          echo "── Decoded AndroidManifest.xml from the built .aab ──"
+          cat "$RUNNER_TEMP/manifest_dump.xml"
+
+          APP_ID=$(grep -oE 'package="[^"]*"' "$RUNNER_TEMP/manifest_dump.xml" | head -1 | cut -d'"' -f2)
+          VERSION_CODE=$(grep -oE 'versionCode="[^"]*"' "$RUNNER_TEMP/manifest_dump.xml" | head -1 | cut -d'"' -f2)
+          VERSION_NAME=$(grep -oE 'versionName="[^"]*"' "$RUNNER_TEMP/manifest_dump.xml" | head -1 | cut -d'"' -f2)
+
+          echo "applicationId=$APP_ID"
+          echo "versionCode=$VERSION_CODE"
+          echo "versionName=$VERSION_NAME"
+
+          if [ "$APP_ID" != "one.zrp.social" ]; then
+            echo "::error::Built .aab has applicationId '$APP_ID', expected 'one.zrp.social' - this would not update the existing Play Store listing."
+            exit 1
           fi
 
       # A certificate's SHA-256 fingerprint is the public half of the

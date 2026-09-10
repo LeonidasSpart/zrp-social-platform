@@ -95,7 +95,19 @@ jobs:
       #
       # Never echo $ANDROID_KEYSTORE_BASE64, the passwords, or the
       # decoded keystore's contents anywhere in this script.
+      #
+      # ⚠️ SECURITY: signing runs ONLY for trusted triggers - a push to
+      # main or a manual workflow_dispatch - never for a pull_request.
+      # GitHub does withhold repository secrets from PRs opened from a
+      # fork, but a PR from a branch in this same repository receives
+      # them, and this step used to run for every such PR: anyone able
+      # to open a same-repo PR could have modified this workflow (or the
+      # Gradle files it invokes) in that same PR to exfiltrate the
+      # production upload keystore. PR builds still run everything
+      # else - type check, web build, Capacitor sync, an UNSIGNED .aab -
+      # so they remain a real end-to-end check of the pipeline.
       - name: Configure release signing
+        if: github.event_name != 'pull_request'
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}

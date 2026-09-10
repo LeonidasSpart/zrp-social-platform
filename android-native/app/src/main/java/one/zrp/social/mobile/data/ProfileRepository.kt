@@ -17,9 +17,11 @@ import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.PinToggleResponse
 import one.zrp.social.mobile.network.PollVoteRequest
 import one.zrp.social.mobile.network.PollVoteResponse
+import one.zrp.social.mobile.network.PostStatsTotals
 import one.zrp.social.mobile.network.RepliesPage
 import one.zrp.social.mobile.network.RepostResponse
 import one.zrp.social.mobile.network.UpdatePostRequest
+import one.zrp.social.mobile.network.UserPostStats
 import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.network.buildFileMultipart
 import one.zrp.social.mobile.network.zrpErrorMessage
@@ -77,6 +79,20 @@ class ProfileRepository {
     suspend fun getUserReposts(username: String, cursor: String?): Result<PostsPage> = runCatching {
         val page = ApiClient.usersApi.getUserReposts(username, cursor)
         PostsPage(posts = page.items ?: emptyList(), nextCursor = page.nextCursor)
+    }
+
+    // The Analytics tab's own data. Session-scoped, so it takes no
+    // username: the route derives the author from the signed-in
+    // session, which is why the tab is own-profile-only on native
+    // exactly as it is on web (page.tsx's visibleTabs filter). The
+    // envelope's two fields are nullable on the wire, so an empty
+    // response degrades to "no posts to analyse" rather than crashing.
+    suspend fun getOwnPostStats(): Result<UserPostStats> = runCatching {
+        val response = ApiClient.usersApi.getOwnPostStats()
+        UserPostStats(
+            posts = response.posts ?: emptyList(),
+            totals = response.totalStats ?: PostStatsTotals(0, 0, 0, 0),
+        )
     }
 
     suspend fun toggleFollow(username: String): Result<FollowToggleResponse> = runCatching {

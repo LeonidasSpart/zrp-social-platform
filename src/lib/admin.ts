@@ -1,7 +1,7 @@
 import { getServerSession, type Session } from "next-auth";
 import { authOptions } from "./auth";
 import { NextResponse } from "next/server";
-import { prisma } from "./db";
+import { getUserAuthState, isAdminState, isModeratorState } from "./auth-state";
 
 // Explicit discriminated union return type. Without this, TypeScript
 // widens the `authorized: true/false` literals to plain `boolean` on
@@ -13,74 +13,51 @@ type AdminCheckResult =
   | { authorized: true; session: Session }
   | { authorized: false; response: NextResponse };
 
-export async function requireAdmin(): Promise<AdminCheckResult> {
+// ⚠️ SECURITY: these used to trust session.user.role / session.user.isAdmin
+// FIRST and only fall back to the database when the session had no role.
+// Those session claims are a snapshot from when the JWT was minted, so an
+// admin demoted in the database kept passing every admin check until
+// their token happened to be re-issued - never, for a native-app token.
+// Every check below now asks the database (uncached - admin traffic is
+// tiny and a demotion must land on the very next request) and treats the
+// session purely as proof of identity. The exported names and result
+// shape are unchanged so no admin route needs to change.
+
+async function checkRole(allowed: (state: Awaited<ReturnType<typeof getUserAuthState>>) => boolean): Promise<AdminCheckResult> {
   const session = await getServerSession(authOptions);
-  if (!session?.user) {
+  if (!session?.user?.id) {
     return { authorized: false, response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
 
-  // Check session first (if role is present)
-  if (session.user.role === "ADMIN") {
-    return { authorized: true, session };
-  }
-  if (session.user.isAdmin) {
-    return { authorized: true, session };
+  const state = await getUserAuthState(session.user.id, { fresh: true });
+  if (!state.exists || state.banned) {
+    return { authorized: false, response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
 
-  // Fallback: check DB (in case session doesn't have role)
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { role: true },
-  });
-  if (user?.role === "ADMIN") {
+  if (allowed(state)) {
     return { authorized: true, session };
   }
 
   return { authorized: false, response: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
+}
+
+export async function requireAdmin(): Promise<AdminCheckResult> {
+  return checkRole(isAdminState);
 }
 
 /**
  * Non-throwing admin check for routes that mix "owner OR admin" logic
  * (e.g. support tickets) rather than gating the whole route on admin
- * access. Applies the same role/isAdmin/DB-fallback checks as
- * requireAdmin(), so a route using this can't silently disagree with
- * the rest of the app about who counts as an admin - e.g. a session
- * whose JWT hasn't refreshed yet after a role change.
+ * access. Same authoritative database check as requireAdmin(), so a
+ * route using this can't silently disagree with the rest of the app
+ * about who counts as an admin.
  */
 export async function isSessionAdmin(session: Session | null | undefined): Promise<boolean> {
-  if (!session?.user) return false;
-
-  if (session.user.role === "ADMIN") return true;
-  if (session.user.isAdmin) return true;
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { role: true },
-  });
-
-  return user?.role === "ADMIN";
+  if (!session?.user?.id) return false;
+  const state = await getUserAuthState(session.user.id, { fresh: true });
+  return isAdminState(state);
 }
 
 export async function requireStaff(): Promise<AdminCheckResult> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return { authorized: false, response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
-  }
-
-  if (session.user.role === "ADMIN" || session.user.role === "MODERATOR") {
-    return { authorized: true, session };
-  }
-  if (session.user.isAdmin) {
-    return { authorized: true, session };
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { role: true },
-  });
-  if (user?.role === "ADMIN" || user?.role === "MODERATOR") {
-    return { authorized: true, session };
-  }
-
-  return { authorized: false, response: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
+  return checkRole(isModeratorState);
 }

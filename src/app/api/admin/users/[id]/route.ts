@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { invalidateUserAuthState } from "@/lib/auth-state";
 import { Role } from "@prisma/client";
 import { deleteUploadThingFiles } from "@/lib/uploadthing";
 import { logAdminAction } from "@/lib/audit-log";
@@ -56,6 +57,10 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
         },
       },
     });
+
+    // Role/isAdmin changed: make it take effect on this instance now,
+    // not at the end of the auth-state cache window.
+    invalidateUserAuthState(params.id);
 
     await logAdminAction({
       actor: adminCheck.session,

@@ -4,7 +4,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { isSessionAdmin } from "@/lib/admin";
 import { logAdminAction } from "@/lib/audit-log";
-import { deleteUploadThingKeys, extractUploadThingKey } from "@/lib/uploadthing";
+import { extractUploadThingKey } from "@/lib/uploadthing";
+import { deleteUploadsIfUnreferenced } from "@/lib/upload-ownership";
+import { isTrustedUploadUrl, UPLOAD_ONLY_ERROR } from "@/lib/media-url";
 
 export const dynamic = "force-dynamic";
 
@@ -53,7 +55,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const { id } = await params;
   const album = await prisma.musicAlbum.findUnique({
     where: { id },
-    select: { id: true, artist: { select: { userId: true } } },
+    select: { id: true, coverUrl: true, artist: { select: { userId: true } } },
   });
   if (!album) return NextResponse.json({ error: "Album not found" }, { status: 404 });
   if (album.artist.userId !== session.user.id) {
@@ -72,8 +74,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     data.description = body.description === null ? null : String(body.description).trim().slice(0, DESCRIPTION_MAX);
   }
   if (body.coverUrl !== undefined) {
-    data.coverUrl = body.coverUrl === null ? null : String(body.coverUrl);
-    data.coverKey = body.coverKey ? String(body.coverKey) : extractUploadThingKey(data.coverUrl as string | null);
+    // ⚠️ SECURITY: a NEW cover must come from ZRP's own upload storage;
+    // re-sending the cover already stored is accepted unchanged. The
+    // key is derived server-side, never taken from the client (see
+    // src/lib/upload-ownership.ts).
+    const coverUrl = body.coverUrl === null ? null : String(body.coverUrl);
+    if (coverUrl && coverUrl !== album.coverUrl && !isTrustedUploadUrl(coverUrl)) {
+      return NextResponse.json({ error: UPLOAD_ONLY_ERROR }, { status: 400 });
+    }
+    data.coverUrl = coverUrl;
+    data.coverKey = extractUploadThingKey(coverUrl);
   }
   if (body.releaseDate !== undefined) {
     data.releaseDate = body.releaseDate ? new Date(body.releaseDate) : null;
@@ -121,19 +131,11 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     prisma.musicAlbum.delete({ where: { id } }),
   ]);
 
-  // Album artwork is only deleted from storage if nothing else - a
-  // track that reused the same artwork, most commonly - still
-  // references it. Never blind-deleted.
-  const coverKey = album.coverKey || extractUploadThingKey(album.coverUrl);
-  if (coverKey && album.coverUrl) {
-    const [otherAlbum, otherTrack] = await Promise.all([
-      prisma.musicAlbum.findFirst({ where: { coverUrl: album.coverUrl }, select: { id: true } }),
-      prisma.musicTrack.findFirst({ where: { coverUrl: album.coverUrl }, select: { id: true } }),
-    ]);
-    if (!otherAlbum && !otherTrack) {
-      await deleteUploadThingKeys([coverKey]);
-    }
-  }
+  // ⚠️ SECURITY: artwork is only deleted from storage if NOTHING in the
+  // database still references it - a track reusing the same artwork,
+  // or any other record anywhere (see src/lib/upload-ownership.ts).
+  // Never blind-deleted.
+  await deleteUploadsIfUnreferenced([album.coverKey || album.coverUrl]);
 
   if (!isOwner) {
     await logAdminAction({

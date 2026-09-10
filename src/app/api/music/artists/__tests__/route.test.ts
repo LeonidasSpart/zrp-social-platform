@@ -57,8 +57,8 @@ describe.skipIf(!hasRealDatabaseUrl)(
           userId,
           displayName: "Original Name",
           bio: "Original bio",
-          avatarUrl: "https://cdn.example/original-avatar.png",
-          bannerUrl: "https://cdn.example/original-banner.png",
+          avatarUrl: "https://utfs.io/f/original-avatar.png",
+          bannerUrl: "https://utfs.io/f/original-banner.png",
         },
       });
     }
@@ -94,8 +94,8 @@ describe.skipIf(!hasRealDatabaseUrl)(
       const body = await res.json();
       expect(body.displayName).toBe("New Name");
       expect(body.bio).toBe("Original bio");
-      expect(body.avatarUrl).toBe("https://cdn.example/original-avatar.png");
-      expect(body.bannerUrl).toBe("https://cdn.example/original-banner.png");
+      expect(body.avatarUrl).toBe("https://utfs.io/f/original-avatar.png");
+      expect(body.bannerUrl).toBe("https://utfs.io/f/original-banner.png");
     });
 
     it("TEST 3: an explicit bio update applies, leaving avatar/banner untouched", async () => {
@@ -106,8 +106,8 @@ describe.skipIf(!hasRealDatabaseUrl)(
       const res = await POST(req({ bio: "Updated bio" }));
       const body = await res.json();
       expect(body.bio).toBe("Updated bio");
-      expect(body.avatarUrl).toBe("https://cdn.example/original-avatar.png");
-      expect(body.bannerUrl).toBe("https://cdn.example/original-banner.png");
+      expect(body.avatarUrl).toBe("https://utfs.io/f/original-avatar.png");
+      expect(body.bannerUrl).toBe("https://utfs.io/f/original-banner.png");
     });
 
     it("TEST 4: an explicit avatar update applies, leaving bio/banner untouched", async () => {
@@ -115,11 +115,11 @@ describe.skipIf(!hasRealDatabaseUrl)(
       await createArtistWithProfile(user.id);
       getServerSession.mockResolvedValueOnce(sessionFor(user.id));
 
-      const res = await POST(req({ avatarUrl: "https://cdn.example/new-avatar.png" }));
+      const res = await POST(req({ avatarUrl: "https://utfs.io/f/new-avatar.png" }));
       const body = await res.json();
-      expect(body.avatarUrl).toBe("https://cdn.example/new-avatar.png");
+      expect(body.avatarUrl).toBe("https://utfs.io/f/new-avatar.png");
       expect(body.bio).toBe("Original bio");
-      expect(body.bannerUrl).toBe("https://cdn.example/original-banner.png");
+      expect(body.bannerUrl).toBe("https://utfs.io/f/original-banner.png");
     });
 
     it("TEST 5: an explicit banner update applies, leaving bio/avatar untouched", async () => {
@@ -127,11 +127,11 @@ describe.skipIf(!hasRealDatabaseUrl)(
       await createArtistWithProfile(user.id);
       getServerSession.mockResolvedValueOnce(sessionFor(user.id));
 
-      const res = await POST(req({ bannerUrl: "https://cdn.example/new-banner.png" }));
+      const res = await POST(req({ bannerUrl: "https://utfs.io/f/new-banner.png" }));
       const body = await res.json();
-      expect(body.bannerUrl).toBe("https://cdn.example/new-banner.png");
+      expect(body.bannerUrl).toBe("https://utfs.io/f/new-banner.png");
       expect(body.bio).toBe("Original bio");
-      expect(body.avatarUrl).toBe("https://cdn.example/original-avatar.png");
+      expect(body.avatarUrl).toBe("https://utfs.io/f/original-avatar.png");
     });
 
     it("an explicit null still clears a field (Artist Profile settings clearing bio)", async () => {
@@ -139,11 +139,11 @@ describe.skipIf(!hasRealDatabaseUrl)(
       await createArtistWithProfile(user.id);
       getServerSession.mockResolvedValueOnce(sessionFor(user.id));
 
-      const res = await POST(req({ bio: null, avatarUrl: "https://cdn.example/original-avatar.png", bannerUrl: "https://cdn.example/original-banner.png" }));
+      const res = await POST(req({ bio: null, avatarUrl: "https://utfs.io/f/original-avatar.png", bannerUrl: "https://utfs.io/f/original-banner.png" }));
       const body = await res.json();
       expect(body.bio).toBeNull();
-      expect(body.avatarUrl).toBe("https://cdn.example/original-avatar.png");
-      expect(body.bannerUrl).toBe("https://cdn.example/original-banner.png");
+      expect(body.avatarUrl).toBe("https://utfs.io/f/original-avatar.png");
+      expect(body.bannerUrl).toBe("https://utfs.io/f/original-banner.png");
     });
 
     it("TEST 7: reproduces the web Music publish flow's request shape (displayName only, or none at all)", async () => {
@@ -157,8 +157,8 @@ describe.skipIf(!hasRealDatabaseUrl)(
       const res = await POST(req({}));
       const body = await res.json();
       expect(body.bio).toBe("Original bio");
-      expect(body.avatarUrl).toBe("https://cdn.example/original-avatar.png");
-      expect(body.bannerUrl).toBe("https://cdn.example/original-banner.png");
+      expect(body.avatarUrl).toBe("https://utfs.io/f/original-avatar.png");
+      expect(body.bannerUrl).toBe("https://utfs.io/f/original-banner.png");
     });
 
     it("TEST 8: reproduces the web album-creation flow's request shape (empty body)", async () => {
@@ -170,8 +170,8 @@ describe.skipIf(!hasRealDatabaseUrl)(
       const res = await POST(req({}));
       const body = await res.json();
       expect(body.bio).toBe("Original bio");
-      expect(body.avatarUrl).toBe("https://cdn.example/original-avatar.png");
-      expect(body.bannerUrl).toBe("https://cdn.example/original-banner.png");
+      expect(body.avatarUrl).toBe("https://utfs.io/f/original-avatar.png");
+      expect(body.bannerUrl).toBe("https://utfs.io/f/original-banner.png");
     });
 
     it("TEST 9: still rejects unauthenticated requests, and never touches the database", async () => {

@@ -66,6 +66,13 @@ fun SignupScreen(authViewModel: AuthViewModel, onSignIn: () -> Unit) {
         factory = remember(authViewModel) { SignupViewModelFactory(AuthRepository(), authViewModel) },
     )
     val state by viewModel.state.collectAsState()
+    // Google sign-up shares AuthViewModel's own loginForm (not
+    // SignupViewModel's state) - it's the exact same find-or-create
+    // flow LoginScreen's Google button drives, so it must show the same
+    // Submitting/Error behavior LoginScreen does, independent of this
+    // screen's own password-registration submit state.
+    val googleForm by authViewModel.loginForm.collectAsState()
+    val googleSubmitting = googleForm is LoginFormState.SubmittingGoogle
     var passwordVisible by remember { mutableStateOf(false) }
 
     val registeredEmail = state.registeredEmail
@@ -237,9 +244,19 @@ fun SignupScreen(authViewModel: AuthViewModel, onSignIn: () -> Unit) {
         )
 
         GoogleSignInButton(
-            enabled = !state.isSubmitting,
-            onIdToken = { idToken -> authViewModel.loginWithGoogle(idToken) },
+            enabled = !state.isSubmitting && !googleSubmitting,
+            loading = googleSubmitting,
+            onClick = { context -> authViewModel.loginWithGoogle(context) },
         )
+
+        if (googleForm is LoginFormState.Error) {
+            Text(
+                text = (googleForm as LoginFormState.Error).message,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
 
         Row(modifier = Modifier.padding(top = 16.dp)) {
             Text(

@@ -293,6 +293,17 @@ export default function ShortsPage() {
   const [muted, setMuted] =
     useState(true);
 
+  // Per-Short, so scrolling to the next one starts collapsed again and
+  // an expanded caption never leaks across slides.
+  const [captionExpanded, setCaptionExpanded] =
+    useState<Record<string, boolean>>({});
+
+  const toggleCaption = (postId: string) =>
+    setCaptionExpanded((prev) => ({
+      ...prev,
+      [postId]: !prev[postId],
+    }));
+
   const [
     activeIndex,
     setActiveIndex,
@@ -1208,7 +1219,13 @@ export default function ShortsPage() {
                   key={
                     post.id
                   }
-                  className="relative h-full w-full snap-start snap-always flex items-center justify-center"
+                  // Centred in what is actually visible: the top chrome
+                  // (back/title/mute) and BottomNav both overlay this
+                  // slide, so centring in the full height pushed the
+                  // frame down behind the nav and left a dead band under
+                  // the header. object-contain below still preserves the
+                  // aspect ratio for portrait, landscape and square.
+                  className="relative h-full w-full snap-start snap-always flex items-center justify-center pt-16 pb-[calc(3.5rem+env(safe-area-inset-bottom))]"
                 >
 
                   {/* REAL VIDEO ONLY */}
@@ -1337,7 +1354,15 @@ export default function ShortsPage() {
                   )}
 
                   {/* BOTTOM OVERLAY */}
-                  <div className="absolute inset-x-0 bottom-0 p-4 pb-8 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
+                  {/* BottomNav is a portal at z-[9999] - above this
+                      z-[100] overlay - so it paints on top of whatever
+                      lands in the bottom strip. pb-8 (32px) was less
+                      than its real footprint (h-14 = 56px plus its own
+                      safe-area inset), which is why the author row was
+                      cut in half by it on a real phone. Reserving the
+                      actual footprint fixes the author line and the
+                      action rail together, without hiding BottomNav. */}
+                  <div className="absolute inset-x-0 bottom-0 p-4 pb-[calc(3.5rem+env(safe-area-inset-bottom)+1rem)] bg-gradient-to-t from-black/70 via-black/20 to-transparent">
 
                     <div className="flex items-end justify-between gap-4">
 
@@ -1413,12 +1438,52 @@ export default function ShortsPage() {
                           </span>
                         </Link>
 
+                        {/* The caption is its own control, deliberately
+                            outside the author Link above: tapping text
+                            to read it must never open a profile. It is a
+                            disclosure - tap to expand, tap again to
+                            collapse - so no second string had to be
+                            invented; "Show more" reuses the existing
+                            translated rightPanel.showMore and the state
+                            itself is announced by aria-expanded. */}
                         {post.content && (
-                          <p className="text-sm whitespace-pre-wrap break-words line-clamp-3">
-                            {
-                              post.content
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleCaption(post.id);
+                            }}
+                            aria-expanded={
+                              !!captionExpanded[
+                                post.id
+                              ]
                             }
-                          </p>
+                            className="block w-full text-left"
+                          >
+                            <span
+                              className={`block text-sm whitespace-pre-wrap break-words ${
+                                captionExpanded[
+                                  post.id
+                                ]
+                                  ? "max-h-40 overflow-y-auto"
+                                  : "line-clamp-2"
+                              }`}
+                            >
+                              {
+                                post.content
+                              }
+                            </span>
+
+                            {!captionExpanded[
+                              post.id
+                            ] && (
+                              <span className="mt-0.5 block text-sm font-semibold text-white/80">
+                                {t(
+                                  "rightPanel.showMore"
+                                )}
+                              </span>
+                            )}
+                          </button>
                         )}
 
                       </div>

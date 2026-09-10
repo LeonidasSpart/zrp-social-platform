@@ -281,6 +281,176 @@ export const SEED_SOURCES: SeedSource[] = [
     topics: ["WORLD", "POLITICS"],
     trustTier: 2,
   },
+
+  // ─── Regional coverage (tier 2) ──────────────────────────────
+  // BBC's own per-region World Service feeds, on the same
+  // feeds.bbci.co.uk host already fetching cleanly for bbc-world /
+  // bbc-business / bbc-technology above - added specifically to give
+  // Africa, Asia, Latin America and North America their own real
+  // region tag (see ingest.ts: a story's region/country comes
+  // directly from whichever source it was fetched from, not from
+  // analysing the article text), rather than everything defaulting to
+  // GLOBAL/WORLD. No source claiming to be Russia-specific is added
+  // here: the only widely-syndicated Russia-focused outlets are
+  // state-run and not independently verifiable as neutral, and no
+  // genuinely independent Russia-specific RSS feed was confirmed
+  // reachable to add responsibly instead of guessing one.
+  {
+    key: "bbc-africa",
+    name: "BBC News — Africa",
+    publisher: "BBC News",
+    feedUrl: "https://feeds.bbci.co.uk/news/world/africa/rss.xml",
+    homepageUrl: "https://www.bbc.com/news/world/africa",
+    region: "AFRICA",
+    language: "en",
+    topics: ["WORLD", "POLITICS"],
+    trustTier: 2,
+  },
+  {
+    key: "bbc-asia",
+    name: "BBC News — Asia",
+    publisher: "BBC News",
+    feedUrl: "https://feeds.bbci.co.uk/news/world/asia/rss.xml",
+    homepageUrl: "https://www.bbc.com/news/world/asia",
+    region: "ASIA",
+    language: "en",
+    topics: ["WORLD", "POLITICS"],
+    trustTier: 2,
+  },
+  {
+    key: "bbc-latin-america",
+    name: "BBC News — Latin America",
+    publisher: "BBC News",
+    feedUrl: "https://feeds.bbci.co.uk/news/world/latin_america/rss.xml",
+    homepageUrl: "https://www.bbc.com/news/world/latin_america",
+    region: "SOUTH_AMERICA",
+    language: "en",
+    topics: ["WORLD", "POLITICS"],
+    trustTier: 2,
+  },
+  {
+    key: "bbc-us-canada",
+    name: "BBC News — US & Canada",
+    publisher: "BBC News",
+    feedUrl: "https://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml",
+    homepageUrl: "https://www.bbc.com/news/world/us_and_canada",
+    region: "NORTH_AMERICA",
+    language: "en",
+    topics: ["WORLD", "POLITICS"],
+    trustTier: 2,
+  },
+
+  // ─── Crypto (tier 3) ──────────────────────────────────────────
+  // The general-news sources above cover crypto only when a story is
+  // large enough to reach a mainstream business desk, so the CRYPTO
+  // topic almost never fired. These are the established crypto trade
+  // press, added so the ZRP Crypto desk has something to publish.
+  // Tier 3, not 2: trade press covering an industry it is part of does
+  // not corroborate a story the way an established general outlet
+  // does, so a story resting on these alone stays DEVELOPING rather
+  // than CONFIRMED (see assessConfidence in classify.ts).
+  // ⚠️ Same caveat as every entry here: not fetched from this build
+  // environment - verify before relying on it.
+  {
+    key: "coindesk",
+    name: "CoinDesk",
+    publisher: "CoinDesk",
+    feedUrl: "https://www.coindesk.com/arc/outboundfeeds/rss/",
+    homepageUrl: "https://www.coindesk.com/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["CRYPTO"],
+    trustTier: 3,
+  },
+  {
+    key: "cointelegraph",
+    name: "Cointelegraph",
+    publisher: "Cointelegraph",
+    feedUrl: "https://cointelegraph.com/rss",
+    homepageUrl: "https://cointelegraph.com/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["CRYPTO"],
+    trustTier: 3,
+  },
+  {
+    key: "decrypt",
+    name: "Decrypt",
+    publisher: "Decrypt",
+    feedUrl: "https://decrypt.co/feed",
+    homepageUrl: "https://decrypt.co/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["CRYPTO"],
+    trustTier: 3,
+  },
+
+  // ─── Gaming (tier 2/3) ────────────────────────────────────────
+  // Per-platform coverage so PlayStation, Nintendo and Xbox each have a
+  // real dedicated source rather than relying on general-news outlets
+  // to occasionally mention a console. All three are Hookshot Media
+  // (formerly Nlife Media) sites on the same feeds.<brand>.com
+  // platform as Eurogamer/Time Extension, each publisher-operated
+  // specifically for machine consumption like every other source here.
+  // ⚠️ Same caveat as every entry above: not fetched from this build
+  // environment - verify before enabling.
+  {
+    key: "pushsquare-ps",
+    name: "Push Square",
+    publisher: "Push Square (Hookshot Media)",
+    feedUrl: "https://www.pushsquare.com/feeds/latest",
+    homepageUrl: "https://www.pushsquare.com/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["GAMING"],
+    trustTier: 3,
+  },
+  {
+    key: "nintendolife",
+    name: "Nintendo Life",
+    publisher: "Nintendo Life (Hookshot Media)",
+    feedUrl: "https://www.nintendolife.com/feeds/latest",
+    homepageUrl: "https://www.nintendolife.com/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["GAMING"],
+    trustTier: 3,
+  },
+  {
+    key: "purexbox",
+    name: "Pure Xbox",
+    publisher: "Pure Xbox (Hookshot Media)",
+    feedUrl: "https://www.purexbox.com/feeds/latest",
+    homepageUrl: "https://www.purexbox.com/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["GAMING"],
+    trustTier: 3,
+  },
+  {
+    key: "playstation-blog",
+    name: "PlayStation.Blog",
+    publisher: "Sony Interactive Entertainment",
+    feedUrl: "https://blog.playstation.com/feed/",
+    homepageUrl: "https://blog.playstation.com/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["GAMING"],
+    trustTier: 1,
+    official: true,
+  },
+  {
+    key: "xbox-wire",
+    name: "Xbox Wire",
+    publisher: "Microsoft",
+    feedUrl: "https://news.xbox.com/en-us/feed/",
+    homepageUrl: "https://news.xbox.com/en-us/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["GAMING"],
+    trustTier: 1,
+    official: true,
+  },
 ];
 
 export function seedSourceKeys(): string[] {

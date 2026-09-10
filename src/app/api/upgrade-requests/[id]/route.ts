@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { invalidateUserAuthState } from "@/lib/auth-state";
 import { requireAdmin } from "@/lib/admin";
 import { logAdminAction } from "@/lib/audit-log";
 
@@ -34,6 +35,7 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
       where: { id: request.userId },
       data: { plan: request.requestedPlan },
     });
+    invalidateUserAuthState(request.userId);
 
     // Mark request as approved
     await prisma.upgradeRequest.update({

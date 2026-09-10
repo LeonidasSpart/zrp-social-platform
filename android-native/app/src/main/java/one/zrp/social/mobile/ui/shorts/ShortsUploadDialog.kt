@@ -129,10 +129,36 @@ fun ShortsUploadDialog(onDismiss: () -> Unit, onPosted: (Post) -> Unit) {
                     val uri = state.fileUri
                     if (uri != null) {
                         Box(
+                            // Root cause of the reported layout bug: the
+                            // old `.fillMaxWidth().heightIn(max=320.dp)
+                            // .aspectRatio(9f/16f)` chain lets aspectRatio
+                            // (innermost) derive HEIGHT from a WIDTH
+                            // already fixed to the full dialog width
+                            // (~380dp+ on a real phone) - 380 / (9/16) =~
+                            // 675dp - which heightIn's 320dp cap then
+                            // clamps, producing a box that is full width
+                            // but only 320dp tall: nowhere near 9:16,
+                            // closer to square/landscape. That shrinks the
+                            // actual video area the ExoPlayer controller
+                            // overlay (seek bar, +-5/15s, play, settings)
+                            // renders into, crowding it down toward the
+                            // caption field right below in the Column,
+                            // instead of the tall preview web's own CSS
+                            // produces (ShortUploadModal.tsx: `aspect-[9/16]
+                            // max-h-[50vh] mx-auto`, no w-full - browser
+                            // aspect-ratio then derives WIDTH from the
+                            // capped height). matchHeightConstraintsFirst
+                            // = true makes Compose do the same: derive
+                            // width from the 320dp height cap (320 * 9/16
+                            // = 180dp) instead of the reverse, so this is
+                            // finally a real tall 9:16 rectangle, centered
+                            // like `mx-auto` via align(CenterHorizontally)
+                            // on the parent Column instead of stretched
+                            // full width.
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .align(Alignment.CenterHorizontally)
                                 .heightIn(max = 320.dp)
-                                .aspectRatio(9f / 16f)
+                                .aspectRatio(9f / 16f, matchHeightConstraintsFirst = true)
                                 .clip(MaterialTheme.shapes.medium)
                                 .background(Color.Black),
                         ) {
@@ -150,6 +176,14 @@ fun ShortsUploadDialog(onDismiss: () -> Unit, onPosted: (Post) -> Unit) {
                             }
                         }
                     } else {
+                        // Matches ShortUploadModal.tsx's own placeholder
+                        // exactly (`w-full aspect-[9/16] max-h-[50vh]`) -
+                        // full width with height then clamped/derived from
+                        // it is the *intended* look before a video is
+                        // picked (a big, obvious full-width dropzone), not
+                        // the bug: see the uri!=null Box above for the
+                        // actual reported bug, which only affects the real
+                        // video preview once one is selected.
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()

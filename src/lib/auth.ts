@@ -5,9 +5,9 @@ import AppleProvider from "next-auth/providers/apple";
 import { prisma } from "./db";
 import bcrypt from "bcryptjs";
 import { getFeatureStatus, FeatureStatus } from "./permissions";
-import { checkRateLimitKey } from "./rate-limit";
+import { checkRateLimitKey, getClientIpFromHeaders } from "./rate-limit";
 import { getAppleClientSecret } from "./apple-client-secret";
-import { findExistingSessionUser } from "./session-user";
+import { applyAuthStateToToken, getUserAuthState } from "./auth-state";
 
 // Only registered when APPLE_TEAM_ID/APPLE_KEY_ID/APPLE_CLIENT_ID/
 // APPLE_PRIVATE_KEY are all present and the key signs successfully - see
@@ -82,8 +82,8 @@ export interface VerifiedCredentialsUser {
 // pair - shared by NextAuth's CredentialsProvider (the website's login
 // flow, below) and the mobile JSON login endpoint. Extracted rather
 // than duplicated so the two never drift apart on something
-// security-sensitive like rate limiting or the legacy-plaintext-
-// password upgrade path.
+// security-sensitive like rate limiting or the accepted password
+// format (bcrypt only - see below).
 export async function verifyCredentials({
   identifier,
   password,
@@ -134,27 +134,27 @@ export async function verifyCredentials({
     throw new CredentialsAuthError("Invalid credentials", 401);
   }
 
+  // ⚠️ SECURITY: bcrypt is the ONLY accepted password format. This used
+  // to fall back to a plaintext equality check (`password ===
+  // user.password`) for any stored value that didn't start with "$2",
+  // "upgrading" the row to a hash on a successful login. That meant any
+  // legacy row still held the user's real password in clear text in
+  // the database until that user next logged in - a full-credential
+  // leak for every such account in any database backup or read-access
+  // compromise, and an equality comparison that wasn't even
+  // constant-time. Legacy plaintext rows are migrated to bcrypt in
+  // bulk, offline, by scripts/hash-legacy-passwords.ts (idempotent,
+  // batched, never resets or logs a password) - run it before or
+  // alongside deploying this change; after it has run there are no
+  // non-bcrypt rows left for this code to ever see. A stored value
+  // that is somehow still not a bcrypt hash simply fails to verify.
   let isValid = false;
-  try {
-    isValid = await bcrypt.compare(password, user.password);
-  } catch (err) {
-    console.error("Password comparison error:", err);
-    isValid = false;
-  }
-
-  // ⚠️ SECURITY: legacy accounts with a non-bcrypt (plaintext) stored
-  // password are still supported here for backward compatibility,
-  // upgrading them to a real bcrypt hash on successful login. This
-  // should be treated as a known, tracked risk, not a permanent design
-  // - see the security audit notes for a recommended remediation plan.
-  if (!isValid && !user.password.startsWith('$2')) {
-    isValid = password === user.password;
-    if (isValid) {
-      const hashed = await bcrypt.hash(password, 10);
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { password: hashed },
-      });
+  if (user.password.startsWith("$2")) {
+    try {
+      isValid = await bcrypt.compare(password, user.password);
+    } catch (err) {
+      console.error("Password comparison error:", err);
+      isValid = false;
     }
   }
 
@@ -331,13 +331,14 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
-        const forwardedFor = req?.headers?.["x-forwarded-for"];
-        const ip =
-          (Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor)
-            ?.split(",")[0]
-            ?.trim() ||
-          (req?.headers as Record<string, string> | undefined)?.["x-real-ip"] ||
-          "unknown";
+        // ⚠️ SECURITY: resolved with the same trusted-proxy rule every
+        // other limiter uses (see getClientIpFromHeaders) - the previous
+        // "first X-Forwarded-For entry" was client-controlled, so a
+        // brute-forcer could rotate a fake header value to get a fresh
+        // login-attempt bucket on every try.
+        const ip = getClientIpFromHeaders(
+          req?.headers as Record<string, string | string[] | undefined> | undefined
+        );
 
         // verifyCredentials throws CredentialsAuthError (a subclass of
         // Error) on any failure - NextAuth only needs a thrown Error
@@ -474,26 +475,48 @@ export const authOptions: NextAuthOptions = {
       // active session's own copy hasn't caught up, for up to 30 days.
       // Riding the existing 5-minute existence check to also pick this
       // up needs no separate client-side update() round trip.
-      if (token.id && !user && trigger !== "update" && !token.banned) {
-        const lastChecked = (token.existsCheckedAt as number) || 0;
-        if (Date.now() - lastChecked > 5 * 60 * 1000) {
-          const stillExists = await findExistingSessionUser(token.id as string);
-          if (!stillExists) {
-            token.banned = true;
-          } else {
-            token.existsCheckedAt = Date.now();
-            const fresh = await prisma.user.findUnique({
-              where: { id: token.id as string },
-              select: { username: true },
-            });
-            if (fresh) token.username = fresh.username;
-          }
-        }
+      //
+      // ⚠️ SECURITY (privileged-claim staleness): this same read is now
+      // also where isAdmin / role / plan / banned get refreshed, via
+      // the authoritative, briefly-cached getUserAuthState() (see
+      // auth-state.ts). Before, those claims were only ever written at
+      // sign-in or on an explicit update(), so a demoted admin or a
+      // banned user kept whatever privileges their token was minted
+      // with - for the token's whole 30-day life, and forever for a
+      // native-app token that is never re-encoded. The old 5-minute
+      // throttle is gone: the per-instance cache (30s) already bounds
+      // the cost to at most one indexed primary-key lookup per user per
+      // window, and it never persisted for route-handler reads anyway
+      // (a route handler can't rewrite the cookie), so this is not more
+      // database load than before - it's the same lookup, now carrying
+      // the claims that actually matter. Nothing here invalidates a
+      // session whose claims haven't changed.
+      if (token.id && !user && trigger !== "update") {
+        const state = await getUserAuthState(token.id as string);
+        const refreshed = applyAuthStateToToken(
+          token as unknown as Record<string, unknown>,
+          state
+        );
+        Object.assign(token, refreshed);
       }
 
       return token;
     },
     async session({ session, token }) {
+      // ⚠️ SECURITY: a banned (or deleted - see auth-state.ts) account
+      // gets NO session at all, rather than a session whose user object
+      // merely carries banned: true. Every API route in this app gates
+      // on `session?.user?.id`; almost none of them re-check
+      // `session.user.banned`, so the flag alone left a banned user
+      // fully authorized for every mutation. Returning null here makes
+      // getServerSession() resolve to null (401 everywhere) and makes
+      // the browser's useSession() report "unauthenticated" - the same
+      // signed-out state middleware.ts already redirects a banned user
+      // into. Non-banned users are entirely unaffected.
+      if (token.banned === true) {
+        return null as unknown as typeof session;
+      }
+
       if (session.user) {
         session.user.id = token.id as string;
         session.user.username = token.username as string;

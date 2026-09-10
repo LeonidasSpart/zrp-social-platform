@@ -4,7 +4,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { isSessionAdmin } from "@/lib/admin";
 import { logAdminAction } from "@/lib/audit-log";
-import { deleteUploadThingKeys, extractUploadThingKey } from "@/lib/uploadthing";
+import { extractUploadThingKey } from "@/lib/uploadthing";
+import { deleteUploadsIfUnreferenced } from "@/lib/upload-ownership";
+import { isTrustedUploadUrl, UPLOAD_ONLY_ERROR } from "@/lib/media-url";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +25,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params;
   const track = await prisma.musicTrack.findUnique({
     where: { id },
-    select: { id: true, artistId: true, artist: { select: { userId: true } } },
+    select: { id: true, artistId: true, coverUrl: true, artist: { select: { userId: true } } },
   });
   if (!track) return NextResponse.json({ error: "Track not found" }, { status: 404 });
   if (track.artist.userId !== session.user.id) {
@@ -48,8 +50,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     data.explicit = !!body.explicit;
   }
   if (body.coverUrl !== undefined) {
-    data.coverUrl = body.coverUrl === null ? null : String(body.coverUrl);
-    data.coverKey = body.coverKey ? String(body.coverKey) : extractUploadThingKey(data.coverUrl as string | null);
+    // ⚠️ SECURITY: a NEW cover must come from ZRP's own upload storage;
+    // re-sending the cover already stored on this track (which the
+    // Music Studio edit form always does) is accepted unchanged. The
+    // key is derived from the URL server-side - never taken from the
+    // client, which could otherwise name any file in storage for
+    // deletion. See src/lib/upload-ownership.ts.
+    const coverUrl = body.coverUrl === null ? null : String(body.coverUrl);
+    if (coverUrl && coverUrl !== track.coverUrl && !isTrustedUploadUrl(coverUrl)) {
+      return NextResponse.json({ error: UPLOAD_ONLY_ERROR }, { status: 400 });
+    }
+    data.coverUrl = coverUrl;
+    data.coverKey = extractUploadThingKey(coverUrl);
   }
   if (body.trackNumber !== undefined) {
     data.trackNumber = body.trackNumber === null ? null : Math.max(0, Math.trunc(Number(body.trackNumber)) || 0);
@@ -120,27 +132,16 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   // manual cleanup needed for those dependent records.
   await prisma.musicTrack.delete({ where: { id } });
 
-  // The audio file is exclusively this track's - safe to delete
-  // unconditionally once the row is gone.
-  const audioKey = track.audioKey || extractUploadThingKey(track.audioUrl);
-  const keysToDelete = audioKey ? [audioKey] : [];
-
-  // The cover, however, could in principle be reused (e.g. an artist
-  // reusing the same artwork for a track and its album), so it's only
-  // deleted from storage if nothing else still references it - never
-  // blind-deleted just because this track is gone.
-  const coverKey = track.coverKey || extractUploadThingKey(track.coverUrl);
-  if (coverKey && track.coverUrl) {
-    const [otherTrack, otherAlbum] = await Promise.all([
-      prisma.musicTrack.findFirst({ where: { coverUrl: track.coverUrl }, select: { id: true } }),
-      prisma.musicAlbum.findFirst({ where: { coverUrl: track.coverUrl }, select: { id: true } }),
-    ]);
-    if (!otherTrack && !otherAlbum) keysToDelete.push(coverKey);
-  }
-
-  if (keysToDelete.length) {
-    await deleteUploadThingKeys(keysToDelete);
-  }
+  // ⚠️ SECURITY: storage files are only deleted when NOTHING in the
+  // database still references them - not just other tracks/albums, but
+  // any record anywhere. Previously the audio key was deleted
+  // unconditionally (and could have been any key the client named at
+  // upload time), so a track pointing at someone else's file would
+  // have destroyed that file on deletion. See src/lib/upload-ownership.ts.
+  await deleteUploadsIfUnreferenced([
+    track.audioKey || track.audioUrl,
+    track.coverKey || track.coverUrl,
+  ]);
 
   if (!isOwner) {
     await logAdminAction({

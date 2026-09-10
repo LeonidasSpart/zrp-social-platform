@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+// ⚠️ SECURITY: getVerifiedToken is a drop-in for getToken() that overlays the
+// database's current role/isAdmin/plan/banned onto the decoded JWT and
+// returns null for a banned or deleted account - see src/lib/auth-guards.ts.
+import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import {
   getPlanLimits,
@@ -13,6 +16,7 @@ import {
 import { rateLimit } from "@/lib/rate-limit";
 import { renderArticleBody } from "@/lib/sanitize";
 import { resolveScheduledAt } from "@/lib/scheduled-time";
+import { isTrustedUploadUrl, validateMediaUrls } from "@/lib/media-url";
 
 // ─────────────────────────────────────────────────────────────
 // MEDIA HELPERS
@@ -138,9 +142,14 @@ function normalizeMediaType(
   //
   // This is required for storage/CDN URLs that have no
   // recognizable video extension.
+  //
+  // ⚠️ SECURITY: only for URLs on ZRP's own upload storage.
+  // The client-declared type is what decides whether a post
+  // enters the Shorts/video feed, so an arbitrary host must
+  // never be able to claim it - see src/lib/media-url.ts.
   // ─────────────────────────────────────────────────────────
 
-  if (isVideoMediaType(requested)) {
+  if (isVideoMediaType(requested) && isTrustedUploadUrl(primaryImageUrl)) {
     return "video";
   }
 
@@ -535,6 +544,24 @@ export async function POST(
               "string"
           ? [imageUrl]
           : [];
+
+    // ⚠️ SECURITY: media URLs are only accepted from the sources ZRP
+    // itself hands out (UploadThing uploads, the GIPHY picker) - never
+    // an arbitrary client-supplied host or scheme. Applied on write
+    // only; existing posts are unaffected. See src/lib/media-url.ts.
+    const mediaCheck =
+      validateMediaUrls(normalizedImageUrls);
+
+    if (!mediaCheck.ok) {
+      return NextResponse.json(
+        {
+          error: mediaCheck.error,
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
     const primaryImageUrl:
       | string

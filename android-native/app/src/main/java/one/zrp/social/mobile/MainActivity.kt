@@ -10,6 +10,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -18,8 +21,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.data.AuthRepository
+import one.zrp.social.mobile.data.GoogleSignInAttemptMarker
 import one.zrp.social.mobile.ui.auth.AuthUiState
 import one.zrp.social.mobile.ui.auth.AuthViewModel
 import one.zrp.social.mobile.ui.auth.AuthViewModelFactory
@@ -40,17 +45,29 @@ private enum class LoggedOutScreen { LOGIN, SIGNUP, FORGOT_PASSWORD }
 // resources after recreate() there, even though the stored preference
 // is correct - the "unreliable" symptom real-device reports described.
 class MainActivity : AppCompatActivity() {
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ZrpSocialApp()
+            // Real window-width detection (tablet/large-screen two-pane
+            // messaging - see WindowSize.kt's own isTwoPane KDoc), not a
+            // fixed dp guess. This Activity now declares configChanges
+            // (see AndroidManifest.xml's own comment on why - it's load-
+            // bearing for Google Sign-In, not just rotation smoothness),
+            // so a rotation/fold/multi-window resize no longer recreates
+            // it - but calculateWindowSizeClass() reads LocalConfiguration
+            // reactively, so this still recomputes correctly on every
+            // such change; nothing here needed to change for that.
+            val windowSizeClass = calculateWindowSizeClass(this)
+            ZrpSocialApp(windowSizeClass = windowSizeClass)
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
-fun ZrpSocialApp() {
+fun ZrpSocialApp(windowSizeClass: WindowSizeClass) {
     // ApiClient.init() already ran in ZrpApplication.onCreate() before
     // this Activity exists, so AuthRepository() is safe to construct
     // here with no context of its own.
@@ -63,6 +80,22 @@ fun ZrpSocialApp() {
     ) { /* Granted or denied, FCM registration itself doesn't depend on
           this - only whether a delivered push actually shows in the
           system tray does (see ZrpFirebaseMessagingService). */ }
+
+    // See GoogleSignInAttemptMarker's own KDoc and AuthViewModel's
+    // loginWithGoogle/reportInterruptedGoogleSignIn - this is the one
+    // check, run once per fresh app start, that can tell whether the
+    // process died mid Google-Sign-In. LaunchedEffect(Unit) re-runs
+    // once per fresh Composition (a true cold start, or the rare
+    // process-death-and-restore case this exists to catch); it is a
+    // no-op on an ordinary configuration-change recreation, since that
+    // does not create a new Composition from scratch and the marker is
+    // otherwise never left set in the first place.
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        if (GoogleSignInAttemptMarker(context).consumeInterruptedAttempt()) {
+            authViewModel.reportInterruptedGoogleSignIn()
+        }
+    }
 
     ZrpSocialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -91,7 +124,7 @@ fun ZrpSocialApp() {
                         LoggedOutScreen.LOGIN -> LoginScreen(
                             formState = loginForm,
                             onLogin = { identifier, password -> authViewModel.login(identifier, password) },
-                            onGoogleIdToken = { idToken -> authViewModel.loginWithGoogle(idToken) },
+                            onGoogleSignIn = { context -> authViewModel.loginWithGoogle(context) },
                             onSignUp = { loggedOutScreen = LoggedOutScreen.SIGNUP },
                             onForgotPassword = { loggedOutScreen = LoggedOutScreen.FORGOT_PASSWORD },
                         )
@@ -111,7 +144,11 @@ fun ZrpSocialApp() {
                             onFinished = { authViewModel.onOnboardingFinished() },
                         )
                     } else {
-                        ZrpNavHost(onLogout = { authViewModel.logout() }, currentUser = currentAuthState.user)
+                        ZrpNavHost(
+                            onLogout = { authViewModel.logout() },
+                            currentUser = currentAuthState.user,
+                            windowSizeClass = windowSizeClass,
+                        )
                     }
                 }
             }

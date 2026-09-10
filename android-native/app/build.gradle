@@ -37,12 +37,22 @@ android {
         minSdkVersion 24
         targetSdkVersion 36
 
-        // Google Sign-In (Credential Manager) - the OAuth Web client ID
-        // registered in the same Google Cloud project GOOGLE_CLIENT_ID
-        // already uses server-side (src/lib/auth.ts's GoogleProvider,
-        // src/app/api/mobile/auth/google/route.ts's audience check).
-        // Not a secret (client IDs are public identifiers, unlike a
-        // client secret) but still not hardcoded here, mirroring the
+        // Google Sign-In (Credential Manager) - this must be a Web-type
+        // OAuth client ID from the SAME Google Cloud project as this
+        // app's own registered Android OAuth clients (package
+        // "one.zrp.social" + each signing certificate's SHA-1, see
+        // google-services.json's own committed oauth_client entries and
+        // GoogleAuth.kt's own KDoc). This is NOT the website's own
+        // GOOGLE_CLIENT_ID (src/lib/auth.ts's GoogleProvider) - that
+        // lives in a different Google Cloud project entirely and cannot
+        // be reused here; reusing it is exactly the mistake that
+        // produces Credential Manager's ambiguous NoCredentialException
+        // even with a perfectly valid device/account (see
+        // src/app/api/mobile/auth/google/route.ts's own comment, which
+        // documents the same distinction server-side via the separate
+        // GOOGLE_MOBILE_CLIENT_ID env var this value must match). Not a
+        // secret (client IDs are public identifiers, unlike a client
+        // secret) but still not hardcoded here, mirroring the
         // keystore.properties pattern above: supplied via a Gradle
         // property so a build with none configured still compiles -
         // GoogleAuth.kt's own call simply fails at runtime with a clear
@@ -58,16 +68,101 @@ android {
         // with that code had already been uploaded), so that bumped to
         // versionCode 3, then 4 once Play confirmed 3 was uploaded too,
         // then 5 for the V4.0.1 real-device validation build, then 6
-        // alongside versionName "4.0.2" - never reuse a versionCode Play
-        // has already seen for this applicationId. This build bumps to
-        // versionCode 7 / versionName "4.0.3" - the native stabilization
-        // pass (follow-back state, Marketplace video, ZRP Play crash
-        // fixes, AI branding, generic link previews, notification deep-
-        // links, messaging keyboard/IME, Story author navigation + video
-        // mute, ZRP Music real background playback via MediaSessionService,
-        // Admin Dashboard crash fix) for real-user Play testing.
-        versionCode 7
-        versionName "4.0.3"
+        // alongside versionName "4.0.2", then 7 alongside "4.0.3" - never
+        // reuse a versionCode Play has already seen for this
+        // applicationId. Play rejected an Internal Testing upload again
+        // with "Le code de version 7 a déjà été utilisé", so this bumps
+        // to versionCode 8 / versionName "4.0.4" - the 4.0.4 milestone
+        // (real presence consuming server.js's existing user-status/
+        // get-status broadcast, real group chat with its own Conversation/
+        // ConversationParticipant schema and Socket.IO events, tablet
+        // two-pane messaging, an advanced profile experience pass, and a
+        // link-preview regression fix) for real-user Play testing. Bumped
+        // again to versionCode 9 (versionName unchanged - still the 4.0.4
+        // milestone, no new feature here) to ship GoogleAuth.kt's own
+        // on-device NoCredentialException diagnostic: real Internal
+        // Testing users hit "Google Sign-In couldn't find an account to
+        // use" on versionCode 8 with a real Google account present, which
+        // this repo's own history (see GoogleAuth.kt's KDoc) already
+        // shows is ambiguous between a device-side cause and a
+        // misconfigured GOOGLE_WEB_CLIENT_ID - this build surfaces the
+        // actual configured (non-secret) client ID value directly in that
+        // error message so the real cause can be confirmed from the
+        // device alone. versionCode 9 was built and committed here but
+        // was never uploaded to Play - versionCode 8 (4.0.4) remained the
+        // latest Internal Testing release, so it is the confirmed
+        // baseline for this bump, not 9. Since 8 shipped, GoogleAuth.kt
+        // gained a real second fix on top of the versionCode 9 diagnostic:
+        // an explicit "Sign in with Google" chooser (GetSignInWithGoogleOption)
+        // that retries automatically when the quiet GetGoogleIdOption path
+        // answers NoCredentialException, which is Google's own documented
+        // fallback for that exact failure and is expected to resolve it
+        // for real testers rather than just diagnosing it. Play Console
+        // also now carries a full admin parity pass built on this same
+        // main history: Support Tickets, the moderation/verification
+        // queues, financial workflows, internal ops tooling, and the ZRP
+        // News CMS + News Network console - all server-authorized via
+        // existing requireStaff/requireAdmin route checks, none of it
+        // changing end-user-facing behavior. That combination is a real
+        // milestone beyond 4.0.4, so this bumps to versionCode 10 /
+        // versionName "4.0.5", never reusing 9 or 8 per Play's
+        // monotonically-increasing versionCode requirement for this
+        // applicationId (see the versionCode 2/7 rejections above).
+        // Bumps again to versionCode 11 / versionName "4.0.6" for two
+        // further, real fixes landed on top of 10: allowBackup is now
+        // false and androidx.security:security-crypto moved off its
+        // alpha build to the stable 1.1.0 release (same MasterKey API
+        // TokenStore already used - see AndroidManifest.xml's own
+        // comment), and editorial feed accounts (ZRP News World, ZRP
+        // Travel, ...) - which showed correctly on web but had no
+        // avatar, banner, or "editorial" badge on Android - are fixed:
+        // EDITORIAL_AVATAR_URL/EDITORIAL_COVER_URL are now fully-
+        // qualified https:// URLs instead of root-relative paths Coil
+        // has no origin to resolve, and VerifiedBadge.kt's BadgeStyles
+        // map now has the "editorial" entry it was missing (see
+        // VerifiedBadge.kt's own comment). Neither changes applicationId,
+        // signing, or deep links.
+        //
+        // Bumps to versionCode 12 / versionName "4.0.7" for a real
+        // Google Sign-In fix: the account picker opened, an account
+        // could be selected, and then nothing happened - no login, no
+        // error. Root cause was CredentialManager.getCredential()'s
+        // result being tied to the specific Activity instance that made
+        // the request, while this Activity had no configChanges
+        // declared and the request itself ran on a Composable-scoped
+        // rememberCoroutineScope() rather than AuthViewModel's
+        // viewModelScope - so any configuration change while the system
+        // account picker had focus (rotation, fold/unfold, a uiMode/
+        // density nudge some OEM skins apply when a system bottom sheet
+        // appears) silently discarded the whole in-flight request. Fixed
+        // by declaring configChanges on MainActivity and moving the
+        // entire Google sign-in round trip onto viewModelScope (see
+        // AuthViewModel.loginWithGoogle's own comment). Email/password
+        // auth, applicationId, signing and deep links are unchanged. 11
+        // was never confirmed uploaded to Play, but per this file's own
+        // convention (see the versionCode 9/10 history above) the next
+        // build always strictly increments past the highest versionCode
+        // ever committed here, not just the last one confirmed shipped.
+        //
+        // Bumps to versionCode 13 / versionName "4.0.8" for five fixes
+        // (PR #229): a real second layer for Google Sign-In
+        // (GoogleSignInAttemptMarker - detects the app's PROCESS being
+        // killed outright while the account picker has focus, which the
+        // configChanges/viewModelScope fix above does not cover, and
+        // surfaces a real error instead of silence); defensive hardening
+        // of Android poll voting against a reported crash on tap (root
+        // cause not confirmed - no crash-reporting SDK, no device); the
+        // Shorts composer's video preview no longer squishing to the
+        // wrong aspect ratio and crowding its own playback controls into
+        // the caption field; the fullscreen photo viewer's close button
+        // no longer sitting under the system status bar, and tapping the
+        // photo itself now closes it; and the Shorts-style action rail
+        // (like/comment/repost/share) no longer hidden behind BottomNav
+        // on mobile web/PWA/tablet. None of this changes applicationId,
+        // signing, or deep links. 12 was confirmed uploaded to Play
+        // Internal Testing.
+        versionCode 13
+        versionName "4.0.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -173,14 +268,24 @@ dependencies {
     // now-deprecated MasterKeys.getOrCreate() static helper) only
     // exists from 1.1.0-alpha03 onward - the true stable 1.0.0 release
     // predates it and does not have this class at all, despite already
-    // shipping EncryptedSharedPreferences itself.
-    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+    // shipping EncryptedSharedPreferences itself. 1.1.0 is the first
+    // stable release carrying it (this was pinned to the pre-release
+    // 1.1.0-alpha06 before - an alpha of a crypto library has no place
+    // guarding a production session token). The classes TokenStore uses
+    // are unchanged in 1.1.0; it emits deprecation warnings only, which
+    // this build does not treat as errors.
+    implementation 'androidx.security:security-crypto:1.1.0'
 
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.material3:material3'
     implementation 'androidx.compose.material:material-icons-extended'
+    // Real window-size-class detection (tablet/large-screen two-pane
+    // messaging) - Google's own calculateWindowSizeClass(Activity), not
+    // a fixed dp guess. Version comes from the compose-bom platform
+    // import above, same as every other material3 artifact in this file.
+    implementation 'androidx.compose.material3:material3-window-size-class'
     // Home feed's pull-to-refresh (Phase 4) - Material2's
     // rememberPullRefreshState/pullRefresh/PullRefreshIndicator, not
     // Material3's newer PullToRefreshBox, since this app is otherwise

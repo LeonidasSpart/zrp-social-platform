@@ -18,7 +18,8 @@ export type JournalistArticleCategory =
   | "SCIENCE"
   | "SPORTS"
   | "CULTURE"
-  | "COMMUNITY";
+  | "COMMUNITY"
+  | "GAMING";
 
 const CATEGORY_KEYS: Record<JournalistArticleCategory, TranslationKey> = {
   WORLD: "newsCategory.world",
@@ -32,6 +33,7 @@ const CATEGORY_KEYS: Record<JournalistArticleCategory, TranslationKey> = {
   SPORTS: "newsCategory.sports",
   CULTURE: "newsCategory.culture",
   COMMUNITY: "newsCategory.community",
+  GAMING: "newsCategory.gaming",
 };
 
 const CATEGORY_VALUES: JournalistArticleCategory[] = [
@@ -46,6 +48,7 @@ const CATEGORY_VALUES: JournalistArticleCategory[] = [
   "SPORTS",
   "CULTURE",
   "COMMUNITY",
+  "GAMING",
 ];
 
 function slugify(value: string) {

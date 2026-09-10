@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { getConversationParticipant } from "@/lib/conversations";
 
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -25,12 +26,20 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 
     const message = await prisma.message.findUnique({
       where: { id: messageId },
-      select: { senderId: true, receiverId: true },
+      select: { senderId: true, receiverId: true, conversationId: true },
     });
     if (!message) {
       return NextResponse.json({ error: "Message not found" }, { status: 404 });
     }
-    if (message.senderId !== session.user.id && message.receiverId !== session.user.id) {
+    if (message.conversationId) {
+      // Any CURRENT group member may react - real membership, not the
+      // 1:1 sender-or-receiver check, which has no meaning for a
+      // message with no single receiver.
+      const membership = await getConversationParticipant(message.conversationId, session.user.id);
+      if (!membership) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+      }
+    } else if (message.senderId !== session.user.id && message.receiverId !== session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
