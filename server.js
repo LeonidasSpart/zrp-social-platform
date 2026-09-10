@@ -16,6 +16,11 @@ const {
   createCallRegistry,
 } = require("./socket-authz");
 const { runLegacyPasswordMigrationAtStartup } = require("./legacy-passwords");
+const {
+  createPresenceTracker,
+  createRedisPresenceStore,
+  createRedisPresenceBus,
+} = require("./presence");
 
 // Minimal cookie-header parser, written inline rather than requiring
 // the "cookie" package - this file is the process entrypoint, so a
@@ -46,8 +51,56 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 const prisma = new PrismaClient();
 
-// ─── Track online users ──────────────────────────────────────────────
-const userStatus = new Map(); // userId -> true (online)
+// ─── Online presence ─────────────────────────────────────────────────
+// Was a per-process `userStatus` Map, which is only correct with exactly
+// one server process: with several, a user connected to instance A was
+// "offline" to everyone on instance B, so the conversation header showed
+// Offline for someone actively chatting. Presence now lives in
+// ./presence.js: per-instance socket counts (authoritative for this
+// process) shared through Redis when REDIS_URL is set, with a heartbeat
+// so a dead instance can never leave a user "online", and a pub/sub
+// bus so every instance relays every transition to its own sockets.
+// Without Redis it degrades to exactly the old single-process behaviour.
+const PRESENCE_HEARTBEAT_MS = 30 * 1000;
+const PRESENCE_INSTANCE_ID = `${process.env.RAILWAY_REPLICA_ID || process.env.HOSTNAME || "inst"}-${process.pid}`;
+
+async function connectPresenceRedis() {
+  const url = process.env.REDIS_URL || process.env.REDIS_PUBLIC_URL;
+  if (!url) return null;
+  try {
+    const { createClient } = require("redis");
+    const pub = createClient({
+      url,
+      socket: {
+        connectTimeout: 5000,
+        reconnectStrategy: (retries) => Math.min(1000 * 2 ** Math.min(retries, 5), 30_000),
+      },
+    });
+    const sub = pub.duplicate();
+    let lastLog = 0;
+    const onError = (err) => {
+      // node-redis reconnects on its own; keep the log quiet.
+      const now = Date.now();
+      if (now - lastLog > 60_000) {
+        lastLog = now;
+        console.error("presence redis error (presence falls back to local until it heals):", err && err.message);
+      }
+    };
+    pub.on("error", onError);
+    sub.on("error", onError);
+    // Bounded first attempt: a Redis that is unreachable from boot must
+    // not delay the HTTP server. The clients keep trying in the
+    // background and the store checks `isReady` on every call.
+    await Promise.race([
+      Promise.all([pub.connect(), sub.connect()]),
+      new Promise((resolve) => setTimeout(resolve, 8000)),
+    ]);
+    return { pub, sub };
+  } catch (err) {
+    console.error("presence redis unavailable (presence is local to this instance):", err && err.message);
+    return null;
+  }
+}
 
 // ─── Allowed origins for the socket server ───────────────────────────
 // Previously this was `origin: "*"`, which combined with zero handshake
@@ -63,7 +116,7 @@ const allowedOrigins = (process.env.SOCKET_ALLOWED_ORIGINS || process.env.NEXTAU
   .map((o) => o.trim())
   .filter(Boolean);
 
-app.prepare().then(() => {
+app.prepare().then(async () => {
   const server = createServer((req, res) => {
     const parsedUrl = parse(req.url, true);
     handle(req, res, parsedUrl);
@@ -95,6 +148,38 @@ app.prepare().then(() => {
     // file-transfer channel.
     maxHttpBufferSize: 1024 * 1024,
   });
+
+  // ─── Presence tracker (see the comment at the top of this file) ───
+  const presenceRedis = await connectPresenceRedis();
+  let presenceBus = null;
+  const presence = createPresenceTracker({
+    instanceId: PRESENCE_INSTANCE_ID,
+    store: presenceRedis ? createRedisPresenceStore(presenceRedis.pub) : null,
+    onChange: (userId, status) => {
+      // Global transition: tell every socket on this instance, and every
+      // other instance (which tells its own sockets).
+      io.emit("user-status", { userId, status });
+      if (presenceBus) presenceBus.publish(userId, status);
+    },
+  });
+  if (presenceRedis) {
+    try {
+      presenceBus = await createRedisPresenceBus(
+        presenceRedis.pub,
+        presenceRedis.sub,
+        PRESENCE_INSTANCE_ID,
+        (userId, status) => io.emit("user-status", { userId, status })
+      );
+      console.log(`🟢 Presence shared via Redis (instance ${PRESENCE_INSTANCE_ID})`);
+    } catch (err) {
+      console.error("presence bus unavailable (transitions stay local to this instance):", err && err.message);
+    }
+  } else {
+    console.log("🟡 Presence is local to this instance (no Redis)");
+  }
+  setInterval(() => {
+    presence.heartbeat();
+  }, PRESENCE_HEARTBEAT_MS).unref();
 
   // ─── Per-user connection cap ──────────────────────────────────────
   // Without this, one account could open unbounded sockets (a script,
@@ -251,8 +336,9 @@ app.prepare().then(() => {
     // joins is exactly the verified identity from the handshake, so
     // there's no way to subscribe to someone else's room.
     socket.join(userId);
-    userStatus.set(userId, true);
-    socket.broadcast.emit("user-status", { userId, status: "online" });
+    // Registers this socket; emits "user-status: online" (locally and to
+    // other instances) only if the user was not already online anywhere.
+    presence.connect(userId).catch((err) => console.error("presence connect error:", err));
 
     // Kept as a no-op-compatible listener so existing clients that
     // still emit "join-room" on connect (see socket-client.ts) don't
@@ -263,9 +349,17 @@ app.prepare().then(() => {
     });
 
     // ─── Request status for a specific user ──────────────────────
-    socket.on("get-status", (targetUserId) => {
-      const isOnline = userStatus.get(targetUserId) === true;
-      socket.emit("user-status", { userId: targetUserId, status: isOnline ? "online" : "offline" });
+    socket.on("get-status", async (targetUserId) => {
+      if (typeof targetUserId !== "string" || !targetUserId || targetUserId.length > 128) return;
+      // Clients re-request every watched user on each reconnect, so this
+      // is bursty by design; the cap only stops runaway loops.
+      if (!checkEventRateLimit(userId, "get-status", 200, 10_000)) return;
+      try {
+        const isOnline = await presence.isOnline(targetUserId);
+        socket.emit("user-status", { userId: targetUserId, status: isOnline ? "online" : "offline" });
+      } catch (err) {
+        console.error("get-status error:", err);
+      }
     });
 
     // ─── Messaging ──────────────────────────────────────────────
@@ -497,11 +591,13 @@ app.prepare().then(() => {
         // that is still running in the first one.
         calls.dropUser(userId);
         connectionCounts.delete(userId);
-        userStatus.delete(userId);
-        socket.broadcast.emit("user-status", { userId, status: "offline" });
       } else {
         connectionCounts.set(userId, remaining);
       }
+      // Emits "user-status: offline" only when this was the user's last
+      // socket on EVERY instance - a second tab or device elsewhere
+      // keeps them online.
+      presence.disconnect(userId).catch((err) => console.error("presence disconnect error:", err));
       console.log(`🔌 User ${userId} disconnected (socket ${socket.id})`);
     });
   });
