@@ -202,14 +202,24 @@ export default function AdminUsers() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-zrp-red border-t-transparent" />
-      </div>
-    );
-  }
-
+  /*
+   * No early `if (loading) return <spinner/>` here, deliberately.
+   *
+   * That is what made the search box unusable on a phone. The effect
+   * below refetches on every change of `search`, fetchUsers() calls
+   * setLoading(true) synchronously, and an early return swapped the
+   * ENTIRE tree for a spinner - so React unmounted the <input> on every
+   * single keystroke and mounted a brand new one when the request came
+   * back. A fresh input has no focus, and an unfocused input on iOS and
+   * Android dismisses the keyboard. Hence: type one letter, keyboard
+   * closes, tap again, type one letter, keyboard closes.
+   *
+   * The page shell - heading, search box, stat cards, filters - now
+   * stays mounted for the life of the page, and only the results region
+   * swaps to a loading state. The input element is never destroyed, so
+   * it keeps focus, the caret and the keyboard all by itself. No
+   * autoFocus, no imperative .focus() calls.
+   */
   return (
     <div>
       {/* ─── Header ────────────────────────────────────────────────────── */}
@@ -327,7 +337,19 @@ export default function AdminUsers() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredUsers.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="px-4 py-8">
+                    <div className="flex items-center justify-center">
+                      <div
+                        className="animate-spin rounded-full h-8 w-8 border-2 border-zrp-red border-t-transparent"
+                        role="status"
+                        aria-label={t("action.loading")}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                     {t("adminUsers.noMatch")}
