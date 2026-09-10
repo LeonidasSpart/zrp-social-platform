@@ -52,6 +52,25 @@ export function sourceStatusFor(consecutiveFailures: number): "HEALTHY" | "WARNI
   return "FAILED";
 }
 
+/*
+ * A poll interval is a target cadence, not a deadline to the second.
+ *
+ * The poller only runs when a cycle runs, so a source that is a few
+ * seconds short of due when a cycle starts does not wait a few seconds
+ * - it waits for the whole next cycle. With most sources on a 60-minute
+ * interval and cycles now running hourly, the two are exactly in phase,
+ * and GitHub's own several-minute jitter on scheduled workflows decides
+ * the outcome: a cycle that starts marginally earlier than the previous
+ * one skips every source, which is how a production cycle reported
+ * sourcesFetched: 0 with nothing actually wrong.
+ *
+ * Treating "within 10% of the interval" as due costs nothing (a source
+ * polled at 54 minutes instead of 60 is still polite) and removes the
+ * phase alignment entirely, at any interval: 15-minute sources get 90
+ * seconds of tolerance, hourly ones get six minutes.
+ */
+const POLL_DUE_TOLERANCE = 0.1;
+
 /** Whether a source is due for a poll right now. */
 export function isSourceDue(
   source: Pick<NewsSource, "enabled" | "backoffUntil" | "lastFetchedAt" | "fetchIntervalMinutes">,
@@ -60,8 +79,10 @@ export function isSourceDue(
   if (!source.enabled) return false;
   if (source.backoffUntil && source.backoffUntil > now) return false;
   if (!source.lastFetchedAt) return true;
+
+  const intervalMs = source.fetchIntervalMinutes * 60 * 1000;
   const dueAt = new Date(
-    source.lastFetchedAt.getTime() + source.fetchIntervalMinutes * 60 * 1000
+    source.lastFetchedAt.getTime() + intervalMs - intervalMs * POLL_DUE_TOLERANCE
   );
   return dueAt <= now;
 }
