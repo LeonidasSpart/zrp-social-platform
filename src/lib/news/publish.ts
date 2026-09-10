@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import { composePostContent, isPostLengthValid, MAX_POST_LENGTH } from "./format";
+import { fetchFallbackImage } from "./image-fallback";
 import { correctNewsArticle, maybeCreateNewsArticle, removeNewsArticle } from "./news-article-bridge";
 import { idempotencyKeyFor, type PlannedSlot } from "./scheduler";
 
@@ -75,7 +76,8 @@ export const MAX_PUBLISH_ATTEMPTS = 3;
 export async function publishDuePublication(
   db: PrismaClient,
   publicationId: string,
-  now: Date
+  now: Date,
+  options: { imageFallback?: Parameters<typeof fetchFallbackImage>[1] } = {}
 ): Promise<PublishResult> {
   const publication = await db.newsPublication.findUnique({
     where: { id: publicationId },
@@ -149,10 +151,15 @@ export async function publishDuePublication(
     return fail(`Composed post length ${content.length} is outside 1..${MAX_POST_LENGTH}`);
   }
 
-  // Only an image the source was explicitly cleared to share reaches
-  // this point (see ingest.ts) - anything else publishes as text plus
-  // the source link.
-  const imageUrl = publication.story.imageUrl;
+  // The source's own RSS image, when its source has been cleared to
+  // share it (see ingest.ts). Most sources aren't, so most stories
+  // reach here with none - in which case fall back to the linked
+  // article's own og:image, exactly like the main feed's link-preview
+  // cards already do for any pasted URL. Computed before the
+  // transaction below: it is a network call, and must never hold a DB
+  // transaction open while it runs.
+  const imageUrl =
+    publication.story.imageUrl ?? (await fetchFallbackImage(sources[0].url, options.imageFallback));
 
   try {
     const result = await db.$transaction(async (tx) => {
