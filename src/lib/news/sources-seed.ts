@@ -340,6 +340,51 @@ export const SEED_SOURCES: SeedSource[] = [
     trustTier: 2,
   },
 
+  // ─── Crypto (tier 3) ──────────────────────────────────────────
+  // The general-news sources above cover crypto only when a story is
+  // large enough to reach a mainstream business desk, so the CRYPTO
+  // topic almost never fired. These are the established crypto trade
+  // press, added so the ZRP Crypto desk has something to publish.
+  // Tier 3, not 2: trade press covering an industry it is part of does
+  // not corroborate a story the way an established general outlet
+  // does, so a story resting on these alone stays DEVELOPING rather
+  // than CONFIRMED (see assessConfidence in classify.ts).
+  // ⚠️ Same caveat as every entry here: not fetched from this build
+  // environment - verify before relying on it.
+  {
+    key: "coindesk",
+    name: "CoinDesk",
+    publisher: "CoinDesk",
+    feedUrl: "https://www.coindesk.com/arc/outboundfeeds/rss/",
+    homepageUrl: "https://www.coindesk.com/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["CRYPTO"],
+    trustTier: 3,
+  },
+  {
+    key: "cointelegraph",
+    name: "Cointelegraph",
+    publisher: "Cointelegraph",
+    feedUrl: "https://cointelegraph.com/rss",
+    homepageUrl: "https://cointelegraph.com/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["CRYPTO"],
+    trustTier: 3,
+  },
+  {
+    key: "decrypt",
+    name: "Decrypt",
+    publisher: "Decrypt",
+    feedUrl: "https://decrypt.co/feed",
+    homepageUrl: "https://decrypt.co/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["CRYPTO"],
+    trustTier: 3,
+  },
+
   // ─── Gaming (tier 2/3) ────────────────────────────────────────
   // Per-platform coverage so PlayStation, Nintendo and Xbox each have a
   // real dedicated source rather than relying on general-news outlets
