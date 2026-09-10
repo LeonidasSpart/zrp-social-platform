@@ -18,6 +18,7 @@ import PageTransition from "@/components/PageTransition";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import BottomNav from "@/components/BottomNav";
+import Footer from "@/components/Footer";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Suspense } from "react";
 import MusicProviderMount from "@/components/music/MusicProviderMount";
@@ -373,6 +374,14 @@ export default function RootLayout({
 
                           <RightPanel />
                         </div>
+
+                        {/* Sits below the whole shell - Sidebar, main and
+                            RightPanel - so it spans the full width and
+                            stays out of the feed's own scroll rhythm. The
+                            main area above is flex-1, so on a short page
+                            the footer lands at the bottom of the viewport
+                            rather than halfway up it. */}
+                        <Footer />
 
                         <CookieConsent />
 
