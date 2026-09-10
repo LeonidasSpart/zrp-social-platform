@@ -205,6 +205,30 @@ export async function recordSourceSuccess(
   });
 }
 
+/*
+ * Failures a source will never recover from by being retried.
+ *
+ * Everything else - a 5xx, a timeout, a connection reset - is a bad
+ * moment, and exponential backoff is the right answer. These two are
+ * not: a 404 or a 410 means the feed is gone, and a robots.txt
+ * disallow is the publisher's decision, not a fault.
+ *
+ * Retrying them forever is worse than pointless. A dead source that
+ * stays enabled makes a category look covered when it is not: found in
+ * production, where swissinfo-eng had returned HTTP 404 seven times in
+ * a row and was still switched on as one of Switzerland's sources, and
+ * cbc-top-stories was still being polled seven failures after the
+ * publisher disallowed it.
+ */
+function isPermanentFailure(error: string): boolean {
+  const text = error.toLowerCase();
+  return (
+    text.startsWith("http 404") ||
+    text.startsWith("http 410") ||
+    text.includes("disallowed by robots.txt")
+  );
+}
+
 export async function recordSourceFailure(
   db: PrismaClient,
   source: Pick<NewsSource, "id" | "consecutiveFailures">,
@@ -214,11 +238,16 @@ export async function recordSourceFailure(
   const failures = source.consecutiveFailures + 1;
   const backoffUntil = new Date(now.getTime() + backoffMinutesFor(failures) * 60 * 1000);
 
+  // Retired rather than retried. The error is kept so the dashboard can
+  // still say exactly why, and an admin can re-enable it after fixing
+  // the URL.
+  const permanent = isPermanentFailure(error);
+
   await db.newsSource.update({
     where: { id: source.id },
     data: {
       consecutiveFailures: failures,
-      status: sourceStatusFor(failures),
+      ...(permanent ? { enabled: false, status: "DISABLED" as const } : { status: sourceStatusFor(failures) }),
       // Truncated: a source that returns a huge error body must not be
       // able to bloat the row it is reported in.
       lastError: error.slice(0, 500),
