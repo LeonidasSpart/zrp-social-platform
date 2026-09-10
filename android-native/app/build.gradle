@@ -178,8 +178,23 @@ android {
         // fix is entirely in the shared Next.js backend/web frontend.
         // None of this changes applicationId, signing, or deep links.
         // 13 was confirmed uploaded to Play Internal Testing.
-        versionCode 14
-        versionName "4.0.9"
+        //
+        // Bumps to versionCode 15 / versionName "4.0.10" to rebuild with
+        // a corrected GOOGLE_WEB_CLIENT_ID repo secret. GOOGLE_WEB_CLIENT_ID
+        // is compiled into the app at build time (see GoogleAuth.kt's own
+        // comment and this file's own GOOGLE_WEB_CLIENT_ID buildConfigField
+        // wiring above) - it must be byte-identical to Railway's
+        // GOOGLE_MOBILE_CLIENT_ID, since that's the value the backend's
+        // POST /api/mobile/auth/google accepts as a token audience (see
+        // that route's own comment on why web and mobile use two separate
+        // Google Cloud OAuth clients). The two had never been directly
+        // compared before; 14's AAB was built before this secret was
+        // re-verified, so this rebuild is the first one confirmed to
+        // carry the checked value. No android-native Kotlin source
+        // changed. None of this changes applicationId, signing, or deep
+        // links. 14 was not confirmed uploaded to Play.
+        versionCode 15
+        versionName "4.0.10"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
