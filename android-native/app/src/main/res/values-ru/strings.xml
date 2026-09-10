@@ -1697,6 +1697,20 @@
     <string name="legal_contact">Контакты</string>
     <string name="legal_about">О ZRP</string>
     <string name="legal_careers">Карьера</string>
+    <string name="legal_charity">Благотворительность</string>
+    <string name="charity_committed_label">Направлено на благотворительность</string>
+    <string name="charity_committed_note">Рассчитывается автоматически на основе завершённых чаевых и покупок премиум-контента: 35% от комиссии платформы ZRP с каждой.</string>
+    <string name="charity_disbursed_label">Выплачено на данный момент</string>
+    <string name="charity_disbursed_note">Реальные выплаты, которые ZRP произвела получателям, зафиксированные нашей командой по мере их совершения.</string>
+    <string name="charity_cause_orphanages">Детские дома</string>
+    <string name="charity_cause_schools">Школы</string>
+    <string name="charity_cause_hospitals">Больницы</string>
+    <string name="charity_cause_climate">Климатические проекты</string>
+    <string name="charity_ledger_heading">Реестр выплат</string>
+    <string name="charity_no_disbursements_yet">Выплаты пока не зарегистрированы. Этот реестр реальный и актуальный: первая запись появится здесь, как только будет произведён платёж.</string>
+    <string name="charity_view_proof">Посмотреть подтверждение</string>
+    <string name="charity_err_load">Не удалось загрузить данные о благотворительности. Пожалуйста, попробуйте позже.</string>
+    <string name="charity_generated_note">Данные сформированы %1$s. Обновляется ежечасно.</string>
     <string name="legal_load_error">Не удалось загрузить страницу. Проверьте подключение и повторите попытку.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Присоединился</string>

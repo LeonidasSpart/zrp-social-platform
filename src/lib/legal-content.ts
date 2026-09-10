@@ -23,7 +23,15 @@
  */
 import { Language, translations } from "@/lib/translations";
 
-export type LegalPageId = "terms" | "privacy" | "guidelines" | "help" | "contact" | "about" | "careers";
+export type LegalPageId =
+  | "terms"
+  | "privacy"
+  | "guidelines"
+  | "help"
+  | "contact"
+  | "about"
+  | "careers"
+  | "charity";
 
 export const LEGAL_PAGE_IDS: LegalPageId[] = [
   "terms",
@@ -33,6 +41,7 @@ export const LEGAL_PAGE_IDS: LegalPageId[] = [
   "contact",
   "about",
   "careers",
+  "charity",
 ];
 
 type CardItem = {
@@ -788,6 +797,67 @@ export const CAREERS_CONFIG: PageConfig = {
   ],
 };
 
+// ─── Charity (src/app/charity/page.tsx) ───────────────────────────────────
+// This config covers only the page's static informational content - the
+// hero, the "how it works" steps, the fixed 35/25/20/20 cause-budget
+// split (a real allocation policy, not live data), and the transparency
+// intro paragraph. The live disbursement ledger itself (CharityLedger.tsx,
+// GET /api/transparency/charity - real committed vs. disbursed totals and
+// per-beneficiary records) is genuinely dynamic data with its own
+// real-time API contract, not resolvable text like every other block
+// here - Android renders it as a separate trailingContent section
+// appended after this config's own content in LegalScreen (see
+// CharityLedgerSection.kt), fetched from the same public endpoint.
+export const CHARITY_CONFIG: PageConfig = {
+  title: ["charity.heroTitle1", "charity.heroTitle2"],
+  subtitle: ["charity.heroSubtitleP1", "charity.heroSubtitleBold", "charity.heroSubtitleP2"],
+  sections: [
+    {
+      id: "how-it-works",
+      title: ["charity.howItWorksHeading"],
+      body: [
+        P("charity.quarterlyBadge"),
+        CARDS(
+          card(["💰", "charity.step1Title"], ["charity.step1Desc", "charity.step1Bold", "charity.step1DescEnd"]),
+          card(["⚖️", "charity.step2Title"], ["charity.step2Desc", "charity.step2Bold"]),
+          card(["🤝", "charity.step3Title"], ["charity.step3Desc", "charity.step3Note"]),
+        ),
+      ],
+    },
+    {
+      id: "where-it-goes",
+      title: ["charity.whereGoesHeading"],
+      body: [
+        P("charity.whereGoesDesc"),
+        CARDS(
+          card(["👶", "charity.cause1Title"], ["charity.cause1Desc"], ["35%"]),
+          card(["📚", "charity.cause2Title"], ["charity.cause2Desc"], ["25%"]),
+          card(["🏥", "charity.cause3Title"], ["charity.cause3Desc"], ["20%"]),
+          card(["🌍", "charity.cause4Title"], ["charity.cause4Desc"], ["20%"]),
+        ),
+      ],
+    },
+    {
+      id: "transparency-intro",
+      title: ["charity.transparencyHeading"],
+      body: [
+        P(
+          "charity.transparencyDescP1",
+          "charity.transparencyDescBold",
+          "charity.transparencyDescP2",
+          "charity.transparencyDescBold2",
+        ),
+        CALLOUT("charity.firstReportNote"),
+      ],
+    },
+    {
+      id: "cta",
+      title: ["charity.ctaHeading"],
+      body: [P("charity.ctaDescP1", "charity.ctaDescBold", "charity.ctaDescP2")],
+    },
+  ],
+};
+
 // ─── Help Center (src/app/help/page.tsx sections, 01-17) ─────────────────
 
 function faqItems(count: number): { question: string[]; answer: string[] }[] {
@@ -1253,4 +1323,5 @@ export const LEGAL_CONFIGS: Record<LegalPageId, PageConfig> = {
   contact: CONTACT_CONFIG,
   about: ABOUT_CONFIG,
   careers: CAREERS_CONFIG,
+  charity: CHARITY_CONFIG,
 };

@@ -1713,6 +1713,20 @@
     <string name="legal_contact">Contact</string>
     <string name="legal_about">About ZRP</string>
     <string name="legal_careers">Careers</string>
+    <string name="legal_charity">Charity</string>
+    <string name="charity_committed_label">Committed to charity</string>
+    <string name="charity_committed_note">Calculated automatically from completed tips and premium content purchases: 35% of ZRP\'s platform fee on each.</string>
+    <string name="charity_disbursed_label">Disbursed so far</string>
+    <string name="charity_disbursed_note">Real payments ZRP has made to beneficiaries, recorded by our team as they happen.</string>
+    <string name="charity_cause_orphanages">Orphanages</string>
+    <string name="charity_cause_schools">Schools</string>
+    <string name="charity_cause_hospitals">Hospitals</string>
+    <string name="charity_cause_climate">Climate Projects</string>
+    <string name="charity_ledger_heading">Disbursement ledger</string>
+    <string name="charity_no_disbursements_yet">No disbursements have been recorded yet. This ledger is real and live: the first entry will appear here as soon as a payment is made.</string>
+    <string name="charity_view_proof">View proof</string>
+    <string name="charity_err_load">Unable to load charity data right now. Please try again later.</string>
+    <string name="charity_generated_note">Data generated %1$s. Updated hourly.</string>
     <string name="legal_load_error">Couldn\'t load this page. Check your connection and try again.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Joined</string>
