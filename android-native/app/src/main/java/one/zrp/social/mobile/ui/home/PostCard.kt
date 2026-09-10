@@ -399,6 +399,8 @@ fun PostCard(
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
                         )
                         VerifiedBadge(badgeType = post.author.badgeType)
                         Spacer(modifier = Modifier.width(6.dp))

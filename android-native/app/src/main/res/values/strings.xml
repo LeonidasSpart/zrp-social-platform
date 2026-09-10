@@ -299,6 +299,8 @@
     <string name="chat_recording_label">Recording...</string>
     <string name="chat_message_actions_cd">Message actions</string>
     <string name="chat_send_voice_message_cd">Send</string>
+    <string name="chat_voice_play_cd">Play</string>
+    <string name="chat_voice_pause_cd">Pause</string>
     <string name="chat_err_mic_access">Couldn\'t access your microphone. Please check your permissions.</string>
     <string name="chat_attachment_fallback">Document</string>
     <string name="comment_post_cd">Post comment</string>
@@ -1947,7 +1949,7 @@
     <string name="admin_news_network_no_stories">No stories in this queue.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · score %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · %3$d sources</string>
-    <string name="admin_news_network_flag_sensitive">Sensitive – human review required</string>
+    <string name="admin_news_network_flag_sensitive">Sensitive - human review required</string>
     <string name="admin_news_network_flag_breaking">Breaking</string>
     <string name="admin_news_network_flag_travel">Travel</string>
     <string name="admin_news_network_reject">Reject</string>

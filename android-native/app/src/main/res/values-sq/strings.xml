@@ -287,6 +287,8 @@
     <string name="chat_recording_label">Duke regjistruar...</string>
     <string name="chat_message_actions_cd">Opsionet e mesazhit</string>
     <string name="chat_send_voice_message_cd">Dërgo</string>
+    <string name="chat_voice_play_cd">Luaj</string>
+    <string name="chat_voice_pause_cd">Pauzë</string>
     <string name="chat_err_mic_access">Nuk mund të aksesohej mikrofoni. Kontrolloni lejet tuaja.</string>
     <string name="chat_attachment_fallback">Dokument</string>
     <string name="comment_post_cd">Posto komentin</string>
@@ -1931,7 +1933,7 @@
     <string name="admin_news_network_no_stories">Asnjë lajm në këtë radhë.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · pikë %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · %3$d burime</string>
-    <string name="admin_news_network_flag_sensitive">I ndjeshëm – kërkon shqyrtim njerëzor</string>
+    <string name="admin_news_network_flag_sensitive">I ndjeshëm - kërkon shqyrtim njerëzor</string>
     <string name="admin_news_network_flag_breaking">I fundit</string>
     <string name="admin_news_network_flag_travel">Udhëtim</string>
     <string name="admin_news_network_reject">Refuzo</string>

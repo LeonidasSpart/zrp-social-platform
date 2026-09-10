@@ -182,13 +182,19 @@ private fun TrustPassportBody(data: TrustPassportResponse, onOpenProfile: (Strin
             }
 
             Row(
-                modifier = Modifier.padding(top = Spacing.sm),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.sm),
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = data.user.name ?: data.user.username,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
                 VerifiedBadge(badgeType = data.user.badgeType)
             }

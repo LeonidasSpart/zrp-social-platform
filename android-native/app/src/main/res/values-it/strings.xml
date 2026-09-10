@@ -287,6 +287,8 @@
     <string name="chat_recording_label">Registrazione in corso...</string>
     <string name="chat_message_actions_cd">Opzioni messaggio</string>
     <string name="chat_send_voice_message_cd">Invia</string>
+    <string name="chat_voice_play_cd">Riproduci</string>
+    <string name="chat_voice_pause_cd">Pausa</string>
     <string name="chat_err_mic_access">Impossibile accedere al microfono. Controlla le autorizzazioni.</string>
     <string name="chat_attachment_fallback">Documento</string>
     <string name="comment_post_cd">Pubblica commento</string>
@@ -1931,7 +1933,7 @@
     <string name="admin_news_network_no_stories">Nessuna notizia in questa coda.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · punteggio %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · %3$d fonti</string>
-    <string name="admin_news_network_flag_sensitive">Sensibile – richiede revisione umana</string>
+    <string name="admin_news_network_flag_sensitive">Sensibile - richiede revisione umana</string>
     <string name="admin_news_network_flag_breaking">Ultim\'ora</string>
     <string name="admin_news_network_flag_travel">Viaggi</string>
     <string name="admin_news_network_reject">Rifiuta</string>

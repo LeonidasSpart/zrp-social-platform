@@ -184,6 +184,7 @@ private fun FollowListRow(
                     style = MaterialTheme.typography.bodyLarge,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
                 VerifiedBadge(badgeType = badgeType, size = BadgeSize.default)
             }

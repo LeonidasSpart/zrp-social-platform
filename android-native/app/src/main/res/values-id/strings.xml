@@ -287,6 +287,8 @@
     <string name="chat_recording_label">Merekam...</string>
     <string name="chat_message_actions_cd">Opsi pesan</string>
     <string name="chat_send_voice_message_cd">Kirim</string>
+    <string name="chat_voice_play_cd">Putar</string>
+    <string name="chat_voice_pause_cd">Jeda</string>
     <string name="chat_err_mic_access">Tidak dapat mengakses mikrofon Anda. Silakan periksa izin Anda.</string>
     <string name="chat_attachment_fallback">Dokumen</string>
     <string name="comment_post_cd">Kirim komentar</string>
@@ -1931,7 +1933,7 @@
     <string name="admin_news_network_no_stories">Tidak ada berita di antrean ini.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · skor %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · %3$d sumber</string>
-    <string name="admin_news_network_flag_sensitive">Sensitif – perlu tinjauan manusia</string>
+    <string name="admin_news_network_flag_sensitive">Sensitif - perlu tinjauan manusia</string>
     <string name="admin_news_network_flag_breaking">Berita sela</string>
     <string name="admin_news_network_flag_travel">Perjalanan</string>
     <string name="admin_news_network_reject">Tolak</string>

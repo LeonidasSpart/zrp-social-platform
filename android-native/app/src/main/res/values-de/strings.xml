@@ -287,6 +287,8 @@
     <string name="chat_recording_label">Aufnahme läuft...</string>
     <string name="chat_message_actions_cd">Nachrichtenoptionen</string>
     <string name="chat_send_voice_message_cd">Senden</string>
+    <string name="chat_voice_play_cd">Abspielen</string>
+    <string name="chat_voice_pause_cd">Pause</string>
     <string name="chat_err_mic_access">Zugriff auf das Mikrofon nicht möglich. Bitte überprüfe deine Berechtigungen.</string>
     <string name="chat_attachment_fallback">Dokument</string>
     <string name="comment_post_cd">Kommentar posten</string>
@@ -1931,7 +1933,7 @@
     <string name="admin_news_network_no_stories">Keine Meldungen in dieser Liste.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · Wert %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · %3$d Quellen</string>
-    <string name="admin_news_network_flag_sensitive">Sensibel – menschliche Prüfung erforderlich</string>
+    <string name="admin_news_network_flag_sensitive">Sensibel - menschliche Prüfung erforderlich</string>
     <string name="admin_news_network_flag_breaking">Eilmeldung</string>
     <string name="admin_news_network_flag_travel">Reise</string>
     <string name="admin_news_network_reject">Ablehnen</string>
@@ -1951,7 +1953,7 @@
     <string name="admin_news_network_remove_reason">Warum wird dieser Beitrag entfernt?</string>
     <string name="admin_news_network_remove_confirm">„%1$s“ entfernen? Der Beitrag wird gelöscht und der Grund bleibt im Protokoll.</string>
     <string name="admin_news_network_post_removed">Beitrag entfernt.</string>
-    <string name="admin_news_network_pause_confirm">Das News-Netzwerk pausieren? Es wird nichts veröffentlicht, bis du fortsetzt – auch nichts bereits Eingeplantes.</string>
+    <string name="admin_news_network_pause_confirm">Das News-Netzwerk pausieren? Es wird nichts veröffentlicht, bis du fortsetzt - auch nichts bereits Eingeplantes.</string>
     <string name="admin_news_network_resume_confirm">Das News-Netzwerk fortsetzen? Die Veröffentlichung startet im nächsten Zyklus.</string>
     <string name="admin_news_network_paused_done">Automatisierung pausiert.</string>
     <string name="admin_news_network_resumed_done">Automatisierung fortgesetzt.</string>
