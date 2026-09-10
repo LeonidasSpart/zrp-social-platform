@@ -161,8 +161,25 @@ android {
         // on mobile web/PWA/tablet. None of this changes applicationId,
         // signing, or deep links. 12 was confirmed uploaded to Play
         // Internal Testing.
-        versionCode 13
-        versionName "4.0.8"
+        //
+        // Bumps to versionCode 14 / versionName "4.0.9" for the real
+        // root cause of "polls not publishing correctly" (PR #233): the
+        // poll create/vote/fetch API pipeline was already correct
+        // end-to-end, but the website's own PostCard.tsx - the shared
+        // component every post-listing page renders through - never
+        // imported or rendered the existing Poll component, so a
+        // published poll saved and was voteable but never appeared as a
+        // poll anywhere in the UI. Also fixes several backend routes
+        // (profile posts/likes/reposts, search, hashtag, quotes,
+        // bookmarks) that never selected a post's poll data at all -
+        // this app's own native screens hitting those same endpoints
+        // (e.g. profile posts) now receive real poll data from them too.
+        // No android-native Kotlin source changed in this release; the
+        // fix is entirely in the shared Next.js backend/web frontend.
+        // None of this changes applicationId, signing, or deep links.
+        // 13 was confirmed uploaded to Play Internal Testing.
+        versionCode 14
+        versionName "4.0.9"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
