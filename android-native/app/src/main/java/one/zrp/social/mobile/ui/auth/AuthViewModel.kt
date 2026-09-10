@@ -1,6 +1,7 @@
 package one.zrp.social.mobile.ui.auth
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -200,12 +201,15 @@ class AuthViewModel(
         // (checked in ZrpSocialApp) means exactly that happened.
         val attemptMarker = GoogleSignInAttemptMarker(context)
         attemptMarker.markStarted()
+        Log.d("GoogleAuthFlow", "loginWithGoogle: started, attempt marker persisted")
 
         viewModelScope.launch {
             GoogleAuth.requestIdToken(context)
                 .onSuccess { idToken ->
+                    Log.d("GoogleAuthFlow", "loginWithGoogle: ID token obtained, calling POST /mobile/auth/google")
                     authRepository.loginWithGoogle(idToken)
                         .onSuccess { user ->
+                            Log.d("GoogleAuthFlow", "loginWithGoogle: backend accepted token, session established for userId=${user.id}")
                             _loginForm.value = LoginFormState.Idle
                             _authState.value = AuthUiState.LoggedIn(user, needsOnboarding = !user.onboardingCompleted)
                             try {
@@ -214,12 +218,18 @@ class AuthViewModel(
                             }
                         }
                         .onFailure { error ->
+                            // The OkHttp BASIC logging interceptor already
+                            // logs this call's method/URL/response code -
+                            // check Logcat for "okhttp" around this line
+                            // to see the actual HTTP status if this fires.
+                            Log.w("GoogleAuthFlow", "loginWithGoogle: backend rejected token: ${error.message}")
                             _loginForm.value = LoginFormState.Error(
                                 error.message ?: "Something went wrong. Please try again."
                             )
                         }
                 }
                 .onFailure { failure ->
+                    Log.w("GoogleAuthFlow", "loginWithGoogle: GoogleAuth.requestIdToken failed: ${failure::class.simpleName}: ${failure.message}")
                     // A cancelled picker isn't an error - just stop
                     // showing Submitting, exactly like tapping away from
                     // the password form never shows an error either.
@@ -230,6 +240,7 @@ class AuthViewModel(
                     }
                 }
             attemptMarker.clear()
+            Log.d("GoogleAuthFlow", "loginWithGoogle: finished, attempt marker cleared")
         }
     }
 

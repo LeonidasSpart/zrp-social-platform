@@ -3,6 +3,7 @@ package one.zrp.social.mobile
 import android.Manifest
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -19,6 +20,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -92,7 +94,18 @@ fun ZrpSocialApp(windowSizeClass: WindowSizeClass) {
     // otherwise never left set in the first place.
     val context = LocalContext.current
     LaunchedEffect(Unit) {
-        if (GoogleSignInAttemptMarker(context).consumeInterruptedAttempt()) {
+        // The single most diagnostic line for "account picker closed,
+        // then silence": if this logs true, the process was genuinely
+        // killed mid Google-Sign-In (see GoogleSignInAttemptMarker's own
+        // KDoc) and reportInterruptedGoogleSignIn() below is what should
+        // put a real message on screen - if the user still saw nothing,
+        // the bug is in how GoogleInterrupted renders, not in detection.
+        // If this logs false, the process survived and the failure is
+        // elsewhere in the flow (GoogleAuth.kt, the backend call, or
+        // post-login navigation) - check those logs instead.
+        val interrupted = GoogleSignInAttemptMarker(context).consumeInterruptedAttempt()
+        Log.d("GoogleAuthFlow", "Cold-start interrupted-attempt check: interrupted=$interrupted")
+        if (interrupted) {
             authViewModel.reportInterruptedGoogleSignIn()
         }
     }
@@ -119,7 +132,25 @@ fun ZrpSocialApp(windowSizeClass: WindowSizeClass) {
             val currentAuthState = authState
             when (currentAuthState) {
                 is AuthUiState.LoggedOut -> {
-                    var loggedOutScreen by remember { mutableStateOf(LoggedOutScreen.LOGIN) }
+                    // rememberSaveable, not remember: a plain remember is
+                    // lost on ANY Activity recreation not covered by
+                    // MainActivity's own configChanges - most notably the
+                    // OS killing this process while backgrounded (see
+                    // GoogleSignInAttemptMarker's own KDoc; already known
+                    // to happen on OEM builds that manage background
+                    // processes aggressively) and recreating it fresh
+                    // when the user returns from the external Google
+                    // account picker. That silently swapped SIGNUP for
+                    // this enum's LOGIN default on return, even on runs
+                    // where the sign-in itself went on to succeed or
+                    // surface a real error - the user lost their place
+                    // regardless of what the rest of the flow did.
+                    // rememberSaveable persists this the same way
+                    // Android's own Bundle-based instance-state
+                    // mechanism already would for a plain View, and
+                    // (unlike a plain remember) it survives that
+                    // recreation intact.
+                    var loggedOutScreen by rememberSaveable { mutableStateOf(LoggedOutScreen.LOGIN) }
                     when (loggedOutScreen) {
                         LoggedOutScreen.LOGIN -> LoginScreen(
                             formState = loginForm,
