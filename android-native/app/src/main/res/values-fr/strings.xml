@@ -1697,6 +1697,20 @@
     <string name="legal_contact">Contact</string>
     <string name="legal_about">À propos de ZRP</string>
     <string name="legal_careers">Carrières</string>
+    <string name="legal_charity">Charité</string>
+    <string name="charity_committed_label">Engagé pour la charité</string>
+    <string name="charity_committed_note">Calculé automatiquement à partir des pourboires et achats de contenu premium complétés : 35% des frais de plateforme de ZRP sur chacun.</string>
+    <string name="charity_disbursed_label">Décaissé jusqu\'à présent</string>
+    <string name="charity_disbursed_note">Paiements réels effectués par ZRP aux bénéficiaires, enregistrés par notre équipe au fur et à mesure.</string>
+    <string name="charity_cause_orphanages">Orphelinats</string>
+    <string name="charity_cause_schools">Écoles</string>
+    <string name="charity_cause_hospitals">Hôpitaux</string>
+    <string name="charity_cause_climate">Projets climatiques</string>
+    <string name="charity_ledger_heading">Registre des décaissements</string>
+    <string name="charity_no_disbursements_yet">Aucun décaissement n\'a encore été enregistré. Ce registre est réel et en direct : la première entrée apparaîtra ici dès qu\'un paiement sera effectué.</string>
+    <string name="charity_view_proof">Voir la preuve</string>
+    <string name="charity_err_load">Impossible de charger les données caritatives pour le moment. Veuillez réessayer plus tard.</string>
+    <string name="charity_generated_note">Données générées le %1$s. Mise à jour toutes les heures.</string>
     <string name="legal_load_error">Impossible de charger cette page. Vérifiez votre connexion et réessayez.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Inscrit(e) depuis</string>

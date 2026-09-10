@@ -61,6 +61,7 @@ import one.zrp.social.mobile.ui.admin.AdminSupportTicketsScreen
 import one.zrp.social.mobile.ui.admin.AdminUpgradeRequestsScreen
 import one.zrp.social.mobile.ui.admin.AdminUsersScreen
 import one.zrp.social.mobile.ui.admin.AdminWithdrawalsScreen
+import one.zrp.social.mobile.ui.charity.CharityLedgerSection
 import one.zrp.social.mobile.ui.legal.LegalScreen
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
@@ -284,6 +285,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     val goToContact: () -> Unit = { navController.navigate("legal/contact") }
     val goToAbout: () -> Unit = { navController.navigate("legal/about") }
     val goToCareers: () -> Unit = { navController.navigate("legal/careers") }
+    val goToCharity: () -> Unit = { navController.navigate("legal/charity") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
@@ -1102,6 +1104,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenContact = goToContact,
                     onOpenAbout = goToAbout,
                     onOpenCareers = goToCareers,
+                    onOpenCharity = goToCharity,
                 )
             }
             composable("settings/team") {
@@ -1157,6 +1160,14 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     page = "careers",
                     title = stringResource(R.string.legal_careers),
                     onBack = { navController.popBackStack() },
+                )
+            }
+            composable("legal/charity") {
+                LegalScreen(
+                    page = "charity",
+                    title = stringResource(R.string.legal_charity),
+                    onBack = { navController.popBackStack() },
+                    trailingContent = { CharityLedgerSection() },
                 )
             }
             composable("admin") {

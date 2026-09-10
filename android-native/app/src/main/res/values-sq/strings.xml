@@ -1697,6 +1697,20 @@
     <string name="legal_contact">Kontakt</string>
     <string name="legal_about">Rreth ZRP</string>
     <string name="legal_careers">Karriera</string>
+    <string name="legal_charity">Bamirësi</string>
+    <string name="charity_committed_label">Angazhuar për bamirësi</string>
+    <string name="charity_committed_note">Llogaritet automatikisht nga bakshishet dhe blerjet e përfunduara të përmbajtjes premium: 35% e tarifës së platformës ZRP për secilën.</string>
+    <string name="charity_disbursed_label">Shpërndarë deri tani</string>
+    <string name="charity_disbursed_note">Pagesa reale që ZRP ka bërë për përfituesit, të regjistruara nga ekipi ynë ndërsa ndodhin.</string>
+    <string name="charity_cause_orphanages">Jetimore</string>
+    <string name="charity_cause_schools">Shkolla</string>
+    <string name="charity_cause_hospitals">Spitale</string>
+    <string name="charity_cause_climate">Projekte klimatike</string>
+    <string name="charity_ledger_heading">Regjistri i shpërndarjeve</string>
+    <string name="charity_no_disbursements_yet">Ende nuk është regjistruar asnjë shpërndarje. Ky regjistër është real dhe live: hyrja e parë do të shfaqet këtu sapo të bëhet një pagesë.</string>
+    <string name="charity_view_proof">Shiko dëshminë</string>
+    <string name="charity_err_load">Nuk mund të ngarkohen të dhënat e bamirësisë tani. Ju lutemi provoni përsëri më vonë.</string>
+    <string name="charity_generated_note">Të dhënat u gjeneruan më %1$s. Përditësohet çdo orë.</string>
     <string name="legal_load_error">Kjo faqe nuk mund të ngarkohej. Kontrollo lidhjen tënde dhe provo përsëri.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Anëtarësuar më</string>

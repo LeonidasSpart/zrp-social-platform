@@ -1697,6 +1697,20 @@
     <string name="legal_contact">Kontak</string>
     <string name="legal_about">Tentang ZRP</string>
     <string name="legal_careers">Karier</string>
+    <string name="legal_charity">Amal</string>
+    <string name="charity_committed_label">Dikomitmenkan untuk amal</string>
+    <string name="charity_committed_note">Dihitung otomatis dari tip dan pembelian konten premium yang selesai: 35% dari biaya platform ZRP pada masing-masing.</string>
+    <string name="charity_disbursed_label">Sudah disalurkan</string>
+    <string name="charity_disbursed_note">Pembayaran nyata yang telah dilakukan ZRP kepada penerima manfaat, dicatat oleh tim kami saat terjadi.</string>
+    <string name="charity_cause_orphanages">Panti Asuhan</string>
+    <string name="charity_cause_schools">Sekolah</string>
+    <string name="charity_cause_hospitals">Rumah Sakit</string>
+    <string name="charity_cause_climate">Proyek Iklim</string>
+    <string name="charity_ledger_heading">Buku besar penyaluran dana</string>
+    <string name="charity_no_disbursements_yet">Belum ada penyaluran dana yang tercatat. Buku besar ini nyata dan langsung: entri pertama akan muncul di sini segera setelah pembayaran dilakukan.</string>
+    <string name="charity_view_proof">Lihat bukti</string>
+    <string name="charity_err_load">Tidak dapat memuat data amal saat ini. Silakan coba lagi nanti.</string>
+    <string name="charity_generated_note">Data dibuat pada %1$s. Diperbarui setiap jam.</string>
     <string name="legal_load_error">Halaman ini gagal dimuat. Periksa koneksi Anda dan coba lagi.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Bergabung</string>

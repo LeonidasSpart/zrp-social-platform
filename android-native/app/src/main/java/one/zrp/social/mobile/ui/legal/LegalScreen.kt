@@ -66,7 +66,17 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * flickers empty while a request is in flight.
  */
 @Composable
-fun LegalScreen(page: String, title: String, onBack: () -> Unit) {
+fun LegalScreen(
+    page: String,
+    title: String,
+    onBack: () -> Unit,
+    // Appended after this page's own resolved content, still inside the
+    // same scrollable body - see CharityLedgerSection's own KDoc for why
+    // the one page that needs this (charity) has content this generic
+    // block renderer can't express (live, non-text data from a separate
+    // real-time endpoint). No-op for every other page.
+    trailingContent: @Composable () -> Unit = {},
+) {
     val viewModel: LegalViewModel = viewModel(
         factory = remember(page) { LegalViewModelFactory(LegalRepository(), page) },
     )
@@ -94,7 +104,7 @@ fun LegalScreen(page: String, title: String, onBack: () -> Unit) {
         when {
             state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
             state.data == null -> LegalErrorBody(message = state.errorMessage, onRetry = viewModel::retry)
-            else -> LegalBody(data = state.data!!)
+            else -> LegalBody(data = state.data!!, trailingContent = trailingContent)
         }
     }
 }
@@ -127,7 +137,7 @@ private fun LegalErrorBody(message: String?, onRetry: () -> Unit) {
 }
 
 @Composable
-private fun LegalBody(data: LegalContentResponse) {
+private fun LegalBody(data: LegalContentResponse, trailingContent: @Composable () -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -147,6 +157,8 @@ private fun LegalBody(data: LegalContentResponse) {
         data.sections.forEach { section ->
             LegalSectionView(section, modifier = Modifier.padding(top = Spacing.xl))
         }
+
+        trailingContent()
 
         Spacer()
     }
