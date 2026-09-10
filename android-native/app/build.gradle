@@ -192,9 +192,37 @@ android {
         // re-verified, so this rebuild is the first one confirmed to
         // carry the checked value. No android-native Kotlin source
         // changed. None of this changes applicationId, signing, or deep
-        // links. 14 was not confirmed uploaded to Play.
-        versionCode 15
-        versionName "4.0.10"
+        // links. 14 was not confirmed uploaded to Play; 15 WAS uploaded
+        // and real-device tested - that real test is what reproduced the
+        // actual bug (see the 16 entry below).
+        //
+        // Bumps to versionCode 16 / versionName "4.0.11" carrying real-
+        // device diagnosis of the Google Sign-In failure 15 reproduced:
+        // account picker opens, an account is selected, and the app
+        // lands back on a blank, unauthenticated Login screen - even
+        // when the attempt started from Signup. Fixes one concrete,
+        // confirmed bug (ZrpSocialApp's loggedOutScreen was plain
+        // `remember`, losing Signup/ForgotPassword across an Activity
+        // recreation not covered by configChanges - most plausibly the
+        // OS killing the backgrounded process during the external
+        // account picker, exactly what GoogleSignInAttemptMarker exists
+        // to detect - now `rememberSaveable`). That alone does not
+        // explain "not authenticated": if the sign-in itself had
+        // succeeded, the surviving ViewModel auth state would have swept
+        // the user into the home feed regardless of which screen was
+        // showing, and manual password login would not have been
+        // needed. This build additionally carries diagnostic logging
+        // (GoogleAuth.kt, MainActivity.kt, AuthViewModel.kt, and the
+        // backend's /mobile/auth/google route, which previously had a
+        // completely blind catch around its own token verification) at
+        // every checkpoint between "account selected" and "session
+        // established" - never logging the token, password, or any
+        // secret - specifically so THIS build's own real-device retest
+        // can show, from Logcat, exactly where the chain actually
+        // breaks. None of this changes applicationId, signing, or deep
+        // links.
+        versionCode 16
+        versionName "4.0.11"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
