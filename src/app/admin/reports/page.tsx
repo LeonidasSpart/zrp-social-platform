@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Flag, Clock, CheckCircle, AlertTriangle, Filter, X, ExternalLink, User } from "lucide-react";
+import { Flag, Clock, CheckCircle, AlertTriangle, Filter, X, ExternalLink, User, Trash2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Report {
@@ -31,6 +31,7 @@ export default function AdminReports() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
@@ -63,8 +64,10 @@ export default function AdminReports() {
       const data = await res.json();
       setReports(data.reports || []);
       setTotalPages(data.totalPages || 1);
+      return data;
     } catch (error) {
       console.error("Error fetching reports:", error);
+      return null;
     } finally {
       setLoading(false);
     }
@@ -113,6 +116,41 @@ export default function AdminReports() {
     }
     await updateStatus(selectedReportId, "actioned", { actionType, actionNote });
     closeModal();
+  };
+
+  // Deletion is only offered here for a report status has already moved
+  // past "pending" - the DELETE route enforces the same rule server-side
+  // (and also refuses a report with an appeal on file), so this is a UX
+  // guard, not the security boundary.
+  const deleteReport = async (reportId: string) => {
+    if (!confirm(t("adminReports.deleteConfirm"))) return;
+
+    setDeletingId(reportId);
+    try {
+      const res = await fetch(`/api/admin/reports/${reportId}`, { method: "DELETE" });
+      if (res.ok) {
+        setMessage({ type: "success", text: t("adminReports.deleteSuccess") });
+        setTimeout(() => setMessage(null), 3000);
+
+        const data = await fetchReports();
+        // The deleted report may have been the only one left on this
+        // page (e.g. the last report on the last page) - step back a
+        // page rather than leaving the admin looking at a page that's
+        // now empty but isn't actually the end of the list. Changing
+        // `page` re-runs the [page, statusFilter] effect above, which
+        // fetches that page fresh.
+        if (data && (data.reports || []).length === 0 && page > 1) {
+          setPage((p) => p - 1);
+        }
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setMessage({ type: "error", text: err.error || t("adminReports.errDeleteFailed") });
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: t("adminReports.errSomethingWrong") });
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const statusColor = (status: string) => {
@@ -351,6 +389,20 @@ export default function AdminReports() {
                           {t("adminReports.action")}
                         </button>
                       </>
+                    )}
+                    {/* A report only reaches here once it's been
+                        reviewed, dismissed or actioned - there was
+                        previously no control at all to clear it out of
+                        the queue afterward. */}
+                    {report.status !== "pending" && (
+                      <button
+                        onClick={() => deleteReport(report.id)}
+                        disabled={deletingId === report.id}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 text-sm border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition disabled:opacity-50"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                        {t("adminUsers.delete")}
+                      </button>
                     )}
                   </div>
                 </div>
