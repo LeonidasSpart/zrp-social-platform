@@ -1677,16 +1677,40 @@ export default function ChatInterface({
               // (see PresenceContext's own hasStatus) rather than
               // defaulting to a misleading "offline" the instant the
               // thread opens.
-              <div className="mt-0.5 hidden items-center gap-1 sm:flex">
+              // Visible at every width now. The `hidden sm:flex` this
+              // replaces arrived with the original socketConnected dot
+              // (#97), which only ever showed THIS device's connection -
+              // hiding a misleading indicator on small screens was
+              // reasonable, hiding the real one is not, and a phone is
+              // where knowing whether the other person is here matters
+              // most.
+              //
+              // role="status" so a change from Offline to Live is
+              // announced politely rather than silently; the dot is
+              // aria-hidden because the label beside it already says the
+              // same thing, and colour alone must never be the carrier.
+              <div
+                role="status"
+                className="mt-0.5 flex min-w-0 items-center gap-1.5"
+              >
+                {/* shrink-0: without it the dot is a flex item with the
+                    default shrink of 1, so a long translated label in a
+                    narrow header squashes the circle into an ellipse.
+                    leading-4 on the label pins the text line box to
+                    16px, which is what makes items-center put the 8px
+                    dot on the text's optical centre predictably - rather
+                    than depending on inherited line-height, which shifts
+                    under OS font scaling. */}
                 <span
-                  className={`h-2 w-2 rounded-full ${
+                  aria-hidden="true"
+                  className={`h-2 w-2 shrink-0 rounded-full ${
                     isPartnerOnline(receiverId)
                       ? "bg-green-500"
                       : "bg-gray-400 dark:bg-gray-600"
                   }`}
                 />
 
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="truncate text-xs leading-4 text-gray-500 dark:text-gray-400">
                   {isPartnerOnline(receiverId)
                     ? t("chat.live")
                     : t("chat.offline")}
