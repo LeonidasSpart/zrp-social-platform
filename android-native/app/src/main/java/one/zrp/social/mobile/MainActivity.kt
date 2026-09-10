@@ -50,9 +50,13 @@ class MainActivity : AppCompatActivity() {
         setContent {
             // Real window-width detection (tablet/large-screen two-pane
             // messaging - see WindowSize.kt's own isTwoPane KDoc), not a
-            // fixed dp guess - recomputes itself across a rotation/fold/
-            // multi-window resize since this Activity isn't configured
-            // to skip recreation on those config changes.
+            // fixed dp guess. This Activity now declares configChanges
+            // (see AndroidManifest.xml's own comment on why - it's load-
+            // bearing for Google Sign-In, not just rotation smoothness),
+            // so a rotation/fold/multi-window resize no longer recreates
+            // it - but calculateWindowSizeClass() reads LocalConfiguration
+            // reactively, so this still recomputes correctly on every
+            // such change; nothing here needed to change for that.
             val windowSizeClass = calculateWindowSizeClass(this)
             ZrpSocialApp(windowSizeClass = windowSizeClass)
         }
@@ -102,7 +106,7 @@ fun ZrpSocialApp(windowSizeClass: WindowSizeClass) {
                         LoggedOutScreen.LOGIN -> LoginScreen(
                             formState = loginForm,
                             onLogin = { identifier, password -> authViewModel.login(identifier, password) },
-                            onGoogleIdToken = { idToken -> authViewModel.loginWithGoogle(idToken) },
+                            onGoogleSignIn = { context -> authViewModel.loginWithGoogle(context) },
                             onSignUp = { loggedOutScreen = LoggedOutScreen.SIGNUP },
                             onForgotPassword = { loggedOutScreen = LoggedOutScreen.FORGOT_PASSWORD },
                         )

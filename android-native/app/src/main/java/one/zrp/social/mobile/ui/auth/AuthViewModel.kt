@@ -1,5 +1,6 @@
 package one.zrp.social.mobile.ui.auth
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -7,6 +8,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.AuthRepository
+import one.zrp.social.mobile.data.GoogleAuth
+import one.zrp.social.mobile.data.GoogleSignInCancelledException
 import one.zrp.social.mobile.data.PushRepository
 import one.zrp.social.mobile.network.MobileUser
 
@@ -21,7 +24,14 @@ sealed interface AuthUiState {
 
 sealed interface LoginFormState {
     data object Idle : LoginFormState
+
+    // Password and Google sign-in are distinct variants - not one shared
+    // Submitting - so each of LoginScreen's two buttons can show a
+    // spinner only for the action it was actually asked to perform,
+    // while still sharing one Error/Idle/SessionExpired surface for
+    // both (see login()/loginWithGoogle()'s own comments).
     data object Submitting : LoginFormState
+    data object SubmittingGoogle : LoginFormState
     data class Error(val message: String) : LoginFormState
 
     // Distinct from Error(message) because this ViewModel has no
@@ -143,27 +153,59 @@ class AuthViewModel(
         }
     }
 
-    // Called once GoogleAuth.requestIdToken (Credential Manager) has
-    // already produced a real signed Google ID token - drives the exact
-    // same LoginFormState machine password login() does, so both
-    // LoginScreen and SignupScreen render Submitting/Error identically
-    // regardless of which method was used.
-    fun loginWithGoogle(idToken: String) {
-        _loginForm.value = LoginFormState.Submitting
+    // Owns the ENTIRE Google sign-in round trip - both the Credential
+    // Manager account-picker request and the backend token exchange -
+    // launched on viewModelScope rather than a Composable's own
+    // rememberCoroutineScope().
+    //
+    // ⚠️ This is not a style preference. rememberCoroutineScope() is
+    // tied to the Composition that created it, which is torn down and
+    // rebuilt from scratch whenever the hosting Activity is destroyed
+    // and recreated - and CredentialManager.getCredential()'s result is
+    // itself tied to the specific Activity instance the request was
+    // made from, so a mid-flight recreation orphans the request
+    // permanently: the picker closes after the user picks an account,
+    // but nothing is left alive to receive the result or show an error.
+    // That was the exact production bug - "select an account, then
+    // nothing happens" - and MainActivity's own configChanges (see
+    // AndroidManifest.xml) removes the most common trigger for it
+    // outright. viewModelScope is this fix's second, independent layer:
+    // it survives any Activity recreation that still legitimately
+    // happens (this ViewModel's store is retained across exactly that),
+    // so even then the request completes and its result - success,
+    // failure, or cancellation - reaches the (rebuilt) UI normally
+    // through the same StateFlow every other auth state change already
+    // uses. `context` is used only for the duration of this one
+    // suspend call, never stored on the ViewModel.
+    fun loginWithGoogle(context: Context) {
+        _loginForm.value = LoginFormState.SubmittingGoogle
         viewModelScope.launch {
-            authRepository.loginWithGoogle(idToken)
-                .onSuccess { user ->
-                    _loginForm.value = LoginFormState.Idle
-                    _authState.value = AuthUiState.LoggedIn(user, needsOnboarding = !user.onboardingCompleted)
-                    try {
-                        pushRepository.registerCurrentToken()
-                    } catch (_: Exception) {
-                    }
+            GoogleAuth.requestIdToken(context)
+                .onSuccess { idToken ->
+                    authRepository.loginWithGoogle(idToken)
+                        .onSuccess { user ->
+                            _loginForm.value = LoginFormState.Idle
+                            _authState.value = AuthUiState.LoggedIn(user, needsOnboarding = !user.onboardingCompleted)
+                            try {
+                                pushRepository.registerCurrentToken()
+                            } catch (_: Exception) {
+                            }
+                        }
+                        .onFailure { error ->
+                            _loginForm.value = LoginFormState.Error(
+                                error.message ?: "Something went wrong. Please try again."
+                            )
+                        }
                 }
-                .onFailure { error ->
-                    _loginForm.value = LoginFormState.Error(
-                        error.message ?: "Something went wrong. Please try again."
-                    )
+                .onFailure { failure ->
+                    // A cancelled picker isn't an error - just stop
+                    // showing Submitting, exactly like tapping away from
+                    // the password form never shows an error either.
+                    _loginForm.value = if (failure is GoogleSignInCancelledException) {
+                        LoginFormState.Idle
+                    } else {
+                        LoginFormState.Error(failure.message ?: "Something went wrong. Please try again.")
+                    }
                 }
         }
     }

@@ -41,7 +41,36 @@
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.ZrpSocial"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|uiMode|density|fontScale">
+            <!--
+                ⚠️ configChanges is load-bearing for Google Sign-In, not
+                just a rotation-flicker nicety. Without it, ANY config
+                change while Android's Credential Manager account picker
+                is in the foreground - a rotation, a fold/unfold, the
+                picker itself nudging uiMode/density on some OEM skins -
+                destroys and recreates this Activity mid-flow. The
+                Credential Manager result is tied to the specific
+                Activity instance the request was made from, so a
+                recreated Activity never receives it: the picker closes
+                after the user picks an account and the app just lands
+                back on a fresh login screen, with no error shown,
+                because the whole Composition (and the coroutine driving
+                the request) that would have shown one was torn down and
+                replaced by a new one before the request finished. This
+                is the exact production symptom reported ("account
+                selected, then nothing happens") and is especially
+                common on OEM builds (MIUI and similar) that manage
+                background Activities/processes aggressively. See
+                AuthViewModel.loginWithGoogle's own comment for the
+                complementary fix (viewModelScope survives whatever
+                recreation this doesn't already prevent). Window-size-
+                class support (tablet two-pane messaging) is unaffected:
+                calculateWindowSizeClass() reads LocalConfiguration
+                reactively, so it still recomputes correctly on a
+                config change that this attribute now handles without
+                recreation - see MainActivity.kt's own comment.
+            -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
