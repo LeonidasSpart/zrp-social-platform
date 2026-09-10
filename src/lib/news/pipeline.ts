@@ -186,7 +186,14 @@ export function startOfUtcDay(at: Date): Date {
 }
 
 export interface RunCycleOptions {
-  trigger?: "cron" | "manual";
+  /**
+   * Who asked for this cycle, recorded on the job run.
+   *
+   * "scheduler" is the app's own hourly timer (see instrumentation.ts),
+   * "cron" the GitHub workflow that backs it up, "manual" an admin. Kept
+   * distinct so it is always clear which trigger a run came from.
+   */
+  trigger?: "cron" | "manual" | "scheduler";
   now?: Date;
   db?: PrismaClient;
   /** Skip the distributed lock. Only ever set by tests. */
