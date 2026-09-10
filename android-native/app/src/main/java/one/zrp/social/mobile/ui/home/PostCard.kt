@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,8 +21,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -32,7 +29,6 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ChatBubbleOutline
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
@@ -75,8 +71,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
@@ -99,6 +93,7 @@ import one.zrp.social.mobile.ui.components.AddReactionDialog
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.LinkifiedText
 import one.zrp.social.mobile.ui.components.BadgeSize
+import one.zrp.social.mobile.ui.components.ImageLightbox
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.TouchTarget
@@ -744,63 +739,6 @@ private fun GalleryTile(image: String, modifier: Modifier, onClick: () -> Unit) 
         contentScale = ContentScale.Crop,
         modifier = modifier.clickable(onClick = onClick),
     )
-}
-
-// The same full-screen viewer PostCard.tsx's own image lightbox offers -
-// swipe between every real image in the post (mobile web relies on the
-// same touch-swipe gesture too; its prev/next chevron buttons are
-// desktop-only, "hidden sm:flex", so a swipeable pager alone is genuine
-// parity with the actual mobile experience, not a reduced substitute).
-// "Close image" matches the real, untranslated aria-label="Close image"
-// web's own lightbox close button carries.
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun ImageLightbox(images: List<String>, initialIndex: Int, onDismiss: () -> Unit) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-    ) {
-        val pagerState = rememberPagerState(initialPage = initialIndex) { images.size }
-        Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-            HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
-                // Tap the image again to close, matching how every other
-                // mobile image viewer behaves - previously the only way
-                // out was the small top-right X, which meant scrolling
-                // all the way back up to reach it. clickable's tap
-                // gesture doesn't fight the pager's own drag-to-swipe
-                // gesture, so swiping between images is unaffected.
-                AsyncImage(
-                    model = images[page],
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable(onClick = onDismiss),
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter)
-                    .padding(Spacing.md),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (images.size > 1) {
-                    Text(
-                        text = "${pagerState.currentPage + 1} / ${images.size}",
-                        color = Color.White,
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-                } else {
-                    Spacer(modifier = Modifier.size(1.dp))
-                }
-                IconButton(onClick = onDismiss) {
-                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.post_close_image_cd), tint = Color.White)
-                }
-            }
-        }
-    }
 }
 
 // Real ExoPlayer-backed inline video preview for a video post - the
