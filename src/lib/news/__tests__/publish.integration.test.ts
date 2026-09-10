@@ -10,6 +10,7 @@ import {
 } from "../publish";
 import { provisionFeeds, EDITORIAL_BADGE_TYPE } from "../feeds";
 import { idempotencyKeyFor } from "../scheduler";
+import { startOriginServer } from "./origin-server";
 
 const hasRealDatabaseUrl =
   !!process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("...");
@@ -183,7 +184,9 @@ describe.skipIf(!hasRealDatabaseUrl)("news publication (integration, real Postgr
     // The link goes in linkUrl too, so the existing link-preview and
     // post rendering treat it like any other post's link.
     expect(post.linkUrl).toBe(reference.url);
-    // No image was cleared for reuse on this source, so none is used.
+    // No image was cleared for reuse on this source, and the fallback
+    // og:image lookup cannot reach this fixture's unresolvable
+    // authority.example host either - so the post publishes without one.
     expect(post.imageUrl).toBeNull();
 
     const publication = await db.newsPublication.findUniqueOrThrow({ where: { id: reserved!.id } });
@@ -195,6 +198,64 @@ describe.skipIf(!hasRealDatabaseUrl)("news publication (integration, real Postgr
 
     const feed = await db.newsFeed.findUniqueOrThrow({ where: { id: feedId } });
     expect(feed.lastPublishedAt).not.toBeNull();
+  });
+
+  // Most sources are not cleared to share their own RSS images, which
+  // left nearly every published post and /news article with no photo at
+  // all. When there is no source image, the linked article's own
+  // og:image is used instead - the same fallback the main feed's
+  // link-preview cards already rely on for any pasted URL.
+  it("falls back to the linked article's own og:image when the source supplied none", async () => {
+    const origin = await startOriginServer();
+    try {
+      await db.newsStorySource.updateMany({
+        where: { storyId },
+        data: { url: origin.url("/article-with-image") },
+      });
+
+      const reserved = await reservePublication(db, slot());
+      const outcome = await publishDuePublication(db, reserved!.id, NOW, {
+        // Real production code path, real socket - only the loopback
+        // block is lifted, exactly as in the other real-HTTP tests.
+        imageFallback: { isAddressAllowed: () => true },
+      });
+
+      expect(outcome.status).toBe("published");
+
+      const post = await db.post.findUniqueOrThrow({ where: { id: outcome.postId! } });
+      expect(post.imageUrl).toBe("https://cdn.example.test/article-photo.jpg");
+      expect(post.mediaType).toBe("image");
+
+      // The /news article mirrors it, so the landing page shows the
+      // same photo rather than the ZRP placeholder block.
+      const article = await db.newsArticle.findFirstOrThrow({ where: { authorId: feedUserId } });
+      expect(article.coverImage).toBe("https://cdn.example.test/article-photo.jpg");
+    } finally {
+      await origin.close();
+    }
+  });
+
+  it("publishes without an image when the linked article has no og:image either", async () => {
+    const origin = await startOriginServer();
+    try {
+      await db.newsStorySource.updateMany({
+        where: { storyId },
+        data: { url: origin.url("/article-without-image") },
+      });
+
+      const reserved = await reservePublication(db, slot());
+      const outcome = await publishDuePublication(db, reserved!.id, NOW, {
+        imageFallback: { isAddressAllowed: () => true },
+      });
+
+      expect(outcome.status).toBe("published");
+
+      const post = await db.post.findUniqueOrThrow({ where: { id: outcome.postId! } });
+      expect(post.imageUrl).toBeNull();
+      expect(post.mediaType).toBeNull();
+    } finally {
+      await origin.close();
+    }
   });
 
   it("does not publish twice if the same publication is processed again", async () => {

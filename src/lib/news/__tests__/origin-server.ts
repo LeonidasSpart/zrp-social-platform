@@ -197,6 +197,26 @@ export async function startOriginServer(
       return;
     }
 
+    if (path.startsWith("/article-with-image")) {
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end(
+        `<!doctype html><html><head>` +
+          `<meta property="og:title" content="Fixture article">` +
+          `<meta property="og:image" content="https://cdn.example.test/article-photo.jpg">` +
+          `</head><body>Fixture article body.</body></html>`
+      );
+      return;
+    }
+
+    if (path.startsWith("/article-without-image")) {
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end(
+        `<!doctype html><html><head><meta property="og:title" content="No photo here"></head>` +
+          `<body>Fixture article with no og:image.</body></html>`
+      );
+      return;
+    }
+
     if (path.startsWith("/empty.xml")) {
       send(200, rssFixture([]));
       return;
