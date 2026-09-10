@@ -473,6 +473,13 @@ export async function runPipelineCycle(options: RunCycleOptions = {}): Promise<C
       postsToday: todayByFeed.get(feed.id) ?? 0,
     }));
 
+    /*
+     * Measured before planning, so the plan can serve the categories
+     * that actually have nothing right now. It is measured again after
+     * publishing for the run's report.
+     */
+    const coverageBeforePlanning = await measureCategoryCoverage(db, now);
+
     const plan = planCycle({
       stories,
       feeds,
@@ -481,6 +488,7 @@ export async function runPipelineCycle(options: RunCycleOptions = {}): Promise<C
       windowMinutes: CYCLE_WINDOW_MINUTES,
       publishedStoryLanguages,
       publicationsToday,
+      categoryCoverage: coverageBeforePlanning,
     });
 
     for (const slot of plan) {
