@@ -12,11 +12,13 @@ import { useLanguage } from "@/contexts/LanguageContext";
  * grouping blocks, no cards - those read as a second navigation menu
  * stacked under the real one, which is exactly what this replaced.
  *
- * The list is deliberately corporate/legal only (About, Careers,
- * Investors, legal pages, support) - the same thing X's own footer
- * links to. Product surfaces like Marketplace, Music, Play and ZRP AI
- * already have their own entry points in Header/Sidebar/BottomNav and
- * don't belong in a footer.
+ * The list is deliberately corporate/legal/support only (About, Help,
+ * Contact, Charity, Transparency, and the legal pages) - the same kind
+ * of thing X's own footer links to. Careers, Investors, Press Kit, ZRP
+ * News and Become a Journalist were cut on request to keep the row
+ * shorter still. Product surfaces like Marketplace, Music, Play and ZRP
+ * AI already have their own entry points in Header/Sidebar/BottomNav
+ * and don't belong in a footer.
  *
  * Every label already existed in all 11 languages (the footer.*, nav.*
  * and help.footer.* namespaces the Header and Help Center use) - this
@@ -47,11 +49,6 @@ export default function Footer() {
 
   const links: { href: string; label: string }[] = [
     { href: "/about", label: t("nav.aboutZrp") },
-    { href: "/careers", label: t("footer.careers") },
-    { href: "/investors", label: t("footer.investors") },
-    { href: "/press", label: t("footer.pressKit") },
-    { href: "/news", label: t("footer.zrpNews") },
-    { href: "/journalist", label: t("footer.becomeJournalist") },
     { href: "/help", label: t("footer.helpCenter") },
     { href: "/contact", label: t("footer.contact") },
     { href: "/charity", label: t("footer.charity") },
