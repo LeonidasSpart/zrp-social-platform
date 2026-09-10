@@ -43,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -173,7 +174,7 @@ private fun MyListingRow(
                 .size(88.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                .clickable(onClick = onClick),
+                .clickable(onClick = onClick, role = Role.Button),
         ) {
             val coverImage = listing.imageUrls.firstOrNull()
             if (coverImage != null) {
@@ -226,7 +227,7 @@ private fun MyListingRow(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .clickable(onClick = onClick)
+                    .clickable(onClick = onClick, role = Role.Button)
                     .padding(top = 2.dp),
             )
             Text(

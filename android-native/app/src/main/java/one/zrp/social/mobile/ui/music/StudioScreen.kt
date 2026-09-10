@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -287,7 +288,7 @@ private fun ArtistProfileForm(
                     .height(120.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .clickable(onClick = onChangeBanner),
+                    .clickable(onClick = onChangeBanner, role = Role.Button),
             ) {
                 if (state.bannerUrl != null) {
                     AsyncImage(
@@ -321,7 +322,7 @@ private fun ArtistProfileForm(
                     .size(64.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .clickable(onClick = onChangeAvatar),
+                    .clickable(onClick = onChangeAvatar, role = Role.Button),
                 contentAlignment = Alignment.Center,
             ) {
                 if (state.avatarUrl != null) {

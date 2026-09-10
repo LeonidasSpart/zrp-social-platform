@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.SportsMartialArts
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PlayRepository
+import one.zrp.social.mobile.ui.components.ZrpEmptyState
 
 /** My Duels - ported from PlayDuelsPage.tsx. */
 @Composable
@@ -70,10 +72,9 @@ fun PlayDuelsScreen(onBack: () -> Unit, onOpenDuel: (String) -> Unit) {
             }
             state.duels.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.play_no_duels_yet),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(32.dp),
+                    ZrpEmptyState(
+                        icon = Icons.Filled.SportsMartialArts,
+                        title = stringResource(R.string.play_no_duels_yet),
                     )
                 }
             }

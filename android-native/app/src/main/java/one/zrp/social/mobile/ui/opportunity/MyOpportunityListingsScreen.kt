@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -117,7 +118,7 @@ private fun MyOpportunityListingRow(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick, role = Role.Button)
             .padding(16.dp),
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -164,7 +165,7 @@ private fun MyOpportunityListingRow(
         }
 
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable(onClick = onOpenApplicants)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable(onClick = onOpenApplicants, role = Role.Button)) {
                 Icon(Icons.Filled.People, contentDescription = null, tint = ZrpRed, modifier = Modifier.size(16.dp))
                 Text(
                     text = stringResource(R.string.opportunity_view_applicants, listing._count.applications),
@@ -178,7 +179,7 @@ private fun MyOpportunityListingRow(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .padding(start = 16.dp)
-                    .clickable(onClick = onEdit),
+                    .clickable(onClick = onEdit, role = Role.Button),
             ) {
                 Icon(Icons.Filled.Edit, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                 Text(

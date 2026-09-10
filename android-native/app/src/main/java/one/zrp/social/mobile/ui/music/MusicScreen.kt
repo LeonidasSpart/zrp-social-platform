@@ -51,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -335,7 +336,7 @@ private fun SectionHeading(title: String, onClick: (() -> Unit)?) {
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold,
         modifier = Modifier
-            .let { if (onClick != null) it.clickable(onClick = onClick) else it }
+            .let { if (onClick != null) it.clickable(onClick = onClick, role = Role.Button) else it }
             .padding(horizontal = 16.dp, vertical = 8.dp),
     )
 }
@@ -345,7 +346,7 @@ private fun TrackCard(track: MusicTrack, isCurrent: Boolean, onClick: () -> Unit
     Column(
         modifier = Modifier
             .width(120.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick, role = Role.Button),
     ) {
         Box(
             modifier = Modifier
@@ -410,7 +411,7 @@ private fun LatestAlbumsSection(albums: List<MusicAlbumSummary>, onAlbumClick: (
                 Column(
                     modifier = Modifier
                         .width(130.dp)
-                        .clickable { onAlbumClick(album.id) },
+                        .clickable(role = Role.Button) { onAlbumClick(album.id) },
                 ) {
                     Box(
                         modifier = Modifier
@@ -461,7 +462,7 @@ private fun PopularArtistsSection(artists: List<MusicArtistSummary>, onArtistCli
                 Column(
                     modifier = Modifier
                         .width(96.dp)
-                        .clickable { onArtistClick(artist.id) },
+                        .clickable(role = Role.Button) { onArtistClick(artist.id) },
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Avatar(url = artist.avatarUrl, name = artist.displayName, size = 80.dp)
@@ -471,7 +472,7 @@ private fun PopularArtistsSection(artists: List<MusicArtistSummary>, onArtistCli
                             style = MaterialTheme.typography.bodyMedium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(top = 6.dp),
+                            modifier = Modifier.weight(1f, fill = false).padding(top = 6.dp),
                         )
                         if (artist.verified) {
                             Icon(
@@ -508,7 +509,7 @@ private fun YourPlaylistsSection(playlists: List<MusicPlaylistSummary>, onPlayli
                 Column(
                     modifier = Modifier
                         .width(130.dp)
-                        .clickable { onPlaylistClick(playlist.id) },
+                        .clickable(role = Role.Button) { onPlaylistClick(playlist.id) },
                 ) {
                     Box(
                         modifier = Modifier

@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -44,7 +45,7 @@ fun LeaderboardTableView(entries: List<PlayLeaderboardEntry>, ownUserId: String?
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(if (entry.userId == ownUserId) ZrpRed.copy(alpha = 0.05f) else Color.Transparent)
-                    .clickable { onEntryClick(entry.user.username) }
+                    .clickable(role = Role.Button) { onEntryClick(entry.user.username) }
                     .padding(horizontal = 16.dp, vertical = 12.dp),
             ) {
                 RankBadge(entry.rank)
@@ -57,6 +58,7 @@ fun LeaderboardTableView(entries: List<PlayLeaderboardEntry>, ownUserId: String?
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
                         )
                         VerifiedBadge(badgeType = entry.user.badgeType)
                     }

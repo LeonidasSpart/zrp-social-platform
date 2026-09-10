@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -309,7 +310,7 @@ private fun PlaylistTrackRowView(
             modifier = Modifier
                 .size(44.dp)
                 .clip(RoundedCornerShape(6.dp))
-                .clickable(onClick = onPlay),
+                .clickable(onClick = onPlay, role = Role.Button),
         ) {
             val cover = track.coverUrl ?: track.album?.coverUrl
             if (cover != null) {

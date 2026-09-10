@@ -31,6 +31,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import one.zrp.social.mobile.R
@@ -63,7 +65,13 @@ fun OpponentSearchView(
                     .weight(1f)
                     .padding(start = 10.dp),
             ) {
-                Text(text = "@${value.username}", style = MaterialTheme.typography.labelLarge)
+                Text(
+                    text = "@${value.username}",
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
                 VerifiedBadge(badgeType = value.badgeType)
             }
             IconButton(onClick = { onChange(null) }) {
@@ -118,7 +126,7 @@ fun OpponentSearchView(
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable {
+                                .clickable(role = Role.Button) {
                                     onChange(user)
                                     query = ""
                                     results = emptyList()
@@ -126,8 +134,14 @@ fun OpponentSearchView(
                                 .padding(10.dp),
                         ) {
                             Avatar(url = user.avatarUrl, name = user.username, size = 32.dp)
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = "@${user.username}", style = MaterialTheme.typography.bodyMedium)
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "@${user.username}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false),
+                                )
                                 VerifiedBadge(badgeType = user.badgeType)
                             }
                         }

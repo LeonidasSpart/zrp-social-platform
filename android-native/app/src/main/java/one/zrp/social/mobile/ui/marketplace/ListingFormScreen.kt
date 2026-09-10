@@ -48,6 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -251,15 +252,14 @@ fun ListingFormScreen(listingId: String?, onBack: () -> Unit, onSaved: (String) 
                             )
                             IconButton(
                                 onClick = { viewModel.onRemoveImage(index) },
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .size(24.dp),
+                                modifier = Modifier.align(Alignment.TopEnd),
                             ) {
                                 Icon(
                                     Icons.Filled.Close,
-                                    contentDescription = null,
+                                    contentDescription = stringResource(R.string.createpost_remove_image_cd, index + 1),
                                     tint = androidx.compose.ui.graphics.Color.White,
                                     modifier = Modifier
+                                        .size(24.dp)
                                         .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.5f), androidx.compose.foundation.shape.CircleShape),
                                 )
                             }
@@ -271,7 +271,7 @@ fun ListingFormScreen(listingId: String?, onBack: () -> Unit, onSaved: (String) 
                                 .size(80.dp)
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                                .clickable(enabled = !state.isUploadingImage) {
+                                .clickable(enabled = !state.isUploadingImage, role = Role.Button) {
                                     imagePickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                                 },
                             contentAlignment = Alignment.Center,

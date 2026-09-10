@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MarketplaceRepository
+import one.zrp.social.mobile.ui.components.ZrpEmptyState
 
 /** The same real GET /listings/favorites route MarketplaceFavoritesPage uses. */
 @Composable
@@ -65,10 +67,9 @@ fun ListingFavoritesScreen(onBack: () -> Unit, onListingClick: (String) -> Unit)
             }
             state.listings.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.marketplace_no_favorites_yet),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(32.dp),
+                    ZrpEmptyState(
+                        icon = Icons.Filled.FavoriteBorder,
+                        title = stringResource(R.string.marketplace_no_favorites_yet),
                     )
                 }
             }

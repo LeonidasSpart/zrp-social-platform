@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import one.zrp.social.mobile.R
@@ -59,7 +60,7 @@ fun TriviaPlayerView(content: TriviaContent, onSubmit: (answers: List<Int>, time
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
                         .background(if (selected) ZrpRed.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceContainerLow)
-                        .clickable {
+                        .clickable(role = Role.Button) {
                             val next = answers.value.toMutableList()
                             next[index] = optIndex
                             answers.value = next

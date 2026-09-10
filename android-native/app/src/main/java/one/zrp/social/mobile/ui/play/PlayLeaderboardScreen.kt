@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PlayRepository
+import one.zrp.social.mobile.ui.components.ZrpEmptyState
 
 private val SCOPES = listOf("global", "country", "friends")
 
@@ -98,14 +99,10 @@ fun PlayLeaderboardScreen(onBack: () -> Unit, onOpenProfile: (String) -> Unit) {
             }
             state.entries.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Filled.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(
-                            text = stringResource(R.string.play_no_leaderboard_data),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 8.dp),
-                        )
-                    }
+                    ZrpEmptyState(
+                        icon = Icons.Filled.EmojiEvents,
+                        title = stringResource(R.string.play_no_leaderboard_data),
+                    )
                 }
             }
             else -> {

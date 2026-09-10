@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -123,7 +124,7 @@ fun PlayChallengeScreen(
                                 if (!state.showDuelPanel) {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.clickable(onClick = viewModel::onOpenDuelPanel),
+                                        modifier = Modifier.clickable(onClick = viewModel::onOpenDuelPanel, role = Role.Button),
                                     ) {
                                         Icon(Icons.Filled.SportsMartialArts, contentDescription = null, tint = ZrpRed, modifier = Modifier.size(18.dp))
                                         Text(
@@ -223,7 +224,7 @@ fun PlayChallengeScreen(
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier
                                     .padding(top = 16.dp)
-                                    .clickable(onClick = onViewDuels),
+                                    .clickable(onClick = onViewDuels, role = Role.Button),
                             )
                         }
                     } else {

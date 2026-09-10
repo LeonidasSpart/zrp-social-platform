@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Handshake
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,7 +33,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
@@ -40,6 +43,7 @@ import one.zrp.social.mobile.data.AidRepository
 import one.zrp.social.mobile.network.HelpOffer
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.VerifiedBadge
+import one.zrp.social.mobile.ui.components.ZrpEmptyState
 
 /**
  * Review Offers - ported from CampaignOffersPage.tsx: the organizer's
@@ -79,10 +83,9 @@ fun AidOffersScreen(campaignId: String, onBack: () -> Unit, onOpenOfferer: (Stri
             }
             state.offers.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.aid_no_offers_yet),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(32.dp),
+                    ZrpEmptyState(
+                        icon = Icons.Filled.Handshake,
+                        title = stringResource(R.string.aid_no_offers_yet),
                     )
                 }
             }
@@ -125,7 +128,7 @@ private fun AidOfferRow(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .weight(1f)
-                    .clickable(enabled = offerer != null) { offerer?.let { onOpenOfferer(it.username) } },
+                    .clickable(enabled = offerer != null, role = Role.Button) { offerer?.let { onOpenOfferer(it.username) } },
             ) {
                 Avatar(url = offerer?.avatarUrl, name = offerer?.username ?: "?", size = 36.dp)
                 Column(modifier = Modifier.padding(start = 8.dp)) {
@@ -134,6 +137,9 @@ private fun AidOfferRow(
                             text = "@${offerer?.username ?: ""}",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
                         )
                         VerifiedBadge(badgeType = offerer?.badgeType)
                     }

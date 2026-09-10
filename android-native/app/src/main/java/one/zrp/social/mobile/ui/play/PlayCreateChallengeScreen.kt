@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -245,7 +246,7 @@ private fun TriviaBuilder(state: PlayCreateChallengeUiState, viewModel: PlayCrea
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .padding(start = 16.dp, top = 4.dp)
-                            .clickable { viewModel.addQuestionOption(qIndex) },
+                            .clickable(role = Role.Button) { viewModel.addQuestionOption(qIndex) },
                     )
                 }
             }
@@ -343,7 +344,7 @@ private fun LogicBuilder(state: PlayCreateChallengeUiState, viewModel: PlayCreat
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .padding(top = 4.dp)
-                        .clickable { viewModel.addLogicOption() },
+                        .clickable(role = Role.Button) { viewModel.addLogicOption() },
                 )
             }
         }

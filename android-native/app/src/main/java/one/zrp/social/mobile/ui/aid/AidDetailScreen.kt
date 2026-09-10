@@ -39,7 +39,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -229,7 +231,7 @@ fun AidDetailScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .padding(top = Spacing.lg)
-                                .clickable { onOpenOrganizer(campaign.organizer.username) },
+                                .clickable(role = Role.Button) { onOpenOrganizer(campaign.organizer.username) },
                         ) {
                             Box(
                                 modifier = Modifier
@@ -257,7 +259,9 @@ fun AidDetailScreen(
                             Text(
                                 text = "@${campaign.organizer.username}",
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(start = Spacing.xs),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false).padding(start = Spacing.xs),
                             )
                             if (campaign.organizer.badgeType != null) {
                                 VerifiedBadge(badgeType = campaign.organizer.badgeType)
@@ -301,7 +305,7 @@ fun AidDetailScreen(
                                                 .background(
                                                     if (selected) ZrpRed.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceContainerHigh,
                                                 )
-                                                .clickable { viewModel.onSelectOfferType(need) }
+                                                .clickable(role = Role.Button) { viewModel.onSelectOfferType(need) }
                                                 .padding(horizontal = 10.dp, vertical = 6.dp),
                                         ) {
                                             Icon(
@@ -377,7 +381,7 @@ fun AidDetailScreen(
                             } else {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.clickable(onClick = viewModel::onOpenReport),
+                                    modifier = Modifier.clickable(onClick = viewModel::onOpenReport, role = Role.Button),
                                 ) {
                                     Icon(Icons.Filled.Flag, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
                                     Text(

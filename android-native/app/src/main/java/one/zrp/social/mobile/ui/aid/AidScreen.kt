@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.AidRepository
+import one.zrp.social.mobile.ui.components.ZrpEmptyState
 
 /**
  * ZRP Aid browse - ported from AidHomePage.tsx: a category filter row
@@ -128,10 +129,9 @@ fun AidScreen(
             }
             state.campaigns.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.aid_no_campaigns_yet),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(32.dp),
+                    ZrpEmptyState(
+                        icon = Icons.Filled.ListAlt,
+                        title = stringResource(R.string.aid_no_campaigns_yet),
                     )
                 }
             }

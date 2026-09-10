@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -30,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -38,6 +40,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MusicRepository
 import one.zrp.social.mobile.network.MusicArtistListItem
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.ZrpEmptyState
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
@@ -87,9 +90,9 @@ fun ArtistsScreen(onBack: () -> Unit, onArtistClick: (String) -> Unit) {
             }
             state.artists.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.music_artists_none_found),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    ZrpEmptyState(
+                        icon = Icons.Filled.Person,
+                        title = stringResource(R.string.music_artists_none_found),
                     )
                 }
             }
@@ -115,7 +118,7 @@ private fun ArtistCard(artist: MusicArtistListItem, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick, role = Role.Button),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Avatar(url = artist.avatarUrl, name = artist.displayName, size = 80.dp)

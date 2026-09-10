@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.VolunteerActivism
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -32,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -39,6 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.AidRepository
 import one.zrp.social.mobile.network.HelpMyCampaign
+import one.zrp.social.mobile.ui.components.ZrpEmptyState
 
 /**
  * My Campaigns - ported from MyCampaignsPage.tsx: the organizer's own
@@ -87,10 +90,9 @@ fun MyAidCampaignsScreen(onBack: () -> Unit, onOpenCampaign: (String) -> Unit) {
             }
             state.campaigns.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.aid_no_own_campaigns),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(32.dp),
+                    ZrpEmptyState(
+                        icon = Icons.Filled.VolunteerActivism,
+                        title = stringResource(R.string.aid_no_own_campaigns),
                     )
                 }
             }
@@ -138,7 +140,7 @@ private fun MyAidCampaignRow(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick, role = Role.Button)
             .padding(16.dp),
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -262,7 +264,7 @@ private fun MyAidCampaignRow(
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier
                         .padding(top = 8.dp)
-                        .clickable(onClick = onStartWithdraw),
+                        .clickable(onClick = onStartWithdraw, role = Role.Button),
                 )
             }
         }

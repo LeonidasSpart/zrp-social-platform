@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import one.zrp.social.mobile.R
@@ -63,7 +64,7 @@ fun LogicPlayerView(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(14.dp))
                             .background(if (isSelected) ZrpRed.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceContainerLow)
-                            .clickable { selected = optIndex }
+                            .clickable(role = Role.Button) { selected = optIndex }
                             .padding(horizontal = 16.dp, vertical = 14.dp),
                     ) {
                         Text(
