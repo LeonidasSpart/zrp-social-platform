@@ -1700,6 +1700,7 @@
     <string name="legal_charity">Wohltätigkeit</string>
     <string name="legal_press">Presseset</string>
     <string name="legal_investors">Investoren</string>
+    <string name="legal_faq">FAQ</string>
     <string name="transparency_title">Transparenz der Moderation</string>
     <string name="transparency_privacy_note">Diese Seite zeigt ausschließlich aggregierte Zahlen. Sie enthält niemals Benutzernamen, Nachrichten- oder Beitragsinhalte oder Angaben dazu, wer was gemeldet hat: die Vertraulichkeit der Moderation bleibt wie immer geschützt.</string>
     <string name="transparency_err_load">Transparenzdaten können derzeit nicht geladen werden. Bitte später erneut versuchen.</string>

@@ -1700,6 +1700,7 @@
     <string name="legal_charity">Amal</string>
     <string name="legal_press">Kit Pers</string>
     <string name="legal_investors">Investor</string>
+    <string name="legal_faq">FAQ</string>
     <string name="transparency_title">Transparansi Moderasi</string>
     <string name="transparency_privacy_note">Halaman ini hanya menampilkan jumlah agregat. Tidak pernah menyertakan nama pengguna, isi pesan atau postingan, atau siapa yang melaporkan apa: privasi moderasi tetap dilindungi seperti biasa.</string>
     <string name="transparency_err_load">Data transparansi tidak dapat dimuat saat ini. Silakan coba lagi nanti.</string>
