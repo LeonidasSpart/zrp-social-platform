@@ -64,6 +64,26 @@ describe("detectBreaking / detectSensitive", () => {
     expect(detectSensitive("Man arrested over alleged fraud", null)).toBe(true);
     expect(detectSensitive("Museum announces new exhibition", null)).toBe(false);
   });
+
+  /*
+   * Real bug: the sensitive test was a raw substring match, so "coup"
+   * fired on "a couple of" - and a sensitive story is held for human
+   * review rather than published, so every ordinary sports report
+   * containing that phrase was silently parked forever.
+   */
+  it("does not see a coup in a couple", () => {
+    expect(detectSensitive("A couple of late goals sealed the win for Basel", null)).toBe(false);
+    expect(detectSensitive("Studio announces a coupon promotion for the new game", null)).toBe(false);
+  });
+
+  it("still catches the real harm, in any tense", () => {
+    // The whole point of the word list - narrowing the match must not
+    // quietly stop it working.
+    expect(detectSensitive("Military coup topples the government", null)).toBe(true);
+    expect(detectSensitive("A bus crashed on the motorway", null)).toBe(true);
+    expect(detectSensitive("Carmaker recalls 40000 vehicles", null)).toBe(true);
+    expect(detectSensitive("Investigation into the collapse continues", null)).toBe(true);
+  });
 });
 
 describe("assessConfidence", () => {
@@ -91,6 +111,42 @@ describe("assessConfidence", () => {
         summaries: ["Sources say the closure could last all day"],
       })
     ).toBe("UNCONFIRMED");
+  });
+
+  /*
+   * Real bug, and it hit exactly the categories that were empty. The
+   * hedge test was a raw substring match, so "claimed" fired inside
+   * "acclaimed" and "reclaimed". A single-source tier-2 story marked
+   * UNCONFIRMED scores 1.5 against a 2.5 publishing floor, so an
+   * ordinary sports or culture report was not merely mislabelled - it
+   * could never be published at all.
+   */
+  it("does not read a hedge into acclaimed or reclaimed", () => {
+    const hedgeFreeSingleSource = (title: string) =>
+      assessConfidence({ sourceCount: 1, bestTrustTier: 2, titles: [title], summaries: [null] });
+
+    expect(hedgeFreeSingleSource("Switzerland reclaimed the title after a late goal")).toBe("DEVELOPING");
+    expect(hedgeFreeSingleSource("The critically acclaimed studio announces its next game")).toBe("DEVELOPING");
+  });
+
+  it("treats a claim as a hedge only in the hedging construction", () => {
+    const single = (title: string) =>
+      assessConfidence({ sourceCount: 1, bestTrustTier: 2, titles: [title], summaries: [null] });
+
+    // Ordinary sports usage: the driver did win pole.
+    expect(single("Verstappen claims pole position in qualifying")).toBe("DEVELOPING");
+    // Genuine hedging: the assertion is the source's, not established.
+    expect(single("The company claims that the figures are wrong")).toBe("UNCONFIRMED");
+    expect(single("He claimed to have finished the route first")).toBe("UNCONFIRMED");
+  });
+
+  it("still refuses to publish a story built on rumour", () => {
+    const single = (title: string) =>
+      assessConfidence({ sourceCount: 1, bestTrustTier: 2, titles: [title], summaries: [null] });
+
+    expect(single("Rumours of a merger sent shares higher")).toBe("UNCONFIRMED");
+    expect(single("The minister allegedly resigned")).toBe("UNCONFIRMED");
+    expect(single("Speculation grows over the deal")).toBe("UNCONFIRMED");
   });
 });
 

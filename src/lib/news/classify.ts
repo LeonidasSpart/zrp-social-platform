@@ -59,12 +59,43 @@ const SENSITIVE_WORDS = [
   "outbreak", "pandemic", "recall", "contaminated", "crash", "derailment",
 ];
 
-/** Hedging language: a source that is itself unsure makes us unsure. */
+/**
+ * Hedging language: a source that is itself unsure makes us unsure.
+ *
+ * "claims"/"claimed" appear here only in the hedging construction
+ * ("claims that", "claimed to"). On their own they are ordinary sports
+ * and business usage - a driver claims pole, a team claims the title -
+ * and flagging those as unconfirmed blocked real, well-sourced stories
+ * from publishing at all.
+ */
 const UNCONFIRMED_WORDS = [
   "reportedly", "rumour", "rumor", "unconfirmed", "sources say", "sources said",
-  "claims", "claimed", "allegedly", "speculation", "may have", "could have",
+  "claims that", "claimed that", "claims to", "claimed to",
+  "allegedly", "speculation", "may have", "could have",
   "is said to",
 ];
+
+/*
+ * Whole-word matching for the three keyword detectors below.
+ *
+ * They used a raw substring test, which quietly produced nonsense:
+ * "coup" fired on "a couple of late goals", so an ordinary sports
+ * report was flagged sensitive and held from publication forever; and
+ * "claimed" fired on "acclaimed" and "reclaimed", so a critically
+ * acclaimed film or a reclaimed title scored as an unconfirmed rumour
+ * and never reached its category.
+ *
+ * Unlike the topic keywords - where an inflection really does change
+ * the meaning, hence "chip" not firing on "chipping" - a harm or a
+ * hedge reads the same in any tense, so common English inflections
+ * count: "crash" must still match "crashed", "recall" must still match
+ * "recalled". Multi-word phrases work unchanged, because the text is
+ * normalized to single spaces first.
+ */
+function containsWord(haystack: string, word: string): boolean {
+  const escaped = normalizeText(word).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(^| )${escaped}(s|es|ed|ing)?( |$)`).test(haystack);
+}
 
 export function classifyTopic(title: string, summary: string | null): NewsTopic {
   const haystack = normalizeText(`${title} ${summary ?? ""}`);
@@ -92,12 +123,12 @@ export function classifyTopic(title: string, summary: string | null): NewsTopic 
 
 export function detectBreaking(title: string, summary: string | null): boolean {
   const haystack = normalizeText(`${title} ${summary ?? ""}`);
-  return BREAKING_WORDS.some((word) => haystack.includes(normalizeText(word)));
+  return BREAKING_WORDS.some((word) => containsWord(haystack, word));
 }
 
 export function detectSensitive(title: string, summary: string | null): boolean {
   const haystack = normalizeText(`${title} ${summary ?? ""}`);
-  return SENSITIVE_WORDS.some((word) => haystack.includes(normalizeText(word)));
+  return SENSITIVE_WORDS.some((word) => containsWord(haystack, word));
 }
 
 /**
@@ -118,7 +149,7 @@ export function assessConfidence(params: {
   const { sourceCount, bestTrustTier, titles, summaries } = params;
 
   const haystack = normalizeText(`${titles.join(" ")} ${summaries.filter(Boolean).join(" ")}`);
-  const hedged = UNCONFIRMED_WORDS.some((word) => haystack.includes(normalizeText(word)));
+  const hedged = UNCONFIRMED_WORDS.some((word) => containsWord(haystack, word));
 
   if (hedged) return "UNCONFIRMED";
   if (bestTrustTier <= 1) return "CONFIRMED";
