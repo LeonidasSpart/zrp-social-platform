@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -41,6 +42,7 @@ import coil.compose.AsyncImage
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MusicRepository
 import one.zrp.social.mobile.network.MusicAlbumSummary
+import one.zrp.social.mobile.ui.components.ZrpEmptyState
 
 /**
  * The same real GET /music/albums list src/app/music/albums/page.tsx
@@ -89,9 +91,9 @@ fun AlbumsScreen(onBack: () -> Unit, onAlbumClick: (String) -> Unit) {
             }
             state.albums.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.music_albums_none_found),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    ZrpEmptyState(
+                        icon = Icons.Filled.Album,
+                        title = stringResource(R.string.music_albums_none_found),
                     )
                 }
             }
@@ -117,7 +119,7 @@ private fun AlbumCard(album: MusicAlbumSummary, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick, role = Role.Button),
     ) {
         Box(
             modifier = Modifier

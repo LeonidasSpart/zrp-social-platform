@@ -34,7 +34,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
@@ -131,13 +133,15 @@ private fun ApplicantRow(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .weight(1f)
-                        .clickable { onOpenApplicant(applicant.username) },
+                        .clickable(role = Role.Button) { onOpenApplicant(applicant.username) },
                 ) {
                     Avatar(url = applicant.avatarUrl, name = applicant.name ?: applicant.username, size = 36.dp)
                     Text(
                         text = "@${applicant.username}",
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(start = 8.dp),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false).padding(start = 8.dp),
                     )
                     if (applicant.badgeType != null) {
                         VerifiedBadge(badgeType = applicant.badgeType)
@@ -169,7 +173,7 @@ private fun ApplicantRow(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .padding(top = 8.dp)
-                    .clickable {
+                    .clickable(role = Role.Button) {
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(application.resumeUrl)))
                     },
             ) {

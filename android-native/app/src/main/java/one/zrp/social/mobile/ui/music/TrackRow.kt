@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -77,7 +78,7 @@ fun TrackRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { player.playFromList(track, list) }
+            .clickable(role = Role.Button) { player.playFromList(track, list) }
             .background(if (isCurrent) ZrpRed.copy(alpha = 0.06f) else Color.Transparent)
             .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
@@ -145,7 +146,7 @@ fun TrackRow(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = if (onArtistClick != null) {
-                            Modifier.clickable { onArtistClick(track.artist.id) }
+                            Modifier.clickable(role = Role.Button) { onArtistClick(track.artist.id) }
                         } else {
                             Modifier
                         },
@@ -159,7 +160,7 @@ fun TrackRow(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = if (onAlbumClick != null) {
-                            Modifier.clickable { onAlbumClick(track.album.id) }
+                            Modifier.clickable(role = Role.Button) { onAlbumClick(track.album.id) }
                         } else {
                             Modifier
                         },

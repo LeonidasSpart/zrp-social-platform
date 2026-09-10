@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.OpportunityRepository
+import one.zrp.social.mobile.ui.components.ZrpEmptyState
 
 /**
  * ZRP OPPORTUNITY browse - ported from OpportunityHomePage.tsx: Post
@@ -139,10 +140,9 @@ fun OpportunityScreen(
             }
             state.listings.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.opportunity_no_listings_yet),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(32.dp),
+                    ZrpEmptyState(
+                        icon = Icons.Filled.ListAlt,
+                        title = stringResource(R.string.opportunity_no_listings_yet),
                     )
                 }
             }

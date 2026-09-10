@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -52,7 +53,7 @@ fun DuelCardView(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .clickable(enabled = canPlay) { onClick(duel.id) }
+            .clickable(enabled = canPlay, role = Role.Button) { onClick(duel.id) }
             .padding(12.dp),
     ) {
         Avatar(url = opponent.avatarUrl, name = opponent.username, size = 40.dp)
@@ -68,6 +69,7 @@ fun DuelCardView(
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
                 VerifiedBadge(badgeType = opponent.badgeType)
             }

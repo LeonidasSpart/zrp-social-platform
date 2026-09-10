@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -89,7 +90,14 @@ fun PlayProfileScreen(username: String, onBack: () -> Unit, onOpenChallenge: (St
                     ) {
                         Avatar(url = data.user.avatarUrl, name = data.user.username, size = 64.dp)
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
-                            Text(text = "@${data.user.username}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = "@${data.user.username}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false),
+                            )
                             VerifiedBadge(badgeType = data.user.badgeType)
                         }
                         PlayXpBarView(
@@ -174,7 +182,7 @@ fun PlayProfileScreen(username: String, onBack: () -> Unit, onOpenChallenge: (St
                                         .fillMaxWidth()
                                         .clip(RoundedCornerShape(14.dp))
                                         .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                                        .clickable { onOpenChallenge(attempt.challenge.id) }
+                                        .clickable(role = Role.Button) { onOpenChallenge(attempt.challenge.id) }
                                         .padding(12.dp),
                                 ) {
                                     Column(modifier = Modifier.weight(1f)) {

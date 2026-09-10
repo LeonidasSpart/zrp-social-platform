@@ -50,7 +50,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -247,7 +249,7 @@ fun OpportunityDetailScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .padding(top = Spacing.lg)
-                                .clickable { onOpenPoster(listing.poster.username) },
+                                .clickable(role = Role.Button) { onOpenPoster(listing.poster.username) },
                         ) {
                             Box(
                                 modifier = Modifier
@@ -269,7 +271,9 @@ fun OpportunityDetailScreen(
                             Text(
                                 text = "@${listing.poster.username}",
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(start = Spacing.xs),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false).padding(start = Spacing.xs),
                             )
                             if (listing.poster.badgeType != null) {
                                 VerifiedBadge(badgeType = listing.poster.badgeType)

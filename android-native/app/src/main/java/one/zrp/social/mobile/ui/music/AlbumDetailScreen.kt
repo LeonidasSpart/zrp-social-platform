@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -118,7 +119,7 @@ fun AlbumDetailScreen(albumId: String, player: MusicPlayerViewModel, onBack: () 
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier
                                     .padding(top = Spacing.xs)
-                                    .clickable { onArtistClick(album.artist.id) },
+                                    .clickable(role = Role.Button) { onArtistClick(album.artist.id) },
                             )
                             album.description?.let {
                                 Text(

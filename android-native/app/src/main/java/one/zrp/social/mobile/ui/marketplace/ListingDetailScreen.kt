@@ -53,7 +53,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -197,7 +199,7 @@ fun ListingDetailScreen(
                                     modifier = Modifier
                                         .size(56.dp)
                                         .clip(RoundedCornerShape(8.dp))
-                                        .clickable { viewModel.onImageSelect(index) },
+                                        .clickable(role = Role.Button) { viewModel.onImageSelect(index) },
                                 )
                             }
                         }
@@ -318,7 +320,7 @@ fun ListingDetailScreen(
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable { onOpenSeller(listing.seller.username) },
+                            modifier = Modifier.clickable(role = Role.Button) { onOpenSeller(listing.seller.username) },
                         ) {
                             Box(
                                 modifier = Modifier
@@ -343,11 +345,14 @@ fun ListingDetailScreen(
                                     )
                                 }
                             }
-                            Column(modifier = Modifier.padding(start = Spacing.sm)) {
+                            Column(modifier = Modifier.weight(1f).padding(start = Spacing.sm)) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
                                         text = listing.seller.name ?: listing.seller.username,
                                         fontWeight = FontWeight.Bold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f, fill = false),
                                     )
                                     if (listing.seller.badgeType != null) {
                                         VerifiedBadge(

@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -236,7 +237,7 @@ private fun ArtistAlbumCard(album: MusicArtistAlbumRef, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .width(130.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick, role = Role.Button),
     ) {
         Box(
             modifier = Modifier

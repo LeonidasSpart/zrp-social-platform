@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
@@ -103,7 +104,10 @@ fun MemoryPlayerView(content: MemoryContent, onSubmit: (moves: Int, matchedPairs
                                         else -> MaterialTheme.colorScheme.surfaceContainerHigh
                                     },
                                 )
-                                .clickable(enabled = !submitting && flipped.size != 2 && !flipped.contains(cardIndex) && !isMatched) {
+                                .clickable(
+                                    enabled = !submitting && flipped.size != 2 && !flipped.contains(cardIndex) && !isMatched,
+                                    role = Role.Button,
+                                ) {
                                     flipped = flipped + cardIndex
                                 },
                             verticalArrangement = Arrangement.Center,

@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MarketplaceRepository
+import one.zrp.social.mobile.ui.components.ZrpEmptyState
 
 /**
  * ZRP Market Plus browse - MarketplaceHomePage/CategoryPage/SearchPage
@@ -169,16 +170,15 @@ fun MarketplaceScreen(
             }
             state.listings.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(
+                    ZrpEmptyState(
+                        icon = Icons.Filled.ListAlt,
+                        title = stringResource(
                             if (state.selectedCategory != null || state.searchQuery.isNotBlank()) {
                                 R.string.marketplace_no_listings_found
                             } else {
                                 R.string.marketplace_no_listings_yet
                             },
                         ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(32.dp),
                     )
                 }
             }

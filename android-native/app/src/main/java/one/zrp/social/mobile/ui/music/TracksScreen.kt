@@ -68,6 +68,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MusicRepository
 import one.zrp.social.mobile.network.MusicAlbumSummary
 import one.zrp.social.mobile.network.MusicTrack
+import one.zrp.social.mobile.ui.components.ZrpEmptyState
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
@@ -184,10 +185,9 @@ fun TracksTabContent() {
             }
             state.tracks.isEmpty() -> {
                 item {
-                    Text(
-                        text = stringResource(R.string.music_studio_no_tracks_yet),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodyMedium,
+                    ZrpEmptyState(
+                        icon = Icons.Filled.MusicNote,
+                        title = stringResource(R.string.music_studio_no_tracks_yet),
                     )
                 }
             }
