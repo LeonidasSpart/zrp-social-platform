@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { NewsArticleCategory, type NewsRegion, type NewsTopic } from "@prisma/client";
 import { buildFeedRoster } from "../feeds";
+import { CYCLE_WINDOW_MINUTES } from "../settings";
 import { SEED_SOURCES } from "../sources-seed";
 import { mapToArticleCategory } from "../news-article-bridge";
 
@@ -53,6 +54,29 @@ describe("hourly automation", () => {
     const maxTime = WORKFLOW.match(/--max-time\s+(\d+)/);
     expect(maxTime).not.toBeNull();
     expect(Number(maxTime![1])).toBeGreaterThanOrEqual(900);
+  });
+
+  /*
+   * Found by the end-to-end test, and the reason it exists: the planner
+   * spreads a cycle's publications over CYCLE_WINDOW_MINUTES, so a
+   * window wider than the gap between cycles pushes the tail of every
+   * plan past the next cycle. At the old 150 - sized for a run every
+   * 2-3 hours - the categories at the bottom of a full plan could not
+   * get an article inside the hour however much real news existed.
+   */
+  it("spreads a cycle's publications over no more than the gap between cycles", () => {
+    const busiestGapMinutes = Math.min(
+      ...scheduledCrons().map((cron) => {
+        const [minute, hours] = cron.split(/\s+/);
+        // Every entry is hourly (asserted above), so each contributes one
+        // run per hour at its own minute.
+        expect(hours).toBe("*");
+        expect(minute).toMatch(/^\d+$/);
+        return 60;
+      })
+    );
+
+    expect(CYCLE_WINDOW_MINUTES).toBeLessThanOrEqual(busiestGapMinutes);
   });
 });
 
