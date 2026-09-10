@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import fs from "fs";
+import path from "path";
 import { randomUUID } from "crypto";
 import { NextRequest } from "next/server";
+import { NewsArticleCategory } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { GET } from "../route";
 
@@ -139,5 +142,48 @@ describe.skipIf(!hasRealDatabaseUrl)("GET /api/news (integration, real Postgres)
     const { status, body } = await call("?category=sports&limit=50");
     expect(status).toBe(200);
     expect(mine(body).length).toBe(1);
+  });
+});
+
+/*
+ * The /news page keeps its own hand-written list of category tabs, and
+ * sends each value straight to this route, which rejects anything that
+ * is not a NewsArticleCategory. If the two ever drift, the tab does not
+ * come back empty - it 400s - so the contract is worth pinning even
+ * though no database is involved.
+ */
+describe("the /news category tabs match the categories the API accepts", () => {
+  const PAGE = fs.readFileSync(
+    path.join(process.cwd(), "src/app/news/page.tsx"),
+    "utf-8"
+  );
+
+  /** The `value:` entries of the page's `categories` array. */
+  function tabValues(): string[] {
+    const block = PAGE.match(/const categories:[\s\S]*?\n\];/);
+    expect(block, "the /news page no longer declares a categories array").not.toBeNull();
+
+    const pattern = /value:\s*"([A-Z_]+)"/g;
+    const found: string[] = [];
+    let match = pattern.exec(block![0]);
+    while (match !== null) {
+      found.push(match[1]);
+      match = pattern.exec(block![0]);
+    }
+    return found;
+  }
+
+  it("offers no tab the API would reject with a 400", () => {
+    const allowed = new Set<string>([...Object.values(NewsArticleCategory), "ALL"]);
+    for (const value of tabValues()) {
+      expect(allowed.has(value), `the /news page offers a "${value}" tab the API rejects`).toBe(true);
+    }
+  });
+
+  it("leaves no category unreachable from the page", () => {
+    const tabs = new Set(tabValues());
+    for (const category of Object.values(NewsArticleCategory)) {
+      expect(tabs.has(category), `${category} articles can be published but never browsed`).toBe(true);
+    }
   });
 });
