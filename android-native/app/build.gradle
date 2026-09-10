@@ -221,8 +221,50 @@ android {
         // can show, from Logcat, exactly where the chain actually
         // breaks. None of this changes applicationId, signing, or deep
         // links.
-        versionCode 16
-        versionName "4.0.11"
+        // Bumps to versionCode 17 / versionName "4.0.12" for a premium-
+        // quality/navigation pass across the Settings and Search
+        // surfaces plus every remaining screen domain (PRs #260, #261,
+        // #264, #265) - no backend, auth, or route-contract changes:
+        //
+        // - Settings' Legal section (grown to 12 flat rows by this same
+        //   session's earlier institutional-page work) regrouped into
+        //   labeled Company/Support/Legal clusters, reusing the
+        //   website's own real translated group headings (#260).
+        // - Search's 8 Discover feature-vertical rows (Music,
+        //   Marketplace, Opportunity, Aid, Play, News, Shorts, AI) get
+        //   the same trailing-chevron navigation affordance Settings
+        //   rows already have, and 8 near-identical row composables
+        //   collapsed into one shared one (#261).
+        // - Across Admin/News/Journalist/Support/Trust/Messages/
+        //   Notifications/Profile/Home/Create/Bookmarks/Hashtag/
+        //   Comments/Quotes/Reposts/FollowList/Creator: the quote-post
+        //   composer gains an on-screen dismiss it was missing, ticket
+        //   rows get the same trailing-chevron affordance, 7 more
+        //   "name text pushes VerifiedBadge off the row" sites are
+        //   fixed (including the main feed's own PostCard header - the
+        //   highest-traffic instance of this recurring bug), a voice-
+        //   message play/pause button gains a real accessible name, and
+        //   two under-sized IconButtons are restored to the 48dp
+        //   minimum touch target (#264).
+        // - Across Music/Marketplace/Opportunity/Aid/Play: ~35 bare
+        //   `clickable` rows gain proper Role.Button semantics for
+        //   TalkBack, 9 more instances of the same text-eviction bug are
+        //   fixed, an icon-only remove-photo button gains a real
+        //   accessible name and its touch target restored, and 12 bare
+        //   "no results" screens now use the app's real shared empty-
+        //   state component instead of a bare centered sentence (#265).
+        //
+        // Also carries a documentation-only fix (#263): README's env-var
+        // list was missing GOOGLE_MOBILE_CLIENT_ID, which the mobile
+        // Google Sign-In backend route requires - no application code
+        // changed by that PR. A parallel, independent re-audit of the
+        // full Google Sign-In flow (client + server) found every
+        // previously-shipped fix still correctly in place and no new
+        // code-level bug; Google Sign-In itself is unchanged in this
+        // release. None of this changes applicationId, signing, or deep
+        // links.
+        versionCode 17
+        versionName "4.0.12"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
