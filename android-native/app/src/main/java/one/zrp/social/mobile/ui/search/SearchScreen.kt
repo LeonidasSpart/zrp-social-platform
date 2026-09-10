@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Newspaper
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.filled.SmartDisplay
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.VolunteerActivism
 import androidx.compose.material.icons.filled.Work
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -266,28 +268,60 @@ private fun DiscoverContent(
             DiscoverSectionHeader()
         }
         item {
-            MusicEntryRow(onClick = onOpenMusic)
+            DiscoverEntryRow(
+                icon = Icons.Filled.MusicNote,
+                label = stringResource(R.string.home_discover_music),
+                onClick = onOpenMusic,
+            )
         }
         item {
-            MarketplaceEntryRow(onClick = onOpenMarketplace)
+            DiscoverEntryRow(
+                icon = Icons.Filled.ShoppingCart,
+                label = stringResource(R.string.marketplace_discover_entry),
+                onClick = onOpenMarketplace,
+            )
         }
         item {
-            OpportunityEntryRow(onClick = onOpenOpportunity)
+            DiscoverEntryRow(
+                icon = Icons.Filled.Work,
+                label = stringResource(R.string.opportunity_discover_entry),
+                onClick = onOpenOpportunity,
+            )
         }
         item {
-            AidEntryRow(onClick = onOpenAid)
+            DiscoverEntryRow(
+                icon = Icons.Filled.VolunteerActivism,
+                label = stringResource(R.string.aid_discover_entry),
+                onClick = onOpenAid,
+            )
         }
         item {
-            PlayEntryRow(onClick = onOpenPlay)
+            DiscoverEntryRow(
+                icon = Icons.Filled.SportsEsports,
+                label = stringResource(R.string.play_discover_entry),
+                onClick = onOpenPlay,
+            )
         }
         item {
-            NewsEntryRow(onClick = onOpenNews)
+            DiscoverEntryRow(
+                icon = Icons.Filled.Newspaper,
+                label = stringResource(R.string.news_discover_entry),
+                onClick = onOpenNews,
+            )
         }
         item {
-            ShortsEntryRow(onClick = onOpenShorts)
+            DiscoverEntryRow(
+                icon = Icons.Filled.SmartDisplay,
+                label = stringResource(R.string.shorts_discover_entry),
+                onClick = onOpenShorts,
+            )
         }
         item {
-            AiEntryRow(onClick = onOpenAi)
+            DiscoverEntryRow(
+                icon = Icons.Filled.AutoAwesome,
+                label = stringResource(R.string.ai_discover_entry),
+                onClick = onOpenAi,
+            )
         }
 
         if (state.trendingHashtags.isNotEmpty()) {
@@ -463,8 +497,13 @@ private fun SearchUserRow(user: SearchUser, onClick: () -> Unit) {
     }
 }
 
+// One shared row for all 8 Discover feature-vertical entries (previously
+// 8 near-identical composables). Adds a trailing chevron matching
+// SettingsRow's own affordance - these rows navigate away from Search
+// exactly like a Settings row navigates away from Settings, so they
+// should signal that the same way.
 @Composable
-private fun MusicEntryRow(onClick: () -> Unit) {
+private fun DiscoverEntryRow(icon: ImageVector, label: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -473,145 +512,21 @@ private fun MusicEntryRow(onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            imageVector = Icons.Filled.MusicNote,
+            imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(28.dp),
         )
         Spacer(modifier = Modifier.width(12.dp))
-        Text(text = stringResource(R.string.home_discover_music), style = MaterialTheme.typography.titleSmall)
-    }
-}
-
-@Composable
-private fun MarketplaceEntryRow(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.weight(1f),
+        )
         Icon(
-            imageVector = Icons.Filled.ShoppingCart,
+            imageVector = Icons.Filled.ChevronRight,
             contentDescription = null,
-            modifier = Modifier.size(28.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(text = stringResource(R.string.marketplace_discover_entry), style = MaterialTheme.typography.titleSmall)
-    }
-}
-
-@Composable
-private fun OpportunityEntryRow(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = Icons.Filled.Work,
-            contentDescription = null,
-            modifier = Modifier.size(28.dp),
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(text = stringResource(R.string.opportunity_discover_entry), style = MaterialTheme.typography.titleSmall)
-    }
-}
-
-@Composable
-private fun AidEntryRow(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = Icons.Filled.VolunteerActivism,
-            contentDescription = null,
-            modifier = Modifier.size(28.dp),
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(text = stringResource(R.string.aid_discover_entry), style = MaterialTheme.typography.titleSmall)
-    }
-}
-
-@Composable
-private fun PlayEntryRow(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = Icons.Filled.SportsEsports,
-            contentDescription = null,
-            modifier = Modifier.size(28.dp),
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(text = stringResource(R.string.play_discover_entry), style = MaterialTheme.typography.titleSmall)
-    }
-}
-
-@Composable
-private fun NewsEntryRow(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = Icons.Filled.Newspaper,
-            contentDescription = null,
-            modifier = Modifier.size(28.dp),
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(text = stringResource(R.string.news_discover_entry), style = MaterialTheme.typography.titleSmall)
-    }
-}
-
-@Composable
-private fun ShortsEntryRow(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = Icons.Filled.SmartDisplay,
-            contentDescription = null,
-            modifier = Modifier.size(28.dp),
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(text = stringResource(R.string.shorts_discover_entry), style = MaterialTheme.typography.titleSmall)
-    }
-}
-
-@Composable
-private fun AiEntryRow(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = Icons.Filled.AutoAwesome,
-            contentDescription = null,
-            modifier = Modifier.size(28.dp),
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(text = stringResource(R.string.ai_discover_entry), style = MaterialTheme.typography.titleSmall)
     }
 }
 
