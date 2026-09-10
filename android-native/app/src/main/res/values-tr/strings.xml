@@ -287,6 +287,8 @@
     <string name="chat_recording_label">Kaydediliyor...</string>
     <string name="chat_message_actions_cd">Mesaj seçenekleri</string>
     <string name="chat_send_voice_message_cd">Gönder</string>
+    <string name="chat_voice_play_cd">Oynat</string>
+    <string name="chat_voice_pause_cd">Duraklat</string>
     <string name="chat_err_mic_access">Mikrofonunuza erişilemedi. Lütfen izinlerinizi kontrol edin.</string>
     <string name="chat_attachment_fallback">Belge</string>
     <string name="comment_post_cd">Yorumu gönder</string>
@@ -1934,7 +1936,7 @@
     <string name="admin_news_network_no_stories">Bu kuyrukta haber yok.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · puan %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · %3$d kaynak</string>
-    <string name="admin_news_network_flag_sensitive">Hassas – insan incelemesi gerekiyor</string>
+    <string name="admin_news_network_flag_sensitive">Hassas - insan incelemesi gerekiyor</string>
     <string name="admin_news_network_flag_breaking">Son dakika</string>
     <string name="admin_news_network_flag_travel">Seyahat</string>
     <string name="admin_news_network_reject">Reddet</string>

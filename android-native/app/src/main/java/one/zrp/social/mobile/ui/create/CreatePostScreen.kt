@@ -61,6 +61,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -79,6 +80,7 @@ import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.GifPickerDialog
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.ui.theme.TouchTarget
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.PollLimits
 import one.zrp.social.mobile.util.getPlanLimits
@@ -110,7 +112,17 @@ private enum class DateTimeTarget { SCHEDULE, POLL_EXPIRY }
 
 @OptIn(ExperimentalMaterial3Api::class, UnstableApi::class)
 @Composable
-fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
+fun CreatePostScreen(
+    onPosted: () -> Unit,
+    quotePostId: String? = null,
+    // Only rendered for the quote-post flow below (the main Create tab
+    // needs no dismiss affordance, same as every other bottom-nav
+    // destination). Defaults to onPosted itself, which every current
+    // call site already resolves to a plain navController.popBackStack()
+    // - matching QuotePostModal.tsx's own onClose, which does exactly
+    // that with no other side effect.
+    onCancel: () -> Unit = onPosted,
+) {
     val viewModel: CreatePostViewModel = viewModel(
         factory = remember(quotePostId) { CreatePostViewModelFactory(PostsRepository(), quotePostId) },
     )
@@ -179,13 +191,27 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
             .padding(16.dp),
     ) {
         if (quotePostId != null) {
-            // "Quote Post" stays English-only on purpose - matches
-            // QuotePostModal.tsx's own hardcoded, untranslated title.
-            Text(
-                text = "Quote Post",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = Spacing.sm),
-            )
+            // QuotePostModal.tsx renders both a top-right X and a
+            // "Cancel" button - this screen had neither, leaving only
+            // the system/gesture back to dismiss it with no on-screen
+            // affordance at all, unlike every other pushed screen in
+            // the app.
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                // "Quote Post" stays English-only on purpose - matches
+                // QuotePostModal.tsx's own hardcoded, untranslated title.
+                Text(
+                    text = "Quote Post",
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                IconButton(onClick = onCancel) {
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close))
+                }
+            }
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             val quotedPost = state.quotedPost
             when {
@@ -212,6 +238,9 @@ fun CreatePostScreen(onPosted: () -> Unit, quotePostId: String? = null) {
                                 Text(
                                     text = quotedPost.author.name ?: quotedPost.author.username,
                                     style = MaterialTheme.typography.labelLarge,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false),
                                 )
                                 VerifiedBadge(
                                     badgeType = quotedPost.author.badgeType,
@@ -690,7 +719,7 @@ private fun PollBuilder(
                             .clickable(enabled = enabled, onClick = onExpiryClick)
                             .padding(4.dp),
                     )
-                    IconButton(onClick = onClearExpiry, enabled = enabled, modifier = Modifier.size(28.dp)) {
+                    IconButton(onClick = onClearExpiry, enabled = enabled, modifier = Modifier.size(TouchTarget.min)) {
                         Icon(
                             Icons.Filled.Close,
                             contentDescription = stringResource(R.string.poll_ends_clear_cd),

@@ -926,7 +926,9 @@ private fun ChatAudioPlayer(url: String, isOwnMessage: Boolean) {
         IconButton(onClick = { if (isPlaying) exoPlayer.pause() else exoPlayer.play() }) {
             Icon(
                 imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                contentDescription = null,
+                contentDescription = stringResource(
+                    if (isPlaying) R.string.chat_voice_pause_cd else R.string.chat_voice_play_cd,
+                ),
                 tint = if (isOwnMessage) Color.White else MaterialTheme.colorScheme.onSurface,
             )
         }

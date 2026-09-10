@@ -12,12 +12,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -49,6 +51,7 @@ import one.zrp.social.mobile.ui.support.supportCategoryLabel
 import one.zrp.social.mobile.ui.support.supportPriorityLabel
 import one.zrp.social.mobile.ui.support.supportStatusColor
 import one.zrp.social.mobile.ui.support.supportStatusLabel
+import one.zrp.social.mobile.ui.theme.IconSize
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
@@ -271,6 +274,14 @@ private fun AdminTicketRow(ticket: AdminSupportTicket, onClick: () -> Unit) {
                     .clip(RoundedCornerShape(50))
                     .background(supportStatusColor(ticket.status).copy(alpha = 0.12f))
                     .padding(horizontal = 8.dp, vertical = 2.dp),
+            )
+            Icon(
+                imageVector = Icons.Filled.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .padding(start = Spacing.xs)
+                    .size(IconSize.sm),
             )
         }
 

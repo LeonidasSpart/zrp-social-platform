@@ -287,6 +287,8 @@
     <string name="chat_recording_label">Запись...</string>
     <string name="chat_message_actions_cd">Параметры сообщения</string>
     <string name="chat_send_voice_message_cd">отправить</string>
+    <string name="chat_voice_play_cd">Воспроизвести</string>
+    <string name="chat_voice_pause_cd">Пауза</string>
     <string name="chat_err_mic_access">Не удалось получить доступ к микрофону. Проверьте разрешения.</string>
     <string name="chat_attachment_fallback">Документ</string>
     <string name="comment_post_cd">Опубликовать комментарий</string>
@@ -1785,7 +1787,7 @@
     <string name="admin_analytics_daily_activity">Ежедневная активность</string>
     <string name="admin_analytics_no_daily">За последние 30 дней активности не зафиксировано.</string>
     <string name="admin_analytics_daily_range">%1$s - %2$s</string>
-    <string name="admin_analytics_daily_peak">Пик: %1$s — %2$s</string>
+    <string name="admin_analytics_daily_peak">Пик: %1$s - %2$s</string>
     <string name="admin_analytics_top_posts">Популярные публикации</string>
     <string name="admin_analytics_no_top_posts">Публикаций пока нет.</string>
     <string name="admin_analytics_post_counts">%1$s   ❤ %2$s   💬 %3$s   🔁 %4$s</string>
@@ -1934,7 +1936,7 @@
     <string name="admin_news_network_no_stories">В этой очереди нет материалов.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · оценка %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · источников: %3$d</string>
-    <string name="admin_news_network_flag_sensitive">Деликатный материал — нужна проверка человеком</string>
+    <string name="admin_news_network_flag_sensitive">Деликатный материал - нужна проверка человеком</string>
     <string name="admin_news_network_flag_breaking">Срочно</string>
     <string name="admin_news_network_flag_travel">Путешествия</string>
     <string name="admin_news_network_reject">Отклонить</string>

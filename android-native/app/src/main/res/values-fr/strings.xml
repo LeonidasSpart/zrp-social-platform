@@ -287,6 +287,8 @@
     <string name="chat_recording_label">Enregistrement...</string>
     <string name="chat_message_actions_cd">Options du message</string>
     <string name="chat_send_voice_message_cd">Envoyer</string>
+    <string name="chat_voice_play_cd">Lecture</string>
+    <string name="chat_voice_pause_cd">Pause</string>
     <string name="chat_err_mic_access">Impossible d\'accéder à votre microphone. Vérifiez vos autorisations.</string>
     <string name="chat_attachment_fallback">Document</string>
     <string name="comment_post_cd">Publier le commentaire</string>
@@ -1934,7 +1936,7 @@
     <string name="admin_news_network_no_stories">Aucun sujet dans cette file.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · score %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · %3$d sources</string>
-    <string name="admin_news_network_flag_sensitive">Sensible – relecture humaine requise</string>
+    <string name="admin_news_network_flag_sensitive">Sensible - relecture humaine requise</string>
     <string name="admin_news_network_flag_breaking">Alerte</string>
     <string name="admin_news_network_flag_travel">Voyage</string>
     <string name="admin_news_network_reject">Rejeter</string>

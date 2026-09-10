@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -46,7 +47,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.SupportRepository
 import one.zrp.social.mobile.network.SupportTicketSummary
+import one.zrp.social.mobile.ui.theme.IconSize
 import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.ui.theme.TouchTarget
 
 /**
  * ZRP Support - ported from src/app/support/tickets/page.tsx: the
@@ -196,7 +199,7 @@ private fun TicketRow(
                 if (isDeleting) {
                     CircularProgressIndicator(modifier = Modifier.size(16.dp).padding(top = 4.dp), strokeWidth = 2.dp)
                 } else {
-                    IconButton(onClick = onDelete, modifier = Modifier.size(28.dp)) {
+                    IconButton(onClick = onDelete, modifier = Modifier.size(TouchTarget.min)) {
                         Icon(
                             Icons.Filled.Delete,
                             contentDescription = stringResource(R.string.support_tickets_delete_button),
@@ -207,5 +210,15 @@ private fun TicketRow(
                 }
             }
         }
+
+        Icon(
+            imageVector = Icons.Filled.ChevronRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .padding(start = Spacing.xs)
+                .size(IconSize.sm),
+        )
     }
 }

@@ -287,6 +287,8 @@
     <string name="chat_recording_label">جارٍ التسجيل...</string>
     <string name="chat_message_actions_cd">خيارات الرسالة</string>
     <string name="chat_send_voice_message_cd">إرسال</string>
+    <string name="chat_voice_play_cd">تشغيل</string>
+    <string name="chat_voice_pause_cd">إيقاف مؤقت</string>
     <string name="chat_err_mic_access">تعذر الوصول إلى الميكروفون. يرجى التحقق من الأذونات.</string>
     <string name="chat_attachment_fallback">مستند</string>
     <string name="comment_post_cd">نشر التعليق</string>
@@ -1934,7 +1936,7 @@
     <string name="admin_news_network_no_stories">لا توجد قصص في هذه القائمة.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · النتيجة %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · %3$d مصادر</string>
-    <string name="admin_news_network_flag_sensitive">حسّاسة – تتطلّب مراجعة بشرية</string>
+    <string name="admin_news_network_flag_sensitive">حسّاسة - تتطلّب مراجعة بشرية</string>
     <string name="admin_news_network_flag_breaking">عاجل</string>
     <string name="admin_news_network_flag_travel">سفر</string>
     <string name="admin_news_network_reject">رفض</string>
