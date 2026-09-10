@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import AppleProvider from "next-auth/providers/apple";
 import { prisma } from "./db";
+import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { getFeatureStatus, FeatureStatus } from "./permissions";
 import { checkRateLimitKey, getClientIpFromHeaders, refundRateLimitKey } from "./rate-limit";
@@ -337,19 +338,48 @@ export async function findOrCreateOAuthUser(
   const baseHandle = normalizedEmail.split("@")[0] || name || "user";
   const username = await generateUniqueUsername(baseHandle);
 
-  const created = await prisma.user.create({
-    data: {
-      email: normalizedEmail,
-      username,
-      name: name || null,
-      avatarUrl: image || null,
-      password: null,
-      emailVerified: new Date(),
-      role: "USER",
-      onboardingCompleted: false,
-    },
-    select,
-  });
+  let created;
+  try {
+    created = await prisma.user.create({
+      data: {
+        email: normalizedEmail,
+        username,
+        name: name || null,
+        avatarUrl: image || null,
+        password: null,
+        emailVerified: new Date(),
+        role: "USER",
+        onboardingCompleted: false,
+      },
+      select,
+    });
+  } catch (err) {
+    // Two first sign-ins for the same new address racing each other:
+    // the second create loses on the unique email (or username) key.
+    // The account now exists, so link to it rather than failing the
+    // sign-in - the same outcome the sequential path produces.
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      const raced = await findUserByIdentifier("email", normalizedEmail, select);
+      if (raced) {
+        if (raced.banned) return null;
+        return {
+          id: raced.id,
+          email: raced.email,
+          name: raced.name,
+          username: raced.username,
+          isAdmin: raced.isAdmin,
+          role: raced.role,
+          badgeType: raced.badgeType,
+          avatarUrl: raced.avatarUrl,
+          onboardingCompleted: raced.onboardingCompleted,
+          banned: raced.banned || false,
+          emailVerified: !!raced.emailVerified,
+          plan: raced.plan || "free",
+        };
+      }
+    }
+    throw err;
+  }
 
   return {
     id: created.id,
