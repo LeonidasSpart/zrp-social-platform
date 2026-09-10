@@ -25,7 +25,7 @@ function isLegalPageId(value: string): value is LegalPageId {
  * hand-maintained copy of the legal text.
  *
  * GET /api/legal/:page?lang=xx
- *   page: "terms" | "privacy" | "guidelines" | "help" | "contact" | "about"
+ *   page: "terms" | "privacy" | "guidelines" | "help" | "contact" | "about" | "careers"
  *   lang: one of the 11 SUPPORTED_LANGUAGES codes (default "en"); an
  *         unrecognized code falls back to "en", matching the site's own
  *         detectBrowserLanguage()/cookie fallback in LanguageContext.tsx.

@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -132,6 +133,7 @@ fun SettingsScreen(
     onOpenHelp: () -> Unit,
     onOpenContact: () -> Unit,
     onOpenAbout: () -> Unit,
+    onOpenCareers: () -> Unit,
     isStaff: Boolean = false,
     onOpenAdmin: () -> Unit = {},
 ) {
@@ -188,6 +190,7 @@ fun SettingsScreen(
             SettingsRow(icon = Icons.Filled.HelpOutline, label = stringResource(R.string.legal_help), onClick = onOpenHelp)
             SettingsRow(icon = Icons.Filled.Email, label = stringResource(R.string.legal_contact), onClick = onOpenContact)
             SettingsRow(icon = Icons.Filled.Info, label = stringResource(R.string.legal_about), onClick = onOpenAbout)
+            SettingsRow(icon = Icons.Filled.Work, label = stringResource(R.string.legal_careers), onClick = onOpenCareers)
 
             if (isStaff) {
                 SettingsRow(icon = Icons.Filled.AdminPanelSettings, label = stringResource(R.string.admin_nav_label), onClick = onOpenAdmin)

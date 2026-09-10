@@ -1696,6 +1696,7 @@
     <string name="legal_help">Hilfe-Center</string>
     <string name="legal_contact">Kontakt</string>
     <string name="legal_about">Über ZRP</string>
+    <string name="legal_careers">Karriere</string>
     <string name="legal_load_error">Diese Seite konnte nicht geladen werden. Überprüfe deine Verbindung und versuche es erneut.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Beigetreten</string>
