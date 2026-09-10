@@ -1184,6 +1184,7 @@ export default function Header() {
                         { href: "/press", label: t("footer.pressKit") },
                         { href: "/news", label: t("footer.zrpNews") },
                         { href: "/journalist", label: t("footer.becomeJournalist") },
+                        { href: "/ambassadors", label: t("ambassadors.navLabel") },
                         { href: "/investors", label: t("footer.investors") },
                         { href: "/contact", label: t("footer.contact") },
                       ].map((item) => (

@@ -205,3 +205,25 @@ summary:focus-visible,
     scroll-behavior: auto !important;
   }
 }
+
+/* ─── Ambassadors world map ──────────────────────────────────────────
+   react-simple-maps v5 renders each country as a plain SVG <path> and
+   forwards a normal `style` prop straight onto it - there is no
+   built-in default/hover/pressed state object the way older versions
+   had. Hover recoloring is done here instead, in CSS, both because
+   that's the only way to express a :hover state on an inline `style`
+   at all, and because it means hovering across 241 country paths never
+   triggers a React re-render - only WorldMap.tsx's own hover state
+   (used solely for the tooltip's text) does. The reduced-motion block
+   above already collapses this transition's duration for anyone who
+   asked for less motion. */
+.zrp-world-map .rsm-geography[data-resolvable="true"] {
+  transition: fill 150ms ease;
+}
+.zrp-world-map .rsm-geography[data-resolvable="true"]:hover {
+  fill: #FF2D2D !important;
+}
+.zrp-world-map .rsm-geography[data-resolvable="true"]:focus-visible {
+  outline: 2px solid #FF2D2D;
+  outline-offset: 1px;
+}

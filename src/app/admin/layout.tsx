@@ -21,6 +21,7 @@ import {
   Wallet,
   Music2,
   Rss,
+  Globe2,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
@@ -103,6 +104,11 @@ export default function AdminLayout({
       href: "/admin/journalists",
       labelKey: "adminJournalists.title",
       icon: BadgeCheck,
+    },
+    {
+      href: "/admin/ambassadors",
+      labelKey: "adminAmbassadors.title",
+      icon: Globe2,
     },
     {
       href: "/admin/reports",
