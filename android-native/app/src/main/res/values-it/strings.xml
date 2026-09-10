@@ -1698,6 +1698,8 @@
     <string name="legal_about">Informazioni su ZRP</string>
     <string name="legal_careers">Carriere</string>
     <string name="legal_charity">Beneficenza</string>
+    <string name="legal_press">Kit stampa</string>
+    <string name="legal_investors">Investitori</string>
     <string name="charity_committed_label">Impegnato in beneficenza</string>
     <string name="charity_committed_note">Calcolato automaticamente dalle mance e dagli acquisti di contenuti premium completati: il 35% della commissione della piattaforma ZRP su ciascuno.</string>
     <string name="charity_disbursed_label">Erogato finora</string>

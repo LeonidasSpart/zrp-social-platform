@@ -1698,6 +1698,8 @@
     <string name="legal_about">关于 ZRP</string>
     <string name="legal_careers">招聘</string>
     <string name="legal_charity">慈善</string>
+    <string name="legal_press">新闻资料包</string>
+    <string name="legal_investors">投资者</string>
     <string name="charity_committed_label">承诺用于慈善</string>
     <string name="charity_committed_note">根据已完成的打赏和高级内容购买自动计算：ZRP 平台费用的 35%。</string>
     <string name="charity_disbursed_label">已发放金额</string>

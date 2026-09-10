@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AdminPanelSettings
+import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CreditCard
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.filled.RequestQuote
 import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.VolunteerActivism
@@ -136,6 +138,8 @@ fun SettingsScreen(
     onOpenAbout: () -> Unit,
     onOpenCareers: () -> Unit,
     onOpenCharity: () -> Unit,
+    onOpenPress: () -> Unit,
+    onOpenInvestors: () -> Unit,
     isStaff: Boolean = false,
     onOpenAdmin: () -> Unit = {},
 ) {
@@ -194,6 +198,8 @@ fun SettingsScreen(
             SettingsRow(icon = Icons.Filled.Info, label = stringResource(R.string.legal_about), onClick = onOpenAbout)
             SettingsRow(icon = Icons.Filled.Work, label = stringResource(R.string.legal_careers), onClick = onOpenCareers)
             SettingsRow(icon = Icons.Filled.VolunteerActivism, label = stringResource(R.string.legal_charity), onClick = onOpenCharity)
+            SettingsRow(icon = Icons.Filled.Article, label = stringResource(R.string.legal_press), onClick = onOpenPress)
+            SettingsRow(icon = Icons.Filled.RequestQuote, label = stringResource(R.string.legal_investors), onClick = onOpenInvestors)
 
             if (isStaff) {
                 SettingsRow(icon = Icons.Filled.AdminPanelSettings, label = stringResource(R.string.admin_nav_label), onClick = onOpenAdmin)

@@ -1714,6 +1714,8 @@
     <string name="legal_about">About ZRP</string>
     <string name="legal_careers">Careers</string>
     <string name="legal_charity">Charity</string>
+    <string name="legal_press">Press Kit</string>
+    <string name="legal_investors">Investors</string>
     <string name="charity_committed_label">Committed to charity</string>
     <string name="charity_committed_note">Calculated automatically from completed tips and premium content purchases: 35% of ZRP\'s platform fee on each.</string>
     <string name="charity_disbursed_label">Disbursed so far</string>

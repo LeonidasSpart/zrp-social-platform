@@ -1698,6 +1698,8 @@
     <string name="legal_about">Tentang ZRP</string>
     <string name="legal_careers">Karier</string>
     <string name="legal_charity">Amal</string>
+    <string name="legal_press">Kit Pers</string>
+    <string name="legal_investors">Investor</string>
     <string name="charity_committed_label">Dikomitmenkan untuk amal</string>
     <string name="charity_committed_note">Dihitung otomatis dari tip dan pembelian konten premium yang selesai: 35% dari biaya platform ZRP pada masing-masing.</string>
     <string name="charity_disbursed_label">Sudah disalurkan</string>

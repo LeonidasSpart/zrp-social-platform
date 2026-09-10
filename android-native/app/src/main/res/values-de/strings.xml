@@ -1698,6 +1698,8 @@
     <string name="legal_about">Über ZRP</string>
     <string name="legal_careers">Karriere</string>
     <string name="legal_charity">Wohltätigkeit</string>
+    <string name="legal_press">Presseset</string>
+    <string name="legal_investors">Investoren</string>
     <string name="charity_committed_label">Für wohltätige Zwecke zugesagt</string>
     <string name="charity_committed_note">Automatisch berechnet aus abgeschlossenen Trinkgeldern und Premium-Inhalt-Käufen: 35% der ZRP-Plattformgebühr auf jeden.</string>
     <string name="charity_disbursed_label">Bisher ausgezahlt</string>
