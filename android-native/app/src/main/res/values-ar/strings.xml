@@ -1701,6 +1701,9 @@
     <string name="legal_press">حزمة صحفية</string>
     <string name="legal_investors">المستثمرون</string>
     <string name="legal_faq">الأسئلة الشائعة</string>
+    <string name="settings_group_company">الشركة</string>
+    <string name="settings_group_support">الدعم</string>
+    <string name="settings_group_legal">قانوني</string>
     <string name="transparency_title">شفافية الإشراف</string>
     <string name="transparency_privacy_note">تعرض هذه الصفحة إحصائيات إجمالية فقط. لا تتضمن أبدًا أسماء المستخدمين أو محتوى الرسائل أو المنشورات، أو من قام بالإبلاغ عن ماذا: تظل خصوصية الإشراف محمية كما هي دائمًا.</string>
     <string name="transparency_err_load">تعذّر تحميل بيانات الشفافية حاليًا. يرجى المحاولة لاحقًا.</string>

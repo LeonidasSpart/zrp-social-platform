@@ -1701,6 +1701,9 @@
     <string name="legal_press">Basın Kiti</string>
     <string name="legal_investors">Yatırımcılar</string>
     <string name="legal_faq">SSS</string>
+    <string name="settings_group_company">Şirket</string>
+    <string name="settings_group_support">Destek</string>
+    <string name="settings_group_legal">Yasal</string>
     <string name="transparency_title">Moderasyon Şeffaflığı</string>
     <string name="transparency_privacy_note">Bu sayfa yalnızca toplu sayıları gösterir. Kullanıcı adlarını, mesaj veya gönderi içeriğini ya da kimin neyi bildirdiğini asla içermez: moderasyon gizliliği her zaman olduğu gibi korunur.</string>
     <string name="transparency_err_load">Şeffaflık verileri şu anda yüklenemiyor. Lütfen daha sonra tekrar deneyin.</string>

@@ -1701,6 +1701,9 @@
     <string name="legal_press">Kit Shtypi</string>
     <string name="legal_investors">Investitorët</string>
     <string name="legal_faq">Pyetje të shpeshta</string>
+    <string name="settings_group_company">Kompania</string>
+    <string name="settings_group_support">Mbështetje</string>
+    <string name="settings_group_legal">Ligjore</string>
     <string name="transparency_title">Transparenca e Moderimit</string>
     <string name="transparency_privacy_note">Kjo faqe shfaq vetëm numra të përgjithshëm. Nuk përfshin kurrë emra përdoruesish, përmbajtje mesazhesh apo postimesh, apo se kush ka raportuar çfarë: konfidencialiteti i moderimit mbetet i mbrojtur si gjithmonë.</string>
     <string name="transparency_err_load">Nuk mund të ngarkohen të dhënat e transparencës tani. Ju lutemi provoni më vonë.</string>

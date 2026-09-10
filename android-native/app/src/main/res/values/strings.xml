@@ -1717,6 +1717,9 @@
     <string name="legal_press">Press Kit</string>
     <string name="legal_investors">Investors</string>
     <string name="legal_faq">FAQ</string>
+    <string name="settings_group_company">Company</string>
+    <string name="settings_group_support">Support</string>
+    <string name="settings_group_legal">Legal</string>
     <string name="transparency_title">Moderation Transparency</string>
     <string name="transparency_privacy_note">This page shows only aggregate counts. It never includes usernames, message or post content, or who reported what: moderation privacy is protected the same way it always has been.</string>
     <string name="transparency_err_load">Unable to load transparency data right now. Please try again later.</string>
