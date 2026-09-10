@@ -321,3 +321,186 @@ describe("idempotencyKeyFor", () => {
     expect(idempotencyKeyFor("story-1", "fr")).not.toBe(idempotencyKeyFor("story-1", "en"));
   });
 });
+
+/*
+ * Covering every ZRP News category each hour was, until this, left to
+ * chance: the plan was ranked purely by importance, and the region cap
+ * counted every GLOBAL topic desk as one bloc.
+ */
+describe("planning for category coverage", () => {
+  const TOPICS = [
+    "WORLD", "POLITICS", "BUSINESS", "TECHNOLOGY", "CRYPTO",
+    "SCIENCE", "SPORTS", "CULTURE", "GAMING",
+  ] as const;
+
+  /** One fresh, publishable story per category-serving topic. */
+  function globalStories() {
+    return TOPICS.map((topic, index) =>
+      story({
+        id: `s-${topic}`,
+        topic,
+        region: "GLOBAL",
+        country: null,
+        importance: 6 - index * 0.1,
+        renditions: [{ id: `s-${topic}-en`, language: "en" }],
+      })
+    );
+  }
+
+  /** One topic-restricted desk per category, all able to publish now. */
+  function globalDesks() {
+    return TOPICS.map((topic) =>
+      feed({
+        id: `desk-${topic}`,
+        topics: [topic],
+        minMinutesBetweenPosts: 60,
+        maxPostsPerDay: 24,
+      })
+    );
+  }
+
+  function categoriesIn(slots: ReturnType<typeof planCycle>) {
+    return new Set(slots.map((slot) => slot.feedId.replace("desk-", "")));
+  }
+
+  it("covers every category when every category has a story ready", () => {
+    // The bug: nine categories each holding one fresh publishable
+    // story, against a budget of 24, planned only 8. GLOBAL is not a
+    // part of the world - it is the absence of one - so counting all
+    // nine as a single region capped the whole wire at a third.
+    const slots = planCycle({
+      stories: globalStories(),
+      feeds: globalDesks(),
+      settings: { ...SETTINGS, maxPublicationsPerCycle: 24, minMinutesBetweenPublications: 1 },
+      now: NOON_UTC,
+      windowMinutes: 60,
+      publishedStoryLanguages: new Set<string>(),
+      publicationsToday: 0,
+    });
+
+    expect(categoriesIn(slots).size).toBe(TOPICS.length);
+  });
+
+  it("serves a starved category before one that just published", () => {
+    // Only one slot. Sports is the weakest story but the only category
+    // with nothing at all, so it is the one that should take it.
+    const slots = planCycle({
+      stories: [
+        story({ id: "world-1", topic: "WORLD", region: "GLOBAL", country: null, importance: 8 }),
+        story({
+          id: "sports-1", topic: "SPORTS", region: "GLOBAL", country: null, importance: 3,
+          renditions: [{ id: "sports-1-en", language: "en" }],
+        }),
+      ],
+      feeds: [
+        feed({ id: "desk-WORLD", topics: ["WORLD"] }),
+        feed({ id: "desk-SPORTS", topics: ["SPORTS"] }),
+      ],
+      settings: { ...SETTINGS, maxPublicationsPerCycle: 1 },
+      now: NOON_UTC,
+      windowMinutes: 60,
+      publishedStoryLanguages: new Set<string>(),
+      publicationsToday: 0,
+      categoryCoverage: { WORLD: 0.2, SPORTS: null },
+    });
+
+    expect(slots).toHaveLength(1);
+    expect(slots[0].storyId).toBe("sports-1");
+  });
+
+  it("does not let one starved category take the whole cycle", () => {
+    // Three Sports stories, one Culture story, two slots. Sports gets
+    // one and Culture gets the other - not Sports twice.
+    const slots = planCycle({
+      stories: [
+        story({ id: "sports-1", topic: "SPORTS", region: "GLOBAL", country: null, importance: 8, renditions: [{ id: "sp1", language: "en" }] }),
+        story({ id: "sports-2", topic: "SPORTS", region: "GLOBAL", country: null, importance: 7, renditions: [{ id: "sp2", language: "en" }] }),
+        story({ id: "sports-3", topic: "SPORTS", region: "GLOBAL", country: null, importance: 6, renditions: [{ id: "sp3", language: "en" }] }),
+        story({ id: "culture-1", topic: "CULTURE", region: "GLOBAL", country: null, importance: 3, renditions: [{ id: "cu1", language: "en" }] }),
+      ],
+      feeds: [
+        feed({ id: "desk-SPORTS", topics: ["SPORTS"], minMinutesBetweenPosts: 1, maxPostsPerDay: 24 }),
+        feed({ id: "desk-CULTURE", topics: ["CULTURE"], minMinutesBetweenPosts: 1, maxPostsPerDay: 24 }),
+      ],
+      settings: { ...SETTINGS, maxPublicationsPerCycle: 2, minMinutesBetweenPublications: 1 },
+      now: NOON_UTC,
+      windowMinutes: 60,
+      publishedStoryLanguages: new Set<string>(),
+      publicationsToday: 0,
+      categoryCoverage: { SPORTS: null, CULTURE: null },
+    });
+
+    expect(categoriesIn(slots)).toEqual(new Set(["SPORTS", "CULTURE"]));
+  });
+
+  it("never publishes a story that does not qualify, however empty the category", () => {
+    // The whole point: coverage is a priority, never a licence. A
+    // category with no publishable news stays empty rather than being
+    // filled with something that failed the bar.
+    const slots = planCycle({
+      stories: [
+        story({
+          id: "sports-stale",
+          topic: "SPORTS",
+          region: "GLOBAL",
+          country: null,
+          // Older than the maximum publishable age.
+          firstSeenAt: new Date(NOON_UTC.getTime() - 40 * 60 * 60 * 1000),
+          renditions: [{ id: "sp-stale", language: "en" }],
+        }),
+      ],
+      feeds: [feed({ id: "desk-SPORTS", topics: ["SPORTS"] })],
+      settings: SETTINGS,
+      now: NOON_UTC,
+      windowMinutes: 60,
+      publishedStoryLanguages: new Set<string>(),
+      publicationsToday: 0,
+      categoryCoverage: { SPORTS: null },
+    });
+
+    expect(slots).toHaveLength(0);
+  });
+
+  it("still stops one country's news dominating a cycle", () => {
+    // Narrowing the region cap must not remove it: GLOBAL is exempt
+    // because it is not a place, but a real region still is not.
+    const slots = planCycle({
+      stories: Array.from({ length: 9 }, (_, index) =>
+        story({
+          id: `ch-${index}`,
+          topic: "WORLD",
+          region: "EUROPE",
+          country: "CH",
+          importance: 6,
+          renditions: [{ id: `ch-${index}-en`, language: "en" }],
+        })
+      ),
+      feeds: [feed({ id: "desk-CH", country: "CH", region: "EUROPE", minMinutesBetweenPosts: 1, maxPostsPerDay: 24 })],
+      settings: { ...SETTINGS, maxPublicationsPerCycle: 9, minMinutesBetweenPublications: 1 },
+      now: NOON_UTC,
+      windowMinutes: 60,
+      publishedStoryLanguages: new Set<string>(),
+      publicationsToday: 0,
+    });
+
+    // A third of the cycle, not all of it.
+    expect(slots.length).toBeLessThanOrEqual(3);
+  });
+
+  it("behaves exactly as before when no coverage is supplied", () => {
+    const withoutCoverage = planCycle({
+      stories: globalStories(),
+      feeds: globalDesks(),
+      settings: { ...SETTINGS, maxPublicationsPerCycle: 24, minMinutesBetweenPublications: 1 },
+      now: NOON_UTC,
+      windowMinutes: 60,
+      publishedStoryLanguages: new Set<string>(),
+      publicationsToday: 0,
+    });
+
+    // Importance order, untouched by any coverage preference.
+    expect(withoutCoverage.map((slot) => slot.storyId)).toEqual(
+      TOPICS.map((topic) => `s-${topic}`)
+    );
+  });
+});

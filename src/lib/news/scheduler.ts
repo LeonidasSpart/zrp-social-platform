@@ -1,5 +1,6 @@
 import type { NewsConfidence, NewsRegion, NewsTopic } from "@prisma/client";
 import { isTravelTopic } from "./config";
+import { mapToArticleCategory } from "./news-article-bridge";
 import { MAX_STORY_AGE_HOURS, MIN_PUBLISHABLE_SCORE, ageHours } from "./ranking";
 
 /*
@@ -87,6 +88,17 @@ export interface PlanCycleInput {
   publishedStoryLanguages: Set<string>;
   /** Publications already made platform-wide in the current UTC day. */
   publicationsToday: number;
+  /**
+   * Hours since the newest published article in each ZRP News category,
+   * null where the category has none at all. Optional: without it the
+   * planner behaves exactly as before.
+   *
+   * Used only to break ties between stories that already clear the
+   * publishing bar, so a category nobody has covered today is served
+   * before one that published minutes ago. It can never cause a story
+   * to be published that would not otherwise qualify.
+   */
+  categoryCoverage?: Record<string, number | null>;
 }
 
 export function storyLanguageKey(storyId: string, language: string): string {
@@ -98,6 +110,51 @@ const MAX_SHARE_PER_CYCLE = 1 / 3;
 
 function shareCap(maxSlots: number): number {
   return Math.max(1, Math.ceil(maxSlots * MAX_SHARE_PER_CYCLE));
+}
+
+/**
+ * A category is treated as needing coverage when its newest article is
+ * older than this, or when it has none at all.
+ */
+const COVERAGE_STALE_AFTER_HOURS = 1;
+
+/**
+ * Whether the region cap applies to a story.
+ *
+ * The cap exists so no one part of the world dominates a cycle. GLOBAL
+ * is not a part of the world - it is the absence of one, and it is what
+ * almost every topic desk's sources carry (technology, crypto, science,
+ * sports, culture, gaming, business, politics, world). Counting them as
+ * a single bloc capped the whole wire at a third of the cycle: nine
+ * categories each holding one fresh, publishable story, against a
+ * budget of 24, planned 8 and left the ninth empty.
+ *
+ * The topic cap still applies to every story, so no single subject can
+ * take more than its share - which is the diversity guarantee that
+ * actually matters here.
+ */
+function regionIsCapped(region: NewsRegion): boolean {
+  return region !== "GLOBAL";
+}
+
+/**
+ * Categories with nothing fresh, which the plan should serve first.
+ *
+ * This is a priority, never a licence: only stories that already pass
+ * every eligibility and quality rule are ever considered, so an empty
+ * category with no genuine news stays empty.
+ */
+function starvedCategories(
+  coverage: Record<string, number | null> | undefined
+): Set<string> {
+  const starved = new Set<string>();
+  if (!coverage) return starved;
+  for (const [category, ageHoursValue] of Object.entries(coverage)) {
+    if (ageHoursValue === null || ageHoursValue >= COVERAGE_STALE_AFTER_HOURS) {
+      starved.add(category);
+    }
+  }
+  return starved;
 }
 
 /** Whether a feed's editorial remit covers a story. */
@@ -192,6 +249,12 @@ export function rankStories(stories: SchedulableStory[]): SchedulableStory[] {
 export function planCycle(input: PlanCycleInput): PlannedSlot[] {
   const { stories, feeds, settings, now, windowMinutes, publishedStoryLanguages } = input;
 
+  const starved = starvedCategories(input.categoryCoverage);
+
+  /** The ZRP News category a story would end up in once published. */
+  const categoryOf = (story: SchedulableStory) =>
+    mapToArticleCategory({ topic: story.topic, region: story.region, country: story.country });
+
   const remainingToday = Math.max(
     0,
     settings.maxPublicationsPerDay - input.publicationsToday
@@ -220,12 +283,23 @@ export function planCycle(input: PlanCycleInput): PlannedSlot[] {
   );
   let routineIndex = 0;
 
-  for (const story of rankStories(stories)) {
-    if (slots.length >= maxSlots) break;
-    if (!storyIsEligible(story, settings, now)) continue;
+  /**
+   * Attempts one story, returning true if it took a slot.
+   *
+   * Every eligibility and quality rule lives here, so both passes below
+   * go through exactly the same gate: ordering can bring a starved
+   * category forward, but it can never lower the bar for it.
+   */
+  function tryToSchedule(story: SchedulableStory): boolean {
+    if (slots.length >= maxSlots) return false;
+    if (!storyIsEligible(story, settings, now)) return false;
 
-    if ((regionCount.get(story.region) ?? 0) >= perRegionCap) continue;
-    if ((topicCount.get(story.topic) ?? 0) >= perTopicCap) continue;
+    if (regionIsCapped(story.region) && (regionCount.get(story.region) ?? 0) >= perRegionCap) {
+      return false;
+    }
+    if ((topicCount.get(story.topic) ?? 0) >= perTopicCap) return false;
+
+    let took = false;
 
     for (const rendition of story.renditions) {
       if (slots.length >= maxSlots) break;
@@ -264,7 +338,44 @@ export function planCycle(input: PlanCycleInput): PlannedSlot[] {
       topicCount.set(story.topic, (topicCount.get(story.topic) ?? 0) + 1);
 
       if (!story.isBreaking) routineIndex += 1;
+      took = true;
     }
+
+    return took;
+  }
+
+  const ranked = rankStories(stories);
+  const attempted = new Set<string>();
+
+  /*
+   * Pass one: one slot for each category that currently has nothing
+   * fresh, best story first. Without this the plan is ranked purely by
+   * importance, so a category with nothing for three days gets no
+   * preference over one that published minutes ago - and covering every
+   * category was left to chance.
+   *
+   * One per category, so a single starved category cannot take the
+   * whole cycle and crowd out the others.
+   */
+  if (starved.size > 0) {
+    const servedThisCycle = new Set<string>();
+
+    for (const story of ranked) {
+      if (slots.length >= maxSlots) break;
+
+      const category = categoryOf(story);
+      if (!starved.has(category) || servedThisCycle.has(category)) continue;
+
+      attempted.add(story.id);
+      if (tryToSchedule(story)) servedThisCycle.add(category);
+    }
+  }
+
+  // Pass two: fill the rest of the cycle exactly as before.
+  for (const story of ranked) {
+    if (slots.length >= maxSlots) break;
+    if (attempted.has(story.id)) continue;
+    tryToSchedule(story);
   }
 
   return slots.sort((a, b) => a.scheduledFor.getTime() - b.scheduledFor.getTime());
