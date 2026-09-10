@@ -47,6 +47,29 @@ export const NEWS_MODEL_TIMEOUT_MS = 45_000;
 // just spends the cycle's remaining budget.
 export const NEWS_MODEL_MAX_RETRIES = 1;
 
+/*
+ * ⚠️ Completion budget.
+ *
+ * Real bug, found from production output: NEWS_MODEL is a REASONING
+ * model. It emits several hundred tokens of `reasoning_content` before
+ * writing a single character of the answer, and max_tokens caps the
+ * whole completion - reasoning included, not just the visible reply.
+ *
+ * At the previous 900, measured reasoning of ~560-580 tokens left too
+ * little for the summary itself, so the model either returned empty
+ * content or was cut off mid-JSON. That was, by a wide margin, the
+ * biggest single cause of failed renditions: of 187 failures sampled in
+ * production, 81 were "empty response" and 21 "not valid JSON", plus 72
+ * localisations skipped because the English one had failed - against
+ * only 11 genuine groundedness rejections.
+ *
+ * Sized against that measurement: ~600 reasoning tokens, plus room for
+ * a MAX_BODY_LENGTH summary, plus headroom for a story the model has to
+ * think harder about. Unused budget costs nothing - billing is on
+ * tokens actually produced - so the risk here is all on the low side.
+ */
+export const NEWS_MODEL_MAX_TOKENS = 3000;
+
 /**
  * Builds the model client.
  *
@@ -183,7 +206,7 @@ export async function generateRendition(
       ],
       // Low temperature: this is restatement, not creative writing.
       temperature: 0.2,
-      max_tokens: 900,
+      max_tokens: NEWS_MODEL_MAX_TOKENS,
       response_format: { type: "json_object" },
     });
   } catch (error) {
@@ -193,6 +216,16 @@ export async function generateRendition(
   }
 
   const raw = response.choices[0]?.message?.content?.trim();
+
+  // Named for what it is, so a future budget problem is diagnosable from
+  // the dashboard instead of surfacing as a mystery empty/malformed
+  // response the way this one did.
+  if (response.choices[0]?.finish_reason === "length") {
+    throw new GenerationError(
+      `Model ran out of its ${NEWS_MODEL_MAX_TOKENS}-token completion budget before finishing the summary`
+    );
+  }
+
   if (!raw) throw new GenerationError("Model returned an empty response");
 
   if (raw.toUpperCase().includes(INSUFFICIENT) && raw.length < 60) {

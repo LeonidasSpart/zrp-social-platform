@@ -70,6 +70,71 @@ export function extractNumbers(text: string): string[] {
     .filter((value) => value.length > 0);
 }
 
+/*
+ * Numbers a source spelled out in words.
+ *
+ * Real false rejection, found in production: The Guardian's copy read
+ * "Forty-three people rescued", the summary correctly said "43", and
+ * the figure was reported as unsupported - the model had restated the
+ * source exactly right and was rejected for it.
+ *
+ * Only small whole numbers are covered, and only in the four languages
+ * the pipeline writes. That is deliberate: this exists to recognise a
+ * figure the source really did state, never to guess at one. Anything
+ * outside this list is still treated as unsupported.
+ */
+const SPELLED_NUMBERS: Record<string, number> = {
+  // English
+  one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8,
+  nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14,
+  fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19,
+  twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70,
+  eighty: 80, ninety: 90, hundred: 100, thousand: 1000,
+  // French
+  un: 1, une: 1, deux: 2, trois: 3, quatre: 4, cinq: 5, six_fr: 6, sept: 7,
+  huit: 8, neuf: 9, dix: 10, onze: 11, douze: 12, treize: 13, quatorze: 14,
+  quinze: 15, seize: 16, vingt: 20, trente: 30, quarante: 40, cinquante: 50,
+  soixante: 60, cent: 100, mille: 1000,
+  // German
+  eins: 1, zwei: 2, drei: 3, vier: 4, fuenf: 5, sechs: 6, sieben: 7, acht: 8,
+  neun: 9, zehn: 10, elf: 11, zwoelf: 12, zwanzig: 20, dreissig: 30,
+  vierzig: 40, fuenfzig: 50, hundert: 100, tausend: 1000,
+  // Italian
+  uno: 1, due: 2, tre: 3, quattro: 4, cinque: 5, sei: 6, sette: 7, otto: 8,
+  nove: 9, dieci: 10, undici: 11, dodici: 12, venti: 20, trenta: 30,
+  quaranta: 40, cinquanta: 50, cento: 100, mille_it: 1000,
+};
+
+/**
+ * Digit forms of every number the source spelled out in words, so a
+ * summary that writes "43" for a source's "Forty-three" is recognised
+ * as grounded. Handles the hyphenated tens-and-units forms ("forty-
+ * three", "quarante-trois") as well as the bare words.
+ */
+export function spelledNumbersIn(text: string): string[] {
+  const words = text.toLowerCase().split(/[^a-zà-ÿ]+/).filter(Boolean);
+  const found: string[] = [];
+
+  for (let index = 0; index < words.length; index += 1) {
+    const value = SPELLED_NUMBERS[words[index]];
+    if (value === undefined) continue;
+
+    found.push(String(value));
+
+    // "forty-three" / "quarante-trois": a tens word directly followed by
+    // a units word is one number, and the source's own hyphen has
+    // already been split away above.
+    if (value >= 20 && value < 100 && value % 10 === 0) {
+      const next = SPELLED_NUMBERS[words[index + 1]];
+      if (next !== undefined && next >= 1 && next <= 9) {
+        found.push(String(value + next));
+      }
+    }
+  }
+
+  return found;
+}
+
 /** Quoted spans long enough to be a real quotation rather than scare quotes. */
 export function extractQuotes(text: string): string[] {
   const matches = text.match(/["“”«»]([^"“”«»]{15,300})["“”«»]/g) || [];
@@ -101,7 +166,13 @@ export function validateGrounded(
   generated: string,
   sourceMaterial: string
 ): GroundednessReport {
-  const sourceNumbers = new Set(extractNumbers(sourceMaterial));
+  // A figure counts as present whether the source wrote it in digits or
+  // in words - restating "Forty-three" as "43" is accurate reporting,
+  // not an invented number.
+  const sourceNumbers = new Set([
+    ...extractNumbers(sourceMaterial),
+    ...spelledNumbersIn(sourceMaterial),
+  ]);
   const normalizedSource = normalizeForComparison(sourceMaterial);
 
   const unsupportedNumbers = Array.from(new Set(extractNumbers(generated))).filter(
