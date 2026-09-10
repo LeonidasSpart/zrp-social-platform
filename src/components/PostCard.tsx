@@ -45,6 +45,7 @@ const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
 import QuotePostModal from "./QuotePostModal";
 import VideoFeedViewer from "./VideoFeedViewer";
 import LinkPreviewCard from "./LinkPreviewCard";
+import Poll from "./Poll";
 import { extractFirstUrl } from "@/lib/link-preview-parse";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -112,6 +113,19 @@ interface PostCardProps {
         avatarUrl?: string | null;
         badgeType?: string | null;
       };
+    } | null;
+
+    // The API has always returned this for a poll post - GET /api/posts
+    // and GET /api/posts/[id] both include it, with votes_user filtered
+    // to the viewer's own vote. Nothing consumed it, which is the bug:
+    // every poll ever created rendered as a plain text post.
+    poll?: {
+      id: string;
+      question: string;
+      options: string[];
+      votes?: Record<string, number> | null;
+      expiresAt?: string | null;
+      votes_user?: { optionIndex: number }[];
     } | null;
   };
 
@@ -2006,6 +2020,53 @@ export default function PostCard({
                       )}
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* POLL
+
+                  Poll.tsx has existed unused since it was written - no
+                  call site anywhere in src. The composer creates the
+                  poll, /api/posts persists it and returns it, and then
+                  the one component that draws every post in the feed,
+                  on a profile and in search simply never looked at it.
+                  A published poll showed as its question text and
+                  nothing else, with no options and no way to vote.
+
+                  votes is the aggregate map on the Poll row and can be
+                  null before anyone has voted; votes_user is already
+                  filtered server-side to this viewer, so its first entry
+                  is their own vote if they have one. onVote refreshes
+                  through the card's existing onUpdate, so the counts
+                  come from the server rather than being guessed here. */}
+              {post.poll && (
+                <div className="mt-3">
+                  <Poll
+                    pollId={post.poll.id}
+                    question={
+                      post.poll.question
+                    }
+                    options={
+                      post.poll.options
+                    }
+                    votes={
+                      post.poll.votes ||
+                      {}
+                    }
+                    userVote={
+                      post.poll
+                        .votes_user?.[0]
+                        ?.optionIndex
+                    }
+                    expiresAt={
+                      post.poll
+                        .expiresAt ??
+                      undefined
+                    }
+                    onVote={() =>
+                      onUpdate()
+                    }
+                  />
                 </div>
               )}
 
