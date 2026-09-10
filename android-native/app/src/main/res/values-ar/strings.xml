@@ -563,6 +563,7 @@
     <string name="onboarding_err_follow_users">تعذر متابعة المستخدمين. يرجى المحاولة مرة أخرى.</string>
     <string name="onboarding_err_skip">تعذر التخطي. يرجى المحاولة مرة أخرى.</string>
     <string name="auth_err_session_expired">لم تعد جلستك صالحة. يرجى تسجيل الدخول مرة أخرى.</string>
+    <string name="auth_err_google_interrupted">تمت مقاطعة محاولة تسجيل الدخول عبر Google. يرجى المحاولة مرة أخرى.</string>
     <!-- Music Phase 1: shared player + Queue -->
     <string name="music_nav_queue_title">قائمة انتظارك</string>
     <string name="music_nav_history_title">استُمع إليه مؤخرًا</string>

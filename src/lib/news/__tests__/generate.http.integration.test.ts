@@ -5,6 +5,7 @@ import {
   generateRenditions,
   GenerationError,
   NEWS_MODEL_MAX_RETRIES,
+  NEWS_MODEL_MAX_TOKENS,
   NEWS_MODEL_TIMEOUT_MS,
   BUDGET_EXHAUSTED_MESSAGE,
   type GenerationContext,
@@ -105,6 +106,35 @@ describe("model integration over real HTTP", () => {
     });
     await generateRendition("en", CONTEXT, { client: client() });
     expect(server.lastAuthHeader).toBe("Bearer test-key");
+  });
+
+  // Real bug, measured in production: NEWS_MODEL is a reasoning model
+  // that spent ~560-580 tokens on reasoning_content before writing any
+  // answer, and max_tokens caps reasoning + answer together. At the
+  // previous 900 the summary itself was left with a few hundred tokens
+  // and came back empty or truncated mid-JSON - the single largest
+  // cause of failed renditions. Asserted on the wire, not on the
+  // constant, so this covers what the model is actually asked for.
+  it("asks for a completion budget that still fits a summary after reasoning tokens", async () => {
+    server.setBehaviour({
+      kind: "ok",
+      headline: "Authority publishes maintenance notice",
+      body: GOOD_BODY,
+    });
+    await generateRendition("en", CONTEXT, { client: client() });
+
+    const sentMaxTokens = server.lastRequestBody?.max_tokens as number | undefined;
+    expect(sentMaxTokens).toBe(NEWS_MODEL_MAX_TOKENS);
+    // Measured worst-case reasoning was ~580 tokens; a MAX_BODY_LENGTH
+    // summary needs several hundred more on top of that.
+    expect(sentMaxTokens).toBeGreaterThanOrEqual(2000);
+  });
+
+  it("names a truncated completion for what it is, rather than reporting empty output", async () => {
+    server.setBehaviour({ kind: "truncated" });
+    await expect(generateRendition("en", CONTEXT, { client: client() })).rejects.toThrow(
+      /completion budget/i
+    );
   });
 
   it("rejects a real hallucinated figure end to end", async () => {

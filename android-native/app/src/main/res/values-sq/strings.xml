@@ -563,6 +563,7 @@
     <string name="onboarding_err_follow_users">Ndjekja e përdoruesve dështoi. Ju lutemi riprovojeni.</string>
     <string name="onboarding_err_skip">Kalimi dështoi. Ju lutemi riprovojeni.</string>
     <string name="auth_err_session_expired">Sesioni yt nuk është më i vlefshëm. Ju lutemi hyni përsëri.</string>
+    <string name="auth_err_google_interrupted">Përpjekja jote për hyrje me Google u ndërpre. Ju lutemi provoni përsëri.</string>
     <!-- Music Phase 1: shared player + Queue -->
     <string name="music_nav_queue_title">Radha jote</string>
     <string name="music_nav_history_title">Dëgjuar së fundmi</string>

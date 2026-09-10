@@ -111,16 +111,43 @@ describe("feedIsAvailableAt", () => {
     );
   });
 
-  it("will not schedule routine news into a feed's local quiet hours", () => {
-    // 12:00 UTC is 03:00 in Los Angeles.
+  // ZRP News is a continuous 24/7 wire: routine news used to be skipped
+  // between 23:00 and 06:00 in the feed's own timezone, which removed a
+  // third of every day from the schedule and left overnight readers
+  // with nothing. The gap and daily cap above are what prevent
+  // flooding, and they apply at every hour equally.
+  it("publishes routine news at every hour of the day, including overnight", () => {
+    // 12:00 UTC is 03:00 in Los Angeles - the middle of the old quiet
+    // window.
     const westCoast = feed({ timezone: "America/Los_Angeles" });
-    expect(feedIsAvailableAt(westCoast, NOON_UTC, story())).toBe(false);
+    expect(feedIsAvailableAt(westCoast, NOON_UTC, story())).toBe(true);
+
+    // And every other hour of the day, for a feed anywhere.
+    for (let hour = 0; hour < 24; hour += 1) {
+      const at = new Date(Date.UTC(2026, 1, 3, hour, 0, 0));
+      expect(feedIsAvailableAt(feed({ timezone: "Europe/Zurich" }), at, story())).toBe(true);
+    }
   });
 
-  it("lets breaking news and travel alerts cross quiet hours", () => {
+  it("still lets breaking news and travel alerts through at any hour", () => {
     const westCoast = feed({ timezone: "America/Los_Angeles" });
     expect(feedIsAvailableAt(westCoast, NOON_UTC, story({ isBreaking: true }))).toBe(true);
     expect(feedIsAvailableAt(westCoast, NOON_UTC, story({ topic: "AVIATION" }))).toBe(true);
+  });
+
+  // The anti-flood limits are the only thing standing between a feed
+  // and a flood, now that time-of-day no longer gates anything.
+  it("still refuses a feed that has hit its gap or its daily cap, overnight included", () => {
+    const midnightUtc = new Date(Date.UTC(2026, 1, 3, 0, 30, 0));
+    const justPosted = feed({
+      timezone: "Europe/Zurich",
+      lastPublishedAt: new Date(midnightUtc.getTime() - 5 * 60 * 1000),
+      minMinutesBetweenPosts: 60,
+    });
+    expect(feedIsAvailableAt(justPosted, midnightUtc, story())).toBe(false);
+
+    const atCap = feed({ timezone: "Europe/Zurich", postsToday: 24, maxPostsPerDay: 24 });
+    expect(feedIsAvailableAt(atCap, midnightUtc, story())).toBe(false);
   });
 });
 

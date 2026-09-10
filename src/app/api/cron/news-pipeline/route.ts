@@ -3,10 +3,14 @@ import { runPipelineCycle } from "@/lib/news/pipeline";
 
 export const dynamic = "force-dynamic";
 
-// The pipeline does real outbound work and can spend a few minutes on a
-// large cycle. Next's default serverless timeout is far shorter than
-// that on some hosts, so ask for the longest window the platform allows.
-export const maxDuration = 300;
+// The pipeline does real outbound work and can spend several minutes on
+// a large cycle - more so now that the model reasons before it writes.
+// Next's default serverless timeout is far shorter than that on some
+// hosts, so ask for the longest window the platform allows. Must stay
+// at or above GENERATION_BUDGET_MS plus room for planning/publishing,
+// and at or below the caller's own timeout in
+// .github/workflows/cron-news-pipeline.yml.
+export const maxDuration = 900;
 
 /**
  * GET /api/cron/news-pipeline

@@ -230,19 +230,31 @@ export default function MessagesIndexPage() {
                         focus-visible:ring-zrp-red
                       "
                     >
-                      <div className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
-                        {partner.avatarUrl ? (
-                          <img
-                            src={partner.avatarUrl}
-                            alt={displayName}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-sm">
-                            {initial}
-                          </div>
-                        )}
+                      {/* Two boxes, not one. The clipping container has
+                          to be rounded-full + overflow-hidden to crop the
+                          avatar image into a circle - but the presence dot
+                          used to live inside it, at the bounding box's
+                          bottom-right corner, which is the point furthest
+                          OUTSIDE a circular mask. The circle sliced the dot
+                          (and its contrasting ring) into a green crescent,
+                          which is what it renders as on a real device.
+                          Positioning off an unclipped wrapper leaves the
+                          image cropped and the dot whole. */}
+                      <div className="relative w-12 h-12 sm:w-13 sm:h-13 flex-shrink-0">
+                        <div className="w-full h-full rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                          {partner.avatarUrl ? (
+                            <img
+                              src={partner.avatarUrl}
+                              alt={displayName}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-sm">
+                              {initial}
+                            </div>
+                          )}
+                        </div>
 
                         {/* Real presence dot - takes priority over the
                             corner when both would render there, since the

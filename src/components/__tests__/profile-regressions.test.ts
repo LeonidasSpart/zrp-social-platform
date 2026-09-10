@@ -161,3 +161,57 @@ describe("shorts caption", () => {
     expect(src).toContain("pb-[calc(3.5rem+env(safe-area-inset-bottom)+1rem)]");
   });
 });
+
+describe("video feed viewer bottom overlay", () => {
+  const src = read("src/components/VideoFeedViewer.tsx");
+
+  it("reserves BottomNav's real footprint under the action rail, matching shorts/page.tsx", () => {
+    // Same bug as shorts/page.tsx above, in the sibling full-screen
+    // video viewer opened by tapping a video post in the feed: this one
+    // still had the old, narrower pb-8, which hid the author row and
+    // the like/comment/repost/share action rail behind BottomNav (a
+    // z-[9999] portal over this z-[100] viewer) on any route below the
+    // lg breakpoint - reported as "the Short menu is invisible" on
+    // mobile web/PWA/tablet.
+    expect(src).toContain("pb-[calc(3.5rem+env(safe-area-inset-bottom)+1rem)]");
+    expect(src).not.toContain('"absolute inset-x-0 bottom-0 p-4 pb-8');
+  });
+});
+
+describe("image lightbox", () => {
+  const src = read(POST_CARD);
+
+  it("clears the system status bar / notch instead of a flat py-4", () => {
+    // The close X sat right at/under the status bar on mobile web/PWA
+    // (notch/dynamic-island devices, PWA standalone mode) because the
+    // header only had a flat py-4 with no safe-area awareness.
+    const idx = src.indexOf("aria-label=\"Image gallery\"");
+    expect(idx).toBeGreaterThan(-1);
+    const header = src.slice(idx, idx + 1500);
+    expect(header).toContain("pt-[calc(1rem+env(safe-area-inset-top))]");
+  });
+
+  it("closes when the photo itself is tapped, not just the surrounding backdrop", () => {
+    // The image-wrapping container was w-full h-full with its own
+    // stopPropagation, so a tap almost anywhere in the viewer - the
+    // photo included - silently did nothing; only a thin strip of true
+    // backdrop outside it actually closed the lightbox. PostCard.tsx
+    // has two "Post image" alt templates (the feed gallery thumbnail,
+    // and this lightbox) - search from the dialog's own start so this
+    // checks the lightbox's <img>, not the thumbnail's.
+    const dialogIdx = src.indexOf("aria-label=\"Image gallery\"");
+    expect(dialogIdx).toBeGreaterThan(-1);
+    const imgIdx = src.indexOf('alt={`Post image ${', dialogIdx);
+    expect(imgIdx).toBeGreaterThan(dialogIdx);
+    const wrapper = src.slice(Math.max(dialogIdx, imgIdx - 400), imgIdx);
+    expect(wrapper).not.toContain("stopPropagation");
+  });
+
+  it("still lets the prev/next arrows and header controls swallow their own clicks", () => {
+    // Those must keep stopPropagation so pressing them doesn't also
+    // close the lightbox out from under the user.
+    expect(src).toContain('aria-label="Previous image"');
+    const prevIdx = src.indexOf('aria-label="Previous image"');
+    expect(src.slice(Math.max(0, prevIdx - 200), prevIdx)).toContain("stopPropagation");
+  });
+});

@@ -65,11 +65,28 @@ export interface FeedDefinition {
   maxPostsPerDay: number;
 }
 
+/*
+ * Anti-flood defaults, sized for a continuous hourly wire.
+ *
+ * ZRP News is expected to carry fresh content in every category in
+ * every hourly window, so a feed has to be *allowed* to post once an
+ * hour: at the previous 180-minute gap and 6-a-day cap, a category
+ * could physically never exceed 6 articles a day no matter how much
+ * real news existed, and an hourly target was arithmetically
+ * impossible before a single story was even considered.
+ *
+ * These are still ceilings, not quotas. Nothing posts because the
+ * budget exists - a feed publishes only when there is a genuine,
+ * fresh, deduplicated story that its own remit covers.
+ */
+const HOURLY_GAP_MINUTES = 60;
+const HOURLY_DAILY_CAP = 24;
+
 function definition(partial: Omit<FeedDefinition, "isPilot" | "minMinutesBetweenPosts" | "maxPostsPerDay"> & Partial<FeedDefinition>): FeedDefinition {
   return {
     isPilot: false,
-    minMinutesBetweenPosts: 180,
-    maxPostsPerDay: 6,
+    minMinutesBetweenPosts: HOURLY_GAP_MINUTES,
+    maxPostsPerDay: HOURLY_DAILY_CAP,
     ...partial,
   };
 }
@@ -227,10 +244,10 @@ export function buildFeedRoster(): FeedDefinition[] {
         topics: desk.topics,
         // ZRP News World anchors the pilot.
         isPilot: desk.key === "world",
-        // The world desk sees the most candidate stories, so it gets the
-        // tightest gap of any feed rather than the loosest.
-        minMinutesBetweenPosts: desk.key === "world" ? 120 : 240,
-        maxPostsPerDay: desk.key === "world" ? 8 : 4,
+        // The world desk sees the most candidate stories of any feed, so
+        // it keeps a higher ceiling than the single-topic desks; both are
+        // allowed to post at least once an hour.
+        maxPostsPerDay: desk.key === "world" ? 36 : HOURLY_DAILY_CAP,
       })
     );
   }
@@ -265,10 +282,10 @@ export function buildFeedRoster(): FeedDefinition[] {
         timezone: desk.timezone,
         topics: desk.topics,
         isPilot: desk.isPilot,
-        // Travel disruption is time-critical, so travel desks are
-        // allowed to post more often than a general desk.
-        minMinutesBetweenPosts: 120,
-        maxPostsPerDay: 8,
+        // Travel disruption is time-critical, so travel desks keep a
+        // shorter gap than the hourly default rather than a longer one.
+        minMinutesBetweenPosts: 30,
+        maxPostsPerDay: 36,
       })
     );
   }

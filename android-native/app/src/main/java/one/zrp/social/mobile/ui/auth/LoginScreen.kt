@@ -150,6 +150,13 @@ fun LoginScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 12.dp),
             )
+        } else if (formState is LoginFormState.GoogleInterrupted) {
+            Text(
+                text = stringResource(R.string.auth_err_google_interrupted),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 12.dp),
+            )
         }
 
         Button(

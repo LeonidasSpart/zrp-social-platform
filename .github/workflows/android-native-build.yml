@@ -63,6 +63,17 @@ jobs:
           GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
         run: ./gradlew assembleDebug --no-daemon "-PGOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID"
 
+      # JVM unit tests (src/test) - pure-Kotlin logic like PollMath.kt's
+      # vote/percentage math that doesn't need an emulator. assembleDebug
+      # above does NOT run these (it only compiles the main source set),
+      # so without this step a broken test file would silently sit in
+      # the repo unverified.
+      - name: Run unit tests
+        working-directory: android-native
+        env:
+          GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+        run: ./gradlew testDebugUnitTest --no-daemon "-PGOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID"
+
       # The debug build now signs with the checked-in android-native/
       # debug.keystore (see build.gradle's own comment) specifically so
       # this fingerprint is STABLE across every run - unlike Gradle's

@@ -1067,24 +1067,39 @@ export default function ShortsPage() {
   return (
     <div className="fixed inset-0 bg-black z-[100]">
 
+      {/* The three pieces of top chrome sit against a `fixed inset-0`
+          container, so a padding on that container cannot move them -
+          each carries the status-bar inset itself.
+
+          Why only the PWA was wrong: layout.tsx sets viewportFit:
+          "cover", so in an installed standalone PWA the viewport starts
+          at y=0 *underneath* the system status bar and
+          env(safe-area-inset-top) becomes non-zero. top-4 (16px) then
+          lands inside the status bar, which is why the back arrow, the
+          "Shorts" title and the mute/upload buttons were drawn across
+          the clock and the battery icons. In an ordinary mobile browser
+          the address bar already pushes the viewport clear, and on iPad
+          the inset is 0, so both looked correct - and both stay exactly
+          as they are here, because calc(1rem + 0px) is 16px. */}
+
       {/* BACK */}
       <button
         onClick={() =>
           router.push("/")
         }
-        className="absolute top-4 left-4 z-30 text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
+        className="absolute top-[calc(1rem+env(safe-area-inset-top))] left-4 z-30 text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
         aria-label={t("shorts.back")}
       >
         <ArrowLeft className="w-6 h-6" />
       </button>
 
       {/* TITLE */}
-      <h1 className="absolute top-4 left-1/2 -translate-x-1/2 z-30 text-white font-semibold text-lg">
+      <h1 className="absolute top-[calc(1rem+env(safe-area-inset-top))] left-1/2 -translate-x-1/2 z-30 text-white font-semibold text-lg">
         {t("nav.shorts")}
       </h1>
 
       {/* TOP RIGHT */}
-      <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
+      <div className="absolute top-[calc(1rem+env(safe-area-inset-top))] right-4 z-30 flex items-center gap-2">
 
         <button
           onClick={() =>
@@ -1225,7 +1240,7 @@ export default function ShortsPage() {
                   // frame down behind the nav and left a dead band under
                   // the header. object-contain below still preserves the
                   // aspect ratio for portrait, landscape and square.
-                  className="relative h-full w-full snap-start snap-always flex items-center justify-center pt-16 pb-[calc(3.5rem+env(safe-area-inset-bottom))]"
+                  className="relative h-full w-full snap-start snap-always flex items-center justify-center pt-[calc(4rem+env(safe-area-inset-top))] pb-[calc(3.5rem+env(safe-area-inset-bottom))]"
                 >
 
                   {/* REAL VIDEO ONLY */}

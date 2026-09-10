@@ -563,6 +563,7 @@
     <string name="onboarding_err_follow_users">Benutzern konnte nicht gefolgt werden. Bitte versuche es erneut.</string>
     <string name="onboarding_err_skip">Überspringen fehlgeschlagen. Bitte versuche es erneut.</string>
     <string name="auth_err_session_expired">Deine Sitzung ist nicht mehr gültig. Bitte melde dich erneut an.</string>
+    <string name="auth_err_google_interrupted">Deine Google-Anmeldung wurde unterbrochen. Bitte versuche es erneut.</string>
     <!-- Music Phase 1: shared player + Queue -->
     <string name="music_nav_queue_title">Deine Warteschlange</string>
     <string name="music_nav_history_title">Zuletzt gehört</string>

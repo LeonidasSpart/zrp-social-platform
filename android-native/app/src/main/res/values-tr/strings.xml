@@ -563,6 +563,7 @@
     <string name="onboarding_err_follow_users">Kullanıcılar takip edilemedi. Lütfen tekrar deneyin.</string>
     <string name="onboarding_err_skip">Atlanamadı. Lütfen tekrar deneyin.</string>
     <string name="auth_err_session_expired">Oturumunuz artık geçerli değil. Lütfen tekrar giriş yapın.</string>
+    <string name="auth_err_google_interrupted">Google ile giriş denemeniz kesintiye uğradı. Lütfen tekrar deneyin.</string>
     <!-- Music Phase 1: shared player + Queue -->
     <string name="music_nav_queue_title">Sıran</string>
     <string name="music_nav_history_title">Son Dinlenenler</string>

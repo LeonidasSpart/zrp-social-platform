@@ -115,17 +115,22 @@ interface PostCardProps {
       };
     } | null;
 
-    // The API has always returned this for a poll post - GET /api/posts
-    // and GET /api/posts/[id] both include it, with votes_user filtered
-    // to the viewer's own vote. Nothing consumed it, which is the bug:
-    // every poll ever created rendered as a plain text post.
+    isPoll?: boolean;
+    // Two different API shapes reach this prop: the feed endpoints
+    // (/api/posts, /api/posts/explore, profile/likes/reposts) return the
+    // raw Prisma relation as `votes_user: [{optionIndex}]`, while
+    // /api/posts/[id] (the single-post page) collapses that into a plain
+    // `userVote: number | null` and strips votes_user entirely. Both are
+    // accepted here so the poll renders correctly regardless of which
+    // route fetched the post.
     poll?: {
       id: string;
       question: string;
       options: string[];
-      votes?: Record<string, number> | null;
+      votes: Record<string, number> | null;
       expiresAt?: string | null;
       votes_user?: { optionIndex: number }[];
+      userVote?: number | null;
     } | null;
   };
 
@@ -2023,51 +2028,20 @@ export default function PostCard({
                 </div>
               )}
 
-              {/* POLL
-
-                  Poll.tsx has existed unused since it was written - no
-                  call site anywhere in src. The composer creates the
-                  poll, /api/posts persists it and returns it, and then
-                  the one component that draws every post in the feed,
-                  on a profile and in search simply never looked at it.
-                  A published poll showed as its question text and
-                  nothing else, with no options and no way to vote.
-
-                  votes is the aggregate map on the Poll row and can be
-                  null before anyone has voted; votes_user is already
-                  filtered server-side to this viewer, so its first entry
-                  is their own vote if they have one. onVote refreshes
-                  through the card's existing onUpdate, so the counts
-                  come from the server rather than being guessed here. */}
+              {/* POLL */}
               {post.poll && (
-                <div className="mt-3">
-                  <Poll
-                    pollId={post.poll.id}
-                    question={
-                      post.poll.question
-                    }
-                    options={
-                      post.poll.options
-                    }
-                    votes={
-                      post.poll.votes ||
-                      {}
-                    }
-                    userVote={
-                      post.poll
-                        .votes_user?.[0]
-                        ?.optionIndex
-                    }
-                    expiresAt={
-                      post.poll
-                        .expiresAt ??
-                      undefined
-                    }
-                    onVote={() =>
-                      onUpdate()
-                    }
-                  />
-                </div>
+                <Poll
+                  pollId={post.poll.id}
+                  question={post.poll.question}
+                  options={post.poll.options}
+                  votes={post.poll.votes || {}}
+                  userVote={
+                    post.poll.userVote ??
+                    post.poll.votes_user?.[0]?.optionIndex
+                  }
+                  expiresAt={post.poll.expiresAt ?? undefined}
+                  onVote={() => onUpdate()}
+                />
               )}
 
               {/* LINK PREVIEW */}
@@ -2911,7 +2885,18 @@ export default function PostCard({
             }
           >
             <div
-              className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 sm:px-6 py-4 bg-gradient-to-b from-black/70 to-transparent"
+              // Reported bug: the close X sat right at/under the system
+              // status bar on mobile web/PWA (notch/dynamic-island
+              // devices, PWA standalone mode where content can extend
+              // under the status bar) because this header only had a
+              // flat py-4 (16px), with no awareness of the real,
+              // device-reported safe area. pt-[...env(safe-area-inset-
+              // top)] matches the same pattern already used for the
+              // bottom safe area elsewhere in this codebase (BottomNav,
+              // shorts pages) - viewport-fit=cover is already set in
+              // app/layout.tsx, which is required for this to resolve to
+              // anything but 0.
+              className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 sm:px-6 pt-[calc(1rem+env(safe-area-inset-top))] pb-4 bg-gradient-to-b from-black/70 to-transparent"
               onClick={(e) =>
                 e.stopPropagation()
               }
@@ -2945,12 +2930,18 @@ export default function PostCard({
               </button>
             )}
 
-            <div
-              className="relative w-full h-full flex items-center justify-center px-3 sm:px-16 lg:px-24 py-16 sm:py-20"
-              onClick={(e) =>
-                e.stopPropagation()
-              }
-            >
+            {/* Reported bug: tapping the photo itself did nothing -
+                this container's own stopPropagation ate every click
+                inside it (nearly the whole viewer, since it's w-full
+                h-full), so only the small strip of true backdrop
+                outside this box actually closed the viewer. Tap-to-
+                close needs to work on the photo too, so this no longer
+                stops propagation: any click here (including directly on
+                the image) bubbles to the outer dialog's own
+                onClick={closeLightbox}. The prev/next arrows and the
+                header above keep their own stopPropagation, so those
+                still don't also trigger a close. */}
+            <div className="relative w-full h-full flex items-center justify-center px-3 sm:px-16 lg:px-24 py-16 sm:py-20">
               <img
                 key={
                   galleryImages[

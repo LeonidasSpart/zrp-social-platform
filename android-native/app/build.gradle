@@ -143,8 +143,58 @@ android {
         // convention (see the versionCode 9/10 history above) the next
         // build always strictly increments past the highest versionCode
         // ever committed here, not just the last one confirmed shipped.
-        versionCode 12
-        versionName "4.0.7"
+        //
+        // Bumps to versionCode 13 / versionName "4.0.8" for five fixes
+        // (PR #229): a real second layer for Google Sign-In
+        // (GoogleSignInAttemptMarker - detects the app's PROCESS being
+        // killed outright while the account picker has focus, which the
+        // configChanges/viewModelScope fix above does not cover, and
+        // surfaces a real error instead of silence); defensive hardening
+        // of Android poll voting against a reported crash on tap (root
+        // cause not confirmed - no crash-reporting SDK, no device); the
+        // Shorts composer's video preview no longer squishing to the
+        // wrong aspect ratio and crowding its own playback controls into
+        // the caption field; the fullscreen photo viewer's close button
+        // no longer sitting under the system status bar, and tapping the
+        // photo itself now closes it; and the Shorts-style action rail
+        // (like/comment/repost/share) no longer hidden behind BottomNav
+        // on mobile web/PWA/tablet. None of this changes applicationId,
+        // signing, or deep links. 12 was confirmed uploaded to Play
+        // Internal Testing.
+        //
+        // Bumps to versionCode 14 / versionName "4.0.9" for the real
+        // root cause of "polls not publishing correctly" (PR #233): the
+        // poll create/vote/fetch API pipeline was already correct
+        // end-to-end, but the website's own PostCard.tsx - the shared
+        // component every post-listing page renders through - never
+        // imported or rendered the existing Poll component, so a
+        // published poll saved and was voteable but never appeared as a
+        // poll anywhere in the UI. Also fixes several backend routes
+        // (profile posts/likes/reposts, search, hashtag, quotes,
+        // bookmarks) that never selected a post's poll data at all -
+        // this app's own native screens hitting those same endpoints
+        // (e.g. profile posts) now receive real poll data from them too.
+        // No android-native Kotlin source changed in this release; the
+        // fix is entirely in the shared Next.js backend/web frontend.
+        // None of this changes applicationId, signing, or deep links.
+        // 13 was confirmed uploaded to Play Internal Testing.
+        //
+        // Bumps to versionCode 15 / versionName "4.0.10" to rebuild with
+        // a corrected GOOGLE_WEB_CLIENT_ID repo secret. GOOGLE_WEB_CLIENT_ID
+        // is compiled into the app at build time (see GoogleAuth.kt's own
+        // comment and this file's own GOOGLE_WEB_CLIENT_ID buildConfigField
+        // wiring above) - it must be byte-identical to Railway's
+        // GOOGLE_MOBILE_CLIENT_ID, since that's the value the backend's
+        // POST /api/mobile/auth/google accepts as a token audience (see
+        // that route's own comment on why web and mobile use two separate
+        // Google Cloud OAuth clients). The two had never been directly
+        // compared before; 14's AAB was built before this secret was
+        // re-verified, so this rebuild is the first one confirmed to
+        // carry the checked value. No android-native Kotlin source
+        // changed. None of this changes applicationId, signing, or deep
+        // links. 14 was not confirmed uploaded to Play.
+        versionCode 15
+        versionName "4.0.10"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

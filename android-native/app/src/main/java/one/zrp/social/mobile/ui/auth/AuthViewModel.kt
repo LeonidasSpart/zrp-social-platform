@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.AuthRepository
 import one.zrp.social.mobile.data.GoogleAuth
+import one.zrp.social.mobile.data.GoogleSignInAttemptMarker
 import one.zrp.social.mobile.data.GoogleSignInCancelledException
 import one.zrp.social.mobile.data.PushRepository
 import one.zrp.social.mobile.network.MobileUser
@@ -39,6 +40,14 @@ sealed interface LoginFormState {
     // renders this as the real, translated auth_err_session_expired,
     // matching web's own /login?error=session_expired.
     data object SessionExpired : LoginFormState
+
+    // Set only by reportInterruptedGoogleSignIn(), when
+    // GoogleSignInAttemptMarker finds a Google Sign-In attempt that
+    // started but never finished in this process - see that class's
+    // own KDoc. Same reasoning as SessionExpired above for being its
+    // own variant rather than Error(message): LoginScreen renders the
+    // real, translated auth_err_google_interrupted string.
+    data object GoogleInterrupted : LoginFormState
 }
 
 /**
@@ -179,6 +188,19 @@ class AuthViewModel(
     // suspend call, never stored on the ViewModel.
     fun loginWithGoogle(context: Context) {
         _loginForm.value = LoginFormState.SubmittingGoogle
+
+        // See GoogleSignInAttemptMarker's own KDoc: this is the failure
+        // mode neither configChanges nor viewModelScope actually covers -
+        // the process itself being killed (aggressive OEM background
+        // management) while the account picker has focus, which takes
+        // this coroutine and every catch block below down with it before
+        // any of them can run. markStarted() persists to disk before the
+        // request launches; clear() below only runs if this coroutine
+        // gets to finish, so a mark still set on the next cold start
+        // (checked in ZrpSocialApp) means exactly that happened.
+        val attemptMarker = GoogleSignInAttemptMarker(context)
+        attemptMarker.markStarted()
+
         viewModelScope.launch {
             GoogleAuth.requestIdToken(context)
                 .onSuccess { idToken ->
@@ -207,6 +229,19 @@ class AuthViewModel(
                         LoginFormState.Error(failure.message ?: "Something went wrong. Please try again.")
                     }
                 }
+            attemptMarker.clear()
+        }
+    }
+
+    // Called once, from ZrpSocialApp's own startup check, when
+    // GoogleSignInAttemptMarker finds a mark that was never cleared -
+    // see loginWithGoogle's own comment on why that specifically means
+    // the process died mid-flow rather than any ordinary failure this
+    // ViewModel already surfaces on its own. Only overrides a genuinely
+    // idle form so this can never clobber a real in-progress state.
+    fun reportInterruptedGoogleSignIn() {
+        if (_loginForm.value == LoginFormState.Idle) {
+            _loginForm.value = LoginFormState.GoogleInterrupted
         }
     }
 

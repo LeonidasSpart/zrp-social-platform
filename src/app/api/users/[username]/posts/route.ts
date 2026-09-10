@@ -97,20 +97,12 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
             },
           },
         },
-        // A poll post rendered on a profile had no poll: this route was
-        // the only one of the three feeding PostCard that did not
-        // include it (GET /api/posts and GET /api/posts/[id] both do).
-        // Additive only - the same shape those two already return, with
-        // votes_user filtered to the viewer so the card can show their
-        // own vote rather than re-querying per post.
         poll: {
           include: {
-            votes_user: viewerId
-              ? {
-                  where: { userId: viewerId },
-                  select: { optionIndex: true },
-                }
-              : { where: { id: "" }, select: { optionIndex: true } },
+            votes_user: {
+              where: viewerId ? { userId: viewerId } : undefined,
+              select: { optionIndex: true },
+            },
           },
         },
         _count: {

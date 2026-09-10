@@ -575,6 +575,7 @@
     <string name="onboarding_err_follow_users">Failed to follow users. Please try again.</string>
     <string name="onboarding_err_skip">Failed to skip. Please try again.</string>
     <string name="auth_err_session_expired">Your session is no longer valid. Please sign in again.</string>
+    <string name="auth_err_google_interrupted">Your Google Sign-In attempt was interrupted. Please try again.</string>
     <!-- Music Phase 1: shared player + Queue -->
     <string name="music_nav_queue_title">Your Queue</string>
     <string name="music_nav_history_title">Recently Played</string>

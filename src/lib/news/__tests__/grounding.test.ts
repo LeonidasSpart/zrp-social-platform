@@ -5,6 +5,7 @@ import {
   extractUrls,
   MAX_BODY_LENGTH,
   MIN_BODY_LENGTH,
+  spelledNumbersIn,
   validateGrounded,
 } from "../grounding";
 
@@ -109,6 +110,40 @@ describe("extractors", () => {
   it("still treats European space-grouped thousands as one number", () => {
     expect(extractNumbers("1 200 personnes")).toEqual(["1200"]);
     expect(extractNumbers("12 345 678")).toEqual(["12345678"]);
+  });
+
+  // Real false rejection, taken verbatim from production: The Guardian
+  // wrote "Forty-three people rescued", the summary correctly said
+  // "43", and the validator called it an unsupported figure.
+  it("accepts a digit the source spelled out in words", () => {
+    const source =
+      "[The Guardian] Deadly Philippines ferry fire leaves scores of people missing. " +
+      "Forty-three people rescued and early death toll stands at five after blaze aboard MV June Aster.";
+
+    const report = validateGrounded(
+      bodyOf("A ferry fire off Palawan left five dead, with 43 people rescued from the vessel."),
+      source
+    );
+
+    expect(report.unsupportedNumbers).toEqual([]);
+    expect(report.ok).toBe(true);
+  });
+
+  it("reads spelled numbers in the other languages the pipeline writes", () => {
+    expect(spelledNumbersIn("Trois volontaires et vingt-deux cyclistes")).toEqual(
+      expect.arrayContaining(["3", "20", "22"])
+    );
+    expect(spelledNumbersIn("Drei Menschen")).toContain("3");
+    expect(spelledNumbersIn("Tre volontari in bici")).toContain("3");
+  });
+
+  it("still rejects a figure the source never stated in any form", () => {
+    const report = validateGrounded(
+      bodyOf("Around 340 flights were cancelled after the storm."),
+      "[Example Wire] Forty-three flights were cancelled."
+    );
+    expect(report.ok).toBe(false);
+    expect(report.unsupportedNumbers).toContain("340");
   });
 
   it("ignores short scare quotes and finds real quotations", () => {

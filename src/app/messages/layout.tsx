@@ -97,18 +97,24 @@ export default function MessagesLayout({ children }: { children: React.ReactNode
                       isActive ? "bg-zrp-red/10" : "hover:bg-gray-100 dark:hover:bg-gray-800"
                     }`}
                   >
-                    <div className="relative w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
-                      {partner.avatarUrl ? (
-                        <img
-                          src={partner.avatarUrl}
-                          alt={partner.name || partner.username}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-sm">
-                          {(partner.name || partner.username)[0].toUpperCase()}
-                        </div>
-                      )}
+                    {/* Same split as the conversation list: the circular
+                        mask crops the image, the unclipped wrapper carries
+                        the dot. Inside the mask the dot was clipped to a
+                        crescent. */}
+                    <div className="relative w-10 h-10 flex-shrink-0">
+                      <div className="w-full h-full rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                        {partner.avatarUrl ? (
+                          <img
+                            src={partner.avatarUrl}
+                            alt={partner.name || partner.username}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-sm">
+                            {(partner.name || partner.username)[0].toUpperCase()}
+                          </div>
+                        )}
+                      </div>
                       {isOnline(partner.id) && (
                         <span
                           className="absolute right-0 bottom-0 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white dark:border-zrp-deepBlack"
