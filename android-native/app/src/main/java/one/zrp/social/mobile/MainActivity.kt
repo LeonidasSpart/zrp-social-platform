@@ -21,8 +21,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.data.AuthRepository
+import one.zrp.social.mobile.data.GoogleSignInAttemptMarker
 import one.zrp.social.mobile.ui.auth.AuthUiState
 import one.zrp.social.mobile.ui.auth.AuthViewModel
 import one.zrp.social.mobile.ui.auth.AuthViewModelFactory
@@ -78,6 +80,22 @@ fun ZrpSocialApp(windowSizeClass: WindowSizeClass) {
     ) { /* Granted or denied, FCM registration itself doesn't depend on
           this - only whether a delivered push actually shows in the
           system tray does (see ZrpFirebaseMessagingService). */ }
+
+    // See GoogleSignInAttemptMarker's own KDoc and AuthViewModel's
+    // loginWithGoogle/reportInterruptedGoogleSignIn - this is the one
+    // check, run once per fresh app start, that can tell whether the
+    // process died mid Google-Sign-In. LaunchedEffect(Unit) re-runs
+    // once per fresh Composition (a true cold start, or the rare
+    // process-death-and-restore case this exists to catch); it is a
+    // no-op on an ordinary configuration-change recreation, since that
+    // does not create a new Composition from scratch and the marker is
+    // otherwise never left set in the first place.
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        if (GoogleSignInAttemptMarker(context).consumeInterruptedAttempt()) {
+            authViewModel.reportInterruptedGoogleSignIn()
+        }
+    }
 
     ZrpSocialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {

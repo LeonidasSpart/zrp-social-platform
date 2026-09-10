@@ -563,6 +563,7 @@
     <string name="onboarding_err_follow_users">关注用户失败，请重试。</string>
     <string name="onboarding_err_skip">跳过失败，请重试。</string>
     <string name="auth_err_session_expired">您的登录状态已失效,请重新登录。</string>
+    <string name="auth_err_google_interrupted">您的 Google 登录尝试已中断,请重试。</string>
     <!-- Music Phase 1: shared player + Queue -->
     <string name="music_nav_queue_title">你的队列</string>
     <string name="music_nav_history_title">最近播放</string>

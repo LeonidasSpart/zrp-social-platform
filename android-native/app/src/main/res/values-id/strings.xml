@@ -563,6 +563,7 @@
     <string name="onboarding_err_follow_users">Gagal mengikuti pengguna. Silakan coba lagi.</string>
     <string name="onboarding_err_skip">Gagal melewati. Silakan coba lagi.</string>
     <string name="auth_err_session_expired">Sesi Anda tidak lagi valid. Silakan masuk kembali.</string>
+    <string name="auth_err_google_interrupted">Percobaan Masuk dengan Google Anda terganggu. Silakan coba lagi.</string>
     <!-- Music Phase 1: shared player + Queue -->
     <string name="music_nav_queue_title">Antreanmu</string>
     <string name="music_nav_history_title">Baru Diputar</string>

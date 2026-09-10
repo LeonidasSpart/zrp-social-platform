@@ -10,9 +10,10 @@ import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.AdsRepository
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.network.Post
-import one.zrp.social.mobile.network.PollVoteUser
 import one.zrp.social.mobile.network.PostsPage
 import one.zrp.social.mobile.network.ServedAd
+import one.zrp.social.mobile.util.applyOptimisticVote
+import one.zrp.social.mobile.util.hasAlreadyVotedOnPost
 
 enum class FeedTab { FOR_YOU, FOLLOWING }
 
@@ -200,21 +201,35 @@ class HomeViewModel(
     // matching the server's permanent PollVote unique constraint.
     // Updates both tabs' cached state, same reasoning as editPost below
     // (the same poll-post can legitimately appear in both).
+    // Wrapped in try/catch end to end - see PollMath.kt's own KDoc on
+    // why: a poll vote's local optimistic state update must never crash
+    // the whole app even on malformed data this function didn't
+    // anticipate (a corrupted votes map, a poll whose option count
+    // doesn't match its votes keys). Worst case the tap silently
+    // doesn't register locally and the user taps again - the same
+    // recoverable outcome as a plain network failure below, instead of
+    // the app closing.
     fun votePoll(postId: String, pollId: String, optionIndex: Int) {
-        val alreadyVoted = (_forYou.value.posts + _following.value.posts)
-            .firstOrNull { it.id == postId }?.poll?.userVoteIndex != null
-        if (alreadyVoted) return
+        try {
+            val alreadyVoted = hasAlreadyVotedOnPost(_forYou.value.posts + _following.value.posts, postId)
+            if (alreadyVoted) return
 
-        val previousForYou = _forYou.value.posts
-        val previousFollowing = _following.value.posts
-        _forYou.update { it.copy(posts = it.posts.map { post -> if (post.id == postId) applyOptimisticVote(post, optionIndex) else post }) }
-        _following.update { it.copy(posts = it.posts.map { post -> if (post.id == postId) applyOptimisticVote(post, optionIndex) else post }) }
+            val previousForYou = _forYou.value.posts
+            val previousFollowing = _following.value.posts
+            _forYou.update { it.copy(posts = it.posts.map { post -> if (post.id == postId) applyOptimisticVote(post, optionIndex) else post }) }
+            _following.update { it.copy(posts = it.posts.map { post -> if (post.id == postId) applyOptimisticVote(post, optionIndex) else post }) }
 
-        viewModelScope.launch {
-            repository.votePoll(pollId, optionIndex).onFailure {
-                _forYou.update { it.copy(posts = previousForYou) }
-                _following.update { it.copy(posts = previousFollowing) }
+            viewModelScope.launch {
+                repository.votePoll(pollId, optionIndex).onFailure {
+                    _forYou.update { it.copy(posts = previousForYou) }
+                    _following.update { it.copy(posts = previousFollowing) }
+                }
             }
+        } catch (e: Exception) {
+            // Nothing to revert to here - the optimistic update either
+            // never applied or already crashed a step it can't undo
+            // blindly, so this only guarantees the exception stops here
+            // instead of propagating up through Compose.
         }
     }
 
@@ -278,17 +293,6 @@ class HomeViewModel(
             reposted = !wasReposted,
             _count = post._count.copy(reposts = post._count.reposts + if (wasReposted) -1 else 1),
         )
-    }
-
-    // The vote endpoint returns only {success: true} - no updated
-    // counts (see Poll's own KDoc) - so the +1 is applied locally the
-    // same way applyOptimisticLike bumps a like count, rather than
-    // refetching.
-    private fun applyOptimisticVote(post: Post, optionIndex: Int): Post {
-        val poll = post.poll ?: return post
-        val key = optionIndex.toString()
-        val newVotes = (poll.votes ?: emptyMap()) + (key to ((poll.votes?.get(key) ?: 0) + 1))
-        return post.copy(poll = poll.copy(votes = newVotes, votes_user = listOf(PollVoteUser(optionIndex))))
     }
 
     private suspend fun fetch(tab: FeedTab, cursor: String?) = when (tab) {

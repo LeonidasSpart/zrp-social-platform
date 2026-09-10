@@ -563,6 +563,7 @@
     <string name="onboarding_err_follow_users">Impossibile seguire gli utenti. Riprova.</string>
     <string name="onboarding_err_skip">Impossibile saltare. Riprova.</string>
     <string name="auth_err_session_expired">La tua sessione non è più valida. Accedi di nuovo.</string>
+    <string name="auth_err_google_interrupted">Il tuo tentativo di accesso con Google è stato interrotto. Riprova.</string>
     <!-- Music Phase 1: shared player + Queue -->
     <string name="music_nav_queue_title">La tua coda</string>
     <string name="music_nav_history_title">Ascoltati di recente</string>

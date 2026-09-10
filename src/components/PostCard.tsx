@@ -2850,7 +2850,18 @@ export default function PostCard({
             }
           >
             <div
-              className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 sm:px-6 py-4 bg-gradient-to-b from-black/70 to-transparent"
+              // Reported bug: the close X sat right at/under the system
+              // status bar on mobile web/PWA (notch/dynamic-island
+              // devices, PWA standalone mode where content can extend
+              // under the status bar) because this header only had a
+              // flat py-4 (16px), with no awareness of the real,
+              // device-reported safe area. pt-[...env(safe-area-inset-
+              // top)] matches the same pattern already used for the
+              // bottom safe area elsewhere in this codebase (BottomNav,
+              // shorts pages) - viewport-fit=cover is already set in
+              // app/layout.tsx, which is required for this to resolve to
+              // anything but 0.
+              className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 sm:px-6 pt-[calc(1rem+env(safe-area-inset-top))] pb-4 bg-gradient-to-b from-black/70 to-transparent"
               onClick={(e) =>
                 e.stopPropagation()
               }
@@ -2884,12 +2895,18 @@ export default function PostCard({
               </button>
             )}
 
-            <div
-              className="relative w-full h-full flex items-center justify-center px-3 sm:px-16 lg:px-24 py-16 sm:py-20"
-              onClick={(e) =>
-                e.stopPropagation()
-              }
-            >
+            {/* Reported bug: tapping the photo itself did nothing -
+                this container's own stopPropagation ate every click
+                inside it (nearly the whole viewer, since it's w-full
+                h-full), so only the small strip of true backdrop
+                outside this box actually closed the viewer. Tap-to-
+                close needs to work on the photo too, so this no longer
+                stops propagation: any click here (including directly on
+                the image) bubbles to the outer dialog's own
+                onClick={closeLightbox}. The prev/next arrows and the
+                header above keep their own stopPropagation, so those
+                still don't also trigger a close. */}
+            <div className="relative w-full h-full flex items-center justify-center px-3 sm:px-16 lg:px-24 py-16 sm:py-20">
               <img
                 key={
                   galleryImages[
