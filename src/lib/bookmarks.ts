@@ -1,18 +1,32 @@
 import { prisma } from "./db";
 import { Prisma } from "@prisma/client";
 
-const POST_INCLUDE = {
+// A bookmark's post is always looked up in the context of the bookmark's
+// own owner (you only ever see your own bookmarks), so `userId` here is
+// always the viewer - safe to use directly to filter the poll's
+// votes_user relation, unlike a shared feed where the viewer is separate
+// from the post author.
+const postInclude = (userId: string) => ({
   post: {
     include: {
       author: {
         select: { id: true, username: true, name: true, avatarUrl: true, badgeType: true },
+      },
+      poll: {
+        include: {
+          votes_user: {
+            where: { userId },
+            select: { optionIndex: true },
+          },
+        },
       },
       _count: {
         select: { likes: true, comments: true, reposts: true, quotedBy: true },
       },
     },
   },
-} as const;
+});
+const POST_INCLUDE = postInclude("");
 
 const COMMENT_INCLUDE = {
   comment: {
@@ -118,7 +132,7 @@ export async function getUserBookmarksPage(
       where: { userId, ...after },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       take: fetchLimit,
-      include: POST_INCLUDE,
+      include: postInclude(userId),
     }),
     prisma.commentBookmark.findMany({
       where: { userId, ...after },
