@@ -96,3 +96,49 @@ describe("presence source", () => {
     expect(src).toContain("hasStatus(receiverId)");
   });
 });
+
+/**
+ * The same presence dot, in the two list views.
+ *
+ * Reported from an iPad: the dot on a conversation-list avatar rendered
+ * as a green crescent rather than a circle. It sat inside the avatar's
+ * own `rounded-full overflow-hidden` box, positioned at that box's
+ * bottom-right corner - which is the point furthest OUTSIDE a circular
+ * mask, so the circle sliced the dot and its contrasting ring away.
+ *
+ * The fix splits one box into two: the inner one still crops the avatar
+ * image into a circle, the outer one is unclipped and carries the dot.
+ * Measured after the change at iPad-portrait width in dark mode: a full
+ * 12x12 box, border-radius 9999px, and the nearest clipping ancestor is
+ * the rectangular scroll container, which does not cut it.
+ */
+describe("presence dot on list avatars is not clipped by the avatar mask", () => {
+  const files = [
+    "src/app/messages/page.tsx",
+    "src/app/messages/layout.tsx",
+  ];
+
+  for (const file of files) {
+    const source = fs.readFileSync(path.join(process.cwd(), file), "utf8");
+
+    it(`${file} does not put the dot inside the circular mask`, () => {
+      const dotIdx = source.indexOf("bg-green-500");
+      expect(dotIdx).toBeGreaterThan(-1);
+
+      // The element that positions the dot is the nearest `relative`
+      // wrapper above it. It must not be the one doing the clipping.
+      const before = source.slice(0, dotIdx);
+      const wrapperIdx = before.lastIndexOf('className="relative');
+      expect(wrapperIdx).toBeGreaterThan(-1);
+      const wrapper = before.slice(wrapperIdx, before.indexOf('"', wrapperIdx + 12) + 1);
+
+      expect(wrapper).not.toContain("overflow-hidden");
+      expect(wrapper).not.toContain("rounded-full");
+    });
+
+    it(`${file} still crops the avatar image to a circle`, () => {
+      // The mask has to survive - it is what makes the avatar round.
+      expect(source).toMatch(/rounded-full[^"]*overflow-hidden|overflow-hidden[^"]*rounded-full/);
+    });
+  }
+});
