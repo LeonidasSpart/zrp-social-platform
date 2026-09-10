@@ -286,6 +286,8 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     val goToAbout: () -> Unit = { navController.navigate("legal/about") }
     val goToCareers: () -> Unit = { navController.navigate("legal/careers") }
     val goToCharity: () -> Unit = { navController.navigate("legal/charity") }
+    val goToPress: () -> Unit = { navController.navigate("legal/press") }
+    val goToInvestors: () -> Unit = { navController.navigate("legal/investors") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
@@ -1105,6 +1107,8 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenAbout = goToAbout,
                     onOpenCareers = goToCareers,
                     onOpenCharity = goToCharity,
+                    onOpenPress = goToPress,
+                    onOpenInvestors = goToInvestors,
                 )
             }
             composable("settings/team") {
@@ -1168,6 +1172,20 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     title = stringResource(R.string.legal_charity),
                     onBack = { navController.popBackStack() },
                     trailingContent = { CharityLedgerSection() },
+                )
+            }
+            composable("legal/press") {
+                LegalScreen(
+                    page = "press",
+                    title = stringResource(R.string.legal_press),
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("legal/investors") {
+                LegalScreen(
+                    page = "investors",
+                    title = stringResource(R.string.legal_investors),
+                    onBack = { navController.popBackStack() },
                 )
             }
             composable("admin") {

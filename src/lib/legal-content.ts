@@ -31,7 +31,9 @@ export type LegalPageId =
   | "contact"
   | "about"
   | "careers"
-  | "charity";
+  | "charity"
+  | "press"
+  | "investors";
 
 export const LEGAL_PAGE_IDS: LegalPageId[] = [
   "terms",
@@ -42,6 +44,8 @@ export const LEGAL_PAGE_IDS: LegalPageId[] = [
   "about",
   "careers",
   "charity",
+  "press",
+  "investors",
 ];
 
 type CardItem = {
@@ -1315,6 +1319,194 @@ export const HELP_CONFIG: PageConfig = {
   ],
 };
 
+// ─── Press Kit (src/app/press/page.tsx) ───────────────────────────────────
+// Brand-asset downloads (logo/favicon/icon PNGs with a device-save link) are
+// not reproduced as tappable actions - there's no native equivalent to the
+// web page's <a download> file links in this content model, and unlike the
+// static copy on the rest of the page, the image files themselves aren't
+// text to resolve. The color palette and typography descriptions (the parts
+// that are genuinely informational, not a file transfer) are kept. The
+// closing "Mission Statement" section has no heading key of its own on the
+// web page either (it's a bare blockquote), so it's folded into the Press
+// Contact section rather than inventing a new title key.
+export const PRESS_CONFIG: PageConfig = {
+  title: ["press.heroTitle"],
+  subtitle: ["press.heroSubtitle"],
+  sections: [
+    {
+      id: "overview",
+      title: ["press.overviewHeading"],
+      body: [
+        P("ZRP Social", "press.overviewIntro"),
+        BULLETS(
+          ["press.pillar1Title", ":", "press.pillar1Desc"],
+          ["press.pillar2Title", ":", "press.pillar2Desc"],
+          ["press.pillar3Title", ":", "press.pillar3Bold", "press.pillar3Desc"]
+        ),
+        CALLOUT("35%", "press.profitsGoTo", "press.profitsGoToCauses"),
+      ],
+    },
+    {
+      id: "key-features",
+      title: ["press.keyFeaturesHeading"],
+      body: [
+        CARDS(
+          card(["press.feature1Title"], ["press.feature1Desc"]),
+          card(["press.feature2Title"], ["press.feature2Desc"]),
+          card(["press.feature3Title"], ["press.feature3Desc"]),
+          card(["press.feature4Title"], ["press.feature4Desc"]),
+          card(["press.feature5Title"], ["press.feature5Desc"]),
+          card(["press.feature6Title"], ["press.feature6Desc"])
+        ),
+      ],
+    },
+    {
+      id: "charity-commitment",
+      title: ["press.charityCommitmentHeading"],
+      body: [
+        P("ZRP Social", "press.notJustAnotherNetwork", "press.notJustAnotherNetworkBold", "press.notJustAnotherNetworkRest"),
+        CARDS(
+          card(["35%"], ["press.netProfitsLabel"]),
+          card(["👶📚🏥🌍"], ["press.fourCausesLabel"])
+        ),
+        CALLOUT("press.transparencyNote"),
+      ],
+    },
+    {
+      id: "platform-stats",
+      title: ["press.platformStatsHeading"],
+      body: [P("press.dataAsOf"), CARDS(card(["195,000+"], ["press.statUsersLabel"]))],
+    },
+    {
+      id: "brand-assets",
+      title: ["press.brandAssetsHeading"],
+      body: [
+        P("press.brandAssetsDesc"),
+        H("press.colorPaletteHeading"),
+        CARDS(
+          card(["ZRP Red"], undefined, ["#FF2D2D"]),
+          card(["Dark Red"], undefined, ["#B10000"]),
+          card(["White"], undefined, ["#FFFFFF"]),
+          card(["Silver"], undefined, ["#BDDBDB"]),
+          card(["Charcoal"], undefined, ["#0D0D0D"]),
+          card(["Deep Black"], undefined, ["#050505"])
+        ),
+        H("press.typographyHeading"),
+        CARDS(card(["Orbitron"], ["press.orbitronDesc"]), card(["Inter"], ["press.interDesc"])),
+      ],
+    },
+    {
+      id: "press-contact",
+      title: ["press.pressContactHeading"],
+      body: [
+        CARDS(
+          card(["press.emailLabel"], undefined, ["press@zrp.one"]),
+          card(["press.websiteLabel"], undefined, ["zrp.one"])
+        ),
+        P("press.mediaInquiriesNote"),
+        CALLOUT("press.missionQuote"),
+        P("press.missionAttribution"),
+      ],
+    },
+  ],
+};
+
+// ─── Investors (src/app/investors/page.tsx) ───────────────────────────────
+// Both CTA links (mailto:investors@zrp.one, a Link back to /about) follow
+// the same precedent as CAREERS_CONFIG/CONTACT_CONFIG: informational text,
+// not a tappable action. The closing quote has no heading key of its own on
+// the web page (a bare blockquote), so it's folded into the Investor
+// Contact section instead of inventing a new title key.
+export const INVESTORS_CONFIG: PageConfig = {
+  title: ["investors.heroTitle"],
+  subtitle: ["investors.heroSubtitle"],
+  sections: [
+    {
+      id: "vision",
+      title: ["investors.visionHeading"],
+      body: [
+        P("investors.visionP1"),
+        P("investors.visionP2"),
+        CARDS(
+          card(["🇨🇭", "investors.why1Title"], ["investors.why1Desc"]),
+          card(["🌍", "investors.why2Title"], ["investors.why2Desc"]),
+          card(["⚡", "investors.why3Title"], ["investors.why3Desc"])
+        ),
+      ],
+    },
+    {
+      id: "platform",
+      title: ["investors.platformHeading"],
+      body: [
+        P("investors.platformSubtitle"),
+        CARDS(
+          card(["investors.platform1Title"], ["investors.platform1Desc"]),
+          card(["investors.platform2Title"], ["investors.platform2Desc"]),
+          card(["investors.platform3Title"], ["investors.platform3Desc"]),
+          card(["investors.platform4Title"], ["investors.platform4Desc"]),
+          card(["investors.platform5Title"], ["investors.platform5Desc"]),
+          card(["investors.platform6Title"], ["investors.platform6Desc"])
+        ),
+      ],
+    },
+    {
+      id: "growth",
+      title: ["investors.growthHeading"],
+      body: [
+        P("investors.growthDesc"),
+        CARDS(
+          card(["195K+"], ["investors.statUsersLabel"]),
+          card(["investors.statLiveValue"], ["investors.statLiveLabel"]),
+          card(["investors.statGrowingValue"], ["investors.statGrowingLabel"])
+        ),
+        CALLOUT("investors.figuresNote"),
+      ],
+    },
+    {
+      id: "opportunities",
+      title: ["investors.opportunitiesHeading"],
+      body: [
+        P("investors.opportunitiesSubtitle"),
+        CARDS(
+          card(["💻", "investors.opp1Title"], ["investors.opp1Desc"]),
+          card(["🌍", "investors.opp2Title"], ["investors.opp2Desc"]),
+          card(["👥", "investors.opp3Title"], ["investors.opp3Desc"]),
+          card(["🚀", "investors.opp4Title"], ["investors.opp4Desc"])
+        ),
+      ],
+    },
+    {
+      id: "investor-types",
+      title: ["investors.typesHeading"],
+      body: [
+        BULLETS(
+          ["investors.type1"],
+          ["investors.type2"],
+          ["investors.type3"],
+          ["investors.type4"],
+          ["investors.type5"],
+          ["investors.type6"]
+        ),
+      ],
+    },
+    {
+      id: "charity",
+      title: ["investors.charityHeading"],
+      body: [P("investors.charityDesc"), CARDS(card(["35%"], ["investors.charityStatLabel"]))],
+    },
+    {
+      id: "investor-contact",
+      title: ["investors.contactHeading"],
+      body: [
+        P("investors.contactDesc"),
+        CARDS(card([], undefined, ["investors@zrp.one"])),
+        CALLOUT("investors.disclaimer"),
+        CALLOUT("investors.closingQuote"),
+      ],
+    },
+  ],
+};
+
 export const LEGAL_CONFIGS: Record<LegalPageId, PageConfig> = {
   terms: TERMS_CONFIG,
   privacy: PRIVACY_CONFIG,
@@ -1324,4 +1516,6 @@ export const LEGAL_CONFIGS: Record<LegalPageId, PageConfig> = {
   about: ABOUT_CONFIG,
   careers: CAREERS_CONFIG,
   charity: CHARITY_CONFIG,
+  press: PRESS_CONFIG,
+  investors: INVESTORS_CONFIG,
 };

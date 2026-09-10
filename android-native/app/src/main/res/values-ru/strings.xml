@@ -1698,6 +1698,8 @@
     <string name="legal_about">О ZRP</string>
     <string name="legal_careers">Карьера</string>
     <string name="legal_charity">Благотворительность</string>
+    <string name="legal_press">Пресс-кит</string>
+    <string name="legal_investors">Инвесторы</string>
     <string name="charity_committed_label">Направлено на благотворительность</string>
     <string name="charity_committed_note">Рассчитывается автоматически на основе завершённых чаевых и покупок премиум-контента: 35% от комиссии платформы ZRP с каждой.</string>
     <string name="charity_disbursed_label">Выплачено на данный момент</string>

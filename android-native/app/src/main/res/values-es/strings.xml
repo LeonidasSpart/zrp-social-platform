@@ -1698,6 +1698,8 @@
     <string name="legal_about">Acerca de ZRP</string>
     <string name="legal_careers">Empleo</string>
     <string name="legal_charity">Caridad</string>
+    <string name="legal_press">Kit de prensa</string>
+    <string name="legal_investors">Inversores</string>
     <string name="charity_committed_label">Comprometido con la caridad</string>
     <string name="charity_committed_note">Calculado automáticamente a partir de propinas y compras de contenido premium completadas: 35% de la tarifa de la plataforma de ZRP en cada una.</string>
     <string name="charity_disbursed_label">Desembolsado hasta ahora</string>

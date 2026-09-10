@@ -1698,6 +1698,8 @@
     <string name="legal_about">حول ZRP</string>
     <string name="legal_careers">الوظائف</string>
     <string name="legal_charity">الأعمال الخيرية</string>
+    <string name="legal_press">حزمة صحفية</string>
+    <string name="legal_investors">المستثمرون</string>
     <string name="charity_committed_label">التزام للأعمال الخيرية</string>
     <string name="charity_committed_note">يُحسب تلقائيًا من الإكراميات ومشتريات المحتوى المميز المكتملة: 35% من رسوم منصة ZRP على كل منها.</string>
     <string name="charity_disbursed_label">المصروف حتى الآن</string>
