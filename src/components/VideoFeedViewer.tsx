@@ -906,7 +906,23 @@ export default function VideoFeedViewer({
                     OVERLAY
                     ───────────────────────────────────────────── */}
 
-                <div className="absolute inset-x-0 bottom-0 p-4 pb-8 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none">
+                {/* BottomNav is a portal at z-[9999] - above this
+                    z-[100] viewer - fixed at the bottom of the screen
+                    on every route below the lg breakpoint (mobile web,
+                    PWA, tablet), so it paints on top of whatever lands
+                    in the bottom strip here. pb-8 (32px) is less than
+                    its real footprint (h-14 = 56px plus its own
+                    safe-area inset), which hid the author row and the
+                    like/comment/repost/share action rail behind it on
+                    a real phone/tablet - reported as "the Short menu is
+                    invisible" since BottomNav is opaque. Same fix
+                    already applied to shorts/page.tsx's own identical
+                    bottom overlay; ported here since this is a second,
+                    separate full-screen video viewer (opened by tapping
+                    a video post in the feed) that had the old, narrower
+                    padding. Desktop is unaffected (BottomNav is
+                    lg:hidden there). */}
+                <div className="absolute inset-x-0 bottom-0 p-4 pb-[calc(3.5rem+env(safe-area-inset-bottom)+1rem)] bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none">
                   <div className="flex items-end justify-between gap-4">
                     {/* AUTHOR + CAPTION */}
                     <div className="flex-1 min-w-0 text-white pointer-events-auto">
