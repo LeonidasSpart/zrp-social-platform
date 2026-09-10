@@ -62,6 +62,7 @@ import one.zrp.social.mobile.ui.admin.AdminUpgradeRequestsScreen
 import one.zrp.social.mobile.ui.admin.AdminUsersScreen
 import one.zrp.social.mobile.ui.admin.AdminWithdrawalsScreen
 import one.zrp.social.mobile.ui.charity.CharityLedgerSection
+import one.zrp.social.mobile.ui.transparency.TransparencyScreen
 import one.zrp.social.mobile.ui.legal.LegalScreen
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
@@ -288,6 +289,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     val goToCharity: () -> Unit = { navController.navigate("legal/charity") }
     val goToPress: () -> Unit = { navController.navigate("legal/press") }
     val goToInvestors: () -> Unit = { navController.navigate("legal/investors") }
+    val goToTransparency: () -> Unit = { navController.navigate("transparency") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
@@ -1109,6 +1111,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenCharity = goToCharity,
                     onOpenPress = goToPress,
                     onOpenInvestors = goToInvestors,
+                    onOpenTransparency = goToTransparency,
                 )
             }
             composable("settings/team") {
@@ -1187,6 +1190,9 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     title = stringResource(R.string.legal_investors),
                     onBack = { navController.popBackStack() },
                 )
+            }
+            composable("transparency") {
+                TransparencyScreen(onBack = { navController.popBackStack() })
             }
             composable("admin") {
                 AdminDashboardScreen(
