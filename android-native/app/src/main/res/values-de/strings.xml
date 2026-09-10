@@ -338,6 +338,8 @@
     <string name="feed_for_you">Für dich</string>
     <string name="feed_following">Folge ich</string>
     <string name="search_placeholder">Nutzer, Beiträge, Hashtags suchen...</string>
+    <string name="search_discover_section_title">ZRP entdecken</string>
+    <string name="search_discover_section_subtitle">Musik, Marktplatz, Jobs, Spiele, News, KI und mehr</string>
     <string name="search_users_tab">Nutzer (%1$d)</string>
     <string name="search_posts_tab">Beiträge (%1$d)</string>
     <string name="search_no_users">Keine Nutzer gefunden.</string>
