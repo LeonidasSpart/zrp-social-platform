@@ -79,6 +79,28 @@ function okRendition(language: string) {
   };
 }
 
+/*
+ * Two different failures live here and the pipeline tells them apart by
+ * whether a validator report came back: a groundedness refusal carries
+ * one (the story is genuinely rejected), while a skipped localisation
+ * or a provider fault does not (the story is kept for another cycle).
+ */
+function rejectedRendition(language: string, error: string) {
+  return {
+    language,
+    rendition: null,
+    error,
+    validation: {
+      ok: false,
+      unsupportedNumbers: ["870"],
+      fabricatedQuotes: 0,
+      injectedUrls: [],
+      tooLong: false,
+      tooShort: false,
+    },
+  };
+}
+
 function failedRendition(language: string, error: string) {
   return { language, rendition: null, error, validation: null };
 }
@@ -275,7 +297,7 @@ describe.skipIf(!hasRealDatabaseUrl)(
       generateRenditions.mockImplementation(async (languages: string[]) =>
         languages.map((language) =>
           language === "fr"
-            ? failedRendition("fr", "unsupported figures: 870")
+            ? rejectedRendition("fr", "unsupported figures: 870")
             : okRendition(language)
         )
       );
@@ -305,7 +327,7 @@ describe.skipIf(!hasRealDatabaseUrl)(
       generateRenditions.mockImplementation(async (languages: string[]) =>
         languages.map((language) =>
           language === "en"
-            ? failedRendition("en", "unsupported figures: 870")
+            ? rejectedRendition("en", "unsupported figures: 870")
             : failedRendition(
                 language,
                 "Skipped: the English summary failed validation, so no localisation was attempted"
