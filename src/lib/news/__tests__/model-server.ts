@@ -21,12 +21,18 @@ export type ModelBehaviour =
   | { kind: "status"; status: number; body?: string }
   | { kind: "invalid-json-envelope" }
   | { kind: "empty-content" }
+  // What a reasoning model really does when max_tokens runs out while
+  // it is still thinking: a well-formed envelope, finish_reason
+  // "length", and no usable content.
+  | { kind: "truncated" }
   | { kind: "hang" };
 
 export interface ModelServer {
   baseURL: string;
   requestCount: number;
   lastAuthHeader: string | null;
+  /** The request body the client actually put on the wire, parsed. */
+  lastRequestBody: Record<string, unknown> | null;
   setBehaviour: (behaviour: ModelBehaviour) => void;
   close: () => Promise<void>;
 }
@@ -35,6 +41,7 @@ export async function startModelServer(initial: ModelBehaviour): Promise<ModelSe
   let behaviour = initial;
   let requestCount = 0;
   let lastAuthHeader: string | null = null;
+  let lastRequestBody: Record<string, unknown> | null = null;
   const hanging: http.ServerResponse[] = [];
 
   const server = http.createServer((req, res) => {
@@ -47,9 +54,17 @@ export async function startModelServer(initial: ModelBehaviour): Promise<ModelSe
     requestCount += 1;
     lastAuthHeader = (req.headers.authorization as string) ?? null;
 
-    // Drain the request body so the socket behaves like a real server.
-    req.resume();
+    // Read the request body: the socket behaves like a real server, and
+    // the parsed body lets a test assert what was actually sent.
+    const chunks: Buffer[] = [];
+    req.on("data", (chunk: Buffer) => chunks.push(chunk));
     req.on("end", () => {
+      try {
+        lastRequestBody = JSON.parse(Buffer.concat(chunks).toString("utf-8"));
+      } catch {
+        lastRequestBody = null;
+      }
+
       if (behaviour.kind === "hang") {
         hanging.push(res);
         return;
@@ -74,6 +89,8 @@ export async function startModelServer(initial: ModelBehaviour): Promise<ModelSe
             ? behaviour.content
             : "";
 
+      const truncated = behaviour.kind === "truncated";
+
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(
         JSON.stringify({
@@ -84,11 +101,22 @@ export async function startModelServer(initial: ModelBehaviour): Promise<ModelSe
           choices: [
             {
               index: 0,
-              message: { role: "assistant", content },
-              finish_reason: "stop",
+              message: truncated
+                ? // Reasoning consumed the whole budget: the thinking is
+                  // there, the answer never got written.
+                  { role: "assistant", content: "", reasoning_content: "thinking ".repeat(60) }
+                : { role: "assistant", content },
+              finish_reason: truncated ? "length" : "stop",
             },
           ],
-          usage: { prompt_tokens: 10, completion_tokens: 10, total_tokens: 20 },
+          usage: truncated
+            ? {
+                prompt_tokens: 600,
+                completion_tokens: 900,
+                total_tokens: 1500,
+                completion_tokens_details: { reasoning_tokens: 900 },
+              }
+            : { prompt_tokens: 10, completion_tokens: 10, total_tokens: 20 },
         })
       );
     });
@@ -104,6 +132,9 @@ export async function startModelServer(initial: ModelBehaviour): Promise<ModelSe
     },
     get lastAuthHeader() {
       return lastAuthHeader;
+    },
+    get lastRequestBody() {
+      return lastRequestBody;
     },
     setBehaviour: (next: ModelBehaviour) => {
       behaviour = next;
