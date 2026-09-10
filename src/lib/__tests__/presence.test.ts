@@ -102,6 +102,47 @@ describe("presence tracker - several server instances sharing a store", () => {
     expect(await reader.t.isOnline("bob")).toBe(true);
   });
 
+  it("a socket that connects and disconnects while the store call is in flight leaves no phantom online", async () => {
+    // Production logs show exactly this traffic: the same user's socket
+    // connecting and disconnecting again within milliseconds, and 2-3
+    // concurrent sockets per user. With a store that takes real time,
+    // an unserialised tracker could leave the user marked online with
+    // no socket at all, or report a spurious offline.
+    const base = createMemoryPresenceStore();
+    const slow = <T extends unknown[], R>(fn: (...a: T) => Promise<R>) => async (...a: T) => {
+      await new Promise((r) => setTimeout(r, 25));
+      return fn(...a);
+    };
+    const store = {
+      ttlMs: base.ttlMs,
+      setOnline: slow(base.setOnline.bind(base)),
+      setOffline: slow(base.setOffline.bind(base)),
+      refresh: slow(base.refresh.bind(base)),
+      isOnline: slow(base.isOnline.bind(base)),
+    };
+    const { t, changes } = tracker("i1", store);
+
+    // Fire both without awaiting the first - the exact interleaving.
+    await Promise.all([t.connect("alice"), t.disconnect("alice")]);
+    expect(t.localCount("alice")).toBe(0);
+    expect(await t.isOnline("alice")).toBe(false);
+    expect(changes).toEqual([["alice", "online"], ["alice", "offline"]]);
+
+    // A burst of overlapping connects/disconnects still settles exactly.
+    const { t: t2 } = tracker("i2", store);
+    await Promise.all([
+      t2.connect("bob"),
+      t2.connect("bob"),
+      t2.disconnect("bob"),
+      t2.connect("bob"),
+      t2.disconnect("bob"),
+    ]);
+    expect(t2.localCount("bob")).toBe(1);
+    expect(await t2.isOnline("bob")).toBe(true);
+    await t2.disconnect("bob");
+    expect(await t2.isOnline("bob")).toBe(false);
+  });
+
   it("a store failure falls back to local knowledge and never throws", async () => {
     const broken = {
       ttlMs: 90_000,

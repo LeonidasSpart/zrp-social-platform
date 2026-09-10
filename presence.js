@@ -137,6 +137,35 @@ function createPresenceTracker(options) {
   const log = (options && options.log) || console;
   const local = new Map(); // userId -> live socket count on THIS instance
 
+  /*
+   * ⚠️ connect()/disconnect() both await the store, so two operations
+   * for the SAME user can interleave - and production logs show exactly
+   * that traffic: a socket connecting and disconnecting again within
+   * milliseconds, and 2-3 concurrent sockets per user. Interleaved,
+   * disconnect could observe a local count the in-flight connect had
+   * not incremented yet (spurious "offline"), or connect's setOnline
+   * could land AFTER disconnect's setOffline and leave the user marked
+   * online in the shared store with no socket at all - a phantom
+   * "Online" until the TTL expired.
+   *
+   * Per-user operations are therefore serialised through a promise
+   * chain: for any one user they run strictly in arrival order, so the
+   * store always ends in the state the last event implies. Different
+   * users never wait on each other. The chain entry is dropped once it
+   * drains, so this cannot grow without bound.
+   */
+  const chains = new Map(); // userId -> Promise (in-flight op chain)
+  function serialize(userId, fn) {
+    const previous = chains.get(userId) || Promise.resolve();
+    const run = previous.then(fn, fn);
+    const tracked = run.catch(() => {});
+    chains.set(userId, tracked);
+    tracked.then(() => {
+      if (chains.get(userId) === tracked) chains.delete(userId);
+    });
+    return run;
+  }
+
   let lastStoreErrorAt = 0;
   function storeFailed(err) {
     // One log line per minute at most - a Redis outage must not turn
@@ -163,38 +192,53 @@ function createPresenceTracker(options) {
     instanceId,
 
     /** A socket for `userId` connected. Resolves after the transition (if any) was reported. */
-    async connect(userId) {
-      const wasOnline = await globallyOnline(userId);
-      local.set(userId, (local.get(userId) || 0) + 1);
-      if (store) {
-        try {
-          await store.setOnline(userId, instanceId);
-        } catch (err) {
-          storeFailed(err);
+    connect(userId) {
+      return serialize(userId, async () => {
+        // Counted synchronously, before any await, so a disconnect that
+        // arrives while the store call is in flight sees this socket.
+        const before = local.get(userId) || 0;
+        local.set(userId, before + 1);
+
+        let wasOnline = before > 0;
+        if (!wasOnline && store) {
+          try {
+            wasOnline = await store.isOnline(userId);
+          } catch (err) {
+            storeFailed(err);
+          }
         }
-      }
-      if (!wasOnline) onChange(userId, "online");
-      return !wasOnline;
+        if (store) {
+          try {
+            await store.setOnline(userId, instanceId);
+          } catch (err) {
+            storeFailed(err);
+          }
+        }
+        if (!wasOnline) onChange(userId, "online");
+        return !wasOnline;
+      });
     },
 
     /** A socket for `userId` disconnected. */
-    async disconnect(userId) {
-      const remaining = (local.get(userId) || 1) - 1;
-      if (remaining > 0) {
-        local.set(userId, remaining);
-        return false;
-      }
-      local.delete(userId);
-      if (store) {
-        try {
-          await store.setOffline(userId, instanceId);
-        } catch (err) {
-          storeFailed(err);
+    disconnect(userId) {
+      return serialize(userId, async () => {
+        const remaining = (local.get(userId) || 1) - 1;
+        if (remaining > 0) {
+          local.set(userId, remaining);
+          return false;
         }
-      }
-      const stillOnline = await globallyOnline(userId);
-      if (!stillOnline) onChange(userId, "offline");
-      return !stillOnline;
+        local.delete(userId);
+        if (store) {
+          try {
+            await store.setOffline(userId, instanceId);
+          } catch (err) {
+            storeFailed(err);
+          }
+        }
+        const stillOnline = await globallyOnline(userId);
+        if (!stillOnline) onChange(userId, "offline");
+        return !stillOnline;
+      });
     },
 
     /** Authoritative answer for get-status: this instance, then the shared store. */
