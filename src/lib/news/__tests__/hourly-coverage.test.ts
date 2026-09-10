@@ -150,21 +150,21 @@ describe("every ZRP News category is reachable", () => {
     expect(swiss.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("covers each category from more than one source where it can, so one failure is not fatal", () => {
-    // Sports and Gaming are the narrow ones; both should have a spare.
-    for (const category of [
-      "SPORTS",
-      "GAMING",
-      "CRYPTO",
-      "CULTURE",
-      "SWITZERLAND",
-    ] as NewsArticleCategory[]) {
+  it("covers every category from more than one source, so one failure is not fatal", () => {
+    /*
+     * A category resting on a single publisher goes dark the moment
+     * that publisher changes a path or has a bad morning - which is
+     * exactly how Sports stayed empty. Asserted for every automated
+     * category rather than a hand-picked few, so the next category
+     * added cannot quietly ship with one feed behind it.
+     */
+    for (const category of AUTOMATED_CATEGORIES) {
       const sources = SEED_SOURCES.filter((source) =>
         source.topics.some(
           (topic) => categoryFor(topic, source.region, source.country ?? null) === category
         )
       );
-      expect(sources.length, `${category} has no fallback source`).toBeGreaterThanOrEqual(2);
+      expect(sources.length, `${category} rests on a single source`).toBeGreaterThanOrEqual(2);
     }
   });
 });
