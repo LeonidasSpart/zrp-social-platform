@@ -1,5 +1,5 @@
 import type { NewsConfidence, NewsRegion, NewsTopic } from "@prisma/client";
-import { isQuietHour, isTravelTopic } from "./config";
+import { isTravelTopic } from "./config";
 import { MAX_STORY_AGE_HOURS, MIN_PUBLISHABLE_SCORE, ageHours } from "./ranking";
 
 /*
@@ -124,12 +124,19 @@ export function feedIsAvailableAt(feed: SchedulableFeed, at: Date, story: Schedu
     if (at < nextAllowed) return false;
   }
 
-  // Quiet hours: routine news waits for a civil hour in the feed's own
-  // timezone. Genuine breaking news and travel alerts are exactly the
-  // things a reader wants at 04:00, so they are exempt.
-  const urgent = story.isBreaking || isTravelTopic(story.topic);
-  if (!urgent && isQuietHour(feed.timezone, at)) return false;
-
+  /*
+   * No quiet hours. ZRP News is a continuous 24/7 wire: every category
+   * is expected to carry fresh content in every hourly window, and a
+   * reader opening /news at 03:00 should not find the last seven hours
+   * empty.
+   *
+   * This previously skipped any non-urgent story between 23:00 and
+   * 06:00 in the feed's own timezone, which silently removed a third of
+   * every day from the publishing schedule. The anti-flood limits above
+   * (a minimum gap between posts, and a daily cap per feed) are what
+   * keep a feed from flooding - they do that at every hour equally,
+   * which is the property that actually matters.
+   */
   return true;
 }
 

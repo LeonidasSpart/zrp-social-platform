@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import { NewsArticleCategory, type PrismaClient } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { acquirePipelineLock } from "./lock";
 import { buildStoryIndex, expireStaleStories, ingestSource, isSourceDue } from "./ingest";
@@ -42,23 +42,38 @@ const LOCK_TTL_SECONDS = 25 * 60;
 /** Sources polled per cycle, so one cycle's outbound work is bounded. */
 const MAX_SOURCES_PER_CYCLE = 40;
 
-/** Stories summarised per cycle, bounding model spend per run. */
-const MAX_GENERATIONS_PER_CYCLE = 10;
+/*
+ * Stories summarised per cycle, bounding model spend per run.
+ *
+ * ZRP News runs hourly and is expected to fill twelve categories, so a
+ * cycle has to be able to produce more than a handful of summaries or
+ * the categories starve no matter how much real news was ingested.
+ */
+const MAX_GENERATIONS_PER_CYCLE = 24;
 
 /*
  * Wall-clock budget for the summarisation stage.
  *
- * The cron route has a 300s platform budget. Summarisation is the only
- * unbounded-ish stage (dozens of model calls), and if it consumes the
- * whole budget the function is killed before stage 5 ever runs - so a
- * cycle that generated perfectly good summaries publishes nothing, and
- * its NewsJobRun is left RUNNING forever with no error recorded.
+ * Summarisation is the only unbounded-ish stage (dozens of model
+ * calls), and if it consumes the whole request the cycle is killed
+ * before stage 5 ever runs - so a cycle that generated perfectly good
+ * summaries publishes nothing, and its NewsJobRun is left RUNNING
+ * forever with no error recorded.
  *
- * Capping it leaves headroom for planning and publishing. Stories not
- * reached stay NEW and are picked up by the next cycle: nothing is lost,
- * and nothing is rejected for a delay that was not its fault.
+ * Sized against the cron route's own maxDuration (900s) and the
+ * caller's curl timeout, leaving headroom for planning and publishing.
+ * It is deliberately generous now that the model reasons before it
+ * writes - each call takes noticeably longer than it used to, and a
+ * three-minute budget produced only a couple of summaries an hour.
+ *
+ * Stories not reached stay NEW and are the next cycle's first pick:
+ * nothing is lost, and nothing is rejected for a delay that was not its
+ * fault.
  */
-const GENERATION_BUDGET_MS = 180_000;
+const GENERATION_BUDGET_MS = 600_000;
+
+/** Every category /news displays, so coverage is reported for all of them. */
+const NEWS_ARTICLE_CATEGORIES = Object.values(NewsArticleCategory);
 
 export interface CycleResult {
   ran: boolean;
@@ -80,6 +95,16 @@ export interface CycleResult {
    * reach are untouched and will be picked up next cycle.
    */
   generationBudgetExhausted: boolean;
+  /**
+   * Age in hours of the newest published article in each ZRP News
+   * category, or null when that category has none at all.
+   *
+   * Every hourly cycle reports this so category starvation is visible
+   * in the run's own output instead of only on the live site. It is a
+   * measurement, never a trigger to manufacture content: a category
+   * with no genuine fresh story simply reports its real age.
+   */
+  categoryCoverage: Record<string, number | null>;
 }
 
 function emptyResult(reason: string): CycleResult {
@@ -99,7 +124,37 @@ function emptyResult(reason: string): CycleResult {
     scheduled: 0,
     storiesExpired: 0,
     generationBudgetExhausted: false,
+    categoryCoverage: {},
   };
+}
+
+/**
+ * Hours since the newest published article in each ZRP News category,
+ * null where a category has none.
+ *
+ * Read straight from what /news actually serves, so the number reported
+ * is the number a reader would experience.
+ */
+export async function measureCategoryCoverage(
+  db: PrismaClient,
+  now: Date
+): Promise<Record<string, number | null>> {
+  const newest = await db.newsArticle.groupBy({
+    by: ["category"],
+    where: { status: "PUBLISHED", publishedAt: { not: null } },
+    _max: { publishedAt: true },
+  });
+
+  const byCategory = new Map(newest.map((row) => [row.category, row._max.publishedAt]));
+
+  const coverage: Record<string, number | null> = {};
+  for (const category of NEWS_ARTICLE_CATEGORIES) {
+    const publishedAt = byCategory.get(category) ?? null;
+    coverage[category] = publishedAt
+      ? Math.round(((now.getTime() - publishedAt.getTime()) / 3_600_000) * 10) / 10
+      : null;
+  }
+  return coverage;
 }
 
 export function startOfUtcDay(at: Date): Date {
@@ -401,6 +456,10 @@ export async function runPipelineCycle(options: RunCycleOptions = {}): Promise<C
 
     const finishedAt = new Date();
 
+    // Measured after publishing, so the run reports the coverage it
+    // actually left behind rather than the one it started with.
+    result.categoryCoverage = await measureCategoryCoverage(db, finishedAt);
+
     await db.newsJobRun.update({
       where: { id: jobRun.id },
       data: {
@@ -421,6 +480,7 @@ export async function runPipelineCycle(options: RunCycleOptions = {}): Promise<C
           generationBudgetExhausted: result.generationBudgetExhausted,
           modelTimeoutMs: NEWS_MODEL_TIMEOUT_MS,
           modelMaxRetries: NEWS_MODEL_MAX_RETRIES,
+          categoryCoverage: result.categoryCoverage,
         },
       },
     });

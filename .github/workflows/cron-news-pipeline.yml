@@ -5,11 +5,15 @@ name: Cron - ZRP News Network pipeline
 # and is now due, polls the sources that are due, writes and validates
 # summaries, and plans the next window's publications.
 #
-# Every two hours matches the "approximately every 2-3 hours" brief.
-# Note that this is the *cycle* cadence, not a per-feed posting cadence:
-# each cycle spreads its publications across the following ~150 minutes
-# and every feed still has its own minimum gap and daily cap, so no feed
-# posts every two hours (see src/lib/news/scheduler.ts).
+# Hourly, continuously, 24/7: every ZRP News category should have fresh
+# content each hour, so a cycle has to run each hour to collect it.
+#
+# Two entries, not one. GitHub's scheduled workflows are best-effort and
+# are delayed or dropped entirely under load, so a single hourly entry
+# silently becomes a gap. The :30 run is the same cycle: if the :00 one
+# ran, there is simply less left to do, and the pipeline's distributed
+# lock plus per-publication idempotency keys mean an overlap can never
+# double-post (see src/lib/news/publish.ts).
 #
 # Nothing is published until BOTH the CRON_SECRET repository secret
 # exists AND an admin has un-paused the automation in
@@ -22,7 +26,8 @@ name: Cron - ZRP News Network pipeline
 # other cron routes are scheduled in the Railway dashboard.
 on:
   schedule:
-    - cron: "23 */2 * * *"
+    - cron: "0 * * * *"
+    - cron: "30 * * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -42,6 +47,6 @@ jobs:
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          curl --fail-with-body --silent --show-error --max-time 300 \
+          curl --fail-with-body --silent --show-error --max-time 900 \
             -H "Authorization: Bearer ${CRON_SECRET}" \
             "https://zrp.one/api/cron/news-pipeline"

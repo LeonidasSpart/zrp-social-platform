@@ -340,6 +340,118 @@ export const SEED_SOURCES: SeedSource[] = [
     trustTier: 2,
   },
 
+  // ─── Category coverage (tier 2) ───────────────────────────────
+  // Every category ZRP News displays needs a source that actually
+  // produces stories the classifier will put there. Sports had no
+  // source at all, and Culture, Science and Health were relying on
+  // whatever a general world/business desk happened to mention. All are
+  // BBC section feeds on feeds.bbci.co.uk, the same host already
+  // fetching cleanly for bbc-world / bbc-business / bbc-technology.
+  {
+    key: "bbc-sport",
+    name: "BBC Sport",
+    publisher: "BBC Sport",
+    feedUrl: "https://feeds.bbci.co.uk/sport/rss.xml",
+    homepageUrl: "https://www.bbc.com/sport",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["SPORTS"],
+    trustTier: 2,
+  },
+  {
+    key: "bbc-entertainment-arts",
+    name: "BBC News — Entertainment & Arts",
+    publisher: "BBC News",
+    feedUrl: "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
+    homepageUrl: "https://www.bbc.com/news/entertainment_and_arts",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["CULTURE", "ENTERTAINMENT"],
+    trustTier: 2,
+  },
+  {
+    key: "bbc-science-environment",
+    name: "BBC News — Science & Environment",
+    publisher: "BBC News",
+    feedUrl: "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
+    homepageUrl: "https://www.bbc.com/news/science_and_environment",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["SCIENCE", "ENVIRONMENT", "CLIMATE"],
+    trustTier: 2,
+  },
+  {
+    key: "bbc-health",
+    name: "BBC News — Health",
+    publisher: "BBC News",
+    feedUrl: "https://feeds.bbci.co.uk/news/health/rss.xml",
+    homepageUrl: "https://www.bbc.com/news/health",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["HEALTH"],
+    trustTier: 2,
+  },
+  // Second source for the two narrowest categories, on the Guardian's
+  // own /rss pattern already fetching cleanly for guardian-world. A
+  // category served by a single publisher goes dark the moment that
+  // publisher does.
+  {
+    key: "guardian-sport",
+    name: "The Guardian — Sport",
+    publisher: "The Guardian",
+    feedUrl: "https://www.theguardian.com/sport/rss",
+    homepageUrl: "https://www.theguardian.com/sport",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["SPORTS"],
+    trustTier: 2,
+  },
+  {
+    key: "guardian-culture",
+    name: "The Guardian — Culture",
+    publisher: "The Guardian",
+    feedUrl: "https://www.theguardian.com/culture/rss",
+    homepageUrl: "https://www.theguardian.com/culture",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["CULTURE", "ENTERTAINMENT"],
+    trustTier: 2,
+  },
+
+  // ─── Switzerland ──────────────────────────────────────────────
+  // swissinfo-eng above is the only CH-tagged source and its feed path
+  // returns a real 404, which is why the Switzerland category has
+  // stayed empty. No verified replacement URL could be fetched from
+  // this build environment, so these are candidates: the provisioning
+  // script performs one live fetch of each and disables whichever does
+  // not answer, rather than leaving a dead feed switched on.
+  {
+    key: "srf-news",
+    name: "SRF News",
+    publisher: "Schweizer Radio und Fernsehen (SRF)",
+    feedUrl: "https://www.srf.ch/news/bnf/rss/1646",
+    homepageUrl: "https://www.srf.ch/news",
+    region: "EUROPE",
+    country: "CH",
+    language: "de",
+    topics: ["WORLD", "POLITICS"],
+    trustTier: 2,
+  },
+  {
+    key: "admin-ch-releases",
+    name: "Swiss Federal Administration — Media releases",
+    publisher: "Swiss Federal Administration",
+    feedUrl: "https://www.admin.ch/gov/en/start/documentation/media-releases.rss.html",
+    homepageUrl: "https://www.admin.ch/gov/en/start/documentation/media-releases.html",
+    region: "EUROPE",
+    country: "CH",
+    language: "en",
+    topics: ["POLITICS", "WORLD"],
+    trustTier: 1,
+    official: true,
+    fetchIntervalMinutes: 60,
+  },
+
   // ─── Crypto (tier 3) ──────────────────────────────────────────
   // The general-news sources above cover crypto only when a story is
   // large enough to reach a mainstream business desk, so the CRYPTO
