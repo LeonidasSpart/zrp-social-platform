@@ -37,8 +37,24 @@ export function toSchedulerSettings(settings: NewsAutomationSetting): SchedulerS
   };
 }
 
-/** How long a cycle's publications are spread over, in minutes. */
-export const CYCLE_WINDOW_MINUTES = 150;
+/**
+ * How long a cycle's publications are spread over, in minutes.
+ *
+ * This must track the interval the cron actually runs at, because the
+ * planner derives its spacing from it:
+ *
+ *   spacing = max(minMinutesBetweenPublications, window / maxSlots)
+ *
+ * At the old 150 - sized for a cycle every 2-3 hours - a full plan of
+ * 24 slots was spread over 2h18m, so the categories at the bottom of
+ * the plan could not get an article inside the hour no matter how much
+ * genuine news existed for them. At 60 the whole plan lands within the
+ * hour it belongs to.
+ *
+ * Anything still scheduled when the next cycle starts is not lost: the
+ * cycle publishes everything due before it plans anything new.
+ */
+export const CYCLE_WINDOW_MINUTES = 60;
 
 export function nextCycleAt(from: Date): Date {
   return new Date(from.getTime() + CYCLE_WINDOW_MINUTES * 60 * 1000);
