@@ -53,13 +53,13 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * live from GET /api/legal/{page} (see LegalRepository/LegalApi) and
  * rendered here as ordered sections of headings/paragraphs/bullet
  * lists/cards/tables/FAQ - the same real, translated copy the website's
- * own /terms, /privacy, /guidelines, /help and /contact pages render, in
- * the app's own current language. No link back to zrp.one anywhere:
- * navigation stays entirely inside this screen (top bar back + system
- * back), the same as every other native screen in this app.
+ * own /terms, /privacy, /guidelines, /help, /contact and /about pages
+ * render, in the app's own current language. No link back to zrp.one
+ * anywhere: navigation stays entirely inside this screen (top bar back
+ * + system back), the same as every other native screen in this app.
  *
  * `page` is one of "terms" | "privacy" | "guidelines" | "help" |
- * "contact". `title` is this screen's fixed top-bar label (e.g.
+ * "contact" | "about". `title` is this screen's fixed top-bar label (e.g.
  * R.string.legal_terms) - kept separate from the fetched content's own
  * (also real, translated) page title/subtitle, which render as the
  * first thing inside the scrollable body instead, so the top bar never

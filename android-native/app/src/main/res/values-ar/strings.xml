@@ -1695,6 +1695,7 @@
     <string name="legal_guidelines">إرشادات المجتمع</string>
     <string name="legal_help">مركز المساعدة</string>
     <string name="legal_contact">تواصل معنا</string>
+    <string name="legal_about">حول ZRP</string>
     <string name="legal_load_error">تعذر تحميل هذه الصفحة. تحقق من اتصالك وحاول مرة أخرى.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">انضم منذ</string>

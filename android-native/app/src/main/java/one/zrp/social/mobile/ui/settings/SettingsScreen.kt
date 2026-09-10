@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.HelpOutline
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Language
@@ -130,6 +131,7 @@ fun SettingsScreen(
     onOpenGuidelines: () -> Unit,
     onOpenHelp: () -> Unit,
     onOpenContact: () -> Unit,
+    onOpenAbout: () -> Unit,
     isStaff: Boolean = false,
     onOpenAdmin: () -> Unit = {},
 ) {
@@ -185,6 +187,7 @@ fun SettingsScreen(
             SettingsRow(icon = Icons.Filled.Groups, label = stringResource(R.string.legal_guidelines), onClick = onOpenGuidelines)
             SettingsRow(icon = Icons.Filled.HelpOutline, label = stringResource(R.string.legal_help), onClick = onOpenHelp)
             SettingsRow(icon = Icons.Filled.Email, label = stringResource(R.string.legal_contact), onClick = onOpenContact)
+            SettingsRow(icon = Icons.Filled.Info, label = stringResource(R.string.legal_about), onClick = onOpenAbout)
 
             if (isStaff) {
                 SettingsRow(icon = Icons.Filled.AdminPanelSettings, label = stringResource(R.string.admin_nav_label), onClick = onOpenAdmin)

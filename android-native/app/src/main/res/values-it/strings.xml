@@ -1695,6 +1695,7 @@
     <string name="legal_guidelines">Linee guida della community</string>
     <string name="legal_help">Centro assistenza</string>
     <string name="legal_contact">Contatti</string>
+    <string name="legal_about">Informazioni su ZRP</string>
     <string name="legal_load_error">Impossibile caricare questa pagina. Controlla la connessione e riprova.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Iscritto dal</string>
