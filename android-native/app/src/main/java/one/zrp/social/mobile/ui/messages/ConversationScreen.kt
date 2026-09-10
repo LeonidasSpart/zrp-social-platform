@@ -105,6 +105,7 @@ import one.zrp.social.mobile.ui.call.CallViewModelFactory
 import one.zrp.social.mobile.ui.components.AddReactionDialog
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
+import one.zrp.social.mobile.ui.components.ImageLightbox
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -1003,6 +1004,12 @@ private fun MessageBubble(
     onReplyPreviewClick: (String) -> Unit,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
+    // Web's ChatInterface.tsx has a working lightbox on every received
+    // message image (its own lightboxImage state); this bubble's image
+    // attachment previously had no tap handler at all, so nothing opened.
+    // Reuses the exact same shared ImageLightbox PostCard's feed images
+    // use, rather than a second, divergent viewer.
+    var lightboxImage by remember { mutableStateOf<String?>(null) }
     val actionsLabel = stringResource(R.string.chat_message_actions_cd)
 
     Row(
@@ -1097,7 +1104,8 @@ private fun MessageBubble(
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .size(160.dp)
-                                    .clip(RoundedCornerShape(8.dp)),
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable { lightboxImage = attachmentUrl },
                             )
                         }
                     }
@@ -1181,6 +1189,15 @@ private fun MessageBubble(
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.action_delete)) },
                     onClick = { menuOpen = false; onDeleteClick() },
+                )
+            }
+
+            val openLightboxImage = lightboxImage
+            if (openLightboxImage != null) {
+                ImageLightbox(
+                    images = listOf(openLightboxImage),
+                    initialIndex = 0,
+                    onDismiss = { lightboxImage = null },
                 )
             }
         }
