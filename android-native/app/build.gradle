@@ -122,8 +122,29 @@ android {
         // map now has the "editorial" entry it was missing (see
         // VerifiedBadge.kt's own comment). Neither changes applicationId,
         // signing, or deep links.
-        versionCode 11
-        versionName "4.0.6"
+        //
+        // Bumps to versionCode 12 / versionName "4.0.7" for a real
+        // Google Sign-In fix: the account picker opened, an account
+        // could be selected, and then nothing happened - no login, no
+        // error. Root cause was CredentialManager.getCredential()'s
+        // result being tied to the specific Activity instance that made
+        // the request, while this Activity had no configChanges
+        // declared and the request itself ran on a Composable-scoped
+        // rememberCoroutineScope() rather than AuthViewModel's
+        // viewModelScope - so any configuration change while the system
+        // account picker had focus (rotation, fold/unfold, a uiMode/
+        // density nudge some OEM skins apply when a system bottom sheet
+        // appears) silently discarded the whole in-flight request. Fixed
+        // by declaring configChanges on MainActivity and moving the
+        // entire Google sign-in round trip onto viewModelScope (see
+        // AuthViewModel.loginWithGoogle's own comment). Email/password
+        // auth, applicationId, signing and deep links are unchanged. 11
+        // was never confirmed uploaded to Play, but per this file's own
+        // convention (see the versionCode 9/10 history above) the next
+        // build always strictly increments past the highest versionCode
+        // ever committed here, not just the last one confirmed shipped.
+        versionCode 12
+        versionName "4.0.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
