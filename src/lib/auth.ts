@@ -5,9 +5,10 @@ import AppleProvider from "next-auth/providers/apple";
 import { prisma } from "./db";
 import bcrypt from "bcryptjs";
 import { getFeatureStatus, FeatureStatus } from "./permissions";
-import { checkRateLimitKey, getClientIpFromHeaders } from "./rate-limit";
+import { checkRateLimitKey, getClientIpFromHeaders, refundRateLimitKey } from "./rate-limit";
 import { getAppleClientSecret } from "./apple-client-secret";
 import { applyAuthStateToToken, getUserAuthState } from "./auth-state";
+import { findUserByIdentifier, findUsersByIdentifier, isUsernameTaken } from "./find-user";
 
 // Only registered when APPLE_TEAM_ID/APPLE_KEY_ID/APPLE_CLIENT_ID/
 // APPLE_PRIVATE_KEY are all present and the key signs successfully - see
@@ -78,12 +79,90 @@ export interface VerifiedCredentialsUser {
   plan: string;
 }
 
+// ⚠️ SECURITY: brute-force protection counts GUESSES, not logins. Both
+// keys are incremented atomically before the password is checked (so a
+// burst of parallel attempts can never all be admitted), and refunded
+// only after the password has actually verified. An attacker's guesses
+// are wrong, so they are never refunded; a real user signing in on the
+// website, then the app, then again after a logout, never consumes the
+// budget at all. Counting successes as well - which is what this did
+// before - locked legitimate users out with "Too many login attempts"
+// after 8 sign-ins in 15 minutes, with a correct password.
+//
+// The per-IP limit protects against spraying guesses across many
+// accounts from one address; it is deliberately wider than the
+// per-account limit because one public address is routinely shared by
+// an entire mobile carrier's NAT, a campus, or an office. The
+// per-account limit is what actually protects a single account from
+// being hammered from many addresses.
+//
+// Refunding the per-IP failure budget has one consequence worth closing:
+// an attacker who owns an account could interleave logins to it with
+// guesses at other accounts and keep that budget flat. So a third,
+// generous per-IP ceiling counts EVERY attempt and is never refunded -
+// it bounds the raw guessing volume any one address can push through
+// regardless of interleaving, while staying far above what a shared
+// NAT's legitimate users produce.
+const LOGIN_WINDOW_SECONDS = 900;
+const LOGIN_IP_FAILURE_LIMIT = 50;
+const LOGIN_IP_TOTAL_LIMIT = 300;
+const LOGIN_ACCOUNT_FAILURE_LIMIT = 8;
+
+function loginIpKey(ip: string) {
+  return `login-ip:${ip}`;
+}
+function loginIpTotalKey(ip: string) {
+  return `login-ip-total:${ip}`;
+}
+function loginAccountKey(identifier: string) {
+  return `login-acct:${identifier.toLowerCase()}`;
+}
+
+// A real bcrypt hash of a random value, compared against when no account
+// matches, so "no such account" costs the same as "wrong password" and
+// the response time doesn't say which one it was.
+let unknownAccountHash: string | null = null;
+async function compareAgainstNoAccount(password: string): Promise<void> {
+  if (!unknownAccountHash) {
+    unknownAccountHash = await bcrypt.hash(`no-such-account-${Date.now()}-${Math.random()}`, 10);
+  }
+  await bcrypt.compare(password, unknownAccountHash);
+}
+
+// Registration and password reset hash the password exactly as typed
+// (neither trims), so login compares it exactly as typed first. The
+// trimmed form is only tried when the typed value actually has
+// surrounding whitespace - a phone keyboard's stray trailing space -
+// which is one extra compare of the same user-supplied secret, not a
+// second guess. Login used to trim unconditionally, which meant a
+// password registered with a trailing space could never verify.
+async function passwordMatches(typed: string, storedHash: string): Promise<boolean> {
+  // ⚠️ SECURITY: bcrypt is the ONLY accepted password format. This used
+  // to fall back to a plaintext equality check for any stored value
+  // that didn't start with "$2". That fallback is gone; legacy plaintext
+  // rows are hashed in place by legacy-passwords.js at every boot (see
+  // server.js), so nothing non-bcrypt should ever reach here. A stored
+  // value that somehow still isn't a bcrypt hash simply fails to verify.
+  if (!storedHash.startsWith("$2")) return false;
+  try {
+    if (await bcrypt.compare(typed, storedHash)) return true;
+    const trimmed = typed.trim();
+    if (trimmed.length > 0 && trimmed !== typed) {
+      return await bcrypt.compare(trimmed, storedHash);
+    }
+    return false;
+  } catch (err) {
+    console.error("Password comparison error:", err);
+    return false;
+  }
+}
+
 // The single source of truth for verifying an email/username + password
 // pair - shared by NextAuth's CredentialsProvider (the website's login
 // flow, below) and the mobile JSON login endpoint. Extracted rather
 // than duplicated so the two never drift apart on something
 // security-sensitive like rate limiting or the accepted password
-// format (bcrypt only - see below).
+// format (bcrypt only - see passwordMatches).
 export async function verifyCredentials({
   identifier,
   password,
@@ -95,72 +174,54 @@ export async function verifyCredentials({
 }): Promise<VerifiedCredentialsUser> {
   const isEmail = identifier.includes("@");
 
-  // ⚠️ SECURITY: brute-force protection. Limit both by source IP
-  // (protects against distributed guessing across many accounts)
-  // and by the targeted account/email (protects a single account
-  // from being hammered from many IPs). Either limit tripping
-  // blocks the attempt with a generic error and a retry delay.
-  const [ipLimit, acctLimit] = await Promise.all([
-    checkRateLimitKey(`login-ip:${ip}`, 20, 900),
-    checkRateLimitKey(`login-acct:${identifier.toLowerCase()}`, 8, 900),
+  const [ipLimit, ipTotal, acctLimit] = await Promise.all([
+    checkRateLimitKey(loginIpKey(ip), LOGIN_IP_FAILURE_LIMIT, LOGIN_WINDOW_SECONDS),
+    checkRateLimitKey(loginIpTotalKey(ip), LOGIN_IP_TOTAL_LIMIT, LOGIN_WINDOW_SECONDS),
+    checkRateLimitKey(loginAccountKey(identifier), LOGIN_ACCOUNT_FAILURE_LIMIT, LOGIN_WINDOW_SECONDS),
   ]);
 
-  if (!ipLimit.success || !acctLimit.success) {
+  if (!ipLimit.success || !ipTotal.success || !acctLimit.success) {
     throw new CredentialsAuthError("Too many login attempts. Please try again later.", 429);
   }
 
-  const user = await prisma.user.findUnique({
-    where: isEmail
-      ? { email: identifier.toLowerCase() }
-      : { username: identifier },
-    select: {
-      id: true,
-      email: true,
-      password: true,
-      name: true,
-      username: true,
-      isAdmin: true,
-      role: true,
-      badgeType: true,
-      avatarUrl: true,
-      onboardingCompleted: true,
-      banned: true,
-      emailVerified: true,
-      plan: true,
-    },
+  // Case-tolerant resolution - see find-user.ts for why an exact
+  // `findUnique` on a lowercased value locked real accounts out. In the
+  // rare case that two rows differ only by case, each candidate is
+  // checked against its OWN hash: the account that verifies is the one
+  // the user meant, and nothing is ever guessed.
+  const candidates = await findUsersByIdentifier(isEmail ? "email" : "username", identifier, {
+    id: true,
+    email: true,
+    password: true,
+    name: true,
+    username: true,
+    isAdmin: true,
+    role: true,
+    badgeType: true,
+    avatarUrl: true,
+    onboardingCompleted: true,
+    banned: true,
+    emailVerified: true,
+    plan: true,
   });
 
-  if (!user || !user.password) {
-    throw new CredentialsAuthError("Invalid credentials", 401);
-  }
-
-  // ⚠️ SECURITY: bcrypt is the ONLY accepted password format. This used
-  // to fall back to a plaintext equality check (`password ===
-  // user.password`) for any stored value that didn't start with "$2",
-  // "upgrading" the row to a hash on a successful login. That meant any
-  // legacy row still held the user's real password in clear text in
-  // the database until that user next logged in - a full-credential
-  // leak for every such account in any database backup or read-access
-  // compromise, and an equality comparison that wasn't even
-  // constant-time. Legacy plaintext rows are migrated to bcrypt in
-  // bulk, offline, by scripts/hash-legacy-passwords.ts (idempotent,
-  // batched, never resets or logs a password) - run it before or
-  // alongside deploying this change; after it has run there are no
-  // non-bcrypt rows left for this code to ever see. A stored value
-  // that is somehow still not a bcrypt hash simply fails to verify.
-  let isValid = false;
-  if (user.password.startsWith("$2")) {
-    try {
-      isValid = await bcrypt.compare(password, user.password);
-    } catch (err) {
-      console.error("Password comparison error:", err);
-      isValid = false;
+  let user: (typeof candidates)[number] | null = null;
+  for (const candidate of candidates) {
+    if (!candidate.password) continue;
+    if (await passwordMatches(password, candidate.password)) {
+      user = candidate;
+      break;
     }
   }
 
-  if (!isValid) {
+  if (!user) {
+    if (candidates.length === 0) await compareAgainstNoAccount(password);
     throw new CredentialsAuthError("Invalid credentials", 401);
   }
+
+  // The password verified: this was the account's owner, not a guess.
+  // Give the attempt back to both budgets (see the note above).
+  await Promise.all([refundRateLimitKey(loginIpKey(ip)), refundRateLimitKey(loginAccountKey(identifier))]);
 
   if (!user.emailVerified) {
     throw new CredentialsAuthError(
@@ -199,7 +260,9 @@ async function generateUniqueUsername(base: string): Promise<string> {
   let username = candidate;
   let attempt = 0;
 
-  while (await prisma.user.findUnique({ where: { username } })) {
+  // Case-insensitive, matching registration's own uniqueness rule -
+  // an exact check here could mint "leo" next to an existing "Leo".
+  while (await isUsernameTaken(username)) {
     attempt += 1;
     const suffix = Math.floor(1000 + Math.random() * 9000).toString();
     username = `${candidate.slice(0, 15 - suffix.length)}${suffix}`;
@@ -246,10 +309,11 @@ export async function findOrCreateOAuthUser(
     plan: true,
   } as const;
 
-  const existing = await prisma.user.findUnique({
-    where: { email: normalizedEmail },
-    select,
-  });
+  // Case-tolerant - see find-user.ts. An exact lookup on the lowercased
+  // address missed every account stored with a mixed-case email and
+  // then CREATED a second, empty account for the same person below,
+  // which is what "Google sign-in lost my account" looked like.
+  const existing = await findUserByIdentifier("email", email, select);
 
   if (existing) {
     if (existing.banned) return null;
@@ -344,9 +408,11 @@ export const authOptions: NextAuthOptions = {
         // Error) on any failure - NextAuth only needs a thrown Error
         // here to surface its own generic "CredentialsSignin" error to
         // the browser flow, so nothing further to translate.
+        // The password is passed exactly as typed - see passwordMatches
+        // for why trimming it here locked real accounts out.
         return await verifyCredentials({
           identifier: credentials.email.trim(),
-          password: credentials.password.trim(),
+          password: credentials.password,
           ip,
         });
       },
@@ -373,8 +439,20 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account, trigger }) {
       // ─── On initial sign‑in via Google or Apple ─────────────────
       if ((account?.provider === "google" || account?.provider === "apple") && user?.email) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: user.email.toLowerCase() },
+        // Same case-tolerant resolution the signIn callback just used to
+        // link this identity (find-user.ts) - resolving differently here
+        // would mint a token with no id for the very account it linked.
+        const dbUser = await findUserByIdentifier("email", user.email, {
+          id: true,
+          username: true,
+          isAdmin: true,
+          role: true,
+          badgeType: true,
+          avatarUrl: true,
+          onboardingCompleted: true,
+          banned: true,
+          emailVerified: true,
+          plan: true,
         });
         if (dbUser) {
           token.id = dbUser.id;
@@ -491,13 +569,31 @@ export const authOptions: NextAuthOptions = {
       // database load than before - it's the same lookup, now carrying
       // the claims that actually matter. Nothing here invalidates a
       // session whose claims haven't changed.
+      //
+      // Availability: NextAuth's session route wraps this callback in a
+      // try/catch whose failure branch DELETES the session cookie
+      // (next-auth/core/routes/session.js: `sessionStore.clean()` on
+      // JWT_SESSION_ERROR). A database error here - a pool timeout, a
+      // failover, one dropped connection - must therefore never
+      // propagate: it would sign the user out on a routine session
+      // poll. On an error the token keeps exactly the claims that were
+      // verified on its last successful read (a ban already learned
+      // stays a ban); the next read retries. A row that IS reachable
+      // and is missing or banned still ends the session, as before.
       if (token.id && !user && trigger !== "update") {
-        const state = await getUserAuthState(token.id as string);
-        const refreshed = applyAuthStateToToken(
-          token as unknown as Record<string, unknown>,
-          state
-        );
-        Object.assign(token, refreshed);
+        try {
+          const state = await getUserAuthState(token.id as string);
+          const refreshed = applyAuthStateToToken(
+            token as unknown as Record<string, unknown>,
+            state
+          );
+          Object.assign(token, refreshed);
+        } catch (err) {
+          console.error(
+            "Auth state refresh failed; keeping the session's previously verified claims:",
+            err instanceof Error ? err.message : err
+          );
+        }
       }
 
       return token;

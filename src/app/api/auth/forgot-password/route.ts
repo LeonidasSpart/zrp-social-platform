@@ -4,6 +4,7 @@ import { sendPasswordResetEmail } from "@/lib/email"; // ✅ added
 import crypto from "crypto";
 import { rateLimit } from "@/lib/rate-limit";
 import { hashToken } from "@/lib/tokens";
+import { findUserByIdentifier } from "@/lib/find-user";
 
 export async function POST(req: NextRequest) {
   // This endpoint is unauthenticated by necessity (a locked-out user
@@ -23,10 +24,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    // ─── Find user (case‑insensitive) ──────────────────────────────
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
-      select: { id: true, email: true, name: true },
+    // ─── Find user (case-insensitive - see find-user.ts) ────────────
+    // An exact lookup on the lowercased address missed every account
+    // stored with a mixed-case email, so those users could neither log
+    // in nor reset their way back in.
+    const user = await findUserByIdentifier("email", String(email), {
+      id: true,
+      email: true,
+      name: true,
     });
 
     if (!user) {

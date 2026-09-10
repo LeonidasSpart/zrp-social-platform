@@ -42,6 +42,30 @@ function trustedProxyHops(): number {
 // IPv4-mapped) and nothing else.
 const IP_SHAPE = /^[0-9a-fA-F.:]{3,45}$/;
 
+// RFC 1918 / 6598 / 3927 / 4193 and loopback: addresses that can only
+// belong to infrastructure between the edge and this process.
+function isInternalAddress(raw: string): boolean {
+  const ip = normalizeIp(raw);
+  if (!ip) return true;
+  const v4 = ip.startsWith("::ffff:") ? ip.slice(7) : ip;
+  const m = v4.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (m) {
+    const a = Number(m[1]);
+    const b = Number(m[2]);
+    return (
+      a === 10 ||
+      a === 127 ||
+      a === 0 ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      (a === 169 && b === 254) ||
+      (a === 100 && b >= 64 && b <= 127)
+    );
+  }
+  const lower = ip.toLowerCase();
+  return lower === "::1" || lower === "::" || lower.startsWith("fc") || lower.startsWith("fd") || lower.startsWith("fe80");
+}
+
 function normalizeIp(value: string | null | undefined): string | null {
   if (!value) return null;
   let ip = value.trim();
@@ -85,7 +109,17 @@ export function getClientIpFromHeaders(
       .map((p) => p.trim())
       .filter(Boolean);
     if (parts.length > 0) {
-      const index = Math.max(0, parts.length - trustedProxyHops());
+      let index = Math.max(0, parts.length - trustedProxyHops());
+      // An address from a private, loopback, link-local or carrier-NAT
+      // range in the trusted position is one of OUR OWN hops (an
+      // internal load balancer or sidecar the hop count didn't know
+      // about), never the connecting client. Walk past it rather than
+      // keying every user in the deployment into one shared bucket -
+      // which is what made the login limiter trip for everyone at once.
+      // The walk stops at the first public address, and never goes past
+      // the leftmost entry, so a client can't get further left than the
+      // proxy chain already put it.
+      while (index > 0 && isInternalAddress(parts[index])) index -= 1;
       const ip = normalizeIp(parts[index]);
       if (ip) return ip;
     }
@@ -223,6 +257,34 @@ export async function checkRateLimitKey(
     // Redis errored mid-operation: fail closed via the local fallback
     // rather than letting the request through unconditionally.
     return localRateLimit(fullKey, limit, windowSeconds);
+  }
+}
+
+/**
+ * Give one admission back to a key. Used by the login path once a
+ * password has verified: the attempt was the account owner's, not a
+ * guess, so it must not count toward the brute-force budget. Never
+ * throws and never takes a count below zero (a key that reaches zero is
+ * simply dropped and starts a fresh window on its next hit).
+ */
+export async function refundRateLimitKey(key: string): Promise<void> {
+  const fullKey = `rate-limit:${key}`;
+  const local = () => {
+    const bucket = localBuckets.get(fullKey);
+    if (bucket && bucket.count > 0) bucket.count -= 1;
+  };
+
+  try {
+    const redis = await getRedisClient();
+    if (!redis) {
+      local();
+      return;
+    }
+    const remaining = await redis.decr(fullKey);
+    if (remaining < 0) await redis.del(fullKey);
+  } catch (error) {
+    console.error("Rate limit refund error:", error);
+    local();
   }
 }
 

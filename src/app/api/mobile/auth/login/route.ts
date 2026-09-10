@@ -50,9 +50,11 @@ export async function POST(req: NextRequest) {
   }
 
   const identifier = body.identifier.trim();
-  const password = body.password.trim();
+  // Passed exactly as typed - registration and reset hash it untrimmed,
+  // and verifyCredentials handles a stray surrounding space itself.
+  const password = body.password;
 
-  if (!identifier || !password) {
+  if (!identifier || password.length === 0) {
     return NextResponse.json(
       { error: "identifier and password are required" },
       { status: 400 }

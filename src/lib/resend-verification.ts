@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { prisma } from "./db";
 import { sendVerificationEmail } from "./email";
 import { hashToken } from "./tokens";
+import { findUserByIdentifier } from "./find-user";
 
 export type ResendVerificationResult =
   | { ok: true }
@@ -17,9 +18,11 @@ export async function resendVerificationEmail(
   const identifier = rawIdentifier.trim();
   const isEmail = identifier.includes("@");
 
-  const user = await prisma.user.findUnique({
-    where: isEmail ? { email: identifier.toLowerCase() } : { username: identifier },
-    select: { id: true, email: true, emailVerified: true },
+  // Case-tolerant, exactly like login itself (see find-user.ts).
+  const user = await findUserByIdentifier(isEmail ? "email" : "username", identifier, {
+    id: true,
+    email: true,
+    emailVerified: true,
   });
 
   if (!user) {
