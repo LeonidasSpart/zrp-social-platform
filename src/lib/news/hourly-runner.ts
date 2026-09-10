@@ -66,6 +66,20 @@ export function startHourlyNewsCycles(): () => void {
           `[zrp-news] cycle: published ${result.published}, ` +
             `stories ${result.storiesCreated}, sources ${result.sourcesFetched}`
         );
+      } else {
+        /*
+         * A cycle that declines to run is the one failure mode with no
+         * trace anywhere: no job run is written, no error is thrown, and
+         * the site simply stops updating.
+         *
+         * Found while verifying this scheduler: with no Redis reachable
+         * the lock can never be taken, so every cycle returned early and
+         * four minutes of running produced no log line, no row and no
+         * clue - the reason was only discoverable by reading the source.
+         * In production that would be an outage that looks like quiet
+         * news.
+         */
+        console.warn(`[zrp-news] cycle did not run: ${result.reason ?? "unknown reason"}`);
       }
     } catch (error) {
       // Never take the web server down because a news cycle failed. The

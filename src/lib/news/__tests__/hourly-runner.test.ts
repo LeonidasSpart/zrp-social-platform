@@ -90,6 +90,28 @@ describe("the hourly news runner", () => {
     expect(runPipelineCycle).toHaveBeenCalledTimes(2);
   });
 
+  it("says so when a cycle declines to run, instead of going quiet", async () => {
+    // The one failure mode that leaves no trace: no job run is written,
+    // nothing throws, and the site just stops updating. It is what an
+    // unreachable Redis looks like - the lock can never be taken - and
+    // in production it would read as quiet news rather than an outage.
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    runPipelineCycle.mockResolvedValue({
+      ran: false,
+      reason: "Could not acquire the pipeline lock",
+      published: 0,
+      storiesCreated: 0,
+      sourcesFetched: 0,
+    });
+
+    stop = startHourlyNewsCycles();
+    await vi.advanceTimersByTimeAsync(5 * 60 * 1000);
+
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(String(warn.mock.calls[0][0])).toContain("Could not acquire the pipeline lock");
+    warn.mockRestore();
+  });
+
   it("stops when told to", async () => {
     const halt = startHourlyNewsCycles();
     halt();
