@@ -23,7 +23,7 @@
  */
 import { Language, translations } from "@/lib/translations";
 
-export type LegalPageId = "terms" | "privacy" | "guidelines" | "help" | "contact";
+export type LegalPageId = "terms" | "privacy" | "guidelines" | "help" | "contact" | "about";
 
 export const LEGAL_PAGE_IDS: LegalPageId[] = [
   "terms",
@@ -31,6 +31,7 @@ export const LEGAL_PAGE_IDS: LegalPageId[] = [
   "guidelines",
   "help",
   "contact",
+  "about",
 ];
 
 type CardItem = {
@@ -695,6 +696,45 @@ export function resolveMoreHelpText(lang: Language): string {
   return template.replace(/\{faq\}/g, faqLabel).replace(/\{help\}/g, helpLabel);
 }
 
+// ─── About (src/app/about/page.tsx) ───────────────────────────────────────
+// Paragraphs are grouped the same way the web page's own JSX does (a
+// plain sentence immediately followed by its bold clause, so joinParts
+// reassembles one natural paragraph) - about.p3Bold is deliberately
+// skipped since about.p3 already contains that exact phrase in plain
+// text (the web page bolds a substring of its own paragraph, which this
+// content model can't express inline; duplicating it as a second part
+// would repeat the phrase instead).
+export const ABOUT_CONFIG: PageConfig = {
+  title: ["about.title"],
+  subtitle: ["about.subtitle"],
+  sections: [
+    {
+      id: "story",
+      title: ["about.storySectionTitle"],
+      body: [
+        P("about.p1", "about.p1Bold"),
+        P("about.p2"),
+        P("about.p3"),
+        P("about.p4", "about.p4Bold", "about.p5"),
+        P("about.p5Em", "about.p5EmQuote", "about.p5Rest"),
+        P("about.p6"),
+        P("about.tagline"),
+      ],
+    },
+    {
+      id: "values",
+      title: ["about.valuesSectionTitle"],
+      body: [
+        CARDS(
+          card(["about.value1Title"], ["about.value1Desc"]),
+          card(["about.value2Title"], ["about.value2Desc"]),
+          card(["about.value3Title"], ["about.value3Desc"]),
+        ),
+      ],
+    },
+  ],
+};
+
 // ─── Help Center (src/app/help/page.tsx sections, 01-17) ─────────────────
 
 function faqItems(count: number): { question: string[]; answer: string[] }[] {
@@ -1158,4 +1198,5 @@ export const LEGAL_CONFIGS: Record<LegalPageId, PageConfig> = {
   guidelines: GUIDELINES_CONFIG,
   help: HELP_CONFIG,
   contact: CONTACT_CONFIG,
+  about: ABOUT_CONFIG,
 };

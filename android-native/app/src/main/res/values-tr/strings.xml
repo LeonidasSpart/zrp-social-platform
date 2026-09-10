@@ -1695,6 +1695,7 @@
     <string name="legal_guidelines">Topluluk Kuralları</string>
     <string name="legal_help">Yardım Merkezi</string>
     <string name="legal_contact">İletişim</string>
+    <string name="legal_about">ZRP Hakkında</string>
     <string name="legal_load_error">Bu sayfa yüklenemedi. Bağlantınızı kontrol edip tekrar deneyin.</string>
     <!-- Profile: join date label + charity note - real backend fields (location/website/category/createdAt already in UserProfile), not invented -->
     <string name="profile_joined">Katılma tarihi</string>
