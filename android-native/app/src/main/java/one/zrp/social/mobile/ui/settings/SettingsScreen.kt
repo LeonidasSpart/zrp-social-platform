@@ -188,24 +188,23 @@ fun SettingsScreen(
             SettingsRow(icon = Icons.Filled.Key, label = stringResource(R.string.nav_api_keys), onClick = onOpenApiKeys)
             SettingsRow(icon = Icons.Filled.SupportAgent, label = stringResource(R.string.support_tickets_page_title), onClick = onOpenSupport)
 
-            Text(
-                text = stringResource(R.string.legal_section_title),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = Spacing.lg, top = Spacing.lg, bottom = Spacing.xs),
-            )
-            SettingsRow(icon = Icons.Filled.Gavel, label = stringResource(R.string.legal_terms), onClick = onOpenTerms)
-            SettingsRow(icon = Icons.Filled.PrivacyTip, label = stringResource(R.string.legal_privacy), onClick = onOpenPrivacyPolicy)
-            SettingsRow(icon = Icons.Filled.Groups, label = stringResource(R.string.legal_guidelines), onClick = onOpenGuidelines)
-            SettingsRow(icon = Icons.Filled.HelpOutline, label = stringResource(R.string.legal_help), onClick = onOpenHelp)
-            SettingsRow(icon = Icons.Filled.Email, label = stringResource(R.string.legal_contact), onClick = onOpenContact)
+            SettingsGroupHeading(stringResource(R.string.settings_group_company))
             SettingsRow(icon = Icons.Filled.Info, label = stringResource(R.string.legal_about), onClick = onOpenAbout)
             SettingsRow(icon = Icons.Filled.Work, label = stringResource(R.string.legal_careers), onClick = onOpenCareers)
             SettingsRow(icon = Icons.Filled.VolunteerActivism, label = stringResource(R.string.legal_charity), onClick = onOpenCharity)
+            SettingsRow(icon = Icons.Filled.BarChart, label = stringResource(R.string.transparency_title), onClick = onOpenTransparency)
             SettingsRow(icon = Icons.Filled.Article, label = stringResource(R.string.legal_press), onClick = onOpenPress)
             SettingsRow(icon = Icons.Filled.RequestQuote, label = stringResource(R.string.legal_investors), onClick = onOpenInvestors)
-            SettingsRow(icon = Icons.Filled.BarChart, label = stringResource(R.string.transparency_title), onClick = onOpenTransparency)
+
+            SettingsGroupHeading(stringResource(R.string.settings_group_support))
+            SettingsRow(icon = Icons.Filled.HelpOutline, label = stringResource(R.string.legal_help), onClick = onOpenHelp)
             SettingsRow(icon = Icons.Filled.QuestionAnswer, label = stringResource(R.string.legal_faq), onClick = onOpenFaq)
+            SettingsRow(icon = Icons.Filled.Email, label = stringResource(R.string.legal_contact), onClick = onOpenContact)
+
+            SettingsGroupHeading(stringResource(R.string.settings_group_legal))
+            SettingsRow(icon = Icons.Filled.Gavel, label = stringResource(R.string.legal_terms), onClick = onOpenTerms)
+            SettingsRow(icon = Icons.Filled.PrivacyTip, label = stringResource(R.string.legal_privacy), onClick = onOpenPrivacyPolicy)
+            SettingsRow(icon = Icons.Filled.Groups, label = stringResource(R.string.legal_guidelines), onClick = onOpenGuidelines)
 
             if (isStaff) {
                 SettingsRow(icon = Icons.Filled.AdminPanelSettings, label = stringResource(R.string.admin_nav_label), onClick = onOpenAdmin)
@@ -218,6 +217,16 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(Spacing.xxl))
         }
     }
+}
+
+@Composable
+private fun SettingsGroupHeading(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = Spacing.lg, top = Spacing.lg, bottom = Spacing.xs),
+    )
 }
 
 @Composable

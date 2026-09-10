@@ -1701,6 +1701,9 @@
     <string name="legal_press">Пресс-кит</string>
     <string name="legal_investors">Инвесторы</string>
     <string name="legal_faq">Частые вопросы</string>
+    <string name="settings_group_company">Компания</string>
+    <string name="settings_group_support">Поддержка</string>
+    <string name="settings_group_legal">Правовая информация</string>
     <string name="transparency_title">Прозрачность модерации</string>
     <string name="transparency_privacy_note">На этой странице отображаются только агрегированные данные. Здесь никогда не указываются имена пользователей, содержание сообщений или публикаций, а также кто и на что пожаловался: конфиденциальность модерации защищена как обычно.</string>
     <string name="transparency_err_load">Не удалось загрузить данные о прозрачности. Попробуйте позже.</string>

@@ -1701,6 +1701,9 @@
     <string name="legal_press">Kit de prensa</string>
     <string name="legal_investors">Inversores</string>
     <string name="legal_faq">Preguntas frecuentes</string>
+    <string name="settings_group_company">Empresa</string>
+    <string name="settings_group_support">Soporte</string>
+    <string name="settings_group_legal">Legal</string>
     <string name="transparency_title">Transparencia de la moderación</string>
     <string name="transparency_privacy_note">Esta página solo muestra totales agregados. Nunca incluye nombres de usuario, contenido de mensajes o publicaciones, ni quién reportó qué: la privacidad de la moderación sigue protegida como siempre.</string>
     <string name="transparency_err_load">No se pueden cargar los datos de transparencia en este momento. Inténtalo de nuevo más tarde.</string>
