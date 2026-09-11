@@ -144,6 +144,7 @@
 "footer.privacyPolicy" = "سياسة الخصوصية";
 "footer.helpCenter" = "مركز المساعدة";
 "help.footer.guidelines" = "إرشادات المجتمع";
+"communityCode.navLabel" = "مدونة المجتمع والقيادة";
 "nav.marketplace" = "السوق";
 "nav.settings" = "الإعدادات";
 "nav.signOut" = "تسجيل الخروج";

@@ -144,6 +144,7 @@
 "footer.privacyPolicy" = "隐私政策";
 "footer.helpCenter" = "帮助中心";
 "help.footer.guidelines" = "社区准则";
+"communityCode.navLabel" = "社区与领导行为准则";
 "nav.marketplace" = "市场";
 "nav.settings" = "设置";
 "nav.signOut" = "退出登录";

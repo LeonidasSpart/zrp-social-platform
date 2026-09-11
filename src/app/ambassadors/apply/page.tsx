@@ -37,6 +37,7 @@ export default function ApplyAmbassadorPage() {
   const [motivation, setMotivation] = useState("");
   const [communityDescription, setCommunityDescription] = useState("");
   const [audienceSize, setAudienceSize] = useState("");
+  const [codeOfConductAccepted, setCodeOfConductAccepted] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,6 +74,10 @@ export default function ApplyAmbassadorPage() {
       setError(t("ambassadors.apply.errMotivationRequired"));
       return;
     }
+    if (!codeOfConductAccepted) {
+      setError(t("ambassadors.apply.errCodeRequired"));
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -87,6 +92,7 @@ export default function ApplyAmbassadorPage() {
           motivation: motivation.trim(),
           communityDescription: communityDescription.trim() || null,
           audienceSize: audienceSize ? Number(audienceSize) : null,
+          codeOfConductAccepted,
         }),
       });
       const body = await res.json();
@@ -338,6 +344,26 @@ export default function ApplyAmbassadorPage() {
               onChange={(e) => setAudienceSize(e.target.value)}
               className={inputClass}
             />
+          </div>
+
+          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-zrp-charcoal">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {t("ambassadors.apply.codeOfConductLinkPrefix")}{" "}
+              <Link href="/community-code#b-ambassador-code" className="legal-link" target="_blank">
+                {t("ambassadors.apply.codeOfConductLinkLabel")}
+              </Link>
+              .
+            </p>
+            <label className="mt-3 flex items-start gap-2.5 text-sm text-gray-700 dark:text-gray-300">
+              <input
+                type="checkbox"
+                required
+                checked={codeOfConductAccepted}
+                onChange={(e) => setCodeOfConductAccepted(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-zrp-red focus:ring-zrp-red dark:border-gray-700"
+              />
+              <span>{t("ambassadors.apply.codeOfConductCheckbox")}</span>
+            </label>
           </div>
 
           <button

@@ -34,7 +34,8 @@ export type LegalPageId =
   | "charity"
   | "press"
   | "investors"
-  | "faq";
+  | "faq"
+  | "communityCode";
 
 export const LEGAL_PAGE_IDS: LegalPageId[] = [
   "terms",
@@ -48,6 +49,7 @@ export const LEGAL_PAGE_IDS: LegalPageId[] = [
   "press",
   "investors",
   "faq",
+  "communityCode",
 ];
 
 type CardItem = {
@@ -663,6 +665,242 @@ export const GUIDELINES_CONFIG: PageConfig = {
           ["terms.moderation.item4"]
         ),
         P("terms.moderation.outro"),
+      ],
+    },
+  ],
+};
+
+// ─── ZRP Community & Leadership Code (src/app/community-code/page.tsx) ───
+//
+// Section A deliberately reuses the exact same resolved blocks as
+// GUIDELINES_CONFIG's "user-conduct"/"content"/"moderation"/"reporting"
+// sections above (same translation keys) rather than re-authoring their
+// substance, so this page can never drift from /guidelines - the brief's
+// explicit "do not create contradictory duplicate policies" requirement.
+// Sections B-D (Ambassador/Country Manager/Leadership) are new content
+// that does not exist anywhere else. Section E reuses the same report
+// category keys as ReportModal.tsx (transparency.reason*). Section G
+// reuses the same appeal status keys as settings/appeals.
+
+export const COMMUNITY_CODE_CONFIG: PageConfig = {
+  title: ["communityCode.title"],
+  subtitle: ["communityCode.subtitle"],
+  sections: [
+    {
+      id: "a-community-guidelines",
+      number: "A",
+      title: ["communityCode.a.title"],
+      body: [
+        P("communityCode.a.intro"),
+        P("terms.userConduct.intro"),
+        BULLETS(
+          ["terms.userConduct.item1"],
+          ["terms.userConduct.item2"],
+          ["terms.userConduct.item3"],
+          ["terms.userConduct.item4"],
+          ["terms.userConduct.item5"],
+          ["terms.userConduct.item6"],
+          ["terms.userConduct.item7"],
+          ["terms.userConduct.item8"]
+        ),
+        P("terms.userConduct.outro"),
+        H("communityCode.a.safetyTitle"),
+        P("communityCode.a.safetyIntro"),
+        BULLETS(
+          ["communityCode.a.safety1"],
+          ["communityCode.a.safety2"],
+          ["communityCode.a.safety3"],
+          ["communityCode.a.safety4"],
+          ["communityCode.a.safety5"],
+          ["communityCode.a.safety6"],
+          ["communityCode.a.safety7"],
+          ["communityCode.a.safety8"],
+          ["communityCode.a.safety9"]
+        ),
+        P("communityCode.a.safetyOutro"),
+        H("terms.h.content"),
+        P("terms.content.p1Bold", "terms.content.p1Suffix"),
+        P("terms.content.p2"),
+        P("terms.content.p3"),
+        P("terms.content.p4"),
+      ],
+    },
+    {
+      id: "b-ambassador-code",
+      number: "B",
+      title: ["communityCode.b.title"],
+      body: [
+        P("communityCode.b.intro"),
+        P("communityCode.b.principlesIntro"),
+        BULLETS(
+          ["communityCode.b.item1"],
+          ["communityCode.b.item2"],
+          ["communityCode.b.item3"],
+          ["communityCode.b.item4"],
+          ["communityCode.b.item5"],
+          ["communityCode.b.item6"],
+          ["communityCode.b.item7"],
+          ["communityCode.b.item8"],
+          ["communityCode.b.item9"],
+          ["communityCode.b.item10"],
+          ["communityCode.b.item11"]
+        ),
+        CALLOUT("communityCode.b.noImmunity"),
+        P("communityCode.b.enforcement"),
+      ],
+    },
+    {
+      id: "c-country-manager-code",
+      number: "C",
+      title: ["communityCode.c.title"],
+      body: [
+        P("communityCode.c.intro"),
+        P("communityCode.c.responsibilitiesIntro"),
+        BULLETS(
+          ["communityCode.c.item1"],
+          ["communityCode.c.item2"],
+          ["communityCode.c.item3"],
+          ["communityCode.c.item4"],
+          ["communityCode.c.item5"],
+          ["communityCode.c.item6"],
+          ["communityCode.c.item7"],
+          ["communityCode.c.item8"],
+          ["communityCode.c.item9"],
+          ["communityCode.c.item10"],
+          ["communityCode.c.item11"]
+        ),
+        H("communityCode.c.distinctionTitle"),
+        P("communityCode.c.distinctionBody"),
+        BULLETS(
+          ["communityCode.c.limit1"],
+          ["communityCode.c.limit2"],
+          ["communityCode.c.limit3"],
+          ["communityCode.c.limit4"],
+          ["communityCode.c.limit5"],
+          ["communityCode.c.limit6"]
+        ),
+        CALLOUT("communityCode.c.serverAuthoritative"),
+      ],
+    },
+    {
+      id: "d-leadership-standards",
+      number: "D",
+      title: ["communityCode.d.title"],
+      body: [
+        P("communityCode.d.intro"),
+        P("communityCode.d.itemsIntro"),
+        BULLETS(
+          ["communityCode.d.item1"],
+          ["communityCode.d.item2"],
+          ["communityCode.d.item3"],
+          ["communityCode.d.item4"],
+          ["communityCode.d.item5"],
+          ["communityCode.d.item6"],
+          ["communityCode.d.item7"],
+          ["communityCode.d.item8"],
+          ["communityCode.d.item9"],
+          ["communityCode.d.item10"]
+        ),
+      ],
+    },
+    {
+      id: "e-reporting-safety",
+      number: "E",
+      title: ["communityCode.e.title"],
+      body: [
+        H("communityCode.e.howToReportTitle"),
+        P("communityCode.e.howToReportBody"),
+        H("communityCode.e.whatTitle"),
+        P("communityCode.e.whatBody"),
+        BULLETS(
+          ["transparency.reasonSpam"],
+          ["transparency.reasonHarassment"],
+          ["transparency.reasonInappropriate"],
+          ["transparency.reasonMisinformation"],
+          ["transparency.reasonHateSpeech"],
+          ["transparency.reasonImpersonation"],
+          ["transparency.reasonOther"]
+        ),
+        H("communityCode.e.afterTitle"),
+        P("communityCode.e.afterBody"),
+        H("communityCode.e.seriousTitle"),
+        CALLOUT("communityCode.e.seriousBody"),
+      ],
+    },
+    {
+      id: "f-moderation-enforcement",
+      number: "F",
+      title: ["communityCode.f.title"],
+      body: [
+        H("communityCode.f.lifecycleTitle"),
+        P("communityCode.f.lifecycleIntro"),
+        BULLETS(
+          ["communityCode.f.step1"],
+          ["communityCode.f.step2"],
+          ["communityCode.f.step3"],
+          ["communityCode.f.step4"],
+          ["communityCode.f.step5"],
+          ["communityCode.f.step6"],
+          ["communityCode.f.step7"],
+          ["communityCode.f.step8"]
+        ),
+        H("communityCode.f.measuresTitle"),
+        P("communityCode.f.measuresIntro"),
+        BULLETS(
+          ["communityCode.f.measure1"],
+          ["communityCode.f.measure2"],
+          ["communityCode.f.measure3"],
+          ["communityCode.f.measure4"],
+          ["communityCode.f.measure5"],
+          ["communityCode.f.measure6"],
+          ["communityCode.f.measure7"],
+          ["communityCode.f.measure8"],
+          ["communityCode.f.measure9"]
+        ),
+        P("communityCode.f.disclaimer"),
+      ],
+    },
+    {
+      id: "g-appeals",
+      number: "G",
+      title: ["communityCode.g.title"],
+      body: [
+        P("communityCode.g.intro"),
+        H("communityCode.g.whenTitle"),
+        P("communityCode.g.whenBody"),
+        H("communityCode.g.howTitle"),
+        P("communityCode.g.howBody"),
+        H("communityCode.g.statusTitle"),
+        BULLETS(
+          ["communityCode.g.statusPending"],
+          ["communityCode.g.statusUpheld"],
+          ["communityCode.g.statusOverturned"]
+        ),
+      ],
+    },
+    {
+      id: "h-status-distinction",
+      number: "H",
+      title: ["communityCode.h.title"],
+      body: [
+        H("communityCode.h.distinctionTitle"),
+        P("communityCode.h.distinctionBody"),
+        H("communityCode.h.accountLevelTitle"),
+        P("communityCode.h.accountLevelBody"),
+        H("communityCode.h.serverAuthoritativeTitle"),
+        CALLOUT("communityCode.h.serverAuthoritativeBody"),
+      ],
+    },
+    {
+      id: "i-version-acceptance",
+      number: "I",
+      title: ["communityCode.i.title"],
+      body: [
+        P("communityCode.i.versionBody"),
+        BULLETS(["communityCode.versionLabel", "communityCode.version"], ["communityCode.publishedLabel", "communityCode.versionDate"]),
+        H("communityCode.i.acceptanceTitle"),
+        P("communityCode.i.acceptanceIntro"),
+        CALLOUT("communityCode.i.acceptanceStatement"),
       ],
     },
   ],
@@ -2185,4 +2423,5 @@ export const LEGAL_CONFIGS: Record<LegalPageId, PageConfig> = {
   press: PRESS_CONFIG,
   investors: INVESTORS_CONFIG,
   faq: FAQ_CONFIG,
+  communityCode: COMMUNITY_CODE_CONFIG,
 };

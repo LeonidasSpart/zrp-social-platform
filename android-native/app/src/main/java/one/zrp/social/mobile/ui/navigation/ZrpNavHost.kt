@@ -301,6 +301,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     val goToInvestors: () -> Unit = { navController.navigate("legal/investors") }
     val goToTransparency: () -> Unit = { navController.navigate("transparency") }
     val goToFaq: () -> Unit = { navController.navigate("legal/faq") }
+    val goToCommunityCode: () -> Unit = { navController.navigate("legal/communityCode") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
@@ -1125,6 +1126,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenTransparency = goToTransparency,
                     onOpenAmbassadors = goToAmbassadors,
                     onOpenFaq = goToFaq,
+                    onOpenCommunityCode = goToCommunityCode,
                 )
             }
             composable("settings/team") {
@@ -1211,6 +1213,13 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                 LegalScreen(
                     page = "faq",
                     title = stringResource(R.string.legal_faq),
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("legal/communityCode") {
+                LegalScreen(
+                    page = "communityCode",
+                    title = stringResource(R.string.legal_community_code),
                     onBack = { navController.popBackStack() },
                 )
             }

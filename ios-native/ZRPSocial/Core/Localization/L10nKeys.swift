@@ -296,6 +296,8 @@ enum L10nKey: String, CaseIterable {
     case footerHelpCenter = "footer.helpCenter"
     /// en: "Community Guidelines"
     case helpFooterGuidelines = "help.footer.guidelines"
+    /// en: "Community & Leadership Code"
+    case communityCodeNavLabel = "communityCode.navLabel"
     /// en: "Marketplace"
     case navMarketplace = "nav.marketplace"
     /// en: "Settings"

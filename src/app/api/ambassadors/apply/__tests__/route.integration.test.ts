@@ -10,6 +10,8 @@ import { POST as APPLY } from "../route";
 import { GET as ME } from "../../me/route";
 import { GET as COUNTRIES } from "../../countries/route";
 import { GET as STATS } from "../../stats/route";
+import { POST as ACCEPT_CODE } from "../../accept-code/route";
+import { CURRENT_CODE_OF_CONDUCT_VERSION } from "@/lib/ambassadors/codeOfConduct";
 
 const hasRealDatabaseUrl =
   !!process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("...");
@@ -37,6 +39,7 @@ const VALID_BODY = {
   motivation: "I want to grow ZRP's community in Switzerland.",
   communityDescription: "A group of privacy-minded creators.",
   audienceSize: 500,
+  codeOfConductAccepted: true,
 };
 
 describe.skipIf(!hasRealDatabaseUrl)("POST /api/ambassadors/apply (integration, real Postgres)", () => {
@@ -91,6 +94,13 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/ambassadors/apply (integration, 
     expect(res.status).toBe(400);
   });
 
+  it("rejects an application that has not accepted the Ambassador Code of Conduct", async () => {
+    const user = await createUser("nocode");
+    getServerSession.mockResolvedValueOnce({ user: { id: user.id } });
+    const res = await apply({ ...VALID_BODY, codeOfConductAccepted: false });
+    expect(res.status).toBe(400);
+  });
+
   it("creates a PENDING application for a valid submission", async () => {
     const user = await createUser("valid");
     getServerSession.mockResolvedValueOnce({ user: { id: user.id } });
@@ -103,6 +113,17 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/ambassadors/apply (integration, 
     expect(body.profile.countryCode).toBe("CH");
     // Never told they are an official ambassador before approval.
     expect(body.profile.status).not.toBe("APPROVED");
+  });
+
+  it("stamps the current Code of Conduct version and an acceptance timestamp server-side", async () => {
+    const user = await createUser("codeaccepted");
+    getServerSession.mockResolvedValueOnce({ user: { id: user.id } });
+    const res = await apply(VALID_BODY);
+    const body = await res.json();
+
+    expect(res.status).toBe(201);
+    expect(body.profile.codeOfConductVersion).toBe(CURRENT_CODE_OF_CONDUCT_VERSION);
+    expect(body.profile.codeOfConductAcceptedAt).toBeTruthy();
   });
 
   it("refuses a second application while one is already pending", async () => {
@@ -261,5 +282,58 @@ describe.skipIf(!hasRealDatabaseUrl)("GET /api/ambassadors/stats (integration, r
     expect(typeof body.totalAmbassadors).toBe("number");
     expect(body.totalAmbassadors).toBeGreaterThanOrEqual(0);
     expect(typeof body.countriesRepresented).toBe("number");
+  });
+});
+
+describe.skipIf(!hasRealDatabaseUrl)("POST /api/ambassadors/accept-code (integration, real Postgres)", () => {
+  const suffix = randomUUID().slice(0, 8);
+  const userIds: string[] = [];
+
+  afterAll(async () => {
+    await prisma.ambassadorProfile.deleteMany({ where: { userId: { in: userIds } } });
+    await prisma.user.deleteMany({ where: { id: { in: userIds } } });
+  });
+
+  beforeEach(() => getServerSession.mockReset());
+
+  it("returns 401 when not signed in", async () => {
+    getServerSession.mockResolvedValueOnce(null);
+    const res = await ACCEPT_CODE();
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 404 for a user with no ambassador application", async () => {
+    const user = await prisma.user.create({
+      data: { email: `noaccept-${suffix}@ambassadortest.example`, username: `noaccept${suffix}`.slice(0, 20), password: "x" },
+    });
+    userIds.push(user.id);
+    getServerSession.mockResolvedValueOnce({ user: { id: user.id } });
+
+    const res = await ACCEPT_CODE();
+    expect(res.status).toBe(404);
+  });
+
+  it("re-stamps the current version and a fresh timestamp for an existing applicant, ignoring any client-supplied data", async () => {
+    const user = await prisma.user.create({
+      data: { email: `reaccept-${suffix}@ambassadortest.example`, username: `reaccept${suffix}`.slice(0, 20), password: "x" },
+    });
+    userIds.push(user.id);
+    await prisma.ambassadorProfile.create({
+      data: {
+        userId: user.id,
+        countryCode: "DE",
+        motivation: "t",
+        status: "APPROVED",
+        codeOfConductVersion: "0.9",
+        codeOfConductAcceptedAt: new Date("2020-01-01"),
+      },
+    });
+    getServerSession.mockResolvedValueOnce({ user: { id: user.id } });
+
+    const res = await ACCEPT_CODE();
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.profile.codeOfConductVersion).toBe(CURRENT_CODE_OF_CONDUCT_VERSION);
+    expect(new Date(body.profile.codeOfConductAcceptedAt).getFullYear()).toBeGreaterThan(2020);
   });
 });

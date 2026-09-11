@@ -620,6 +620,16 @@ model AmbassadorProfile {
   rejectionReason  String? @db.Text
   suspensionReason String? @db.Text
 
+  // Server-authoritative acceptance of the Ambassador Code of Conduct
+  // (ZRP Community & Leadership Code, section B) - set once at
+  // application time and re-set whenever the applicant/ambassador
+  // accepts a newer version after CURRENT_CODE_OF_CONDUCT_VERSION
+  // (src/lib/ambassadors/codeOfConduct.ts) changes. Never trust a
+  // client-only "accepted" flag: acceptedAt is stamped server-side by
+  // the API route at the moment of acceptance, not supplied by the client.
+  codeOfConductVersion   String?
+  codeOfConductAcceptedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

@@ -144,6 +144,7 @@
 "footer.privacyPolicy" = "Политика конфиденциальности";
 "footer.helpCenter" = "Центр помощи";
 "help.footer.guidelines" = "Правила сообщества";
+"communityCode.navLabel" = "Кодекс сообщества и руководства";
 "nav.marketplace" = "Маркетплейс";
 "nav.settings" = "Настройки";
 "nav.signOut" = "Выйти";

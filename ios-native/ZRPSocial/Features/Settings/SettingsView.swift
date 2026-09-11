@@ -69,7 +69,7 @@ struct SettingsView: View {
             }
 
             Section {
-                ForEach([WebPage.terms, .privacy, .guidelines]) { page in
+                ForEach([WebPage.terms, .privacy, .guidelines, .communityCode]) { page in
                     Button { openPage = page } label: {
                         Label {
                             Text(page.titleKey)

@@ -151,6 +151,7 @@ footer.termsOfService
 footer.privacyPolicy
 footer.helpCenter
 help.footer.guidelines
+communityCode.navLabel
 nav.marketplace
 nav.settings
 nav.signOut

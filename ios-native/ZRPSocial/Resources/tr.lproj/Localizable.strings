@@ -144,6 +144,7 @@
 "footer.privacyPolicy" = "Gizlilik Politikası";
 "footer.helpCenter" = "Yardım Merkezi";
 "help.footer.guidelines" = "Topluluk Kuralları";
+"communityCode.navLabel" = "Topluluk ve Liderlik Kuralları";
 "nav.marketplace" = "Pazar Yeri";
 "nav.settings" = "Ayarlar";
 "nav.signOut" = "Çıkış Yap";
