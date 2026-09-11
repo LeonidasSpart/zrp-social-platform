@@ -235,6 +235,9 @@
     <string name="messages_unnamed_group">Unnamed group</string>
     <string name="messages_group_no_messages_yet">No messages yet</string>
     <string name="messages_group_member_count">%1$d members</string>
+    <string name="messages_delete_conversation">Delete conversation</string>
+    <string name="messages_delete_conversation_confirm">Delete this conversation? All messages will be removed.</string>
+    <string name="messages_err_delete_conversation">Failed to delete conversation</string>
     <string name="messages_select_conversation">Select a conversation</string>
     <string name="group_create_title">New group</string>
     <string name="group_create_action">Create</string>

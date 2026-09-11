@@ -223,6 +223,9 @@
     <string name="messages_unnamed_group">Gruppo senza nome</string>
     <string name="messages_group_no_messages_yet">Ancora nessun messaggio</string>
     <string name="messages_group_member_count">%1$d membri</string>
+    <string name="messages_delete_conversation">Elimina conversazione</string>
+    <string name="messages_delete_conversation_confirm">Eliminare questa conversazione? Tutti i messaggi verranno rimossi.</string>
+    <string name="messages_err_delete_conversation">Impossibile eliminare la conversazione</string>
     <string name="messages_select_conversation">Seleziona una conversazione</string>
     <string name="group_create_title">Nuovo gruppo</string>
     <string name="group_create_action">Crea</string>

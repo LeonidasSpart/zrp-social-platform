@@ -223,6 +223,9 @@
     <string name="messages_unnamed_group">Unbenannte Gruppe</string>
     <string name="messages_group_no_messages_yet">Noch keine Nachrichten</string>
     <string name="messages_group_member_count">%1$d Mitglieder</string>
+    <string name="messages_delete_conversation">Unterhaltung löschen</string>
+    <string name="messages_delete_conversation_confirm">Diese Unterhaltung löschen? Alle Nachrichten werden entfernt.</string>
+    <string name="messages_err_delete_conversation">Löschen der Unterhaltung fehlgeschlagen</string>
     <string name="messages_select_conversation">Unterhaltung auswählen</string>
     <string name="group_create_title">Neue Gruppe</string>
     <string name="group_create_action">Erstellen</string>

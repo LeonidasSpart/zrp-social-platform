@@ -223,6 +223,9 @@
     <string name="messages_unnamed_group">مجموعة بلا اسم</string>
     <string name="messages_group_no_messages_yet">لا توجد رسائل بعد</string>
     <string name="messages_group_member_count">%1$d أعضاء</string>
+    <string name="messages_delete_conversation">حذف المحادثة</string>
+    <string name="messages_delete_conversation_confirm">حذف هذه المحادثة؟ سيتم حذف جميع الرسائل.</string>
+    <string name="messages_err_delete_conversation">تعذر حذف المحادثة</string>
     <string name="messages_select_conversation">اختر محادثة</string>
     <string name="group_create_title">مجموعة جديدة</string>
     <string name="group_create_action">إنشاء</string>

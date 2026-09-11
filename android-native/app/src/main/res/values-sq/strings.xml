@@ -223,6 +223,9 @@
     <string name="messages_unnamed_group">Grup pa emër</string>
     <string name="messages_group_no_messages_yet">Ende pa mesazhe</string>
     <string name="messages_group_member_count">%1$d anëtarë</string>
+    <string name="messages_delete_conversation">Fshi bisedën</string>
+    <string name="messages_delete_conversation_confirm">Të fshihet kjo bisedë? Të gjitha mesazhet do të hiqen.</string>
+    <string name="messages_err_delete_conversation">Fshirja e bisedës dështoi</string>
     <string name="messages_select_conversation">Zgjidh një bisedë</string>
     <string name="group_create_title">Grup i ri</string>
     <string name="group_create_action">Krijo</string>
