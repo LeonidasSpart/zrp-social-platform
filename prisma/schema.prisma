@@ -1510,6 +1510,40 @@ model PremiumPurchase {
   @@index([status])
 }
 
+// ⚠️ SECURITY: cross-payment-type transaction-signature reuse guard. A
+// single verified on-chain transaction may fund exactly ONE ZRP payment
+// record - a Tip, a PremiumPurchase, or a HelpContribution - never more
+// than one, and never more than once. Each of those tables already has
+// its own @unique transactionId, which stops reuse *within* that one
+// table, but does nothing to stop the SAME signature being claimed by a
+// *different* table - Tip.transactionId and PremiumPurchase.transactionId
+// are two separate constraints on two separate tables, so nothing at the
+// database level ever stopped the same payment being credited once as
+// each.
+//
+// This row is created as the FIRST statement inside the exact same
+// prisma.$transaction([...]) array that creates the accompanying Tip/
+// PremiumPurchase/HelpContribution row (see creator/tip,
+// creator/premium-purchase, help/[id]/contribute). Two requests racing
+// to claim the same signature - even across two different payment
+// types - can therefore never both succeed: whichever transaction
+// commits first wins this row, and the loser's entire transaction,
+// including its own payment row, rolls back on the unique-constraint
+// conflict. This is the atomic guard; each route's own pre-check
+// against this table is only a fast path, not the actual protection.
+model ConsumedPaymentTransaction {
+  transactionId String @id
+
+  // "tip" | "premium_purchase" | "help_contribution" - which table
+  // actually holds the payment record, purely for diagnostics/audit.
+  paymentType String
+
+  // id of the Tip/PremiumPurchase/HelpContribution row this accompanies.
+  paymentId String
+
+  createdAt DateTime @default(now())
+}
+
 model WithdrawalRequest {
   id String @id @default(cuid())
 

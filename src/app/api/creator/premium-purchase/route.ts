@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 // ⚠️ SECURITY: getVerifiedToken is a drop-in for getToken() that overlays the
 // database's current role/isAdmin/plan/banned onto the decoded JWT and
 // returns null for a banned or deleted account - see src/lib/auth-guards.ts.
@@ -64,16 +65,18 @@ export async function POST(req: NextRequest) {
     }
 
     // ⚠️ SECURITY: a transaction signature must never be usable to credit
-    // more than one payment record - without this check, the same
-    // on-chain transfer could be replayed against both a tip and a
-    // premium purchase (or resubmitted after a failed request) to claim
-    // credit twice. The per-table @@unique on transactionId only stops
-    // reuse *within* the same table.
-    const [reusedAsPurchase, reusedAsTip] = await Promise.all([
-      prisma.premiumPurchase.findUnique({ where: { transactionId } }),
-      prisma.tip.findUnique({ where: { transactionId } }),
-    ]);
-    if (reusedAsPurchase || reusedAsTip) {
+    // more than one payment record - without this, the same on-chain
+    // transfer could be replayed against a tip, a HELP contribution, or
+    // another premium purchase (or resubmitted after a failed request)
+    // to claim credit twice. Checked against the single shared
+    // ConsumedPaymentTransaction table (see schema.prisma) rather than
+    // per-table, so reuse against a payment type this route doesn't
+    // otherwise know about is still caught. This is only the fast path;
+    // the actual, race-proof guard is claimed atomically below.
+    const existingClaim = await prisma.consumedPaymentTransaction.findUnique({
+      where: { transactionId },
+    });
+    if (existingClaim) {
       return NextResponse.json(
         { error: "This transaction has already been used for a payment." },
         { status: 400 }
@@ -143,16 +146,27 @@ export async function POST(req: NextRequest) {
     const charityAmount = platformFee.times(CHARITY_PERCENTAGE);
     const creatorAmount = premiumPost.price.minus(platformFee);
 
-    // Create the purchase record and credit the creator atomically - and
-    // let the DB's unique constraint on transactionId be the final,
-    // race-proof guard against double-spending the same signature (two
-    // concurrent requests could both pass the reuse check above before
-    // either has written its row).
+    // Create the purchase record and credit the creator atomically.
+    //
+    // ⚠️ SECURITY: claiming ConsumedPaymentTransaction is the FIRST
+    // statement, not an afterthought - its primary key on transactionId
+    // is the actual race-proof guard against double-spending the same
+    // signature, including across payment types (two concurrent requests
+    // - even to two different routes - could both pass the reuse check
+    // above before either has written its row; only one of them can win
+    // this insert). purchaseId is generated client-side so both rows can
+    // reference the same id without a second round trip.
+    const purchaseId = randomUUID();
+
     let purchase;
     try {
-      [purchase] = await prisma.$transaction([
+      [, purchase] = await prisma.$transaction([
+        prisma.consumedPaymentTransaction.create({
+          data: { transactionId, paymentType: "premium_purchase", paymentId: purchaseId },
+        }),
         prisma.premiumPurchase.create({
           data: {
+            id: purchaseId,
             premiumPostId,
             userId,
             amount: premiumPost.price,

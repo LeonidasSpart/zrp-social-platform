@@ -2,12 +2,12 @@ import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from "vites
 import { NextRequest } from "next/server";
 import { randomUUID } from "crypto";
 
-const { requireStaff, logAdminAction } = vi.hoisted(() => ({
-  requireStaff: vi.fn(),
+const { requireAdmin, logAdminAction } = vi.hoisted(() => ({
+  requireAdmin: vi.fn(),
   logAdminAction: vi.fn(),
 }));
 
-vi.mock("@/lib/admin", () => ({ requireStaff }));
+vi.mock("@/lib/admin", () => ({ requireAdmin }));
 vi.mock("@/lib/audit-log", () => ({ logAdminAction }));
 
 import { prisma } from "@/lib/db";
@@ -68,13 +68,16 @@ describe.skipIf(!hasRealDatabaseUrl)("DELETE /api/admin/reports/[id] (integratio
   });
 
   beforeEach(() => {
-    requireStaff.mockReset();
+    requireAdmin.mockReset();
     logAdminAction.mockReset();
     // Every test that reaches the handler's own logic is an authorized
-    // moderator by default; the two auth tests below override this.
-    requireStaff.mockResolvedValue({
+    // admin by default; the two auth tests below override this. (Which
+    // real role actually passes requireAdmin() - vs. a moderator who
+    // must not - is covered by authorization.integration.test.ts, which
+    // deliberately does not mock @/lib/admin.)
+    requireAdmin.mockResolvedValue({
       authorized: true,
-      session: { user: { id: "mod-1", username: "moderator" } },
+      session: { user: { id: "admin-1", username: "admin" } },
     });
   });
 
@@ -85,7 +88,7 @@ describe.skipIf(!hasRealDatabaseUrl)("DELETE /api/admin/reports/[id] (integratio
   });
 
   it("returns 401 when the caller is not authenticated", async () => {
-    requireStaff.mockResolvedValueOnce({
+    requireAdmin.mockResolvedValueOnce({
       authorized: false,
       response: new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 }) as any,
     });
@@ -99,8 +102,8 @@ describe.skipIf(!hasRealDatabaseUrl)("DELETE /api/admin/reports/[id] (integratio
     expect(await prisma.report.findUnique({ where: { id: report.id } })).not.toBeNull();
   });
 
-  it("returns 403 when the caller is authenticated but not staff (a normal user)", async () => {
-    requireStaff.mockResolvedValueOnce({
+  it("returns 403 when the caller is authenticated but not admin", async () => {
+    requireAdmin.mockResolvedValueOnce({
       authorized: false,
       response: new Response(JSON.stringify({ error: "Forbidden" }), { status: 403 }) as any,
     });
