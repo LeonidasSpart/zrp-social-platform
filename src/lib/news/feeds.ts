@@ -66,27 +66,27 @@ export interface FeedDefinition {
 }
 
 /*
- * Anti-flood defaults, sized for a continuous hourly wire.
+ * Anti-flood defaults: at most one post per category every six hours.
  *
- * ZRP News is expected to carry fresh content in every category in
- * every hourly window, so a feed has to be *allowed* to post once an
- * hour: at the previous 180-minute gap and 6-a-day cap, a category
- * could physically never exceed 6 articles a day no matter how much
- * real news existed, and an hourly target was arithmetically
- * impossible before a single story was even considered.
+ * The pipeline cycle itself still runs hourly (polling, classifying and
+ * writing summaries stays continuous, so a story is ready the moment a
+ * category's window opens) - this cap governs only how often a feed is
+ * actually *allowed* to publish. Explicit product decision, applied
+ * uniformly to every desk: the previous hourly cap made every category
+ * post up to 24 times a day, which was more than wanted.
  *
  * These are still ceilings, not quotas. Nothing posts because the
  * budget exists - a feed publishes only when there is a genuine,
  * fresh, deduplicated story that its own remit covers.
  */
-const HOURLY_GAP_MINUTES = 60;
-const HOURLY_DAILY_CAP = 24;
+const CATEGORY_GAP_MINUTES = 360;
+const CATEGORY_DAILY_CAP = 4; // 24h / 360min
 
 function definition(partial: Omit<FeedDefinition, "isPilot" | "minMinutesBetweenPosts" | "maxPostsPerDay"> & Partial<FeedDefinition>): FeedDefinition {
   return {
     isPilot: false,
-    minMinutesBetweenPosts: HOURLY_GAP_MINUTES,
-    maxPostsPerDay: HOURLY_DAILY_CAP,
+    minMinutesBetweenPosts: CATEGORY_GAP_MINUTES,
+    maxPostsPerDay: CATEGORY_DAILY_CAP,
     ...partial,
   };
 }
@@ -244,10 +244,6 @@ export function buildFeedRoster(): FeedDefinition[] {
         topics: desk.topics,
         // ZRP News World anchors the pilot.
         isPilot: desk.key === "world",
-        // The world desk sees the most candidate stories of any feed, so
-        // it keeps a higher ceiling than the single-topic desks; both are
-        // allowed to post at least once an hour.
-        maxPostsPerDay: desk.key === "world" ? 36 : HOURLY_DAILY_CAP,
       })
     );
   }
@@ -282,10 +278,10 @@ export function buildFeedRoster(): FeedDefinition[] {
         timezone: desk.timezone,
         topics: desk.topics,
         isPilot: desk.isPilot,
-        // Travel disruption is time-critical, so travel desks keep a
-        // shorter gap than the hourly default rather than a longer one.
-        minMinutesBetweenPosts: 30,
-        maxPostsPerDay: 36,
+        // Uniform six-hour cadence like every other desk (see
+        // CATEGORY_GAP_MINUTES): travel disruption used to justify a
+        // shorter gap here, but the product decision to cap every
+        // category at one post per six hours applies without exception.
       })
     );
   }
