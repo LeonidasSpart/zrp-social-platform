@@ -44,3 +44,12 @@ export async function register() {
     startHourlyNewsCycles();
   }
 }
+
+// Required by @sentry/nextjs so errors thrown in nested React Server
+// Components reach Sentry - without it those errors were silently
+// dropped instead of going through the scrubbing in sentry.server.config.ts
+// / sentry.edge.config.ts. See src/lib/sentry-scrub.ts.
+export async function onRequestError(...args: Parameters<typeof import("@sentry/nextjs").captureRequestError>) {
+  const Sentry = await import("@sentry/nextjs");
+  Sentry.captureRequestError(...args);
+}

@@ -117,14 +117,19 @@ const nextConfig = {
 };
 
 // ─── Wrap with Sentry configuration ──────────────────────────────
+// Source maps: only ever generated/uploaded when a real auth token is
+// present (CI release builds), and always deleted from the build output
+// after upload so a readable stack trace is never served publicly from
+// /_next/static - `sourcemaps.disable` skips map generation entirely for
+// any build (e.g. local `next build`) that doesn't set SENTRY_AUTH_TOKEN.
 module.exports = withSentryConfig(nextConfig, {
-  // Additional Sentry options (optional, these are defaults)
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
   silent: true, // Suppress logs
-  hideSourceMaps: false,
   widenClientFileUpload: true,
-  transpileClientSDK: true,
-  // If you want to upload source maps, set these environment variables:
-  // org: process.env.SENTRY_ORG,
-  // project: process.env.SENTRY_PROJECT,
-  // authToken: process.env.SENTRY_AUTH_TOKEN,
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+    deleteSourcemapsAfterUpload: true,
+  },
 });
