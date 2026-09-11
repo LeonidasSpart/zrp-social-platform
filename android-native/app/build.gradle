@@ -289,8 +289,21 @@ android {
         // activity/achievements/leaderboard sections that have no real
         // backing model yet. None of this changes applicationId, signing,
         // or deep links.
-        versionCode 18
-        versionName "4.0.13"
+        //
+        // Bumps to versionCode 19 / versionName "4.0.14" for the
+        // conversation-list "Delete conversation" fix: a real, permanent
+        // whole-1:1-conversation delete (DELETE
+        // /api/messages/conversation/[userId], already existed
+        // server-side) was reachable nowhere in this app before - no
+        // client code here ever called it. Adds the missing Retrofit
+        // endpoint, repository/ViewModel wiring (including the same
+        // realtime "delete-conversation" socket relay the website
+        // already uses), and an always-visible overflow button + confirm
+        // dialog on each direct conversation row in MessagesScreen.
+        // Matches the same feature just added to web/PWA/desktop. None
+        // of this changes applicationId, signing, or deep links.
+        versionCode 19
+        versionName "4.0.14"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
