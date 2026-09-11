@@ -164,6 +164,7 @@ import one.zrp.social.mobile.ui.settings.AppealsScreen
 import one.zrp.social.mobile.ui.settings.DeleteAccountScreen
 import one.zrp.social.mobile.ui.settings.LanguageSettingsScreen
 import one.zrp.social.mobile.ui.settings.NotificationSettingsScreen
+import one.zrp.social.mobile.ui.settings.PlanScreen
 import one.zrp.social.mobile.ui.settings.PrivacySettingsScreen
 import one.zrp.social.mobile.ui.settings.ProfileEditScreen
 import one.zrp.social.mobile.ui.settings.SecuritySettingsScreen
@@ -1201,6 +1202,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenPrivacy = goToSettingsPrivacy,
                     onOpenLanguage = goToSettingsLanguage,
                     onOpenNotifications = goToSettingsNotifications,
+                    onOpenPlan = { navController.navigate("settings/plan") },
                     onOpenCreator = goToCreator,
                     onOpenJournalist = goToJournalist,
                     onOpenTeam = goToTeam,
@@ -1223,6 +1225,9 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenFaq = goToFaq,
                     onOpenCommunityCode = goToCommunityCode,
                 )
+            }
+            composable("settings/plan") {
+                PlanScreen(currentPlan = currentUser?.plan, onBack = { navController.popBackStack() })
             }
             composable("settings/team") {
                 TeamScreen(onBack = { navController.popBackStack() })
