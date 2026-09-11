@@ -8,7 +8,13 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import PlayXpBar from "@/components/play/PlayXpBar";
 import AchievementBadge from "@/components/play/AchievementBadge";
-import { TYPE_LABEL_KEYS, type PlayAchievement, type PlayProfileStats, type PlayUserSummary } from "@/lib/play/types";
+import {
+  TYPE_LABEL_KEYS,
+  type PlayAchievement,
+  type PlayChallengeType,
+  type PlayProfileStats,
+  type PlayUserSummary,
+} from "@/lib/play/types";
 
 interface ProfileData {
   user: PlayUserSummary;
@@ -19,7 +25,7 @@ interface ProfileData {
     score: number;
     xpEarned: number;
     createdAt: string;
-    challenge: { id: string; type: "TRIVIA" | "MEMORY" | "LOGIC"; title: string; difficulty: string };
+    challenge: { id: string; type: PlayChallengeType; title: string; difficulty: string };
   }[];
 }
 

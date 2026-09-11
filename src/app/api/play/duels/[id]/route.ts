@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 // returns null for a banned or deleted account - see src/lib/auth-guards.ts.
 import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
+import { rateLimit } from "@/lib/rate-limit";
 import { createNotification } from "@/lib/notifications";
 import { stripAnswers } from "@/lib/play/scoring";
 
@@ -60,6 +61,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
 // ─── PUT: opponent accepts or declines an incoming duel invite ──────
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const limit = await rateLimit(req, { limit: 30, window: 3600, type: "play-duel-respond" });
+  if (!limit.success) return limit.response;
+
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

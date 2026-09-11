@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { BrainCircuit, LayoutGrid, Puzzle, Sparkles } from "lucide-react";
+import { BrainCircuit, LayoutGrid, Puzzle, Sparkles, Zap, ListOrdered } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
-import { DIFFICULTY_LABEL_KEYS, TYPE_LABEL_KEYS, type PlayChallengeSummary } from "@/lib/play/types";
+import { DIFFICULTY_LABEL_KEYS, TYPE_LABEL_KEYS, type PlayChallengeType, type PlayChallengeSummary } from "@/lib/play/types";
 
-const TYPE_ICON = {
+const TYPE_ICON: Record<PlayChallengeType, typeof BrainCircuit> = {
   TRIVIA: BrainCircuit,
   MEMORY: LayoutGrid,
   LOGIC: Puzzle,
-} as const;
+  REACTION: Zap,
+  SEQUENCE: ListOrdered,
+};
 
 interface ChallengeCardProps {
   challenge: PlayChallengeSummary;

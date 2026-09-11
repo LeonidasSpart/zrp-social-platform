@@ -1,6 +1,6 @@
 import type { TranslationKey } from "@/lib/translations";
 
-export type PlayChallengeType = "TRIVIA" | "MEMORY" | "LOGIC";
+export type PlayChallengeType = "TRIVIA" | "MEMORY" | "LOGIC" | "REACTION" | "SEQUENCE";
 export type PlayDuelStatus = "PENDING" | "ACCEPTED" | "DECLINED" | "COMPLETED" | "EXPIRED";
 
 export interface PlayUserSummary {
@@ -43,9 +43,15 @@ export interface LogicContent {
   correctIndex?: number;
   answer?: string;
 }
+export interface ReactionContent {
+  rounds: number;
+}
+export interface SequenceContent {
+  sequence: string[];
+}
 
 export interface PlayChallengeDetail extends PlayChallengeSummary {
-  content: TriviaContent | MemoryContent | LogicContent;
+  content: TriviaContent | MemoryContent | LogicContent | ReactionContent | SequenceContent;
   status?: string;
   alreadyPlayed?: boolean;
 }
@@ -115,6 +121,8 @@ export const TYPE_LABEL_KEYS: Record<PlayChallengeType, TranslationKey> = {
   TRIVIA: "play.typeTrivia",
   MEMORY: "play.typeMemory",
   LOGIC: "play.typeLogic",
+  REACTION: "play.typeReaction",
+  SEQUENCE: "play.typeSequence",
 };
 
 // Client-safe display metadata mirroring src/lib/play/achievements.ts

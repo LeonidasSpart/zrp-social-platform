@@ -9,6 +9,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import TriviaPlayer from "@/components/play/TriviaPlayer";
 import MemoryPlayer from "@/components/play/MemoryPlayer";
 import LogicPlayer from "@/components/play/LogicPlayer";
+import ReactionPlayer from "@/components/play/ReactionPlayer";
+import SequencePlayer from "@/components/play/SequencePlayer";
 import AchievementBadge from "@/components/play/AchievementBadge";
 import OpponentSearch from "@/components/play/OpponentSearch";
 import { TYPE_LABEL_KEYS, type PlayAchievement, type PlayChallengeDetail, type PlayUserSummary } from "@/lib/play/types";
@@ -205,6 +207,20 @@ export default function PlayChallengePage() {
               <LogicPlayer
                 content={challenge.content as any}
                 onSubmit={(answer, timeMs) => handleSubmit({ ...answer, timeMs })}
+                submitting={submitting}
+              />
+            )}
+            {challenge.type === "REACTION" && (
+              <ReactionPlayer
+                content={challenge.content as any}
+                onSubmit={(reactionResult, timeMs) => handleSubmit({ ...reactionResult, timeMs })}
+                submitting={submitting}
+              />
+            )}
+            {challenge.type === "SEQUENCE" && (
+              <SequencePlayer
+                content={challenge.content as any}
+                onSubmit={(sequenceResult, timeMs) => handleSubmit({ ...sequenceResult, timeMs })}
                 submitting={submitting}
               />
             )}
