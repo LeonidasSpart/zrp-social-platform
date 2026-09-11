@@ -9,7 +9,7 @@ import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { createNotification } from "@/lib/notifications";
-import { scoreTrivia, scoreMemory, scoreLogic } from "@/lib/play/scoring";
+import { getGame } from "@/lib/play/registry";
 import {
   ensurePlayProfile,
   awardXp,
@@ -27,7 +27,7 @@ function startOfDay(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }): Promise<NextResponse> {
   const limit = await rateLimit(req, { limit: 30, window: 60, type: "play-submit" });
   if (!limit.success) return limit.response;
 
@@ -50,18 +50,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     // ─── Score server-side against the real (unstripped) content ────
-    let scoreResult: { score: number; extra?: Record<string, unknown> };
+    // Dispatched through the game registry (src/lib/play/registry.ts) so
+    // adding a new PlayChallengeType never requires touching this route.
     const content = challenge.content as any;
-    if (challenge.type === "TRIVIA") {
-      const r = scoreTrivia(content, answers);
-      scoreResult = { score: r.score, extra: { correctCount: r.correctCount, total: r.total } };
-    } else if (challenge.type === "MEMORY") {
-      const r = scoreMemory(content, body);
-      scoreResult = { score: r.score };
-    } else {
-      const r = scoreLogic(content, body);
-      scoreResult = { score: r.score, extra: { isCorrect: r.isCorrect } };
-    }
+    const scoreResult = getGame(challenge.type).score(content, body);
     const score = scoreResult.score;
 
     // ─── Duel path: two players share one challenge, XP is awarded ──
@@ -161,7 +153,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const profile = await ensurePlayProfile(userId);
     const now = new Date();
 
-    let xpEarned = soloXp(score / challenge.maxScore, challenge.difficulty);
+    // Replaying a challenge is allowed (section 4 requires "replay
+    // capability"), but only the first solo completion of a given
+    // challenge earns base XP - otherwise a user could grind any single
+    // easy challenge indefinitely for unlimited XP. The daily/streak
+    // bonus below has its own separate once-per-day gate.
+    const alreadyCompletedThisChallenge = await prisma.playAttempt.findFirst({
+      where: { userId, challengeId, duelId: null },
+      select: { id: true },
+    });
+
+    let xpEarned = alreadyCompletedThisChallenge ? 0 : soloXp(score / challenge.maxScore, challenge.difficulty);
     let isFirstPlayToday = false;
     let newStreak = profile.currentStreak;
 

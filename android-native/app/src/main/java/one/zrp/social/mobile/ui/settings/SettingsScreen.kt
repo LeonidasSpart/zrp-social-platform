@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Policy
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material.icons.filled.RequestQuote
@@ -144,6 +145,7 @@ fun SettingsScreen(
     onOpenPress: () -> Unit,
     onOpenInvestors: () -> Unit,
     onOpenTransparency: () -> Unit,
+    onOpenAmbassadors: () -> Unit,
     onOpenFaq: () -> Unit,
     onOpenCommunityCode: () -> Unit,
     isStaff: Boolean = false,
@@ -195,6 +197,7 @@ fun SettingsScreen(
             SettingsRow(icon = Icons.Filled.Work, label = stringResource(R.string.legal_careers), onClick = onOpenCareers)
             SettingsRow(icon = Icons.Filled.VolunteerActivism, label = stringResource(R.string.legal_charity), onClick = onOpenCharity)
             SettingsRow(icon = Icons.Filled.BarChart, label = stringResource(R.string.transparency_title), onClick = onOpenTransparency)
+            SettingsRow(icon = Icons.Filled.Public, label = stringResource(R.string.ambassadors_nav_label), onClick = onOpenAmbassadors)
             SettingsRow(icon = Icons.Filled.Article, label = stringResource(R.string.legal_press), onClick = onOpenPress)
             SettingsRow(icon = Icons.Filled.RequestQuote, label = stringResource(R.string.legal_investors), onClick = onOpenInvestors)
 

@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 // returns null for a banned or deleted account - see src/lib/auth-guards.ts.
 import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
+import { rateLimit } from "@/lib/rate-limit";
 import { stripAnswers } from "@/lib/play/scoring";
 
 const CREATOR_SELECT = {
@@ -59,6 +60,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
 // ─── DELETE: creator removes their own challenge (soft delete) ──────
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const limit = await rateLimit(req, { limit: 20, window: 3600, type: "play-challenge-delete" });
+  if (!limit.success) return limit.response;
+
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

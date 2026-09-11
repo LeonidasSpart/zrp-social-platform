@@ -9,9 +9,9 @@ import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { generateChallengeContent } from "@/lib/play/ai-generate";
+import { AI_SUPPORTED_GAME_TYPES } from "@/lib/play/registry";
 import type { PlayChallengeType } from "@prisma/client";
 
-const TYPES = ["TRIVIA", "MEMORY", "LOGIC"] as const;
 const DAILY_AI_LIMIT = 10;
 
 function todayDateOnly() {
@@ -40,8 +40,8 @@ export async function POST(req: NextRequest) {
     if (!topic || typeof topic !== "string" || !topic.trim() || topic.trim().length > 200) {
       return NextResponse.json({ error: "A topic is required (max 200 characters)." }, { status: 400 });
     }
-    if (!type || !(TYPES as readonly string[]).includes(type)) {
-      return NextResponse.json({ error: "A valid challenge type is required." }, { status: 400 });
+    if (!type || !(AI_SUPPORTED_GAME_TYPES as readonly string[]).includes(type)) {
+      return NextResponse.json({ error: "AI generation isn't available for this challenge type." }, { status: 400 });
     }
     const cleanDifficulty = ["easy", "medium", "hard"].includes(difficulty) ? difficulty : "medium";
 

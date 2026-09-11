@@ -10,9 +10,8 @@ import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
 import { validateChallengeContent, stripAnswers } from "@/lib/play/scoring";
+import { ALL_GAME_TYPES } from "@/lib/play/registry";
 import { Prisma, PlayChallengeType } from "@prisma/client";
-
-const TYPES = ["TRIVIA", "MEMORY", "LOGIC"] as const;
 
 const CREATOR_SELECT = {
   id: true,
@@ -31,7 +30,7 @@ export async function GET(req: NextRequest) {
     const sort = req.nextUrl.searchParams.get("sort") || "trending";
 
     const where: Prisma.PlayChallengeWhereInput = { status: "ACTIVE" };
-    if (type && (TYPES as readonly string[]).includes(type)) {
+    if (type && (ALL_GAME_TYPES as readonly string[]).includes(type)) {
       where.type = type as PlayChallengeType;
     }
     if (creatorId) where.creatorId = creatorId;
@@ -87,7 +86,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { type, title, description, difficulty, content } = body;
 
-    if (!type || !(TYPES as readonly string[]).includes(type)) {
+    if (!type || !(ALL_GAME_TYPES as readonly string[]).includes(type)) {
       return NextResponse.json({ error: "A valid challenge type is required." }, { status: 400 });
     }
     if (!title || typeof title !== "string" || !title.trim() || title.trim().length > 120) {

@@ -61,6 +61,10 @@ import one.zrp.social.mobile.ui.admin.AdminSupportTicketsScreen
 import one.zrp.social.mobile.ui.admin.AdminUpgradeRequestsScreen
 import one.zrp.social.mobile.ui.admin.AdminUsersScreen
 import one.zrp.social.mobile.ui.admin.AdminWithdrawalsScreen
+import one.zrp.social.mobile.ui.ambassadors.AdminAmbassadorsScreen
+import one.zrp.social.mobile.ui.ambassadors.AmbassadorApplyScreen
+import one.zrp.social.mobile.ui.ambassadors.AmbassadorDashboardScreen
+import one.zrp.social.mobile.ui.ambassadors.AmbassadorsScreen
 import one.zrp.social.mobile.ui.charity.CharityLedgerSection
 import one.zrp.social.mobile.ui.transparency.TransparencyScreen
 import one.zrp.social.mobile.ui.legal.LegalScreen
@@ -249,6 +253,11 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     val goToDeleteAccount: () -> Unit = { navController.navigate("settings/delete-account") }
     val goToCreator: () -> Unit = { navController.navigate("creator") }
     val goToJournalist: () -> Unit = { navController.navigate("journalist") }
+    val goToAmbassadors: () -> Unit = { navController.navigate("ambassadors") }
+    val goToAmbassadorsApply: (String?) -> Unit = { country ->
+        navController.navigate(if (country != null) "ambassadors/apply?country=${Uri.encode(country)}" else "ambassadors/apply")
+    }
+    val goToAmbassadorsDashboard: () -> Unit = { navController.navigate("ambassadors/dashboard") }
     val goToTeam: () -> Unit = { navController.navigate("settings/team") }
     val goToApiKeys: () -> Unit = { navController.navigate("settings/api-keys") }
     val goToNewArticle: () -> Unit = { navController.navigate("journalist/new") }
@@ -267,6 +276,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     val goToAdminOpportunity: () -> Unit = { navController.navigate("admin/opportunity") }
     val goToAdminHelp: () -> Unit = { navController.navigate("admin/help") }
     val goToAdminJournalists: () -> Unit = { navController.navigate("admin/journalists") }
+    val goToAdminAmbassadors: () -> Unit = { navController.navigate("admin/ambassadors") }
     val goToAdminMusicArtists: () -> Unit = { navController.navigate("admin/music-artists") }
     val goToAdminNews: () -> Unit = { navController.navigate("admin/news") }
     val goToAdminSupport: () -> Unit = { navController.navigate("admin/support") }
@@ -1114,6 +1124,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenPress = goToPress,
                     onOpenInvestors = goToInvestors,
                     onOpenTransparency = goToTransparency,
+                    onOpenAmbassadors = goToAmbassadors,
                     onOpenFaq = goToFaq,
                     onOpenCommunityCode = goToCommunityCode,
                 )
@@ -1226,6 +1237,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenJournalists = goToAdminJournalists,
                     onOpenMusicArtists = goToAdminMusicArtists,
                     onOpenNews = goToAdminNews,
+                    onOpenAmbassadors = goToAdminAmbassadors,
                     // The support tools and the three financial queues
                     // are the admin sections the website itself gates
                     // on the real ADMIN role instead of staff (every
@@ -1276,6 +1288,31 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
             }
             composable("admin/journalists") {
                 AdminJournalistsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("admin/ambassadors") {
+                AdminAmbassadorsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("ambassadors") {
+                AmbassadorsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenApply = goToAmbassadorsApply,
+                    onOpenDashboard = goToAmbassadorsDashboard,
+                )
+            }
+            composable(
+                route = "ambassadors/apply?country={country}",
+                arguments = listOf(navArgument("country") { type = NavType.StringType; nullable = true; defaultValue = null }),
+            ) { backStackEntry ->
+                AmbassadorApplyScreen(
+                    onBack = { navController.popBackStack() },
+                    initialCountryCode = backStackEntry.arguments?.getString("country"),
+                )
+            }
+            composable("ambassadors/dashboard") {
+                AmbassadorDashboardScreen(
+                    onBack = { navController.popBackStack() },
+                    onApply = { goToAmbassadorsApply(null) },
+                )
             }
             composable("admin/music-artists") {
                 AdminMusicArtistsScreen(onBack = { navController.popBackStack() })

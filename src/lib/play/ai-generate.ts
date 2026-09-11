@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import type { PlayChallengeType } from "@prisma/client";
 import { validateChallengeContent } from "./scoring";
+import { getGame } from "./registry";
 
 // Same lazy-init pattern as src/app/api/ai/chat/route.ts (ZRP AI): the
 // client must not be constructed at build time, only per-request, so a
@@ -18,12 +19,6 @@ interface GeneratedChallenge {
   content: unknown;
 }
 
-const TYPE_INSTRUCTIONS: Record<PlayChallengeType, string> = {
-  TRIVIA: `Return JSON: {"title": string, "description": string, "content": {"questions": [{"q": string, "options": string[2..4], "correctIndex": number}]}}. Generate exactly 5 questions.`,
-  MEMORY: `Return JSON: {"title": string, "description": string, "content": {"pairs": string[6]}}. Each pair value is a short word or emoji-friendly term related to the topic, all unique.`,
-  LOGIC: `Return JSON: {"title": string, "description": string, "content": {"prompt": string, "options": string[2..4], "correctIndex": number}}. Write one riddle or logic puzzle related to the topic with a single clear correct answer.`,
-};
-
 // Generates a complete, ready-to-play challenge from a short topic
 // description. Throws on any failure (missing key, malformed model
 // output, failed validation) rather than returning a partial/silent
@@ -34,9 +29,14 @@ export async function generateChallengeContent(
   type: PlayChallengeType,
   difficulty: string
 ): Promise<GeneratedChallenge> {
+  const game = getGame(type);
+  if (!game.aiGenerationSupported || !game.aiInstructions) {
+    throw new Error("AI generation isn't available for this challenge type.");
+  }
+
   const deepseek = getDeepSeek();
 
-  const systemPrompt = `You are a game content generator for ZRP PLAY, a social entertainment hub. Generate a fun, family-friendly ${type.toLowerCase()} challenge at ${difficulty} difficulty about the given topic. ${TYPE_INSTRUCTIONS[type]} Respond with ONLY the JSON object, no other text. Never include real people's private information, hate speech, or explicit content.`;
+  const systemPrompt = `You are a game content generator for ZRP PLAY, a social entertainment hub. Generate a fun, family-friendly ${type.toLowerCase()} challenge at ${difficulty} difficulty about the given topic. ${game.aiInstructions} Respond with ONLY the JSON object, no other text. Never include real people's private information, hate speech, or explicit content.`;
 
   const response = await deepseek.chat.completions.create({
     model: "deepseek-v4-flash",
