@@ -302,8 +302,16 @@ android {
         // dialog on each direct conversation row in MessagesScreen.
         // Matches the same feature just added to web/PWA/desktop. None
         // of this changes applicationId, signing, or deep links.
-        versionCode 19
-        versionName "4.0.14"
+        //
+        // Bumps to versionCode 20 / versionName "4.0.15": versionCode 19
+        // was independently produced by two different PRs merged into
+        // main in quick succession (this one and the earlier native
+        // redesign PR), and Play Console rejected a second upload
+        // attempt at versionCode 19 ("Le code de version 19 a déjà été
+        // utilisé") since it had already accepted one AAB carrying that
+        // versionCode. No feature change here - version numbers only.
+        versionCode 20
+        versionName "4.0.15"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
