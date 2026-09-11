@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { requireStaff } from "@/lib/admin";
+import { requireStaff, requireAdmin } from "@/lib/admin";
 import { logAdminAction } from "@/lib/audit-log";
 export async function PUT(
   req: NextRequest,
@@ -115,7 +115,14 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const adminCheck = await requireStaff();
+  // ⚠️ SECURITY: this used to call requireStaff(), which - per
+  // isModeratorState() in auth-state.ts - also passes any MODERATOR, not
+  // just ADMIN. Deleting a report is a destructive, unrecoverable action
+  // against the moderation record (unlike PUT above, which only changes
+  // status and is intentionally staff-accessible), so it is gated to
+  // admin-only. Same authoritative database-backed check every other
+  // admin-only route uses - no parallel role logic.
+  const adminCheck = await requireAdmin();
   if (!adminCheck.authorized) return adminCheck.response;
 
   if (!id) {

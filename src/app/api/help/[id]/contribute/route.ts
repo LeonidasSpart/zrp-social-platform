@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 // ⚠️ SECURITY: getVerifiedToken is a drop-in for getToken() that overlays the
 // database's current role/isAdmin/plan/banned onto the decoded JWT and
 // returns null for a banned or deleted account - see src/lib/auth-guards.ts.
@@ -66,14 +67,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     // Dedup: a signature may only ever credit one payment record across
-    // the whole system - same guard as tip/premium-purchase, extended
-    // to also cover HelpContribution.
-    const [existingContribution, existingTip, existingPurchase] = await Promise.all([
-      prisma.helpContribution.findUnique({ where: { transactionId } }),
-      prisma.tip.findUnique({ where: { transactionId } }),
-      prisma.premiumPurchase.findUnique({ where: { transactionId } }),
-    ]);
-    if (existingContribution || existingTip || existingPurchase) {
+    // the whole system. Checked against the single shared
+    // ConsumedPaymentTransaction table (see schema.prisma) - same guard
+    // tip and premium-purchase now use - rather than per-table, so this
+    // stays correct if a future payment type is added without this route
+    // needing to know about it. This is only the fast path; the actual,
+    // race-proof guard is claimed atomically below.
+    const existingClaim = await prisma.consumedPaymentTransaction.findUnique({
+      where: { transactionId },
+    });
+    if (existingClaim) {
       return NextResponse.json({ error: "Transaction already processed." }, { status: 409 });
     }
 
@@ -122,11 +125,22 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Failed to verify transaction: " + errorMessage }, { status: 400 });
     }
 
+    // ⚠️ SECURITY: claiming ConsumedPaymentTransaction is the FIRST
+    // statement, not an afterthought - see tip/route.ts and
+    // premium-purchase/route.ts for the full reasoning. contributionId
+    // is generated client-side so both rows can share it without a
+    // second round trip.
+    const contributionId = randomUUID();
+
     let contribution;
     try {
-      [contribution] = await prisma.$transaction([
+      [, contribution] = await prisma.$transaction([
+        prisma.consumedPaymentTransaction.create({
+          data: { transactionId, paymentType: "help_contribution", paymentId: contributionId },
+        }),
         prisma.helpContribution.create({
           data: {
+            id: contributionId,
             campaignId,
             contributorId,
             amount: numericAmount,

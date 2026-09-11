@@ -16,9 +16,12 @@ import path from "path";
  * vitest runs with environment: "node" (see vitest.config.ts), so
  * there is no DOM to mount into; these assert on the source, matching
  * the pattern in admin-navigation-regressions.test.ts. The actual
- * delete/auth/appeal-protection behaviour is covered by the real-
+ * delete/appeal-protection/audit-log behaviour is covered by the real-
  * Postgres integration test alongside the route itself
- * (src/app/api/admin/reports/[id]/__tests__/route.integration.test.ts).
+ * (src/app/api/admin/reports/[id]/__tests__/route.integration.test.ts);
+ * the real authorization boundary - which actual roles pass or fail
+ * requireAdmin(), not a mocked stand-in for it - is covered by
+ * src/app/api/admin/reports/[id]/__tests__/authorization.integration.test.ts.
  */
 
 const read = (p: string) => fs.readFileSync(path.join(process.cwd(), p), "utf8");
@@ -75,14 +78,23 @@ describe("Admin > Reports has a delete action for processed reports", () => {
 describe("Admin > Reports DELETE route", () => {
   const code = stripComments(read(ROUTE));
 
-  it("exists and is gated the same way GET/PUT on this route already are", () => {
+  // ⚠️ SECURITY: this originally asserted requireStaff() here, on the
+  // reasoning that DELETE shouldn't invent a stricter check than PUT
+  // (staff-gated, reversible status changes) on the same route file.
+  // That reasoning does not hold for DELETE specifically: unlike PUT,
+  // deleting a report is permanent and unrecoverable, and a moderator
+  // - not just an admin - could previously erase a processed report
+  // (and its moderation-transparency trail) outright with no way back.
+  // Confirmed and fixed - see the ⚠️ SECURITY comment in route.ts and
+  // authorization.integration.test.ts, which exercises the real
+  // requireStaff()/requireAdmin() role-check chain against real user
+  // rows (this file only asserts on source text, not behavior) and
+  // proves a moderator is refused while an admin is allowed.
+  it("exists and is admin-gated - a stricter check than the read/update endpoints on this same route, deliberately, because deletion is permanent", () => {
     expect(code).toMatch(/export async function DELETE/);
-    // requireStaff, not requireAdmin - Reports is already staff-gated
-    // (GET/PUT above use it too); DELETE must not invent a stricter or
-    // looser check than the rest of this same file.
     const delIdx = code.indexOf("export async function DELETE");
     const delFn = code.slice(delIdx);
-    expect(delFn).toContain("await requireStaff()");
+    expect(delFn).toContain("await requireAdmin()");
     expect(delFn).toMatch(/if\s*\(!adminCheck\.authorized\)\s*return adminCheck\.response/);
   });
 
