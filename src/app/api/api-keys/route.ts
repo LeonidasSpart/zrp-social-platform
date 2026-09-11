@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 // database's current role/isAdmin/plan/banned onto the decoded JWT and
 // returns null for a banned or deleted account - see src/lib/auth-guards.ts.
 import { getVerifiedToken as getToken } from "@/lib/auth-guards";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { canAccessApi } from "@/lib/permissions";
 import { apiKeyExpiryFor } from "@/lib/api-auth";
@@ -19,6 +20,43 @@ function generateApiKey(): { plain: string; hash: string } {
 // long-lived credentials - cap how many a single account can hold at
 // once (revoked keys don't count against this).
 const MAX_ACTIVE_KEYS_PER_USER = 10;
+const MAX_KEYS_MESSAGE = `You can have at most ${MAX_ACTIVE_KEYS_PER_USER} active API keys. Revoke one before creating another.`;
+
+class MaxActiveKeysError extends Error {}
+
+// ⚠️ SECURITY: count-then-create was a check-then-act race - two
+// concurrent POSTs could both read a count under the limit and both
+// insert, letting an account exceed MAX_ACTIVE_KEYS_PER_USER. Serializable
+// isolation makes Postgres detect that write skew and abort one of the
+// two transactions (surfaced by Prisma as P2034) instead of letting both
+// commit; the caller retries once, which is enough for two genuinely
+// concurrent requests to resolve into "one succeeds, one sees the real,
+// now-current count and is correctly rejected."
+async function createApiKeyAtomic(
+  userId: string,
+  name: string,
+  expiresAt: Date | null
+) {
+  return prisma.$transaction(
+    async (tx) => {
+      const activeKeyCount = await tx.apiKey.count({
+        where: { userId, revoked: false },
+      });
+      if (activeKeyCount >= MAX_ACTIVE_KEYS_PER_USER) {
+        throw new MaxActiveKeysError();
+      }
+
+      const { plain, hash } = generateApiKey();
+      const apiKey = await tx.apiKey.create({
+        data: { userId, name, keyHash: hash, expiresAt },
+        select: { id: true, name: true, expiresAt: true, createdAt: true },
+      });
+
+      return { apiKey, plain };
+    },
+    { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+  );
+}
 
 // ─── GET: List all API keys for the user ──────────────────────────
 export async function GET(req: NextRequest) {
@@ -96,16 +134,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const activeKeyCount = await prisma.apiKey.count({
-      where: { userId, revoked: false },
-    });
-    if (activeKeyCount >= MAX_ACTIVE_KEYS_PER_USER) {
-      return NextResponse.json(
-        { error: `You can have at most ${MAX_ACTIVE_KEYS_PER_USER} active API keys. Revoke one before creating another.` },
-        { status: 400 }
-      );
-    }
-
     // ⚠️ SECURITY: every key gets an expiry. The comment here always said
     // "default: 365 days", but the code only set one when the client
     // asked for it - a request that omitted expiresInDays produced a key
@@ -116,27 +144,47 @@ export async function POST(req: NextRequest) {
     // touched by this (see api-auth.ts for how existing keys are read).
     const expiresAt = apiKeyExpiryFor(expiresInDays);
 
-    const { plain, hash } = generateApiKey();
+    // P2034: Postgres detected a serialization conflict against another
+    // concurrent request to the same account. Each retry re-reads the
+    // real, now-current count, so a handful of attempts is enough for
+    // even a burst of concurrent requests to converge on the correct
+    // outcome (some succeed up to the cap, the rest are correctly
+    // rejected) instead of surfacing as a 500.
+    const MAX_SERIALIZATION_RETRIES = 5;
+    let result: Awaited<ReturnType<typeof createApiKeyAtomic>> | undefined;
+    for (let attempt = 0; attempt <= MAX_SERIALIZATION_RETRIES; attempt++) {
+      try {
+        result = await createApiKeyAtomic(userId, name.trim(), expiresAt);
+        break;
+      } catch (err) {
+        if (err instanceof MaxActiveKeysError) {
+          return NextResponse.json({ error: MAX_KEYS_MESSAGE }, { status: 400 });
+        }
+        const isSerializationConflict =
+          err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2034";
+        if (!isSerializationConflict || attempt === MAX_SERIALIZATION_RETRIES) {
+          if (isSerializationConflict) {
+            return NextResponse.json(
+              { error: "Too many concurrent requests. Please try again." },
+              { status: 409 }
+            );
+          }
+          throw err;
+        }
+      }
+    }
 
-    const apiKey = await prisma.apiKey.create({
-      data: {
-        userId,
-        name: name.trim(),
-        keyHash: hash,
-        expiresAt,
-      },
-      select: {
-        id: true,
-        name: true,
-        expiresAt: true,
-        createdAt: true,
-      },
-    });
+    if (!result) {
+      // Unreachable: every loop exit path above either sets `result` and
+      // breaks, or returns/throws. Guards TypeScript's narrowing and any
+      // future refactor of the loop above.
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
 
     // Return the plain key (only once!)
     return NextResponse.json({
-      key: apiKey,
-      plainKey: plain, // <-- this is the actual token
+      key: result.apiKey,
+      plainKey: result.plain, // <-- this is the actual token
       warning: "Store this key securely. It will not be shown again.",
     });
   } catch (error) {

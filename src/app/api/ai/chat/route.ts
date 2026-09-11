@@ -9,14 +9,18 @@ import {
   releaseAiMessage,
   reserveAiMessage,
 } from "@/lib/ai-quota";
+import { BodyTooLargeError, readJsonWithLimit } from "@/lib/read-json-with-limit";
 import OpenAI from "openai";
 
 // ⚠️ SECURITY: abuse limits that were missing entirely. A message is
 // forwarded verbatim into the model's context (billed per token), so
-// its length is capped; the whole JSON body is capped before parsing
-// so a multi-megabyte payload is rejected without being buffered; and
-// a per-IP limit sits alongside the per-user daily quota so a burst
-// from one address can't exhaust many accounts' quotas at once.
+// its length is capped; the whole JSON body is capped so a multi-
+// megabyte payload is rejected without being buffered - enforced on
+// the actual bytes read from the stream (readJsonWithLimit), not on
+// the client-supplied Content-Length header, which a chunked-encoded
+// request can omit or lie about entirely; and a per-IP limit sits
+// alongside the per-user daily quota so a burst from one address can't
+// exhaust many accounts' quotas at once.
 const MAX_MESSAGE_CHARS = 4000;
 const MAX_BODY_BYTES = 64 * 1024;
 const AI_IP_RATE_LIMIT = { limit: 30, window: 60, type: "ai-chat" };
@@ -62,16 +66,22 @@ export async function POST(req: NextRequest) {
       return ipLimit.response!;
     }
 
-    const declaredLength = parseInt(req.headers.get("content-length") || "0", 10);
-    if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+    let body: any;
+    try {
+      body = await readJsonWithLimit(req, MAX_BODY_BYTES);
+    } catch (err) {
+      if (err instanceof BodyTooLargeError) {
+        return NextResponse.json(
+          { error: "Request too large" },
+          { status: 413 }
+        );
+      }
       return NextResponse.json(
-        { error: "Request too large" },
-        { status: 413 }
+        { error: "Invalid request body" },
+        { status: 400 }
       );
     }
-
-    const body = await req.json();
-    const { message, conversationId, stream = true } = body;
+    const { message, conversationId, stream = true } = body || {};
 
     if (typeof message !== "string" || !message.trim()) {
       return NextResponse.json(
