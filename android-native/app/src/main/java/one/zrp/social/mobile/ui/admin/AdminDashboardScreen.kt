@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.filled.Upgrade
@@ -100,6 +101,7 @@ fun AdminDashboardScreen(
     onOpenJournalists: () -> Unit,
     onOpenMusicArtists: () -> Unit,
     onOpenNews: () -> Unit,
+    onOpenAmbassadors: () -> Unit,
     isAdmin: Boolean,
     onOpenSupport: () -> Unit,
     onOpenAnalytics: () -> Unit,
@@ -266,6 +268,13 @@ fun AdminDashboardScreen(
                 OutlinedButton(onClick = onOpenNews, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
                     Icon(Icons.Filled.Newspaper, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
                     Text(stringResource(R.string.admin_dash_manage_news))
+                }
+                // Ambassador review is requireStaff too (see
+                // src/app/api/admin/ambassadors/[id]/route.ts's own
+                // comment), so it sits with the staff-wide actions.
+                OutlinedButton(onClick = onOpenAmbassadors, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
+                    Icon(Icons.Filled.Public, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
+                    Text(stringResource(R.string.admin_dash_manage_ambassadors))
                 }
                 if (isAdmin) {
                     OutlinedButton(onClick = onOpenSupport, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
