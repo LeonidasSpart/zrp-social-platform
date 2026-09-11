@@ -60,6 +60,30 @@ export async function GET(req: NextRequest) {
     ]);
   }
 
+  // ⚠️ CREDENTIAL LIFETIME (verified against Metered's own API reference,
+  // https://www.metered.ca/docs/, "TURN Server Service" section - not
+  // guessed): this is Metered's "Get TURN Credential" endpoint. It only
+  // returns the ICE servers array for a credential that already exists;
+  // it does not create, expire, or rotate anything itself, and it takes
+  // no expiry parameter of its own. Whether the underlying username/
+  // password pair ever expires is decided entirely by whether
+  // `expiryInSeconds` was set on Metered's separate Create Credential
+  // call - and this codebase never calls Create Credential (grep for
+  // "secretKey"/"turn/credential" finds nothing outside this file). That
+  // call was made once, manually, via the Metered dashboard, to produce
+  // the METERED_API_KEY this route holds - so there is no code-level
+  // default to report: the actual expiry, if any, is a fact that lives
+  // only in the Metered dashboard for that one credential, invisible to
+  // this code. Metered's own docs recommend never relying on a single
+  // non-expiring credential in production - "Expiring Credentials" (set
+  // expiryInSeconds at creation) plus "Rotating Credentials" (48h
+  // lifetime, rotated every 24h via a scheduled back-end job). ZRP
+  // implements neither today. Adding that is real TURN/WebRTC
+  // architecture (a secretKey, a scheduled job, dashboard-side credential
+  // management) - deliberately not done here; it needs an explicit,
+  // separate task. Verifying whether the current credential already has
+  // an expiry only needs a dashboard lookup (TURN Server page, or `GET
+  // /api/v2/turn/credentials?secretKey=...`), not a code change.
   try {
     const res = await fetch(
       `https://${appName}.metered.live/api/v1/turn/credentials?apiKey=${apiKey}`
