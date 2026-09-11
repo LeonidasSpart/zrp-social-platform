@@ -144,6 +144,7 @@
 "footer.privacyPolicy" = "Política de privacidad";
 "footer.helpCenter" = "Centro de ayuda";
 "help.footer.guidelines" = "Normas de la Comunidad";
+"communityCode.navLabel" = "Código de Comunidad y Liderazgo";
 "nav.marketplace" = "Marketplace";
 "nav.settings" = "Configuración";
 "nav.signOut" = "Cerrar sesión";

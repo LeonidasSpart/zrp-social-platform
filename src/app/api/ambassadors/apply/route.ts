@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { validateApplication } from "@/lib/ambassadors/validation";
+import { CURRENT_CODE_OF_CONDUCT_VERSION } from "@/lib/ambassadors/codeOfConduct";
 
 /**
  * POST /api/ambassadors/apply
@@ -59,6 +60,11 @@ export async function POST(request: NextRequest) {
       motivation: result.value.motivation,
       communityDescription: result.value.communityDescription,
       audienceSize: result.value.audienceSize,
+      // Stamped server-side, at the moment of this request, from the
+      // validated codeOfConductAccepted flag - never taken from a
+      // client-supplied version/timestamp.
+      codeOfConductVersion: CURRENT_CODE_OF_CONDUCT_VERSION,
+      codeOfConductAcceptedAt: new Date(),
     };
 
     const profile = existing

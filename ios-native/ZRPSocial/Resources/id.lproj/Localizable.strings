@@ -144,6 +144,7 @@
 "footer.privacyPolicy" = "Kebijakan Privasi";
 "footer.helpCenter" = "Pusat Bantuan";
 "help.footer.guidelines" = "Pedoman Komunitas";
+"communityCode.navLabel" = "Kode Etik Komunitas & Kepemimpinan";
 "nav.marketplace" = "Marketplace";
 "nav.settings" = "Pengaturan";
 "nav.signOut" = "Keluar";

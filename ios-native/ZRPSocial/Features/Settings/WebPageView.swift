@@ -4,15 +4,16 @@ import UIKit
 
 /// A ZRP page that exists only on the web, opened inside the app.
 ///
-/// Terms of Service, the Privacy Policy, the Community Guidelines, About
-/// and the Help Center are long-form text that is already written,
-/// already reviewed, and already translated into all eleven languages on
-/// zrp.one. A native reimplementation would be a second copy that drifts
-/// the next time Legal changes a paragraph - which is a compliance risk
-/// a Terms or Privacy page specifically cannot carry. Android reached the
-/// same conclusion and loads the same live pages.
+/// Terms of Service, the Privacy Policy, the Community Guidelines, About,
+/// the Help Center and the Community & Leadership Code are long-form text
+/// that is already written, already reviewed, and already translated into
+/// all eleven languages on zrp.one. A native reimplementation would be a
+/// second copy that drifts the next time Legal changes a paragraph -
+/// which is a compliance risk a Terms or Privacy page specifically cannot
+/// carry. Android reached the same conclusion and loads the same live
+/// pages.
 ///
-/// All five are public, so nothing here needs the session: `SFSafariViewController`
+/// All six are public, so nothing here needs the session: `SFSafariViewController`
 /// has its own cookie store and never sees the app's.
 enum WebPage: String, Hashable, Identifiable, CaseIterable {
     case terms
@@ -20,6 +21,7 @@ enum WebPage: String, Hashable, Identifiable, CaseIterable {
     case guidelines
     case about
     case help
+    case communityCode = "community-code"
 
     var id: String { rawValue }
 
@@ -30,6 +32,7 @@ enum WebPage: String, Hashable, Identifiable, CaseIterable {
         case .guidelines: return .helpFooterGuidelines
         case .about: return .navAboutZrp
         case .help: return .footerHelpCenter
+        case .communityCode: return .communityCodeNavLabel
         }
     }
 
@@ -40,6 +43,7 @@ enum WebPage: String, Hashable, Identifiable, CaseIterable {
         case .guidelines: return "person.3"
         case .about: return "info.circle"
         case .help: return "questionmark.circle"
+        case .communityCode: return "checkmark.shield"
         }
     }
 

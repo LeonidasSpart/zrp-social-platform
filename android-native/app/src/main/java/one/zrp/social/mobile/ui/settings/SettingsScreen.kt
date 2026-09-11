@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material.icons.filled.RequestQuote
@@ -144,6 +145,7 @@ fun SettingsScreen(
     onOpenInvestors: () -> Unit,
     onOpenTransparency: () -> Unit,
     onOpenFaq: () -> Unit,
+    onOpenCommunityCode: () -> Unit,
     isStaff: Boolean = false,
     onOpenAdmin: () -> Unit = {},
 ) {
@@ -205,6 +207,7 @@ fun SettingsScreen(
             SettingsRow(icon = Icons.Filled.Gavel, label = stringResource(R.string.legal_terms), onClick = onOpenTerms)
             SettingsRow(icon = Icons.Filled.PrivacyTip, label = stringResource(R.string.legal_privacy), onClick = onOpenPrivacyPolicy)
             SettingsRow(icon = Icons.Filled.Groups, label = stringResource(R.string.legal_guidelines), onClick = onOpenGuidelines)
+            SettingsRow(icon = Icons.Filled.Policy, label = stringResource(R.string.legal_community_code), onClick = onOpenCommunityCode)
 
             if (isStaff) {
                 SettingsRow(icon = Icons.Filled.AdminPanelSettings, label = stringResource(R.string.admin_nav_label), onClick = onOpenAdmin)

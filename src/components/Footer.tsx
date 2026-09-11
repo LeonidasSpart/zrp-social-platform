@@ -56,6 +56,7 @@ export default function Footer() {
     { href: "/privacy", label: t("footer.privacyPolicy") },
     { href: "/terms", label: t("footer.termsOfService") },
     { href: "/guidelines", label: t("help.footer.guidelines") },
+    { href: "/community-code", label: t("communityCode.navLabel") },
   ];
 
   return (

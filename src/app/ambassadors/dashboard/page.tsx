@@ -7,6 +7,7 @@ import { Check, Clock, Copy, Globe2, Loader2, MapPin, ShieldAlert, XCircle } fro
 import { useLanguage } from "@/contexts/LanguageContext";
 import { flagEmoji, getCountryName } from "@/lib/ambassadors/countries";
 import type { TranslationKey } from "@/lib/translations";
+import { isCodeOfConductCurrent } from "@/lib/ambassadors/codeOfConduct";
 
 interface AmbassadorProfile {
   status: "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED";
@@ -17,6 +18,7 @@ interface AmbassadorProfile {
   rejectionReason: string | null;
   suspensionReason: string | null;
   appliedAt: string;
+  codeOfConductVersion: string | null;
 }
 
 const LEVEL_LABEL: Record<AmbassadorProfile["level"], TranslationKey> = {
@@ -45,6 +47,7 @@ export default function AmbassadorDashboardPage() {
   const { data: session, status } = useSession();
   const [profile, setProfile] = useState<AmbassadorProfile | null | undefined>(undefined);
   const [copied, setCopied] = useState(false);
+  const [acceptingCode, setAcceptingCode] = useState(false);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -75,6 +78,19 @@ export default function AmbassadorDashboardPage() {
     } catch {
       // Clipboard access can be denied by the browser - the link text
       // itself is still visible and selectable, so nothing is lost.
+    }
+  };
+
+  const acceptCurrentCode = async () => {
+    setAcceptingCode(true);
+    try {
+      const res = await fetch("/api/ambassadors/accept-code", { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setProfile(data.profile);
+      }
+    } finally {
+      setAcceptingCode(false);
     }
   };
 
@@ -121,6 +137,32 @@ export default function AmbassadorDashboardPage() {
 
     content = (
       <div className="space-y-5">
+        {!isCodeOfConductCurrent(profile.codeOfConductVersion) && (
+          <StatusBanner
+            icon={ShieldAlert}
+            tone="pending"
+            title={t("ambassadors.dashboard.codeUpdatedTitle")}
+            body={t("ambassadors.dashboard.codeUpdatedBody")}
+          >
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <Link
+                href="/community-code#b-ambassador-code"
+                target="_blank"
+                className="text-xs font-semibold underline underline-offset-2"
+              >
+                {t("communityCode.b.title")}
+              </Link>
+              <button
+                type="button"
+                onClick={acceptCurrentCode}
+                disabled={acceptingCode}
+                className="inline-flex items-center justify-center rounded-full bg-zrp-red px-4 py-2 text-xs font-semibold text-white transition hover:bg-zrp-darkRed disabled:opacity-60"
+              >
+                {acceptingCode ? t("ambassadors.dashboard.codeAccepting") : t("ambassadors.dashboard.codeReviewCta")}
+              </button>
+            </div>
+          </StatusBanner>
+        )}
         {profile.status === "PENDING" && (
           <StatusBanner
             icon={Clock}

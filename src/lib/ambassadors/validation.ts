@@ -56,6 +56,12 @@ export function validateApplication(body: unknown): ValidationResult {
   }
   const b = body as Record<string, unknown>;
 
+  // Server-side gate on the Ambassador Code of Conduct checkbox - the
+  // form's own checkbox state is never trusted as the only enforcement.
+  if (b.codeOfConductAccepted !== true) {
+    return { ok: false, error: "You must accept the Ambassador Code of Conduct to apply." };
+  }
+
   const countryCode = typeof b.countryCode === "string" ? b.countryCode.trim().toUpperCase() : "";
   if (!isValidCountryCode(countryCode)) {
     return { ok: false, error: "Select a valid country." };
