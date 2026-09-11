@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { getSocket } from "@/lib/socket-client";
 import {
   Send,
@@ -100,6 +101,7 @@ export default function ChatInterface({
   onVideoCall,
 }: ChatInterfaceProps) {
   const { data: session } = useSession();
+  const router = useRouter();
   const { refreshUnreadMessageCount } = useUnreadCount();
   const { t, language } = useLanguage();
 
@@ -766,6 +768,23 @@ export default function ChatInterface({
     const timer = setTimeout(() => setDeleteError(null), 4000);
     return () => clearTimeout(timer);
   }, [deleteError]);
+
+  // ---------------------------------------------------------------------------
+  // Delete whole conversation
+  // ---------------------------------------------------------------------------
+
+  // ChatContactDrawer already performed the actual DELETE
+  // (server-authoritative) before calling this - this only handles what's
+  // local to this open thread: telling the other party in realtime (their
+  // own conversation list drops the row via the "conversation-deleted"
+  // relay - see useConversationList.ts), clearing this view's own message
+  // state, and navigating away, since there is nothing left here to show.
+  const handleConversationDeleted = () => {
+    setShowContactInfo(false);
+    setMessages([]);
+    socketRef.current?.emit("delete-conversation", { otherUserId: receiverId });
+    router.push("/messages");
+  };
 
   // ---------------------------------------------------------------------------
   // Edit message
@@ -1796,6 +1815,7 @@ export default function ChatInterface({
 
       {showContactInfo && (
         <ChatContactDrawer
+          receiverId={receiverId}
           receiverUsername={
             receiverUsername
           }
@@ -1812,6 +1832,9 @@ export default function ChatInterface({
           }
           onVoiceCall={onVoiceCall}
           onVideoCall={onVideoCall}
+          onConversationDeleted={
+            handleConversationDeleted
+          }
         />
       )}
 

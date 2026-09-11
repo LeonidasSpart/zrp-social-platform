@@ -13,6 +13,7 @@ const {
   authorizeEditRelay,
   authorizeReactionRelay,
   authorizeDeleteRelay,
+  authorizeConversationDeleteRelay,
   createCallRegistry,
 } = require("./socket-authz");
 const { runLegacyPasswordMigrationAtStartup } = require("./legacy-passwords");
@@ -382,6 +383,18 @@ app.prepare().then(() => {
         io.to(relay.targetId).emit("message-deleted", { messageId: relay.messageId });
       } catch (err) {
         console.error("delete-message relay error:", err);
+      }
+    });
+
+    socket.on("delete-conversation", async (payload) => {
+      if (!payload || typeof payload !== "object") return;
+      if (!checkEventRateLimit(userId, "delete-conversation", 10, 300_000)) return;
+      try {
+        const relay = await authorizeConversationDeleteRelay(prisma, userId, payload);
+        if (!relay.ok) return;
+        io.to(relay.targetId).emit("conversation-deleted", { withUserId: userId });
+      } catch (err) {
+        console.error("delete-conversation relay error:", err);
       }
     });
 

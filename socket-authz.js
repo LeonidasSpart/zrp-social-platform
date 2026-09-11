@@ -232,6 +232,32 @@ async function authorizeDeleteRelay(prisma, userId, payload) {
 }
 
 /**
+ * delete-conversation: unlike authorizeDeleteRelay above, this fires
+ * AFTER the whole 1:1 conversation's messages are already gone (the
+ * REST route already ran the real DELETE and returned success) - so
+ * there is no "did we ever exchange messages" fact left in the
+ * database to check against. The only real verification left is that
+ * `otherUserId` names an actual user and isn't the caller themselves,
+ * which stops this event being used to make an arbitrary/garbage id
+ * "conversation-deleted" pop someone's sidebar for no reason. This is
+ * a UI-only signal (the receiving client just drops a row from its
+ * conversation list; a stale/duplicate one is harmless and
+ * self-corrects on that list's own next real fetch), not a
+ * authorization boundary for the deletion itself - that boundary is
+ * the REST route's own session + ownership check.
+ */
+async function authorizeConversationDeleteRelay(prisma, userId, payload) {
+  const otherUserId = payload && payload.otherUserId;
+  if (!isNonEmptyString(otherUserId)) return { ok: false };
+  if (otherUserId === userId) return { ok: false };
+
+  const user = await prisma.user.findUnique({ where: { id: otherUserId }, select: { id: true } });
+  if (!user) return { ok: false };
+
+  return { ok: true, targetId: otherUserId };
+}
+
+/**
  * Call signaling registry. accept-call / reject-call / end-call used to
  * be relayed to any `callerId` the client named, so a user could emit
  * "call-accepted" (with an arbitrary WebRTC signal) or "call-ended" to
@@ -325,5 +351,6 @@ module.exports = {
   authorizeEditRelay,
   authorizeReactionRelay,
   authorizeDeleteRelay,
+  authorizeConversationDeleteRelay,
   createCallRegistry,
 };
