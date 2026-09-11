@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { subscription } = await req.json();
+    const { subscription, previousEndpoint } = await req.json();
 
     // Upsert subscription
     await prisma.pushSubscription.upsert({
@@ -25,6 +25,24 @@ export async function POST(req: NextRequest) {
         userId: session.user.id,
       },
     });
+
+    // The client resubscribed because the VAPID public key changed, so
+    // the endpoint it replaced can never receive another notification -
+    // every send to it would fail with a 403 that the delivery loop does
+    // not prune (it only prunes 404/410). Delete that one row.
+    //
+    // Scoped to this user's own subscriptions and to an endpoint the
+    // caller has just demonstrably replaced, so it cannot be used to
+    // remove anyone else's.
+    if (
+      typeof previousEndpoint === "string" &&
+      previousEndpoint &&
+      previousEndpoint !== subscription.endpoint
+    ) {
+      await prisma.pushSubscription.deleteMany({
+        where: { endpoint: previousEndpoint, userId: session.user.id },
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
