@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
+
 export default function GlobalError({
   error,
   reset,
@@ -7,6 +10,15 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  // This top-level boundary isn't covered by Next.js's request-lifecycle
+  // hooks that Sentry normally auto-instruments, so it has to report
+  // itself - without this, a root render crash never reached Sentry at all.
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
+  const showDebugDetail = process.env.NODE_ENV !== "production";
+
   return (
     <html>
       <body>
@@ -18,19 +30,26 @@ export default function GlobalError({
             We're sorry, an unexpected error occurred.
           </p>
 
-          {/* ─── TEMPORARY: show the real error for debugging ─── */}
-          <div className="mb-4 max-w-2xl w-full text-left bg-red-50 border border-red-200 rounded-lg p-4 text-xs text-red-800 overflow-auto">
-            <p className="font-bold mb-1">Error message:</p>
-            <p className="mb-3 whitespace-pre-wrap break-words">{error?.message || "No message"}</p>
-            {error?.digest && (
-              <>
-                <p className="font-bold mb-1">Digest:</p>
-                <p className="mb-3">{error.digest}</p>
-              </>
-            )}
-            <p className="font-bold mb-1">Stack:</p>
-            <pre className="whitespace-pre-wrap break-words text-[10px]">{error?.stack || "No stack"}</pre>
-          </div>
+          {/* Full error/stack is dev-only - in production it can contain
+              internal details (file paths, DB error text) that shouldn't
+              be shown to end users; the digest is enough to look it up. */}
+          {showDebugDetail && (
+            <div className="mb-4 max-w-2xl w-full text-left bg-red-50 border border-red-200 rounded-lg p-4 text-xs text-red-800 overflow-auto">
+              <p className="font-bold mb-1">Error message:</p>
+              <p className="mb-3 whitespace-pre-wrap break-words">{error?.message || "No message"}</p>
+              {error?.digest && (
+                <>
+                  <p className="font-bold mb-1">Digest:</p>
+                  <p className="mb-3">{error.digest}</p>
+                </>
+              )}
+              <p className="font-bold mb-1">Stack:</p>
+              <pre className="whitespace-pre-wrap break-words text-[10px]">{error?.stack || "No stack"}</pre>
+            </div>
+          )}
+          {!showDebugDetail && error?.digest && (
+            <p className="mb-4 text-xs text-gray-400">Error reference: {error.digest}</p>
+          )}
 
           <button
             onClick={reset}
