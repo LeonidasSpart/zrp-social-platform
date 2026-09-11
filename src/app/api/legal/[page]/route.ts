@@ -53,7 +53,7 @@ function isLegalPageId(value: string): value is LegalPageId {
  */
 export async function GET(req: NextRequest, props: { params: Promise<{ page: string }> }) {
   const limit = await rateLimit(req, { limit: 60, window: 60, type: "legal-content-get" });
-  if (!limit.success) return limit.response!;
+  if (!limit.success) return limit.response;
 
   const { page } = await props.params;
 
