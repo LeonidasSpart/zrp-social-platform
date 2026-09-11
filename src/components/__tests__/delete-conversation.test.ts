@@ -133,6 +133,124 @@ describe("useConversationList - realtime removal on the other party's side", () 
   });
 });
 
+describe("useConversationList - deleteConversation (list-level delete, no thread open)", () => {
+  const src = stripComments(
+    fs.readFileSync(path.join(root, "src/lib/useConversationList.ts"), "utf8")
+  );
+
+  const fnSrc = (() => {
+    const start = src.indexOf("const deleteConversation = useCallback(");
+    expect(start).toBeGreaterThan(-1);
+    const end = src.indexOf("\n  );", start);
+    expect(end).toBeGreaterThan(start);
+    return src.slice(start, end);
+  })();
+
+  it("calls the same authoritative DELETE conversation API ChatContactDrawer uses", () => {
+    expect(fnSrc).toContain("/api/messages/conversation/${partnerId}");
+    expect(fnSrc).toContain('method: "DELETE"');
+  });
+
+  it("only relays over the socket and updates local state after the API call succeeds", () => {
+    expect(fnSrc).toMatch(/if \(res\.ok\) \{[\s\S]*"delete-conversation"[\s\S]*setConversations/);
+  });
+
+  it("relays the same delete-conversation socket event ChatInterface emits", () => {
+    expect(fnSrc).toContain('.emit("delete-conversation", { otherUserId: partnerId })');
+  });
+
+  it("returns a success/error result instead of throwing, so the UI can show a real error", () => {
+    expect(fnSrc).toContain("return { success: true }");
+    expect(fnSrc).toContain("return { success: false");
+  });
+
+  it("is exposed from the hook for both messages/page.tsx and messages/layout.tsx to use", () => {
+    expect(src).toMatch(/return \{ conversations, loading, refresh, deleteConversation \}/);
+  });
+});
+
+describe("ConversationRowMenu - conversation-list delete action", () => {
+  const src = stripComments(
+    fs.readFileSync(path.join(root, "src/components/ConversationRowMenu.tsx"), "utf8")
+  );
+
+  it("never calls window.confirm()/alert() to gate or report the deletion", () => {
+    expect(src).not.toMatch(/[^a-zA-Z.]confirm\(/);
+    expect(src).not.toMatch(/[^a-zA-Z.]alert\(/);
+  });
+
+  it("imports and renders the in-app ConfirmModal, not a native dialog", () => {
+    expect(src).toContain('import ConfirmModal from "@/components/ConfirmModal"');
+    expect(src).toContain("<ConfirmModal");
+  });
+
+  it("opens the modal first (does not delete directly) from the menu item", () => {
+    const buttonStart = src.indexOf("setConfirming(true)");
+    const buttonBlockEnd = src.indexOf("</button>", buttonStart);
+    const buttonSrc = src.slice(buttonStart - 200, buttonBlockEnd);
+    expect(buttonSrc).not.toContain("onDelete(");
+  });
+
+  it("only calls onDelete from the confirm handler, invoked by the modal", () => {
+    expect(src).toMatch(/const handleConfirm = async \(\) => \{[\s\S]*await onDelete\(\)/);
+    expect(src).toContain("onConfirm={handleConfirm}");
+  });
+
+  it("uses the pre-existing, already-translated messages.* keys (not chat.* - that's the in-thread menu)", () => {
+    expect(src).toContain('t("messages.deleteConversation")');
+    expect(src).toContain('t("messages.deleteConfirm")');
+    expect(src).toContain('t("messages.errDeleteFailed")');
+  });
+
+  it("stops the click from bubbling into the row's own Link (would otherwise navigate into the thread)", () => {
+    expect(src).toMatch(/onClick=\{\(event\) => \{\s*event\.preventDefault\(\);\s*event\.stopPropagation\(\);/);
+  });
+
+  it("gives the icon-only trigger button a translated accessible label", () => {
+    expect(src).toMatch(/<button[\s\S]{0,120}aria-label=\{t\(/);
+  });
+
+  it("shows delete errors as in-app UI, not a native alert, and auto-clears them", () => {
+    expect(src).toContain("setError(");
+    expect(src).toMatch(/role="alert"[\s\S]{0,40}aria-live="polite"/);
+    expect(src).toMatch(/window\.setTimeout\(\(\) => setError\(null\), 4000\)/);
+  });
+
+  it("disables the modal's actions while the delete request is in flight", () => {
+    expect(src).toMatch(/busy=\{busy\}/);
+  });
+});
+
+describe("messages list screens - conversation-list delete is wired for direct conversations only", () => {
+  const pageSrc = stripComments(fs.readFileSync(path.join(root, "src/app/messages/page.tsx"), "utf8"));
+  const layoutSrc = stripComments(fs.readFileSync(path.join(root, "src/app/messages/layout.tsx"), "utf8"));
+
+  for (const [name, src] of [
+    ["messages/page.tsx (mobile list)", pageSrc],
+    ["messages/layout.tsx (desktop sidebar)", layoutSrc],
+  ] as const) {
+    it(`${name} renders ConversationRowMenu for a direct row, wired to deleteConversation`, () => {
+      expect(src).toContain('import ConversationRowMenu from "@/components/ConversationRowMenu"');
+      expect(src).toContain("<ConversationRowMenu");
+      expect(src).toMatch(/onDelete=\{\(\) => deleteConversation\(partner\.id\)\}/);
+    });
+
+    it(`${name} does not offer conversation deletion on a GROUP row (no such backend feature - see IMPORTANT DISTINCTION)`, () => {
+      const menuIdx = src.indexOf("<ConversationRowMenu");
+      // Every group row renders its member-count chip via group.memberCount
+      // (buildMessagePreview's "fromSender" branch, or the plain fallback) -
+      // present only in the group-row JSX, after the direct-row branch ends.
+      const groupSectionIdx = src.indexOf('t("group.memberCount"');
+      expect(menuIdx).toBeGreaterThan(-1);
+      expect(groupSectionIdx).toBeGreaterThan(-1);
+      // The one ConversationRowMenu usage appears before the group-row
+      // section starts, i.e. only inside the direct-row branch.
+      expect(menuIdx).toBeLessThan(groupSectionIdx);
+      expect(src.indexOf("<ConversationRowMenu", menuIdx + 1)).toBe(-1);
+    });
+  }
+});
+
 describe("socket-authz - authorizeConversationDeleteRelay", () => {
   const src = stripComments(fs.readFileSync(path.join(root, "socket-authz.js"), "utf8"));
 

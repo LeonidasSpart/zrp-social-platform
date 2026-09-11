@@ -223,6 +223,9 @@
     <string name="messages_unnamed_group">Groupe sans nom</string>
     <string name="messages_group_no_messages_yet">Aucun message pour l\'instant</string>
     <string name="messages_group_member_count">%1$d membres</string>
+    <string name="messages_delete_conversation">Supprimer la conversation</string>
+    <string name="messages_delete_conversation_confirm">Supprimer cette conversation ? Tous les messages seront supprimés.</string>
+    <string name="messages_err_delete_conversation">Échec de la suppression de la conversation</string>
     <string name="messages_select_conversation">Sélectionnez une conversation</string>
     <string name="group_create_title">Nouveau groupe</string>
     <string name="group_create_action">Créer</string>

@@ -56,6 +56,41 @@ export function useConversationList() {
     }
   }, [status, refresh]);
 
+  /**
+   * Delete a whole 1:1 conversation directly from the list, without
+   * opening it first - the same real, permanent DELETE
+   * /api/messages/conversation/{partnerId} ChatContactDrawer already
+   * calls from inside an open thread (see its own KDoc: this hard-deletes
+   * every message in both directions and cleans up attachments, it does
+   * not just hide the row). On success this also emits the same
+   * "delete-conversation" socket relay ChatInterface's
+   * handleConversationDeleted emits, so every other open tab/session -
+   * including this user's own other sessions, per server.js's relay -
+   * drops the row live instead of only this one updating.
+   */
+  const deleteConversation = useCallback(
+    async (partnerId: string): Promise<{ success: boolean; error?: string }> => {
+      try {
+        const res = await fetch(`/api/messages/conversation/${partnerId}`, { method: "DELETE" });
+        if (res.ok) {
+          if (session?.user?.id) {
+            getSocket(session.user.id).emit("delete-conversation", { otherUserId: partnerId });
+          }
+          setConversations((prev) =>
+            prev.filter((c) => !(c.type === "direct" && c.partner.id === partnerId))
+          );
+          return { success: true };
+        }
+        const err = await res.json().catch(() => null);
+        return { success: false, error: err?.error };
+      } catch (error) {
+        console.error("Error deleting conversation:", error);
+        return { success: false };
+      }
+    },
+    [session?.user?.id]
+  );
+
   // Real-time: a new incoming/sent 1:1 or group message, or an unblock
   // that deleted a stale 1:1 conversation, all just trigger a real
   // re-fetch rather than trying to hand-patch the merged+sorted list in
@@ -88,5 +123,5 @@ export function useConversationList() {
     };
   }, [status, session?.user?.id, refresh]);
 
-  return { conversations, loading, refresh };
+  return { conversations, loading, refresh, deleteConversation };
 }

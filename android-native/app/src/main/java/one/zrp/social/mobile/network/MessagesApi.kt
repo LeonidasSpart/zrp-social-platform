@@ -80,6 +80,15 @@ data class SocketMessagePreview(
 // minimal shape below.
 data class SocketMessageEditedPayload(val message: ChatMessage)
 data class SocketMessageDeletedPayload(val messageId: String)
+
+// The "conversation-deleted" relay server.js sends to both parties of a
+// deleted 1:1 conversation (see its own delete-conversation handler KDoc)
+// - withUserId is whichever side this client wasn't, i.e. the partner
+// whose row should now disappear from the list. Received here so a
+// conversation deleted from another client (web, or this same account's
+// other device) also drops off this screen's list live, not just after
+// the next full refresh.
+data class SocketConversationDeletedPayload(val withUserId: String)
 data class SocketMessageReadPayload(val messageId: String)
 data class SocketReactionUpdatedPayload(val messageId: String, val reactions: List<MessageReaction>)
 data class SocketTypingPayload(val userId: String, val isTyping: Boolean)
@@ -269,6 +278,16 @@ interface MessagesApi {
     // for me only" concept in this schema; it deletes the one shared row.
     @DELETE("messages/delete/{id}")
     suspend fun deleteMessage(@Path("id") messageId: String)
+
+    // The real, permanent whole-conversation delete
+    // (src/app/api/messages/conversation/[userId]/route.ts) - the same
+    // endpoint the website's ChatContactDrawer already calls. This is a
+    // genuine hard delete: every message between the two users in both
+    // directions, server-side, plus their attachments' UploadThing
+    // cleanup - not a per-device hide. Before this, no client in this app
+    // ever called it; only deleteMessage() (one message) existed here.
+    @DELETE("messages/conversation/{userId}")
+    suspend fun deleteConversation(@Path("userId") userId: String)
 
     // Sender-only, server-side (src/app/api/messages/edit/[id]/route.ts).
     // Sets edited=true, unlike post/comment edits which have no such flag.

@@ -14,6 +14,7 @@ import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.ConversationSummary
 import one.zrp.social.mobile.network.GroupConversationSummary
+import one.zrp.social.mobile.network.SocketConversationDeletedPayload
 import one.zrp.social.mobile.network.SocketUserStatusPayload
 import one.zrp.social.mobile.network.ZrpSocket
 import org.json.JSONObject
@@ -54,6 +55,20 @@ fun mergeConversations(direct: List<ConversationSummary>, group: List<GroupConve
         group.map { ConversationListItem.Group(it) }
     return items.sortedByDescending { it.sortTimestamp }
 }
+
+/**
+ * Drops the direct conversation with [partnerId] from [items], leaving
+ * every group row and every other direct row untouched - the one filter
+ * rule shared by both places a conversation can disappear from this
+ * screen's list: a successful delete from this device (deleteConversation
+ * below) and the "conversation-deleted" relay for one deleted elsewhere
+ * (MessagesViewModel.connectSocket). A pure function, like
+ * mergeConversations above, so this rule has a direct JUnit test rather
+ * than only being exercised through the ViewModel's socket/repository
+ * plumbing.
+ */
+fun conversationsAfterDirectDelete(items: List<ConversationListItem>, partnerId: String): List<ConversationListItem> =
+    items.filterNot { it is ConversationListItem.Direct && it.summary.partner.id == partnerId }
 
 data class MessagesUiState(
     val items: List<ConversationListItem> = emptyList(),
@@ -106,14 +121,57 @@ class MessagesViewModel(private val repository: MessagesRepository) : ViewModel(
             } ?: return@Listener
             _state.update { it.copy(presence = it.presence + (payload.userId to (payload.status == "online"))) }
         })
+
+        // A conversation deleted elsewhere (the web app, or this same
+        // account open on another device) - see server.js's own
+        // "delete-conversation" relay, which reaches both parties' rooms
+        // plus every other session of the deleting user. Without this,
+        // this screen would keep showing a row for a conversation that
+        // no longer exists server-side until the next full refresh.
+        liveSocket.on("conversation-deleted", Emitter.Listener { args ->
+            val json = args.getOrNull(0) as? JSONObject ?: return@Listener
+            val payload = try {
+                gson.fromJson(json.toString(), SocketConversationDeletedPayload::class.java)
+            } catch (e: Exception) {
+                null
+            } ?: return@Listener
+            removeDirectConversation(payload.withUserId)
+        })
     }
 
     override fun onCleared() {
         socket?.let { liveSocket ->
             liveSocket.off("user-status")
+            liveSocket.off("conversation-deleted")
             liveSocket.disconnect()
         }
         socket = null
+    }
+
+    private fun removeDirectConversation(partnerId: String) {
+        _state.update { current -> current.copy(items = conversationsAfterDirectDelete(current.items, partnerId)) }
+    }
+
+    /**
+     * Deletes the whole 1:1 conversation with [partnerId] - the real,
+     * permanent server-side delete (see MessagesRepository's own KDoc),
+     * not a local-only hide. On success the row is removed immediately
+     * and the same "delete-conversation" socket relay the website emits
+     * is sent too, so the other party's own list (and this account's
+     * other open sessions) update live rather than only on their next
+     * refresh. On failure the row is left exactly as it was and the
+     * caller is handed the real error to show - this never pretends a
+     * failed delete succeeded.
+     */
+    fun deleteConversation(partnerId: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            val result = repository.deleteConversation(partnerId)
+            if (result.isSuccess) {
+                removeDirectConversation(partnerId)
+                socket?.emit("delete-conversation", JSONObject().put("otherUserId", partnerId))
+            }
+            onResult(result)
+        }
     }
 
     // One real "get-status" round trip per 1:1 partner, the first time

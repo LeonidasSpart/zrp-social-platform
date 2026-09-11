@@ -223,6 +223,9 @@
     <string name="messages_unnamed_group">Adsız grup</string>
     <string name="messages_group_no_messages_yet">Henüz mesaj yok</string>
     <string name="messages_group_member_count">%1$d üye</string>
+    <string name="messages_delete_conversation">Sohbeti sil</string>
+    <string name="messages_delete_conversation_confirm">Bu sohbet silinsin mi? Tüm mesajlar kaldırılacaktır.</string>
+    <string name="messages_err_delete_conversation">Sohbet silinemedi</string>
     <string name="messages_select_conversation">Bir görüşme seçin</string>
     <string name="group_create_title">Yeni grup</string>
     <string name="group_create_action">Oluştur</string>
