@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -1771,7 +1772,7 @@ private fun ZrpBottomBar(
                                     .size(TouchTarget.comfortable)
                                     .scale(iconScale),
                             ) {
-                                Box(contentAlignment = Alignment.Center) {
+                                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                                     Icon(
                                         imageVector = destination.selectedIcon,
                                         contentDescription = stringResource(destination.labelRes),
