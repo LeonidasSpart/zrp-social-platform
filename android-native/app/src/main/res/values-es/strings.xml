@@ -211,6 +211,8 @@
     <string name="plan_limit_video">Videos: hasta %1$d MB</string>
     <string name="plan_limit_scheduled">Publicaciones programadas: %1$s al mes</string>
     <string name="plan_current_badge">Plan actual</string>
+    <string name="communities_screen_note">Temas reales y activos en ZRP ahora mismo - toca uno para ver la conversación.</string>
+    <string name="communities_view_action">Ver</string>
     <string name="nav_messages">Mensajes</string>
     <string name="nav_notifications">Notificaciones</string>
     <string name="settings_notif_mentions">Menciones</string>

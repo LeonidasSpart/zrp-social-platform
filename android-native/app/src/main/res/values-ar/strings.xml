@@ -211,6 +211,8 @@
     <string name="plan_limit_video">الفيديوهات: حتى %1$d ميجابايت</string>
     <string name="plan_limit_scheduled">المنشورات المجدولة: %1$s شهرياً</string>
     <string name="plan_current_badge">الخطة الحالية</string>
+    <string name="communities_screen_note">مواضيع حقيقية ونشطة على ZRP الآن - اضغط على أي منها لرؤية المحادثة.</string>
+    <string name="communities_view_action">عرض</string>
     <string name="nav_messages">الرسائل</string>
     <string name="nav_notifications">الإشعارات</string>
     <string name="settings_notif_mentions">الإشارات</string>

@@ -87,6 +87,7 @@ import one.zrp.social.mobile.ui.transparency.TransparencyScreen
 import one.zrp.social.mobile.ui.legal.LegalScreen
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
+import one.zrp.social.mobile.ui.communities.CommunitiesScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
 import one.zrp.social.mobile.ui.followlist.FollowListMode
 import one.zrp.social.mobile.ui.followlist.FollowListScreen
@@ -259,6 +260,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     // "See all" destinations for Search's Discover state - the real
     // website's own /explore/trending and /explore/people pages.
     val goToTrending: () -> Unit = { navController.navigate("explore/trending") }
+    val goToCommunities: () -> Unit = { navController.navigate("communities") }
     val goToExplorePeople: () -> Unit = { navController.navigate("explore/people") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -434,7 +436,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     goExplore = { goToOwnTab(ZrpDestination.Search) },
                     goNotifications = goToNotificationsTab,
                     goMessages = { goToOwnTab(ZrpDestination.Messages) },
-                    goCommunities = goToTrending,
+                    goCommunities = goToCommunities,
                     goPlay = goToPlay,
                     goNews = goToNews,
                     goShorts = goToShorts,
@@ -530,6 +532,12 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
             }
             composable("explore/trending") {
                 ExploreTrendingScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenHashtag = goToHashtag,
+                )
+            }
+            composable("communities") {
+                CommunitiesScreen(
                     onBack = { navController.popBackStack() },
                     onOpenHashtag = goToHashtag,
                 )

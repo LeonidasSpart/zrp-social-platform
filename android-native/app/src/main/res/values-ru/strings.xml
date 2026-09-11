@@ -211,6 +211,8 @@
     <string name="plan_limit_video">Видео: до %1$d МБ</string>
     <string name="plan_limit_scheduled">Отложенные посты: %1$s в месяц</string>
     <string name="plan_current_badge">Текущий тариф</string>
+    <string name="communities_screen_note">Реальные, активные темы в ZRP прямо сейчас - нажмите на любую, чтобы увидеть обсуждение.</string>
+    <string name="communities_view_action">Смотреть</string>
     <string name="nav_messages">Сообщения</string>
     <string name="nav_notifications">Уведомления</string>
     <string name="settings_notif_mentions">Упоминания</string>

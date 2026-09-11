@@ -211,6 +211,8 @@
     <string name="plan_limit_video">视频上传：最高 %1$d MB</string>
     <string name="plan_limit_scheduled">定时发布：每月 %1$s 条</string>
     <string name="plan_current_badge">当前套餐</string>
+    <string name="communities_screen_note">ZRP 上此刻真实、活跃的话题 - 点击任意一个查看对话。</string>
+    <string name="communities_view_action">查看</string>
     <string name="nav_messages">私信</string>
     <string name="nav_notifications">通知</string>
     <string name="settings_notif_mentions">提及</string>

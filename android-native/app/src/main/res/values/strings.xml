@@ -223,6 +223,8 @@
     <string name="plan_limit_video">Video uploads: up to %1$d MB</string>
     <string name="plan_limit_scheduled">Scheduled posts: %1$s per month</string>
     <string name="plan_current_badge">Current plan</string>
+    <string name="communities_screen_note">Real, active topics on ZRP right now - tap any one to see the conversation.</string>
+    <string name="communities_view_action">View</string>
     <string name="nav_messages">Messages</string>
     <string name="nav_notifications">Notifications</string>
     <string name="settings_notif_mentions">Mentions</string>

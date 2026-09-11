@@ -211,6 +211,8 @@
     <string name="plan_limit_video">Video: deri në %1$d MB</string>
     <string name="plan_limit_scheduled">Postime të planifikuara: %1$s në muaj</string>
     <string name="plan_current_badge">Plani aktual</string>
+    <string name="communities_screen_note">Tema reale dhe aktive në ZRP tani - prek një për të parë bisedën.</string>
+    <string name="communities_view_action">Shiko</string>
     <string name="nav_messages">Mesazhet</string>
     <string name="nav_notifications">Njoftimet</string>
     <string name="settings_notif_mentions">Përmendjet</string>

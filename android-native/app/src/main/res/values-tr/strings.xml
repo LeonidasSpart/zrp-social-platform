@@ -211,6 +211,8 @@
     <string name="plan_limit_video">Video yüklemeleri: %1$d MB\'a kadar</string>
     <string name="plan_limit_scheduled">Zamanlanmış gönderiler: ayda %1$s</string>
     <string name="plan_current_badge">Mevcut plan</string>
+    <string name="communities_screen_note">ZRP\'de şu anda gerçek ve aktif konular - konuşmayı görmek için birine dokun.</string>
+    <string name="communities_view_action">Görüntüle</string>
     <string name="nav_messages">Mesajlar</string>
     <string name="nav_notifications">Bildirimler</string>
     <string name="settings_notif_mentions">Bahsetmeler</string>

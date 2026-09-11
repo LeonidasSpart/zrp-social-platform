@@ -190,7 +190,7 @@
     <string name="nav_creator_studio">Studio Créateur</string>
     <string name="nav_admin">Admin</string>
     <string name="nav_shorts">Shorts</string>
-    <string name="nav_help_center">Centre d'aide</string>
+    <string name="nav_help_center">Centre d\'aide</string>
     <string name="drawer_section_core">Essentiel</string>
     <string name="drawer_section_discover">Découvrir</string>
     <string name="drawer_section_services">Services</string>
@@ -211,6 +211,8 @@
     <string name="plan_limit_video">Vidéos : jusqu\'à %1$d Mo</string>
     <string name="plan_limit_scheduled">Publications programmées : %1$s par mois</string>
     <string name="plan_current_badge">Forfait actuel</string>
+    <string name="communities_screen_note">Des sujets réels et actifs sur ZRP en ce moment - touchez-en un pour voir la conversation.</string>
+    <string name="communities_view_action">Voir</string>
     <string name="nav_messages">Messages</string>
     <string name="nav_notifications">Notifications</string>
     <string name="settings_notif_mentions">Mentions</string>
@@ -566,9 +568,9 @@
     <string name="auth_sign_up">S\'inscrire</string>
     <string name="auth_tagline_line1">Personnes · Idées · Liberté</string>
     <string name="auth_tagline_line2">Un avenir plus lumineux</string>
-    <string name="auth_continue_with_email">Continuer avec l'e-mail</string>
+    <string name="auth_continue_with_email">Continuer avec l\'e-mail</string>
     <string name="auth_footer_privacy">Politique de confidentialité</string>
-    <string name="auth_footer_terms">Conditions d'utilisation</string>
+    <string name="auth_footer_terms">Conditions d\'utilisation</string>
     <string name="auth_forgot_password">Mot de passe oublié ?</string>
     <string name="forgot_password_subtitle">Réinitialisez votre mot de passe</string>
     <string name="forgot_password_success_default">Consultez votre e-mail pour les instructions de réinitialisation</string>

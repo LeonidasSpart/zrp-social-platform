@@ -211,6 +211,8 @@
     <string name="plan_limit_video">Unggahan video: hingga %1$d MB</string>
     <string name="plan_limit_scheduled">Postingan terjadwal: %1$s per bulan</string>
     <string name="plan_current_badge">Paket saat ini</string>
+    <string name="communities_screen_note">Topik nyata dan aktif di ZRP saat ini - ketuk salah satu untuk melihat percakapannya.</string>
+    <string name="communities_view_action">Lihat</string>
     <string name="nav_messages">Pesan</string>
     <string name="nav_notifications">Notifikasi</string>
     <string name="settings_notif_mentions">Sebutan</string>

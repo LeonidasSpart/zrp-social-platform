@@ -211,6 +211,8 @@
     <string name="plan_limit_video">Video: fino a %1$d MB</string>
     <string name="plan_limit_scheduled">Post programmati: %1$s al mese</string>
     <string name="plan_current_badge">Piano attuale</string>
+    <string name="communities_screen_note">Argomenti reali e attivi su ZRP in questo momento - tocca uno per vedere la conversazione.</string>
+    <string name="communities_view_action">Visualizza</string>
     <string name="nav_messages">Messaggi</string>
     <string name="nav_notifications">Notifiche</string>
     <string name="settings_notif_mentions">Menzioni</string>
@@ -566,7 +568,7 @@
     <string name="auth_sign_up">Registrati</string>
     <string name="auth_tagline_line1">Persone · Idee · Libertà</string>
     <string name="auth_tagline_line2">Un domani più luminoso</string>
-    <string name="auth_continue_with_email">Continua con l'email</string>
+    <string name="auth_continue_with_email">Continua con l\'email</string>
     <string name="auth_footer_privacy">Informativa sulla privacy</string>
     <string name="auth_footer_terms">Termini di servizio</string>
     <string name="auth_forgot_password">Password dimenticata?</string>
