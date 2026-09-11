@@ -263,8 +263,34 @@ android {
         // code-level bug; Google Sign-In itself is unchanged in this
         // release. None of this changes applicationId, signing, or deep
         // links.
-        versionCode 17
-        versionName "4.0.12"
+        //
+        // Bumps to versionCode 18 / versionName "4.0.13" for native
+        // Android parity with the web/PWA ZRP Global Ambassador Program
+        // (PR #269), built by inspecting the Front Agent's real, already-
+        // merged implementation (PR #267 - schema, all 6 API routes,
+        // validation rules, all 4 page components, full translation
+        // inventory) rather than assuming a spec: a public overview
+        // (Hero, Country Explorer over the real, complete 250-country
+        // dataset fetched live from GET /api/ambassadors/countries - no
+        // hardcoded country list, Ambassador levels section), a full
+        // application form, a status dashboard that always re-fetches
+        // GET /api/ambassadors/me (status/level are never trusted
+        // client-side), and an admin review queue mirroring
+        // AdminJournalistsScreen's own established pattern (status
+        // filter chips, search, confirm/reason dialogs for destructive
+        // actions). Wired into Settings' Company group, the Admin
+        // dashboard's staff quick actions, and ZrpNavHost. 96 new string
+        // keys across all 11 locales, reusing existing admin_journalists_*/
+        // admin_reports_* copy for shared verbs rather than duplicating
+        // strings. Deliberately does not add a native interactive world-
+        // map visualization (the Country Explorer is the complete,
+        // independently accessible path to any of the 250 countries -
+        // see AmbassadorsScreen.kt's own KDoc) or fabricate community-
+        // activity/achievements/leaderboard sections that have no real
+        // backing model yet. None of this changes applicationId, signing,
+        // or deep links.
+        versionCode 18
+        versionName "4.0.13"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
