@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import type { NewsTopic } from "@prisma/client";
 import {
   appendSourceMaterial,
   backoffMinutesFor,
@@ -175,19 +176,19 @@ describe("source material", () => {
  */
 describe("topicFor", () => {
   it("trusts a single-topic source's own beat over generic keywords", () => {
-    const cointelegraph = { topics: ["CRYPTO"] as const };
+    const cointelegraph: { topics: NewsTopic[] } = { topics: ["CRYPTO"] };
     expect(
       topicFor(cointelegraph, { title: "Ethereum staking yields fall as validators grow", summary: null })
     ).toBe("CRYPTO");
 
-    const playstationBlog = { topics: ["GAMING"] as const };
+    const playstationBlog: { topics: NewsTopic[] } = { topics: ["GAMING"] };
     expect(
       topicFor(playstationBlog, { title: "Astro Bot receives a new Photo Mode update", summary: null })
     ).toBe("GAMING");
   });
 
   it("still classifies a multi-topic source's items, to pick among its own beats", () => {
-    const unNews = { topics: ["WORLD", "POLITICS", "HEALTH", "ENVIRONMENT"] as const };
+    const unNews: { topics: NewsTopic[] } = { topics: ["WORLD", "POLITICS", "HEALTH", "ENVIRONMENT"] };
     expect(
       topicFor(unNews, { title: "New vaccine rollout reaches record coverage", summary: null })
     ).toBe("HEALTH");
@@ -196,7 +197,7 @@ describe("topicFor", () => {
   it("falls back to WORLD for a multi-topic source's item that matches none of its own beats", () => {
     // Unchanged behaviour: this is not the bug this fix addresses -
     // only the single-topic, ground-truth case is.
-    const unNews = { topics: ["WORLD", "POLITICS", "HEALTH", "ENVIRONMENT"] as const };
+    const unNews: { topics: NewsTopic[] } = { topics: ["WORLD", "POLITICS", "HEALTH", "ENVIRONMENT"] };
     expect(
       topicFor(unNews, { title: "A quiet Tuesday in Geneva", summary: null })
     ).toBe("WORLD");
