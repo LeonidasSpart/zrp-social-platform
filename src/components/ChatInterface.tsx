@@ -28,6 +28,7 @@ import { useUnreadCount } from "@/contexts/UnreadCountContext";
 import { usePresence } from "@/contexts/PresenceContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ChatContactDrawer from "@/components/ChatContactDrawer";
+import ConfirmModal from "@/components/ConfirmModal";
 
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
   ssr: false,
@@ -123,6 +124,14 @@ export default function ChatInterface({
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(
     null
   );
+
+  // Message pending delete confirmation, and the last delete error - both
+  // rendered as in-app UI (ConfirmModal / an inline banner) rather than
+  // window.confirm()/alert(), which are unreliable in ZRP's real
+  // deployment surfaces (iOS standalone PWA, in-app browsers - see
+  // ConfirmModal's own doc comment).
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
 
@@ -680,20 +689,20 @@ export default function ChatInterface({
   // Delete message
   // ---------------------------------------------------------------------------
 
-  const handleDeleteMessage = async (
-    messageId: string
-  ) => {
-    if (
-      !confirm(
-        t("chat.deleteMessageConfirm")
-      )
-    ) {
-      return;
-    }
-
-    setDeletingMessageId(messageId);
+  // Opens the in-app confirmation modal - the actual deletion only
+  // happens from confirmPendingDelete below, once the user confirms.
+  const requestDeleteMessage = (messageId: string) => {
+    setDeleteError(null);
+    setPendingDeleteId(messageId);
     setActiveMessageActions(null);
     setReactionPickerFor(null);
+  };
+
+  const confirmPendingDelete = async () => {
+    const messageId = pendingDeleteId;
+    if (!messageId) return;
+
+    setDeletingMessageId(messageId);
 
     try {
       const res = await fetch(
@@ -724,15 +733,18 @@ export default function ChatInterface({
             }
           );
         }
+
+        setPendingDeleteId(null);
       } else {
         const err = await res
           .json()
           .catch(() => null);
 
-        alert(
+        setDeleteError(
           err?.error ||
             t("chat.errDeleteMessage")
         );
+        setPendingDeleteId(null);
       }
     } catch (error) {
       console.error(
@@ -740,13 +752,20 @@ export default function ChatInterface({
         error
       );
 
-      alert(
+      setDeleteError(
         t("chat.errDeleteMessage")
       );
+      setPendingDeleteId(null);
     } finally {
       setDeletingMessageId(null);
     }
   };
+
+  useEffect(() => {
+    if (!deleteError) return;
+    const timer = setTimeout(() => setDeleteError(null), 4000);
+    return () => clearTimeout(timer);
+  }, [deleteError]);
 
   // ---------------------------------------------------------------------------
   // Edit message
@@ -2097,7 +2116,7 @@ export default function ChatInterface({
                                 ) => {
                                   event.stopPropagation();
 
-                                  handleDeleteMessage(
+                                  requestDeleteMessage(
                                     message.id
                                   );
                                 }}
@@ -3522,6 +3541,29 @@ export default function ChatInterface({
               <Download className="h-5 w-5" />
             </button>
           </div>
+        </div>
+      )}
+
+      {pendingDeleteId && (
+        <ConfirmModal
+          title={t("chat.deleteMessage")}
+          body={t("chat.deleteMessageConfirm")}
+          confirmLabel={t("action.delete")}
+          cancelLabel={t("action.cancel")}
+          destructive
+          busy={deletingMessageId === pendingDeleteId}
+          onConfirm={confirmPendingDelete}
+          onCancel={() => setPendingDeleteId(null)}
+        />
+      )}
+
+      {deleteError && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="fixed bottom-20 left-1/2 z-[110] -translate-x-1/2 rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-lg"
+        >
+          {deleteError}
         </div>
       )}
     </div>
