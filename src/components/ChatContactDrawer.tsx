@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import {
   X, User, Phone, Video, MoreHorizontal, Image as ImageIcon,
-  Ban, Loader2,
+  Ban, Loader2, Trash2,
 } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import ConfirmModal from "@/components/ConfirmModal";
 
 interface SharedMediaMessage {
   id: string;
@@ -16,6 +17,7 @@ interface SharedMediaMessage {
 }
 
 interface ChatContactDrawerProps {
+  receiverId: string;
   receiverUsername: string;
   receiverName: string;
   receiverAvatar?: string;
@@ -24,9 +26,17 @@ interface ChatContactDrawerProps {
   onClose: () => void;
   onVoiceCall?: () => void;
   onVideoCall?: () => void;
+  /**
+   * Called once the whole conversation has actually been deleted
+   * server-side (DELETE /api/messages/conversation/[userId] returned
+   * success) - the caller is responsible for clearing its own message
+   * state and navigating away, since there is nothing left to show.
+   */
+  onConversationDeleted?: () => void;
 }
 
 export default function ChatContactDrawer({
+  receiverId,
   receiverUsername,
   receiverName,
   receiverAvatar,
@@ -35,11 +45,15 @@ export default function ChatContactDrawer({
   onClose,
   onVoiceCall,
   onVideoCall,
+  onConversationDeleted,
 }: ChatContactDrawerProps) {
   const { t } = useLanguage();
   const [showMore, setShowMore] = useState(false);
   const [blocking, setBlocking] = useState(false);
   const [blocked, setBlocked] = useState(false);
+  const [pendingDeleteConversation, setPendingDeleteConversation] = useState(false);
+  const [deletingConversation, setDeletingConversation] = useState(false);
+  const [deleteConversationError, setDeleteConversationError] = useState<string | null>(null);
 
   // ─── Shared media: actual images only - excludes voice messages (🎤)
   // and document attachments (📎), which use the same imageUrl field
@@ -72,6 +86,32 @@ export default function ChatContactDrawer({
       setBlocking(false);
     }
   };
+
+  const confirmDeleteConversation = async () => {
+    setDeletingConversation(true);
+    setDeleteConversationError(null);
+    try {
+      const res = await fetch(`/api/messages/conversation/${receiverId}`, { method: "DELETE" });
+      if (res.ok) {
+        setPendingDeleteConversation(false);
+        onConversationDeleted?.();
+      } else {
+        const err = await res.json().catch(() => null);
+        setDeleteConversationError(err?.error || t("chat.errDeleteConversation"));
+      }
+    } catch (error) {
+      console.error("Delete conversation error:", error);
+      setDeleteConversationError(t("chat.errDeleteConversation"));
+    } finally {
+      setDeletingConversation(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!deleteConversationError) return;
+    const timer = setTimeout(() => setDeleteConversationError(null), 4000);
+    return () => clearTimeout(timer);
+  }, [deleteConversationError]);
 
   return (
     <div
@@ -159,7 +199,7 @@ export default function ChatContactDrawer({
             </button>
 
             {showMore && (
-              <div className="absolute top-14 right-0 z-10 w-44 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="absolute top-14 right-0 z-10 w-52 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <button
                   onClick={handleBlock}
                   disabled={blocking}
@@ -167,6 +207,17 @@ export default function ChatContactDrawer({
                 >
                   {blocking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ban className="w-4 h-4" />}
                   {blocked ? t("chat.unblock") : t("chat.block")} @{receiverUsername}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowMore(false);
+                    setDeleteConversationError(null);
+                    setPendingDeleteConversation(true);
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition border-t border-gray-100 dark:border-gray-700"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {t("chat.deleteConversation")}
                 </button>
               </div>
             )}
@@ -206,6 +257,29 @@ export default function ChatContactDrawer({
           )}
         </div>
       </div>
+
+      {pendingDeleteConversation && (
+        <ConfirmModal
+          title={t("chat.deleteConversation")}
+          body={t("chat.deleteConversationConfirm", { name: receiverName })}
+          confirmLabel={t("action.delete")}
+          cancelLabel={t("action.cancel")}
+          destructive
+          busy={deletingConversation}
+          onConfirm={confirmDeleteConversation}
+          onCancel={() => setPendingDeleteConversation(false)}
+        />
+      )}
+
+      {deleteConversationError && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="fixed bottom-20 left-1/2 z-[120] -translate-x-1/2 rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-lg"
+        >
+          {deleteConversationError}
+        </div>
+      )}
     </div>
   );
 }
