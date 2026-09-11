@@ -27,7 +27,7 @@ function startOfDay(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }): Promise<NextResponse> {
   const limit = await rateLimit(req, { limit: 30, window: 60, type: "play-submit" });
   if (!limit.success) return limit.response;
 

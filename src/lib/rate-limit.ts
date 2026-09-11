@@ -233,7 +233,7 @@ export function getRequestIp(req: NextRequest): string {
 export async function rateLimit(
   req: NextRequest,
   config: RateLimitConfig
-): Promise<{ success: boolean; response?: NextResponse }> {
+): Promise<{ success: true; response?: undefined } | { success: false; response: NextResponse }> {
   const { limit, window: windowSeconds, type } = config;
   const ip = getClientIp(req);
 
