@@ -51,6 +51,42 @@ describe("classifyTopic", () => {
     expect(classifyTopic("Microsoft unveils next Xbox console lineup", null)).toBe("GAMING");
     expect(classifyTopic("Studio delays release of upcoming video game", null)).toBe("GAMING");
   });
+
+  /*
+   * Found while investigating the empty Crypto category: real crypto
+   * coverage routinely uses vocabulary this list did not have at all -
+   * an altcoin, Web3 or NFT story, or a CBDC/smart-contract story from
+   * a general-news source, matched no keyword whatsoever and fell
+   * through to WORLD. This matters most for Crypto specifically, since
+   * (unlike Sports or Culture) it has no general-news fallback source -
+   * a story lost at classification is a story the category never gets
+   * back by any other path.
+   */
+  it("recognises altcoin, Web3, NFT and CBDC coverage as CRYPTO", () => {
+    expect(classifyTopic("Popular altcoin surges after protocol upgrade", null)).toBe("CRYPTO");
+    expect(classifyTopic("Gaming studio launches Web3 marketplace", null)).toBe("CRYPTO");
+    expect(classifyTopic("Auction house sells record NFT collection", null)).toBe("CRYPTO");
+    expect(classifyTopic("Digital euro CBDC pilot expands to five countries", null)).toBe("CRYPTO");
+    expect(classifyTopic("Smart contract bug exposes millions in funds", null)).toBe("CRYPTO");
+  });
+
+  it("still lets a genuinely finance-centred CBDC story land in Finance", () => {
+    // A headline built around "central bank" itself is legitimate
+    // finance/monetary-policy signal too - CBDC does not always win,
+    // and it should not: this is a real overlap, not a bug.
+    expect(classifyTopic("Central bank considers interest rate impact of new CBDC", null)).toBe(
+      "FINANCE"
+    );
+  });
+
+  it("recognises 'crypto exchange' and 'crypto regulation' without those phrases alone hijacking unrelated stories", () => {
+    expect(classifyTopic("Regulators unveil new crypto regulation framework", null)).toBe("CRYPTO");
+    expect(classifyTopic("Crypto exchange expands into new markets", null)).toBe("CRYPTO");
+    // A generic "exchange" or "regulation" story, with no crypto term
+    // anywhere, must not be swept in by these phrases.
+    expect(classifyTopic("Stock exchange extends trading hours", null)).not.toBe("CRYPTO");
+    expect(classifyTopic("New banking regulation takes effect", null)).not.toBe("CRYPTO");
+  });
 });
 
 describe("detectBreaking / detectSensitive", () => {
@@ -203,6 +239,54 @@ describe("scoreStory", () => {
         firstSeenAt: new Date(NOW.getTime() - 40 * 3600 * 1000),
       })
     ).toBeGreaterThanOrEqual(0);
+  });
+
+  /*
+   * Root cause of the empty Crypto category, made concrete: Crypto has
+   * zero tier-1/2 fallback sources (see sources-seed.ts), so every
+   * single-sourced crypto item is tier 3, DEVELOPING. Its score decays
+   * with age and never recovers, so it stops clearing the publishing
+   * floor a few hours in - permanently - while a confirmed story stays
+   * publishable for nearly the full 36-hour window. This is not a
+   * Crypto-specific rule; it is what the shared ranking formula does to
+   * ANY topic that only ever has one tier-3 source, which is why the
+   * fix is more/better sources (see the two added below), not a special
+   * case in this formula.
+   */
+  it("a single tier-3 source stops being publishable within hours, and stays that way", () => {
+    const tier3Single = { ...base, bestTrustTier: 3 };
+
+    const fresh = scoreStory({ ...tier3Single, firstSeenAt: NOW });
+    const fiveHoursOld = scoreStory({
+      ...tier3Single,
+      firstSeenAt: new Date(NOW.getTime() - 5 * 3600 * 1000),
+    });
+    const aDayOld = scoreStory({
+      ...tier3Single,
+      firstSeenAt: new Date(NOW.getTime() - 24 * 3600 * 1000),
+    });
+
+    expect(fresh).toBeGreaterThanOrEqual(MIN_PUBLISHABLE_SCORE);
+    expect(fiveHoursOld).toBeLessThan(MIN_PUBLISHABLE_SCORE);
+    expect(aDayOld).toBeLessThan(MIN_PUBLISHABLE_SCORE);
+  });
+
+  it("a second source agreeing clears that floor for nearly the full window", () => {
+    // Two tier-3 outlets reporting the same story is CONFIRMED
+    // regardless of tier (see assessConfidence) - this is the real
+    // lever: corroboration, not a change to how trust tier is scored.
+    const corroborated = {
+      ...base,
+      sourceCount: 2,
+      bestTrustTier: 3,
+      confidence: "CONFIRMED" as const,
+    };
+
+    const aDayOld = scoreStory({
+      ...corroborated,
+      firstSeenAt: new Date(NOW.getTime() - 24 * 3600 * 1000),
+    });
+    expect(aDayOld).toBeGreaterThanOrEqual(MIN_PUBLISHABLE_SCORE);
   });
 });
 
