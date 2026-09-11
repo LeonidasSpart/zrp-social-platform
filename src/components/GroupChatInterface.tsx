@@ -26,6 +26,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useUnreadCount } from "@/contexts/UnreadCountContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import GroupInfoPanel from "@/components/GroupInfoPanel";
+import ConfirmModal from "@/components/ConfirmModal";
 import { hydrateGroupSocketMessage, type RawGroupSocketMessage } from "@/lib/groupMessageHydration";
 import { describeGroupTyping } from "@/lib/groupTyping";
 import type { GroupConversationDetail, GroupParticipantUser } from "@/lib/groupConversationTypes";
@@ -399,6 +400,8 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
   const [failedImageIds, setFailedImageIds] = useState<Set<string>>(new Set());
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [reactionPickerFor, setReactionPickerFor] = useState<string | null>(null);
   const [activeMessageActions, setActiveMessageActions] = useState<string | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -502,27 +505,46 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
   // ─── Delete ─────────────────────────────────────────────────────────
   const canDelete = (message: GroupMessage) => message.senderId === userId || myRole === "OWNER";
 
-  const handleDeleteMessage = async (messageId: string) => {
-    if (!confirm(t("chat.deleteMessageConfirm"))) return;
-    setDeletingMessageId(messageId);
+  // Opens the in-app confirmation modal (see ConfirmModal's doc comment
+  // for why window.confirm() is not used) - the actual deletion only
+  // happens from confirmPendingDelete below, once the user confirms.
+  const requestDeleteMessage = (messageId: string) => {
+    setDeleteError(null);
+    setPendingDeleteId(messageId);
     setActiveMessageActions(null);
     setReactionPickerFor(null);
+  };
+
+  const confirmPendingDelete = async () => {
+    const messageId = pendingDeleteId;
+    if (!messageId) return;
+
+    setDeletingMessageId(messageId);
     try {
       const res = await fetch(`/api/messages/delete/${messageId}`, { method: "DELETE" });
       if (res.ok) {
         setMessages((prev) => prev.filter((m) => m.id !== messageId));
         socketRef.current?.emit("delete-message", { messageId, conversationId });
+        setPendingDeleteId(null);
       } else {
         const err = await res.json().catch(() => null);
-        alert(err?.error || t("chat.errDeleteMessage"));
+        setDeleteError(err?.error || t("chat.errDeleteMessage"));
+        setPendingDeleteId(null);
       }
     } catch (error) {
       console.error("Delete group message error:", error);
-      alert(t("chat.errDeleteMessage"));
+      setDeleteError(t("chat.errDeleteMessage"));
+      setPendingDeleteId(null);
     } finally {
       setDeletingMessageId(null);
     }
   };
+
+  useEffect(() => {
+    if (!deleteError) return;
+    const timer = setTimeout(() => setDeleteError(null), 4000);
+    return () => clearTimeout(timer);
+  }, [deleteError]);
 
   // ─── Reactions ──────────────────────────────────────────────────────
   const handleReact = async (messageId: string, emoji: string) => {
@@ -1041,7 +1063,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
                                 type="button"
                                 onClick={(event) => {
                                   event.stopPropagation();
-                                  handleDeleteMessage(message.id);
+                                  requestDeleteMessage(message.id);
                                 }}
                                 disabled={deletingMessageId === message.id}
                                 className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600 disabled:opacity-50 dark:text-gray-300 dark:hover:bg-red-900/30"
@@ -1438,6 +1460,29 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
             onLeftGroup?.();
           }}
         />
+      )}
+
+      {pendingDeleteId && (
+        <ConfirmModal
+          title={t("chat.deleteMessage")}
+          body={t("chat.deleteMessageConfirm")}
+          confirmLabel={t("action.delete")}
+          cancelLabel={t("action.cancel")}
+          destructive
+          busy={deletingMessageId === pendingDeleteId}
+          onConfirm={confirmPendingDelete}
+          onCancel={() => setPendingDeleteId(null)}
+        />
+      )}
+
+      {deleteError && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="fixed bottom-20 left-1/2 z-[110] -translate-x-1/2 rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-lg"
+        >
+          {deleteError}
+        </div>
       )}
     </div>
   );
