@@ -45,6 +45,7 @@ const VERIFY_EMAIL_PATH = "/verify-email";
 
 const PUBLIC_PATHS = [
   "/about",
+  "/ambassadors",
   "/careers",
   "/charity",
   "/contact",
