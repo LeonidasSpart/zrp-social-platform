@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
+import CryptoMarketTable from "@/components/CryptoMarketTable";
 
 type NewsCategory =
   | "WORLD"
@@ -277,6 +278,11 @@ export default function NewsPage() {
             })}
           </div>
         </div>
+
+        {/* Crypto markets - shown only on the Crypto tab, above the
+            news articles for that category. A real, live snapshot or
+            an honest failure state; see CryptoMarketTable. */}
+        {selectedCategory === "CRYPTO" && <CryptoMarketTable />}
 
         {/* Error */}
         {error && (
