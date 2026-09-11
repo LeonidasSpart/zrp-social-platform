@@ -4,6 +4,7 @@ import android.Manifest
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -33,11 +34,12 @@ import one.zrp.social.mobile.ui.auth.AuthViewModelFactory
 import one.zrp.social.mobile.ui.auth.ForgotPasswordScreen
 import one.zrp.social.mobile.ui.auth.LoginScreen
 import one.zrp.social.mobile.ui.auth.SignupScreen
+import one.zrp.social.mobile.ui.auth.WelcomeScreen
 import one.zrp.social.mobile.ui.navigation.ZrpNavHost
 import one.zrp.social.mobile.ui.onboarding.OnboardingScreen
 import one.zrp.social.mobile.ui.theme.ZrpSocialTheme
 
-private enum class LoggedOutScreen { LOGIN, SIGNUP, FORGOT_PASSWORD }
+private enum class LoggedOutScreen { WELCOME, LOGIN, SIGNUP, FORGOT_PASSWORD }
 
 // AppCompatActivity, not ComponentActivity - AppCompatDelegate's per-app
 // language switch (LanguageSettingsScreen) only reliably reapplies the
@@ -150,8 +152,35 @@ fun ZrpSocialApp(windowSizeClass: WindowSizeClass) {
                     // mechanism already would for a plain View, and
                     // (unlike a plain remember) it survives that
                     // recreation intact.
-                    var loggedOutScreen by rememberSaveable { mutableStateOf(LoggedOutScreen.LOGIN) }
+                    // Default WELCOME, not LOGIN: see this var's own KDoc
+                    // above for why rememberSaveable (not remember) is
+                    // required here - that reasoning is unchanged by
+                    // which screen the default happens to be. WELCOME
+                    // only ever shows on a truly fresh start (no saved
+                    // instance state yet), so it doesn't affect the
+                    // Google-sign-in-interruption recreation case that
+                    // comment describes - by the time that can happen,
+                    // loggedOutScreen has already moved off WELCOME.
+                    var loggedOutScreen by rememberSaveable { mutableStateOf(LoggedOutScreen.WELCOME) }
+
+                    // Predictable back navigation (mandatory per the
+                    // redesign's senior-friendly requirement): system
+                    // Back from any of these three returns to Welcome
+                    // instead of exiting the app outright - only enabled
+                    // while NOT already on Welcome, so Welcome itself
+                    // still falls through to the platform default
+                    // (exit), matching every other "first screen" in the
+                    // app.
+                    BackHandler(enabled = loggedOutScreen != LoggedOutScreen.WELCOME) {
+                        loggedOutScreen = LoggedOutScreen.WELCOME
+                    }
+
                     when (loggedOutScreen) {
+                        LoggedOutScreen.WELCOME -> WelcomeScreen(
+                            onSignIn = { loggedOutScreen = LoggedOutScreen.LOGIN },
+                            onCreateAccount = { loggedOutScreen = LoggedOutScreen.SIGNUP },
+                            onGoogleSignIn = { context -> authViewModel.loginWithGoogle(context) },
+                        )
                         LoggedOutScreen.LOGIN -> LoginScreen(
                             formState = loginForm,
                             onLogin = { identifier, password -> authViewModel.login(identifier, password) },
