@@ -138,13 +138,18 @@ function regionIsCapped(region: NewsRegion): boolean {
 }
 
 /**
- * Categories with nothing fresh, which the plan should serve first.
+ * Categories with nothing fresh, which both generation and publication
+ * should serve first.
  *
  * This is a priority, never a licence: only stories that already pass
  * every eligibility and quality rule are ever considered, so an empty
  * category with no genuine news stays empty.
+ *
+ * Exported so pipeline.ts's generation-candidate selection uses the
+ * identical definition of "starved" that publication planning does,
+ * rather than two independently-tuned thresholds drifting apart.
  */
-function starvedCategories(
+export function starvedCategories(
   coverage: Record<string, number | null> | undefined
 ): Set<string> {
   const starved = new Set<string>();

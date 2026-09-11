@@ -11,8 +11,15 @@ import {
 } from "./generate";
 import { isNewsLanguage, type NewsLanguage } from "./config";
 import { CYCLE_WINDOW_MINUTES, getAutomationSettings, nextCycleAt, toSchedulerSettings } from "./settings";
-import { planCycle, storyLanguageKey, type SchedulableFeed, type SchedulableStory } from "./scheduler";
+import {
+  planCycle,
+  starvedCategories,
+  storyLanguageKey,
+  type SchedulableFeed,
+  type SchedulableStory,
+} from "./scheduler";
 import { findDuePublications, publishDuePublication, reservePublication } from "./publish";
+import { mapToArticleCategory } from "./news-article-bridge";
 
 /*
  * ============================================================
@@ -66,6 +73,15 @@ const GENERATION_RETRY_WINDOW_HOURS = 6;
 const MAX_GENERATIONS_PER_CYCLE = 24;
 
 /*
+ * The generation candidate query fetches this many times
+ * MAX_GENERATIONS_PER_CYCLE so the starved-category pass below has a
+ * wide enough pool to actually find a candidate from a thin category -
+ * the same reason planCycle's starvation pass works from all ranked
+ * stories rather than just the top MAX_GENERATIONS_PER_CYCLE.
+ */
+const GENERATION_POOL_MULTIPLIER = 4;
+
+/*
  * Wall-clock budget for the summarisation stage.
  *
  * Summarisation is the only unbounded-ish stage (dozens of model
@@ -88,6 +104,50 @@ const GENERATION_BUDGET_MS = 600_000;
 
 /** Every category /news displays, so coverage is reported for all of them. */
 const NEWS_ARTICLE_CATEGORIES = Object.values(NewsArticleCategory);
+
+/**
+ * Two-pass selection: one slot for each currently-starved category (best
+ * candidate first, per `pool`'s own order), then fill the remaining
+ * budget by that same order. Mirrors planCycle's starvation pass in
+ * scheduler.ts, applied here to generation instead of publication - a
+ * flat "top N" cut lets a thin category's only eligible story lose the
+ * ranking every cycle and never get attempted at all.
+ *
+ * A pure function over plain objects (not the database) so the
+ * starvation behaviour itself can be tested directly.
+ */
+export function selectStarvedFirst<T>(
+  pool: readonly T[],
+  starved: ReadonlySet<string>,
+  categoryOf: (item: T) => string,
+  max: number
+): T[] {
+  const selected: T[] = [];
+  const takenFromPool = new Set<T>();
+
+  if (starved.size > 0) {
+    const servedThisCycle = new Set<string>();
+
+    for (const item of pool) {
+      if (selected.length >= max) break;
+
+      const category = categoryOf(item);
+      if (!starved.has(category) || servedThisCycle.has(category)) continue;
+
+      takenFromPool.add(item);
+      selected.push(item);
+      servedThisCycle.add(category);
+    }
+  }
+
+  for (const item of pool) {
+    if (selected.length >= max) break;
+    if (takenFromPool.has(item)) continue;
+    selected.push(item);
+  }
+
+  return selected;
+}
 
 export interface CycleResult {
   ran: boolean;
@@ -261,13 +321,41 @@ export async function runPipelineCycle(options: RunCycleOptions = {}): Promise<C
     // ─── 3. Age out stale stories ─────────────────────────────
     result.storiesExpired = await expireStaleStories(db, now, MAX_STORY_AGE_HOURS);
 
+    /*
+     * Measured once here and reused for both generation (below) and
+     * publication planning (step 5): both stages need to know which
+     * categories currently have nothing, and they should agree on it
+     * within one cycle rather than each computing their own snapshot.
+     */
+    const categoryCoverage = await measureCategoryCoverage(db, now);
+    const starved = starvedCategories(categoryCoverage);
+
     // ─── 4. Write summaries ───────────────────────────────────
     const languages = settings.enabledLanguages.filter(isNewsLanguage) as NewsLanguage[];
 
     if (languages.length > 0) {
       const cutoff = new Date(now.getTime() - MAX_STORY_AGE_HOURS * 60 * 60 * 1000);
 
-      const candidates = await db.newsStory.findMany({
+      /*
+       * A flat "top N by importance" query starves generation exactly
+       * the way the publication planner used to starve publishing
+       * (fixed in #243): a modest-but-genuinely-publishable story in a
+       * thin category (Crypto has no tier-1/2 source, so it never wins
+       * on raw score against a corroborated World/Politics story) can
+       * lose that race every single cycle for its entire lifetime and
+       * never get a rendition attempt at all - not rejected, just never
+       * tried. Found in production: a real, publishable (score 2.69,
+       * not sensitive) Crypto story sat at status NEW with zero
+       * renditions for almost 24 hours while the category it belonged
+       * to stayed empty.
+       *
+       * Same two-pass shape as planCycle: fetch a wider pool than the
+       * budget, give one slot to the best candidate from each starved
+       * category first, then fill the rest by the original rank. Never
+       * a licence - every candidate here already passed the identical
+       * where-clause (score floor, freshness, sensitivity hold).
+       */
+      const pool = await db.newsStory.findMany({
         where: {
           status: "NEW",
           importance: { gte: MIN_PUBLISHABLE_SCORE },
@@ -277,9 +365,15 @@ export async function runPipelineCycle(options: RunCycleOptions = {}): Promise<C
           ...(settings.requireHumanReviewForSensitive ? { sensitive: false } : {}),
         },
         orderBy: [{ isBreaking: "desc" }, { importance: "desc" }],
-        take: MAX_GENERATIONS_PER_CYCLE,
+        take: MAX_GENERATIONS_PER_CYCLE * GENERATION_POOL_MULTIPLIER,
         include: { references: { include: { source: true } } },
       });
+
+      /** The ZRP News category a story would end up in once published. */
+      const categoryOfStory = (story: (typeof pool)[number]) =>
+        mapToArticleCategory({ topic: story.topic, region: story.region, country: story.country });
+
+      const candidates = selectStarvedFirst(pool, starved, categoryOfStory, MAX_GENERATIONS_PER_CYCLE);
 
       const generationDeadline = Date.now() + GENERATION_BUDGET_MS;
 
@@ -481,12 +575,14 @@ export async function runPipelineCycle(options: RunCycleOptions = {}): Promise<C
     }));
 
     /*
-     * Measured before planning, so the plan can serve the categories
-     * that actually have nothing right now. It is measured again after
-     * publishing for the run's report.
+     * Reuses the snapshot measured before generation (step 4) rather
+     * than measuring again: nothing between there and here publishes an
+     * article, so a second query would only ever repeat the same
+     * answer - and sharing one snapshot keeps generation and
+     * publication planning agreeing on exactly which categories are
+     * starved within a cycle. It is measured again after publishing for
+     * the run's report.
      */
-    const coverageBeforePlanning = await measureCategoryCoverage(db, now);
-
     const plan = planCycle({
       stories,
       feeds,
@@ -495,7 +591,7 @@ export async function runPipelineCycle(options: RunCycleOptions = {}): Promise<C
       windowMinutes: CYCLE_WINDOW_MINUTES,
       publishedStoryLanguages,
       publicationsToday,
-      categoryCoverage: coverageBeforePlanning,
+      categoryCoverage,
     });
 
     for (const slot of plan) {
