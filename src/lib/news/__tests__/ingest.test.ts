@@ -6,6 +6,7 @@ import {
   isSourceDue,
   sourceStatusFor,
   StoryIndex,
+  topicFor,
 } from "../ingest";
 import { fingerprint } from "../dedupe";
 
@@ -160,5 +161,44 @@ describe("source material", () => {
       });
     }
     expect(material.length).toBeLessThanOrEqual(3000);
+  });
+});
+
+/*
+ * Real bug: a dedicated single-topic source's own items were still
+ * run through generic keyword classification, and a real Cointelegraph
+ * or PlayStation Blog headline routinely contains none of those
+ * keywords - "Ethereum staking yields fall as validators grow" and
+ * "Astro Bot receives a new Photo Mode update" both classified WORLD.
+ * Crypto has no general-news fallback source, so every item lost this
+ * way never reaches the category by any other path.
+ */
+describe("topicFor", () => {
+  it("trusts a single-topic source's own beat over generic keywords", () => {
+    const cointelegraph = { topics: ["CRYPTO"] as const };
+    expect(
+      topicFor(cointelegraph, { title: "Ethereum staking yields fall as validators grow", summary: null })
+    ).toBe("CRYPTO");
+
+    const playstationBlog = { topics: ["GAMING"] as const };
+    expect(
+      topicFor(playstationBlog, { title: "Astro Bot receives a new Photo Mode update", summary: null })
+    ).toBe("GAMING");
+  });
+
+  it("still classifies a multi-topic source's items, to pick among its own beats", () => {
+    const unNews = { topics: ["WORLD", "POLITICS", "HEALTH", "ENVIRONMENT"] as const };
+    expect(
+      topicFor(unNews, { title: "New vaccine rollout reaches record coverage", summary: null })
+    ).toBe("HEALTH");
+  });
+
+  it("falls back to WORLD for a multi-topic source's item that matches none of its own beats", () => {
+    // Unchanged behaviour: this is not the bug this fix addresses -
+    // only the single-topic, ground-truth case is.
+    const unNews = { topics: ["WORLD", "POLITICS", "HEALTH", "ENVIRONMENT"] as const };
+    expect(
+      topicFor(unNews, { title: "A quiet Tuesday in Geneva", summary: null })
+    ).toBe("WORLD");
   });
 });

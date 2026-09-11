@@ -301,6 +301,37 @@ export interface IngestItemResult {
 }
 
 /**
+ * Which topic an ingested item belongs to.
+ *
+ * A source whose remit is exactly one topic - CoinDesk, Cointelegraph
+ * and Decrypt all declare `topics: ["CRYPTO"]` and cover nothing else;
+ * the five gaming blogs and NASA/ESA are the same shape - IS the ground
+ * truth for what its own items are about. That is not a fabrication:
+ * region and country already come straight from the source rather than
+ * being re-derived from the text (see classify.ts), for exactly the
+ * same reason. Generic keyword classification exists for a source that
+ * covers many things (BBC World, UN News), not one that covers one.
+ *
+ * Real bug this caught: a Cointelegraph headline like "Ethereum staking
+ * yields fall as validators grow" or a PlayStation Blog post like
+ * "Astro Bot receives a new Photo Mode update" contains none of the
+ * generic topic keywords and was silently classified WORLD - sent to a
+ * desk that would never publish it as crypto or gaming news at all.
+ * Crypto has zero general-news fallback sources (see the comment on
+ * the crypto sources below), so every item it loses this way is a
+ * story the category never gets back.
+ *
+ * A source covering more than one topic (UN News: WORLD, POLITICS,
+ * HEALTH, ENVIRONMENT; WHO: HEALTH, SCIENCE) still needs classification
+ * to pick among its own topics, so this only short-circuits the
+ * unambiguous single-topic case.
+ */
+export function topicFor(source: Pick<NewsSource, "topics">, item: Pick<RawFeedItem, "title" | "summary">) {
+  if (source.topics.length === 1) return source.topics[0];
+  return classifyTopic(item.title, item.summary);
+}
+
+/**
  * Turns one feed item into either a new story or an extra attribution
  * on an existing one.
  *
@@ -406,7 +437,7 @@ export async function ingestItem(
       return { outcome: "merged", storyId: story.id };
     }
 
-    const topic = classifyTopic(item.title, item.summary);
+    const topic = topicFor(source, item);
     const isBreaking = detectBreaking(item.title, item.summary);
     const sensitive = detectSensitive(item.title, item.summary);
 

@@ -16,7 +16,21 @@ const TOPIC_KEYWORDS: Array<{ topic: NewsTopic; weight: number; words: string[] 
   { topic: "TRAVEL", weight: 3, words: ["travel", "traveller", "traveler", "tourist", "visa", "passport", "border crossing", "travel advisory", "voyage", "reise", "viaggio"] },
   { topic: "TOURISM", weight: 3, words: ["tourism", "destination", "hotel", "resort", "sightseeing", "tourisme", "tourismus", "turismo"] },
   { topic: "TRANSPORTATION", weight: 3, words: ["rail", "railway", "train", "metro", "ferry", "highway", "motorway", "bus service", "bahn", "treno"] },
-  { topic: "CRYPTO", weight: 3, words: ["crypto", "cryptocurrency", "cryptocurrencies", "digital currency", "bitcoin", "ethereum", "blockchain", "stablecoin", "defi", "coinbase", "binance"] },
+  {
+    topic: "CRYPTO",
+    weight: 3,
+    words: [
+      "crypto", "cryptocurrency", "cryptocurrencies", "digital currency", "bitcoin", "ethereum",
+      "blockchain", "stablecoin", "defi", "coinbase", "binance",
+      // Added after auditing real crypto headlines against this list: an
+      // altcoin, Web3 or NFT story - all explicitly part of the beat -
+      // matched none of the words above and fell through to WORLD. Only
+      // unambiguous crypto-specific terms, or phrases too specific to a
+      // generic "exchange"/"regulation" story to false-positive on one.
+      "altcoin", "altcoins", "web3", "nft", "nfts", "cbdc", "smart contract",
+      "token sale", "layer 2", "crypto exchange", "crypto regulation",
+    ],
+  },
   { topic: "GAMING", weight: 3, words: ["playstation", "nintendo", "xbox", "video game", "video games", "esports", "esport", "game awards", "steam deck", "game studio"] },
   { topic: "AI", weight: 3, words: ["artificial intelligence", "machine learning", "chatbot", "llm", "neural network", "openai", "anthropic"] },
   { topic: "CLIMATE", weight: 2, words: ["climate", "emissions", "global warming", "carbon", "cop29", "cop30", "klima", "clima"] },

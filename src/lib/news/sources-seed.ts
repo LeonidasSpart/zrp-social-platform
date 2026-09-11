@@ -533,6 +533,43 @@ export const SEED_SOURCES: SeedSource[] = [
     topics: ["CRYPTO"],
     trustTier: 3,
   },
+  /*
+   * Two more, for the same reason Sports and Culture each got a second
+   * source: a category resting on too few outlets cannot corroborate.
+   * The tier-3 ceiling above has a real effect on Crypto specifically -
+   * a single-sourced tier-3 story's ranking score decays below the
+   * publishing floor within roughly its first 4-5 hours (measured:
+   * scoreStory for sourceCount=1, trustTier=3, DEVELOPING falls under
+   * MIN_PUBLISHABLE_SCORE past ~4.5h and never recovers, against ~36h
+   * for a confirmed story) - and Crypto has zero tier-1/2 fallback, so
+   * every single-sourced item is on that clock. A second outlet
+   * reporting the same story raises it to two sources agreeing, which
+   * is CONFIRMED under assessConfidence regardless of tier, and that
+   * swings the score by roughly +3 - comfortably clear of the floor for
+   * nearly the full 36-hour window instead of the first few hours of it.
+   */
+  {
+    key: "the-block",
+    name: "The Block",
+    publisher: "The Block",
+    feedUrl: "https://www.theblock.co/rss.xml",
+    homepageUrl: "https://www.theblock.co/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["CRYPTO"],
+    trustTier: 3,
+  },
+  {
+    key: "bitcoin-magazine",
+    name: "Bitcoin Magazine",
+    publisher: "Bitcoin Magazine",
+    feedUrl: "https://bitcoinmagazine.com/feed",
+    homepageUrl: "https://bitcoinmagazine.com/",
+    region: "GLOBAL",
+    language: "en",
+    topics: ["CRYPTO"],
+    trustTier: 3,
+  },
 
   // ─── Gaming (tier 2/3) ────────────────────────────────────────
   // Per-platform coverage so PlayStation, Nintendo and Xbox each have a
