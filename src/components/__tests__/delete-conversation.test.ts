@@ -160,10 +160,22 @@ describe("server.js - delete-conversation relay", () => {
   it("authorizes via the DB-backed helper before relaying, never trusting the raw payload", () => {
     const start = src.indexOf('socket.on("delete-conversation"');
     expect(start).toBeGreaterThan(-1);
-    const end = src.indexOf("});", start);
+    const end = src.indexOf("delete-conversation relay error", start);
+    expect(end).toBeGreaterThan(start);
     const handlerSrc = src.slice(start, end);
     expect(handlerSrc).toContain("authorizeConversationDeleteRelay(prisma, userId, payload)");
     expect(handlerSrc).toContain("if (!relay.ok) return;");
     expect(handlerSrc).toContain('io.to(relay.targetId).emit("conversation-deleted"');
+  });
+
+  it("also tells the deleting user's own other sessions, not just the other party", () => {
+    // The sidebar list (messages/layout.tsx desktop, messages/page.tsx
+    // mobile) uses its own useConversationList() instance, separate from
+    // the open thread's - without this, deleting a conversation clears
+    // the open thread but leaves it listed as if still there.
+    const start = src.indexOf('socket.on("delete-conversation"');
+    const end = src.indexOf("delete-conversation relay error", start);
+    const handlerSrc = src.slice(start, end);
+    expect(handlerSrc).toContain('io.to(userId).emit("conversation-deleted", { withUserId: relay.targetId });');
   });
 });

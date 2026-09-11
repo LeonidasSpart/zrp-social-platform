@@ -393,6 +393,12 @@ app.prepare().then(() => {
         const relay = await authorizeConversationDeleteRelay(prisma, userId, payload);
         if (!relay.ok) return;
         io.to(relay.targetId).emit("conversation-deleted", { withUserId: userId });
+        // Also tell the deleting user's own other sessions/tabs - the
+        // sidebar list (messages/layout.tsx, messages/page.tsx) uses its
+        // own useConversationList() instance, separate from the open
+        // thread's, so it has no other way to learn the conversation it's
+        // showing is now gone.
+        io.to(userId).emit("conversation-deleted", { withUserId: relay.targetId });
       } catch (err) {
         console.error("delete-conversation relay error:", err);
       }
